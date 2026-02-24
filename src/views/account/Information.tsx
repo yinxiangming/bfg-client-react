@@ -27,8 +27,9 @@ import CustomTextField from '@components/ui/TextField'
 // Utils Imports
 import { meApi } from '@/utils/meApi'
 
-const MEDIA_BASE_URL = process.env.NEXT_PUBLIC_MEDIA_URL || '/media'
-const DEFAULT_AVATAR = `${MEDIA_BASE_URL}/images/avatars/1.png`
+import { DEFAULT_AVATAR_URL } from '@/utils/media'
+
+const DEFAULT_AVATAR = DEFAULT_AVATAR_URL
 
 const Information = () => {
   const t = useTranslations('account.information')

@@ -4,6 +4,10 @@
 
 const MEDIA_BASE_URL = process.env.NEXT_PUBLIC_MEDIA_URL || '/media'
 const STORE_IMAGES_PATH = 'seed_images/store'
+const AVATAR_PATH = 'seed_images/avatars'
+
+/** Default avatar URL (from seed_images, copied by seed_data --copy-images) */
+export const DEFAULT_AVATAR_URL = `${MEDIA_BASE_URL}/${AVATAR_PATH}/1.png`
 
 /**
  * Normalize media URL - convert absolute URLs to use NEXT_PUBLIC_MEDIA_URL
@@ -60,12 +64,12 @@ export const getMediaUrl = (relativePath: string | null | undefined): string => 
 
 /**
  * Get avatar image URL
- * @param avatarPath - Avatar path (relative to images/avatars/ or full path)
+ * @param avatarPath - Avatar path (relative to seed_images/avatars/, or legacy images/avatars/, or full path)
  * @returns Full avatar URL using NEXT_PUBLIC_MEDIA_URL
  */
 export const getAvatarUrl = (avatarPath?: string | null): string => {
   if (!avatarPath) {
-    return `${MEDIA_BASE_URL}/images/avatars/1.png`
+    return DEFAULT_AVATAR_URL
   }
   
   // If it's already a full URL, return as is
@@ -73,15 +77,21 @@ export const getAvatarUrl = (avatarPath?: string | null): string => {
     return avatarPath
   }
   
-  // If it starts with /images/avatars/, use it directly with MEDIA_BASE_URL
-  if (avatarPath.startsWith('/images/avatars/')) {
-    const relativePath = avatarPath.replace('/images/avatars/', '')
-    return `${MEDIA_BASE_URL}/images/avatars/${relativePath}`
+  // seed_images/avatars/ or /seed_images/avatars/
+  if (avatarPath.includes('seed_images/avatars')) {
+    const relativePath = avatarPath.replace(/^\/?seed_images\/avatars\/?/, '')
+    return `${MEDIA_BASE_URL}/${AVATAR_PATH}/${relativePath || '1.png'}`
   }
   
-  // If it's just a filename like "1.png", assume it's in images/avatars/
+  // Legacy: /images/avatars/
+  if (avatarPath.startsWith('/images/avatars/') || avatarPath.startsWith('images/avatars/')) {
+    const relativePath = avatarPath.replace(/^\/?images\/avatars\/?/, '')
+    return `${MEDIA_BASE_URL}/${AVATAR_PATH}/${relativePath || '1.png'}`
+  }
+  
+  // If it's just a filename like "1.png", assume seed_images/avatars/
   if (!avatarPath.includes('/')) {
-    return `${MEDIA_BASE_URL}/images/avatars/${avatarPath}`
+    return `${MEDIA_BASE_URL}/${AVATAR_PATH}/${avatarPath}`
   }
   
   // Otherwise, treat as relative path from media root

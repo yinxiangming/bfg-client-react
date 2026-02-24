@@ -116,7 +116,7 @@ export function CategoryGridV1({
       >
         {categories.map((category, index) => (
           <Link
-            key={category.slug || index}
+            key={`${category.slug ?? 'cat'}-${index}`}
             href={`/category/${category.slug}`}
             className={styles.card}
           >

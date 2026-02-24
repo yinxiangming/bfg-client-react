@@ -48,8 +48,9 @@ function themeDisplayName(themeId: string): string {
   return themeId.charAt(0).toUpperCase() + themeId.slice(1)
 }
 
-const MEDIA_BASE_URL = process.env.NEXT_PUBLIC_MEDIA_URL || '/media'
-const DEFAULT_AVATAR = `${MEDIA_BASE_URL}/images/avatars/1.png`
+import { DEFAULT_AVATAR_URL } from '@/utils/media'
+
+const DEFAULT_AVATAR = DEFAULT_AVATAR_URL
 
 type BasicData = {
   siteName: string

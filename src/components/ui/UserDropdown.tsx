@@ -12,8 +12,7 @@ import Icon from '@components/Icon'
 import { meApi } from '@/utils/meApi'
 import { authApi } from '@/utils/authApi'
 
-const MEDIA_BASE_URL = process.env.NEXT_PUBLIC_MEDIA_URL || '/media'
-const DEFAULT_AVATAR = `${MEDIA_BASE_URL}/images/avatars/1.png`
+import { getAvatarUrl } from '@/utils/media'
 
 type UserInfo = {
   name: string
@@ -101,7 +100,7 @@ const UserDropdown = (_props: Props) => {
     closeMenu()
   }
 
-  const avatarSrc = user?.avatar || DEFAULT_AVATAR
+  const avatarSrc = getAvatarUrl(user?.avatar)
   const avatarAlt = user?.name || 'User'
 
   const renderAvatar = (size: 'sm' | 'lg') => {

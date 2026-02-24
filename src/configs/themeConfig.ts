@@ -10,9 +10,9 @@ export type Config = {
 }
 
 const themeConfig: Config = {
-  templateName: 'App',
+  templateName: 'BFG',
   homePageUrl: '/',
-  settingsCookieName: 'packgo-layout-settings',
+  settingsCookieName: 'bfg-layout-settings',
   layout: 'vertical', // 'vertical' | 'collapsed' | 'horizontal'
   skin: 'default' // 'default' | 'bordered'
 }
