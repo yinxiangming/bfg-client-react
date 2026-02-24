@@ -1,0 +1,268 @@
+/* Menu Component - Generic */
+.menu-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.menu-item,
+.menu-submenu {
+  margin: 2px 0;
+}
+
+.menu-link,
+.menu-submenu-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  color: #4a5568;
+  font-size: 14px;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+}
+
+.menu-link:hover,
+.menu-submenu-button:hover {
+  background: rgba(105, 108, 255, 0.08);
+  color: #5b5ede;
+}
+
+.menu-link.active {
+  background: linear-gradient(90deg, #7367f0 0%, #9b8cff 100%);
+  color: #fff;
+}
+
+.menu-link.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.menu-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.menu-icon svg {
+  width: 20px;
+  height: 20px;
+  color: inherit;
+}
+
+/* Smaller icons for nested menu items */
+.menu-link.level-1 .menu-icon,
+.menu-submenu-button.level-1 .menu-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.menu-link.level-1 .menu-icon svg,
+.menu-submenu-button.level-1 .menu-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.menu-link.level-2 .menu-icon,
+.menu-submenu-button.level-2 .menu-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.menu-link.level-2 .menu-icon svg,
+.menu-submenu-button.level-2 .menu-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.menu-link.level-3 .menu-icon,
+.menu-submenu-button.level-3 .menu-icon {
+  width: 16px;
+  height: 16px;
+}
+
+.menu-link.level-3 .menu-icon svg,
+.menu-submenu-button.level-3 .menu-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.menu-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Badge Styles */
+.menu-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.badge-default {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+.badge-primary {
+  background: #696cff;
+  color: #fff;
+}
+
+.badge-secondary {
+  background: #8592a3;
+  color: #fff;
+}
+
+.badge-error {
+  background: #ff3e1d;
+  color: #fff;
+}
+
+.badge-warning {
+  background: #ff9f43;
+  color: #fff;
+}
+
+.badge-info {
+  background: #00cfe8;
+  color: #fff;
+}
+
+.badge-success {
+  background: #28c76f;
+  color: #fff;
+}
+
+/* Submenu Styles */
+.menu-submenu-button {
+  position: relative;
+}
+
+.menu-expand-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  transition: transform 0.3s ease;
+  flex-shrink: 0;
+}
+
+.menu-expand-icon.open {
+  transform: rotate(90deg);
+}
+
+.menu-expand-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.menu-submenu-children {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.1s ease-out, padding 0.1s ease-out;
+}
+
+.menu-submenu-children.open {
+  max-height: 2000px;
+  padding: 4px 0 4px 12px;
+}
+
+.menu-submenu.open > .menu-submenu-button {
+  background: rgba(105, 108, 255, 0.1);
+  color: #5b5ede;
+}
+
+.menu-submenu.has-active > .menu-submenu-button {
+  color: #5b5ede;
+}
+
+/* Nested levels */
+.menu-link.level-1,
+.menu-submenu-button.level-1 {
+  padding-left: 16px;
+}
+
+.menu-link.level-2,
+.menu-submenu-button.level-2 {
+  padding-left: 20px;
+}
+
+.menu-link.level-3,
+.menu-submenu-button.level-3 {
+  padding-left: 24px;
+}
+
+/* Section Styles */
+.menu-section {
+  margin: 16px 0 8px;
+}
+
+.menu-section-label {
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #9ca3af;
+}
+
+.menu-section-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Dark Mode */
+[data-mode='dark'] .menu-link,
+[data-mode='dark'] .menu-submenu-button {
+  color: rgba(231, 227, 252, 0.87);
+}
+
+[data-mode='dark'] .menu-link:hover,
+[data-mode='dark'] .menu-submenu-button:hover {
+  background: rgba(105, 108, 255, 0.15);
+  color: #9b8cff;
+}
+
+[data-mode='dark'] .menu-link.active {
+  background: linear-gradient(90deg, #7367f0 0%, #9b8cff 100%);
+  color: #fff;
+}
+
+[data-mode='dark'] .menu-submenu.open > .menu-submenu-button {
+  background: rgba(105, 108, 255, 0.15);
+  color: #9b8cff;
+}
+
+[data-mode='dark'] .menu-submenu.has-active > .menu-submenu-button {
+  color: #9b8cff;
+}
+
+[data-mode='dark'] .menu-section-label {
+  color: rgba(231, 227, 252, 0.54);
+}
+

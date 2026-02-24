@@ -1,0 +1,329 @@
+{
+  "topBar": {
+    "promo": "节日大促，最高立减 20%，立即购买！",
+    "myAccount": "我的账户",
+    "login": "登录"
+  },
+  "search": {
+    "placeholder": "搜索"
+  },
+  "common": {
+    "loading": "加载中...",
+    "na": "暂无"
+  },
+  "buttons": {
+    "shopNow": "立即购买",
+    "addToCart": "加入购物车",
+    "adding": "加入中...",
+    "viewCart": "查看购物车",
+    "checkout": "结算",
+    "continueShopping": "继续购物",
+    "subscribe": "订阅",
+    "processing": "处理中...",
+    "placeOrder": "提交订单",
+    "payNow": "立即支付",
+    "completeOrder": "完成订单"
+  },
+  "nav": {
+    "home": "首页"
+  },
+  "home": {
+    "welcomeTitle": "欢迎来到 BFG Store",
+    "welcomeSubtitle": "从菜单浏览分类与商品，或在后台配置首页内容。",
+    "hero": {
+      "slide1": { "title": "限量库存，抢购从速！", "subtitle": "潮流穿搭", "description": "经典风格" },
+      "slide2": { "title": "新品上新", "subtitle": "引领潮流", "description": "发现最新趋势" },
+      "slide3": { "title": "超级促销", "subtitle": "最高立减 50%", "description": "限时优惠" }
+    },
+    "categories": {
+      "empty": "暂无分类"
+    },
+    "banners": {
+      "handBag": "手提包",
+      "handWatch": "腕表",
+      "shoes": "鞋履"
+    },
+    "sections": {
+      "featuredTitle": "精选商品",
+      "featuredEmpty": "暂无精选商品",
+      "newTitle": "新品推荐",
+      "newEmpty": "暂无新品",
+      "bestsellerTitle": "热销商品",
+      "bestsellerEmpty": "暂无热销商品"
+    }
+  },
+  "category": {
+    "sidebar": {
+      "categoriesTitle": "分类",
+      "sampleClothes": "服饰",
+      "sampleShoes": "鞋履",
+      "sampleAccessories": "配饰",
+      "priceTitle": "价格"
+    },
+    "defaultDescription": "这里展示该分类的商品列表。",
+    "toolbar": {
+      "toggleFiltersAria": "切换筛选",
+      "filters": "筛选",
+      "productsCount": "共 {count} 件商品。",
+      "gridViewAria": "网格视图",
+      "listViewAria": "列表视图",
+      "sortBy": "排序：",
+      "sort": {
+        "relevance": "综合",
+        "sales": "销量从高到低",
+        "nameAsc": "名称 A-Z",
+        "nameDesc": "名称 Z-A",
+        "priceAsc": "价格从低到高",
+        "priceDesc": "价格从高到低"
+      }
+    },
+    "pagination": {
+      "first": "首页",
+      "previous": "上一页",
+      "next": "下一页",
+      "last": "末页",
+      "pageOf": "第 {page} / {total} 页"
+    },
+    "empty": "该分类暂无商品。"
+  },
+  "product": {
+    "alerts": {
+      "addedToCart": "已加入购物车！",
+      "addFailed": "加入购物车失败"
+    },
+    "errors": {
+      "loadFailed": "商品加载失败",
+      "notFound": "未找到商品"
+    },
+    "links": {
+      "backToHome": "返回首页"
+    },
+    "labels": {
+      "size": "尺码：",
+      "color": "颜色：",
+      "quantity": "数量：",
+      "reference": "货号：",
+      "inStock": "库存：",
+      "items": "件",
+      "brand": "品牌：",
+      "reviews": "条评价"
+    },
+    "tabs": {
+      "description": "商品描述",
+      "details": "商品详情",
+      "reviews": "评价",
+      "noReviews": "暂无评价，快来成为第一个评价的人吧！"
+    },
+    "badges": {
+      "new": "新品"
+    },
+    "actions": {
+      "addToWishlist": "加入心愿单",
+      "addToCompare": "加入对比",
+      "share": "分享"
+    },
+    "relatedTitle": "你可能还喜欢",
+    "descriptionFallback": "暂无商品描述。"
+  },
+  "cart": {
+    "title": "购物车",
+    "emptyTitle": "购物车为空",
+    "emptyDesc": "你还没有添加任何商品到购物车。",
+    "removeFailed": "移除失败，请重试。",
+    "updateQtyFailed": "更新数量失败，请重试。",
+    "labels": {
+      "size": "尺码：",
+      "color": "颜色：",
+      "removeItemTitle": "移除商品"
+    },
+    "continueShopping": "继续购物",
+    "orderSummary": {
+      "title": "订单摘要",
+      "itemsCount": "{count} 件商品：",
+      "tax": "税费（{percent}%）：",
+      "subtotalTaxIncl": "小计（含税）：",
+      "shippingNote": "运费与最终总价将在结算时计算",
+      "checkout": "去结算",
+      "policies": {
+        "security": "安全保障",
+        "delivery": "配送政策",
+        "return": "退换政策",
+        "editHint": "（可在 Customer Reassurance 模块中编辑）"
+      }
+    }
+  },
+  "checkout": {
+    "emptyCartTitle": "购物车为空",
+    "errors": {
+      "selectPaymentMethod": "请选择支付方式",
+      "completeCardDetails": "请完善银行卡信息",
+      "enterNameOnCard": "请输入持卡人姓名",
+      "missingRequiredFields": "请填写以下必填项：{fields}",
+      "placeOrderFailed": "下单失败，请重试。",
+      "loginRequired": "请先登录以完成下单",
+      "serviceNotAvailable": "结算服务暂不可用，请联系支持。",
+      "serverError": "服务器错误，请稍后再试。",
+      "paymentFailed": "支付失败，请重试。"
+    },
+    "contact": {
+      "title": "联系方式",
+      "signIn": "登录",
+      "emailPlaceholder": "邮箱或手机号"
+    },
+    "delivery": {
+      "title": "收货信息",
+      "loggedInAs": "已登录：{email}",
+      "selectSavedAddress": "选择已保存地址",
+      "defaultLabel": "（默认）",
+      "useDifferentAddress": "+ 使用其他地址",
+      "showAllAddresses": "显示全部",
+      "moreAddressesAvailable": "还有 {count} 个地址可选",
+      "showFewerAddresses": "收起",
+      "country": {
+        "us": "美国",
+        "ca": "加拿大",
+        "gb": "英国"
+      },
+      "firstNameOptional": "名（可选）",
+      "lastName": "姓",
+      "address": "地址",
+      "apartmentOptional": "门牌号/套房等（可选）",
+      "city": "城市",
+      "state": "州/省",
+      "zipCode": "邮编",
+      "phone": "电话",
+      "saveInfoNextTime": "保存信息，便于下次使用"
+    },
+    "shipping": {
+      "title": "配送方式",
+      "loadingOptions": "正在加载配送选项...",
+      "noOptions": "该国家/地区暂无可用配送方式。",
+      "showMore": "展开更多（{count}）",
+      "showFewer": "收起",
+      "businessDay": "个工作日",
+      "businessDays": "个工作日"
+    },
+    "payment": {
+      "title": "支付",
+      "secureHint": "所有交易均安全加密。",
+      "savedCards": "已保存的银行卡",
+      "expires": "有效期 {month}/{year}",
+      "default": "默认",
+      "useDifferentMethod": "+ 使用其他支付方式",
+      "backToSavedCards": "← 返回已保存的银行卡",
+      "gateway": {
+        "creditDebitCard": "信用卡/借记卡",
+        "paymentInstructions": "支付说明",
+        "paypal": "使用 PayPal 支付",
+        "wechat": "扫码支付",
+        "alipay": "使用支付宝支付"
+      },
+      "redirectHint": "提交订单后将跳转到 {name} 完成支付。",
+      "noMethods": "当前没有可用的支付方式，请联系支持。",
+      "gatewayDisplayInfo": {
+        "title": "{name} – 支付信息",
+        "bankName": "银行名称",
+        "accountName": "账户名",
+        "accountNumber": "账号",
+        "routingNumber": "路由号",
+        "swiftCode": "SWIFT 代码",
+        "important": "重要提示：",
+        "importantFallback": "请在备注中填写订单号作为付款凭据。"
+      },
+      "card": {
+        "title": "银行卡信息",
+        "nameOnCard": "持卡人姓名",
+        "createFailed": "创建支付方式失败",
+        "saveCard": "保存该卡用于下次购买"
+      },
+      "billing": {
+        "useShippingAsBilling": "账单地址与收货地址一致",
+        "selectBillingAddress": "选择账单地址",
+        "addNewBillingAddress": "+ 新增账单地址",
+        "backToSavedAddresses": "← 返回已保存地址",
+        "enterNewBillingAddress": "填写新的账单地址",
+        "billingAddress": "账单地址",
+        "placeholders": {
+          "firstName": "名",
+          "lastName": "姓",
+          "address": "地址",
+          "apartmentOptional": "门牌号/套房等（可选）",
+          "city": "城市",
+          "state": "州/省",
+          "zipCode": "邮编"
+        }
+      }
+    },
+    "orderSummary": {
+      "title": "订单摘要",
+      "continueShopping": "继续购物",
+      "labels": {
+        "subtotal": "小计",
+        "discount": "折扣",
+        "shipping": "运费",
+        "tax": "税费",
+        "total": "合计",
+        "currency": "USD",
+        "size": "尺码",
+        "color": "颜色"
+      }
+    }
+  },
+  "checkoutSuccess": {
+    "title": "下单成功！",
+    "description": "感谢你的购买。订单正在处理中，我们会尽快通过邮件发送确认与物流信息。",
+    "itemsInOrder": "订单商品",
+    "qty": "数量",
+    "size": "尺码",
+    "color": "颜色",
+    "viewMyOrders": "查看我的订单",
+    "whatNext": "接下来会发生什么？",
+    "next1": "你将很快收到订单确认邮件",
+    "next2": "发货后我们会发送物流追踪信息",
+    "next3": "预计送达：3-5 个工作日"
+  },
+  "modal": {
+    "addedTitle": "商品已成功加入购物车",
+    "cartItemsCount": "你的购物车有 {count} 件商品。",
+    "subtotal": "小计：",
+    "shipping": "运费：",
+    "totalTaxExcl": "合计（不含税）：",
+    "totalTaxIncl": "合计（含税）：",
+    "taxes": "税费：",
+    "viewCart": "查看购物车",
+    "checkout": "去结算",
+    "size": "尺码：",
+    "color": "颜色：",
+    "quantity": "数量："
+  },
+  "footer": {
+    "contactUs": "联系我们",
+    "products": "商品",
+    "pricesDrop": "降价商品",
+    "newProducts": "新品",
+    "bestSellers": "热销",
+    "ourCompany": "关于我们",
+    "delivery": "配送",
+    "legalNotice": "法律声明",
+    "terms": "使用条款",
+    "aboutUs": "关于我们",
+    "securePayment": "安全支付",
+    "contactUsLink": "联系我们",
+    "sitemap": "网站地图",
+    "stores": "门店",
+    "newsletterTitle": "订阅最新资讯",
+    "yourEmail": "你的邮箱",
+    "newsletterSuccess": "感谢订阅。",
+    "newsletterError": "订阅失败，请重试。",
+    "newsletterSubmitting": "提交中…",
+    "copyright": "© 2025 - PackGo 电商系统",
+    "questionsCallUs": "如有疑问，24x7 致电 {phone}"
+  },
+  "filters": {
+    "title": "筛选",
+    "size": "尺码",
+    "color": "颜色",
+    "price": "价格"
+  }
+}
+

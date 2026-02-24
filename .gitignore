@@ -1,0 +1,14 @@
+node_modules/
+.next/
+.env*
+.env
+.env.local
+.cursor/commands/
+.shared/
+
+# Plugin synced routes (auto-generated)
+src/app/account/plugins/
+src/app/admin/plugins/
+src/.plugin-routes-manifest.json
+.vercel
+next-env.d.ts

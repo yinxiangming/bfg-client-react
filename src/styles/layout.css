@@ -1,0 +1,588 @@
+/* Layout Components - Generic */
+.admin-shell {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 100vh;
+}
+
+.admin-main {
+  display: flex;
+  justify-content: center;
+  background: #f8f8fb;
+  width: 100%;
+}
+
+.admin-content {
+  width: 100%;
+  max-width: 1440px;
+  margin-inline: auto;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+}
+
+/* D365 Style Layout - Sidebar + Content with Topbar in content area */
+.d365-admin-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  background: #f8f8fb;
+}
+
+.d365-main-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+  min-height: 0;
+  height: 100vh;
+}
+
+.d365-sidebar {
+  width: 260px;
+  flex-shrink: 0;
+  background: #ffffff;
+  border-right: 1px solid #eceef2;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: width 0.3s ease;
+  height: 100vh;
+  position: relative;
+}
+
+.d365-sidebar.collapsed {
+  width: 64px;
+}
+
+.d365-content-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #f8f8fb;
+  width: 100%;
+  min-width: 0;
+  height: 100vh;
+}
+
+.d365-topbar-wrapper {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+  flex-shrink: 0;
+  background: #ffffff;  
+}
+
+.d365-topbar-wrapper .admin-topbar {
+  width: 100% !important;
+  height: 56px !important; /* Reduced height */
+  min-height: 56px !important;
+  max-height: 56px !important;
+  margin: 0 !important; /* Remove margin for full width */
+  border-radius: 0 !important; /* Remove border radius */  
+}
+
+.d365-topbar-wrapper .admin-topbar-left,
+.d365-topbar-wrapper .admin-topbar-right {
+  height: 56px;
+}
+
+.d365-topbar-wrapper .admin-topbar-btn,
+.d365-topbar-wrapper .topbar-menu-toggle {
+  width: 36px;
+  height: 36px;
+}
+
+.d365-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  background: #f8f8fb;
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+
+.d365-content-body {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 24px;
+  width: 100%;
+}
+
+/* Compact page title styles for D365 layout */
+.d365-content-body .MuiTypography-h4 {
+  font-size: 1.125rem !important; /* Reduced from default h4 (1.5rem) */
+  font-weight: 600 !important;
+  line-height: 1.4 !important;
+  margin-bottom: 0.375rem !important; /* Reduced from 1rem */
+  margin-top: 0 !important;
+}
+
+.d365-content-body .MuiTypography-body2 {
+  font-size: 0.75rem !important; /* Slightly smaller */
+  margin-bottom: 0 !important;
+  line-height: 1.5 !important;
+}
+
+/* Reduce spacing for page header Grid */
+.d365-content-body > .MuiGrid-container:first-child {
+  margin-top: -12px !important; /* Compensate for default spacing */
+  margin-bottom: 8px !important; /* Reduced spacing after header */
+}
+
+.d365-content-body > .MuiGrid-container:first-child > .MuiGrid-item {
+  padding-top: 12px !important; /* Reduced from default 24px */
+}
+
+/* Compact page header div */
+.d365-content-body > .MuiGrid-container:first-child > .MuiGrid-item > div:first-child {
+  padding-bottom: 0 !important;
+}
+
+/* Override sidebar styles for D365 admin layout only */
+.d365-admin-layout .sidebar {
+  width: 100%;
+  height: 100vh;
+  background: #ffffff;
+  border-right: 0px solid #eceef2;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Override sidebar-header styles for D365 admin layout */
+.d365-admin-layout .sidebar-header {
+  padding: 15px 16px; /* Override default padding */
+  /* Add any other overrides you need here */
+  border-bottom: 0px solid #eceef2;
+}
+
+/* Override sidebar collapsed state for D365 admin layout */
+.d365-admin-layout .sidebar.collapsed .sidebar-header {
+  padding: 15px 8px; /* Adjust for collapsed state */
+}
+
+/* Dark Mode styles for D365 admin layout sidebar */
+[data-mode='dark'] .d365-sidebar {
+  border-right-color: #312d4b;;
+}
+
+[data-mode='dark'] .d365-admin-layout .sidebar {
+  background: #312d4b;
+  border-right-color: #312d4b;;
+}
+
+[data-mode='dark'] .d365-admin-layout .sidebar-header {
+  border-bottom-color: rgba(231, 227, 252, 0.12);
+}
+
+[data-mode='dark'] .d365-admin-layout .sidebar-logo-wrapper {
+  color: rgba(231, 227, 252, 0.87);
+}
+
+[data-mode='dark'] .d365-admin-layout .sidebar-logo-icon {
+  color: #696CFF !important;
+}
+
+[data-mode='dark'] .d365-admin-layout .sidebar-logo-icon svg {
+  color: #696CFF !important;
+}
+
+[data-mode='dark'] .d365-admin-layout .sidebar-logo-text {
+  color: rgba(231, 227, 252, 0.87) !important;
+}
+
+[data-mode='dark'] .d365-admin-layout .sidebar-lock-btn {
+  color: rgba(231, 227, 252, 0.68);
+}
+
+[data-mode='dark'] .d365-admin-layout .sidebar-lock-btn:hover {
+  color: rgba(231, 227, 252, 0.87);
+}
+
+[data-mode='dark'] .d365-admin-layout .sidebar-lock-btn iconify-icon {
+  color: rgba(231, 227, 252, 0.68);
+}
+
+[data-mode='dark'] .d365-admin-layout .sidebar-lock-btn:hover iconify-icon {
+  color: rgba(231, 227, 252, 0.87);
+}
+
+/* Dark Mode for D365 topbar */
+[data-mode='dark'] .d365-topbar-wrapper {
+  background: #312d4b;
+}
+
+[data-mode='dark'] .d365-topbar-wrapper .admin-topbar {
+  background: #312d4b;
+  border-bottom-color: rgba(231, 227, 252, 0.12);
+}
+
+/* Dark Mode for D365 content area */
+[data-mode='dark'] .d365-content {
+  background: #28243d;
+}
+
+[data-mode='dark'] .d365-content-wrapper {
+  background: #28243d;
+}
+
+[data-mode='dark'] .d365-main-container {
+  background: #28243d;
+}
+
+/* Dark Mode for D365 content body tables */
+[data-mode='dark'] .d365-content-body table thead {
+  background-color: rgba(231, 227, 252, 0.06) !important;
+  color: rgba(231, 227, 252, 0.68) !important;
+  border-top-color: rgba(231, 227, 252, 0.12) !important;
+}
+
+[data-mode='dark'] .d365-content-body table thead th {
+  color: rgba(231, 227, 252, 0.68) !important;
+}
+
+[data-mode='dark'] .d365-content-body table tbody tr {
+  border-top-color: rgba(231, 227, 252, 0.12) !important;
+  border-bottom-color: rgba(231, 227, 252, 0.12) !important;
+}
+
+[data-mode='dark'] .d365-content-body table tbody td {
+  color: rgba(231, 227, 252, 0.87) !important;
+}
+
+[data-mode='dark'] .d365-content-body table tbody tr:hover {
+  background-color: rgba(231, 227, 252, 0.08) !important;
+}
+
+/* Mobile Styles */
+@media (max-width: 960px) {
+  .d365-sidebar {
+    position: fixed;
+    inset: 48px auto 0 0;
+    width: 260px;
+    max-width: 80vw;
+    height: calc(100vh - 48px);
+    box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    z-index: 90;
+  }
+
+  .d365-sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .d365-content-body {
+    padding: 16px;
+  }
+}
+
+
+.sidebar {
+  width: 100%;
+  height: 100vh;
+  background: #ffffff;
+  border-right: 1px solid #eceef2;
+  display: flex;
+  flex-direction: column;
+  transition: width 0.3s ease;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Mobile Sidebar */
+@media (max-width: 960px) {
+  .admin-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 260px;
+    max-width: 80vw;
+    height: 100vh;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transform: translateX(-100%);
+    transition: transform 0.25s ease;
+    z-index: 200;
+  }
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .sidebar-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 180;
+  }
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 16px;
+  border-bottom: 1px solid #eceef2;
+  flex-shrink: 0;
+}
+
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+.sidebar-logo-wrapper {
+  color: #1f2937;
+}
+
+.sidebar-logo-icon {
+  color: #696CFF !important;
+}
+
+.sidebar-logo-icon svg {
+  color: #696CFF !important;
+}
+
+.sidebar-logo-text {
+  color: #1f2937 !important;
+  margin-left: 12px;
+  font-size: 1.375rem;
+  line-height: 1.09091;
+  font-weight: 700;
+  letter-spacing: 0.25px;
+}
+
+.sidebar-lock-btn {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #1f2937;
+  transition: color 0.2s;
+}
+
+.sidebar-lock-btn:hover {
+  color: #111827;
+}
+
+.sidebar-lock-btn svg {
+  width: 18px;
+  height: 18px;
+  color: inherit;
+}
+
+.sidebar-lock-btn iconify-icon {
+  color: #1f2937;
+}
+
+.sidebar-lock-btn:hover iconify-icon {
+  color: #111827;
+}
+
+.sidebar-nav {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 8px;
+  min-height: 0;
+}
+
+/* Collapsed State */
+.sidebar.collapsed .menu-label,
+.sidebar.collapsed .menu-badge,
+.sidebar.collapsed .menu-expand-icon,
+.sidebar.collapsed .menu-section-label,
+.sidebar.collapsed .menu-section-list {
+  display: none;
+}
+
+.sidebar.collapsed .menu-link,
+.sidebar.collapsed .menu-submenu-button {
+  justify-content: center;
+  padding: 10px;
+}
+
+.sidebar.collapsed .sidebar-header {
+  justify-content: center;
+  padding: 20px 8px;
+}
+
+.sidebar.collapsed .sidebar-logo {
+  display: none;
+}
+
+/* Topbar */
+.topbar {
+  height: 64px;
+  background: #ffffff;
+  border-bottom: 1px solid #eceef2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.topbar-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topbar-btn {
+  border: none;
+  background: #f3f4f6;
+  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.topbar-btn:hover {
+  background: #e5e7eb;
+}
+
+.topbar-btn svg {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  color: inherit;
+  display: inline-block;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #f3f4f6;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  color: #4a5568;
+}
+
+/* Content Area */
+.content {
+  padding: 24px;
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  min-height: 0;
+}
+
+.content-body {
+  flex: 0 0 auto;
+  padding: 24px;
+  min-height: 0;
+}
+
+/* Footer */
+.footer {
+  margin-top: auto;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6b7280;
+  font-size: 12px;
+  border-top: 1px solid #eceef2;
+}
+
+/* Dark Mode */
+[data-mode='dark'] .sidebar {
+  background: #312d4b;
+  border-right-color: rgba(231, 227, 252, 0.12);
+}
+
+[data-mode='dark'] .sidebar-header {
+  border-bottom-color: rgba(231, 227, 252, 0.12);
+}
+
+[data-mode='dark'] .sidebar-lock-btn {
+  color: rgba(231, 227, 252, 0.68);
+}
+
+[data-mode='dark'] .sidebar-lock-btn:hover {
+  color: rgba(231, 227, 252, 0.87);
+}
+
+[data-mode='dark'] .sidebar-lock-btn iconify-icon {
+  color: rgba(231, 227, 252, 0.68);
+}
+
+[data-mode='dark'] .sidebar-lock-btn:hover iconify-icon {
+  color: rgba(231, 227, 252, 0.87);
+}
+
+[data-mode='dark'] .sidebar-logo-wrapper {
+  color: rgba(231, 227, 252, 0.87);
+}
+
+[data-mode='dark'] .sidebar-logo-icon {
+  color: #696CFF !important;
+}
+
+[data-mode='dark'] .sidebar-logo-icon svg {
+  color: #696CFF !important;
+}
+
+[data-mode='dark'] .sidebar-logo-text {
+  color: rgba(231, 227, 252, 0.87) !important;
+}
+
+[data-mode='dark'] .topbar {
+  background: #312d4b;
+  border-bottom-color: rgba(231, 227, 252, 0.12);
+}
+
+[data-mode='dark'] .topbar-btn {
+  background: rgba(231, 227, 252, 0.08);
+  color: rgba(231, 227, 252, 0.87);
+}
+
+[data-mode='dark'] .topbar-btn:hover {
+  background: rgba(231, 227, 252, 0.12);
+}
+
+[data-mode='dark'] .avatar {
+  background: rgba(231, 227, 252, 0.08);
+  color: rgba(231, 227, 252, 0.87);
+}
+
+[data-mode='dark'] .footer {
+  border-top-color: rgba(231, 227, 252, 0.12);
+  color: rgba(231, 227, 252, 0.54);
+}
+

@@ -1,0 +1,91 @@
+/* Theme Switcher */
+.theme-switcher {
+  position: relative;
+}
+
+.theme-switcher-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  min-width: 160px;
+  padding: 8px;
+  z-index: 1000;
+  animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.theme-switcher-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  color: #4a5568;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-align: left;
+  position: relative;
+}
+
+.theme-switcher-option:hover {
+  background: rgba(105, 108, 255, 0.08);
+  color: #5b5ede;
+}
+
+.theme-switcher-option.selected {
+  background: rgba(105, 108, 255, 0.1);
+  color: #5b5ede;
+}
+
+.theme-switcher-option svg {
+  width: 18px;
+  height: 18px;
+  color: inherit;
+  flex-shrink: 0;
+}
+
+.theme-switcher-option .check-icon {
+  margin-left: auto;
+  width: 16px;
+  height: 16px;
+}
+
+/* Dark Mode */
+[data-mode='dark'] .theme-switcher-dropdown {
+  background: #312d4b;
+  border-color: rgba(231, 227, 252, 0.12);
+}
+
+[data-mode='dark'] .theme-switcher-option {
+  color: rgba(231, 227, 252, 0.87);
+}
+
+[data-mode='dark'] .theme-switcher-option:hover {
+  background: rgba(105, 108, 255, 0.15);
+  color: #9b8cff;
+}
+
+[data-mode='dark'] .theme-switcher-option.selected {
+  background: rgba(105, 108, 255, 0.2);
+  color: #9b8cff;
+}
+

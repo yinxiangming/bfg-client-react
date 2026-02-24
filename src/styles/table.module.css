@@ -1,0 +1,115 @@
+.table {
+  inline-size: 100%;
+  border-collapse: collapse;
+  font-size: 0.8125rem;
+  white-space: nowrap;
+
+  [align='right'] > * {
+    text-align: end;
+  }
+  [align='center'] > * {
+    text-align: center;
+  }
+
+  thead {
+    text-transform: uppercase;
+    color: var(--mui-palette-text-primary);
+    background-color: var(--mui-palette-grey-50);
+    border-block-start: 1px solid var(--border-color);
+  }
+
+  [data-mode='dark'] & thead {
+    background-color: var(--mui-palette-grey-800, #2d2d2d);
+    color: var(--mui-palette-grey-100, #e0e0e0);
+  }
+
+  thead th {
+      font-weight: 600;
+      font-size: 0.75rem;
+      letter-spacing: 0.5px;
+      line-height: 1.5;
+      text-align: start;
+      block-size: 44px;
+      &:not(:first-of-type):not(:last-of-type) {
+        padding-block: 0.75rem;
+        padding-inline: 1.5rem;
+      }
+      &:first-of-type {
+        &:not(:has(input[type='checkbox'])) {
+          padding-block: 0.75rem;
+          padding-inline: 1.5rem;
+        }
+        &:has(input[type='checkbox']) {
+          inline-size: 56px;
+          padding-inline: 1.5rem;
+          text-align: center;
+        }
+      }
+      &:last-of-type {
+        padding-block: 0.75rem;
+        padding-inline: 1.5rem;
+      }
+  }
+
+  tbody {
+    color: var(--mui-palette-text-secondary);
+
+    th,
+    td {
+      font-size: 0.875rem;
+      line-height: 1.5;
+      block-size: 52px;
+      &:not(:first-of-type):not(:last-of-type) {
+        padding-block: 0.75rem;
+        padding-inline: 1.5rem;
+      }
+      &:first-of-type {
+        &:not(:has(input[type='checkbox'])) {
+          padding-block: 0.75rem;
+          padding-inline: 1.5rem;
+        }
+        &:has(input[type='checkbox']) {
+          inline-size: 56px;
+          padding-inline: 1.5rem;
+          text-align: center;
+        }
+      }
+      &:last-of-type {
+        padding-block: 0.75rem;
+        padding-inline: 1.5rem;
+      }
+    }
+
+    tr:not(:last-child) {
+      border-block-end: 1px solid var(--border-color);
+    }
+    tr {
+      border-block-start: 1px solid var(--border-color);
+    }
+    
+    tr:hover {
+      background-color: var(--mui-palette-grey-50);
+    }
+  }
+
+  [data-mode='dark'] & tbody tr:hover {
+    background-color: var(--mui-palette-grey-800, #2d2d2d);
+    color: var(--mui-palette-text-primary);
+  }
+}
+
+.cellWithInput input {
+  inline-size: 100%;
+  background-color: transparent;
+  font-size: inherit;
+  color: inherit;
+  border-radius: var(--mui-shape-customBorderRadius-sm);
+  padding-block: 6px;
+  padding-inline: 10px;
+  margin-inline: -10px;
+
+  &:focus-visible {
+    outline: 1px solid var(--mui-palette-primary-main);
+  }
+}
+

@@ -1,0 +1,25 @@
+{
+  "language": {
+    "label": "Language",
+    "en": "English",
+    "zhHans": "简体中文"
+  },
+  "layout": {
+    "sideMenu": "Side Menu",
+    "topMenu": "Top Menu"
+  },
+  "user": {
+    "myProfile": "My Profile",
+    "settings": "Settings",
+    "orders": "Orders",
+    "addresses": "Addresses",
+    "logout": "Logout",
+    "account": "My Account",
+    "login": "Login",
+    "guest": "Guest"
+  },
+  "common": {
+    "loading": "Loading..."
+  }
+}
+

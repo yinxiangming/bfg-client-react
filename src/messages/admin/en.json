@@ -1,0 +1,3049 @@
+{
+  "nav": {
+    "dashboard": "Dashboard",
+    "store": "Store",
+    "storeOrders": "Orders",
+    "storeProducts": "Products",
+    "storeCustomers": "Customers",
+    "storeCategories": "Categories",
+    "storeStores": "Stores",
+    "freight": "Freight",
+    "freightDashboard": "Dashboard",
+    "freightParcels": "Parcels",
+    "freightOrders": "Freight Orders",
+    "freightConsignments": "Consignments",
+    "freightWarehouses": "Warehouses",
+    "support": "Support",
+    "supportTickets": "Tickets",
+    "supportCustomers": "Customers",
+    "settings": "Settings",
+    "settingsGeneral": "General",
+    "settingsWeb": "Web",
+    "settingsStore": "Store",
+    "settingsFinance": "Finance",
+    "settingsDelivery": "Delivery",
+    "settingsMarketing": "Marketing"
+  },
+  "common": {
+    "actions": {
+      "add": "Add",
+      "update": "Update",
+      "cancel": "Cancel",
+      "delete": "Delete",
+      "close": "Close",
+      "view": "View",
+      "edit": "Edit",
+      "send": "Send",
+      "pay": "Pay",
+      "downloadPdf": "Download PDF",
+      "retry": "Retry"
+    },
+    "states": {
+      "loading": "Loading...",
+      "saving": "Saving...",
+      "sending": "Sending...",
+      "deleting": "Deleting...",
+      "downloading": "Downloading...",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "labels": {
+      "created": "Created",
+      "status": "Status",
+      "actions": "Actions",
+      "date": "Date",
+      "from": "From",
+      "email": "Email",
+      "subject": "Subject",
+      "message": "Message"
+    },
+    "schemaTable": {
+      "search": "Search",
+      "searchPlaceholder": "Search...",
+      "bulkActions": "Bulk Actions",
+      "deleteSelected": "Delete Selected",
+      "exportSelected": "Export Selected",
+      "all": "All",
+      "loading": "Loading...",
+      "noData": "No data available",
+      "confirmAction": "Confirm Action",
+      "confirmMessage": "Are you sure you want to perform this action?",
+      "confirm": "Confirm",
+      "confirmBulkDelete": "Are you sure you want to delete {count} selected item(s)? This action cannot be undone.",
+      "itemsPerPage": "Items per page",
+      "showing": "Showing",
+      "to": "to",
+      "of": "of",
+      "entries": "entries"
+    },
+    "schemaForm": {
+      "save": "Save",
+      "cancel": "Cancel",
+      "saving": "Saving...",
+      "upload": "Upload",
+      "typeToSearch": "Type to search...",
+      "details": "Details",
+      "required": "Required",
+      "isRequired": "is required",
+      "mustBeAtLeast": "must be at least {min}",
+      "mustBeAtMost": "must be at most {max}",
+      "formatInvalid": "format is invalid"
+    }
+  },
+  "orders": {
+    "status": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "processing": "Processing",
+      "shipped": "Shipped",
+      "completed": "Completed",
+      "cancelled": "Cancelled",
+      "delivered": "Delivered"
+    },
+    "paymentStatus": {
+      "pending": "Pending",
+      "paid": "Paid",
+      "failed": "Failed"
+    },
+    "basicInfo": {
+      "storeFallback": "Store #{store}",
+      "stats": {
+        "packages": "Packages",
+        "totalWeight": "Total Weight",
+        "totalVolume": "Total Volume",
+        "consignments": "Consignments",
+        "store": "Store",
+        "paymentGatewayType": "Payment Method"
+      }
+    },
+    "listPage": {
+      "title": "Orders",
+      "schema": {
+        "title": "Orders",
+        "columns": {
+          "orderNo": "Order No",
+          "customer": "Customer",
+          "store": "Store",
+          "total": "Total",
+          "status": "Status",
+          "payment": "Payment",
+          "createdAt": "Created At"
+        }
+      },
+      "filters": {
+        "status": {
+          "label": "Status"
+        },
+        "paymentStatus": {
+          "label": "Payment Status"
+        }
+      },
+      "actions": {
+        "exportExcel": "Export Excel",
+        "view": "View",
+        "edit": "Edit",
+        "cancel": "Cancel",
+        "confirmCancel": "Are you sure you want to cancel this order?",
+        "ship": "Ship"
+      },
+      "messages": {
+        "deleteFailed": "Failed to delete order: {error}",
+        "cancelTodo": "Cancel order functionality to be implemented",
+        "shipTodo": "Ship order functionality to be implemented",
+        "exportTodo": "Export Excel functionality to be implemented"
+      }
+    },
+    "addressCards": {
+      "labels": {
+        "attn": "Attn",
+        "phone": "Phone",
+        "email": "Email"
+      },
+      "shipping": {
+        "title": "Shipping Address",
+        "empty": "No shipping address available",
+        "actions": {
+          "editTooltip": "Edit shipping address"
+        }
+      },
+      "billing": {
+        "title": "Billing Address",
+        "empty": "No billing address available",
+        "actions": {
+          "editTooltip": "Edit billing address"
+        }
+      },
+      "errors": {
+        "updateFailed": "Failed to update address"
+      }
+    },
+    "editHeader": {
+      "orderTitle": "Order #{orderNumber}",
+      "orderProgressTitle": "Order progress",
+      "orderStatusLabel": "Order Status",
+      "paymentStatusLabel": "Payment Status",
+      "cancelOrder": "Cancel Order",
+      "createdAt": "Created: {date}"
+    },
+    "editPage": {
+      "errors": {
+        "fetchFailed": "Failed to fetch order"
+      },
+      "states": {
+        "notFound": "Order not found",
+        "schemaNotFound": "Schema not found"
+      },
+      "actions": {
+        "backToOrders": "Back to Orders"
+      },
+      "values": {
+        "mainStore": "Main Store",
+        "onlineStore": "Online Store"
+      },
+      "snackbar": {
+        "saved": "Order saved successfully!",
+        "saveFailed": "Failed to update order"
+      }
+    },
+    "detailsCard": {
+      "title": "Order Details",
+      "empty": "No items in this order",
+      "table": {
+        "headers": {
+          "product": "Product",
+          "price": "Price",
+          "quantity": "Quantity",
+          "total": "Total"
+        },
+        "values": {
+          "sku": "SKU"
+        }
+      },
+      "shipping": {
+        "methodLabel": "Shipping Method",
+        "carrierLabel": "Carrier",
+        "estimatedDelivery": "Estimated delivery: {min}-{max} days"
+      },
+      "summary": {
+        "subtotal": "Subtotal",
+        "shipping": "Shipping",
+        "tax": "Tax",
+        "discount": "Discount",
+        "total": "Total"
+      }
+    },
+    "customerCard": {
+      "title": "Customer details",
+      "customerFallback": "Customer #{id}",
+      "actions": {
+        "viewDetails": "View Details"
+      },
+      "labels": {
+        "customerNumber": "Customer #",
+        "id": "ID",
+        "tax": "Tax"
+      },
+      "itemsCount": "{count} Items",
+      "itemsSubtitle": "in this order",
+      "contact": {
+        "title": "Contact info",
+        "email": "Email",
+        "phone": "Phone"
+      }
+    },
+    "timeline": {
+      "title": "Order Timeline",
+      "empty": "No order activity available"
+    },
+    "delivery": {
+      "title": "Delivery Information",
+      "deliveryStatusLabel": "Delivery Status",
+      "shippingAddressLabel": "Shipping Address",
+      "phoneLabel": "Phone",
+      "deliveryTimelineLabel": "Delivery Timeline",
+      "notShippedYet": "Order has not been shipped yet.",
+      "shippingCostLabel": "Shipping Cost"
+    },
+    "packages": {
+      "title": "Packages",
+      "addPackage": "Add Package",
+      "empty": "No packages added yet. Add packages to calculate shipping cost.",
+      "errors": {
+        "loadData": "Failed to load data",
+        "savePackage": "Failed to save package",
+        "deletePackage": "Failed to delete package",
+        "getShippingOptions": "Failed to get shipping options",
+        "createShipment": "Failed to create shipment",
+        "shipOrder": "Failed to ship order",
+        "getLabel": "Failed to get label",
+        "deleteConsignment": "Failed to delete consignment",
+        "warehouseNotFound": "Selected warehouse not found",
+        "selectCarrier": "Please select a carrier",
+        "selectPickupWarehouse": "Please select a pickup warehouse",
+        "selectShippingOption": "Please select a shipping option"
+      },
+      "validation": {
+        "weightRequired": "Weight is required",
+        "dimensionsRequired": "Dimensions are required"
+      },
+      "snackbar": {
+        "packageUpdated": "Package updated",
+        "packageAdded": "Package added",
+        "packageDeleted": "Package deleted",
+        "consignmentCreated": "Consignment created: {number}",
+        "consignmentDeleted": "Consignment deleted"
+      },
+      "table": {
+        "template": "Template",
+        "dimensions": "Dimensions (cm)",
+        "weight": "Weight (kg)",
+        "volWeight": "Vol. Weight",
+        "billingWeight": "Billing Weight",
+        "qty": "Qty",
+        "actions": "Actions",
+        "custom": "Custom"
+      },
+      "totals": {
+        "totalPackages": "Total Packages",
+        "actualWeight": "Actual Weight",
+        "billingWeight": "Billing Weight"
+      },
+      "consignments": {
+        "title": "Consignments",
+        "table": {
+          "consignmentNumber": "Consignment #",
+          "trackingNumber": "Tracking #",
+          "carrier": "Carrier",
+          "status": "Status",
+          "actions": "Actions"
+        },
+        "actions": {
+          "printLabel": "Print Label",
+          "deleteConsignment": "Delete Consignment"
+        },
+        "confirmDelete": {
+          "title": "Delete Consignment",
+          "message": "Are you sure you want to delete consignment {consignmentNumber}?",
+          "warnShippedOrDelivered": "This consignment has been shipped or delivered. Deletion may not be allowed."
+        }
+      },
+      "addresses": {
+        "title": "Shipping Addresses",
+        "fromPickup": "FROM (Pickup Address)",
+        "toDelivery": "TO (Delivery Address)",
+        "selectWarehouse": "Select Warehouse",
+        "selectPlaceholder": "Select...",
+        "noWarehouseConfigured": "No warehouse configured",
+        "noShippingAddress": "No shipping address",
+        "crossCountryWarning": "Cross-country shipping: From {fromCountry} to {toCountry}. Make sure selected carrier supports international shipping."
+      },
+      "shipping": {
+        "createShipmentTitle": "Create Shipment",
+        "carrierLabel": "Carrier",
+        "getShippingOptions": "Get Shipping Options",
+        "optionsPrompt": "Select a shipping option:",
+        "table": {
+          "carrier": "Carrier",
+          "service": "Service",
+          "price": "Price",
+          "estDays": "Est. Days"
+        },
+        "na": "N/A",
+        "daysSingle": "{days} days",
+        "daysRange": "{min}-{max} days",
+        "selected": "Selected: {serviceName}",
+        "createShipmentButton": "Create Shipment",
+        "noOptions": "No shipping options available from {carrierName}.",
+        "countryMismatchNote": "Note: Pickup address is in {pickupCountry} but delivery is in {deliveryCountry}.",
+        "parcelPortNzOnly": "ParcelPort only supports shipping from New Zealand.",
+        "selectedCarrierFallback": "Selected carrier",
+        "testModeTag": "(Test)"
+      },
+      "dialogs": {
+        "addTitle": "Add Package",
+        "editTitle": "Edit Package",
+        "packageTemplate": "Package Template",
+        "customDimensions": "Custom Dimensions",
+        "loadingTemplates": "Loading templates...",
+        "length": "Length (cm)",
+        "width": "Width (cm)",
+        "height": "Height (cm)",
+        "weight": "Weight (kg)",
+        "quantity": "Quantity",
+        "description": "Description",
+        "notes": "Notes",
+        "deletePackageTitle": "Delete Package",
+        "deletePackageConfirm": "Are you sure you want to delete this package?"
+      }
+    },
+    "invoice": {
+      "title": "Invoices ({count})",
+      "createInvoice": "Create Invoice",
+      "empty": "No invoices found for this order.",
+      "labels": {
+        "issue": "Issue",
+        "due": "Due",
+        "sent": "Sent",
+        "paid": "Paid",
+        "subtotal": "Subtotal",
+        "tax": "Tax",
+        "notes": "Notes"
+      },
+      "status": {
+        "paid": "Paid",
+        "sent": "Sent",
+        "draft": "Draft",
+        "overdue": "Overdue",
+        "cancelled": "Cancelled"
+      },
+      "actions": {
+        "delete": "Delete",
+        "pay": "Pay",
+        "downloadPdf": "Download PDF",
+        "send": "Send",
+        "edit": "Edit",
+        "view": "View"
+      },
+      "messages": {
+        "loadInvoicesFailed": "Failed to load invoices",
+        "loadInvoiceDetailsFailed": "Failed to load invoice details",
+        "updated": "Invoice updated successfully",
+        "created": "Invoice created successfully",
+        "cannotDelete": "Cannot delete {status} invoice",
+        "deleteFailed": "Failed to delete invoice",
+        "sent": "Invoice sent successfully",
+        "sendFailed": "Failed to send invoice",
+        "downloadFailed": "Failed to download invoice",
+        "paymentSuccess": "Payment successful"
+      },
+      "confirmDelete": {
+        "title": "Delete Invoice",
+        "message": "Are you sure you want to delete invoice {invoiceNumber}? This action cannot be undone."
+      }
+    }
+  },
+  "customers": {
+    "page": {
+      "title": "Customers",
+      "schema": {
+        "title": "Customers",
+        "customerNumber": "Customer Number",
+        "companyName": "Company Name",
+        "email": "Email",
+        "taxNumber": "Tax Number",
+        "creditLimit": "Credit Limit",
+        "balance": "Balance",
+        "active": "Active",
+        "verified": "Verified",
+        "createdAt": "Created At"
+      },
+      "actions": {
+        "addCustomer": "Add Customer",
+        "view": "View",
+        "delete": "Delete",
+        "confirmDelete": "Are you sure you want to delete this customer?",
+        "confirmDeleteCustomer": "Are you sure you want to delete {name}?",
+        "deleteFailed": "Failed to delete customer: {error}"
+      }
+    },
+    "editHeader": {
+      "addCustomer": "Add Customer",
+      "customerNumber": "Customer Number",
+      "verified": "Verified",
+      "resetPassword": "Reset Password",
+      "deleteCustomer": "Delete Customer",
+      "createdAt": "Created: {date}"
+    },
+    "values": {
+      "yes": "Yes",
+      "no": "No",
+      "active": "Active",
+      "inactive": "Inactive",
+      "default": "Default"
+    },
+    "newPage": {
+      "card": {
+        "title": "Customer Information"
+      },
+      "fields": {
+        "userId": {
+          "label": "User ID",
+          "helper": "Enter the user ID to create a customer profile"
+        },
+        "companyName": {
+          "label": "Company Name"
+        },
+        "taxNumber": {
+          "label": "Tax Number"
+        },
+        "creditLimit": {
+          "label": "Credit Limit"
+        },
+        "notes": {
+          "label": "Notes"
+        }
+      },
+      "actions": {
+        "discard": "Discard",
+        "creating": "Creating...",
+        "createCustomer": "Create Customer"
+      },
+      "validation": {
+        "userIdRequired": "User ID is required"
+      },
+      "snackbar": {
+        "created": "Customer created successfully!",
+        "createFailed": "Failed to create customer"
+      }
+    },
+    "detailPage": {
+      "states": {
+        "notFound": "Customer not found"
+      },
+      "actions": {
+        "backToCustomers": "Back to Customers",
+        "cancel": "Cancel",
+        "delete": "Delete"
+      },
+      "tabs": {
+        "basicInfo": "Basic Info",
+        "wallet": "Wallet",
+        "segments": "Segments",
+        "orders": "Orders",
+        "addresses": "Addresses",
+        "paymentMethods": "Payment Methods",
+        "inbox": "Inbox"
+      },
+      "deleteDialog": {
+        "title": "Delete Customer",
+        "thisCustomer": "this customer",
+        "message": "Are you sure you want to delete {name}? This action cannot be undone."
+      },
+      "resetPasswordDialog": {
+        "title": "Reset Password",
+        "message": "Send password reset email to {email}?",
+        "actions": {
+          "sendEmail": "Send Email"
+        }
+      },
+      "errors": {
+        "fetchFailed": "Failed to fetch customer"
+      },
+      "snackbar": {
+        "deleteFailed": "Failed to delete customer: {error}",
+        "resetEmailRequired": "Customer email is required for password reset",
+        "resetEmailSent": "Password reset email sent successfully",
+        "resetEmailFailed": "Failed to send password reset email: {error}"
+      }
+    },
+    "basicInfo": {
+      "fields": {
+        "status": { "label": "Status" },
+        "email": { "label": "Email" },
+        "firstName": { "label": "First Name" },
+        "lastName": { "label": "Last Name" },
+        "phone": { "label": "Phone" },
+        "notes": { "label": "Notes" },
+        "companyName": { "label": "Company Name" },
+        "taxNumber": { "label": "Tax Number" },
+        "creditLimit": { "label": "Credit Limit" },
+        "verified": { "label": "Verified" }
+      },
+      "sidebar": {
+        "title": "Basic Information"
+      },
+      "actions": {
+        "saveChanges": "Save Changes"
+      },
+      "snackbar": {
+        "updated": "Customer updated successfully!",
+        "updateFailed": "Failed to update customer: {error}"
+      }
+    },
+    "addresses": {
+      "title": "Addresses ({count})",
+      "actions": {
+        "add": "Add Address",
+        "cancel": "Cancel",
+        "save": "Save",
+        "delete": "Delete"
+      },
+      "values": {
+        "default": "Default",
+        "na": "N/A"
+      },
+      "empty": "No addresses found. Add an address to get started.",
+      "dialog": {
+        "addTitle": "Add Address",
+        "editTitle": "Edit Address"
+      },
+      "deleteDialog": {
+        "title": "Delete Address",
+        "message": "Are you sure you want to delete this address?"
+      },
+      "fields": {
+        "fullName": { "label": "Full Name" },
+        "company": { "label": "Company" },
+        "addressLine1": { "label": "Address Line 1" },
+        "addressLine2": { "label": "Address Line 2" },
+        "city": { "label": "City" },
+        "state": { "label": "State" },
+        "postalCode": { "label": "Postal Code" },
+        "country": { "label": "Country" },
+        "phone": { "label": "Phone" },
+        "email": { "label": "Email" }
+      },
+      "snackbar": {
+        "saved": "Address saved successfully!",
+        "saveFailed": "Failed to save address: {error}",
+        "deleted": "Address deleted successfully!",
+        "deleteFailed": "Failed to delete address: {error}"
+      }
+    },
+    "wallet": {
+      "title": "Wallet Balance",
+      "actions": {
+        "viewHistory": "View History"
+      },
+      "labels": {
+        "availableCredit": "Available Credit",
+        "totalAvailable": "Total Available"
+      },
+      "topUp": {
+        "title": "Top Up Wallet",
+        "fields": {
+          "amount": { "label": "Amount" },
+          "note": {
+            "label": "Note (Optional)",
+            "placeholder": "Reason for top-up..."
+          }
+        },
+        "actions": {
+          "processing": "Processing...",
+          "topUp": "Top Up",
+          "cancel": "Cancel",
+          "confirm": "Confirm"
+        },
+        "confirmDialog": {
+          "title": "Top Up Wallet",
+          "message": "Top up wallet with {amount} {currency}?"
+        }
+      },
+      "sidebar": {
+        "title": "Wallet Information",
+        "currentBalance": "Current Balance",
+        "creditLimit": "Credit Limit",
+        "totalAvailable": "Total Available"
+      },
+      "states": {
+        "loading": "Loading wallet information..."
+      },
+      "validation": {
+        "amountInvalid": "Please enter a valid amount"
+      },
+      "defaults": {
+        "adminTopUpNote": "Manual top-up by admin"
+      },
+      "snackbar": {
+        "toppedUp": "Wallet topped up successfully!",
+        "topUpFailed": "Failed to top up wallet: {error}"
+      },
+      "transactions": {
+        "title": "Transaction History",
+        "empty": "No transactions found",
+        "table": {
+          "headers": {
+            "date": "Date",
+            "type": "Type",
+            "description": "Description",
+            "user": "User",
+            "amount": "Amount"
+          }
+        },
+        "actions": {
+          "close": "Close"
+        },
+        "types": {
+          "payment": "Payment",
+          "refund": "Refund",
+          "credit": "Credit",
+          "debit": "Debit",
+          "adjustment": "Adjustment"
+        }
+      }
+    },
+    "paymentMethods": {
+      "title": "Payment Methods ({count})",
+      "actions": {
+        "cancel": "Cancel",
+        "addCard": "Add Card",
+        "addPaymentMethod": "Add Payment Method",
+        "delete": "Delete"
+      },
+      "addDialog": {
+        "title": "Add Payment Method",
+        "fields": {
+          "cardDetails": "Card Details",
+          "cardholderName": {
+            "label": "Cardholder Name",
+            "placeholder": "Name on card"
+          },
+          "setAsDefault": "Set as default payment method"
+        },
+        "securityNotice": "Your card information is securely processed by Stripe. We never store your full card number."
+      },
+      "deleteDialog": {
+        "title": "Delete Payment Method",
+        "message": "Are you sure you want to delete this payment method?"
+      },
+      "values": {
+        "card": "Card",
+        "default": "Default",
+        "expires": "Expires {month}/{year}"
+      },
+      "states": {
+        "noGateways": "No payment gateways are configured. Please contact the administrator.",
+        "stripeMissingKey": "Stripe payment gateway is not properly configured (missing publishable key). Please contact the administrator."
+      },
+      "errors": {
+        "fetchFailed": "Failed to fetch payment methods",
+        "stripeNotInitialized": "Stripe is not initialized",
+        "cardElementNotFound": "Card element not found",
+        "createFailed": "Failed to create payment method",
+        "initStripeFailed": "Failed to initialize Stripe. Please check if Stripe is configured correctly.",
+        "noGatewaySelected": "No payment gateway selected",
+        "saveFailed": "Failed to save payment method"
+      },
+      "snackbar": {
+        "added": "Payment method added successfully",
+        "deleted": "Payment method deleted successfully!",
+        "deleteFailed": "Failed to delete payment method: {error}"
+      },
+      "empty": "No payment methods found. Payment methods will appear here when you add them."
+    },
+    "segments": {
+      "title": "Customer Segments",
+      "empty": "This customer is not in any segments yet.",
+      "experiencePoints": {
+        "title": "Experience Points",
+        "unavailable": "Experience points not available."
+      }
+    },
+    "inbox": {
+      "title": "Messages ({count})",
+      "sendMessage": "Send Message",
+      "system": "System",
+      "errors": {
+        "fetchMessages": "Failed to fetch messages"
+      },
+      "status": {
+        "read": "Read",
+        "unread": "Unread"
+      },
+      "actions": {
+        "view": "View"
+      },
+      "schemas": {
+        "messagesTitle": "Messages",
+        "messageDetailsTitle": "Message Details",
+        "messageInfoTitle": "Message Information"
+      },
+      "sendDialog": {
+        "title": "Send Message to Customer"
+      },
+      "validation": {
+        "subjectAndMessageRequired": "Please enter both subject and message"
+      },
+      "snackbar": {
+        "sent": "Message sent successfully!",
+        "sendFailed": "Failed to send message: {error}"
+      }
+    },
+    "orders": {
+      "schema": {
+        "title": "Orders",
+        "columns": {
+          "orderNo": "Order No",
+          "total": "Total",
+          "status": "Status",
+          "paymentStatus": "Payment Status",
+          "createdAt": "Created At"
+        }
+      },
+      "actions": {
+        "edit": "Edit"
+      }
+    }
+  },
+  "categories": {
+    "page": {
+      "title": "Categories",
+      "actions": {
+        "addCategory": "Add Category",
+        "confirmDeleteWithName": "Are you sure you want to delete category {name}?"
+      },
+      "errors": {
+        "deleteFailed": "Failed to delete category: {error}"
+      }
+    },
+    "form": {
+      "title": "Category Details",
+      "fields": {
+        "name": { "label": "Name", "validationMessage": "Name must be 100 characters or less" },
+        "slug": { "label": "Slug", "validationMessage": "Slug must be 100 characters or less" },
+        "parent": { "label": "Parent Category", "placeholder": "Select parent category" },
+        "description": { "label": "Description" },
+        "icon": {
+          "label": "Icon",
+          "placeholder": "e.g. tabler-home",
+          "helperText": "Icon class name or emoji (max 50 characters)",
+          "validationMessage": "Icon must be 50 characters or less"
+        },
+        "order": { "label": "Order", "validationMessage": "Order must be 0 or greater" },
+        "is_active": { "label": "Is Active" },
+        "language": { "label": "Language", "validationMessage": "Language must be 10 characters or less" }
+      },
+      "actions": { "save": "Save", "submit": "Save", "cancel": "Cancel" }
+    },
+    "newPage": {
+      "title": "Add Category",
+      "titleWithParent": "Add Subcategory to \"{name}\"",
+      "snackbar": {
+        "created": "Category created successfully!",
+        "createFailed": "Failed to create category"
+      }
+    },
+    "editPage": {
+      "title": "Edit Category",
+      "tabs": {
+        "info": "Category Info",
+        "rules": "Product Category Rules"
+      },
+      "states": {
+        "invalidId": "Invalid category ID",
+        "notFound": "Category not found",
+        "loading": "Loading...",
+        "loadError": "Failed to load category"
+      },
+      "snackbar": {
+        "updated": "Category updated successfully!",
+        "updateFailed": "Failed to update category"
+      },
+      "config": {
+        "usageTitle": "How to use",
+        "usageBody": "Smart collection rules automatically include products that match the conditions. Each rule has: Column (product attribute, e.g. price, weight), Relation (e.g. greater than, equals), and Condition (the value to compare). Example: price greater than 100 includes products with price > 100. Add one or more rules and click Save.",
+        "invalidJson": "Invalid JSON for rules",
+        "snackbar": {
+          "updated": "Rules updated successfully",
+          "updateFailed": "Failed to update rules"
+        },
+        "rulesEditor": {
+          "column": "Column",
+          "relation": "Relation",
+          "condition": "Condition",
+          "addRule": "Add rule",
+          "removeRule": "Remove",
+          "columnPlaceholder": "e.g. price, weight",
+          "conditionPlaceholder": "e.g. 100"
+        },
+        "relationOptions": {
+          "greater_than": "Greater than",
+          "less_than": "Less than",
+          "equals": "Equals",
+          "greater_than_or_equal": "Greater than or equal",
+          "less_than_or_equal": "Less than or equal",
+          "not_equals": "Not equals",
+          "contains": "Contains"
+        }
+      }
+    },
+    "values": {
+      "yes": "Yes",
+      "no": "No",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "treeTable": {
+      "filters": {
+        "search": {
+          "label": "Search",
+          "placeholder": "Search by name, slug, or description"
+        },
+        "activeStatus": {
+          "label": "Active Status",
+          "all": "All",
+          "active": "Active",
+          "inactive": "Inactive"
+        }
+      },
+      "table": {
+        "headers": {
+          "name": "Name",
+          "slug": "Slug",
+          "language": "Language",
+          "order": "Order",
+          "active": "Active",
+          "products": "Products",
+          "actions": "Actions"
+        },
+        "empty": "No categories found"
+      },
+      "tooltips": {
+        "viewProducts": "Click to view products in this category"
+      },
+      "actions": {
+        "addSubcategory": "Add Subcategory",
+        "edit": "Edit",
+        "delete": "Delete",
+        "confirmDeleteWithName": "Are you sure you want to delete category \"{name}\"?"
+      }
+    }
+  },
+  "stores": {
+    "page": {
+      "title": "Stores"
+    },
+    "schema": {
+      "title": "Stores",
+      "columns": {
+        "name": "Name",
+        "code": "Code",
+        "description": "Description",
+        "warehouses": "Warehouses",
+        "createdAt": "Created At"
+      }
+    },
+    "actions": {
+      "add": "Add Store",
+      "edit": "Edit",
+      "view": "View",
+      "delete": "Delete",
+      "confirmDelete": "Are you sure you want to delete this store?"
+    },
+    "errors": {
+      "deleteFailed": "Failed to delete store: {error}"
+    },
+    "editPage": {
+      "states": {
+        "notFound": "Store not found",
+        "schemaNotFound": "Schema not found"
+      },
+      "snackbar": {
+        "saved": "Store saved successfully!",
+        "saveFailed": "Failed to update store"
+      }
+    }
+  },
+  "products": {
+    "edit": {
+      "header": {
+        "title": {
+          "add": "Add Product",
+          "edit": "Edit Product"
+        },
+        "subtitle": {
+          "add": "Create a new product",
+          "edit": "Update product information"
+        }
+      },
+      "actions": {
+        "discard": "Discard",
+        "creating": "Creating...",
+        "saving": "Saving...",
+        "createProduct": "Create Product",
+        "updateProduct": "Update Product"
+      },
+      "states": {
+        "notFound": "Product not found"
+      },
+      "snackbar": {
+        "saved": "Product saved successfully!",
+        "saveFailed": "Failed to save product"
+      }
+    },
+    "addPage": {
+      "errors": {
+        "nameRequiredForSlug": "Product name is required to generate slug"
+      },
+      "snackbar": {
+        "created": "Product created successfully!",
+        "createFailed": "Failed to create product"
+      }
+    },
+    "information": {
+      "title": "Product Information",
+      "fields": {
+        "name": {
+          "label": "Product Name",
+          "placeholder": "iPhone 14"
+        },
+        "sku": {
+          "label": "SKU",
+          "placeholder": "FXSK123U"
+        },
+        "barcode": {
+          "label": "Barcode",
+          "placeholder": "0123-4567"
+        }
+      }
+    },
+    "pricing": {
+      "title": "Pricing",
+      "fields": {
+        "basePrice": {
+          "label": "Base Price",
+          "placeholder": "Enter price"
+        },
+        "discountedPrice": {
+          "label": "Discounted Price",
+          "placeholder": "Discounted price"
+        },
+        "cost": {
+          "label": "Cost",
+          "placeholder": "Enter cost"
+        }
+      }
+    },
+    "list": {
+      "title": "Products",
+      "schema": {
+        "title": "Products",
+        "columns": {
+          "product": "Product",
+          "category": "Category",
+          "sku": "SKU",
+          "price": "Price",
+          "qty": "QTY",
+          "published": "Published"
+        },
+        "filters": {
+          "status": {
+            "label": "Status",
+            "published": "Published",
+            "inactive": "Inactive"
+          },
+          "featured": {
+            "label": "Featured",
+            "yes": "Yes",
+            "no": "No"
+          }
+        },
+        "searchPlaceholder": "Search products...",
+        "actions": {
+          "add": "Add Product",
+          "edit": "Edit",
+          "delete": "Delete",
+          "confirmDelete": "Are you sure you want to delete this product?"
+        }
+      },
+      "columns": {
+        "categories": "Categories"
+      },
+      "values": {
+        "uncategorized": "Uncategorized"
+      },
+      "filters": {
+        "category": {
+          "label": "Category",
+          "placeholder": "Select category"
+        }
+      },
+      "confirmDeleteWithName": "Are you sure you want to delete product {name}?",
+      "errors": {
+        "updateStatusFailed": "Failed to update status: {error}",
+        "deleteFailed": "Failed to delete product: {error}",
+        "schemaNotFound": "Schema not found"
+      }
+    },
+    "description": {
+      "cardTitle": "Product Description",
+      "descriptionHint": "Description (Optional) - Click image icon to insert images",
+      "editor": {
+        "placeholder": "Write product description..."
+      },
+      "toolbar": {
+        "insertFromLibrary": "Insert Image from Media Library",
+        "resizeImage": "Resize Image"
+      },
+      "warnings": {
+        "selectImageFirst": "Please select an image first to resize it"
+      },
+      "resizeDialog": {
+        "title": "Resize Image",
+        "fields": {
+          "width": {
+            "label": "Width",
+            "placeholder": "e.g. 200px or 50%"
+          },
+          "height": {
+            "label": "Height",
+            "placeholder": "e.g. 150px",
+            "helperKeepRatio": "Width/Height keep ratio when both are numeric px"
+          }
+        },
+        "actions": {
+          "cancel": "Cancel",
+          "apply": "Apply"
+        }
+      },
+      "toast": {
+        "imageInserted": "Image inserted"
+      }
+    },
+    "tableFilters": {
+      "status": {
+        "placeholder": "Select Status",
+        "published": "Published",
+        "inactive": "Inactive"
+      },
+      "category": {
+        "placeholder": "Select Category"
+      },
+      "stock": {
+        "placeholder": "Select Stock",
+        "inStock": "In Stock",
+        "outOfStock": "Out of Stock"
+      }
+    },
+    "inventory": {
+      "title": "Inventory",
+      "fields": {
+        "totalStockQuantity": "Total Stock Quantity",
+        "trackInventory": "Track inventory",
+        "trackInventoryHelp": "When enabled, the system will track and update stock quantities automatically when orders are placed or cancelled. When disabled, stock quantities are not automatically updated.",
+        "requiresShipping": "Requires shipping"
+      },
+      "helpers": {
+        "autoCalculatedFromVariants": "Auto-calculated from all variant inventories",
+        "autoCalculatedFromProduct": "Auto-calculated from product inventory"
+      },
+      "actions": {
+        "manageInventory": "Manage inventory"
+      }
+    },
+    "organize": {
+      "title": "Organize",
+      "fields": {
+        "productType": {
+          "label": "Product Type",
+          "options": {
+            "physical": "Physical",
+            "digital": "Digital",
+            "service": "Service"
+          }
+        },
+        "categories": {
+          "label": "Categories",
+          "placeholder": "Select categories"
+        },
+        "tags": {
+          "label": "Tags",
+          "placeholder": "Select or type new tags"
+        },
+        "published": "Published",
+        "featured": "Featured"
+      },
+      "states": {
+        "loadingCategories": "Loading categories...",
+        "noCategories": "No categories available"
+      }
+    },
+    "variants": {
+      "title": "Product Variants",
+      "actions": {
+        "addVariant": "Add Variant"
+      },
+      "table": {
+        "headers": {
+          "image": "Image",
+          "name": "Name",
+          "sku": "SKU",
+          "price": "Price",
+          "stock": "Stock",
+          "actions": "Actions"
+        },
+        "empty": "No variants found"
+      },
+      "values": {
+        "clickToAdd": "Click to add"
+      },
+      "new": {
+        "placeholders": {
+          "name": "Name",
+          "sku": "SKU",
+          "price": "Price",
+          "stock": "Stock"
+        }
+      },
+      "snackbar": {
+        "created": "Variant created",
+        "updated": "Variant updated",
+        "deleted": "Variant deleted",
+        "orderUpdated": "Variant order updated",
+        "imageUpdated": "Variant image updated"
+      },
+      "errors": {
+        "saveProductFirst": "Please save the product first before adding variants",
+        "saveProductFirstImages": "Please save the product first before adding variant images",
+        "cannotDeleteStock": "Cannot delete: stock greater than 0",
+        "createFailed": "Failed to create variant",
+        "updateFailed": "Failed to update variant",
+        "reorderFailed": "Failed to reorder variants",
+        "deleteFailed": "Failed to delete variant",
+        "updateImageFailed": "Failed to update variant image"
+      },
+      "deleteDialog": {
+        "title": "Delete Variant",
+        "thisVariant": "this variant",
+        "messageWithName": "Are you sure you want to delete \"{name}\"?",
+        "actions": {
+          "cancel": "Cancel",
+          "delete": "Delete"
+        }
+      },
+      "mediaDialog": {
+        "title": "Select Variant Image"
+      }
+    },
+    "variantInventory": {
+      "title": "Manage Inventory",
+      "titleWithVariant": "Manage Inventory - {variant}",
+      "variantFallback": "Variant",
+      "variantWithId": "Variant #{id}",
+      "errors": {
+        "loadFailed": "Failed to load inventory data",
+        "saveFailed": "Failed to save inventory"
+      },
+      "empty": {
+        "variantNotFound": "Variant not found.",
+        "noVariants": "No variants found. Please create variants first.",
+        "noWarehouses": "No warehouses found. Please create warehouses first."
+      },
+      "table": {
+        "headers": {
+          "variant": "Variant",
+          "total": "Total"
+        }
+      },
+      "actions": {
+        "cancel": "Cancel",
+        "save": "Save"
+      }
+    },
+    "media": {
+      "title": "Product Media",
+      "subtitle": "Select images from the Media Library to add to the product gallery.",
+      "empty": "No images added yet. Click Select Image to add product photos.",
+      "imageAltFallback": "Image {index}",
+      "actions": {
+        "selectImage": "Select Image",
+        "delete": "Delete"
+      },
+      "deleteDialog": {
+        "title": "Remove Image Reference",
+        "message": "Are you sure you want to remove this image from the product gallery? The image file will remain in the Media Library and can be deleted from there if needed.",
+        "actions": {
+          "cancel": "Cancel",
+          "remove": "Remove"
+        }
+      },
+      "mediaDialog": {
+        "title": "Select Product Image"
+      }
+    }
+  },
+  "payments": {
+    "title": "Payments ({count})",
+    "empty": "No payment records found for this order.",
+    "status": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Completed",
+      "paid": "Paid",
+      "failed": "Failed",
+      "refunded": "Refunded"
+    },
+    "labels": {
+      "gateway": "Gateway",
+      "transactionId": "Transaction ID",
+      "created": "Created",
+      "completed": "Completed",
+      "paymentAmount": "Payment Amount"
+    }
+  },
+  "settings": {
+    "rootPage": {
+      "title": "Settings",
+      "subtitle": "Manage your workspace settings and preferences",
+      "tabs": {
+        "general": "General",
+        "web": "Web",
+        "store": "Store",
+        "finance": "Finance",
+        "delivery": "Delivery",
+        "marketing": "Marketing"
+      },
+      "placeholders": {
+        "generalTitle": "General Settings",
+        "generalBody": "General settings content will be here",
+        "webTitle": "Web Settings",
+        "webBody": "Web settings content will be here",
+        "storeTitle": "Store Settings",
+        "storeBody": "Store settings content will be here",
+        "financeTitle": "Finance Settings",
+        "financeBody": "Finance settings content will be here",
+        "deliveryTitle": "Delivery Settings",
+        "deliveryBody": "Delivery settings content will be here",
+        "marketingTitle": "Marketing Settings",
+        "marketingBody": "Marketing settings content will be here"
+      }
+    },
+    "delivery": {
+      "carriers": {
+        "tab": {
+          "title": "Carriers",
+          "columns": {
+            "name": "Name",
+            "code": "Code",
+            "trackingUrl": "Tracking URL",
+            "status": "Status"
+          },
+          "actions": {
+            "newCarrier": "New Carrier",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this carrier?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete carrier: {error}",
+            "saveFailed": "Failed to save carrier: {error}"
+          }
+        },
+        "editDialog": {
+          "titleEdit": "Edit Carrier",
+          "titleNew": "New Carrier",
+          "name": "Name",
+          "code": "Code",
+          "carrierType": "Carrier Type (Plugin)",
+          "carrierTypePlaceholder": "(Manual / No Plugin)",
+          "trackingUrlTemplate": "Tracking URL Template",
+          "trackingUrlPlaceholder": "https://track.example.com/{tracking_number}",
+          "active": "Active",
+          "testMode": "Test Mode",
+          "pluginConfiguration": "Plugin Configuration",
+          "liveConfig": "Live Config",
+          "testConfig": "Test Config",
+          "nameRequired": "Name and Code are required"
+        }
+      },
+      "warehouses": {
+        "tab": {
+          "title": "Warehouses",
+          "columns": {
+            "name": "Name",
+            "code": "Code",
+            "address": "Address",
+            "city": "City",
+            "country": "Country",
+            "phone": "Phone",
+            "status": "Status",
+            "default": "Default"
+          },
+          "actions": {
+            "newWarehouse": "New Warehouse",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this warehouse?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete warehouse: {error}",
+            "saveFailed": "Failed to save warehouse: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Warehouse",
+          "fields": {
+            "name": "Name",
+            "code": "Code",
+            "active": "Active",
+            "defaultWarehouse": "Default Warehouse",
+            "addressLine1": "Address Line 1",
+            "addressLine2": "Address Line 2",
+            "city": "City",
+            "state": "State/Province",
+            "postalCode": "Postal Code",
+            "country": "Country",
+            "phone": "Phone",
+            "email": "Email"
+          },
+          "addressSearchPlaceholder": "Start typing an address to search..."
+        }
+      },
+      "deliverySettings": {
+        "title": "Delivery Settings",
+        "fields": {
+          "defaultWarehouse": "Default Warehouse",
+          "defaultCarrier": "Default Carrier",
+          "freeShippingThreshold": "Free Shipping Threshold",
+          "defaultPackagingType": "Default Packaging Type"
+        },
+        "errors": {
+          "noWorkspaceSettings": "No workspace settings found.",
+          "saveFailed": "Failed to save delivery setting: {error}"
+        },
+        "snackbar": {
+          "saved": "Delivery settings saved successfully"
+        }
+      },
+      "zones": {
+        "tab": {
+          "title": "Delivery Zones",
+          "columns": {
+            "name": "Name",
+            "code": "Code",
+            "countries": "Countries",
+            "postalCodes": "Postal Codes",
+            "status": "Status"
+          },
+          "actions": {
+            "newZone": "New Zone",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this delivery zone?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete delivery zone: {error}",
+            "saveFailed": "Failed to save delivery zone: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Delivery Zone",
+          "fields": {
+            "name": "Name",
+            "code": "Code",
+            "countries": "Countries",
+            "postalCodePatterns": "Postal Code Patterns",
+            "active": "Active"
+          },
+          "placeholders": {
+            "countries": "NZ,AU",
+            "postalCodePatterns": "10*,11*,12*"
+          }
+        }
+      },
+      "packagingTypes": {
+        "tab": {
+          "title": "Packaging Types",
+          "columns": {
+            "name": "Name",
+            "code": "Code",
+            "description": "Description",
+            "order": "Order",
+            "status": "Status"
+          },
+          "actions": {
+            "newPackaging": "New Packaging",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this packaging type?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete packaging type: {error}",
+            "saveFailed": "Failed to save packaging type: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Packaging Type",
+          "fields": {
+            "name": "Name",
+            "code": "Code",
+            "description": "Description",
+            "order": "Order",
+            "active": "Active"
+          }
+        }
+      },
+      "trackingEvents": {
+        "tab": {
+          "title": "Tracking Events",
+          "columns": {
+            "eventType": "Event Type",
+            "description": "Description",
+            "location": "Location",
+            "eventTime": "Event Time",
+            "created": "Created"
+          },
+          "actions": {
+            "newEvent": "New Event",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this tracking event?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete tracking event: {error}",
+            "saveFailed": "Failed to save tracking event: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Tracking Event",
+          "fields": {
+            "eventType": "Event Type",
+            "description": "Description",
+            "location": "Location",
+            "eventTime": "Event Time",
+            "consignment": "Consignment"
+          }
+        }
+      },
+      "freightServices": {
+        "tab": {
+          "title": "Freight Services",
+          "columns": {
+            "name": "Name",
+            "code": "Code",
+            "carrier": "Carrier",
+            "basePrice": "Base Price",
+            "pricePerKg": "Price / kg",
+            "etaDays": "ETA (days)",
+            "status": "Status"
+          },
+          "actions": {
+            "newService": "New Service",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this freight service?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete freight service: {error}",
+            "saveFailed": "Failed to save freight service: {error}"
+          },
+          "created": "Freight service created.",
+          "updated": "Freight service saved.",
+          "configUpdated": "Configuration saved.",
+          "invalidId": "Invalid freight service ID.",
+          "tabs": {
+            "info": "Info",
+            "config": "Configuration"
+          },
+          "configTab": {
+            "descriptionTitle": "Pricing configuration",
+            "descriptionBody": "Choose a pricing method below and fill in the form. Configuration is saved without editing JSON.",
+            "selectTemplatePrompt": "This service does not use a recognized pricing template. Please select a pricing method below to reconfigure.",
+            "chooseTemplate": "Choose pricing method",
+            "viewConfigJson": "View config JSON",
+            "addTier": "Add tier",
+            "formatJson": "Format JSON",
+            "invalidJson": "Invalid JSON in \"{field}\": {message}"
+          }
+        },
+        "editDialog": {
+          "title": "Freight Service",
+          "fields": {
+            "name": "Name",
+            "code": "Code",
+            "carrier": "Carrier",
+            "description": "Description",
+            "basePrice": "Base Price",
+            "pricePerKg": "Price per kg",
+            "etaMinDays": "ETA Min (days)",
+            "etaMaxDays": "ETA Max (days)",
+            "order": "Order",
+            "active": "Active"
+          }
+        }
+      },
+      "freightStatuses": {
+        "tab": {
+          "title": "Freight Statuses",
+          "columns": {
+            "name": "Name",
+            "code": "Code",
+            "type": "Type",
+            "state": "State",
+            "order": "Order",
+            "status": "Status"
+          },
+          "actions": {
+            "newStatus": "New Status",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this freight status?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete freight status: {error}",
+            "saveFailed": "Failed to save freight status: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Freight Status",
+          "fields": {
+            "name": "Name",
+            "code": "Code",
+            "type": "Type",
+            "state": "State",
+            "description": "Description",
+            "color": "Color",
+            "order": "Order",
+            "active": "Active"
+          }
+        }
+      },
+      "page": {
+        "title": "Delivery Settings",
+        "subtitle": "Manage warehouses, carriers, packaging types, and delivery defaults",
+        "tabs": {
+          "warehouses": "Warehouses",
+          "freightServices": "Freight Services",
+          "carriers": "Carriers",
+          "freightStatus": "Freight Status",
+          "trackingEvents": "Tracking Events",
+          "packagingTypes": "Packaging Types",
+          "deliveryZones": "Delivery Zones",
+          "deliverySettings": "Delivery Settings"
+        }
+      }
+    },
+    "finance": {
+      "page": {
+        "title": "Finance Settings",
+        "subtitle": "Manage currencies, payment gateways, tax rates, brands, financial codes, and invoice settings",
+        "tabs": {
+          "currencies": "Currencies",
+          "paymentGateways": "Payment Gateways",
+          "taxRates": "Tax Rates",
+          "brands": "Brands",
+          "financialCodes": "Financial Codes",
+          "invoiceSettings": "Invoice Settings"
+        }
+      },
+      "currencies": {
+        "tab": {
+          "title": "Currencies",
+          "columns": {
+            "name": "Name",
+            "symbol": "Symbol",
+            "decimals": "Decimals",
+            "status": "Status"
+          },
+          "searchPlaceholder": "Search currencies...",
+          "filters": {
+            "currencyType": {
+              "label": "Currency Type",
+              "options": {
+                "fiat": "Fiat",
+                "crypto": "Crypto"
+              }
+            },
+            "region": {
+              "label": "Region",
+              "options": {
+                "americas": "Americas",
+                "europe": "Europe",
+                "asia": "Asia",
+                "oceania": "Oceania",
+                "africa": "Africa"
+              }
+            }
+          },
+          "actions": {
+            "addNew": "Add New Currency",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this currency?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete currency: {error}",
+            "saveFailed": "Failed to save currency: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Currency",
+          "fields": {
+            "code": "Code",
+            "name": "Name",
+            "symbol": "Symbol",
+            "decimalPlaces": "Decimal Places",
+            "active": "Active"
+          }
+        }
+      },
+      "taxRates": {
+        "tab": {
+          "title": "Tax Rates",
+          "columns": {
+            "name": "Name",
+            "rate": "Rate",
+            "country": "Country",
+            "state": "State",
+            "status": "Status"
+          },
+          "actions": {
+            "newTaxRate": "New Tax Rate",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this tax rate?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete tax rate: {error}",
+            "saveFailed": "Failed to save tax rate: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Tax Rate",
+          "fields": {
+            "name": "Name",
+            "ratePercent": "Rate (%)",
+            "country": "Country",
+            "stateProvince": "State/Province",
+            "active": "Active"
+          }
+        }
+      },
+      "brands": {
+        "tab": {
+          "title": "Brands",
+          "columns": {
+            "name": "Name",
+            "taxId": "Tax ID",
+            "registrationNumber": "Registration No.",
+            "default": "Default",
+            "status": "Status"
+          },
+          "values": {
+            "yes": "Yes",
+            "no": "No"
+          },
+          "actions": {
+            "newBrand": "New Brand",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this brand?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete brand: {error}",
+            "saveFailed": "Failed to save brand: {error}"
+          }
+        },
+        "schema": {
+          "title": "Brand",
+          "name": "Name",
+          "logo": "Logo",
+          "addressId": "Address ID",
+          "taxId": "Tax ID",
+          "registrationNumber": "Registration Number",
+          "invoiceNote": "Invoice Note",
+          "invoiceNotePlaceholder": "Enter payment instructions, bank details, or other information to display on invoices.\n\nExample:\nASB Bank\nSurlex Limited\n12-3484-0026365-00\n\nPlease use the following reference when making payment:\n- Particular: [Company Name]\n- Reference: [Invoice Number]\n- Code: [Customer Number]",
+          "isDefault": "Default",
+          "isActive": "Active"
+        }
+      },
+      "financialCodes": {
+        "tab": {
+          "title": "Financial Codes",
+          "columns": {
+            "code": "Code",
+            "name": "Name",
+            "taxType": "Tax Type",
+            "status": "Status"
+          },
+          "actions": {
+            "new": "New Financial Code",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this financial code?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete financial code: {error}",
+            "saveFailed": "Failed to save financial code: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Financial Code",
+          "fields": {
+            "code": "Code",
+            "name": "Name",
+            "description": "Description",
+            "taxType": "Tax Type",
+            "active": "Active"
+          },
+          "taxTypeOptions": {
+            "default": "Default",
+            "noTax": "No Tax",
+            "zeroGst": "Zero GST"
+          }
+        }
+      },
+      "invoiceSettings": {
+        "tab": {
+          "confirmDelete": "Are you sure you want to delete this invoice setting?",
+          "actions": {
+            "edit": "Edit Invoice Settings",
+            "add": "Add Invoice Settings"
+          },
+          "current": {
+            "title": "Current Invoice Settings",
+            "prefix": "Prefix",
+            "defaultDueDays": "Default Due Days",
+            "autoNumber": "Auto Number",
+            "status": "Status",
+            "enabled": "Enabled",
+            "disabled": "Disabled",
+            "active": "Active",
+            "inactive": "Inactive"
+          },
+          "empty": "No invoice settings found. Click \"Add Invoice Settings\" to create one.",
+          "errors": {
+            "deleteFailed": "Failed to delete invoice setting: {error}",
+            "saveFailed": "Failed to save invoice setting: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Invoice Setting",
+          "fields": {
+            "invoicePrefix": "Invoice Prefix",
+            "defaultDueDays": "Default Due Days",
+            "defaultFooter": "Default Footer",
+            "autoNumber": "Auto Number",
+            "emailTemplateId": "Email Template ID",
+            "active": "Active"
+          }
+        }
+      },
+      "paymentGateways": {
+        "schema": {
+          "title": "Payment Gateways",
+          "name": "Name",
+          "type": "Type",
+          "mode": "Mode",
+          "status": "Status",
+          "modeTest": "Test",
+          "modeLive": "Live"
+        },
+        "actions": {
+          "newGateway": "New Gateway",
+          "edit": "Edit",
+          "delete": "Delete",
+          "confirmDelete": "Are you sure you want to delete this payment gateway?",
+          "deleteFailed": "Failed to delete payment gateway: {error}"
+        },
+        "editDialog": {
+          "title": "Payment Gateway",
+          "titleNew": "New Payment Gateway",
+          "titleEdit": "Edit Payment Gateway",
+          "name": "Name",
+          "nameRequired": "Name is required",
+          "gatewayType": "Gateway Type",
+          "gatewayTypePlaceholder": "Select gateway type",
+          "pluginConfiguration": "Plugin configuration",
+          "liveConfig": "Live Config (JSON)",
+          "testConfig": "Test Config (JSON)",
+          "liveConfigPlaceholder": "{{\"secret_key\": \"sk_live_...\", \"publishable_key\": \"pk_live_...\", \"webhook_secret\": \"whsec_...\"}}",
+          "testConfigPlaceholder": "{{\"secret_key\": \"sk_test_...\", \"publishable_key\": \"pk_test_...\", \"webhook_secret\": \"whsec_...\"}}",
+          "active": "Active",
+          "testMode": "Test Mode",
+          "liveConfigInvalid": "Live Config must be valid JSON",
+          "testConfigInvalid": "Test Config must be valid JSON",
+          "saveFailed": "Failed to save payment gateway: {error}",
+          "gatewayTypes": {
+            "stripe": "Stripe",
+            "paypal": "PayPal",
+            "wechat": "WeChat",
+            "alipay": "Alipay",
+            "custom": "Custom"
+          }
+        }
+      }
+    },
+    "web": {
+      "page": {
+        "title": "Web Settings",
+        "subtitle": "Manage sites, themes, languages, pages, posts, categories, tags, menus, media, and web defaults",
+        "tabs": {
+          "sites": "Sites",
+          "themes": "Themes",
+          "languages": "Languages",
+          "pages": "Pages",
+          "posts": "Posts",
+          "categories": "Categories",
+          "tags": "Tags",
+          "menus": "Menus",
+          "media": "Media",
+          "newsletter": "Newsletter",
+          "settings": "Web Settings"
+        }
+      },
+      "sites": {
+        "tab": {
+          "title": "Sites",
+          "columns": {
+            "name": "Name",
+            "domain": "Domain",
+            "theme": "Theme",
+            "defaultLanguage": "Default Language",
+            "isDefault": "Is Default",
+            "status": "Status"
+          },
+          "actions": {
+            "newSite": "New Site",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this site?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete site: {error}",
+            "saveFailed": "Failed to save site: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Site",
+          "fields": {
+            "name": "Name",
+            "domain": "Domain",
+            "theme": "Theme",
+            "defaultLanguage": "Default Language",
+            "supportedLanguages": "Supported Languages",
+            "siteTitle": "Site Title",
+            "siteDescription": "Site Description",
+            "active": "Active",
+            "isDefault": "Is Default"
+          },
+          "placeholders": {
+            "domain": "example.com"
+          }
+        }
+      },
+      "themes": {
+        "tab": {
+          "title": "Themes",
+          "columns": {
+            "name": "Name",
+            "code": "Code",
+            "primaryColor": "Primary Color",
+            "status": "Status"
+          },
+          "actions": {
+            "newTheme": "New Theme",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this theme?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete theme: {error}",
+            "saveFailed": "Failed to save theme: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Theme",
+          "fields": {
+            "name": "Name",
+            "code": "Code",
+            "description": "Description",
+            "templatePath": "Template Path",
+            "logo": "Logo",
+            "favicon": "Favicon",
+            "primaryColor": "Primary Color",
+            "secondaryColor": "Secondary Color",
+            "customCss": "Custom CSS",
+            "customJs": "Custom JS",
+            "active": "Active"
+          }
+        }
+      },
+      "languages": {
+        "tab": {
+          "title": "Languages",
+          "columns": {
+            "code": "Code",
+            "name": "Name",
+            "nativeName": "Native Name",
+            "isDefault": "Is Default",
+            "status": "Status",
+            "order": "Order"
+          },
+          "actions": {
+            "newLanguage": "New Language",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this language?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete language: {error}",
+            "saveFailed": "Failed to save language: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Language",
+          "fields": {
+            "code": "Code",
+            "name": "Name",
+            "nativeName": "Native Name",
+            "isDefault": "Is Default",
+            "active": "Active",
+            "rtl": "RTL (Right-to-Left)",
+            "order": "Order"
+          },
+          "placeholders": {
+            "code": "en, zh-hans, zh-hant",
+            "name": "English, Simplified Chinese",
+            "nativeName": "English, 简体中文"
+          }
+        }
+      },
+      "menus": {
+        "tab": {
+          "title": "Menus",
+          "columns": {
+            "name": "Name",
+            "slug": "Slug",
+            "location": "Location",
+            "language": "Language",
+            "itemsCount": "Items Count",
+            "status": "Status"
+          },
+          "actions": {
+            "newMenu": "New Menu",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this menu?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete menu: {error}",
+            "saveFailed": "Failed to save menu: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Menu",
+          "fields": {
+            "name": "Name",
+            "slug": "Slug",
+            "location": "Location",
+            "language": "Language",
+            "active": "Active",
+            "menuItems": "Menu items"
+          },
+          "itemTitle": "Title",
+          "itemUrl": "URL",
+          "openInNewTab": "New tab",
+          "removeItem": "Remove",
+          "addItem": "Add item",
+          "locationOptions": {
+            "header": "Header",
+            "footer": "Footer",
+            "sidebar": "Sidebar"
+          }
+        }
+      },
+      "tags": {
+        "tab": {
+          "title": "Tags",
+          "columns": {
+            "name": "Name",
+            "slug": "Slug",
+            "language": "Language"
+          },
+          "actions": {
+            "newTag": "New Tag",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this tag?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete tag: {error}",
+            "saveFailed": "Failed to save tag: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Tag",
+          "fields": {
+            "name": "Name",
+            "slug": "Slug",
+            "language": "Language"
+          }
+        }
+      },
+      "categories": {
+        "tab": {
+          "actions": {
+            "newCategory": "New Category",
+            "edit": "Edit",
+            "delete": "Delete"
+          },
+          "headers": {
+            "name": "Name",
+            "slug": "Slug",
+            "contentType": "Content Type",
+            "language": "Language",
+            "order": "Order",
+            "status": "Status",
+            "actions": "Actions"
+          },
+          "empty": "No categories found",
+          "confirmDeleteWithName": "Are you sure you want to delete category \"{name}\"?",
+          "status": {
+            "active": "Active",
+            "inactive": "Inactive"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete category: {error}",
+            "saveFailed": "Failed to save category: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Category",
+          "fields": {
+            "name": "Name",
+            "slug": "Slug",
+            "description": "Description",
+            "parentCategory": "Parent Category",
+            "contentType": "Content Type",
+            "icon": "Icon",
+            "color": "Color",
+            "order": "Order",
+            "active": "Active",
+            "language": "Language"
+          },
+          "placeholders": {
+            "icon": "tabler-icon-name or emoji"
+          },
+          "contentTypeOptions": {
+            "generic": "Generic",
+            "post": "Post",
+            "project": "Project",
+            "service": "Service",
+            "faq": "FAQ"
+          }
+        }
+      },
+      "pages": {
+        "tab": {
+          "title": "Pages",
+          "columns": {
+            "title": "Title",
+            "slug": "Slug",
+            "status": "Status",
+            "language": "Language",
+            "order": "Order",
+            "featured": "Featured",
+            "publishedAt": "Published At"
+          },
+          "actions": {
+            "newPage": "New Page",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this page?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete page: {error}",
+            "saveFailed": "Failed to save page: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Page",
+          "tabs": {
+            "basic": "Basic",
+            "blocks": "Blocks"
+          },
+          "saveBlocks": "Save Blocks",
+          "fields": {
+            "title": "Title",
+            "slug": "Slug",
+            "content": "Content",
+            "excerpt": "Excerpt",
+            "parentPage": "Parent Page",
+            "template": "Template",
+            "seoTitle": "SEO Title",
+            "seoDescription": "SEO Description",
+            "seoKeywords": "SEO Keywords",
+            "status": "Status",
+            "featured": "Featured",
+            "allowComments": "Allow Comments",
+            "order": "Order",
+            "language": "Language"
+          },
+          "statusOptions": {
+            "draft": "Draft",
+            "published": "Published",
+            "archived": "Archived"
+          }
+        }
+      },
+      "posts": {
+        "tab": {
+          "title": "Posts",
+          "columns": {
+            "title": "Title",
+            "slug": "Slug",
+            "category": "Category",
+            "status": "Status",
+            "language": "Language",
+            "views": "Views",
+            "publishedAt": "Published At"
+          },
+          "actions": {
+            "newPost": "New Post",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this post?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete post: {error}",
+            "saveFailed": "Failed to save post: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Post",
+          "fields": {
+            "title": "Title",
+            "slug": "Slug",
+            "content": "Content",
+            "excerpt": "Excerpt",
+            "featuredImage": "Featured Image",
+            "category": "Category",
+            "tags": "Tags",
+            "seoTitle": "SEO Title",
+            "seoDescription": "SEO Description",
+            "status": "Status",
+            "publishedAt": "Published At",
+            "allowComments": "Allow Comments",
+            "language": "Language"
+          },
+          "statusOptions": {
+            "draft": "Draft",
+            "published": "Published",
+            "archived": "Archived"
+          }
+        }
+      },
+      "media": {
+        "tab": {
+          "title": "Media",
+          "columns": {
+            "fileName": "File Name",
+            "preview": "Preview",
+            "fileType": "File Type",
+            "fileSize": "File Size",
+            "title": "Title",
+            "uploadedAt": "Uploaded At"
+          },
+          "actions": {
+            "uploadMedia": "Upload Media",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this media?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete media: {error}",
+            "saveFailed": "Failed to save media: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Media",
+          "fields": {
+            "file": "File",
+            "title": "Title",
+            "altText": "Alt Text",
+            "caption": "Caption"
+          },
+          "placeholders": {
+            "altText": "For images"
+          }
+        }
+      },
+      "settingsTab": {
+        "title": "Web Settings",
+        "fields": {
+          "defaultLanguage": "Default Language",
+          "seoDefaultTitle": "SEO Default Title",
+          "seoDefaultDescription": "SEO Default Description"
+        },
+        "placeholders": {
+          "seoDefaultTitle": "Enter default SEO title",
+          "seoDefaultDescription": "Enter default SEO description"
+        },
+        "actions": {
+          "saveChanges": "Save Changes",
+          "reset": "Reset"
+        },
+        "alerts": {
+          "saved": "Web settings saved successfully",
+          "saveFailed": "Failed to save web settings: {error}"
+        },
+        "languageOptions": {
+          "en": "English",
+          "zhHans": "Simplified Chinese",
+          "zhHant": "Traditional Chinese"
+        }
+      },
+      "timeSlots": {
+        "title": "Time Slots",
+        "formTitle": "Time slot",
+        "columns": {
+          "date": "Date",
+          "time": "Time",
+          "capacity": "Capacity",
+          "name": "Name",
+          "active": "Active"
+        },
+        "actions": {
+          "add": "Add time slot",
+          "edit": "Edit",
+          "delete": "Delete",
+          "confirmDelete": "Delete this time slot?"
+        },
+        "fields": {
+          "date": "Date",
+          "startTime": "Start time",
+          "endTime": "End time",
+          "maxBookings": "Max bookings",
+          "nameOptional": "Name (optional)",
+          "namePlaceholder": "e.g. Morning drop-off",
+          "notes": "Notes",
+          "active": "Active"
+        },
+        "errors": {
+          "deleteFailed": "Failed to delete",
+          "saveFailed": "Failed to save"
+        }
+      }
+    },
+    "store": {
+      "page": {
+        "title": "Store Settings",
+        "subtitle": "Manage stores, sales channels, and subscription plans",
+        "tabs": {
+          "stores": "Stores",
+          "salesChannels": "Sales Channels",
+          "subscriptionPlans": "Subscription Plans",
+          "messageTemplates": "Message Templates"
+        }
+      },
+      "stores": {
+        "tab": {
+          "title": "Stores",
+          "columns": {
+            "name": "Name",
+            "code": "Code",
+            "description": "Description",
+            "status": "Status"
+          },
+          "actions": {
+            "newStore": "New Store",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this store?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete store: {error}",
+            "saveFailed": "Failed to save store: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Store",
+          "fields": {
+            "name": "Name",
+            "code": "Code",
+            "description": "Description",
+            "warehouses": "Warehouses",
+            "active": "Active"
+          }
+        }
+      },
+      "salesChannels": {
+        "tab": {
+          "title": "Sales Channels",
+          "columns": {
+            "name": "Name",
+            "code": "Code",
+            "channelType": "Channel Type",
+            "default": "Default",
+            "status": "Status"
+          },
+          "values": {
+            "yes": "Yes",
+            "no": "No"
+          },
+          "actions": {
+            "newChannel": "New Channel",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this sales channel?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete sales channel: {error}",
+            "saveFailed": "Failed to save sales channel: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Sales Channel",
+          "fields": {
+            "name": "Name",
+            "code": "Code",
+            "channelType": "Channel Type",
+            "description": "Description",
+            "active": "Active",
+            "setDefault": "Set as Default Channel"
+          },
+          "channelTypeOptions": {
+            "onlineStore": "Online Store",
+            "pos": "Point of Sale",
+            "mobileApp": "Mobile App",
+            "social": "Social Media",
+            "marketplace": "Marketplace",
+            "custom": "Custom"
+          }
+        }
+      },
+      "subscriptionPlans": {
+        "tab": {
+          "title": "Subscription Plans",
+          "columns": {
+            "name": "Name",
+            "price": "Price",
+            "interval": "Interval",
+            "trialDays": "Trial Days",
+            "status": "Status"
+          },
+          "interval": {
+            "every": "Every {count} {interval}",
+            "single": {
+              "day": "Daily",
+              "week": "Weekly",
+              "month": "Monthly",
+              "year": "Yearly"
+            },
+            "units": {
+              "day": "day",
+              "week": "week",
+              "month": "month",
+              "year": "year"
+            }
+          },
+          "trial": {
+            "days": "{count} days",
+            "noTrial": "No trial"
+          },
+          "actions": {
+            "newPlan": "New Plan",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this subscription plan?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete subscription plan: {error}",
+            "saveFailed": "Failed to save subscription plan: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Subscription Plan",
+          "fields": {
+            "planName": "Plan Name",
+            "description": "Description",
+            "price": "Price",
+            "interval": "Interval",
+            "intervalCount": "Interval Count",
+            "trialPeriodDays": "Trial Period (days)",
+            "features": "Features (one per line)",
+            "active": "Active"
+          },
+          "intervalOptions": {
+            "day": "Daily",
+            "week": "Weekly",
+            "month": "Monthly",
+            "year": "Yearly"
+          }
+        }
+      },
+      "messageTemplates": {
+        "tab": {
+          "title": "Message Templates",
+          "columns": {
+            "name": "Name",
+            "code": "Code",
+            "event": "Event",
+            "language": "Language",
+            "email": "Email",
+            "sms": "SMS",
+            "push": "Push",
+            "status": "Status"
+          },
+          "values": {
+            "yes": "Yes",
+            "no": "No"
+          },
+          "actions": {
+            "newTemplate": "New Template",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this message template?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete message template: {error}",
+            "saveFailed": "Failed to save message template: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Message Template",
+          "fields": {
+            "name": "Name",
+            "code": "Code",
+            "event": "Event",
+            "language": "Language",
+            "active": "Active",
+            "emailEnabled": "Enable Email",
+            "emailSubject": "Email Subject",
+            "emailBody": "Email Body",
+            "emailHtmlBody": "Email HTML Body",
+            "appMessageEnabled": "Enable App Message",
+            "appMessageTitle": "App Message Title",
+            "appMessageBody": "App Message Body",
+            "smsEnabled": "Enable SMS",
+            "smsBody": "SMS Body (max 160 chars)",
+            "pushEnabled": "Enable Push",
+            "pushTitle": "Push Title",
+            "pushBody": "Push Body"
+          },
+          "languageOptions": {
+            "en": "English",
+            "zhCn": "Simplified Chinese",
+            "zhTw": "Traditional Chinese"
+          }
+        }
+      }
+    },
+    "marketing": {
+      "page": {
+        "title": "Marketing Settings",
+        "subtitle": "Manage marketing settings, campaigns, coupons, gift cards, and referral programs",
+        "tabs": {
+          "campaigns": "Campaigns",
+          "promoDisplays": "Promo Displays",
+          "coupons": "Coupons",
+          "giftCards": "Gift Cards",
+          "referralPrograms": "Referral Programs",
+          "settings": "Marketing Settings"
+        }
+      },
+      "campaignDisplays": {
+        "tab": {
+          "title": "Promo Displays",
+          "columns": {
+            "campaign": "Campaign",
+            "title": "Title",
+            "displayType": "Display Type",
+            "order": "Order",
+            "linkUrl": "Link URL",
+            "status": "Status"
+          },
+          "actions": {
+            "newDisplay": "New Display",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this display?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete display: {error}",
+            "saveFailed": "Failed to save display: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Promo Display",
+          "fields": {
+            "campaign": "Campaign",
+            "campaignHelp": "Optional. Leave empty for standalone display.",
+            "displayType": "Display Type",
+            "order": "Order",
+            "title": "Title",
+            "titleHelp": "Optional. Shown on slide.",
+            "subtitle": "Subtitle",
+            "subtitleHelp": "Optional. Shown on slide.",
+            "image": "Image",
+            "imageHelp": "Optional. For slide or featured post cover.",
+            "linkUrl": "Link URL",
+            "linkTarget": "Link Target",
+            "rules": "Rules",
+            "rulesHelp": "JSON array: same as ProductCategory rules. e.g. [{\"column\":\"category_id\",\"relation\":\"equals\",\"condition\":\"5\"}] or [{\"column\":\"price\",\"relation\":\"greater_than\",\"condition\":\"100\"}]",
+            "post": "Post",
+            "active": "Active"
+          },
+          "displayTypeOptions": {
+            "slide": "Slide",
+            "categoryEntry": "Category Entry",
+            "featured": "Featured"
+          }
+        }
+      },
+      "settingsTab": {
+        "title": "Marketing Settings",
+        "fields": {
+          "defaultReferralProgram": "Default Referral Program",
+          "utmSource": "UTM Source Template",
+          "utmMedium": "UTM Medium Template",
+          "utmCampaign": "UTM Campaign Template"
+        },
+        "placeholders": {
+          "utmCampaign": "{campaign_name}"
+        },
+        "errors": {
+          "noWorkspaceSettings": "No workspace settings found.",
+          "saveFailed": "Failed to save marketing setting: {error}"
+        },
+        "snackbar": {
+          "saved": "Marketing settings saved successfully"
+        }
+      },
+      "campaigns": {
+        "tab": {
+          "title": "Campaigns",
+          "columns": {
+            "name": "Name",
+            "type": "Type",
+            "startDate": "Start Date",
+            "endDate": "End Date",
+            "budget": "Budget",
+            "status": "Status"
+          },
+          "actions": {
+            "newCampaign": "New Campaign",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this campaign?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete campaign: {error}",
+            "saveFailed": "Failed to save campaign: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Campaign",
+          "fields": {
+            "name": "Name",
+            "type": "Type",
+            "description": "Description",
+            "startDate": "Start Date",
+            "endDate": "End Date",
+            "budget": "Budget",
+            "active": "Active"
+          },
+          "typeOptions": {
+            "email": "Email",
+            "sms": "SMS",
+            "social": "Social Media",
+            "affiliate": "Affiliate",
+            "other": "Other"
+          }
+        }
+      },
+      "coupons": {
+        "tab": {
+          "title": "Coupons",
+          "columns": {
+            "code": "Code",
+            "discount": "Discount",
+            "validFrom": "Valid From",
+            "validTo": "Valid To",
+            "usageLimit": "Usage Limit",
+            "used": "Used",
+            "status": "Status"
+          },
+          "actions": {
+            "newCoupon": "New Coupon",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this coupon?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete coupon: {error}",
+            "saveFailed": "Failed to save coupon: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Coupon",
+          "fields": {
+            "code": "Code",
+            "description": "Description",
+            "discountRuleId": "Discount Rule ID",
+            "campaignOptional": "Campaign (Optional)",
+            "validFrom": "Valid From",
+            "validTo": "Valid To",
+            "usageLimit": "Usage Limit",
+            "usageLimitPerCustomer": "Usage Limit per Customer",
+            "active": "Active"
+          },
+          "placeholders": {
+            "discountRuleId": "Enter discount rule ID"
+          }
+        }
+      },
+      "giftCards": {
+        "tab": {
+          "title": "Gift Cards",
+          "columns": {
+            "code": "Code",
+            "initialValue": "Initial Value",
+            "balance": "Balance",
+            "currency": "Currency",
+            "customer": "Customer",
+            "status": "Status",
+            "expires": "Expires"
+          },
+          "actions": {
+            "newGiftCard": "New Gift Card",
+            "edit": "Edit",
+            "deactivate": "Deactivate",
+            "delete": "Delete",
+            "confirmDeactivate": "Are you sure you want to deactivate this gift card?",
+            "confirmDelete": "Are you sure you want to delete this gift card?"
+          },
+          "errors": {
+            "deactivateFailed": "Failed to deactivate gift card: {error}",
+            "deleteFailed": "Failed to delete gift card: {error}",
+            "saveFailed": "Failed to save gift card: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Gift Card",
+          "fields": {
+            "currency": "Currency",
+            "initialValue": "Initial Value",
+            "customerOptional": "Customer (Optional)",
+            "expiresAt": "Expires At",
+            "active": "Active"
+          }
+        }
+      },
+      "referralPrograms": {
+        "tab": {
+          "title": "Referral Programs",
+          "columns": {
+            "name": "Name",
+            "referrerReward": "Referrer Reward",
+            "refereeReward": "Referee Reward",
+            "minPurchase": "Min Purchase",
+            "status": "Status"
+          },
+          "actions": {
+            "newProgram": "New Program",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this referral program?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete referral program: {error}",
+            "saveFailed": "Failed to save referral program: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Referral Program",
+          "fields": {
+            "name": "Name",
+            "description": "Description",
+            "referrerReward": "Referrer Reward",
+            "refereeReward": "Referee Reward",
+            "minimumPurchase": "Minimum Purchase",
+            "active": "Active"
+          }
+        }
+      }
+    },
+    "general": {
+      "page": {
+        "title": "General Settings",
+        "subtitle": "Manage your workspace general settings and preferences",
+        "tabs": {
+          "basic": "Basic",
+          "users": "Users",
+          "roles": "Roles",
+          "email": "Email"
+        }
+      },
+      "email": {
+        "title": "Email configuration",
+        "subtitle": "Configure workspace email sending (SMTP or Mailgun). The default config is used for all workspace emails.",
+        "add": "Add config",
+        "edit": "Edit",
+        "delete": "Delete",
+        "deleteConfirm": "Delete this email config?",
+        "editTitle": "Edit email config",
+        "cancel": "Cancel",
+        "save": "Save",
+        "saving": "Saving...",
+        "send": "Send",
+        "sending": "Sending...",
+        "saved": "Saved.",
+        "created": "Created.",
+        "setDefaultSuccess": "Set as default.",
+        "deleted": "Deleted.",
+        "yes": "Yes",
+        "no": "No",
+        "dash": "-",
+        "name": "Name",
+        "backendType": "Backend type",
+        "smtp": "SMTP",
+        "mailgun": "Mailgun",
+        "isActive": "Active",
+        "isDefault": "Default",
+        "setDefault": "Set as default",
+        "sendTest": "Send test email",
+        "testEmailTo": "Send test to (email)",
+        "testEmailSent": "Test email sent successfully.",
+        "testEmailFailed": "Failed to send test: {error}",
+        "configSmtp": {
+          "host": "Host",
+          "port": "Port",
+          "useTls": "Use TLS",
+          "useSsl": "Use SSL",
+          "user": "User",
+          "password": "Password",
+          "fromEmail": "From email",
+          "passwordPlaceholder": "Leave blank to keep"
+        },
+        "configMailgun": {
+          "apiKey": "API key",
+          "domain": "Domain",
+          "fromEmail": "From email",
+          "region": "Region (e.g. eu)",
+          "regionPlaceholder": "eu",
+          "passwordPlaceholder": "Leave blank to keep"
+        },
+        "errors": {
+          "loadFailed": "Failed to load email configs",
+          "saveFailed": "Failed to save",
+          "deleteFailed": "Failed to delete",
+          "toRequired": "Please enter a valid email address"
+        }
+      },
+      "basic": {
+        "sections": {
+          "siteInformation": "Site Information",
+          "localization": "Localization",
+          "contactInformation": "Contact Information",
+          "storefrontDisplay": "Storefront Display",
+          "storefrontTheme": "Storefront Theme & Header",
+          "socialMediaLinks": "Social Media Links"
+        },
+        "logo": {
+          "alt": "Logo",
+          "help": "Allowed JPG, GIF or PNG. Max size of 800K"
+        },
+        "fields": {
+          "siteName": {
+            "label": "Site Name",
+            "placeholder": "Enter your workspace name"
+          },
+          "siteDescription": {
+            "label": "Site Description",
+            "placeholder": "Brief description of your workspace"
+          },
+          "defaultLanguage": {
+            "label": "Default Language"
+          },
+          "defaultCurrency": {
+            "label": "Default Currency",
+            "options": {
+              "nzd": "NZD ($)",
+              "usd": "USD ($)",
+              "cny": "CNY (¥)"
+            }
+          },
+          "timezone": {
+            "label": "Timezone",
+            "options": {
+              "pacificAuckland": "Pacific/Auckland (GMT+13)",
+              "utc": "UTC (GMT+0)",
+              "asiaShanghai": "Asia/Shanghai (GMT+8)"
+            }
+          },
+          "contactEmail": {
+            "label": "Contact Email",
+            "placeholder": "support@example.com"
+          },
+          "contactPhone": {
+            "label": "Contact Phone",
+            "placeholder": "+64 21 123 4567"
+          },
+          "footerContact": {
+            "label": "Footer contact (below “Contact us”)",
+            "placeholder": "Optional text with line breaks. Email and phone above also show in footer."
+          },
+          "topBarAnnouncement": {
+            "label": "Top Bar Announcement",
+            "placeholder": "e.g. Super sale up to 20% — Shop Now!"
+          },
+          "footerCopyright": {
+            "label": "Footer Copyright",
+            "placeholder": "e.g. © 2025 Your Store Name. All rights reserved."
+          },
+          "siteAnnouncement": {
+            "label": "Site announcement (dismissible banner)",
+            "placeholder": "e.g. System maintenance on Feb 15, 2:00–4:00 AM. Displayed once per hour; users can close."
+          },
+          "storefrontTheme": {
+            "label": "Storefront theme",
+            "options": {
+              "store": "Standard store",
+              "website": "Website / landing"
+            }
+          },
+          "storefrontHeader": {
+            "label": "Header override",
+            "default": "Use theme default"
+          },
+          "storefrontFooter": {
+            "label": "Footer override",
+            "default": "Use theme default"
+          },
+          "headerOptions": {
+            "label": "Header elements to show",
+            "showSearch": "Search",
+            "showCart": "Cart",
+            "showLanguageSwitcher": "Language",
+            "showStyleSelector": "Theme (light/dark)",
+            "showLogin": "Login / account"
+          },
+          "social": {
+            "facebook": {
+              "label": "Facebook",
+              "placeholder": "https://facebook.com/yourpage"
+            },
+            "twitter": {
+              "label": "Twitter",
+              "placeholder": "https://twitter.com/yourhandle"
+            },
+            "instagram": {
+              "label": "Instagram",
+              "placeholder": "https://instagram.com/yourprofile"
+            }
+          }
+        },
+        "actions": {
+          "uploadNewPhoto": "Upload New Photo",
+          "resetPhoto": "Reset",
+          "saveChanges": "Save Changes",
+          "resetForm": "Reset",
+          "saving": "Saving..."
+        },
+        "snackbar": {
+          "saved": "Settings saved successfully!"
+        },
+        "errors": {
+          "loadFailed": "Failed to load settings: {error}",
+          "loadFailedWithRefresh": "Failed to load settings: {error}. Please refresh the page.",
+          "settingsIdMissing": "Settings ID not found. Please refresh the page.",
+          "saveFailed": "Failed to save settings: {error}"
+        }
+      },
+      "users": {
+        "schema": {
+          "title": "Users",
+          "columns": {
+            "user": "User",
+            "email": "Email",
+            "role": "Role",
+            "status": "Status",
+            "lastLogin": "Last Login"
+          },
+          "roleValues": {
+            "superuser": "Superuser",
+            "staff": "Staff",
+            "user": "User"
+          },
+          "lastLoginNever": "Never"
+        },
+        "filters": {
+          "status": {
+            "label": "Status",
+            "options": {
+              "active": "Active",
+              "inactive": "Inactive"
+            }
+          },
+          "role": {
+            "label": "Role",
+            "options": {
+              "staff": "Staff",
+              "user": "User"
+            }
+          }
+        },
+        "searchPlaceholder": "Search users...",
+        "actions": {
+          "add": "Add User",
+          "edit": "Edit",
+          "delete": "Delete",
+          "confirmDelete": "Are you sure you want to delete this user?",
+          "confirmDeleteWithName": "Are you sure you want to delete user {name}?"
+        },
+        "form": {
+          "title": "User Details",
+          "fields": {
+            "username": "Username",
+            "email": "Email",
+            "firstName": "First Name",
+            "lastName": "Last Name",
+            "phone": "Phone",
+            "isStaff": "Is Staff",
+            "isActive": "Is Active",
+            "isSuperuser": "Is Superuser"
+          },
+          "actions": {
+            "save": "Save",
+            "cancel": "Cancel"
+          }
+        },
+        "errors": {
+          "fetchFailed": "Failed to fetch user: {error}",
+          "deleteFailed": "Failed to delete user: {error}",
+          "saveFailed": "Failed to save user: {error}",
+          "schemaNotFound": "Schema not found"
+        }
+      },
+      "roles": {
+        "schema": {
+          "title": "Staff Roles",
+          "columns": {
+            "roleName": "Role Name",
+            "description": "Description",
+            "status": "Status",
+            "createdAt": "Created At"
+          }
+        },
+        "filters": {
+          "status": {
+            "label": "Status",
+            "options": {
+              "active": "Active",
+              "inactive": "Inactive"
+            }
+          }
+        },
+        "searchPlaceholder": "Search roles...",
+        "actions": {
+          "add": "Add Role",
+          "edit": "Edit",
+          "delete": "Delete",
+          "confirmDelete": "Are you sure you want to delete this role?",
+          "confirmDeleteWithName": "Are you sure you want to delete role {name}?"
+        },
+        "form": {
+          "title": "Staff Role Details",
+          "fields": {
+            "roleName": "Role Name",
+            "description": "Description",
+            "isActive": "Is Active"
+          },
+          "actions": {
+            "save": "Save",
+            "cancel": "Cancel"
+          }
+        },
+        "errors": {
+          "fetchFailed": "Failed to fetch role: {error}",
+          "deleteFailed": "Failed to delete role: {error}",
+          "saveFailed": "Failed to save role: {error}",
+          "schemaNotFound": "Schema not found"
+        }
+      }
+    }
+  }
+}
+

@@ -1,0 +1,3049 @@
+{
+  "nav": {
+    "dashboard": "仪表盘",
+    "store": "商店",
+    "storeOrders": "订单",
+    "storeProducts": "商品",
+    "storeCustomers": "客户",
+    "storeCategories": "分类",
+    "storeStores": "门店",
+    "freight": "货运",
+    "freightDashboard": "仪表盘",
+    "freightParcels": "包裹",
+    "freightOrders": "货运订单",
+    "freightConsignments": "运单",
+    "freightWarehouses": "仓库",
+    "support": "支持",
+    "supportTickets": "工单",
+    "supportCustomers": "客户",
+    "settings": "设置",
+    "settingsGeneral": "通用",
+    "settingsWeb": "网站",
+    "settingsStore": "商店",
+    "settingsFinance": "财务",
+    "settingsDelivery": "配送",
+    "settingsMarketing": "营销"
+  },
+  "common": {
+    "actions": {
+      "add": "新增",
+      "update": "更新",
+      "cancel": "取消",
+      "delete": "删除",
+      "close": "关闭",
+      "view": "查看",
+      "edit": "编辑",
+      "send": "发送",
+      "pay": "支付",
+      "downloadPdf": "下载PDF",
+      "retry": "重试"
+    },
+    "states": {
+      "loading": "加载中...",
+      "saving": "保存中...",
+      "sending": "发送中...",
+      "deleting": "删除中...",
+      "downloading": "下载中...",
+      "active": "启用",
+      "inactive": "禁用"
+    },
+    "labels": {
+      "created": "创建时间",
+      "status": "状态",
+      "actions": "操作",
+      "date": "日期",
+      "from": "来自",
+      "email": "邮箱",
+      "subject": "主题",
+      "message": "内容"
+    },
+    "schemaTable": {
+      "search": "搜索",
+      "searchPlaceholder": "搜索...",
+      "bulkActions": "批量操作",
+      "deleteSelected": "删除选中项",
+      "exportSelected": "导出选中项",
+      "all": "全部",
+      "loading": "加载中...",
+      "noData": "暂无数据",
+      "confirmAction": "确认操作",
+      "confirmMessage": "确定要执行此操作吗？",
+      "confirm": "确认",
+      "confirmBulkDelete": "确定要删除 {count} 个选中项吗？此操作无法撤销。",
+      "itemsPerPage": "每页条数",
+      "showing": "显示",
+      "to": "到",
+      "of": "共",
+      "entries": "条"
+    },
+    "schemaForm": {
+      "save": "保存",
+      "cancel": "取消",
+      "saving": "保存中...",
+      "upload": "上传",
+      "typeToSearch": "输入以搜索...",
+      "details": "详情",
+      "required": "必填",
+      "isRequired": "是必填项",
+      "mustBeAtLeast": "必须至少为 {min}",
+      "mustBeAtMost": "必须最多为 {max}",
+      "formatInvalid": "格式无效"
+    }
+  },
+  "orders": {
+    "status": {
+      "pending": "待处理",
+      "paid": "已支付",
+      "processing": "处理中",
+      "shipped": "已发货",
+      "completed": "已完成",
+      "cancelled": "已取消",
+      "delivered": "已送达"
+    },
+    "paymentStatus": {
+      "pending": "待支付",
+      "paid": "已支付",
+      "failed": "失败"
+    },
+    "basicInfo": {
+      "storeFallback": "门店 #{store}",
+      "stats": {
+        "packages": "包裹",
+        "totalWeight": "总重量",
+        "totalVolume": "总体积",
+        "consignments": "运单",
+        "store": "门店",
+        "paymentGatewayType": "支付方式"
+      }
+    },
+    "listPage": {
+      "title": "订单",
+      "schema": {
+        "title": "订单",
+        "columns": {
+          "orderNo": "订单号",
+          "customer": "客户",
+          "store": "门店",
+          "total": "总计",
+          "status": "状态",
+          "payment": "支付",
+          "createdAt": "创建时间"
+        }
+      },
+      "filters": {
+        "status": {
+          "label": "状态"
+        },
+        "paymentStatus": {
+          "label": "支付状态"
+        }
+      },
+      "actions": {
+        "exportExcel": "导出 Excel",
+        "view": "查看",
+        "edit": "编辑",
+        "cancel": "取消",
+        "confirmCancel": "确认取消该订单？",
+        "ship": "发货"
+      },
+      "messages": {
+        "deleteFailed": "删除订单失败：{error}",
+        "cancelTodo": "取消订单功能待实现",
+        "shipTodo": "发货功能待实现",
+        "exportTodo": "导出 Excel 功能待实现"
+      }
+    },
+    "addressCards": {
+      "labels": {
+        "attn": "收件人",
+        "phone": "电话",
+        "email": "邮箱"
+      },
+      "shipping": {
+        "title": "收货地址",
+        "empty": "暂无收货地址",
+        "actions": {
+          "editTooltip": "编辑收货地址"
+        }
+      },
+      "billing": {
+        "title": "账单地址",
+        "empty": "暂无账单地址",
+        "actions": {
+          "editTooltip": "编辑账单地址"
+        }
+      },
+      "errors": {
+        "updateFailed": "更新地址失败"
+      }
+    },
+    "editHeader": {
+      "orderTitle": "订单 #{orderNumber}",
+      "orderProgressTitle": "订单处理进度",
+      "orderStatusLabel": "订单状态",
+      "paymentStatusLabel": "支付状态",
+      "cancelOrder": "取消订单",
+      "createdAt": "创建时间：{date}"
+    },
+    "editPage": {
+      "errors": {
+        "fetchFailed": "获取订单失败"
+      },
+      "states": {
+        "notFound": "未找到订单",
+        "schemaNotFound": "未找到 Schema"
+      },
+      "actions": {
+        "backToOrders": "返回订单列表"
+      },
+      "values": {
+        "mainStore": "主门店",
+        "onlineStore": "线上门店"
+      },
+      "snackbar": {
+        "saved": "订单保存成功！",
+        "saveFailed": "保存订单失败"
+      }
+    },
+    "detailsCard": {
+      "title": "订单详情",
+      "empty": "该订单暂无商品",
+      "table": {
+        "headers": {
+          "product": "商品",
+          "price": "单价",
+          "quantity": "数量",
+          "total": "小计"
+        },
+        "values": {
+          "sku": "SKU"
+        }
+      },
+      "shipping": {
+        "methodLabel": "配送方式",
+        "carrierLabel": "承运商",
+        "estimatedDelivery": "预计送达：{min}-{max} 天"
+      },
+      "summary": {
+        "subtotal": "小计",
+        "shipping": "运费",
+        "tax": "税费",
+        "discount": "折扣",
+        "total": "总计"
+      }
+    },
+    "customerCard": {
+      "title": "客户信息",
+      "customerFallback": "客户 #{id}",
+      "actions": {
+        "viewDetails": "查看详情"
+      },
+      "labels": {
+        "customerNumber": "客户编号",
+        "id": "ID",
+        "tax": "税号"
+      },
+      "itemsCount": "{count} 件商品",
+      "itemsSubtitle": "本订单",
+      "contact": {
+        "title": "联系方式",
+        "email": "邮箱",
+        "phone": "电话"
+      }
+    },
+    "timeline": {
+      "title": "订单时间线",
+      "empty": "暂无订单动态"
+    },
+    "delivery": {
+      "title": "配送信息",
+      "deliveryStatusLabel": "配送状态",
+      "shippingAddressLabel": "收货地址",
+      "phoneLabel": "电话",
+      "deliveryTimelineLabel": "配送时间线",
+      "notShippedYet": "订单尚未发货。",
+      "shippingCostLabel": "运费"
+    },
+    "packages": {
+      "title": "包裹",
+      "addPackage": "新增包裹",
+      "empty": "还没有包裹。添加包裹以计算运费。",
+      "errors": {
+        "loadData": "数据加载失败",
+        "savePackage": "保存包裹失败",
+        "deletePackage": "删除包裹失败",
+        "getShippingOptions": "获取运费选项失败",
+        "createShipment": "创建运单失败",
+        "shipOrder": "发货失败",
+        "getLabel": "获取面单失败",
+        "deleteConsignment": "删除运单失败",
+        "warehouseNotFound": "未找到所选仓库",
+        "selectCarrier": "请选择承运商",
+        "selectPickupWarehouse": "请选择取件仓库",
+        "selectShippingOption": "请选择运费选项"
+      },
+      "validation": {
+        "weightRequired": "请填写重量",
+        "dimensionsRequired": "请填写长宽高"
+      },
+      "snackbar": {
+        "packageUpdated": "包裹已更新",
+        "packageAdded": "包裹已新增",
+        "packageDeleted": "包裹已删除",
+        "consignmentCreated": "运单已创建：{number}",
+        "consignmentDeleted": "运单已删除"
+      },
+      "table": {
+        "template": "模板",
+        "dimensions": "尺寸（cm）",
+        "weight": "重量（kg）",
+        "volWeight": "体积重",
+        "billingWeight": "计费重",
+        "qty": "数量",
+        "actions": "操作",
+        "custom": "自定义"
+      },
+      "totals": {
+        "totalPackages": "包裹总数",
+        "actualWeight": "实际重量",
+        "billingWeight": "计费重量"
+      },
+      "consignments": {
+        "title": "运单",
+        "table": {
+          "consignmentNumber": "运单号",
+          "trackingNumber": "追踪号",
+          "carrier": "承运商",
+          "status": "状态",
+          "actions": "操作"
+        },
+        "actions": {
+          "printLabel": "打印面单",
+          "deleteConsignment": "删除运单"
+        },
+        "confirmDelete": {
+          "title": "删除运单",
+          "message": "确认删除运单 {consignmentNumber}？",
+          "warnShippedOrDelivered": "该运单已发货或已送达，可能不允许删除。"
+        }
+      },
+      "addresses": {
+        "title": "地址信息",
+        "fromPickup": "发货地址（仓库）",
+        "toDelivery": "收货地址",
+        "selectWarehouse": "选择仓库",
+        "selectPlaceholder": "请选择...",
+        "noWarehouseConfigured": "未配置仓库",
+        "noShippingAddress": "缺少收货地址",
+        "crossCountryWarning": "跨境运输：从 {fromCountry} 到 {toCountry}。请确认承运商支持国际运输。"
+      },
+      "shipping": {
+        "createShipmentTitle": "创建运单",
+        "carrierLabel": "承运商",
+        "getShippingOptions": "获取运费选项",
+        "optionsPrompt": "请选择运费选项：",
+        "table": {
+          "carrier": "承运商",
+          "service": "服务",
+          "price": "价格",
+          "estDays": "预计天数"
+        },
+        "na": "-",
+        "daysSingle": "{days} 天",
+        "daysRange": "{min}-{max} 天",
+        "selected": "已选择：{serviceName}",
+        "createShipmentButton": "创建运单",
+        "noOptions": "{carrierName} 暂无可用运费选项。",
+        "countryMismatchNote": "提示：取件地址在 {pickupCountry}，但收货地址在 {deliveryCountry}。",
+        "parcelPortNzOnly": "ParcelPort 仅支持从新西兰发货。",
+        "selectedCarrierFallback": "所选承运商",
+        "testModeTag": "（测试）"
+      },
+      "dialogs": {
+        "addTitle": "新增包裹",
+        "editTitle": "编辑包裹",
+        "packageTemplate": "包裹模板",
+        "customDimensions": "自定义尺寸",
+        "loadingTemplates": "正在加载模板...",
+        "length": "长度（cm）",
+        "width": "宽度（cm）",
+        "height": "高度（cm）",
+        "weight": "重量（kg）",
+        "quantity": "数量",
+        "description": "描述",
+        "notes": "备注",
+        "deletePackageTitle": "删除包裹",
+        "deletePackageConfirm": "确认删除该包裹？"
+      }
+    },
+    "invoice": {
+      "title": "发票（{count}）",
+      "createInvoice": "创建发票",
+      "empty": "此订单暂无发票。",
+      "labels": {
+        "issue": "开票",
+        "due": "到期",
+        "sent": "已发送",
+        "paid": "已支付",
+        "subtotal": "小计",
+        "tax": "税费",
+        "notes": "备注"
+      },
+      "status": {
+        "paid": "已支付",
+        "sent": "已发送",
+        "draft": "草稿",
+        "overdue": "逾期",
+        "cancelled": "已取消"
+      },
+      "actions": {
+        "delete": "删除",
+        "pay": "支付",
+        "downloadPdf": "下载PDF",
+        "send": "发送",
+        "edit": "编辑",
+        "view": "查看"
+      },
+      "messages": {
+        "loadInvoicesFailed": "发票加载失败",
+        "loadInvoiceDetailsFailed": "发票详情加载失败",
+        "updated": "发票已更新",
+        "created": "发票已创建",
+        "cannotDelete": "无法删除状态为 {status} 的发票",
+        "deleteFailed": "删除发票失败",
+        "sent": "发票已发送",
+        "sendFailed": "发送发票失败",
+        "downloadFailed": "下载发票失败",
+        "paymentSuccess": "支付成功"
+      },
+      "confirmDelete": {
+        "title": "删除发票",
+        "message": "确认删除发票 {invoiceNumber}？此操作无法撤销。"
+      }
+    }
+  },
+  "customers": {
+    "page": {
+      "title": "客户",
+      "schema": {
+        "title": "客户",
+        "customerNumber": "客户编号",
+        "companyName": "公司名称",
+        "email": "邮箱",
+        "taxNumber": "税号",
+        "creditLimit": "信用额度",
+        "balance": "余额",
+        "active": "启用",
+        "verified": "已验证",
+        "createdAt": "创建时间"
+      },
+      "actions": {
+        "addCustomer": "新增客户",
+        "view": "查看",
+        "delete": "删除",
+        "confirmDelete": "确认删除该客户？",
+        "confirmDeleteCustomer": "确认删除 {name}？",
+        "deleteFailed": "删除失败：{error}"
+      }
+    },
+    "editHeader": {
+      "addCustomer": "新增客户",
+      "customerNumber": "客户编号",
+      "verified": "已验证",
+      "resetPassword": "重置密码",
+      "deleteCustomer": "删除客户",
+      "createdAt": "创建时间：{date}"
+    },
+    "values": {
+      "yes": "是",
+      "no": "否",
+      "active": "启用",
+      "inactive": "停用",
+      "default": "默认"
+    },
+    "newPage": {
+      "card": {
+        "title": "客户信息"
+      },
+      "fields": {
+        "userId": {
+          "label": "用户ID",
+          "helper": "输入用户ID以创建客户档案"
+        },
+        "companyName": {
+          "label": "公司名称"
+        },
+        "taxNumber": {
+          "label": "税号"
+        },
+        "creditLimit": {
+          "label": "信用额度"
+        },
+        "notes": {
+          "label": "备注"
+        }
+      },
+      "actions": {
+        "discard": "放弃",
+        "creating": "创建中...",
+        "createCustomer": "创建客户"
+      },
+      "validation": {
+        "userIdRequired": "用户ID为必填"
+      },
+      "snackbar": {
+        "created": "客户创建成功！",
+        "createFailed": "创建客户失败"
+      }
+    },
+    "detailPage": {
+      "states": {
+        "notFound": "未找到客户"
+      },
+      "actions": {
+        "backToCustomers": "返回客户列表",
+        "cancel": "取消",
+        "delete": "删除"
+      },
+      "tabs": {
+        "basicInfo": "基本信息",
+        "wallet": "钱包",
+        "segments": "分群",
+        "orders": "订单",
+        "addresses": "地址",
+        "paymentMethods": "支付方式",
+        "inbox": "收件箱"
+      },
+      "deleteDialog": {
+        "title": "删除客户",
+        "thisCustomer": "该客户",
+        "message": "确认删除 {name}？此操作无法撤销。"
+      },
+      "resetPasswordDialog": {
+        "title": "重置密码",
+        "message": "发送密码重置邮件到 {email}？",
+        "actions": {
+          "sendEmail": "发送邮件"
+        }
+      },
+      "errors": {
+        "fetchFailed": "获取客户信息失败"
+      },
+      "snackbar": {
+        "deleteFailed": "删除客户失败：{error}",
+        "resetEmailRequired": "重置密码需要客户邮箱",
+        "resetEmailSent": "密码重置邮件发送成功",
+        "resetEmailFailed": "发送密码重置邮件失败：{error}"
+      }
+    },
+    "basicInfo": {
+      "fields": {
+        "status": { "label": "状态" },
+        "email": { "label": "邮箱" },
+        "firstName": { "label": "名" },
+        "lastName": { "label": "姓" },
+        "phone": { "label": "电话" },
+        "notes": { "label": "备注" },
+        "companyName": { "label": "公司名称" },
+        "taxNumber": { "label": "税号" },
+        "creditLimit": { "label": "信用额度" },
+        "verified": { "label": "已验证" }
+      },
+      "sidebar": {
+        "title": "基本信息"
+      },
+      "actions": {
+        "saveChanges": "保存修改"
+      },
+      "snackbar": {
+        "updated": "客户更新成功！",
+        "updateFailed": "更新客户失败：{error}"
+      }
+    },
+    "addresses": {
+      "title": "地址（{count}）",
+      "actions": {
+        "add": "新增地址",
+        "cancel": "取消",
+        "save": "保存",
+        "delete": "删除"
+      },
+      "values": {
+        "default": "默认",
+        "na": "暂无"
+      },
+      "empty": "暂无地址，请先添加地址。",
+      "dialog": {
+        "addTitle": "新增地址",
+        "editTitle": "编辑地址"
+      },
+      "deleteDialog": {
+        "title": "删除地址",
+        "message": "确认删除该地址？"
+      },
+      "fields": {
+        "fullName": { "label": "姓名" },
+        "company": { "label": "公司" },
+        "addressLine1": { "label": "地址行1" },
+        "addressLine2": { "label": "地址行2" },
+        "city": { "label": "城市" },
+        "state": { "label": "省/州" },
+        "postalCode": { "label": "邮编" },
+        "country": { "label": "国家" },
+        "phone": { "label": "电话" },
+        "email": { "label": "邮箱" }
+      },
+      "snackbar": {
+        "saved": "地址保存成功！",
+        "saveFailed": "保存地址失败：{error}",
+        "deleted": "地址删除成功！",
+        "deleteFailed": "删除地址失败：{error}"
+      }
+    },
+    "wallet": {
+      "title": "钱包余额",
+      "actions": {
+        "viewHistory": "查看记录"
+      },
+      "labels": {
+        "availableCredit": "可用额度",
+        "totalAvailable": "总可用"
+      },
+      "topUp": {
+        "title": "充值钱包",
+        "fields": {
+          "amount": { "label": "金额" },
+          "note": {
+            "label": "备注（可选）",
+            "placeholder": "充值原因..."
+          }
+        },
+        "actions": {
+          "processing": "处理中...",
+          "topUp": "充值",
+          "cancel": "取消",
+          "confirm": "确认"
+        },
+        "confirmDialog": {
+          "title": "充值钱包",
+          "message": "确认充值 {amount} {currency}？"
+        }
+      },
+      "sidebar": {
+        "title": "钱包信息",
+        "currentBalance": "当前余额",
+        "creditLimit": "信用额度",
+        "totalAvailable": "总可用"
+      },
+      "states": {
+        "loading": "正在加载钱包信息..."
+      },
+      "validation": {
+        "amountInvalid": "请输入有效金额"
+      },
+      "defaults": {
+        "adminTopUpNote": "管理员手动充值"
+      },
+      "snackbar": {
+        "toppedUp": "充值成功！",
+        "topUpFailed": "充值失败：{error}"
+      },
+      "transactions": {
+        "title": "交易记录",
+        "empty": "暂无记录",
+        "table": {
+          "headers": {
+            "date": "日期",
+            "type": "类型",
+            "description": "描述",
+            "user": "操作人",
+            "amount": "金额"
+          }
+        },
+        "actions": {
+          "close": "关闭"
+        },
+        "types": {
+          "payment": "支付",
+          "refund": "退款",
+          "credit": "入账",
+          "debit": "出账",
+          "adjustment": "调整"
+        }
+      }
+    },
+    "paymentMethods": {
+      "title": "支付方式（{count}）",
+      "actions": {
+        "cancel": "取消",
+        "addCard": "添加卡片",
+        "addPaymentMethod": "新增支付方式",
+        "delete": "删除"
+      },
+      "addDialog": {
+        "title": "新增支付方式",
+        "fields": {
+          "cardDetails": "卡信息",
+          "cardholderName": {
+            "label": "持卡人姓名",
+            "placeholder": "卡片上的姓名"
+          },
+          "setAsDefault": "设为默认支付方式"
+        },
+        "securityNotice": "你的卡信息由 Stripe 安全处理，我们不会保存完整卡号。"
+      },
+      "deleteDialog": {
+        "title": "删除支付方式",
+        "message": "确认删除该支付方式？"
+      },
+      "values": {
+        "card": "卡片",
+        "default": "默认",
+        "expires": "到期 {month}/{year}"
+      },
+      "states": {
+        "noGateways": "未配置支付网关，请联系管理员。",
+        "stripeMissingKey": "Stripe 未正确配置（缺少 publishable key），请联系管理员。"
+      },
+      "errors": {
+        "fetchFailed": "获取支付方式失败",
+        "stripeNotInitialized": "Stripe 未初始化",
+        "cardElementNotFound": "未找到卡片输入组件",
+        "createFailed": "创建支付方式失败",
+        "initStripeFailed": "初始化 Stripe 失败，请检查配置。",
+        "noGatewaySelected": "未选择支付网关",
+        "saveFailed": "保存支付方式失败"
+      },
+      "snackbar": {
+        "added": "支付方式添加成功",
+        "deleted": "支付方式删除成功！",
+        "deleteFailed": "删除支付方式失败：{error}"
+      },
+      "empty": "暂无支付方式，添加后将显示在这里。"
+    },
+    "segments": {
+      "title": "客户分群",
+      "empty": "该客户暂无分群。",
+      "experiencePoints": {
+        "title": "经验值",
+        "unavailable": "暂无经验值。"
+      }
+    },
+    "inbox": {
+      "title": "消息（{count}）",
+      "sendMessage": "发送消息",
+      "system": "系统",
+      "errors": {
+        "fetchMessages": "获取消息失败"
+      },
+      "status": {
+        "read": "已读",
+        "unread": "未读"
+      },
+      "actions": {
+        "view": "查看"
+      },
+      "schemas": {
+        "messagesTitle": "消息",
+        "messageDetailsTitle": "消息详情",
+        "messageInfoTitle": "消息信息"
+      },
+      "sendDialog": {
+        "title": "给客户发送消息"
+      },
+      "validation": {
+        "subjectAndMessageRequired": "请填写主题和内容"
+      },
+      "snackbar": {
+        "sent": "消息发送成功！",
+        "sendFailed": "发送失败：{error}"
+      }
+    },
+    "orders": {
+      "schema": {
+        "title": "订单",
+        "columns": {
+          "orderNo": "订单号",
+          "total": "总计",
+          "status": "状态",
+          "paymentStatus": "支付状态",
+          "createdAt": "创建时间"
+        }
+      },
+      "actions": {
+        "edit": "编辑"
+      }
+    }
+  },
+  "categories": {
+    "page": {
+      "title": "分类",
+      "actions": {
+        "addCategory": "新增分类",
+        "confirmDeleteWithName": "确认删除分类 {name}？"
+      },
+      "errors": {
+        "deleteFailed": "删除分类失败：{error}"
+      }
+    },
+    "form": {
+      "title": "分类详情",
+      "fields": {
+        "name": { "label": "名称", "validationMessage": "名称不能超过 100 个字符" },
+        "slug": { "label": "Slug", "validationMessage": "Slug 不能超过 100 个字符" },
+        "parent": { "label": "父级分类", "placeholder": "选择父级分类" },
+        "description": { "label": "描述" },
+        "icon": {
+          "label": "图标",
+          "placeholder": "如 tabler-home",
+          "helperText": "图标类名或 emoji（最多 50 字符）",
+          "validationMessage": "图标不能超过 50 个字符"
+        },
+        "order": { "label": "排序", "validationMessage": "排序值必须大于等于 0" },
+        "is_active": { "label": "启用" },
+        "language": { "label": "语言", "validationMessage": "语言不能超过 10 个字符" }
+      },
+      "actions": { "save": "保存", "submit": "保存", "cancel": "取消" }
+    },
+    "newPage": {
+      "title": "新增分类",
+      "titleWithParent": "为“{name}”新增子分类",
+      "snackbar": {
+        "created": "分类创建成功！",
+        "createFailed": "创建分类失败"
+      }
+    },
+    "editPage": {
+      "title": "编辑分类",
+      "tabs": {
+        "info": "分类信息",
+        "rules": "商品分类规则"
+      },
+      "states": {
+        "invalidId": "分类 ID 无效",
+        "notFound": "未找到分类",
+        "loading": "加载中…",
+        "loadError": "加载分类失败"
+      },
+      "snackbar": {
+        "updated": "分类更新成功！",
+        "updateFailed": "更新分类失败"
+      },
+      "config": {
+        "usageTitle": "使用说明",
+        "usageBody": "智能集合规则会根据条件自动把符合条件的商品归入本分类。每条规则包含：字段（如 price、weight）、关系（如大于、等于）、条件值。例如：price 大于 100 表示价格大于 100 的商品。可添加多条规则后点击保存。",
+        "invalidJson": "规则 JSON 格式无效",
+        "snackbar": {
+          "updated": "规则已更新",
+          "updateFailed": "更新规则失败"
+        },
+        "rulesEditor": {
+          "column": "字段",
+          "relation": "关系",
+          "condition": "条件值",
+          "addRule": "添加规则",
+          "removeRule": "删除",
+          "columnPlaceholder": "如 price、weight",
+          "conditionPlaceholder": "如 100"
+        },
+        "relationOptions": {
+          "greater_than": "大于",
+          "less_than": "小于",
+          "equals": "等于",
+          "greater_than_or_equal": "大于等于",
+          "less_than_or_equal": "小于等于",
+          "not_equals": "不等于",
+          "contains": "包含"
+        }
+      }
+    },
+    "values": {
+      "yes": "是",
+      "no": "否",
+      "active": "启用",
+      "inactive": "停用"
+    },
+    "treeTable": {
+      "filters": {
+        "search": {
+          "label": "搜索",
+          "placeholder": "按名称、slug 或描述搜索"
+        },
+        "activeStatus": {
+          "label": "启用状态",
+          "all": "全部",
+          "active": "启用",
+          "inactive": "停用"
+        }
+      },
+      "table": {
+        "headers": {
+          "name": "名称",
+          "slug": "Slug",
+          "language": "语言",
+          "order": "排序",
+          "active": "启用",
+          "products": "商品",
+          "actions": "操作"
+        },
+        "empty": "暂无分类"
+      },
+      "tooltips": {
+        "viewProducts": "点击查看该分类下的商品"
+      },
+      "actions": {
+        "addSubcategory": "新增子分类",
+        "edit": "编辑",
+        "delete": "删除",
+        "confirmDeleteWithName": "确认删除分类“{name}”？"
+      }
+    }
+  },
+  "stores": {
+    "page": {
+      "title": "门店"
+    },
+    "schema": {
+      "title": "门店",
+      "columns": {
+        "name": "名称",
+        "code": "代码",
+        "description": "描述",
+        "warehouses": "仓库",
+        "createdAt": "创建时间"
+      }
+    },
+    "actions": {
+      "add": "新增门店",
+      "edit": "编辑",
+      "view": "查看",
+      "delete": "删除",
+      "confirmDelete": "确认删除该门店？"
+    },
+    "errors": {
+      "deleteFailed": "删除门店失败：{error}"
+    },
+    "editPage": {
+      "states": {
+        "notFound": "未找到门店",
+        "schemaNotFound": "未找到 Schema"
+      },
+      "snackbar": {
+        "saved": "门店保存成功！",
+        "saveFailed": "保存门店失败"
+      }
+    }
+  },
+  "products": {
+    "edit": {
+      "header": {
+        "title": {
+          "add": "新增商品",
+          "edit": "编辑商品"
+        },
+        "subtitle": {
+          "add": "创建新商品",
+          "edit": "更新商品信息"
+        }
+      },
+      "actions": {
+        "discard": "放弃",
+        "creating": "创建中...",
+        "saving": "保存中...",
+        "createProduct": "创建商品",
+        "updateProduct": "更新商品"
+      },
+      "states": {
+        "notFound": "未找到商品"
+      },
+      "snackbar": {
+        "saved": "商品保存成功！",
+        "saveFailed": "保存商品失败"
+      }
+    },
+    "addPage": {
+      "errors": {
+        "nameRequiredForSlug": "需要商品名称以生成 slug"
+      },
+      "snackbar": {
+        "created": "商品创建成功！",
+        "createFailed": "创建商品失败"
+      }
+    },
+    "information": {
+      "title": "商品信息",
+      "fields": {
+        "name": {
+          "label": "商品名称",
+          "placeholder": "例如：iPhone 14"
+        },
+        "sku": {
+          "label": "SKU",
+          "placeholder": "例如：FXSK123U"
+        },
+        "barcode": {
+          "label": "条码",
+          "placeholder": "例如：0123-4567"
+        }
+      }
+    },
+    "pricing": {
+      "title": "价格",
+      "fields": {
+        "basePrice": {
+          "label": "基础价格",
+          "placeholder": "输入价格"
+        },
+        "discountedPrice": {
+          "label": "折扣价",
+          "placeholder": "输入折扣价"
+        },
+        "cost": {
+          "label": "成本",
+          "placeholder": "输入成本"
+        }
+      }
+    },
+    "list": {
+      "title": "商品",
+      "schema": {
+        "title": "商品",
+        "columns": {
+          "product": "商品",
+          "category": "分类",
+          "sku": "SKU",
+          "price": "价格",
+          "qty": "数量",
+          "published": "发布状态"
+        },
+        "filters": {
+          "status": {
+            "label": "状态",
+            "published": "已发布",
+            "inactive": "未启用"
+          },
+          "featured": {
+            "label": "精选",
+            "yes": "是",
+            "no": "否"
+          }
+        },
+        "searchPlaceholder": "搜索商品...",
+        "actions": {
+          "add": "新增商品",
+          "edit": "编辑",
+          "delete": "删除",
+          "confirmDelete": "确定要删除此商品吗？"
+        }
+      },
+      "columns": {
+        "categories": "分类"
+      },
+      "values": {
+        "uncategorized": "未分类"
+      },
+      "filters": {
+        "category": {
+          "label": "分类",
+          "placeholder": "选择分类"
+        }
+      },
+      "confirmDeleteWithName": "确认删除商品 {name}？",
+      "errors": {
+        "updateStatusFailed": "更新状态失败：{error}",
+        "deleteFailed": "删除商品失败：{error}",
+        "schemaNotFound": "未找到 Schema"
+      }
+    },
+    "description": {
+      "cardTitle": "商品描述",
+      "descriptionHint": "描述（可选）- 点击图片图标插入图片",
+      "editor": {
+        "placeholder": "编写商品描述..."
+      },
+      "toolbar": {
+        "insertFromLibrary": "从媒体库插入图片",
+        "resizeImage": "调整图片尺寸"
+      },
+      "warnings": {
+        "selectImageFirst": "请先选中一张图片再进行尺寸调整"
+      },
+      "resizeDialog": {
+        "title": "调整图片尺寸",
+        "fields": {
+          "width": {
+            "label": "宽度",
+            "placeholder": "例如：200px 或 50%"
+          },
+          "height": {
+            "label": "高度",
+            "placeholder": "例如：150px",
+            "helperKeepRatio": "当宽高都是 px 数值时可保持比例"
+          }
+        },
+        "actions": {
+          "cancel": "取消",
+          "apply": "应用"
+        }
+      },
+      "toast": {
+        "imageInserted": "图片已插入"
+      }
+    },
+    "tableFilters": {
+      "status": {
+        "placeholder": "选择状态",
+        "published": "已发布",
+        "inactive": "未启用"
+      },
+      "category": {
+        "placeholder": "选择分类"
+      },
+      "stock": {
+        "placeholder": "选择库存",
+        "inStock": "有库存",
+        "outOfStock": "无库存"
+      }
+    },
+    "inventory": {
+      "title": "库存",
+      "fields": {
+        "totalStockQuantity": "总库存数量",
+        "trackInventory": "跟踪库存",
+        "trackInventoryHelp": "启用后，系统会在下单或取消订单时自动跟踪并更新库存数量；关闭后，库存数量不会自动更新。",
+        "requiresShipping": "需要配送"
+      },
+      "helpers": {
+        "autoCalculatedFromVariants": "根据所有规格库存自动计算",
+        "autoCalculatedFromProduct": "根据商品库存自动计算"
+      },
+      "actions": {
+        "manageInventory": "管理库存"
+      }
+    },
+    "organize": {
+      "title": "组织",
+      "fields": {
+        "productType": {
+          "label": "商品类型",
+          "options": {
+            "physical": "实物",
+            "digital": "数字",
+            "service": "服务"
+          }
+        },
+        "categories": {
+          "label": "分类",
+          "placeholder": "选择分类"
+        },
+        "tags": {
+          "label": "标签",
+          "placeholder": "选择或输入新标签"
+        },
+        "published": "已发布",
+        "featured": "推荐"
+      },
+      "states": {
+        "loadingCategories": "正在加载分类...",
+        "noCategories": "暂无可用分类"
+      }
+    },
+    "variants": {
+      "title": "商品规格",
+      "actions": {
+        "addVariant": "新增规格"
+      },
+      "table": {
+        "headers": {
+          "image": "图片",
+          "name": "名称",
+          "sku": "SKU",
+          "price": "价格",
+          "stock": "库存",
+          "actions": "操作"
+        },
+        "empty": "暂无规格"
+      },
+      "values": {
+        "clickToAdd": "点击添加"
+      },
+      "new": {
+        "placeholders": {
+          "name": "名称",
+          "sku": "SKU",
+          "price": "价格",
+          "stock": "库存"
+        }
+      },
+      "snackbar": {
+        "created": "规格已创建",
+        "updated": "规格已更新",
+        "deleted": "规格已删除",
+        "orderUpdated": "规格顺序已更新",
+        "imageUpdated": "规格图片已更新"
+      },
+      "errors": {
+        "saveProductFirst": "请先保存商品再新增规格",
+        "saveProductFirstImages": "请先保存商品再添加规格图片",
+        "cannotDeleteStock": "无法删除：库存大于 0",
+        "createFailed": "创建规格失败",
+        "updateFailed": "更新规格失败",
+        "reorderFailed": "调整规格顺序失败",
+        "deleteFailed": "删除规格失败",
+        "updateImageFailed": "更新规格图片失败"
+      },
+      "deleteDialog": {
+        "title": "删除规格",
+        "thisVariant": "该规格",
+        "messageWithName": "确认删除“{name}”？",
+        "actions": {
+          "cancel": "取消",
+          "delete": "删除"
+        }
+      },
+      "mediaDialog": {
+        "title": "选择规格图片"
+      }
+    },
+    "variantInventory": {
+      "title": "管理库存",
+      "titleWithVariant": "管理库存 - {variant}",
+      "variantFallback": "规格",
+      "variantWithId": "规格 #{id}",
+      "errors": {
+        "loadFailed": "加载库存数据失败",
+        "saveFailed": "保存库存失败"
+      },
+      "empty": {
+        "variantNotFound": "未找到该规格。",
+        "noVariants": "暂无规格，请先创建规格。",
+        "noWarehouses": "暂无仓库，请先创建仓库。"
+      },
+      "table": {
+        "headers": {
+          "variant": "规格",
+          "total": "合计"
+        }
+      },
+      "actions": {
+        "cancel": "取消",
+        "save": "保存"
+      }
+    },
+    "media": {
+      "title": "商品媒体",
+      "subtitle": "从媒体库选择图片添加到商品图库。",
+      "empty": "尚未添加图片。点击“选择图片”添加商品图片。",
+      "imageAltFallback": "图片 {index}",
+      "actions": {
+        "selectImage": "选择图片",
+        "delete": "删除"
+      },
+      "deleteDialog": {
+        "title": "移除图片引用",
+        "message": "确认将该图片从商品图库中移除？图片文件会保留在媒体库中，必要时可在媒体库中删除。",
+        "actions": {
+          "cancel": "取消",
+          "remove": "移除"
+        }
+      },
+      "mediaDialog": {
+        "title": "选择商品图片"
+      }
+    }
+  },
+  "payments": {
+    "title": "支付记录（{count}）",
+    "empty": "此订单暂无支付记录。",
+    "status": {
+      "pending": "待处理",
+      "processing": "处理中",
+      "completed": "已完成",
+      "paid": "已支付",
+      "failed": "失败",
+      "refunded": "已退款"
+    },
+    "labels": {
+      "gateway": "支付网关",
+      "transactionId": "交易ID",
+      "created": "创建时间",
+      "completed": "完成时间",
+      "paymentAmount": "支付金额"
+    }
+  },
+  "settings": {
+    "rootPage": {
+      "title": "设置",
+      "subtitle": "管理工作区设置与偏好",
+      "tabs": {
+        "general": "通用",
+        "web": "网站",
+        "store": "商店",
+        "finance": "财务",
+        "delivery": "配送",
+        "marketing": "营销"
+      },
+      "placeholders": {
+        "generalTitle": "通用设置",
+        "generalBody": "通用设置内容将在这里显示",
+        "webTitle": "网站设置",
+        "webBody": "网站设置内容将在这里显示",
+        "storeTitle": "商店设置",
+        "storeBody": "商店设置内容将在这里显示",
+        "financeTitle": "财务设置",
+        "financeBody": "财务设置内容将在这里显示",
+        "deliveryTitle": "配送设置",
+        "deliveryBody": "配送设置内容将在这里显示",
+        "marketingTitle": "营销设置",
+        "marketingBody": "营销设置内容将在这里显示"
+      }
+    },
+    "delivery": {
+      "carriers": {
+        "tab": {
+          "title": "承运商",
+          "columns": {
+            "name": "名称",
+            "code": "代码",
+            "trackingUrl": "追踪链接",
+            "status": "状态"
+          },
+          "actions": {
+            "newCarrier": "新增承运商",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该承运商？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "titleEdit": "编辑承运商",
+          "titleNew": "新增承运商",
+          "name": "名称",
+          "code": "代码",
+          "carrierType": "承运商类型（插件）",
+          "carrierTypePlaceholder": "（手动 / 无插件）",
+          "trackingUrlTemplate": "追踪链接模板",
+          "trackingUrlPlaceholder": "https://track.example.com/{tracking_number}",
+          "active": "启用",
+          "testMode": "测试模式",
+          "pluginConfiguration": "插件配置",
+          "liveConfig": "正式环境配置",
+          "testConfig": "测试环境配置",
+          "nameRequired": "名称和代码为必填项"
+        }
+      },
+      "warehouses": {
+        "tab": {
+          "title": "仓库",
+          "columns": {
+            "name": "名称",
+            "code": "代码",
+            "address": "地址",
+            "city": "城市",
+            "country": "国家/地区",
+            "phone": "电话",
+            "status": "状态",
+            "default": "默认"
+          },
+          "actions": {
+            "newWarehouse": "新增仓库",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该仓库？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "仓库",
+          "fields": {
+            "name": "名称",
+            "code": "代码",
+            "active": "启用",
+            "defaultWarehouse": "默认仓库",
+            "addressLine1": "地址行 1",
+            "addressLine2": "地址行 2",
+            "city": "城市",
+            "state": "州/省",
+            "postalCode": "邮编",
+            "country": "国家/地区",
+            "phone": "电话",
+            "email": "邮箱"
+          },
+          "addressSearchPlaceholder": "输入地址以搜索..."
+        }
+      },
+      "deliverySettings": {
+        "title": "配送设置",
+        "fields": {
+          "defaultWarehouse": "默认仓库",
+          "defaultCarrier": "默认承运商",
+          "freeShippingThreshold": "免运费门槛",
+          "defaultPackagingType": "默认包装类型"
+        },
+        "errors": {
+          "noWorkspaceSettings": "未找到工作区设置。",
+          "saveFailed": "保存失败：{error}"
+        },
+        "snackbar": {
+          "saved": "配送设置已保存"
+        }
+      },
+      "zones": {
+        "tab": {
+          "title": "配送区域",
+          "columns": {
+            "name": "名称",
+            "code": "代码",
+            "countries": "国家/地区",
+            "postalCodes": "邮编规则",
+            "status": "状态"
+          },
+          "actions": {
+            "newZone": "新增区域",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该配送区域？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "配送区域",
+          "fields": {
+            "name": "名称",
+            "code": "代码",
+            "countries": "国家/地区",
+            "postalCodePatterns": "邮编规则",
+            "active": "启用"
+          },
+          "placeholders": {
+            "countries": "NZ,AU",
+            "postalCodePatterns": "10*,11*,12*"
+          }
+        }
+      },
+      "packagingTypes": {
+        "tab": {
+          "title": "包装类型",
+          "columns": {
+            "name": "名称",
+            "code": "代码",
+            "description": "描述",
+            "order": "排序",
+            "status": "状态"
+          },
+          "actions": {
+            "newPackaging": "新增包装",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该包装类型？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "包装类型",
+          "fields": {
+            "name": "名称",
+            "code": "代码",
+            "description": "描述",
+            "order": "排序",
+            "active": "启用"
+          }
+        }
+      },
+      "trackingEvents": {
+        "tab": {
+          "title": "追踪事件",
+          "columns": {
+            "eventType": "事件类型",
+            "description": "描述",
+            "location": "地点",
+            "eventTime": "事件时间",
+            "created": "创建时间"
+          },
+          "actions": {
+            "newEvent": "新增事件",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该追踪事件？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "追踪事件",
+          "fields": {
+            "eventType": "事件类型",
+            "description": "描述",
+            "location": "地点",
+            "eventTime": "事件时间",
+            "consignment": "运单"
+          }
+        }
+      },
+      "freightServices": {
+        "tab": {
+          "title": "货运服务",
+          "columns": {
+            "name": "名称",
+            "code": "代码",
+            "carrier": "承运商",
+            "basePrice": "基础价格",
+            "pricePerKg": "每公斤价格",
+            "etaDays": "预计天数",
+            "status": "状态"
+          },
+          "actions": {
+            "newService": "新增服务",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该货运服务？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          },
+          "created": "货运服务已创建。",
+          "updated": "货运服务已保存。",
+          "configUpdated": "配置已保存。",
+          "invalidId": "无效的货运服务 ID。",
+          "tabs": {
+            "info": "基本信息",
+            "config": "配置"
+          },
+          "configTab": {
+            "descriptionTitle": "计费配置",
+            "descriptionBody": "请选择下方计费方式并填写表单即可完成配置，无需编辑 JSON。",
+            "selectTemplatePrompt": "当前服务未识别为已知计费方式，请选择下方计费方式重新配置。",
+            "chooseTemplate": "选择计费方式",
+            "viewConfigJson": "查看完整 config JSON",
+            "addTier": "添加阶梯",
+            "formatJson": "格式化 JSON",
+            "invalidJson": "「{field}」中 JSON 无效：{message}"
+          }
+        },
+        "editDialog": {
+          "title": "货运服务",
+          "fields": {
+            "name": "名称",
+            "code": "代码",
+            "carrier": "承运商",
+            "description": "描述",
+            "basePrice": "基础价格",
+            "pricePerKg": "每公斤价格",
+            "etaMinDays": "预计最少天数",
+            "etaMaxDays": "预计最多天数",
+            "order": "排序",
+            "active": "启用"
+          }
+        }
+      },
+      "freightStatuses": {
+        "tab": {
+          "title": "货运状态",
+          "columns": {
+            "name": "名称",
+            "code": "代码",
+            "type": "类型",
+            "state": "状态值",
+            "order": "排序",
+            "status": "状态"
+          },
+          "actions": {
+            "newStatus": "新增状态",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该货运状态？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "货运状态",
+          "fields": {
+            "name": "名称",
+            "code": "代码",
+            "type": "类型",
+            "state": "状态值",
+            "description": "描述",
+            "color": "颜色",
+            "order": "排序",
+            "active": "启用"
+          }
+        }
+      },
+      "page": {
+        "title": "配送设置",
+        "subtitle": "管理仓库、承运商、包装类型与配送默认配置",
+        "tabs": {
+          "warehouses": "仓库",
+          "freightServices": "货运服务",
+          "carriers": "承运商",
+          "freightStatus": "货运状态",
+          "trackingEvents": "追踪事件",
+          "packagingTypes": "包装类型",
+          "deliveryZones": "配送区域",
+          "deliverySettings": "配送设置"
+        }
+      }
+    },
+    "finance": {
+      "page": {
+        "title": "财务设置",
+        "subtitle": "管理币种、支付网关、税率、品牌、财务代码与发票设置",
+        "tabs": {
+          "currencies": "币种",
+          "paymentGateways": "支付网关",
+          "taxRates": "税率",
+          "brands": "品牌",
+          "financialCodes": "财务代码",
+          "invoiceSettings": "发票设置"
+        }
+      },
+      "currencies": {
+        "tab": {
+          "title": "币种",
+          "columns": {
+            "name": "名称",
+            "symbol": "符号",
+            "decimals": "小数位",
+            "status": "状态"
+          },
+          "searchPlaceholder": "搜索币种...",
+          "filters": {
+            "currencyType": {
+              "label": "币种类型",
+              "options": {
+                "fiat": "法币",
+                "crypto": "加密货币"
+              }
+            },
+            "region": {
+              "label": "区域",
+              "options": {
+                "americas": "美洲",
+                "europe": "欧洲",
+                "asia": "亚洲",
+                "oceania": "大洋洲",
+                "africa": "非洲"
+              }
+            }
+          },
+          "actions": {
+            "addNew": "新增币种",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该币种？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "币种",
+          "fields": {
+            "code": "代码",
+            "name": "名称",
+            "symbol": "符号",
+            "decimalPlaces": "小数位",
+            "active": "启用"
+          }
+        }
+      },
+      "taxRates": {
+        "tab": {
+          "title": "税率",
+          "columns": {
+            "name": "名称",
+            "rate": "税率",
+            "country": "国家/地区",
+            "state": "州/省",
+            "status": "状态"
+          },
+          "actions": {
+            "newTaxRate": "新增税率",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该税率？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "税率",
+          "fields": {
+            "name": "名称",
+            "ratePercent": "税率（%）",
+            "country": "国家/地区",
+            "stateProvince": "州/省",
+            "active": "启用"
+          }
+        }
+      },
+      "brands": {
+        "tab": {
+          "title": "品牌",
+          "columns": {
+            "name": "名称",
+            "taxId": "税号",
+            "registrationNumber": "注册号",
+            "default": "默认",
+            "status": "状态"
+          },
+          "values": {
+            "yes": "是",
+            "no": "否"
+          },
+          "actions": {
+            "newBrand": "新增品牌",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该品牌？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "schema": {
+          "title": "品牌",
+          "name": "名称",
+          "logo": "Logo",
+          "addressId": "地址ID",
+          "taxId": "税号",
+          "registrationNumber": "注册号",
+          "invoiceNote": "发票备注",
+          "invoiceNotePlaceholder": "输入付款说明、银行信息或其他需要在发票上显示的信息。\n\n示例：\nASB Bank\nSurlex Limited\n12-3484-0026365-00\n\n付款时请使用以下信息：\n- Particular: [公司名称]\n- Reference: [发票号]\n- Code: [客户编号]",
+          "isDefault": "默认",
+          "isActive": "启用"
+        }
+      },
+      "financialCodes": {
+        "tab": {
+          "title": "财务代码",
+          "columns": {
+            "code": "代码",
+            "name": "名称",
+            "taxType": "税务类型",
+            "status": "状态"
+          },
+          "actions": {
+            "new": "新增财务代码",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该财务代码？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "财务代码",
+          "fields": {
+            "code": "代码",
+            "name": "名称",
+            "description": "描述",
+            "taxType": "税务类型",
+            "active": "启用"
+          },
+          "taxTypeOptions": {
+            "default": "默认",
+            "noTax": "免税",
+            "zeroGst": "零 GST"
+          }
+        }
+      },
+      "invoiceSettings": {
+        "tab": {
+          "confirmDelete": "确认删除该发票设置？",
+          "actions": {
+            "edit": "编辑发票设置",
+            "add": "新增发票设置"
+          },
+          "current": {
+            "title": "当前发票设置",
+            "prefix": "前缀",
+            "defaultDueDays": "默认到期天数",
+            "autoNumber": "自动编号",
+            "status": "状态",
+            "enabled": "已启用",
+            "disabled": "已禁用",
+            "active": "启用",
+            "inactive": "停用"
+          },
+          "empty": "未找到发票设置。点击“新增发票设置”创建一条。",
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "发票设置",
+          "fields": {
+            "invoicePrefix": "发票前缀",
+            "defaultDueDays": "默认到期天数",
+            "defaultFooter": "默认页脚",
+            "autoNumber": "自动编号",
+            "emailTemplateId": "邮件模板ID",
+            "active": "启用"
+          }
+        }
+      },
+      "paymentGateways": {
+        "schema": {
+          "title": "支付网关",
+          "name": "名称",
+          "type": "类型",
+          "mode": "模式",
+          "status": "状态",
+          "modeTest": "测试",
+          "modeLive": "正式"
+        },
+        "actions": {
+          "newGateway": "新增网关",
+          "edit": "编辑",
+          "delete": "删除",
+          "confirmDelete": "确认删除该支付网关？",
+          "deleteFailed": "删除失败：{error}"
+        },
+        "editDialog": {
+          "title": "支付网关",
+          "titleNew": "新增支付网关",
+          "titleEdit": "编辑支付网关",
+          "name": "名称",
+          "nameRequired": "请填写名称",
+          "gatewayType": "网关类型",
+          "gatewayTypePlaceholder": "请选择网关类型",
+          "pluginConfiguration": "插件配置",
+          "liveConfig": "正式环境配置（JSON）",
+          "testConfig": "测试环境配置（JSON）",
+          "liveConfigPlaceholder": "{{\"secret_key\": \"sk_live_...\", \"publishable_key\": \"pk_live_...\", \"webhook_secret\": \"whsec_...\"}}",
+          "testConfigPlaceholder": "{{\"secret_key\": \"sk_test_...\", \"publishable_key\": \"pk_test_...\", \"webhook_secret\": \"whsec_...\"}}",
+          "active": "启用",
+          "testMode": "测试模式",
+          "liveConfigInvalid": "正式环境配置必须为有效的 JSON",
+          "testConfigInvalid": "测试环境配置必须为有效的 JSON",
+          "saveFailed": "保存失败：{error}",
+          "gatewayTypes": {
+            "stripe": "Stripe",
+            "paypal": "PayPal",
+            "wechat": "微信",
+            "alipay": "支付宝",
+            "custom": "自定义"
+          }
+        }
+      }
+    },
+    "web": {
+      "page": {
+        "title": "网站设置",
+        "subtitle": "管理站点、主题、语言、页面、文章、分类、标签、菜单、媒体与网站默认设置",
+        "tabs": {
+          "sites": "站点",
+          "themes": "主题",
+          "languages": "语言",
+          "pages": "页面",
+          "posts": "文章",
+          "categories": "分类",
+          "tags": "标签",
+          "menus": "菜单",
+          "media": "媒体",
+          "newsletter": "邮件订阅",
+          "settings": "网站设置"
+        }
+      },
+      "sites": {
+        "tab": {
+          "title": "站点",
+          "columns": {
+            "name": "名称",
+            "domain": "域名",
+            "theme": "主题",
+            "defaultLanguage": "默认语言",
+            "isDefault": "默认",
+            "status": "状态"
+          },
+          "actions": {
+            "newSite": "新增站点",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该站点？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "站点",
+          "fields": {
+            "name": "名称",
+            "domain": "域名",
+            "theme": "主题",
+            "defaultLanguage": "默认语言",
+            "supportedLanguages": "支持语言",
+            "siteTitle": "站点标题",
+            "siteDescription": "站点描述",
+            "active": "启用",
+            "isDefault": "默认"
+          },
+          "placeholders": {
+            "domain": "example.com"
+          }
+        }
+      },
+      "themes": {
+        "tab": {
+          "title": "主题",
+          "columns": {
+            "name": "名称",
+            "code": "代码",
+            "primaryColor": "主色",
+            "status": "状态"
+          },
+          "actions": {
+            "newTheme": "新增主题",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该主题？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "主题",
+          "fields": {
+            "name": "名称",
+            "code": "代码",
+            "description": "描述",
+            "templatePath": "模板路径",
+            "logo": "Logo",
+            "favicon": "Favicon",
+            "primaryColor": "主色",
+            "secondaryColor": "辅助色",
+            "customCss": "自定义 CSS",
+            "customJs": "自定义 JS",
+            "active": "启用"
+          }
+        }
+      },
+      "languages": {
+        "tab": {
+          "title": "语言",
+          "columns": {
+            "code": "代码",
+            "name": "名称",
+            "nativeName": "本地名称",
+            "isDefault": "默认",
+            "status": "状态",
+            "order": "排序"
+          },
+          "actions": {
+            "newLanguage": "新增语言",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该语言？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "语言",
+          "fields": {
+            "code": "代码",
+            "name": "名称",
+            "nativeName": "本地名称",
+            "isDefault": "默认",
+            "active": "启用",
+            "rtl": "RTL（从右到左）",
+            "order": "排序"
+          },
+          "placeholders": {
+            "code": "en, zh-hans, zh-hant",
+            "name": "English, Simplified Chinese",
+            "nativeName": "English, 简体中文"
+          }
+        }
+      },
+      "menus": {
+        "tab": {
+          "title": "菜单",
+          "columns": {
+            "name": "名称",
+            "slug": "Slug",
+            "location": "位置",
+            "language": "语言",
+            "itemsCount": "条目数量",
+            "status": "状态"
+          },
+          "actions": {
+            "newMenu": "新增菜单",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该菜单？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "菜单",
+          "fields": {
+            "name": "名称",
+            "slug": "Slug",
+            "location": "位置",
+            "language": "语言",
+            "active": "启用",
+            "menuItems": "菜单项"
+          },
+          "itemTitle": "标题",
+          "itemUrl": "链接",
+          "openInNewTab": "新窗口打开",
+          "removeItem": "删除",
+          "addItem": "添加一项",
+          "locationOptions": {
+            "header": "页头",
+            "footer": "页脚",
+            "sidebar": "侧边栏"
+          }
+        }
+      },
+      "tags": {
+        "tab": {
+          "title": "标签",
+          "columns": {
+            "name": "名称",
+            "slug": "Slug",
+            "language": "语言"
+          },
+          "actions": {
+            "newTag": "新增标签",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该标签？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "标签",
+          "fields": {
+            "name": "名称",
+            "slug": "Slug",
+            "language": "语言"
+          }
+        }
+      },
+      "categories": {
+        "tab": {
+          "actions": {
+            "newCategory": "新增分类",
+            "edit": "编辑",
+            "delete": "删除"
+          },
+          "headers": {
+            "name": "名称",
+            "slug": "Slug",
+            "contentType": "内容类型",
+            "language": "语言",
+            "order": "排序",
+            "status": "状态",
+            "actions": "操作"
+          },
+          "empty": "暂无分类",
+          "confirmDeleteWithName": "确认删除分类“{name}”？",
+          "status": {
+            "active": "启用",
+            "inactive": "停用"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "分类",
+          "fields": {
+            "name": "名称",
+            "slug": "Slug",
+            "description": "描述",
+            "parentCategory": "父级分类",
+            "contentType": "内容类型",
+            "icon": "图标",
+            "color": "颜色",
+            "order": "排序",
+            "active": "启用",
+            "language": "语言"
+          },
+          "placeholders": {
+            "icon": "tabler-icon-name 或 emoji"
+          },
+          "contentTypeOptions": {
+            "generic": "通用",
+            "post": "文章",
+            "project": "项目",
+            "service": "服务",
+            "faq": "FAQ"
+          }
+        }
+      },
+      "pages": {
+        "tab": {
+          "title": "页面",
+          "columns": {
+            "title": "标题",
+            "slug": "Slug",
+            "status": "状态",
+            "language": "语言",
+            "order": "排序",
+            "featured": "置顶",
+            "publishedAt": "发布时间"
+          },
+          "actions": {
+            "newPage": "新增页面",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该页面？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "页面",
+          "tabs": {
+            "basic": "基本信息",
+            "blocks": "区块"
+          },
+          "saveBlocks": "保存区块",
+          "fields": {
+            "title": "标题",
+            "slug": "Slug",
+            "content": "内容",
+            "excerpt": "摘要",
+            "parentPage": "父级页面",
+            "template": "模板",
+            "seoTitle": "SEO 标题",
+            "seoDescription": "SEO 描述",
+            "seoKeywords": "SEO 关键词",
+            "status": "状态",
+            "featured": "置顶",
+            "allowComments": "允许评论",
+            "order": "排序",
+            "language": "语言"
+          },
+          "statusOptions": {
+            "draft": "草稿",
+            "published": "已发布",
+            "archived": "已归档"
+          }
+        }
+      },
+      "posts": {
+        "tab": {
+          "title": "文章",
+          "columns": {
+            "title": "标题",
+            "slug": "Slug",
+            "category": "分类",
+            "status": "状态",
+            "language": "语言",
+            "views": "浏览量",
+            "publishedAt": "发布时间"
+          },
+          "actions": {
+            "newPost": "新增文章",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该文章？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "文章",
+          "fields": {
+            "title": "标题",
+            "slug": "Slug",
+            "content": "内容",
+            "excerpt": "摘要",
+            "featuredImage": "封面图",
+            "category": "分类",
+            "tags": "标签",
+            "seoTitle": "SEO 标题",
+            "seoDescription": "SEO 描述",
+            "status": "状态",
+            "publishedAt": "发布时间",
+            "allowComments": "允许评论",
+            "language": "语言"
+          },
+          "statusOptions": {
+            "draft": "草稿",
+            "published": "已发布",
+            "archived": "已归档"
+          }
+        }
+      },
+      "media": {
+        "tab": {
+          "title": "媒体",
+          "columns": {
+            "fileName": "文件名",
+            "preview": "预览",
+            "fileType": "文件类型",
+            "fileSize": "文件大小",
+            "title": "标题",
+            "uploadedAt": "上传时间"
+          },
+          "actions": {
+            "uploadMedia": "上传媒体",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该媒体？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "媒体",
+          "fields": {
+            "file": "文件",
+            "title": "标题",
+            "altText": "替代文本",
+            "caption": "说明"
+          },
+          "placeholders": {
+            "altText": "用于图片"
+          }
+        }
+      },
+      "settingsTab": {
+        "title": "网站设置",
+        "fields": {
+          "defaultLanguage": "默认语言",
+          "seoDefaultTitle": "SEO 默认标题",
+          "seoDefaultDescription": "SEO 默认描述"
+        },
+        "placeholders": {
+          "seoDefaultTitle": "请输入默认 SEO 标题",
+          "seoDefaultDescription": "请输入默认 SEO 描述"
+        },
+        "actions": {
+          "saveChanges": "保存更改",
+          "reset": "重置"
+        },
+        "alerts": {
+          "saved": "网站设置已保存",
+          "saveFailed": "保存失败：{error}"
+        },
+        "languageOptions": {
+          "en": "英文",
+          "zhHans": "简体中文",
+          "zhHant": "繁体中文"
+        }
+      },
+      "timeSlots": {
+        "title": "时段",
+        "formTitle": "时段",
+        "columns": {
+          "date": "日期",
+          "time": "时间",
+          "capacity": "容量",
+          "name": "名称",
+          "active": "启用"
+        },
+        "actions": {
+          "add": "添加时段",
+          "edit": "编辑",
+          "delete": "删除",
+          "confirmDelete": "确认删除此时段？"
+        },
+        "fields": {
+          "date": "日期",
+          "startTime": "开始时间",
+          "endTime": "结束时间",
+          "maxBookings": "最大预约数",
+          "nameOptional": "名称（选填）",
+          "namePlaceholder": "如：上午寄送",
+          "notes": "备注",
+          "active": "启用"
+        },
+        "errors": {
+          "deleteFailed": "删除失败",
+          "saveFailed": "保存失败"
+        }
+      }
+    },
+    "store": {
+      "page": {
+        "title": "商店设置",
+        "subtitle": "管理门店、销售渠道与订阅计划",
+        "tabs": {
+          "stores": "门店",
+          "salesChannels": "销售渠道",
+          "subscriptionPlans": "订阅计划",
+          "messageTemplates": "消息模板"
+        }
+      },
+      "stores": {
+        "tab": {
+          "title": "门店",
+          "columns": {
+            "name": "名称",
+            "code": "代码",
+            "description": "描述",
+            "status": "状态"
+          },
+          "actions": {
+            "newStore": "新增门店",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该门店？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "门店",
+          "fields": {
+            "name": "名称",
+            "code": "代码",
+            "description": "描述",
+            "warehouses": "仓库",
+            "active": "启用"
+          }
+        }
+      },
+      "salesChannels": {
+        "tab": {
+          "title": "销售渠道",
+          "columns": {
+            "name": "名称",
+            "code": "代码",
+            "channelType": "渠道类型",
+            "default": "默认",
+            "status": "状态"
+          },
+          "values": {
+            "yes": "是",
+            "no": "否"
+          },
+          "actions": {
+            "newChannel": "新增渠道",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该销售渠道？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "销售渠道",
+          "fields": {
+            "name": "名称",
+            "code": "代码",
+            "channelType": "渠道类型",
+            "description": "描述",
+            "active": "启用",
+            "setDefault": "设为默认渠道"
+          },
+          "channelTypeOptions": {
+            "onlineStore": "线上商店",
+            "pos": "线下收银（POS）",
+            "mobileApp": "移动应用",
+            "social": "社交媒体",
+            "marketplace": "第三方平台",
+            "custom": "自定义"
+          }
+        }
+      },
+      "subscriptionPlans": {
+        "tab": {
+          "title": "订阅计划",
+          "columns": {
+            "name": "名称",
+            "price": "价格",
+            "interval": "周期",
+            "trialDays": "试用天数",
+            "status": "状态"
+          },
+          "interval": {
+            "every": "每 {count} {interval}",
+            "single": {
+              "day": "每日",
+              "week": "每周",
+              "month": "每月",
+              "year": "每年"
+            },
+            "units": {
+              "day": "天",
+              "week": "周",
+              "month": "月",
+              "year": "年"
+            }
+          },
+          "trial": {
+            "days": "{count} 天",
+            "noTrial": "无试用"
+          },
+          "actions": {
+            "newPlan": "新增计划",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该订阅计划？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "订阅计划",
+          "fields": {
+            "planName": "计划名称",
+            "description": "描述",
+            "price": "价格",
+            "interval": "周期",
+            "intervalCount": "周期数量",
+            "trialPeriodDays": "试用期（天）",
+            "features": "功能（每行一个）",
+            "active": "启用"
+          },
+          "intervalOptions": {
+            "day": "每日",
+            "week": "每周",
+            "month": "每月",
+            "year": "每年"
+          }
+        }
+      },
+      "messageTemplates": {
+        "tab": {
+          "title": "消息模板",
+          "columns": {
+            "name": "名称",
+            "code": "代码",
+            "event": "事件",
+            "language": "语言",
+            "email": "邮件",
+            "sms": "短信",
+            "push": "推送",
+            "status": "状态"
+          },
+          "values": {
+            "yes": "是",
+            "no": "否"
+          },
+          "actions": {
+            "newTemplate": "新增模板",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该消息模板？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "消息模板",
+          "fields": {
+            "name": "名称",
+            "code": "代码",
+            "event": "事件",
+            "language": "语言",
+            "active": "启用",
+            "emailEnabled": "启用邮件",
+            "emailSubject": "邮件主题",
+            "emailBody": "邮件内容",
+            "emailHtmlBody": "邮件 HTML 内容",
+            "appMessageEnabled": "启用站内消息",
+            "appMessageTitle": "站内消息标题",
+            "appMessageBody": "站内消息内容",
+            "smsEnabled": "启用短信",
+            "smsBody": "短信内容（最多 160 字符）",
+            "pushEnabled": "启用推送",
+            "pushTitle": "推送标题",
+            "pushBody": "推送内容"
+          },
+          "languageOptions": {
+            "en": "英文",
+            "zhCn": "简体中文",
+            "zhTw": "繁体中文"
+          }
+        }
+      }
+    },
+    "marketing": {
+      "page": {
+        "title": "营销设置",
+        "subtitle": "管理营销设置、活动、优惠券、礼品卡与推荐计划",
+        "tabs": {
+          "campaigns": "活动",
+          "promoDisplays": "首页推广",
+          "coupons": "优惠券",
+          "giftCards": "礼品卡",
+          "referralPrograms": "推荐计划",
+          "settings": "营销设置"
+        }
+      },
+      "campaignDisplays": {
+        "tab": {
+          "title": "首页推广",
+          "columns": {
+            "campaign": "活动",
+            "title": "标题",
+            "displayType": "展示类型",
+            "order": "排序",
+            "linkUrl": "链接",
+            "status": "状态"
+          },
+          "actions": {
+            "newDisplay": "新增展示",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该展示？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "推广展示",
+          "fields": {
+            "campaign": "活动",
+            "campaignHelp": "可选。留空则为独立展示。",
+            "displayType": "展示类型",
+            "order": "排序",
+            "title": "标题",
+            "titleHelp": "可选。轮播上显示。",
+            "subtitle": "副标题",
+            "subtitleHelp": "可选。轮播上显示。",
+            "image": "图片",
+            "imageHelp": "可选。轮播图或精选文章封面。",
+            "linkUrl": "链接地址",
+            "linkTarget": "打开方式",
+            "rules": "规则",
+            "rulesHelp": "JSON 数组，与商品分类规则一致。例：[{\"column\":\"category_id\",\"relation\":\"equals\",\"condition\":\"5\"}]",
+            "post": "文章",
+            "active": "启用"
+          },
+          "displayTypeOptions": {
+            "slide": "轮播图",
+            "categoryEntry": "分类入口",
+            "featured": "精选推荐"
+          }
+        }
+      },
+      "settingsTab": {
+        "title": "营销设置",
+        "fields": {
+          "defaultReferralProgram": "默认推荐计划",
+          "utmSource": "UTM Source 模板",
+          "utmMedium": "UTM Medium 模板",
+          "utmCampaign": "UTM Campaign 模板"
+        },
+        "placeholders": {
+          "utmCampaign": "{campaign_name}"
+        },
+        "errors": {
+          "noWorkspaceSettings": "未找到工作区设置。",
+          "saveFailed": "保存失败：{error}"
+        },
+        "snackbar": {
+          "saved": "营销设置已保存"
+        }
+      },
+      "campaigns": {
+        "tab": {
+          "title": "活动",
+          "columns": {
+            "name": "名称",
+            "type": "类型",
+            "startDate": "开始日期",
+            "endDate": "结束日期",
+            "budget": "预算",
+            "status": "状态"
+          },
+          "actions": {
+            "newCampaign": "新增活动",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该活动？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "活动",
+          "fields": {
+            "name": "名称",
+            "type": "类型",
+            "description": "描述",
+            "startDate": "开始日期",
+            "endDate": "结束日期",
+            "budget": "预算",
+            "active": "启用"
+          },
+          "typeOptions": {
+            "email": "邮件",
+            "sms": "短信",
+            "social": "社交媒体",
+            "affiliate": "联盟推广",
+            "other": "其他"
+          }
+        }
+      },
+      "coupons": {
+        "tab": {
+          "title": "优惠券",
+          "columns": {
+            "code": "代码",
+            "discount": "折扣",
+            "validFrom": "生效时间",
+            "validTo": "失效时间",
+            "usageLimit": "使用上限",
+            "used": "已使用",
+            "status": "状态"
+          },
+          "actions": {
+            "newCoupon": "新增优惠券",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该优惠券？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "优惠券",
+          "fields": {
+            "code": "代码",
+            "description": "描述",
+            "discountRuleId": "折扣规则ID",
+            "campaignOptional": "活动（可选）",
+            "validFrom": "生效时间",
+            "validTo": "失效时间",
+            "usageLimit": "使用上限",
+            "usageLimitPerCustomer": "每个客户使用上限",
+            "active": "启用"
+          },
+          "placeholders": {
+            "discountRuleId": "请输入折扣规则ID"
+          }
+        }
+      },
+      "giftCards": {
+        "tab": {
+          "title": "礼品卡",
+          "columns": {
+            "code": "代码",
+            "initialValue": "初始金额",
+            "balance": "余额",
+            "currency": "币种",
+            "customer": "客户",
+            "status": "状态",
+            "expires": "到期"
+          },
+          "actions": {
+            "newGiftCard": "新增礼品卡",
+            "edit": "编辑",
+            "deactivate": "停用",
+            "delete": "删除",
+            "confirmDeactivate": "确认停用该礼品卡？",
+            "confirmDelete": "确认删除该礼品卡？"
+          },
+          "errors": {
+            "deactivateFailed": "停用失败：{error}",
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "礼品卡",
+          "fields": {
+            "currency": "币种",
+            "initialValue": "初始金额",
+            "customerOptional": "客户（可选）",
+            "expiresAt": "到期时间",
+            "active": "启用"
+          }
+        }
+      },
+      "referralPrograms": {
+        "tab": {
+          "title": "推荐计划",
+          "columns": {
+            "name": "名称",
+            "referrerReward": "推荐人奖励",
+            "refereeReward": "被推荐人奖励",
+            "minPurchase": "最低消费",
+            "status": "状态"
+          },
+          "actions": {
+            "newProgram": "新增计划",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确认删除该推荐计划？"
+          },
+          "errors": {
+            "deleteFailed": "删除失败：{error}",
+            "saveFailed": "保存失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "推荐计划",
+          "fields": {
+            "name": "名称",
+            "description": "描述",
+            "referrerReward": "推荐人奖励",
+            "refereeReward": "被推荐人奖励",
+            "minimumPurchase": "最低消费",
+            "active": "启用"
+          }
+        }
+      }
+    },
+    "general": {
+      "page": {
+        "title": "通用设置",
+        "subtitle": "管理工作区通用设置与偏好",
+        "tabs": {
+          "basic": "基础",
+          "users": "用户",
+          "roles": "角色",
+          "email": "邮件"
+        }
+      },
+      "email": {
+        "title": "邮件配置",
+        "subtitle": "配置工作区发信方式（SMTP 或 Mailgun）。默认配置将用于所有工作区邮件。",
+        "add": "添加配置",
+        "edit": "编辑",
+        "delete": "删除",
+        "deleteConfirm": "确定要删除该邮件配置吗？",
+        "editTitle": "编辑邮件配置",
+        "cancel": "取消",
+        "save": "保存",
+        "saving": "保存中...",
+        "send": "发送",
+        "sending": "发送中...",
+        "saved": "已保存。",
+        "created": "已创建。",
+        "setDefaultSuccess": "已设为默认。",
+        "deleted": "已删除。",
+        "yes": "是",
+        "no": "否",
+        "dash": "-",
+        "name": "名称",
+        "backendType": "类型",
+        "smtp": "SMTP",
+        "mailgun": "Mailgun",
+        "isActive": "启用",
+        "isDefault": "默认",
+        "setDefault": "设为默认",
+        "sendTest": "发送测试邮件",
+        "testEmailTo": "发送测试到（邮箱）",
+        "testEmailSent": "测试邮件已发送。",
+        "testEmailFailed": "发送失败：{error}",
+        "configSmtp": {
+          "host": "主机",
+          "port": "端口",
+          "useTls": "使用 TLS",
+          "useSsl": "使用 SSL",
+          "user": "用户名",
+          "password": "密码",
+          "fromEmail": "发件人邮箱",
+          "passwordPlaceholder": "留空表示不修改"
+        },
+        "configMailgun": {
+          "apiKey": "API Key",
+          "domain": "域名",
+          "fromEmail": "发件人邮箱",
+          "region": "区域（如 eu）",
+          "regionPlaceholder": "eu",
+          "passwordPlaceholder": "留空表示不修改"
+        },
+        "errors": {
+          "loadFailed": "加载邮件配置失败",
+          "saveFailed": "保存失败",
+          "deleteFailed": "删除失败",
+          "toRequired": "请输入有效邮箱地址"
+        }
+      },
+      "basic": {
+        "sections": {
+          "siteInformation": "站点信息",
+          "localization": "本地化",
+          "contactInformation": "联系信息",
+          "storefrontDisplay": "前台展示",
+          "storefrontTheme": "前台主题与页头",
+          "socialMediaLinks": "社交媒体链接"
+        },
+        "logo": {
+          "alt": "Logo",
+          "help": "支持 JPG、GIF 或 PNG，最大 800KB"
+        },
+        "fields": {
+          "siteName": {
+            "label": "站点名称",
+            "placeholder": "输入工作区名称"
+          },
+          "siteDescription": {
+            "label": "站点描述",
+            "placeholder": "简要描述你的工作区"
+          },
+          "defaultLanguage": {
+            "label": "默认语言"
+          },
+          "defaultCurrency": {
+            "label": "默认货币",
+            "options": {
+              "nzd": "NZD ($)",
+              "usd": "USD ($)",
+              "cny": "CNY (¥)"
+            }
+          },
+          "timezone": {
+            "label": "时区",
+            "options": {
+              "pacificAuckland": "Pacific/Auckland (GMT+13)",
+              "utc": "UTC (GMT+0)",
+              "asiaShanghai": "Asia/Shanghai (GMT+8)"
+            }
+          },
+          "contactEmail": {
+            "label": "联系邮箱",
+            "placeholder": "support@example.com"
+          },
+          "contactPhone": {
+            "label": "联系电话",
+            "placeholder": "+64 21 123 4567"
+          },
+          "footerContact": {
+            "label": "页脚联系方式（显示在「联系我们」下方）",
+            "placeholder": "可选多行文字，换行显示。上方邮箱和电话也会显示在页脚。"
+          },
+          "topBarAnnouncement": {
+            "label": "顶部提示文字",
+            "placeholder": "例如：限时大促 全场8折 — 立即选购"
+          },
+          "footerCopyright": {
+            "label": "页脚版权文字",
+            "placeholder": "例如：© 2025 商店名称。保留所有权利。"
+          },
+          "siteAnnouncement": {
+            "label": "全站公告（可关闭横幅）",
+            "placeholder": "例如：系统将于 2 月 15 日 2:00–4:00 维护。首次展示后 1 小时内不再重复，用户可关闭。"
+          },
+          "storefrontTheme": {
+            "label": "前台主题",
+            "options": {
+              "store": "标准商城",
+              "website": "官网/落地页"
+            }
+          },
+          "storefrontHeader": {
+            "label": "页头覆盖",
+            "default": "使用主题默认"
+          },
+          "storefrontFooter": {
+            "label": "页脚覆盖",
+            "default": "使用主题默认"
+          },
+          "headerOptions": {
+            "label": "页头显示项",
+            "showSearch": "搜索",
+            "showCart": "购物车",
+            "showLanguageSwitcher": "语言",
+            "showStyleSelector": "主题（亮/暗）",
+            "showLogin": "登录/账户"
+          },
+          "social": {
+            "facebook": {
+              "label": "Facebook",
+              "placeholder": "https://facebook.com/yourpage"
+            },
+            "twitter": {
+              "label": "Twitter",
+              "placeholder": "https://twitter.com/yourhandle"
+            },
+            "instagram": {
+              "label": "Instagram",
+              "placeholder": "https://instagram.com/yourprofile"
+            }
+          }
+        },
+        "actions": {
+          "uploadNewPhoto": "上传新图片",
+          "resetPhoto": "重置",
+          "saveChanges": "保存更改",
+          "resetForm": "重置",
+          "saving": "保存中..."
+        },
+        "snackbar": {
+          "saved": "设置已保存！"
+        },
+        "errors": {
+          "loadFailed": "加载设置失败：{error}",
+          "loadFailedWithRefresh": "加载设置失败：{error}。请刷新页面。",
+          "settingsIdMissing": "未找到设置 ID，请刷新页面。",
+          "saveFailed": "保存设置失败：{error}"
+        }
+      },
+      "users": {
+        "schema": {
+          "title": "用户",
+          "columns": {
+            "user": "用户",
+            "email": "邮箱",
+            "role": "角色",
+            "status": "状态",
+            "lastLogin": "上次登录"
+          },
+          "roleValues": {
+            "superuser": "超级管理员",
+            "staff": "员工",
+            "user": "用户"
+          },
+          "lastLoginNever": "从未"
+        },
+        "filters": {
+          "status": {
+            "label": "状态",
+            "options": {
+              "active": "启用",
+              "inactive": "停用"
+            }
+          },
+          "role": {
+            "label": "角色",
+            "options": {
+              "staff": "员工",
+              "user": "用户"
+            }
+          }
+        },
+        "searchPlaceholder": "搜索用户...",
+        "actions": {
+          "add": "新增用户",
+          "edit": "编辑",
+          "delete": "删除",
+          "confirmDelete": "确认删除该用户？",
+          "confirmDeleteWithName": "确认删除用户 {name}？"
+        },
+        "form": {
+          "title": "用户详情",
+          "fields": {
+            "username": "用户名",
+            "email": "邮箱",
+            "firstName": "名",
+            "lastName": "姓",
+            "phone": "电话",
+            "isStaff": "是否员工",
+            "isActive": "是否启用",
+            "isSuperuser": "是否超级管理员"
+          },
+          "actions": {
+            "save": "保存",
+            "cancel": "取消"
+          }
+        },
+        "errors": {
+          "fetchFailed": "获取用户失败：{error}",
+          "deleteFailed": "删除用户失败：{error}",
+          "saveFailed": "保存用户失败：{error}",
+          "schemaNotFound": "未找到 Schema"
+        }
+      },
+      "roles": {
+        "schema": {
+          "title": "员工角色",
+          "columns": {
+            "roleName": "角色名称",
+            "description": "描述",
+            "status": "状态",
+            "createdAt": "创建时间"
+          }
+        },
+        "filters": {
+          "status": {
+            "label": "状态",
+            "options": {
+              "active": "启用",
+              "inactive": "停用"
+            }
+          }
+        },
+        "searchPlaceholder": "搜索角色...",
+        "actions": {
+          "add": "新增角色",
+          "edit": "编辑",
+          "delete": "删除",
+          "confirmDelete": "确认删除该角色？",
+          "confirmDeleteWithName": "确认删除角色 {name}？"
+        },
+        "form": {
+          "title": "角色详情",
+          "fields": {
+            "roleName": "角色名称",
+            "description": "描述",
+            "isActive": "是否启用"
+          },
+          "actions": {
+            "save": "保存",
+            "cancel": "取消"
+          }
+        },
+        "errors": {
+          "fetchFailed": "获取角色失败：{error}",
+          "deleteFailed": "删除角色失败：{error}",
+          "saveFailed": "保存角色失败：{error}",
+          "schemaNotFound": "未找到 Schema"
+        }
+      }
+    }
+  }
+}
+

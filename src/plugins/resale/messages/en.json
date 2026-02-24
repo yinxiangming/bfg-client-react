@@ -1,0 +1,276 @@
+{
+  "admin": {
+    "nav": {
+      "resale": "Resale",
+      "resaleSettings": "Settings",
+      "resaleTimeslots": "Time Slots",
+      "resaleBookings": "Bookings",
+      "resaleProducts": "Products",
+      "resalePayouts": "Payouts"
+    }
+  },
+  "account": {
+    "nav": {
+      "resaleMyListing": "My Listing",
+      "resaleMyProducts": "My Products",
+      "resaleMyBookings": "Bookings",
+      "resaleMyPayouts": "Payouts",
+      "resaleMyPreference": "Payout Preference"
+    }
+  },
+  "resale": {
+    "myProducts": {
+      "title": "My Resale Items",
+      "subtitle": "Items you have listed for resale through our consignment program.",
+      "empty": "You don't have any items listed for resale yet.",
+      "table": {
+        "item": "Item",
+        "price": "Price",
+        "commission": "Commission",
+        "stock": "Stock",
+        "status": "Status",
+        "listedDate": "Listed Date",
+        "expires": "Expires"
+      }
+    },
+    "myPayouts": {
+      "title": "My Payouts",
+      "subtitle": "View your resale payout history and status.",
+      "empty": "No payouts yet.",
+      "emptyDetail": "You don't have any payouts yet. Payouts are created when your resale items are sold.",
+      "payoutItems": "Payout Items",
+      "payoutHistory": "Payout History",
+      "trackEarnings": "Track your earnings from sold resale items.",
+      "totalPaid": "Total Paid",
+      "pendingPayout": "Pending Payout",
+      "table": {
+        "id": "ID",
+        "amount": "Amount",
+        "status": "Status",
+        "paymentMethod": "Payment Method",
+        "created": "Created",
+        "paidDate": "Paid Date",
+        "product": "Product",
+        "salePrice": "Sale Price",
+        "commission": "Commission",
+        "yourEarnings": "Your Earnings"
+      },
+      "noItemDetails": "No item details available",
+      "notes": "Notes",
+      "status": {
+        "pending": "Pending",
+        "paid": "Paid",
+        "failed": "Failed"
+      }
+    },
+    "myPreference": {
+      "title": "Payout Preference",
+      "subtitle": "Tell us how you prefer to receive payouts when your resale items are sold.",
+      "preferredPayoutMethod": "Preferred payout method",
+      "preferredPayoutMethodPlaceholder": "e.g. Bank transfer, PayPal, Venmo",
+      "payoutMethodNotes": "Notes",
+      "payoutMethodNotesPlaceholder": "Account details or other instructions for receiving payouts",
+      "save": "Save",
+      "saving": "Saving...",
+      "saved": "Preference saved.",
+      "loadFailed": "Failed to load preference"
+    },
+    "myBookings": {
+      "title": "My Bookings",
+      "subtitle": "Your resale drop-off and pickup appointments.",
+      "empty": "You don't have any bookings yet.",
+      "table": {
+        "dateTime": "Date & Time",
+        "type": "Type",
+        "status": "Status",
+        "created": "Created"
+      },
+      "status": {
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "cancelled": "Cancelled",
+        "completed": "Completed",
+        "no_show": "No Show"
+      }
+    },
+    "section": {
+      "ownerTitle": "Resale Owner",
+      "ownerSubtitle": "Assign a customer as the owner of this resale product.",
+      "enableResale": "Enable as resale product",
+      "selectCustomer": "Select customer",
+      "customerPlaceholder": "Select customer...",
+      "commissionRate": "Commission rate (%)",
+      "resaleCardTitle": "Resale",
+      "resaleCardSubtitle": "Sell items on behalf of customers",
+      "itemOwner": "Item Owner",
+      "itemOwnerHelper": "The customer who owns this item and will receive payment when sold",
+      "commissionRateHelper": "Customer receives this percentage of the sale price",
+      "owner": "Owner"
+    },
+    "storefront": {
+      "resaleItemSold": "Resale item"
+    },
+    "admin": {
+      "settings": {
+        "title": "Resale Settings",
+        "subtitle": "Configure consignment and resale options.",
+        "subtitleAlt": "Configure resale program for your store",
+        "enabled": "Resale module enabled",
+        "enableProgram": "Enable Resale Program",
+        "commissionRate": "Default commission rate (%)",
+        "commissionRateLabel": "Default Commission Rate (%)",
+        "commissionRateHelper": "Percentage of sale price that customers receive (e.g., 80 means customer gets 80%)",
+        "maxProductsPerCustomer": "Max products per customer",
+        "maxProductsLabel": "Max Products Per Customer",
+        "maxProductsHelper": "Maximum number of items a customer can list for resale",
+        "defaultListingDays": "Default listing days",
+        "defaultListingLabel": "Default Listing Duration (days)",
+        "defaultListingHelper": "How long items stay listed before expiring",
+        "termsAndConditions": "Terms and conditions",
+        "termsLabel": "Terms and Conditions",
+        "termsHelper": "Terms that customers must agree to when listing items for resale",
+        "save": "Save changes",
+        "saveSettings": "Save Settings",
+        "saving": "Saving...",
+        "saved": "Settings saved successfully.",
+        "saveFailed": "Failed to save settings.",
+        "commissionSettings": "Commission Settings",
+        "listingSettings": "Listing Settings"
+      },
+      "timeslots": {
+        "title": "Time Slots Management",
+        "subtitle": "Manage booking time slots for resale drop-off appointments."
+      },
+      "bookings": {
+        "title": "Bookings",
+        "subtitle": "View and manage resale-related bookings.",
+        "dateTime": "Date & Time",
+        "customer": "Customer",
+        "type": "Type",
+        "status": "Status",
+        "created": "Created",
+        "edit": "Edit",
+        "confirm": "Confirm",
+        "cancel": "Cancel",
+        "confirmBooking": "Confirm this booking?",
+        "cancelBooking": "Cancel this booking?",
+        "formTitle": "Booking",
+        "notes": "Notes",
+        "adminNotes": "Admin notes",
+        "statusNoShow": "No show"
+      },
+      "products": {
+        "title": "Resale Products",
+        "subtitle": "Manage products listed for resale by customers.",
+        "table": {
+          "product": "Product",
+          "customer": "Customer",
+          "stock": "Stock",
+          "price": "Price",
+          "commission": "Commission",
+          "status": "Status",
+          "listed": "Listed",
+          "expires": "Expires"
+        },
+        "soldCount": "Sold ({count})"
+      },
+      "payouts": {
+        "title": "Resale Payouts",
+        "subtitle": "Process and track payouts to resale product owners.",
+        "filterStatus": "Filter: {status}",
+        "subheaderSummary": "Process unpaid payouts and view history. {pendingCount} pending, {paidCount} paid.",
+        "filterCustomer": "Customer",
+        "filterCustomerPlaceholder": "Search by name, email, or phone…",
+        "filterCustomerHelper": "Filter payouts by customer",
+        "statsPaid": "Paid",
+        "statsPayable": "Payable",
+        "statusLabel": "Status",
+        "pageSize": "Per page",
+        "all": "All",
+        "noPayoutsFound": "No payouts found",
+        "table": {
+          "id": "ID",
+          "customer": "Customer",
+          "amount": "Amount",
+          "status": "Status",
+          "created": "Created",
+          "paid": "Paid",
+          "actions": "Actions",
+          "itemsCount": "Items ({count})",
+          "payment": "Payment",
+          "markPaid": "Mark Paid",
+          "processing": "Processing..."
+        },
+        "markPaidTitle": "Mark Payout as Paid",
+        "payoutToCustomer": "Payout #{id} · {amount} to {customer}",
+        "paymentMethod": "Payment method",
+        "paymentMethodPlaceholder": "e.g. Bank transfer, PayPal",
+        "paymentReference": "Payment reference",
+        "paymentReferencePlaceholder": "e.g. transaction ID",
+        "cancel": "Cancel",
+        "confirmPaid": "Confirm Paid",
+        "confirmMarkPaidTitle": "Confirm mark as paid",
+        "confirmMarkPaidMessage": "Mark payout #{id} as paid? The customer will receive an email notification.",
+        "yesMarkPaid": "Yes, Mark as Paid",
+        "itemsModalTitle": "Payout #{id} · Items",
+        "itemsTable": {
+          "created": "Created",
+          "product": "Product",
+          "order": "Order",
+          "orderId": "Order #{id}",
+          "salePrice": "Sale Price",
+          "commissionPct": "Commission %",
+          "payoutAmount": "Payout Amount"
+        },
+        "noItems": "No items",
+        "close": "Close",
+        "paymentDetailsTitle": "Payment details · Payout #{id}",
+        "thisPayoutActual": "This payout (actual)",
+        "paymentMethodLabel": "Payment method:",
+        "paymentReferenceLabel": "Payment reference:",
+        "notesLabel": "Notes:",
+        "customerPreference": "Customer preference (how they prefer to receive payout)",
+        "preferredPayoutMethod": "Preferred payout method:",
+        "preferenceNotes": "Preference notes:",
+        "dash": "—"
+      }
+    },
+    "status": {
+      "product": {
+        "pending": "Pending Review",
+        "active": "For Sale",
+        "sold": "Sold",
+        "returned": "Returned",
+        "expired": "Expired"
+      },
+      "payout": {
+        "pending": "Pending",
+        "paid": "Paid",
+        "failed": "Failed"
+      },
+      "booking": {
+        "pending": "Pending",
+        "confirmed": "Confirmed",
+        "cancelled": "Cancelled",
+        "completed": "Completed",
+        "no_show": "No Show"
+      }
+    },
+    "errors": {
+      "loadPreference": "Failed to load payout preference",
+      "loadProducts": "Failed to load your resale items",
+      "loadPayouts": "Failed to load payouts",
+      "loadPayoutsAccount": "Failed to load your payouts",
+      "loadBookings": "Failed to load your bookings",
+      "loadProductsAdmin": "Failed to load products",
+      "markPaidFailed": "Failed to mark as paid",
+      "noResaleProductsFound": "No resale products found",
+      "confirmFailed": "Failed to confirm",
+      "cancelFailed": "Failed to cancel",
+      "saveFailed": "Failed to save",
+      "saveSettingsFailed": "Failed to save settings"
+    },
+    "customerId": "Customer #{id}",
+    "productId": "Product #{id}"
+  }
+}

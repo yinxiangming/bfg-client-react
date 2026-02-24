@@ -1,0 +1,485 @@
+/* Website theme: block content styling for landing (hero, sections) - aligned with reference code.html */
+/* Force light appearance so theme looks correct regardless of app dark mode */
+.website-theme-root {
+  --block-bg-primary: #ffffff;
+  --block-text-primary: #0b1120;
+  --block-text-secondary: #4b5563;
+  --block-text-muted: #6b7280;
+  --electric-blue: #2563eb;
+  --deep-navy: #0b1120;
+  background-color: #ffffff;
+  color: #0b1120;
+}
+
+.website-theme-root .material-symbols-outlined {
+  font-family: 'Material Symbols Outlined', sans-serif;
+  font-weight: normal;
+  font-style: normal;
+  font-size: 1.25em;
+  line-height: 1;
+  letter-spacing: normal;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Reference code.html utility classes */
+.website-theme-root .glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+/* Dark mode: header glass matches stitch_xmart_dark/code.html */
+.dark .website-theme-root .glass-panel,
+.website-theme-root.dark .glass-panel,
+.website-theme-root.dark nav.glass-panel {
+  background: rgba(15, 23, 42, 0.6) !important;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Dark: deep-navy #020617 (stitch_xmart_dark) */
+.website-theme-root.dark {
+  --electric-blue: #3b82f6;
+  --neon-purple: #a855f7;
+  --deep-navy: #020617;
+  background-color: #020617;
+  color: #94a3b8;
+}
+
+/* Light: hero gradient */
+.website-theme-root .hero-gradient {
+  background: radial-gradient(circle at top right, #2563eb 0%, transparent 40%),
+    radial-gradient(circle at bottom left, #0b1120 0%, transparent 40%);
+}
+/* Dark: hero-bg (stitch_xmart_dark) */
+.website-theme-root.dark .hero-bg {
+  background:
+    radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+    #020617;
+}
+.website-theme-root .grid-pattern {
+  background-size: 40px 40px;
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px);
+}
+.website-theme-root.dark .grid-pattern {
+  background-size: 50px 50px;
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+}
+/* Dark: neon border for dashboard card */
+.website-theme-root.dark .neon-border {
+  border: 1px solid transparent;
+  background-image: linear-gradient(#020617, #020617), linear-gradient(to right, #3b82f6, #a855f7);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+.website-theme-root.dark .kernel-glow {
+  box-shadow: 0 0 40px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(59, 130, 246, 0.2);
+}
+@keyframes dash-move {
+  to { stroke-dashoffset: -200; }
+}
+.website-theme-root.dark .pulsate-path {
+  stroke-dasharray: 10;
+  animation: dash-move 20s linear infinite;
+}
+.website-theme-root .isometric-card {
+  transform: perspective(1000px) rotateX(5deg) rotateY(-5deg) rotateZ(2deg);
+  transition: transform 0.5s ease;
+}
+.website-theme-root .isometric-card:hover {
+  transform: perspective(1000px) rotateX(0deg) rotateY(0deg) rotateZ(0deg);
+}
+
+/* ========== Theme components: all styling by .website-theme-root / .website-theme-root.dark ========== */
+
+/* ---- Header ---- */
+.website-theme-root .website-header {
+  border-bottom-color: rgba(226, 232, 240, 0.5);
+}
+.website-theme-root .website-header-logo {
+  background: linear-gradient(to bottom right, #2563eb, #0052cc);
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+}
+.website-theme-root .website-header-brand { color: #0f172a; }
+.website-theme-root .website-nav-link { color: #475569; }
+.website-theme-root .website-nav-link:hover { color: #2563eb; }
+.website-theme-root .website-header-login:hover { color: #2563eb; }
+.website-theme-root .website-header-cta {
+  background: #0f172a;
+  color: #fff;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+.website-theme-root .website-header-cta:hover { background: #1e293b; }
+.website-theme-root .website-header-cta-secondary {
+  background: transparent;
+  color: #0f172a;
+  border: 2px solid #e2e8f0;
+  box-shadow: none;
+}
+.website-theme-root .website-header-cta-secondary:hover {
+  border-color: #2563eb;
+  color: #2563eb;
+  background: rgba(37, 99, 235, 0.05);
+}
+
+.website-theme-root.dark .website-header { border-bottom-color: rgba(255, 255, 255, 0.05); }
+.website-theme-root.dark .website-header-logo {
+  background: linear-gradient(to bottom right, #3b82f6, #a855f7);
+  box-shadow: none;
+}
+.website-theme-root.dark .website-header-brand { color: #fff; }
+.website-theme-root.dark .website-nav-link { color: #cbd5e1; }
+.website-theme-root.dark .website-nav-link:hover { color: #3b82f6; }
+.website-theme-root.dark .website-header-login:hover { color: #fff; }
+.website-theme-root.dark .website-header-cta {
+  background: #fff;
+  color: #020617;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+}
+.website-theme-root.dark .website-header-cta:hover { background: #e2e8f0; }
+.website-theme-root.dark .website-header-cta-secondary {
+  background: transparent;
+  color: #e2e8f0;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  box-shadow: none;
+}
+.website-theme-root.dark .website-header-cta-secondary:hover {
+  border-color: #3b82f6;
+  color: #fff;
+  background: rgba(59, 130, 246, 0.15);
+}
+
+/* ---- Footer ---- */
+.website-theme-root .website-footer {
+  background: #f8fafc;
+  border-top-color: #e2e8f0;
+  padding-top: 5rem;
+  padding-bottom: 2.5rem;
+}
+.website-theme-root .website-footer-logo { background: #2563eb; }
+.website-theme-root .website-footer-brand { color: #0f172a; }
+.website-theme-root .website-footer-desc { color: #64748b; }
+.website-theme-root .website-footer-social a {
+  background: #e2e8f0;
+  color: #64748b;
+}
+.website-theme-root .website-footer-social a:hover { background: #2563eb; color: #fff; }
+.website-theme-root .website-footer-col h4 { color: #0f172a; }
+.website-theme-root .website-footer-col a { color: #475569; }
+.website-theme-root .website-footer-col a:hover { color: #2563eb; }
+.website-theme-root .website-footer-legal {
+  border-top-color: #e2e8f0;
+  padding-top: 2rem;
+}
+.website-theme-root .website-footer-legal p,
+.website-theme-root .website-footer-legal a { color: #94a3b8; }
+.website-theme-root .website-footer-legal a:hover { color: #64748b; }
+
+.website-theme-root.dark .website-footer {
+  background: #020617;
+  border-top-color: rgba(255, 255, 255, 0.05);
+  padding-top: 6rem;
+  padding-bottom: 3rem;
+}
+.website-theme-root.dark .website-footer-logo {
+  background: linear-gradient(to bottom right, #3b82f6, #a855f7);
+}
+.website-theme-root.dark .website-footer-brand { color: #fff; }
+.website-theme-root.dark .website-footer-desc { color: #64748b; }
+.website-theme-root.dark .website-footer-social a {
+  background: rgba(255, 255, 255, 0.05);
+  color: #94a3b8;
+}
+.website-theme-root.dark .website-footer-social a:hover { background: #2563eb; color: #fff; }
+.website-theme-root.dark .website-footer-col h4 {
+  color: #fff;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+.website-theme-root.dark .website-footer-col a { color: #64748b; }
+.website-theme-root.dark .website-footer-col a:hover { color: #fff; }
+.website-theme-root.dark .website-footer-legal {
+  border-top-color: rgba(255, 255, 255, 0.05);
+  padding-top: 3rem;
+}
+.website-theme-root.dark .website-footer-legal p,
+.website-theme-root.dark .website-footer-legal a { color: #475569; }
+.website-theme-root.dark .website-footer-legal a:hover { color: #fff; }
+
+/* ---- Hero ---- */
+.website-theme-root .website-hero {
+  background: #f8fafc;
+}
+.website-theme-root .website-hero .hero-gradient { opacity: 0.1; }
+.website-theme-root .website-hero-badge {
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #bfdbfe;
+}
+.website-theme-root .website-hero-badge .ping-dot { background: #2563eb; }
+.website-theme-root .website-hero-title { color: #0f172a; }
+.website-theme-root .website-hero-title-accent {
+  background: linear-gradient(to right, #2563eb, #3b82f6, #4f46e5);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.website-theme-root .website-hero-desc { color: #475569; }
+.website-theme-root .website-hero-btn-primary {
+  background: #2563eb;
+  color: #fff;
+  box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+}
+.website-theme-root .website-hero-btn-primary:hover { background: #1d4ed8; }
+.website-theme-root .website-hero-btn-secondary {
+  border-color: #cbd5e1;
+  color: #334155;
+  background: transparent;
+}
+.website-theme-root .website-hero-btn-secondary:hover { background: #f1f5f9; }
+.website-theme-root .website-hero-stats { border-top-color: #e2e8f0; }
+.website-theme-root .website-hero-stat-value { color: #0f172a; }
+.website-theme-root .website-hero-stat-label { color: #64748b; }
+.website-theme-root .website-hero-stat-divider { background: #e2e8f0; }
+
+.website-theme-root.dark .website-hero {
+  background:
+    radial-gradient(circle at 20% 30%, rgba(59, 130, 246, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 80% 70%, rgba(168, 85, 247, 0.15) 0%, transparent 50%),
+    #020617;
+}
+.website-theme-root.dark .website-hero .hero-gradient { opacity: 0; }
+.website-theme-root.dark .website-hero .hero-bg { opacity: 1; }
+.website-theme-root.dark .website-hero-badge {
+  background: rgba(59, 130, 246, 0.1);
+  color: #3b82f6;
+  border-color: rgba(59, 130, 246, 0.2);
+}
+.website-theme-root.dark .website-hero-badge .ping-dot { background: #3b82f6; }
+.website-theme-root.dark .website-hero-title { color: #fff; }
+.website-theme-root.dark .website-hero-title-accent {
+  background: linear-gradient(to right, #3b82f6, #22d3ee, #a855f7);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.website-theme-root.dark .website-hero-desc { color: #94a3b8; }
+.website-theme-root.dark .website-hero-btn-primary {
+  background: linear-gradient(to right, #3b82f6, #1d4ed8);
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+}
+.website-theme-root.dark .website-hero-btn-primary:hover { opacity: 0.9; }
+.website-theme-root.dark .website-hero-btn-secondary {
+  border-color: rgba(255, 255, 255, 0.1);
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+.website-theme-root.dark .website-hero-btn-secondary:hover { background: rgba(255, 255, 255, 0.1); }
+.website-theme-root.dark .website-hero-stats { border-top-color: rgba(255, 255, 255, 0.1); }
+.website-theme-root.dark .website-hero-stat-value { color: #fff; }
+.website-theme-root.dark .website-hero-stat-label { color: #64748b; }
+.website-theme-root.dark .website-hero-stat-divider { background: rgba(255, 255, 255, 0.1); }
+
+/* ---- Hero dashboard card ---- */
+.website-theme-root .website-hero-dashboard {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(226, 232, 240, 0.5);
+}
+.website-theme-root .website-hero-dashboard-bar-fill { background: #2563eb; }
+.website-theme-root .website-hero-dashboard-header { background: #f8fafc; border-color: #e2e8f0; }
+.website-theme-root .website-hero-dashboard-body { background: linear-gradient(to bottom right, #f8fafc, #fff); border-color: #f1f5f9; }
+.website-theme-root .website-hero-dashboard-kpi { background: #fff; border-color: #f1f5f9; }
+.website-theme-root .website-hero-dashboard-label { color: #64748b; }
+.website-theme-root .website-hero-dashboard-value { color: #1e293b; }
+.website-theme-root .website-hero-dashboard-grid { background: transparent; }
+.website-theme-root .website-hero-float { background: #fff; border-color: #e2e8f0; }
+.website-theme-root .website-hero-deploy { background: #0f172a; border-color: #334155; }
+
+.website-theme-root.dark .website-hero-dashboard {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.website-theme-root.dark .website-hero-dashboard.neon-border {
+  border: 1px solid transparent;
+  background-image: linear-gradient(#020617, #020617), linear-gradient(to right, #3b82f6, #a855f7);
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+}
+.website-theme-root.dark .website-hero-dashboard-bar-fill {
+  background: linear-gradient(to top, #3b82f6, #22d3ee);
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.6);
+}
+.website-theme-root.dark .website-hero-dashboard-header { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); }
+.website-theme-root.dark .website-hero-dashboard-body { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); }
+.website-theme-root.dark .website-hero-dashboard-kpi { background: rgba(255, 255, 255, 0.05); border-color: rgba(255, 255, 255, 0.1); }
+.website-theme-root.dark .website-hero-dashboard-label { color: #64748b; }
+.website-theme-root.dark .website-hero-dashboard-value { color: #fff; }
+.website-theme-root.dark .website-hero-dashboard-grid { background: rgba(15, 23, 42, 0.4); }
+.website-theme-root.dark .website-hero-float { background: #1e293b; border-color: #334155; }
+.website-theme-root.dark .website-hero-deploy { background: #0f172a; border-color: #334155; }
+
+/* ============================================================
+   Section containers — shared layout used by multiple CMS blocks.
+   Block-specific styles live in each block's <style> tag in the CMS JSON.
+   ============================================================ */
+
+/* ---- Section containers ---- */
+.website-theme-root .website-section {
+  padding: 6rem 0;
+  border-bottom: 1px solid #f1f5f9;
+  background: #fff;
+}
+.website-theme-root .website-section.website-section-compact {
+  padding: 4rem 0;
+}
+.website-theme-root .website-section-alt {
+  padding: 6rem 0;
+  border-bottom: 1px solid #f1f5f9;
+  background: #f8fafc;
+  position: relative;
+}
+.website-theme-root .website-section-inner {
+  max-width: 80rem;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+@media (min-width: 640px) {
+  .website-theme-root .website-section-inner { padding: 0 1.5rem; }
+}
+@media (min-width: 1024px) {
+  .website-theme-root .website-section-inner { padding: 0 2rem; }
+}
+.website-theme-root .website-section-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+/* ---- Section titles ---- */
+.website-theme-root .website-section-title-sm {
+  font-size: 0.875rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.5rem;
+  color: #2563eb;
+}
+.website-theme-root .website-section-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+@media (min-width: 1024px) {
+  .website-theme-root .website-section-title { font-size: 2.25rem; }
+}
+
+/* ---- Card grid ---- */
+.website-theme-root .website-card-grid {
+  display: grid;
+  gap: 2rem;
+}
+.website-theme-root .website-card-grid-3 {
+  grid-template-columns: 1fr;
+}
+@media (min-width: 768px) {
+  .website-theme-root .website-card-grid-3 { grid-template-columns: repeat(3, 1fr); }
+}
+
+/* ---- Cards ---- */
+.website-theme-root .website-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.5rem;
+  border-radius: 1rem;
+  border: 1px solid transparent;
+  transition: background-color 0.2s, border-color 0.2s;
+  background: #f8fafc;
+}
+.website-theme-root .website-card:hover { background: #fff; border-color: #e2e8f0; }
+
+.website-theme-root .website-card-icon {
+  width: 4rem;
+  height: 4rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 1rem;
+  font-size: 1.875rem;
+}
+.website-theme-root .website-card-icon-blue { background: #dbeafe; color: #2563eb; }
+.website-theme-root .website-card-icon-green { background: #d1fae5; color: #059669; }
+.website-theme-root .website-card-icon-purple { background: #ede9fe; color: #7c3aed; }
+
+.website-theme-root .website-card-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  color: #0f172a;
+}
+.website-theme-root .website-card-value {
+  font-size: 1.5rem;
+}
+.website-theme-root .website-card-p {
+  font-size: 0.875rem;
+  color: #475569;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Block-specific styles (feature rows, hero content, plugin orbital, CTA)
+   have been moved into each block's <style> tag in the CMS JSON (site-config).
+   This file only contains theme-wide layout shared across all pages. */
+
+/* ---- Dark mode overrides ---- */
+.website-theme-root.dark .website-section { background: rgba(2, 6, 23, 0.5); border-color: rgba(255, 255, 255, 0.05); }
+.website-theme-root.dark .website-section-alt { background: #020617; border-color: rgba(255, 255, 255, 0.05); }
+.website-theme-root.dark .website-section-title-sm { color: #3b82f6; }
+.website-theme-root.dark .website-section-title { color: #fff; }
+.website-theme-root.dark .website-card {
+  background: rgba(15, 23, 42, 0.6);
+  border-color: rgba(255, 255, 255, 0.08);
+}
+.website-theme-root.dark .website-card:hover { border-color: rgba(255, 255, 255, 0.2); }
+.website-theme-root.dark .website-card-icon-blue { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+.website-theme-root.dark .website-card-icon-green { background: rgba(16, 185, 129, 0.2); color: #34d399; }
+.website-theme-root.dark .website-card-icon-purple { background: rgba(168, 85, 247, 0.2); color: #c084fc; }
+.website-theme-root.dark .website-card-title { color: #fff; }
+.website-theme-root.dark .website-card-p { color: #94a3b8; }
+/* Block-specific dark mode overrides live in each block's <style> tag in the CMS JSON. */
+
+/* ============================================================
+   Dynamic page container — full-width, zero-gap flex column.
+   Each block manages its own background, padding, and content width.
+   ============================================================ */
+.website-theme-root .dynamic-page {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.website-theme-root .dynamic-page .page-renderer {
+  gap: 0 !important;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Strip TextBlockV1 wrapper padding so block HTML controls all spacing */
+.website-theme-root .dynamic-page .block-wrapper {
+  margin: 0;
+  padding: 0;
+}
+.website-theme-root .dynamic-page .block-wrapper.block-text_block_v1 > section {
+  padding: 0;
+  margin: 0;
+}
+/* Let block settings.maxWidth control width (e.g. 80rem for inner pages, 100% for home) */
+.website-theme-root .dynamic-page .block-wrapper.block-text_block_v1 > section > div {
+  margin: 0 auto;
+  padding: 0;
+}

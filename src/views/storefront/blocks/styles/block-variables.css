@@ -1,0 +1,162 @@
+/**
+ * Block CSS Variables
+ *
+ * Design tokens for page builder blocks
+ * Supports light/dark mode theming
+ */
+
+:root {
+  /* Background colors */
+  --block-bg-primary: #ffffff;
+  --block-bg-secondary: #f8f9fa;
+  --block-bg-tertiary: #e9ecef;
+  --block-bg-accent: #007bff;
+  --block-bg-accent-light: rgba(0, 123, 255, 0.1);
+  --block-bg-overlay: rgba(0, 0, 0, 0.4);
+
+  /* Text colors */
+  --block-text-primary: #212529;
+  --block-text-secondary: #495057;
+  --block-text-muted: #6c757d;
+  --block-text-inverse: #ffffff;
+  --block-text-accent: #007bff;
+
+  /* Border colors */
+  --block-border-color: #dee2e6;
+  --block-border-light: #e9ecef;
+  --block-border-accent: #007bff;
+
+  /* Shadow */
+  --block-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --block-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+  --block-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+  --block-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+
+  /* Spacing */
+  --block-spacing-xs: 0.25rem;
+  --block-spacing-sm: 0.5rem;
+  --block-spacing-md: 1rem;
+  --block-spacing-lg: 1.5rem;
+  --block-spacing-xl: 2rem;
+  --block-spacing-2xl: 3rem;
+  --block-spacing-3xl: 4rem;
+
+  /* Font sizes */
+  --block-font-size-xs: 0.75rem;
+  --block-font-size-sm: 0.875rem;
+  --block-font-size-base: 1rem;
+  --block-font-size-lg: 1.125rem;
+  --block-font-size-xl: 1.25rem;
+  --block-font-size-2xl: 1.5rem;
+  --block-font-size-3xl: 2rem;
+  --block-font-size-4xl: 2.5rem;
+  --block-font-size-5xl: 3rem;
+
+  /* Border radius */
+  --block-radius-sm: 4px;
+  --block-radius-md: 8px;
+  --block-radius-lg: 12px;
+  --block-radius-xl: 16px;
+  --block-radius-full: 9999px;
+
+  /* Transitions */
+  --block-transition-fast: 150ms ease;
+  --block-transition-normal: 250ms ease;
+  --block-transition-slow: 350ms ease;
+
+  /* Container widths */
+  --block-container-sm: 640px;
+  --block-container-md: 768px;
+  --block-container-lg: 1024px;
+  --block-container-xl: 1280px;
+
+  /* Accent colors (customizable per theme) */
+  --block-accent-primary: #007bff;
+  --block-accent-secondary: #6c757d;
+  --block-accent-success: #28a745;
+  --block-accent-warning: #ffc107;
+  --block-accent-danger: #dc3545;
+}
+
+/* Dark mode overrides */
+[data-mode='dark'],
+.dark {
+  --block-bg-primary: #1a1a2e;
+  --block-bg-secondary: #16213e;
+  --block-bg-tertiary: #0f3460;
+  --block-bg-accent: #0d6efd;
+  --block-bg-accent-light: rgba(13, 110, 253, 0.15);
+  --block-bg-overlay: rgba(0, 0, 0, 0.6);
+
+  --block-text-primary: #f8f9fa;
+  --block-text-secondary: #ced4da;
+  --block-text-muted: #adb5bd;
+  --block-text-inverse: #1a1a2e;
+  --block-text-accent: #6ea8fe;
+
+  --block-border-color: #3a3a5c;
+  --block-border-light: #2a2a4a;
+  --block-border-accent: #0d6efd;
+
+  --block-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --block-shadow-md: 0 4px 6px rgba(0, 0, 0, 0.3);
+  --block-shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.3);
+  --block-shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* Utility classes for blocks */
+.block-container {
+  width: 100%;
+  max-width: var(--block-container-xl);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--block-spacing-md);
+  padding-right: var(--block-spacing-md);
+}
+
+.block-section {
+  padding-top: var(--block-spacing-2xl);
+  padding-bottom: var(--block-spacing-2xl);
+}
+
+.block-section-compact {
+  padding-top: var(--block-spacing-xl);
+  padding-bottom: var(--block-spacing-xl);
+}
+
+.block-section-spacious {
+  padding-top: var(--block-spacing-3xl);
+  padding-bottom: var(--block-spacing-3xl);
+}
+
+.block-grid {
+  display: grid;
+  gap: var(--block-spacing-lg);
+}
+
+.block-grid-2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+.block-grid-3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.block-grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+
+@media (max-width: 768px) {
+  .block-grid-2,
+  .block-grid-3,
+  .block-grid-4 {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .block-grid-3,
+  .block-grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

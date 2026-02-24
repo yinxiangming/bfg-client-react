@@ -1,0 +1,25 @@
+{
+  "language": {
+    "label": "语言",
+    "en": "English",
+    "zhHans": "简体中文"
+  },
+  "layout": {
+    "sideMenu": "侧边菜单",
+    "topMenu": "顶部菜单"
+  },
+  "user": {
+    "myProfile": "个人资料",
+    "settings": "设置",
+    "orders": "订单",
+    "addresses": "地址",
+    "logout": "退出登录",
+    "account": "我的账户",
+    "login": "登录",
+    "guest": "访客"
+  },
+  "common": {
+    "loading": "加载中..."
+  }
+}
+

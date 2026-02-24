@@ -1,0 +1,46 @@
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans',
+    'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #f8f8fb;
+}
+
+/* Utility Classes */
+.bg-backgroundPaper {
+  background-color: var(--mui-palette-background-paper);
+}
+
+.text-error {
+  color: var(--mui-palette-error-main);
+}
+
+.bg-error\/10 {
+  background-color: rgba(255, 62, 29, 0.1);
+}
+
+.text-textPrimary {
+  color: var(--mui-palette-text-primary);
+}
+
+.bg-actionHover {
+  background-color: var(--mui-palette-action-hover);
+}
+
+.bg-actionSelected {
+  background-color: var(--mui-palette-action-selected);
+}
+
+.text-facebook {
+  color: #1877f2;
+}
+
+.text-twitter {
+  color: #1da1f2;
+}
+
+.text-primary {
+  color: var(--mui-palette-primary-main);
+}
+

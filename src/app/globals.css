@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+/* Import all style modules */
+@import '../styles/variables.css';
+@import '../styles/base.css';
+@import '../styles/card.css';
+@import '../styles/table.css';
+@import '../styles/button.css';
+@import '../styles/form.css';
+@import '../styles/menu.css';
+@import '../styles/layout.css';
+@import '../styles/theme.css';
+@import '../styles/auth.css';
+@import '../styles/admin.css';
+@import '../styles/storefront.css';

@@ -1,0 +1,68 @@
+/* Button Component - Generic */
+.btn {
+  border: 1px solid #d8dae5;
+  background: #fff;
+  color: #4a5568;
+  border-radius: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.15s ease;
+  font-size: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.06);
+}
+
+.btn.ghost {
+  background: #fff;
+}
+
+.btn.danger {
+  border-color: #fca5a5;
+  color: #e11d48;
+}
+
+.btn.primary {
+  background: var(--mui-palette-primary-main);
+  color: #fff;
+  border-color: var(--mui-palette-primary-main);
+}
+
+.btn.secondary {
+  background: #8592a3;
+  color: #fff;
+  border-color: #8592a3;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Dark Mode */
+[data-mode='dark'] .btn {
+  background: rgba(231, 227, 252, 0.08);
+  border-color: rgba(231, 227, 252, 0.12);
+  color: rgba(231, 227, 252, 0.87);
+}
+
+[data-mode='dark'] .btn:hover {
+  background: rgba(231, 227, 252, 0.12);
+}
+
+[data-mode='dark'] .btn.ghost {
+  background: transparent;
+}
+
+[data-mode='dark'] .btn.primary {
+  background: var(--mui-palette-primary-main);
+  color: #fff;
+}
+

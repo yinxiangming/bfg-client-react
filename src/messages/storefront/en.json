@@ -1,0 +1,329 @@
+{
+  "topBar": {
+    "promo": "Super sale up to 20% in this holiday Shop Now!",
+    "myAccount": "My Account",
+    "login": "Login"
+  },
+  "search": {
+    "placeholder": "Search"
+  },
+  "common": {
+    "loading": "Loading...",
+    "na": "N/A"
+  },
+  "buttons": {
+    "shopNow": "Shop Now",
+    "addToCart": "Add to cart",
+    "adding": "Adding...",
+    "viewCart": "View cart",
+    "checkout": "Checkout",
+    "continueShopping": "Continue shopping",
+    "subscribe": "Subscribe",
+    "processing": "Processing...",
+    "placeOrder": "Place order",
+    "payNow": "Pay now",
+    "completeOrder": "Complete order"
+  },
+  "nav": {
+    "home": "Home"
+  },
+  "home": {
+    "welcomeTitle": "Welcome to BFG Store",
+    "welcomeSubtitle": "Browse categories and products from the menu, or configure the home page in admin.",
+    "hero": {
+      "slide1": { "title": "Limited Stock, Hurry Up!", "subtitle": "Trendy Looks", "description": "Timeless Style" },
+      "slide2": { "title": "New Collection", "subtitle": "Fashion Forward", "description": "Discover the Latest Trends" },
+      "slide3": { "title": "Super Sale", "subtitle": "Up to 50% Off", "description": "Limited Time Offer" }
+    },
+    "categories": {
+      "empty": "No categories available"
+    },
+    "banners": {
+      "handBag": "Hand Bag",
+      "handWatch": "Hand Watch",
+      "shoes": "Shoes"
+    },
+    "sections": {
+      "featuredTitle": "Featured Products",
+      "featuredEmpty": "No featured products available",
+      "newTitle": "New Products",
+      "newEmpty": "No new products available",
+      "bestsellerTitle": "Bestseller Products",
+      "bestsellerEmpty": "No bestseller products available"
+    }
+  },
+  "category": {
+    "sidebar": {
+      "categoriesTitle": "Categories",
+      "sampleClothes": "Clothes",
+      "sampleShoes": "Shoes",
+      "sampleAccessories": "Accessories",
+      "priceTitle": "Price"
+    },
+    "defaultDescription": "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form.",
+    "toolbar": {
+      "toggleFiltersAria": "Toggle filters",
+      "filters": "Filters",
+      "productsCount": "There are {count} products.",
+      "gridViewAria": "Grid view",
+      "listViewAria": "List view",
+      "sortBy": "Sort by:",
+      "sort": {
+        "relevance": "Relevance",
+        "sales": "Sales, highest to lowest",
+        "nameAsc": "Name, A to Z",
+        "nameDesc": "Name, Z to A",
+        "priceAsc": "Price, low to high",
+        "priceDesc": "Price, high to low"
+      }
+    },
+    "pagination": {
+      "first": "First",
+      "previous": "Previous",
+      "next": "Next",
+      "last": "Last",
+      "pageOf": "Page {page} of {total}"
+    },
+    "empty": "No products found in this category."
+  },
+  "product": {
+    "alerts": {
+      "addedToCart": "Product added to cart!",
+      "addFailed": "Failed to add product to cart"
+    },
+    "errors": {
+      "loadFailed": "Failed to load product",
+      "notFound": "Product not found"
+    },
+    "links": {
+      "backToHome": "Back to Home"
+    },
+    "labels": {
+      "size": "Size:",
+      "color": "Color:",
+      "quantity": "Quantity:",
+      "reference": "Reference:",
+      "inStock": "In stock:",
+      "items": "Items",
+      "brand": "Brand:",
+      "reviews": "reviews"
+    },
+    "tabs": {
+      "description": "Description",
+      "details": "Product Details",
+      "reviews": "Reviews",
+      "noReviews": "No reviews yet. Be the first to review this product!"
+    },
+    "badges": {
+      "new": "New"
+    },
+    "actions": {
+      "addToWishlist": "Add to Wishlist",
+      "addToCompare": "Add to Compare",
+      "share": "Share"
+    },
+    "relatedTitle": "You might also like",
+    "descriptionFallback": "No description available."
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "emptyTitle": "Your cart is empty",
+    "emptyDesc": "Looks like you haven't added anything to your cart yet.",
+    "removeFailed": "Failed to remove item. Please try again.",
+    "updateQtyFailed": "Failed to update quantity. Please try again.",
+    "labels": {
+      "size": "Size:",
+      "color": "Color:",
+      "removeItemTitle": "Remove item"
+    },
+    "continueShopping": "Continue shopping",
+    "orderSummary": {
+      "title": "Order Summary",
+      "itemsCount": "{count} item(s):",
+      "tax": "Tax ({percent}%):",
+      "subtotalTaxIncl": "Subtotal (tax incl.):",
+      "shippingNote": "Shipping and final total will be calculated at checkout",
+      "checkout": "CHECKOUT",
+      "policies": {
+        "security": "Security policy",
+        "delivery": "Delivery policy",
+        "return": "Return policy",
+        "editHint": "(edit with the Customer Reassurance module)"
+      }
+    }
+  },
+  "checkout": {
+    "emptyCartTitle": "Your cart is empty",
+    "errors": {
+      "selectPaymentMethod": "Please select a payment method",
+      "completeCardDetails": "Please complete your card details",
+      "enterNameOnCard": "Please enter the name on card",
+      "missingRequiredFields": "Please fill in the following required fields: {fields}",
+      "placeOrderFailed": "Failed to place order. Please try again.",
+      "loginRequired": "Please login to complete your order",
+      "serviceNotAvailable": "Checkout service not available. Please contact support.",
+      "serverError": "Server error. Please try again later.",
+      "paymentFailed": "Payment failed. Please try again."
+    },
+    "contact": {
+      "title": "Contact",
+      "signIn": "Sign in",
+      "emailPlaceholder": "Email or mobile phone number"
+    },
+    "delivery": {
+      "title": "Delivery",
+      "loggedInAs": "Logged in as {email}",
+      "selectSavedAddress": "Select a saved address",
+      "defaultLabel": "(Default)",
+      "useDifferentAddress": "+ Use a different address",
+      "showAllAddresses": "Show all",
+      "moreAddressesAvailable": "{count} more addresses available",
+      "showFewerAddresses": "Show fewer",
+      "country": {
+        "us": "United States",
+        "ca": "Canada",
+        "gb": "United Kingdom"
+      },
+      "firstNameOptional": "First name (optional)",
+      "lastName": "Last name",
+      "address": "Address",
+      "apartmentOptional": "Apartment, suite, etc. (optional)",
+      "city": "City",
+      "state": "State",
+      "zipCode": "ZIP code",
+      "phone": "Phone",
+      "saveInfoNextTime": "Save this information for next time"
+    },
+    "shipping": {
+      "title": "Shipping method",
+      "loadingOptions": "Loading shipping options...",
+      "noOptions": "No shipping options available for this country.",
+      "showMore": "Show {count} more shipping options",
+      "showFewer": "Show fewer options",
+      "businessDay": "business day",
+      "businessDays": "business days"
+    },
+    "payment": {
+      "title": "Payment",
+      "secureHint": "All transactions are secure and encrypted.",
+      "savedCards": "Saved Cards",
+      "expires": "Expires {month}/{year}",
+      "default": "Default",
+      "useDifferentMethod": "+ Use a different payment method",
+      "backToSavedCards": "← Back to saved cards",
+      "gateway": {
+        "creditDebitCard": "Credit/Debit Card",
+        "paymentInstructions": "Payment instructions",
+        "paypal": "Pay with PayPal account",
+        "wechat": "Scan QR code to pay",
+        "alipay": "Pay with Alipay"
+      },
+      "redirectHint": "You will be redirected to {name} to complete your payment after placing the order.",
+      "noMethods": "No payment methods are currently available. Please contact support.",
+      "gatewayDisplayInfo": {
+        "title": "{name} – Payment details",
+        "bankName": "Bank Name",
+        "accountName": "Account Name",
+        "accountNumber": "Account Number",
+        "routingNumber": "Routing Number",
+        "swiftCode": "SWIFT Code",
+        "important": "Important:",
+        "importantFallback": "Please include your order number as payment reference."
+      },
+      "card": {
+        "title": "Card Details",
+        "nameOnCard": "Name on card",
+        "createFailed": "Failed to create payment method",
+        "saveCard": "Save this card for future purchases"
+      },
+      "billing": {
+        "useShippingAsBilling": "Use shipping address as billing address",
+        "selectBillingAddress": "Select billing address",
+        "addNewBillingAddress": "+ Add a new billing address",
+        "backToSavedAddresses": "← Back to saved addresses",
+        "enterNewBillingAddress": "Enter a new billing address",
+        "billingAddress": "Billing address",
+        "placeholders": {
+          "firstName": "First name",
+          "lastName": "Last name",
+          "address": "Address",
+          "apartmentOptional": "Apartment, suite, etc. (optional)",
+          "city": "City",
+          "state": "State",
+          "zipCode": "ZIP code"
+        }
+      }
+    },
+    "orderSummary": {
+      "title": "Order summary",
+      "continueShopping": "Continue Shopping",
+      "labels": {
+        "subtotal": "Subtotal",
+        "discount": "Discount",
+        "shipping": "Shipping",
+        "tax": "Tax",
+        "total": "Total",
+        "currency": "USD",
+        "size": "Size",
+        "color": "Color"
+      }
+    }
+  },
+  "checkoutSuccess": {
+    "title": "Order Placed Successfully!",
+    "description": "Thank you for your purchase. Your order is being processed and you will receive an email confirmation with tracking details shortly.",
+    "itemsInOrder": "Items in Your Order",
+    "qty": "Qty",
+    "size": "Size",
+    "color": "Color",
+    "viewMyOrders": "View My Orders",
+    "whatNext": "What happens next?",
+    "next1": "You'll receive an order confirmation email shortly",
+    "next2": "We'll send you tracking information once your order ships",
+    "next3": "Expected delivery: 3-5 business days"
+  },
+  "modal": {
+    "addedTitle": "Product successfully added to your shopping cart",
+    "cartItemsCount": "There are {count} items in your cart.",
+    "subtotal": "Subtotal:",
+    "shipping": "Shipping:",
+    "totalTaxExcl": "Total (tax excl.):",
+    "totalTaxIncl": "Total (tax incl.):",
+    "taxes": "Taxes:",
+    "viewCart": "VIEW CART",
+    "checkout": "CHECKOUT",
+    "size": "Size:",
+    "color": "Color:",
+    "quantity": "Quantity:"
+  },
+  "footer": {
+    "contactUs": "Contact us",
+    "products": "Products",
+    "pricesDrop": "Prices drop",
+    "newProducts": "New products",
+    "bestSellers": "Best sellers",
+    "ourCompany": "Our company",
+    "delivery": "Delivery",
+    "legalNotice": "Legal Notice",
+    "terms": "Terms and conditions of use",
+    "aboutUs": "About us",
+    "securePayment": "Secure payment",
+    "contactUsLink": "Contact us",
+    "sitemap": "Sitemap",
+    "stores": "Stores",
+    "newsletterTitle": "Get Latest Update & News",
+    "yourEmail": "Your email",
+    "newsletterSuccess": "Thank you for subscribing.",
+    "newsletterError": "Subscription failed. Please try again.",
+    "newsletterSubmitting": "Subscribing…",
+    "copyright": "© 2025 - Ecommerce software by PackGo",
+    "questionsCallUs": "You have any Questions ? Call us 24x7 {phone}"
+  },
+  "filters": {
+    "title": "Filter By",
+    "size": "Size",
+    "color": "Color",
+    "price": "Price"
+  }
+}
+
