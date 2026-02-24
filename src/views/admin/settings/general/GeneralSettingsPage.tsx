@@ -183,26 +183,27 @@ const GeneralSettingsPage = () => {
         }
 
         const general = (settings.custom_settings as any)?.general || {}
-        if (general) {
+        if (general || (settings as any).site_name != null || (settings as any).site_description != null) {
           setBasicData({
-            siteName: general.site_name || initialBasicData.siteName,
-            siteDescription: general.site_description || initialBasicData.siteDescription,
-            defaultLanguage: general.default_language || initialBasicData.defaultLanguage,
-            defaultCurrency: general.default_currency || initialBasicData.defaultCurrency,
-            defaultTimezone: general.default_timezone || initialBasicData.defaultTimezone,
-            contactEmail: general.contact_email || initialBasicData.contactEmail,
-            contactPhone: general.contact_phone || initialBasicData.contactPhone,
-            facebookUrl: general.facebook_url || initialBasicData.facebookUrl,
-            twitterUrl: general.twitter_url || initialBasicData.twitterUrl,
-            instagramUrl: general.instagram_url || initialBasicData.instagramUrl,
+            siteName: general.site_name || (settings as any).site_name || initialBasicData.siteName,
+            siteDescription: general.site_description || (settings as any).site_description || initialBasicData.siteDescription,
+            defaultLanguage: general.default_language || (settings as any).default_language || initialBasicData.defaultLanguage,
+            defaultCurrency: general.default_currency || (settings as any).default_currency || initialBasicData.defaultCurrency,
+            defaultTimezone: general.default_timezone || (settings as any).default_timezone || initialBasicData.defaultTimezone,
+            contactEmail: general.contact_email || (settings as any).contact_email || initialBasicData.contactEmail,
+            contactPhone: general.contact_phone || (settings as any).contact_phone || initialBasicData.contactPhone,
+            facebookUrl: general.facebook_url || (settings as any).facebook_url || initialBasicData.facebookUrl,
+            twitterUrl: general.twitter_url || (settings as any).twitter_url || initialBasicData.twitterUrl,
+            instagramUrl: general.instagram_url || (settings as any).instagram_url || initialBasicData.instagramUrl,
             topBarAnnouncement: general.top_bar_announcement || initialBasicData.topBarAnnouncement,
             footerCopyright: general.footer_copyright || initialBasicData.footerCopyright,
             siteAnnouncement: general.site_announcement || initialBasicData.siteAnnouncement,
             footerContact: general.footer_contact || initialBasicData.footerContact
           })
           
-          if (general.logo) {
-            setImgSrc(general.logo)
+          const logoUrl = general.logo || (settings as any).logo
+          if (logoUrl) {
+            setImgSrc(logoUrl)
           }
         } else {
           console.log('[GeneralSettings] No general settings found, using defaults')

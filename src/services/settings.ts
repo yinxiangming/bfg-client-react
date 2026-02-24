@@ -45,7 +45,9 @@ export type StorefrontUiSettingsPayload = {
 
 export type WorkspaceSettings = {
   id: number
-  workspace_id: number
+  workspace_id?: number
+  site_name?: string
+  site_description?: string
   custom_settings?: {
     invoice?: InvoiceSettingsPayload
     delivery?: DeliverySettingsPayload
