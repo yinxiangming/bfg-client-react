@@ -1,32 +1,32 @@
 import { cache } from 'react'
 import { unstable_cache } from 'next/cache'
 import type { Extension } from './registry'
+import { PLUGIN_LOADERS } from '@/plugins/loaders'
 export { applyNavExtensions } from './utils/applyNavExtensions'
 
 const EXTENSIONS_CACHE_REVALIDATE_SECONDS = 3600
 
+function getEnabledPluginIds(pluginIds?: string[]): string[] {
+  if (pluginIds && pluginIds.length > 0) return pluginIds
+  const envPlugins =
+    process.env.ENABLED_PLUGINS || process.env.NEXT_PUBLIC_ENABLED_PLUGINS
+  return envPlugins?.split(',').map((p) => p.trim()).filter(Boolean) || []
+}
+
 async function loadExtensionsImpl(pluginIds?: string[]): Promise<Extension[]> {
-  let enabledPlugins: string[] = []
-
-  if (pluginIds && pluginIds.length > 0) {
-    enabledPlugins = pluginIds
-  } else {
-    const envPlugins =
-      process.env.ENABLED_PLUGINS || process.env.NEXT_PUBLIC_ENABLED_PLUGINS
-    enabledPlugins = envPlugins?.split(',').map((p) => p.trim()).filter(Boolean) || []
-  }
-
-  const pluginsToLoad =
-    enabledPlugins.length > 0
-      ? enabledPlugins
-      : process.env.NODE_ENV === 'development' && !pluginIds
-        ? ['freight']
-        : []
-
+  const pluginsToLoad = getEnabledPluginIds(pluginIds)
   const extensions: Extension[] = []
+
   for (const pluginId of pluginsToLoad) {
+    const loader = PLUGIN_LOADERS[pluginId]
+    if (!loader) {
+      if (process.env.NODE_ENV === 'development') {
+        console.warn(`[Extensions] Plugin "${pluginId}" not in PLUGIN_LOADERS (src/plugins/loaders.ts)`)
+      }
+      continue
+    }
     try {
-      const plugin = await import(`@/plugins/${pluginId}`)
+      const plugin = await loader()
       const ext = plugin.default as Extension
       if (ext.enabled === false) continue
       if (typeof ext.enabled === 'function' && !ext.enabled()) continue
@@ -35,7 +35,7 @@ async function loadExtensionsImpl(pluginIds?: string[]): Promise<Extension[]> {
         console.log(`[Extensions] Loaded plugin: ${ext.id}`)
       }
     } catch (e) {
-      console.warn(`[Extensions] Plugin "${pluginId}" not found or failed to load:`, e)
+      console.warn(`[Extensions] Plugin "${pluginId}" failed to load:`, e)
     }
   }
 

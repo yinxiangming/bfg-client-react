@@ -1,6 +1,7 @@
 import {cookies, headers} from 'next/headers'
 import {getRequestConfig} from 'next-intl/server'
 import {routing, type AppLocale} from './routing'
+import {loadPluginMessages} from './plugin-messages'
 
 type Messages = Record<string, any>
 
@@ -31,14 +32,6 @@ async function loadCommonMessages(locale: AppLocale): Promise<Messages> {
 
 async function loadAppMessages(app: EnabledApp, locale: AppLocale): Promise<Messages> {
   return (await import(`../messages/${app}/${locale}.json`)).default
-}
-
-async function loadResalePluginMessages(locale: AppLocale): Promise<Messages | null> {
-  try {
-    return (await import(`@/plugins/resale/messages/${locale}.json`)).default
-  } catch {
-    return null
-  }
 }
 
 async function getLocaleFromCookie(): Promise<AppLocale | null> {
@@ -72,7 +65,7 @@ export default getRequestConfig(async ({requestLocale}) => {
     loadAppMessages('storefront', locale),
     loadAppMessages('account', locale),
     loadAppMessages('admin', locale),
-    loadResalePluginMessages(locale)
+    loadPluginMessages(locale)
   ])
 
   const accountMerged = resalePlugin?.account ? deepMerge({ ...account }, resalePlugin.account) : account
