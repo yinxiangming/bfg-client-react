@@ -41,6 +41,7 @@ async function getPageData(slug: string, locale: string) {
 export default async function Page() {
   const locale = await getLocale()
   const config = await getStorefrontConfigForServer(locale)
+  if (config === null) return null
   const theme = config.theme ?? 'store'
   const pageData = await getPageData('home', locale)
 

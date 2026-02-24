@@ -10,6 +10,7 @@ import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 import { loadExtensions } from '@/extensions'
 import { ExtensionLoaderProvider } from '@/extensions/context'
 import { getPageSectionReplacements, getStorefrontLayoutOverride } from '@/extensions/resolve'
+import StorefrontSetupRequired from '@/components/storefront/StorefrontSetupRequired'
 
 export default async function StorefrontLayoutWrapper({ children }: { children: React.ReactNode }) {
   const extensions = await loadExtensions()
@@ -45,6 +46,15 @@ export default async function StorefrontLayoutWrapper({ children }: { children: 
 
   const locale = await getLocale()
   const config = await getStorefrontConfigForServer(locale)
+  if (config === null) {
+    return (
+      <ExtensionLoaderProvider extensionIds={extensionIds}>
+        <StorefrontConfigProvider initialConfig={null}>
+          <StorefrontSetupRequired />
+        </StorefrontConfigProvider>
+      </ExtensionLoaderProvider>
+    )
+  }
   const theme = config.theme ?? 'store'
 
   return (
