@@ -4,7 +4,7 @@ import Link from 'next/link'
 
 /**
  * Shown when storefront config API returns 404 (workspace/site not configured).
- * Prompts user to run migrations and configure the backend.
+ * Prompts user to run init (which runs migrate, creates workspace/admin, optional seed + site config).
  */
 export default function StorefrontSetupRequired() {
   return (
@@ -14,13 +14,14 @@ export default function StorefrontSetupRequired() {
           Storefront not configured
         </h1>
         <p className="mt-2 text-sm text-gray-600">
-          Please complete database and site configuration on the server first.
+          Initialize the server first: from the server directory run
         </p>
-        <ul className="mt-4 list-inside list-disc space-y-1 text-sm text-gray-600">
-          <li>Run migrations: <code className="rounded bg-gray-100 px-1">python manage.py migrate</code></li>
-          <li>Create workspace / init web: run the server init commands if needed</li>
-          <li>Configure general settings in Admin (e.g. Site name, theme)</li>
-        </ul>
+        <pre className="mt-3 rounded bg-gray-600 p-3 text-left text-sm">
+          python manage.py init
+        </pre>
+        <p className="mt-2 text-sm text-gray-600">
+          This runs migrate, creates a workspace and admin user (you will be prompted for password), and can import seed_data and site config (e.g. web/design/site-config-xmart.json). Then configure Site/theme in Admin if needed.
+        </p>
         <Link
           href="/admin"
           className="mt-6 inline-block rounded-md bg-gray-900 px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
