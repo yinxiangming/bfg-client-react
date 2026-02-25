@@ -104,8 +104,8 @@ type PackagesCardProps = {
 }
 
 // Cookie helper functions
-const CARRIER_COOKIE_KEY = 'packgo_selected_carrier'
-const WAREHOUSE_COOKIE_KEY = 'packgo_selected_warehouse'
+const CARRIER_COOKIE_KEY = 'bfg_selected_carrier'
+const WAREHOUSE_COOKIE_KEY = 'bfg_selected_warehouse'
 
 const getSelectedCarrierFromCookie = (): number | null => {
   if (typeof document === 'undefined') return null
