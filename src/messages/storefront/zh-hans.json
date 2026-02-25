@@ -316,7 +316,7 @@
     "newsletterSuccess": "感谢订阅。",
     "newsletterError": "订阅失败，请重试。",
     "newsletterSubmitting": "提交中…",
-    "copyright": "© 2025 - PackGo 电商系统",
+    "copyright": "© 2025 - XMart 电商系统",
     "questionsCallUs": "如有疑问，24x7 致电 {phone}"
   },
   "filters": {
@@ -324,6 +324,17 @@
     "size": "尺码",
     "color": "颜色",
     "price": "价格"
+  },
+  "cta": {
+    "note": "无需信用卡 · 14天免费试用 · 随时取消"
+  },
+  "contactForm": {
+    "name": "姓名",
+    "email": "邮箱",
+    "phone": "电话",
+    "subject": "主题",
+    "message": "留言",
+    "sending": "发送中..."
   }
 }
 

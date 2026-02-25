@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import { getLocalizedText } from '@/utils/i18n'
 import { getApiUrl, getApiHeaders } from '@/utils/api'
 import type { BlockProps } from '../../../types'
@@ -38,6 +39,7 @@ export function ContactFormV1({
 
   const { inquiryType = 'inquiry', showPhone = true, showSubject = true, buttonVariant = 'primary' } = settings
 
+  const t = useTranslations('storefront')
   const title = getLocalizedText(data.title, locale)
   const description = getLocalizedText(data.description, locale)
   const successMessage = getLocalizedText(data.successMessage, locale) || 'Thank you! We will get back to you soon.'
@@ -97,7 +99,7 @@ export function ContactFormV1({
             <div className={styles.row}>
               <div className={styles.field}>
                 <label htmlFor='name' className={styles.label}>
-                  {locale === 'zh' ? '姓名' : 'Name'} *
+                  {t('contactForm.name')} *
                 </label>
                 <input
                   type='text'
@@ -112,7 +114,7 @@ export function ContactFormV1({
               </div>
               <div className={styles.field}>
                 <label htmlFor='email' className={styles.label}>
-                  {locale === 'zh' ? '邮箱' : 'Email'} *
+                  {t('contactForm.email')} *
                 </label>
                 <input
                   type='email'
@@ -130,7 +132,7 @@ export function ContactFormV1({
             {showPhone && (
               <div className={styles.field}>
                 <label htmlFor='phone' className={styles.label}>
-                  {locale === 'zh' ? '电话' : 'Phone'}
+                  {t('contactForm.phone')}
                 </label>
                 <input
                   type='tel'
@@ -147,7 +149,7 @@ export function ContactFormV1({
             {showSubject && (
               <div className={styles.field}>
                 <label htmlFor='subject' className={styles.label}>
-                  {locale === 'zh' ? '主题' : 'Subject'}
+                  {t('contactForm.subject')}
                 </label>
                 <input
                   type='text'
@@ -163,7 +165,7 @@ export function ContactFormV1({
 
             <div className={styles.field}>
               <label htmlFor='message' className={styles.label}>
-                {locale === 'zh' ? '留言' : 'Message'} *
+                {t('contactForm.message')} *
               </label>
               <textarea
                 id='message'
@@ -184,7 +186,7 @@ export function ContactFormV1({
               className={`${styles.button} ${buttonVariant === 'outline' ? styles.buttonOutline : ''}`}
               disabled={status === 'submitting' || isEditing}
             >
-              {status === 'submitting' ? (locale === 'zh' ? '发送中...' : 'Sending...') : buttonText}
+              {status === 'submitting' ? t('contactForm.sending') : buttonText}
             </button>
           </form>
         )}

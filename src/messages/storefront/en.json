@@ -324,6 +324,17 @@
     "size": "Size",
     "color": "Color",
     "price": "Price"
+  },
+  "cta": {
+    "note": "No credit card required · 14-day free trial · Cancel anytime"
+  },
+  "contactForm": {
+    "name": "Name",
+    "email": "Email",
+    "phone": "Phone",
+    "subject": "Subject",
+    "message": "Message",
+    "sending": "Sending..."
   }
 }
 

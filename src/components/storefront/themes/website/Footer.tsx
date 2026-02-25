@@ -24,7 +24,7 @@ export default function WebsiteFooter({ mode = 'light' }: Props) {
 
   const FOOTER_LEGAL_SLUG = 'footer-legal'
   const isLegalGroup = (g: StorefrontFooterMenuGroup) =>
-    g.slug ? g.slug === FOOTER_LEGAL_SLUG : g.name === '法律'
+    g.slug ? g.slug === FOOTER_LEGAL_SLUG : g.name === 'Legal'
   const columnGroups = groups.filter((g) => !isLegalGroup(g))
   const legalGroup = groups.find(isLegalGroup)
 

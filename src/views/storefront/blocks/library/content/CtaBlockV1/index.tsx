@@ -2,6 +2,7 @@
 
 import React from 'react'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 import { getLocalizedText } from '@/utils/i18n'
 import type { BlockProps } from '../../../types'
 
@@ -20,7 +21,7 @@ interface CtaBlockData {
   secondaryButtonLink?: string
 }
 
-/** Parse "100% 源码交付 · 0% 交易佣金 · 24/7 技术支持" into [{ value, label }] */
+/** Parse "100% source · 0% commission · 24/7 support" style text into [{ value, label }] */
 function parseStatsRow(text: string): { value: string; label: string }[] {
   const parts = text.split(/\s*·\s*/).map((s) => s.trim()).filter(Boolean)
   return parts.map((part) => {
@@ -41,6 +42,7 @@ export function CtaBlockV1({
   locale = 'en',
   isEditing,
 }: BlockProps<CtaBlockSettings, CtaBlockData>) {
+  const t = useTranslations('storefront')
   const { variant = 'primary', size = 'medium', layout } = settings
   const title = getLocalizedText(data.title, locale)
   const description = getLocalizedText(data.description, locale)
@@ -73,7 +75,7 @@ export function CtaBlockV1({
               </Link>
             )}
           </div>
-          <p className='cta-note'>无需信用卡 · 14天免费试用 · 随时取消</p>
+          <p className='cta-note'>{t('cta.note')}</p>
         </div>
       </section>
     )
