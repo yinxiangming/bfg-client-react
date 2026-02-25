@@ -1284,8 +1284,8 @@
         "marketing": "Marketing"
       },
       "placeholders": {
-        "generalTitle": "General Settings",
-        "generalBody": "General settings content will be here",
+        "generalTitle": "Workspace Settings",
+        "generalBody": "Workspace settings content will be here",
         "webTitle": "Web Settings",
         "webBody": "Web settings content will be here",
         "storeTitle": "Store Settings",
@@ -1903,7 +1903,7 @@
             "defaultLanguage": "Default Language",
             "supportedLanguages": "Supported Languages",
             "siteTitle": "Site Title",
-            "siteDescription": "Site Description",
+            "siteDescription": "Workspace Description",
             "active": "Active",
             "isDefault": "Is Default"
           },
@@ -2747,8 +2747,8 @@
     },
     "general": {
       "page": {
-        "title": "General Settings",
-        "subtitle": "Manage your workspace general settings and preferences",
+        "title": "Workspace Settings",
+        "subtitle": "Manage workspace settings and preferences",
         "tabs": {
           "basic": "Basic",
           "users": "Users",
@@ -2814,7 +2814,7 @@
       },
       "basic": {
         "sections": {
-          "siteInformation": "Site Information",
+          "siteInformation": "Workspace Information",
           "localization": "Localization",
           "contactInformation": "Contact Information",
           "storefrontDisplay": "Storefront Display",
@@ -2822,16 +2822,16 @@
           "socialMediaLinks": "Social Media Links"
         },
         "logo": {
-          "alt": "Logo",
+          "alt": "Workspace Logo",
           "help": "Allowed JPG, GIF or PNG. Max size of 800K"
         },
         "fields": {
           "siteName": {
-            "label": "Site Name",
+            "label": "Workspace Name",
             "placeholder": "Enter your workspace name"
           },
           "siteDescription": {
-            "label": "Site Description",
+            "label": "Workspace Description",
             "placeholder": "Brief description of your workspace"
           },
           "defaultLanguage": {

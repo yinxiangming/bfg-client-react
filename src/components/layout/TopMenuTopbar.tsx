@@ -1,11 +1,15 @@
 'use client'
 
+// React Imports
+import { useState, useEffect } from 'react'
+
 // Component Imports
 import Logo from '@components/Logo'
 import ThemeSwitcher from '@components/theme/ThemeSwitcher'
 import Icon from '@components/Icon'
 import UserDropdown from '../ui/UserDropdown'
 import LanguageSwitcher from '@/components/i18n/LanguageSwitcher'
+import { getWorkspaceSettings } from '@/services/settings'
 
 // Hook Imports
 import { useAppLayout } from '@/hooks/useLayoutSettings'
@@ -16,6 +20,18 @@ type Props = {
 
 const TopMenuTopbar = ({ avatarInitial = 'N' }: Props) => {
   const { updateConfig } = useAppLayout()
+  const [workspaceName, setWorkspaceName] = useState<string | undefined>(undefined)
+  const [workspaceLogoSrc, setWorkspaceLogoSrc] = useState<string | undefined>(undefined)
+
+  useEffect(() => {
+    getWorkspaceSettings()
+      .then(s => {
+        setWorkspaceName(s.site_name ?? undefined)
+        const logo = s.custom_settings?.general?.logo ?? s.logo
+        setWorkspaceLogoSrc(logo ?? undefined)
+      })
+      .catch(() => {})
+  }, [])
 
   const handleSwitchToVertical = () => {
     updateConfig({ menuPosition: 'vertical' })
@@ -24,7 +40,7 @@ const TopMenuTopbar = ({ avatarInitial = 'N' }: Props) => {
   return (
     <div className='topmenu-topbar'>
       <div className='topmenu-topbar-left'>
-        <Logo />
+        <Logo name={workspaceName} logoSrc={workspaceLogoSrc} />
       </div>
       <div className='topmenu-topbar-right'>
         <button

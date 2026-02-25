@@ -33,12 +33,12 @@ export function buildApiUrl(
   version: 'v1' | 'v2' | '' = 'v1',
   module?: string
 ): string {
-  const API_BASE_URL = getApiBaseUrl()
+  const base = getApiBaseUrl().replace(/\/+$/, '')
   const basePath = version ? `/api/${version}` : '/api'
   const modulePath = module ? `/${module}` : ''
   const cleanPath = path.startsWith('/') ? path : `/${path}`
 
-  return `${API_BASE_URL}${basePath}${modulePath}${cleanPath}`
+  return `${base}${basePath}${modulePath}${cleanPath}`
 }
 
 /**

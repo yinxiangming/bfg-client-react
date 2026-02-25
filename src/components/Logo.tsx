@@ -10,21 +10,44 @@ import Link from 'next/link'
 import themeConfig from '@configs/themeConfig'
 // Component Imports
 import LogoIcon from './LogoIcon'
+import { normalizeMediaUrl } from '@/utils/media'
 
 type LogoProps = {
   color?: CSSProperties['color']
   href?: string
   skipLink?: boolean // If true, don't wrap in Link (for cases where it's already wrapped)
+  /** When provided (e.g. workspace name in admin), displayed instead of themeConfig.templateName */
+  name?: string
+  /** When provided (e.g. workspace logo URL), displayed instead of default LogoIcon */
+  logoSrc?: string | null
 }
 
-const Logo = ({ color, href = '/', skipLink = false }: LogoProps) => {
+const Logo = ({ color, href = '/', skipLink = false, name, logoSrc }: LogoProps) => {
   const textStyle = color ? { color } : undefined
+  const displayName = name ?? themeConfig.templateName
+  // Use data URLs and absolute http(s) URLs as-is; only normalize relative media paths
+  const resolvedLogoSrc = !logoSrc
+    ? ''
+    : logoSrc.startsWith('data:') || logoSrc.startsWith('http://') || logoSrc.startsWith('https://')
+      ? logoSrc
+      : normalizeMediaUrl(logoSrc)
+
+  const iconContent = resolvedLogoSrc ? (
+    <img
+      src={resolvedLogoSrc}
+      alt=''
+      className='sidebar-logo-icon'
+      style={{ height: '2.6rem', width: 'auto', objectFit: 'contain' }}
+    />
+  ) : (
+    <LogoIcon className='text-[2.6rem] sidebar-logo-icon' />
+  )
 
   const content = (
     <>
-      <LogoIcon className='text-[2.6rem] sidebar-logo-icon' />
+      {iconContent}
       <span style={textStyle} className='sidebar-logo-text'>
-        {themeConfig.templateName}
+        {displayName}
       </span>
     </>
   )

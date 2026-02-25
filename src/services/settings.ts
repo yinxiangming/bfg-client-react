@@ -48,6 +48,7 @@ export type WorkspaceSettings = {
   workspace_id?: number
   site_name?: string
   site_description?: string
+  logo?: string
   custom_settings?: {
     invoice?: InvoiceSettingsPayload
     delivery?: DeliverySettingsPayload
@@ -110,44 +111,45 @@ export type GeneralSettingsPayload = {
   logo?: string
 }
 
+let workspaceSettingsCache: Promise<WorkspaceSettings> | null = null
+
+export function invalidateWorkspaceSettingsCache(): void {
+  workspaceSettingsCache = null
+}
+
 export async function getWorkspaceSettings(): Promise<WorkspaceSettings> {
+  if (workspaceSettingsCache) {
+    return workspaceSettingsCache
+  }
   const url = bfgApi.settings()
-  console.log('[getWorkspaceSettings] Fetching from:', url)
-  const res = await apiFetch<WorkspaceSettings | WorkspaceSettings[] | { results: WorkspaceSettings[] }>(url)
-  console.log('[getWorkspaceSettings] Raw response:', res)
-  console.log('[getWorkspaceSettings] Response type:', Array.isArray(res) ? 'array' : typeof res)
-  console.log('[getWorkspaceSettings] Has results?', 'results' in (res || {}))
-  
-  // Handle paginated response
-  if (res && typeof res === 'object' && 'results' in res) {
-    const results = (res as { results: WorkspaceSettings[] }).results
-    if (results.length === 0) {
-      throw new Error('No workspace settings found. Please create settings first.')
+  const promise = (async () => {
+    const res = await apiFetch<WorkspaceSettings | WorkspaceSettings[] | { results: WorkspaceSettings[] }>(url)
+    
+    // Handle paginated response
+    if (res && typeof res === 'object' && 'results' in res) {
+      const results = (res as { results: WorkspaceSettings[] }).results
+      if (results.length === 0) {
+        throw new Error('No workspace settings found. Please create settings first.')
+      }
+      return results[0]
     }
-    console.log('[getWorkspaceSettings] Returning first item from paginated results:', results[0])
-    return results[0]
-  }
-  
-  // Handle array response
-  if (Array.isArray(res)) {
-    if (res.length === 0) {
-      throw new Error('No workspace settings found. Please create settings first.')
+    
+    if (Array.isArray(res)) {
+      if (res.length === 0) {
+        throw new Error('No workspace settings found. Please create settings first.')
+      }
+      return res[0]
     }
-    console.log('[getWorkspaceSettings] Returning first item from array:', res[0])
-    console.log('[getWorkspaceSettings] First item keys:', Object.keys(res[0] || {}))
-    console.log('[getWorkspaceSettings] First item id:', res[0]?.id)
-    return res[0]
-  }
-  
-  // Handle single object response
-  if (res && typeof res === 'object') {
-    console.log('[getWorkspaceSettings] Returning object:', res)
-    console.log('[getWorkspaceSettings] Object keys:', Object.keys(res))
-    console.log('[getWorkspaceSettings] Object id:', (res as any).id)
-    return res as WorkspaceSettings
-  }
-  
-  throw new Error('Invalid settings response format: ' + JSON.stringify(res))
+    
+    if (res && typeof res === 'object') {
+      return res as WorkspaceSettings
+    }
+    
+    throw new Error('Invalid settings response format: ' + JSON.stringify(res))
+  })()
+  workspaceSettingsCache = promise
+  promise.catch(() => { workspaceSettingsCache = null })
+  return promise
 }
 
 export async function updateInvoiceSettings(settingsId: number, invoice: InvoiceSettingsPayload) {
@@ -204,10 +206,12 @@ export async function updateGeneralSettings(settingsId: number, general: General
   const current = await apiFetch<WorkspaceSettings>(url)
   const currentCustom = current.custom_settings || {}
   const nextCustom = { ...currentCustom, general }
-  return apiFetch<WorkspaceSettings>(url, {
+  const result = await apiFetch<WorkspaceSettings>(url, {
     method: 'PATCH',
     body: JSON.stringify({ custom_settings: nextCustom })
   })
+  invalidateWorkspaceSettingsCache()
+  return result
 }
 
 export async function updateStorefrontUiSettings(settingsId: number, storefront_ui: StorefrontUiSettingsPayload) {

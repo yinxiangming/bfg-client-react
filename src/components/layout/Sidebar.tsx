@@ -17,6 +17,7 @@ import { useTranslations } from 'next-intl'
 // Type Imports
 import type { MenuNode } from '@/types/menu'
 import { isMenuSection, isMenuSubMenu, isMenuItem } from '@/types/menu'
+import { getWorkspaceSettings } from '@/services/settings'
 
 const normalizePath = (path?: string | null) => {
   if (!path) return path
@@ -43,6 +44,20 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
   const currentPath = activePath || pathname
   const normalizedPath = useMemo(() => normalizePath(currentPath), [currentPath])
   const [openSubmenus, setOpenSubmenus] = useState<OpenSubmenuState>({})
+  const [workspaceName, setWorkspaceName] = useState<string | undefined>(undefined)
+  const [workspaceLogoSrc, setWorkspaceLogoSrc] = useState<string | undefined>(undefined)
+
+  useEffect(() => {
+    const isAdminOrAccount = normalizedPath?.startsWith('/admin') || normalizedPath?.startsWith('/account')
+    if (!isAdminOrAccount) return
+    getWorkspaceSettings()
+      .then(s => {
+        setWorkspaceName(s.site_name ?? undefined)
+        const logo = s.custom_settings?.general?.logo ?? s.logo
+        setWorkspaceLogoSrc(logo ?? undefined)
+      })
+      .catch(() => {})
+  }, [normalizedPath])
 
   const i18nNamespace = useMemo(() => {
     if (normalizedPath?.startsWith('/admin')) return 'admin'
@@ -249,7 +264,7 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
       <div className='sidebar-header'>
         <div className='sidebar-logo'>
-          <Logo />
+          <Logo name={workspaceName} logoSrc={workspaceLogoSrc} />
         </div>
         {onToggleCollapse && (
           <button

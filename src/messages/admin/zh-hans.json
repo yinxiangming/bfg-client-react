@@ -1284,8 +1284,8 @@
         "marketing": "营销"
       },
       "placeholders": {
-        "generalTitle": "通用设置",
-        "generalBody": "通用设置内容将在这里显示",
+        "generalTitle": "工作区设置",
+        "generalBody": "工作区设置内容将在这里显示",
         "webTitle": "网站设置",
         "webBody": "网站设置内容将在这里显示",
         "storeTitle": "商店设置",
@@ -1903,7 +1903,7 @@
             "defaultLanguage": "默认语言",
             "supportedLanguages": "支持语言",
             "siteTitle": "站点标题",
-            "siteDescription": "站点描述",
+            "siteDescription": "工作区描述",
             "active": "启用",
             "isDefault": "默认"
           },
@@ -2747,8 +2747,8 @@
     },
     "general": {
       "page": {
-        "title": "通用设置",
-        "subtitle": "管理工作区通用设置与偏好",
+        "title": "工作区设置",
+        "subtitle": "管理工作区设置与偏好",
         "tabs": {
           "basic": "基础",
           "users": "用户",
@@ -2814,7 +2814,7 @@
       },
       "basic": {
         "sections": {
-          "siteInformation": "站点信息",
+          "siteInformation": "工作区信息",
           "localization": "本地化",
           "contactInformation": "联系信息",
           "storefrontDisplay": "前台展示",
@@ -2822,16 +2822,16 @@
           "socialMediaLinks": "社交媒体链接"
         },
         "logo": {
-          "alt": "Logo",
+          "alt": "工作区 Logo",
           "help": "支持 JPG、GIF 或 PNG，最大 800KB"
         },
         "fields": {
           "siteName": {
-            "label": "站点名称",
+            "label": "工作区名称",
             "placeholder": "输入工作区名称"
           },
           "siteDescription": {
-            "label": "站点描述",
+            "label": "工作区描述",
             "placeholder": "简要描述你的工作区"
           },
           "defaultLanguage": {
