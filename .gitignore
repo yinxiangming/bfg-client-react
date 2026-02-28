@@ -5,10 +5,15 @@ node_modules/
 .env.local
 .cursor/commands/
 .shared/
+.vercel
+next-env.d.ts
 
-# Plugin synced routes (auto-generated)
+# Plugin content (submodules)
+src/plugins/*/
+
+# Generated files
+src/plugins/loaders.generated.ts
+src/components/storefront/themes/registry.generated.ts
 src/app/account/plugins/
 src/app/admin/plugins/
 src/.plugin-routes-manifest.json
-.vercel
-next-env.d.ts

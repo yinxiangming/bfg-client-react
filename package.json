@@ -3,10 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "sync-plugins": "node scripts/sync-plugin-routes.js",
-    "generate-theme-registry": "node scripts/generate-theme-registry.js",
-    "dev": "npm run sync-plugins && npm run generate-theme-registry && next dev",
-    "build": "npm run sync-plugins && npm run generate-theme-registry && next build",
+    "prepare": "node scripts/prepare.js",
+    "dev": "npm run prepare && next dev",
+    "build": "npm run prepare && next build",
     "start": "next start",
     "lint": "next lint"
   },

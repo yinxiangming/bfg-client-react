@@ -1,0 +1,209 @@
+#!/usr/bin/env node
+
+/**
+ * Run all pre-build tasks: plugin loaders, plugin routes, theme registry.
+ * Usage: node scripts/prepare.js
+ */
+
+const fs = require('fs')
+const path = require('path')
+
+const SRC_DIR = path.join(__dirname, '..', 'src')
+const PLUGINS_DIR = path.join(SRC_DIR, 'plugins')
+const APP_DIR = path.join(SRC_DIR, 'app')
+const MANIFEST_FILE = path.join(SRC_DIR, '.plugin-routes-manifest.json')
+const THEMES_DIR = path.join(SRC_DIR, 'components', 'storefront', 'themes')
+
+// --- 1. Generate plugin loaders ---
+function generatePluginLoaders() {
+  const outputFile = path.join(PLUGINS_DIR, 'loaders.generated.ts')
+  const entries = []
+
+  if (fs.existsSync(PLUGINS_DIR)) {
+    const items = fs.readdirSync(PLUGINS_DIR)
+    for (const name of items) {
+      if (name.startsWith('.') || name === 'loaders.ts' || name.endsWith('.generated.ts')) continue
+      const pluginPath = path.join(PLUGINS_DIR, name)
+      if (!fs.statSync(pluginPath).isDirectory()) continue
+      if (!fs.existsSync(path.join(pluginPath, 'index.ts'))) continue
+      entries.push(name)
+    }
+  }
+
+  const loaderLines = entries.map((id) => `  ${id}: () => import('@/plugins/${id}'),`).join('\n')
+  const content = `/**
+ * Auto-generated. Do not edit. Run: node scripts/prepare.js
+ */
+import type { Extension } from '@/extensions/registry'
+
+export const PLUGIN_LOADERS: Record<
+  string,
+  () => Promise<{ default: Extension }>
+> = {
+${entries.length ? loaderLines + '\n' : ''}}
+`
+  if (!fs.existsSync(PLUGINS_DIR)) fs.mkdirSync(PLUGINS_DIR, { recursive: true })
+  fs.writeFileSync(outputFile, content)
+  if (entries.length > 0) console.log('Plugin loaders:', entries.join(', '))
+}
+
+// --- 2. Sync plugin routes ---
+const IGNORE_FILES = ['.DS_Store', 'Thumbs.db', '.gitkeep']
+
+function loadManifest() {
+  try {
+    if (fs.existsSync(MANIFEST_FILE)) {
+      return JSON.parse(fs.readFileSync(MANIFEST_FILE, 'utf-8'))
+    }
+  } catch (e) {
+    console.warn('Could not load manifest:', e.message)
+  }
+  return { files: [] }
+}
+
+function saveManifest(manifest) {
+  fs.writeFileSync(MANIFEST_FILE, JSON.stringify(manifest, null, 2))
+}
+
+function cleanupOldFiles(manifest) {
+  for (const file of manifest.files || []) {
+    const fullPath = path.join(SRC_DIR, file)
+    if (fs.existsSync(fullPath)) {
+      fs.unlinkSync(fullPath)
+      let dir = path.dirname(fullPath)
+      while (dir !== APP_DIR && dir.startsWith(APP_DIR)) {
+        try {
+          if (fs.readdirSync(dir).length === 0) {
+            fs.rmdirSync(dir)
+            dir = path.dirname(dir)
+          } else break
+        } catch {
+          break
+        }
+      }
+    }
+  }
+}
+
+function copyRecursive(src, dest, syncedFiles) {
+  if (!fs.existsSync(src)) return
+  const stat = fs.statSync(src)
+  const basename = path.basename(src)
+  if (IGNORE_FILES.includes(basename)) return
+
+  if (stat.isDirectory()) {
+    if (!fs.existsSync(dest)) fs.mkdirSync(dest, { recursive: true })
+    for (const item of fs.readdirSync(src)) {
+      copyRecursive(path.join(src, item), path.join(dest, item), syncedFiles)
+    }
+  } else {
+    fs.copyFileSync(src, dest)
+    syncedFiles.push(path.relative(SRC_DIR, dest))
+  }
+}
+
+function syncPluginRoutes() {
+  const oldManifest = loadManifest()
+  cleanupOldFiles(oldManifest)
+  const syncedFiles = []
+
+  if (fs.existsSync(PLUGINS_DIR)) {
+    const plugins = fs.readdirSync(PLUGINS_DIR).filter((name) => {
+      const p = path.join(PLUGINS_DIR, name)
+      return fs.statSync(p).isDirectory() && fs.existsSync(path.join(p, 'app'))
+    })
+    for (const plugin of plugins) {
+      copyRecursive(path.join(PLUGINS_DIR, plugin, 'app'), APP_DIR, syncedFiles)
+    }
+    if (plugins.length > 0) {
+      console.log('Plugin routes:', plugins.join(', '), '->', syncedFiles.length, 'file(s)')
+    }
+  }
+  saveManifest({ files: syncedFiles, timestamp: new Date().toISOString() })
+}
+
+// --- 3. Generate theme registry ---
+const THEME_REQUIRED = ['Layout.tsx', 'Header.tsx', 'Footer.tsx']
+
+function getThemeIds() {
+  if (!fs.existsSync(THEMES_DIR)) return []
+  return fs.readdirSync(THEMES_DIR, { withFileTypes: true })
+    .filter((e) => e.isDirectory() && !e.name.startsWith('.') && e.name !== 'node_modules')
+    .filter((e) => THEME_REQUIRED.every((f) => fs.existsSync(path.join(THEMES_DIR, e.name, f))))
+    .map((e) => e.name)
+    .sort()
+}
+
+function hasHomeComponent(themeId) {
+  const dir = path.join(THEMES_DIR, themeId)
+  if (fs.existsSync(path.join(dir, 'Home.tsx'))) return true
+  try {
+    const j = path.join(dir, 'theme.json')
+    if (fs.existsSync(j)) {
+      const d = JSON.parse(fs.readFileSync(j, 'utf8'))
+      return !!(d.homeComponent && d.homeComponent !== 'none')
+    }
+  } catch (_) {}
+  return false
+}
+
+function generateThemeRegistry() {
+  const themeIds = getThemeIds()
+  if (themeIds.length === 0) return
+
+  const outputFile = path.join(THEMES_DIR, 'registry.generated.ts')
+  const lines = [
+    '// Auto-generated by scripts/prepare.js. Do not edit.',
+    '',
+    'import React from "react"',
+    '',
+  ]
+
+  for (const id of themeIds) {
+    const name = id.charAt(0).toUpperCase() + id.slice(1)
+    lines.push(`import ${name}Layout from './${id}/Layout'`)
+    lines.push(`import ${name}Header from './${id}/Header'`)
+    lines.push(`import ${name}Footer from './${id}/Footer'`)
+  }
+  const homeThemes = themeIds.filter(hasHomeComponent)
+  for (const id of homeThemes) {
+    const name = id.charAt(0).toUpperCase() + id.slice(1)
+    lines.push(`import ${name}Home from './${id}/Home'`)
+  }
+
+  lines.push('')
+  lines.push('// eslint-disable-next-line @typescript-eslint/no-explicit-any')
+  lines.push('export type ThemeShell = { Layout: React.ComponentType<any>; Header: React.ComponentType<any>; Footer: React.ComponentType<any> }')
+  lines.push('')
+  lines.push('export interface ThemeHomeProps {')
+  lines.push('  // eslint-disable-next-line @typescript-eslint/no-explicit-any')
+  lines.push('  pageData: any | null')
+  lines.push('  locale: string')
+  lines.push('}')
+  lines.push('')
+  lines.push('export const THEME_REGISTRY: Record<string, ThemeShell> = {')
+  for (const id of themeIds) {
+    const name = id.charAt(0).toUpperCase() + id.slice(1)
+    lines.push(`  ${id}: { Layout: ${name}Layout, Header: ${name}Header, Footer: ${name}Footer },`)
+  }
+  lines.push('}')
+  lines.push('')
+  lines.push('export const HOME_REGISTRY: Record<string, React.ComponentType<ThemeHomeProps> | null> = {')
+  for (const id of themeIds) {
+    const hasHome = homeThemes.includes(id)
+    const name = id.charAt(0).toUpperCase() + id.slice(1)
+    lines.push(`  ${id}: ${hasHome ? name + 'Home' : 'null'},`)
+  }
+  lines.push('}')
+  lines.push('')
+
+  fs.writeFileSync(outputFile, lines.join('\n'), 'utf8')
+  console.log('Theme registry:', themeIds.join(', '))
+}
+
+// --- Run all ---
+console.log('Preparing...\n')
+generatePluginLoaders()
+syncPluginRoutes()
+generateThemeRegistry()
+console.log('\nDone.')

@@ -32,15 +32,7 @@ client/src/
 
 ### 1. Enable Plugins
 
-Register each plugin in `src/plugins/loaders.ts` with a static import, then set environment variable `ENABLED_PLUGINS` (comma-separated):
-
-```typescript
-// src/plugins/loaders.ts
-export const PLUGIN_LOADERS = {
-  freight: () => import('@/plugins/freight'),
-  'custom-module': () => import('@/plugins/custom-module'),
-}
-```
+Add plugin dirs under `src/plugins/<id>/` with `index.ts`; they are auto-discovered by `npm run prepare`. Set `ENABLED_PLUGINS` (comma-separated):
 
 ```bash
 ENABLED_PLUGINS=freight,custom-module
