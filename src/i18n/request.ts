@@ -60,7 +60,7 @@ export default getRequestConfig(async ({requestLocale}) => {
     fromAcceptLanguage ||
     routing.defaultLocale
 
-  const [common, storefront, account, admin, resalePlugin] = await Promise.all([
+  const [common, storefront, account, admin, pluginMessages] = await Promise.all([
     loadCommonMessages(locale),
     loadAppMessages('storefront', locale),
     loadAppMessages('account', locale),
@@ -68,9 +68,13 @@ export default getRequestConfig(async ({requestLocale}) => {
     loadPluginMessages(locale)
   ])
 
-  const accountMerged = resalePlugin?.account ? deepMerge({ ...account }, resalePlugin.account) : account
-  const adminMerged = resalePlugin?.admin ? deepMerge({ ...admin }, resalePlugin.admin) : admin
-  const resaleNs = resalePlugin?.resale ?? {}
+  const accountMerged = pluginMessages?.account ? deepMerge({ ...account }, pluginMessages.account as Messages) : account
+  const adminMerged = pluginMessages?.admin ? deepMerge({ ...admin }, pluginMessages.admin as Messages) : admin
+  const pluginNamespaces = pluginMessages
+    ? Object.fromEntries(
+        Object.entries(pluginMessages).filter(([k]) => k !== 'admin' && k !== 'account')
+      )
+    : {}
 
   return {
     locale,
@@ -79,7 +83,7 @@ export default getRequestConfig(async ({requestLocale}) => {
       storefront,
       account: accountMerged,
       admin: adminMerged,
-      resale: resaleNs
+      ...pluginNamespaces
     }
   }
 })

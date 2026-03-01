@@ -20,7 +20,7 @@ export default function StorefrontSetupRequired() {
           python manage.py init
         </pre>
         <p className="mt-2 text-sm text-gray-600">
-          This runs migrate, creates a workspace and admin user (you will be prompted for password), and can import seed_data and site config (e.g. web/design/site-config-xmart.json). Then configure Site/theme in Admin if needed.
+          This runs migrate, creates a workspace and admin user (you will be prompted for password), and can import seed_data and site config (e.g. web/design/site-config-store.json). Then configure Site/theme in Admin if needed.
         </p>
         <Link
           href="/admin"
