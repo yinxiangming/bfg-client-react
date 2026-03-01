@@ -1,7 +1,7 @@
 import { cache } from 'react'
 import { unstable_cache } from 'next/cache'
 import type { Extension } from './registry'
-import { PLUGIN_LOADERS } from '@/plugins/loaders'
+import { PLUGIN_LOADERS } from '@/plugins/loaders.generated'
 export { applyNavExtensions } from './utils/applyNavExtensions'
 
 const EXTENSIONS_CACHE_REVALIDATE_SECONDS = 3600
@@ -21,7 +21,7 @@ async function loadExtensionsImpl(pluginIds?: string[]): Promise<Extension[]> {
     const loader = PLUGIN_LOADERS[pluginId]
     if (!loader) {
       if (process.env.NODE_ENV === 'development') {
-        console.warn(`[Extensions] Plugin "${pluginId}" not in PLUGIN_LOADERS (src/plugins/loaders.ts)`)
+        console.warn(`[Extensions] Plugin "${pluginId}" not in PLUGIN_LOADERS (src/plugins/loaders.generated.ts)`)
       }
       continue
     }

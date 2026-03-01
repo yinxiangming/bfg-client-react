@@ -1,18 +1,16 @@
 node_modules/
 .next/
-.env*
 .env
 .env.local
+.env.*.local
+!.env.example
 .cursor/commands/
 .shared/
 .vercel
 next-env.d.ts
 
-# Plugin content (submodules)
-src/plugins/*/
-
-# Generated files
-src/plugins/loaders.generated.ts
+# Plugin dir: ignore generated file only; track loaders.generated.ts and plugin subdirs (e.g. resale)
+src/plugins/*
 src/components/storefront/themes/registry.generated.ts
 src/app/account/plugins/
 src/app/admin/plugins/

@@ -10,7 +10,9 @@ import { getApiLanguageHeaders } from '@/i18n/http'
 export function getApiBaseUrl(): string {
   const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
   if (!apiBaseUrl) {
-    throw new Error('NEXT_PUBLIC_API_URL environment variable is not set')
+    throw new Error(
+      'NEXT_PUBLIC_API_URL is not set. Copy .env.example to .env.local and set NEXT_PUBLIC_API_URL (e.g. your API base URL).'
+    )
   }
   return apiBaseUrl
 }

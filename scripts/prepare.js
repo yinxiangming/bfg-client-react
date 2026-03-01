@@ -22,7 +22,7 @@ function generatePluginLoaders() {
   if (fs.existsSync(PLUGINS_DIR)) {
     const items = fs.readdirSync(PLUGINS_DIR)
     for (const name of items) {
-      if (name.startsWith('.') || name === 'loaders.ts' || name.endsWith('.generated.ts')) continue
+      if (name.startsWith('.') || name.endsWith('.generated.ts')) continue
       const pluginPath = path.join(PLUGINS_DIR, name)
       if (!fs.statSync(pluginPath).isDirectory()) continue
       if (!fs.existsSync(path.join(pluginPath, 'index.ts'))) continue
