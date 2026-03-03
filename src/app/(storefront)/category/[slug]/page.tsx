@@ -11,7 +11,7 @@ type Props = {
 async function findCategoryBySlug(slug: string): Promise<{ name: string } | null> {
   try {
     const base = getApiBaseUrl()
-    const res = await fetch(`${base}/api/store/categories/`, {
+    const res = await fetch(`${base}/api/v1/store/categories/`, {
       headers: getApiHeaders(),
       next: { revalidate: 60 },
     })
