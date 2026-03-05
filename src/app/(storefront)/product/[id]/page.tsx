@@ -11,7 +11,7 @@ type Props = {
 async function getProductName(id: string): Promise<string | null> {
   try {
     const base = getApiBaseUrl()
-    const res = await fetch(`${base}/api/store/products/${id}/`, {
+    const res = await fetch(`${base}/api/v1/store/products/${id}/`, {
       headers: getApiHeaders(),
       next: { revalidate: 60 },
     })

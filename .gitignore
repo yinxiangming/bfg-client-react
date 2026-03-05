@@ -9,9 +9,9 @@ node_modules/
 .vercel
 next-env.d.ts
 
-# Plugin dir: ignore generated file only; track loaders.generated.ts and plugin subdirs (e.g. resale)
+# Plugin dir: ignore generated file only; track loaders.generated.ts and plugin subdirs (e.g. resale submodule)
 src/plugins/*
-src/components/storefront/themes/registry.generated.ts
 src/app/account/plugins/
 src/app/admin/plugins/
 src/.plugin-routes-manifest.json
+src/components/storefront/themes/registry.generated.ts

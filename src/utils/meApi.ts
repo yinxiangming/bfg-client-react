@@ -529,7 +529,7 @@ class MeApiClient {
 
   // Payment Gateways (use storefront API)
   async getPaymentGateways(): Promise<any[]> {
-    return this.request<any[]>('/api/store/payments/gateways/')
+    return this.request<any[]>('/api/v1/store/payments/gateways/')
   }
 
   // Create payment method with Stripe integration

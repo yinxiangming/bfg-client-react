@@ -1,10 +1,14 @@
 /**
- * Utility functions for Django media URLs
- * Single source for NEXT_PUBLIC_MEDIA_URL to avoid repeated env references.
+ * Utility functions for Django media URLs.
+ * Single source: NEXT_PUBLIC_MEDIA_URL, or API base + /media (media is served by backend).
  */
 
 export function getMediaBaseUrl(): string {
-  return process.env.NEXT_PUBLIC_MEDIA_URL || '/media'
+  if (process.env.NEXT_PUBLIC_MEDIA_URL) {
+    return process.env.NEXT_PUBLIC_MEDIA_URL.replace(/\/+$/, '')
+  }
+  const api = process.env.NEXT_PUBLIC_API_URL
+  return api ? `${api.replace(/\/+$/, '')}/media` : '/media'
 }
 
 const STORE_IMAGES_PATH = 'seed_images/store'

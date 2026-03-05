@@ -1,7 +1,7 @@
 /**
  * Storefront API Client
  *
- * Client for calling storefront API endpoints (/api/store/)
+ * Client for calling storefront API endpoints (/api/v1/store/)
  */
 
 import { refreshTokenIfNeeded } from './tokenRefresh'
@@ -17,7 +17,7 @@ interface ApiResponse<T> {
   error?: string
 }
 
-/** Storefront promo API: GET /api/store/promo/?context=home (CampaignDisplay slides, etc.) */
+/** Storefront promo API: GET /api/v1/store/promo/?context=home (CampaignDisplay slides, etc.) */
 export interface StorefrontPromoSlide {
   id: number
   title?: string
@@ -298,11 +298,11 @@ class StorefrontApiClient {
     if (params?.page) queryParams.append('page', params.page.toString())
 
     const query = queryParams.toString()
-    return this.request<ApiResponse<any>>(`/api/store/products/${query ? `?${query}` : ''}`)
+    return this.request<ApiResponse<any>>(`/api/v1/store/products/${query ? `?${query}` : ''}`)
   }
 
   async getProduct(idOrSlug: string | number): Promise<any> {
-    return this.request<any>(`/api/store/products/${idOrSlug}/`)
+    return this.request<any>(`/api/v1/store/products/${idOrSlug}/`)
   }
 
   async getProductReviews(
@@ -315,7 +315,7 @@ class StorefrontApiClient {
     if (params?.rating) queryParams.append('rating', params.rating.toString())
 
     const query = queryParams.toString()
-    return this.request<any[]>(`/api/store/products/${productIdOrSlug}/reviews/${query ? `?${query}` : ''}`)
+    return this.request<any[]>(`/api/v1/store/products/${productIdOrSlug}/reviews/${query ? `?${query}` : ''}`)
   }
 
   async createProductReview(
@@ -327,7 +327,7 @@ class StorefrontApiClient {
       images?: string[]
     }
   ): Promise<any> {
-    return this.request<any>(`/api/store/products/${productIdOrSlug}/reviews/`, {
+    return this.request<any>(`/api/v1/store/products/${productIdOrSlug}/reviews/`, {
       method: 'POST',
       body: JSON.stringify(data)
     })
@@ -339,21 +339,21 @@ class StorefrontApiClient {
     if (params?.tree) queryParams.append('tree', 'true')
 
     const query = queryParams.toString()
-    return this.request<ApiResponse<any>>(`/api/store/categories/${query ? `?${query}` : ''}`)
+    return this.request<ApiResponse<any>>(`/api/v1/store/categories/${query ? `?${query}` : ''}`)
   }
 
   async getCategory(id: number): Promise<any> {
-    return this.request<any>(`/api/store/categories/${id}/`)
+    return this.request<any>(`/api/v1/store/categories/${id}/`)
   }
 
   /** Promo data for homepage (CampaignDisplay slides, featured_categories, flash_sales, group_buys). */
   async getPromo(context: string = 'home'): Promise<StorefrontPromoResponse> {
-    return this.request<StorefrontPromoResponse>(`/api/store/promo/?context=${encodeURIComponent(context)}`)
+    return this.request<StorefrontPromoResponse>(`/api/v1/store/promo/?context=${encodeURIComponent(context)}`)
   }
 
   // Cart
   async getCart(): Promise<any> {
-    return this.request<any>('/api/store/cart/current/')
+    return this.request<any>('/api/v1/store/cart/current/')
   }
 
   async getCartPreview(shippingMethod?: string, freightServiceId?: number): Promise<{
@@ -378,7 +378,7 @@ class StorefrontApiClient {
       tax: string
       total: string
       shipping_discount?: string | null
-    }>(`/api/store/cart/preview/${query ? `?${query}` : ''}`)
+    }>(`/api/v1/store/cart/preview/${query ? `?${query}` : ''}`)
   }
 
   // Freight Services
@@ -396,34 +396,34 @@ class StorefrontApiClient {
       requestData.variant = data.variant
     }
 
-    return this.request<any>('/api/store/cart/add_item/', {
+    return this.request<any>('/api/v1/store/cart/add_item/', {
       method: 'POST',
       body: JSON.stringify(requestData)
     })
   }
 
   async updateCartItem(data: { item_id: number; quantity: number }): Promise<any> {
-    return this.request<any>('/api/store/cart/update_item/', {
+    return this.request<any>('/api/v1/store/cart/update_item/', {
       method: 'POST',
       body: JSON.stringify(data)
     })
   }
 
   async removeCartItem(data: { item_id: number }): Promise<any> {
-    return this.request<any>('/api/store/cart/remove_item/', {
+    return this.request<any>('/api/v1/store/cart/remove_item/', {
       method: 'POST',
       body: JSON.stringify(data)
     })
   }
 
   async clearCart(): Promise<any> {
-    return this.request<any>('/api/store/cart/clear/', {
+    return this.request<any>('/api/v1/store/cart/clear/', {
       method: 'POST'
     })
   }
 
   async getDefaultStore(): Promise<{ id: number; name: string; code: string }> {
-    return this.request<{ id: number; name: string; code: string }>('/api/store/cart/default_store/')
+    return this.request<{ id: number; name: string; code: string }>('/api/v1/store/cart/default_store/')
   }
 
   async checkout(data: {
@@ -436,7 +436,7 @@ class StorefrontApiClient {
     shipping_cost?: number  // Backward compatibility
     tax?: number  // Backward compatibility
   }): Promise<any> {
-    return this.request<any>('/api/store/cart/checkout/', {
+    return this.request<any>('/api/v1/store/cart/checkout/', {
       method: 'POST',
       body: JSON.stringify(data)
     })
@@ -475,7 +475,7 @@ class StorefrontApiClient {
     freight_service_id?: number  // Preferred
     shipping_method?: string  // Backward compatibility
   }): Promise<any> {
-    return this.request<any>('/api/store/cart/guest_checkout/', {
+    return this.request<any>('/api/v1/store/cart/guest_checkout/', {
       method: 'POST',
       body: JSON.stringify(data)
     })
@@ -483,11 +483,11 @@ class StorefrontApiClient {
 
   // Addresses
   async getAddresses(): Promise<ApiResponse<any>> {
-    return this.request<ApiResponse<any>>('/api/store/addresses/')
+    return this.request<ApiResponse<any>>('/api/v1/store/addresses/')
   }
 
   async getDefaultAddress(): Promise<any> {
-    return this.request<any>('/api/store/addresses/default/')
+    return this.request<any>('/api/v1/store/addresses/default/')
   }
 
   async createAddress(data: {
@@ -502,7 +502,7 @@ class StorefrontApiClient {
     country: string
     is_default?: boolean
   }): Promise<any> {
-    return this.request<any>('/api/store/addresses/', {
+    return this.request<any>('/api/v1/store/addresses/', {
       method: 'POST',
       body: JSON.stringify(data)
     })
@@ -523,14 +523,14 @@ class StorefrontApiClient {
       is_default: boolean
     }>
   ): Promise<any> {
-    return this.request<any>(`/api/store/addresses/${id}/`, {
+    return this.request<any>(`/api/v1/store/addresses/${id}/`, {
       method: 'PATCH',
       body: JSON.stringify(data)
     })
   }
 
   async deleteAddress(id: number): Promise<void> {
-    return this.request<void>(`/api/store/addresses/${id}/`, {
+    return this.request<void>(`/api/v1/store/addresses/${id}/`, {
       method: 'DELETE'
     })
   }
@@ -541,11 +541,11 @@ class StorefrontApiClient {
     if (params?.status) queryParams.append('status', params.status)
 
     const query = queryParams.toString()
-    return this.request<ApiResponse<any>>(`/api/store/orders/${query ? `?${query}` : ''}`)
+    return this.request<ApiResponse<any>>(`/api/v1/store/orders/${query ? `?${query}` : ''}`)
   }
 
   async getOrder(id: number): Promise<any> {
-    return this.request<any>(`/api/store/orders/${id}/`)
+    return this.request<any>(`/api/v1/store/orders/${id}/`)
   }
 
   async cancelOrder(
@@ -554,7 +554,7 @@ class StorefrontApiClient {
       reason?: string
     }
   ): Promise<any> {
-    return this.request<any>(`/api/store/orders/${id}/cancel/`, {
+    return this.request<any>(`/api/v1/store/orders/${id}/cancel/`, {
       method: 'POST',
       body: JSON.stringify(data)
     })
@@ -562,7 +562,7 @@ class StorefrontApiClient {
 
   // Payments
   async getPaymentGateways(): Promise<any[]> {
-    return this.request<any[]>('/api/store/payments/gateways/')
+    return this.request<any[]>('/api/v1/store/payments/gateways/')
   }
   
   async createPaymentIntent(data: { 
@@ -572,14 +572,14 @@ class StorefrontApiClient {
     customer_id?: number
     save_card?: boolean
   }): Promise<any> {
-    return this.request<any>('/api/store/payments/intent/', {
+    return this.request<any>('/api/v1/store/payments/intent/', {
       method: 'POST',
       body: JSON.stringify(data)
     })
   }
 
   async processPayment(id: number): Promise<any> {
-    return this.request<any>(`/api/store/payments/${id}/process/`, {
+    return this.request<any>(`/api/v1/store/payments/${id}/process/`, {
       method: 'POST'
     })
   }
