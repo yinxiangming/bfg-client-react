@@ -4,11 +4,13 @@ import { refreshTokenIfNeeded } from './tokenRefresh'
 import { getApiLanguageHeaders } from '@/i18n/http'
 
 /**
- * Get API base URL from environment variable
- * Throws error if not set
+ * Get API base URL from environment variable.
+ * On server (SSR): use API_URL when set (e.g. Docker internal http://server:8000), else NEXT_PUBLIC_API_URL.
+ * In browser: use NEXT_PUBLIC_API_URL only.
  */
 export function getApiBaseUrl(): string {
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
+  const serverUrl = typeof window === 'undefined' ? process.env.API_URL : undefined
+  const apiBaseUrl = serverUrl || process.env.NEXT_PUBLIC_API_URL
   if (!apiBaseUrl) {
     throw new Error(
       'NEXT_PUBLIC_API_URL is not set. Copy .env.example to .env.local and set NEXT_PUBLIC_API_URL (e.g. your API base URL).'

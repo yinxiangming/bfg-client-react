@@ -1,5 +1,5 @@
 import { getLocale } from 'next-intl/server'
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { getApiBaseUrl, getApiHeaders } from '@/utils/api'
 import { getSiteConfig } from '@/utils/siteMetadata'
 import DynamicPage from '@views/storefront/DynamicPage'
@@ -41,10 +41,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return { title: `${title} | ${site_name}` }
 }
 
+const RESERVED_SLUGS = ['admin', 'account', 'auth'] as const
+
 export default async function StorefrontSlugPage({ params }: Props) {
   const { slug } = await params
-  const locale = await getLocale()
+  if (RESERVED_SLUGS.includes(slug as (typeof RESERVED_SLUGS)[number])) {
+    if (slug === 'admin') redirect('/admin/dashboard')
+    if (slug === 'account') redirect('/account')
+    if (slug === 'auth') redirect('/auth/login')
+  }
 
+  const locale = await getLocale()
   const pageData = await getPageData(slug, locale)
   if (!pageData || !pageData.blocks?.length) {
     notFound()

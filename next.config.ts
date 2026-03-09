@@ -5,9 +5,10 @@ import type { NextConfig } from 'next'
 
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
+// Local: parent root for symlink tracing. Docker: set NEXT_FILE_TRACING_ROOT=/app
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  outputFileTracingRoot: join(__dirname, '../..'),
+  outputFileTracingRoot: process.env.NEXT_FILE_TRACING_ROOT || join(__dirname, '../..'),
 }
 
 export default withNextIntl(nextConfig)
