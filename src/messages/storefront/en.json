@@ -5,7 +5,12 @@
     "login": "Login"
   },
   "search": {
-    "placeholder": "Search"
+    "placeholder": "Search",
+    "title": "Search Results",
+    "resultsFor": "Results for \"{keyword}\"",
+    "empty": "No products found. Try different keywords or filters.",
+    "refresh": "Refresh",
+    "enterKeyword": "Enter a keyword above and click Refresh to search."
   },
   "common": {
     "loading": "Loading...",

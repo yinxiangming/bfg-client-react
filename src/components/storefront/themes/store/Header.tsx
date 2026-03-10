@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import Logo from '@components/Logo'
 import { useCart } from '@/contexts/CartContext'
@@ -27,7 +28,9 @@ export default function StoreHeader(_props: StoreHeaderProps) {
   const [categories, setCategories] = useState<CategoryType[]>([])
   const [loadingCategories, setLoadingCategories] = useState(true)
   const [mounted, setMounted] = useState(false)
+  const [searchKeyword, setSearchKeyword] = useState('')
 
+  const router = useRouter()
   const { getItemCount } = useCart()
   const theme = useTheme()
   const t = useTranslations('storefront')
@@ -194,13 +197,24 @@ export default function StoreHeader(_props: StoreHeaderProps) {
           </nav>
           <div className='sf-header-actions'>
             {showSearch && (
-              <div className='sf-search-box'>
+              <form
+                className='sf-search-box'
+                onSubmit={e => {
+                  e.preventDefault()
+                  const q = searchKeyword.trim()
+                  if (q) router.push(`/search?q=${encodeURIComponent(q)}`)
+                }}
+              >
                 <i className='tabler-search sf-search-icon' />
-                <input type='text' placeholder={t('search.placeholder')} className='sf-search-input' />
-              </div>
+                <input
+                  type='text'
+                  placeholder={t('search.placeholder')}
+                  className='sf-search-input'
+                  value={searchKeyword}
+                  onChange={e => setSearchKeyword(e.target.value)}
+                />
+              </form>
             )}
-            <button className='sf-icon-btn'><i className='tabler-heart' style={{ fontSize: '1.25rem' }} /><span className='sf-badge'>0</span></button>
-            <button className='sf-icon-btn'><i className='tabler-scale' style={{ fontSize: '1.25rem' }} /><span className='sf-badge'>0</span></button>
             {showCart && (
               <Link href='/cart' className='sf-icon-btn' style={{ textDecoration: 'none', color: 'inherit' }}>
                 <i className='tabler-shopping-cart' style={{ fontSize: '1.25rem' }} />
@@ -220,12 +234,28 @@ export default function StoreHeader(_props: StoreHeaderProps) {
               <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.75rem', cursor: 'pointer', color: '#757575', padding: '0.25rem' }} aria-label='Close menu'>×</button>
             </div>
             {showSearch && (
-              <div style={{ marginBottom: '1.5rem' }}>
+              <form
+                style={{ marginBottom: '1.5rem' }}
+                onSubmit={e => {
+                  e.preventDefault()
+                  const q = searchKeyword.trim()
+                  if (q) {
+                    router.push(`/search?q=${encodeURIComponent(q)}`)
+                    setMobileMenuOpen(false)
+                  }
+                }}
+              >
                 <div style={{ position: 'relative' }}>
                   <i className='tabler-search' style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', fontSize: '1.125rem', color: '#757575' }} />
-                  <input type='text' placeholder='Search products...' style={{ width: '100%', padding: '0.625rem 1rem 0.625rem 2.5rem', border: '1px solid #e0e0e0', borderRadius: '8px', fontSize: '0.875rem', outline: 'none' }} />
+                  <input
+                    type='text'
+                    placeholder={t('search.placeholder')}
+                    value={searchKeyword}
+                    onChange={e => setSearchKeyword(e.target.value)}
+                    style={{ width: '100%', padding: '0.625rem 1rem 0.625rem 2.5rem', border: '1px solid #e0e0e0', borderRadius: '8px', fontSize: '0.875rem', outline: 'none' }}
+                  />
                 </div>
-              </div>
+              </form>
             )}
             <nav>
               <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#757575', marginBottom: '0.75rem', textTransform: 'uppercase' }}>Categories</h3>

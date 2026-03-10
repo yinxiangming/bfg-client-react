@@ -5,7 +5,12 @@
     "login": "登录"
   },
   "search": {
-    "placeholder": "搜索"
+    "placeholder": "搜索",
+    "title": "搜索结果",
+    "resultsFor": "“{keyword}” 的搜索结果",
+    "empty": "未找到商品，请尝试其他关键词或筛选条件。",
+    "refresh": "刷新",
+    "enterKeyword": "在上方输入关键词并点击刷新进行搜索。"
   },
   "common": {
     "loading": "加载中...",
