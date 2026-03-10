@@ -24,7 +24,14 @@ function generatePluginLoaders() {
     for (const name of items) {
       if (name.startsWith('.') || name.endsWith('.generated.ts')) continue
       const pluginPath = path.join(PLUGINS_DIR, name)
-      if (!fs.statSync(pluginPath).isDirectory()) continue
+      let stat
+      try {
+        stat = fs.statSync(pluginPath)
+      } catch (e) {
+        if (e.code === 'ENOENT') continue
+        throw e
+      }
+      if (!stat.isDirectory()) continue
       if (!fs.existsSync(path.join(pluginPath, 'index.ts'))) continue
       entries.push(name)
     }
@@ -110,7 +117,14 @@ function syncPluginRoutes() {
   if (fs.existsSync(PLUGINS_DIR)) {
     const plugins = fs.readdirSync(PLUGINS_DIR).filter((name) => {
       const p = path.join(PLUGINS_DIR, name)
-      return fs.statSync(p).isDirectory() && fs.existsSync(path.join(p, 'app'))
+      let stat
+      try {
+        stat = fs.statSync(p)
+      } catch (e) {
+        if (e.code === 'ENOENT') return false
+        throw e
+      }
+      return stat.isDirectory() && fs.existsSync(path.join(p, 'app'))
     })
     for (const plugin of plugins) {
       copyRecursive(path.join(PLUGINS_DIR, plugin, 'app'), APP_DIR, syncedFiles)
