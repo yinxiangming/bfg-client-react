@@ -322,7 +322,8 @@
     "newsletterError": "Subscription failed. Please try again.",
     "newsletterSubmitting": "Subscribing…",
     "copyright": "© 2025 - Ecommerce software by BFG",
-    "questionsCallUs": "You have any Questions ? Call us 24x7 {phone}"
+    "questionsCallUs": "You have any Questions ? Call us {phone}",
+    "paymentMethods": "Payment methods"
   },
   "filters": {
     "title": "Filter By",

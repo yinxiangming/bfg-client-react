@@ -8,6 +8,23 @@ import { useStorefrontConfigSafe } from '@/contexts/StorefrontConfigContext'
 import { getStoreImageUrl } from '@/utils/media'
 import { bfgApi, getApiHeaders } from '@/utils/api'
 
+/** Inline SVG fallback when payment.png is not available from media. */
+function PaymentMethodsFallback() {
+  return (
+    <svg width="130" height="24" viewBox="0 0 130 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ opacity: 0.9, maxWidth: '100%', height: '24px' }} aria-hidden>
+      <rect x="2" y="4" width="28" height="16" rx="2" stroke="rgba(255,255,255,0.7)" strokeWidth="1.2" fill="none" />
+      <rect x="6" y="10" width="12" height="2" rx="0.5" fill="rgba(255,255,255,0.6)" />
+      <rect x="34" y="4" width="28" height="16" rx="2" stroke="rgba(255,255,255,0.7)" strokeWidth="1.2" fill="none" />
+      <circle cx="42" cy="12" r="4" stroke="rgba(255,255,255,0.6)" strokeWidth="1.2" fill="none" />
+      <rect x="66" y="4" width="28" height="16" rx="2" stroke="rgba(255,255,255,0.7)" strokeWidth="1.2" fill="none" />
+      <rect x="70" y="8" width="8" height="2" rx="0.5" fill="rgba(255,255,255,0.6)" />
+      <rect x="70" y="13" width="14" height="2" rx="0.5" fill="rgba(255,255,255,0.5)" />
+      <rect x="98" y="4" width="28" height="16" rx="2" stroke="rgba(255,255,255,0.7)" strokeWidth="1.2" fill="none" />
+      <path d="M104 12h4l2 4 2-4h4" stroke="rgba(255,255,255,0.6)" strokeWidth="1.2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  )
+}
+
 type StoreFooterProps = { mode?: 'light' | 'dark' }
 
 export default function StoreFooter(_props: StoreFooterProps) {
@@ -19,6 +36,7 @@ export default function StoreFooter(_props: StoreFooterProps) {
   const [newsletterEmail, setNewsletterEmail] = useState('')
   const [newsletterLoading, setNewsletterLoading] = useState(false)
   const [newsletterMessage, setNewsletterMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [paymentImageError, setPaymentImageError] = useState(false)
 
   const handleNewsletterSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -137,8 +155,17 @@ export default function StoreFooter(_props: StoreFooterProps) {
         </div>
         <div className='sf-footer-bottom'>
           <p className='sf-footer-text'>{config.footer_copyright || t('footer.copyright')}</p>
-          <div>
-            <img src={getStoreImageUrl('modules/cp_footercms1/views/img/payment.png')} alt='Payment methods' style={{ height: '24px', opacity: 0.9 }} />
+          <div className='sf-footer-payment' title={t('footer.paymentMethods')}>
+            {paymentImageError ? (
+              <PaymentMethodsFallback />
+            ) : (
+              <img
+                src={getStoreImageUrl('payment.png')}
+                alt={t('footer.paymentMethods')}
+                style={{ height: '24px', opacity: 0.9 }}
+                onError={() => setPaymentImageError(true)}
+              />
+            )}
           </div>
         </div>
       </div>

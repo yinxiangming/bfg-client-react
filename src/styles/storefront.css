@@ -254,6 +254,14 @@ body {
   gap: 1rem;
 }
 
+.sf-footer-payment {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-left: auto;
+  margin-right: 1.5rem;
+}
+
 .sf-footer-text {
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.8125rem;
@@ -1081,6 +1089,11 @@ body {
   .sf-footer-bottom {
     flex-direction: column;
     text-align: center;
+  }
+
+  .sf-footer-payment {
+    margin-left: 0;
+    margin-right: 0;
   }
 
   /* Typography */

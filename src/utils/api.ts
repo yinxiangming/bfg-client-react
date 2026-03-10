@@ -24,6 +24,20 @@ export function getApiBaseUrl(): string {
  */
 export const getApiUrl = getApiBaseUrl
 
+/**
+ * Public site base URL for absolute links (OG, canonical, JSON-LD).
+ * Prefer NEXT_PUBLIC_SITE_URL; fallback to Vercel URL when deployed.
+ */
+export function getSiteBaseUrl(): string {
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/+$/, '')
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`
+  }
+  return ''
+}
+
 // API version configuration
 export const API_VERSIONS = {
   BFG2: 'v1'

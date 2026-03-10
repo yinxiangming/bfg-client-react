@@ -322,7 +322,8 @@
     "newsletterError": "订阅失败，请重试。",
     "newsletterSubmitting": "提交中…",
     "copyright": "© 2025 - XMart 电商系统",
-    "questionsCallUs": "如有疑问，24x7 致电 {phone}"
+    "questionsCallUs": "如有疑问，致电 {phone}",
+    "paymentMethods": "支付方式"
   },
   "filters": {
     "title": "筛选",
