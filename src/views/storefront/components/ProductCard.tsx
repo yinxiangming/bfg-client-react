@@ -103,11 +103,13 @@ const ProductCard = ({ product }: { product: Product }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className='sf-product-img-wrapper'>
-        <img
-          src={product.image || getStoreImageUrl('themes/PRS04099/assets/img/megnor/empty-cart.svg')}
-          alt={product.name}
-          className='sf-card-img'
-        />
+        <Link href={`/product/${product.id}`} style={{ display: 'block', lineHeight: 0 }} aria-label={product.name}>
+          <img
+            src={product.image || getStoreImageUrl('themes/PRS04099/assets/img/megnor/empty-cart.svg')}
+            alt={product.name}
+            className='sf-card-img'
+          />
+        </Link>
         <div className='sf-product-actions'>
           <button className='sf-action-btn' title={t('product.actions.addToWishlist')}>
             <i className='tabler-heart' style={{ fontSize: '1.125rem' }} />
