@@ -161,7 +161,7 @@ export default function StoreHeader(_props: StoreHeaderProps) {
             <button className='sf-icon-btn sf-mobile-menu-btn' onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label='Toggle menu'>
               <i className='tabler-menu-2 sf-nav-icon' style={{ fontSize: '1.5rem' }} />
             </button>
-            <Logo color='#ffffff' />
+            <Logo color='#ffffff' name={config.site_name || undefined} />
             <ul className='sf-nav-menu'>
               {loadingCategories ? <li>Loading...</li> : categories.map((category, index) => {
                 const categoryKey = typeof category === 'string' ? category : category.slug || category.name
@@ -230,7 +230,7 @@ export default function StoreHeader(_props: StoreHeaderProps) {
           <div onClick={() => setMobileMenuOpen(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 999 }} />
           <div style={{ position: 'fixed', top: 0, left: 0, width: '80%', maxWidth: '320px', height: '100vh', background: 'white', boxShadow: '2px 0 8px rgba(0,0,0,0.1)', zIndex: 1000, padding: '1rem', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <Logo color='#6366f1' />
+              <Logo color='#6366f1' name={config.site_name || undefined} />
               <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.75rem', cursor: 'pointer', color: '#757575', padding: '0.25rem' }} aria-label='Close menu'>×</button>
             </div>
             {showSearch && (
