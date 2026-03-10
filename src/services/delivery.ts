@@ -261,7 +261,7 @@ export async function getFreightServiceFormSchema(templateId?: string): Promise<
   const res = await apiFetch<{ form_schema: FormSchema | unknown[] }>(url)
   const raw = res.form_schema
   if (Array.isArray(raw)) {
-    return { fields: raw as FormSchema['fields'] }
+    return { title: '', fields: raw as FormSchema['fields'] }
   }
   return raw as FormSchema
 }

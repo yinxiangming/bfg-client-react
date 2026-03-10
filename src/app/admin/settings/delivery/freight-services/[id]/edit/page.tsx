@@ -407,7 +407,7 @@ export default function FreightServiceEditPage() {
                         type="button"
                         variant="contained"
                         disabled={savingConfig}
-                        onClick={() => document.getElementById('freight-config-form')?.requestSubmit()}
+                        onClick={() => (document.getElementById('freight-config-form') as HTMLFormElement)?.requestSubmit()}
                       >
                         {savingConfig ? t('common.schemaForm.saving') : t('common.schemaForm.save')}
                       </Button>

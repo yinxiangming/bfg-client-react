@@ -97,7 +97,7 @@ const MenuEditDialog = ({ open, menu, onClose, onSave }: MenuEditDialogProps) =>
         language,
         is_active,
         items: items.map((row, i) => ({
-          id: row.id,
+          id: row.id ?? 0,
           title: row.title.trim(),
           url: row.url.trim() || '/',
           order: i,

@@ -138,7 +138,7 @@ const CampaignDisplayEditDialog = ({ open, display, onClose, onSave }: CampaignD
       order: Number(data.order ?? 0),
       title: (data.title as string) ?? '',
       subtitle: (data.subtitle as string) ?? '',
-      image: data.image ?? null,
+      image: (data.image as string) ?? null,
       link_url: (data.link_url as string) ?? '',
       link_target: (data.link_target as string) ?? '_self',
       rules: parseRules(data.rules),
