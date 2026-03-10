@@ -121,7 +121,7 @@ export const getStorefrontConfigForServer = cache(async (locale: string): Promis
   try {
     const res = await fetch(url, {
       headers: getApiHeaders({ 'Content-Type': 'application/json' }),
-      cache: 'no-store',
+      next: { revalidate: 300 },
       signal: controller.signal,
     })
     clearTimeout(timeoutId)

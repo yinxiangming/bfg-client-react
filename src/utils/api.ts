@@ -4,11 +4,13 @@ import { refreshTokenIfNeeded } from './tokenRefresh'
 import { getApiLanguageHeaders } from '@/i18n/http'
 
 /**
- * Get API base URL from environment variable
- * Throws error if not set
+ * Get API base URL from environment variable.
+ * On server (SSR): use API_URL when set (e.g. Docker internal http://server:8000), else NEXT_PUBLIC_API_URL.
+ * In browser: use NEXT_PUBLIC_API_URL only.
  */
 export function getApiBaseUrl(): string {
-  const apiBaseUrl = process.env.NEXT_PUBLIC_API_URL
+  const serverUrl = typeof window === 'undefined' ? process.env.API_URL : undefined
+  const apiBaseUrl = serverUrl || process.env.NEXT_PUBLIC_API_URL
   if (!apiBaseUrl) {
     throw new Error(
       'NEXT_PUBLIC_API_URL is not set. Copy .env.example to .env.local and set NEXT_PUBLIC_API_URL (e.g. your API base URL).'
@@ -21,6 +23,20 @@ export function getApiBaseUrl(): string {
  * Alias for getApiBaseUrl for convenience
  */
 export const getApiUrl = getApiBaseUrl
+
+/**
+ * Public site base URL for absolute links (OG, canonical, JSON-LD).
+ * Prefer NEXT_PUBLIC_SITE_URL; fallback to Vercel URL when deployed.
+ */
+export function getSiteBaseUrl(): string {
+  if (process.env.NEXT_PUBLIC_SITE_URL) {
+    return process.env.NEXT_PUBLIC_SITE_URL.replace(/\/+$/, '')
+  }
+  if (process.env.VERCEL_URL) {
+    return `https://${process.env.VERCEL_URL}`
+  }
+  return ''
+}
 
 // API version configuration
 export const API_VERSIONS = {

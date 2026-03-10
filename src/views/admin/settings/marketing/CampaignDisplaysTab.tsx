@@ -119,7 +119,7 @@ const CampaignDisplaysTab = () => {
   if (error) {
     return (
       <Alert severity='error' sx={{ m: 2 }}>
-        {error.message}
+        {error}
       </Alert>
     )
   }

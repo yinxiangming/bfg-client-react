@@ -5,7 +5,12 @@
     "login": "Login"
   },
   "search": {
-    "placeholder": "Search"
+    "placeholder": "Search",
+    "title": "Search Results",
+    "resultsFor": "Results for \"{keyword}\"",
+    "empty": "No products found. Try different keywords or filters.",
+    "refresh": "Refresh",
+    "enterKeyword": "Enter a keyword above and click Refresh to search."
   },
   "common": {
     "loading": "Loading...",
@@ -317,7 +322,8 @@
     "newsletterError": "Subscription failed. Please try again.",
     "newsletterSubmitting": "Subscribing…",
     "copyright": "© 2025 - Ecommerce software by BFG",
-    "questionsCallUs": "You have any Questions ? Call us 24x7 {phone}"
+    "questionsCallUs": "You have any Questions ? Call us {phone}",
+    "paymentMethods": "Payment methods"
   },
   "filters": {
     "title": "Filter By",

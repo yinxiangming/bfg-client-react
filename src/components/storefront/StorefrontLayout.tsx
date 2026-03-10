@@ -24,14 +24,14 @@ export function StorefrontLayoutInner({ children, mode = 'light' }: StorefrontLa
 
   if (isAccountPage || isAdminPage || isAuthPage) {
     return (
-      <div className='flex flex-col min-bs-screen'>
+      <div className='flex min-h-screen flex-col'>
         <main className='flex-1'>{children}</main>
       </div>
     )
   }
 
   return (
-    <div className='flex flex-col min-bs-screen'>
+    <div className='flex min-h-screen flex-col'>
       <SiteAnnouncementBanner />
       <StoreHeader mode={mode} />
       <main className='flex-1'>{children}</main>
