@@ -1,10 +1,9 @@
 import { useMemo } from 'react'
 import { useExtensions } from '../context'
-import type { PageSectionExtension } from '../registry'
+import { getTargetSlot, type PageSlotExtension } from '../registry'
 
-// Default sections definition (for hide/replace detection)
-// Used by plugin sections (before/after/replace/hide); documented in docs/extend/plugin/README.md
-export const DEFAULT_SECTIONS: Record<string, string[]> = {
+// Default slot IDs per page (for hide/replace detection). Canonical name: DEFAULT_SLOTS.
+export const DEFAULT_SLOTS: Record<string, string[]> = {
   // Admin - Store
   'admin/store/products/edit': [
     'ProductInformation', 'ProductImage', 'ProductDescription',
@@ -41,57 +40,71 @@ export const DEFAULT_SECTIONS: Record<string, string[]> = {
   'storefront/cart': ['AboveCart', 'CartContent', 'BelowCart'],
   'storefront/checkout': ['AboveSteps', 'Contact', 'Shipping', 'Payment', 'OrderSummary', 'BelowSteps'],
   'storefront/checkout/success': ['AboveMessage', 'Message', 'BelowActions'],
-  // Account
-  'account/dashboard': ['Welcome', 'QuickLinks', 'RecentOrders'],
+  // Account (StatsRowTail = slot after New Messages for plugin replace, e.g. resale Listings/Sold)
+  'account/dashboard': ['Welcome', 'QuickLinks', 'RecentOrders', 'StatsRowTail'],
   'account/information': ['ProfileForm'],
   'account/orders': ['AboveList', 'OrderList', 'BelowList'],
   'account/orders/detail': ['OrderSummary', 'OrderItems', 'BelowActions'],
   'account/addresses': ['AddressList', 'BelowList']
 }
 
-export function usePageSections(page: string) {
+/** @deprecated Use DEFAULT_SLOTS */
+export const DEFAULT_SECTIONS = DEFAULT_SLOTS
+
+export function usePageSlots(page: string) {
   const ctx = useExtensions()
 
   return useMemo(() => {
     if (!ctx) {
-      return { 
-        visibleSections: DEFAULT_SECTIONS[page] || [],
-        beforeSections: [],
-        afterSections: [],
-        replacements: new Map<string, PageSectionExtension>()
+      return {
+        visibleSlots: DEFAULT_SLOTS[page] || [],
+        beforeSlots: [] as PageSlotExtension[],
+        afterSlots: [] as PageSlotExtension[],
+        replacements: new Map<string, PageSlotExtension>()
       }
     }
 
-    const extensions = ctx.getPageSections(page)
-    const hiddenSections = new Set<string>()
-    const replacements = new Map<string, PageSectionExtension>()
-    const beforeSections: PageSectionExtension[] = []
-    const afterSections: PageSectionExtension[] = []
+    const extensions = ctx.getPageSlots(page)
+    const hiddenSlots = new Set<string>()
+    const replacements = new Map<string, PageSlotExtension>()
+    const beforeSlots: PageSlotExtension[] = []
+    const afterSlots: PageSlotExtension[] = []
 
     for (const ext of extensions) {
       if (ext.condition && !ext.condition()) continue
+      const slotId = getTargetSlot(ext)
 
       switch (ext.position) {
         case 'hide':
-          if (ext.targetSection) hiddenSections.add(ext.targetSection)
+          if (slotId) hiddenSlots.add(slotId)
           break
         case 'replace':
-          if (ext.targetSection && !replacements.has(ext.targetSection)) {
-            replacements.set(ext.targetSection, ext)
+          if (slotId && !replacements.has(slotId)) {
+            replacements.set(slotId, ext)
           }
           break
         case 'before':
-          beforeSections.push(ext)
+          beforeSlots.push(ext)
           break
         case 'after':
-          afterSections.push(ext)
+          afterSlots.push(ext)
           break
       }
     }
 
-    const visibleSections = (DEFAULT_SECTIONS[page] || [])
-      .filter(s => !hiddenSections.has(s))
+    const visibleSlots = (DEFAULT_SLOTS[page] || []).filter((s) => !hiddenSlots.has(s))
 
-    return { visibleSections, beforeSections, afterSections, replacements }
+    return { visibleSlots, beforeSlots, afterSlots, replacements }
   }, [ctx, page])
+}
+
+/** @deprecated Use usePageSlots. Returns same data with legacy section names. */
+export function usePageSections(page: string) {
+  const { visibleSlots, beforeSlots, afterSlots, replacements } = usePageSlots(page)
+  return {
+    visibleSections: visibleSlots,
+    beforeSections: beforeSlots,
+    afterSections: afterSlots,
+    replacements
+  }
 }

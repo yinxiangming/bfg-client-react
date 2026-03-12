@@ -321,6 +321,17 @@ class MeApiClient {
     return this.request<any>('/api/v1/me/addresses/default/')
   }
 
+  /** Dashboard stats: wallet, order counts by status, unread messages, plus pluginStats from extensions */
+  async getDashboardStats(): Promise<{
+    wallet_balance: number | null
+    wallet_currency: string | null
+    order_counts: Record<string, number>
+    unread_messages_count: number
+    pluginStats?: Record<string, unknown>
+  }> {
+    return this.request<any>('/api/v1/me/dashboard-stats/')
+  }
+
   // Orders
   async getOrders(params?: { status?: string; page?: number; page_size?: number }): Promise<ApiResponse<any>> {
     const queryParams = new URLSearchParams()

@@ -9,7 +9,8 @@ import ThemeShell from '@/components/storefront/ThemeShell'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 import { loadExtensions } from '@/extensions'
 import { ExtensionLoaderProvider } from '@/extensions/context'
-import { getPageSectionReplacements, getStorefrontLayoutOverride } from '@/extensions/resolve'
+import { getPageSlotReplacements, getStorefrontLayoutOverride } from '@/extensions/resolve'
+import { ROOT_SLOT_ID } from '@/extensions/terminology'
 import StorefrontSetupRequired from '@/components/storefront/StorefrontSetupRequired'
 
 export default async function StorefrontLayoutWrapper({ children }: { children: React.ReactNode }) {
@@ -29,8 +30,8 @@ export default async function StorefrontLayoutWrapper({ children }: { children: 
   const headersList = await headers()
   const pathname = headersList.get('x-pathname') ?? ''
   const isStorefrontRoot = pathname === '/' || pathname === ''
-  const replacements = isStorefrontRoot ? getPageSectionReplacements(extensions, 'storefront/home') : new Map()
-  const rootReplace = isStorefrontRoot ? replacements.get('__root__') : null
+  const replacements = isStorefrontRoot ? getPageSlotReplacements(extensions, 'storefront/home') : new Map()
+  const rootReplace = isStorefrontRoot ? replacements.get(ROOT_SLOT_ID) : null
   const HomeOverride = rootReplace?.component as React.ComponentType<{ locale?: string; children?: React.ReactNode }> | undefined
 
   if (HomeOverride) {
@@ -45,7 +46,8 @@ export default async function StorefrontLayoutWrapper({ children }: { children: 
   }
 
   const locale = await getLocale()
-  const config = await getStorefrontConfigForServer(locale)
+  const requestHost = headersList.get('host') ?? undefined
+  const config = await getStorefrontConfigForServer(locale, requestHost)
   if (config === null) {
     return (
       <ExtensionLoaderProvider extensionIds={extensionIds}>

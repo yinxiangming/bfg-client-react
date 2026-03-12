@@ -30,8 +30,8 @@ import { createCategory, getCategoriesTree, type CategoryPayload, type Category 
 import { useApiData } from '@/hooks/useApiData'
 
 // Extension Hooks
-import { usePageSections } from '@/extensions/hooks/usePageSections'
-import { renderSection } from '@/extensions/hooks/renderSection'
+import { usePageSlots } from '@/extensions/hooks/usePageSections'
+import { renderSlot } from '@/extensions/hooks/renderSection'
 
 export default function CategoryNewPage() {
   const router = useRouter()
@@ -49,8 +49,8 @@ export default function CategoryNewPage() {
   const [categories, setCategories] = useState<Category[]>([])
   const [categoriesLoading, setCategoriesLoading] = useState(false)
 
-  const { visibleSections, beforeSections, afterSections, replacements } =
-    usePageSections('admin/store/categories/new')
+  const { visibleSlots, beforeSlots, afterSlots, replacements } =
+    usePageSlots('admin/store/categories/new')
 
   // Load categories tree for parent selection
   useEffect(() => {
@@ -255,7 +255,7 @@ export default function CategoryNewPage() {
             ? t('categories.newPage.titleWithParent', { name: parentCategory.name })
             : t('categories.newPage.title')}
         </Typography>
-        {beforeSections.map(
+        {beforeSlots.map(
           ext =>
             ext.component && (
               <Box key={ext.id} sx={{ mb: 4 }}>
@@ -263,15 +263,15 @@ export default function CategoryNewPage() {
               </Box>
             )
         )}
-        {visibleSections.includes('CategoryInfo') &&
-          renderSection(
+        {visibleSlots.includes('CategoryInfo') &&
+          renderSlot(
             'CategoryInfo',
-            visibleSections,
+            visibleSlots,
             replacements,
             CategoryInfoContent,
             undefined
           )}
-        {afterSections.map(
+        {afterSlots.map(
           ext =>
             ext.component && (
               <Box key={ext.id} sx={{ mt: 4 }}>

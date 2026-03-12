@@ -3,6 +3,13 @@ import type { MenuNode } from '@/types/menu'
 // Simplified navigation with refreshed icons
 export const defaultNavItems: MenuNode[] = [
   {
+    id: 'dashboard',
+    label: 'Dashboard',
+    i18nKey: 'nav.dashboard',
+    href: '/account/',
+    icon: 'tabler-layout-dashboard'
+  },
+  {
     id: 'orders',
     label: 'My Orders',
     i18nKey: 'nav.orders',

@@ -1,5 +1,6 @@
 import path from 'path'
 import fs from 'fs'
+import { fileURLToPath } from 'url'
 import type { AppLocale } from './routing'
 
 export type PluginMessages = Record<string, unknown>
@@ -18,6 +19,21 @@ function deepMerge(target: PluginMessages, source: PluginMessages): PluginMessag
   return target
 }
 
+/** Resolve plugins dir: prefer path relative to this module so it works regardless of cwd. */
+function getPluginsDir(): string {
+  const fromCwd = path.join(process.cwd(), 'src', 'plugins')
+  try {
+    const dir = typeof __dirname !== 'undefined'
+      ? __dirname
+      : path.dirname(fileURLToPath(import.meta.url))
+    const fromModule = path.join(dir, '..', 'plugins')
+    if (fs.existsSync(fromModule)) return fromModule
+  } catch {
+    // ESM/__dirname not available
+  }
+  return fromCwd
+}
+
 /**
  * Scan plugins dir for subdirs that have messages/{locale}.json, load and merge.
  * Return shape: { account?, admin?, [pluginId]? } for merge into app messages.
@@ -25,11 +41,22 @@ function deepMerge(target: PluginMessages, source: PluginMessages): PluginMessag
 export async function loadPluginMessages(
   locale: AppLocale
 ): Promise<PluginMessages | null> {
-  const pluginsDir = path.join(process.cwd(), 'src', 'plugins')
+  const pluginsDir = getPluginsDir()
   let dirs: string[]
   try {
     dirs = fs.readdirSync(pluginsDir, { withFileTypes: true })
-      .filter((d) => d.isDirectory())
+      .filter((d) => {
+        if (d.isDirectory()) return true
+        // Symlinks: treat as dir if target is a directory
+        if (d.isSymbolicLink?.()) {
+          try {
+            return fs.statSync(path.join(pluginsDir, d.name)).isDirectory()
+          } catch {
+            return false
+          }
+        }
+        return false
+      })
       .map((d) => d.name)
   } catch {
     return null

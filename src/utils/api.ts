@@ -136,6 +136,7 @@ export const bfgApi = {
   paymentGatewayPlugins: () => buildApiUrl('/payment-gateways/plugins/', API_VERSIONS.BFG2),
   taxRates: () => buildApiUrl('/tax-rates/', API_VERSIONS.BFG2),
   invoiceSettings: () => buildApiUrl('/invoice-settings/', API_VERSIONS.BFG2),
+  wallets: () => buildApiUrl('/finance/wallets/', API_VERSIONS.BFG2),
 
   // Marketing
   campaigns: () => buildApiUrl('/campaigns/', API_VERSIONS.BFG2),
@@ -182,10 +183,19 @@ export function getWorkspaceId(): string | null {
   return null
 }
 
+export type GetApiHeadersOptions = {
+  /** When set (e.g. request host for auth/storefront), backend can resolve workspace by domain. */
+  requestHost?: string
+}
+
 /**
  * Common headers for API requests (workspace, locale). Use for any direct fetch to backend.
+ * Pass requestHost for auth/storefront so backend resolves workspace by domain when X-Workspace-ID is not set.
  */
-export function getApiHeaders(overrides?: Record<string, string>): Record<string, string> {
+export function getApiHeaders(
+  overrides?: Record<string, string>,
+  options?: GetApiHeadersOptions
+): Record<string, string> {
   const headers: Record<string, string> = {
     ...getApiLanguageHeaders(),
   }
@@ -193,10 +203,28 @@ export function getApiHeaders(overrides?: Record<string, string>): Record<string
   if (workspaceId) {
     headers['X-Workspace-ID'] = workspaceId
   }
+  if (options?.requestHost) {
+    headers['X-Forwarded-Host'] = options.requestHost
+  }
   if (overrides) {
     Object.assign(headers, overrides)
   }
   return headers
+}
+
+/**
+ * Redirect to login when on /admin and API returns 401 or 403.
+ * /admin is not allowed for anonymous or customer; other users access by workspace permission.
+ * Call only in browser; no-op on server.
+ */
+function redirectToLoginIfAdminUnauthorized(status: number): void {
+  if (typeof window === 'undefined') return
+  if (status !== 401 && status !== 403) return
+  const pathname = window.location.pathname
+  if (!pathname.startsWith('/admin')) return
+  const href = window.location.href
+  const redirect = encodeURIComponent(href)
+  window.location.href = `/auth/login?redirect=${redirect}`
 }
 
 /**
@@ -267,7 +295,9 @@ export async function apiFetch<T>(
     } else {
       errorDetail = response.statusText
     }
-    
+
+    redirectToLoginIfAdminUnauthorized(response.status)
+
     const error = new Error(errorDetail)
     ;(error as any).status = response.status
     throw error

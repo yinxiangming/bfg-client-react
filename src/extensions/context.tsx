@@ -2,11 +2,13 @@
 
 import { createContext, useContext, useMemo, useEffect, useState, ReactNode } from 'react'
 import { loadExtensions } from '@/extensions'
-import type { Extension, PageSectionExtension, DataHookExtension } from './registry'
+import type { Extension, PageSlotExtension, DataHookExtension } from './registry'
 
 interface ExtensionContextValue {
   extensions: Extension[]
-  getPageSections: (page: string) => PageSectionExtension[]
+  getPageSlots: (page: string) => PageSlotExtension[]
+  /** @deprecated Use getPageSlots */
+  getPageSections: (page: string) => PageSlotExtension[]
   getDataHooks: (page: string) => DataHookExtension[]
 }
 
@@ -47,10 +49,16 @@ export function ExtensionProvider({
 }) {
   const value = useMemo(() => ({
     extensions,
+    getPageSlots: (page: string) => {
+      return extensions
+        .flatMap((e) => e.sections || [])
+        .filter((s) => s.page === page)
+        .sort((a, b) => (b.priority ?? 100) - (a.priority ?? 100))
+    },
     getPageSections: (page: string) => {
       return extensions
-        .flatMap(e => e.sections || [])
-        .filter(s => s.page === page)
+        .flatMap((e) => e.sections || [])
+        .filter((s) => s.page === page)
         .sort((a, b) => (b.priority ?? 100) - (a.priority ?? 100))
     },
     getDataHooks: (page: string) => {

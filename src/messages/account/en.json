@@ -1,5 +1,6 @@
 {
   "nav": {
+    "dashboard": "Dashboard",
     "orders": "My Orders",
     "addresses": "Addresses",
     "payments": "Payments",
@@ -23,12 +24,27 @@
       "title": "Payments",
       "subtitle": "Manage payment methods, view payment history and download invoices"
     },
+    "wallet": {
+      "withdraw": {
+        "title": "Withdraw",
+        "subtitle": "Request a withdrawal from your wallet"
+      }
+    },
     "settings": {
       "title": "Settings",
       "subtitle": "Manage your profile, security, preferences and privacy"
     }
   },
   "dashboard": {
+    "stats": {
+      "walletBalance": "Wallet Balance",
+      "newMessages": "New Messages",
+      "ordersPending": "Pending",
+      "ordersPaid": "Paid",
+      "ordersShipped": "Shipped",
+      "ordersCompleted": "Completed",
+      "ordersCancelled": "Cancelled"
+    },
     "menuItems": {
       "orders": {
         "title": "My Orders",
@@ -302,6 +318,27 @@
     "passwordMismatch": "New password and confirm password do not match",
     "passwordTooShort": "New password must be at least 8 characters long",
     "failedChange": "Failed to change password"
+  },
+  "wallet": {
+    "withdraw": {
+      "title": "Withdrawal Request",
+      "subtitle": "Request a withdrawal from your wallet balance. It will be processed after review.",
+      "available": "Available (cash balance)",
+      "amount": "Amount",
+      "payoutMethod": "Payout method",
+      "payoutMethodPlaceholder": "e.g. Bank transfer, PayPal",
+      "notes": "Notes",
+      "submit": "Submit Request",
+      "submitting": "Submitting...",
+      "cancel": "Cancel",
+      "backToAccount": "Back to Account",
+      "noCashBalance": "No withdrawable balance. Cash balance is required to request a withdrawal.",
+      "validation": {
+        "amountRequired": "Please enter a valid amount.",
+        "amountExceeds": "Amount cannot exceed your cash balance."
+      },
+      "submitFailed": "Failed to submit withdrawal request."
+    }
   },
   "addresses": {
     "title": "My Addresses",

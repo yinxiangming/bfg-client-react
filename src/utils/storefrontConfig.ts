@@ -77,6 +77,7 @@ function getStorefrontConfigUrl(locale: string): string {
 
 /**
  * Fetch storefront config (sanitized settings + header/footer menus).
+ * Uses request host when in browser so backend can resolve workspace by domain (same as storefront).
  * Returns null when server returns 404 or request fails (e.g. not configured yet).
  * Uses in-memory cache for 5 minutes when config is loaded.
  */
@@ -85,9 +86,13 @@ export async function getStorefrontConfig(locale?: string): Promise<StorefrontCo
   if (cached && Date.now() - cached.at < STALE_MS) {
     return cached.data
   }
+  const requestHost = typeof window !== 'undefined' ? window.location.host : undefined
   const url = getStorefrontConfigUrl(lang)
   const res = await fetch(url, {
-    headers: getApiHeaders({ 'Content-Type': 'application/json' }),
+    headers: getApiHeaders(
+      { 'Content-Type': 'application/json' },
+      requestHost ? { requestHost } : undefined
+    ),
     credentials: 'include',
   })
   if (!res.ok) {
@@ -111,30 +116,36 @@ export function getDefaultHeaderOptions(): StorefrontHeaderOptions {
 
 /**
  * Fetch storefront config on server (e.g. in layout or page).
+ * Pass requestHost (e.g. from headers().get('host')) so backend resolves workspace by domain (same as storefront).
  * Returns null when server returns 404 (e.g. workspace/site not configured yet).
  * Deduped per request via React.cache() so layout + page share one fetch.
  */
-export const getStorefrontConfigForServer = cache(async (locale: string): Promise<StorefrontConfig | null> => {
-  const url = getStorefrontConfigUrl(locale)
-  const controller = new AbortController()
-  const timeoutId = setTimeout(() => controller.abort(), 8000)
-  try {
-    const res = await fetch(url, {
-      headers: getApiHeaders({ 'Content-Type': 'application/json' }),
-      next: { revalidate: 300 },
-      signal: controller.signal,
-    })
-    clearTimeout(timeoutId)
-    if (res.status === 404 || !res.ok) {
+export const getStorefrontConfigForServer = cache(
+  async (locale: string, requestHost?: string): Promise<StorefrontConfig | null> => {
+    const url = getStorefrontConfigUrl(locale)
+    const controller = new AbortController()
+    const timeoutId = setTimeout(() => controller.abort(), 8000)
+    try {
+      const res = await fetch(url, {
+        headers: getApiHeaders(
+          { 'Content-Type': 'application/json' },
+          requestHost ? { requestHost } : undefined
+        ),
+        next: { revalidate: 300 },
+        signal: controller.signal,
+      })
+      clearTimeout(timeoutId)
+      if (res.status === 404 || !res.ok) {
+        return null
+      }
+      const data = (await res.json()) as StorefrontConfig
+      if (!data.theme) data.theme = 'store'
+      if (!data.header_options) data.header_options = { ...DEFAULT_HEADER_OPTIONS }
+      else data.header_options = { ...DEFAULT_HEADER_OPTIONS, ...data.header_options }
+      return data
+    } catch {
+      clearTimeout(timeoutId)
       return null
     }
-    const data = (await res.json()) as StorefrontConfig
-    if (!data.theme) data.theme = 'store'
-    if (!data.header_options) data.header_options = { ...DEFAULT_HEADER_OPTIONS }
-    else data.header_options = { ...DEFAULT_HEADER_OPTIONS, ...data.header_options }
-    return data
-  } catch {
-    clearTimeout(timeoutId)
-    return null
   }
-})
+)

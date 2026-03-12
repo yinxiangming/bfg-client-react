@@ -24,8 +24,8 @@ import ProductPricing from '@/views/admin/store/products/edit/ProductPricing'
 import ProductOrganize from '@/views/admin/store/products/edit/ProductOrganize'
 
 // Extension Hooks
-import { usePageSections } from '@/extensions/hooks/usePageSections'
-import { renderSection } from '@/extensions/hooks/renderSection'
+import { usePageSlots } from '@/extensions/hooks/usePageSections'
+import { renderSlot } from '@/extensions/hooks/renderSection'
 
 // API Imports
 import { createProduct, type Product } from '@/services/store'
@@ -42,8 +42,8 @@ export default function ProductAddPage() {
     severity: 'success'
   })
 
-  const { visibleSections, beforeSections, afterSections, replacements } =
-    usePageSections('admin/store/products/add')
+  const { visibleSlots, beforeSlots, afterSlots, replacements } =
+    usePageSlots('admin/store/products/add')
 
   // Update form data when child components change
   const handleChange = useCallback((field: keyof Product, value: any) => {
@@ -151,7 +151,7 @@ export default function ProductAddPage() {
         </Grid>
         <Grid size={{ xs: 12, md: 8 }}>
           <Grid container spacing={6}>
-            {beforeSections.map(
+            {beforeSlots.map(
               ext =>
                 ext.component && (
                   <Grid key={ext.id} size={{ xs: 12 }}>
@@ -159,47 +159,47 @@ export default function ProductAddPage() {
                   </Grid>
                 )
             )}
-            {visibleSections.includes('ProductInformation') && (
+            {visibleSlots.includes('ProductInformation') && (
               <Grid size={{ xs: 12 }}>
-                {renderSection(
+                {renderSlot(
                   'ProductInformation',
-                  visibleSections,
+                  visibleSlots,
                   replacements,
                   ProductInformation,
                   { productData: formData, onChange: handleChange }
                 )}
               </Grid>
             )}
-            {visibleSections.includes('ProductImage') && (
+            {visibleSlots.includes('ProductImage') && (
               <Grid size={{ xs: 12 }}>
-                {renderSection('ProductImage', visibleSections, replacements, ProductImage, {
+                {renderSlot('ProductImage', visibleSlots, replacements, ProductImage, {
                   productId: 'new'
                 })}
               </Grid>
             )}
-            {visibleSections.includes('ProductDescription') && (
+            {visibleSlots.includes('ProductDescription') && (
               <Grid size={{ xs: 12 }}>
-                {renderSection(
+                {renderSlot(
                   'ProductDescription',
-                  visibleSections,
+                  visibleSlots,
                   replacements,
                   ProductDescription,
                   { productData: formData, onChange: handleChange }
                 )}
               </Grid>
             )}
-            {visibleSections.includes('ProductVariants') && (
+            {visibleSlots.includes('ProductVariants') && (
               <Grid size={{ xs: 12 }}>
-                {renderSection(
+                {renderSlot(
                   'ProductVariants',
-                  visibleSections,
+                  visibleSlots,
                   replacements,
                   ProductVariants,
                   { productId: 'new', productMedia: [], initialVariants: [] }
                 )}
               </Grid>
             )}
-            {afterSections.map(
+            {afterSlots.map(
               ext =>
                 ext.component && (
                   <Grid key={ext.id} size={{ xs: 12 }}>
@@ -211,33 +211,33 @@ export default function ProductAddPage() {
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
           <Grid container spacing={6}>
-            {visibleSections.includes('ProductPricing') && (
+            {visibleSlots.includes('ProductPricing') && (
               <Grid size={{ xs: 12 }}>
-                {renderSection(
+                {renderSlot(
                   'ProductPricing',
-                  visibleSections,
+                  visibleSlots,
                   replacements,
                   ProductPricing,
                   { productData: formData, onChange: handleChange }
                 )}
               </Grid>
             )}
-            {visibleSections.includes('ProductInventory') && (
+            {visibleSlots.includes('ProductInventory') && (
               <Grid size={{ xs: 12 }}>
-                {renderSection(
+                {renderSlot(
                   'ProductInventory',
-                  visibleSections,
+                  visibleSlots,
                   replacements,
                   ProductInventory,
                   { productData: formData, onChange: handleChange }
                 )}
               </Grid>
             )}
-            {visibleSections.includes('ProductOrganize') && (
+            {visibleSlots.includes('ProductOrganize') && (
               <Grid size={{ xs: 12 }}>
-                {renderSection(
+                {renderSlot(
                   'ProductOrganize',
-                  visibleSections,
+                  visibleSlots,
                   replacements,
                   ProductOrganize,
                   { productData: formData, onChange: handleChange }

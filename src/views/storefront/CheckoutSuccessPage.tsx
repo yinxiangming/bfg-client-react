@@ -13,7 +13,7 @@ import { useTranslations } from 'next-intl'
 // Context Imports
 import { useCart, type CartItem } from '@/contexts/CartContext'
 import { useTheme } from '@/contexts/ThemeContext'
-import { usePageSections } from '@/extensions/hooks/usePageSections'
+import { usePageSlots } from '@/extensions/hooks/usePageSections'
 
 // Import CSS
 import '@/styles/storefront.css'
@@ -31,7 +31,7 @@ const CheckoutSuccessPage = () => {
   const router = useRouter()
   const { items, getSubtotal, getShipping, getTotalWithShipping, clearCart } = useCart()
   const theme = useTheme()
-  const { beforeSections, afterSections } = usePageSections('storefront/checkout/success')
+  const { beforeSlots, afterSlots } = usePageSlots('storefront/checkout/success')
   
   // Get effective theme mode (systemMode is already the effective mode)
   const isDark = theme.systemMode === 'dark'
@@ -61,7 +61,7 @@ const CheckoutSuccessPage = () => {
 
   return (
     <div className='sf-container' style={{ padding: '3rem 1rem', maxWidth: '960px', margin: '0 auto' }}>
-      {beforeSections.map(
+      {beforeSlots.map(
         ext =>
           ext.component && (
             <div key={ext.id} style={{ marginBottom: '1.5rem' }}>
@@ -217,7 +217,7 @@ const CheckoutSuccessPage = () => {
       </div>
 
 
-      {afterSections.map(
+      {afterSlots.map(
         ext =>
           ext.component && (
             <div key={ext.id} style={{ marginTop: '1.5rem' }}>

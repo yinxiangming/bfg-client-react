@@ -18,6 +18,7 @@ import { useTranslations } from 'next-intl'
 import type { MenuNode } from '@/types/menu'
 import { isMenuSection, isMenuSubMenu, isMenuItem } from '@/types/menu'
 import { getWorkspaceSettings } from '@/services/settings'
+import { useStorefrontConfig } from '@/contexts/StorefrontConfigContext'
 
 const normalizePath = (path?: string | null) => {
   if (!path) return path
@@ -43,6 +44,7 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
   const pathname = usePathname()
   const currentPath = activePath || pathname
   const normalizedPath = useMemo(() => normalizePath(currentPath), [currentPath])
+  const { config: storefrontConfig } = useStorefrontConfig()
   const [openSubmenus, setOpenSubmenus] = useState<OpenSubmenuState>({})
   const [workspaceName, setWorkspaceName] = useState<string | undefined>(undefined)
   const [workspaceLogoSrc, setWorkspaceLogoSrc] = useState<string | undefined>(undefined)
@@ -58,6 +60,11 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
       })
       .catch(() => {})
   }, [normalizedPath])
+
+  const isAccount = Boolean(normalizedPath?.startsWith('/account'))
+  const displayName = isAccount && storefrontConfig?.site_name
+    ? storefrontConfig.site_name
+    : workspaceName
 
   const i18nNamespace = useMemo(() => {
     if (normalizedPath?.startsWith('/admin')) return 'admin'
@@ -264,7 +271,7 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
     <aside className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
       <div className='sidebar-header'>
         <div className='sidebar-logo'>
-          <Logo name={workspaceName} logoSrc={workspaceLogoSrc} />
+          <Logo name={displayName} logoSrc={workspaceLogoSrc} />
         </div>
         {onToggleCollapse && (
           <button
