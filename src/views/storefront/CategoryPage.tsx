@@ -15,7 +15,7 @@ import ProductCard from './components/ProductCard'
 // Util Imports
 import { getStoreImageUrl, getMediaUrl } from '@/utils/media'
 import { storefrontApi } from '@/utils/storefrontApi'
-import { usePageSections } from '@/extensions/hooks/usePageSections'
+import { usePageSlots } from '@/extensions/hooks/usePageSections'
 
 // Import CSS
 import '@/styles/storefront.css'
@@ -37,7 +37,7 @@ type SortOption = 'relevance' | 'sales' | 'name-asc' | 'name-desc' | 'price-asc'
 
 const CategoryPage = ({ slug }: { slug: string }) => {
   const t = useTranslations('storefront')
-  const { beforeSections, afterSections } = usePageSections('storefront/category')
+  const { beforeSlots, afterSlots } = usePageSlots('storefront/category')
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [sortBy, setSortBy] = useState<SortOption>('relevance')
@@ -129,7 +129,7 @@ const CategoryPage = ({ slug }: { slug: string }) => {
 
   return (
     <div className='sf-container' style={{ padding: '2rem 1rem' }}>
-      {beforeSections.map(
+      {beforeSlots.map(
         ext =>
           ext.component && (
             <div key={ext.id} style={{ marginBottom: '1.5rem' }}>
@@ -352,7 +352,7 @@ const CategoryPage = ({ slug }: { slug: string }) => {
           )}
         </main>
       </div>
-      {afterSections.map(
+      {afterSlots.map(
         ext =>
           ext.component && (
             <div key={ext.id} style={{ marginTop: '1.5rem' }}>

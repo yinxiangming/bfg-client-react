@@ -16,7 +16,7 @@ import { useCart } from '@/contexts/CartContext'
 // Util Imports
 import { getStoreImageUrl, getMediaUrl } from '@/utils/media'
 import { storefrontApi } from '@/utils/storefrontApi'
-import { usePageSections } from '@/extensions/hooks/usePageSections'
+import { usePageSlots } from '@/extensions/hooks/usePageSections'
 
 // Import CSS
 import '@/styles/storefront.css'
@@ -51,9 +51,9 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState<'description' | 'details' | 'reviews'>('description')
   const { addItem, loading: cartLoading } = useCart()
-  const { beforeSections, afterSections } = usePageSections('storefront/product')
-  const afterProductInfoSections = afterSections.filter(e => e.targetSection === 'ProductInfo')
-  const afterContentSections = afterSections.filter(e => e.targetSection !== 'ProductInfo')
+  const { beforeSlots, afterSlots } = usePageSlots('storefront/product')
+  const afterProductInfoSlots = afterSlots.filter(e => (e.targetSlot ?? e.targetSection) === 'ProductInfo')
+  const afterContentSlots = afterSlots.filter(e => (e.targetSlot ?? e.targetSection) !== 'ProductInfo')
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -228,7 +228,7 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
 
   return (
     <div className='sf-container' style={{ padding: '2rem 1rem' }}>
-      {beforeSections.map(
+      {beforeSlots.map(
         ext =>
           ext.component && (
             <div key={ext.id} style={{ marginBottom: '1.5rem' }}>
@@ -461,8 +461,8 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
               </span>
             </p>
           </div>
-          {/* Extension sections after ProductInfo (e.g. Resale owner info) */}
-          {afterProductInfoSections.map(
+          {/* Extension slots after ProductInfo (e.g. Resale owner info) */}
+          {afterProductInfoSlots.map(
             ext =>
               ext.component && (
                 <div key={ext.id} style={{ marginTop: '1rem' }}>
@@ -566,7 +566,7 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
           </div>
         </div>
       )}
-      {afterContentSections.map(
+      {afterContentSlots.map(
         ext =>
           ext.component && (
             <div key={ext.id} style={{ marginTop: '1.5rem' }}>

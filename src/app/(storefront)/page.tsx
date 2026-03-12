@@ -2,7 +2,8 @@ import React from 'react'
 import { getLocale } from 'next-intl/server'
 import { headers } from 'next/headers'
 import { loadExtensions } from '@/extensions'
-import { getPageSectionReplacements } from '@/extensions/resolve'
+import { getPageSlotReplacements } from '@/extensions/resolve'
+import { ROOT_SLOT_ID } from '@/extensions/terminology'
 import { getApiBaseUrl, getApiHeaders } from '@/utils/api'
 import { getSiteConfig } from '@/utils/siteMetadata'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
@@ -51,8 +52,8 @@ export default async function Page() {
   const pageData = await getPageData('home', locale)
 
   const extensions = await loadExtensions()
-  const replacements = getPageSectionReplacements(extensions, 'storefront/home')
-  const rootReplace = replacements.get('__root__')
+  const replacements = getPageSlotReplacements(extensions, 'storefront/home')
+  const rootReplace = replacements.get(ROOT_SLOT_ID)
   if (rootReplace?.component) {
     const RootComponent = rootReplace.component
     return <RootComponent locale={locale} />

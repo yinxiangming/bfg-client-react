@@ -19,7 +19,7 @@ import CheckoutPaymentSection from './CheckoutPaymentSection'
 import CheckoutOrderSummary from './CheckoutOrderSummary'
 import type { CheckoutFormData, UserInfo, Address, PaymentGateway, SavedPaymentMethod } from './types'
 import { isPlaceOrderGateway } from './types'
-import { usePageSections } from '@/extensions/hooks/usePageSections'
+import { usePageSlots } from '@/extensions/hooks/usePageSections'
 
 import '@/styles/storefront.css'
 
@@ -27,7 +27,7 @@ const CheckoutPage = () => {
   const t = useTranslations('storefront')
   const router = useRouter()
   const { items, getSubtotal, clearCart } = useCart()
-  const { beforeSections, afterSections } = usePageSections('storefront/checkout')
+  const { beforeSlots, afterSlots } = usePageSlots('storefront/checkout')
   const [submitting, setSubmitting] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [user, setUser] = useState<UserInfo | null>(null)
@@ -570,7 +570,7 @@ const CheckoutPage = () => {
     <div className='sf-checkout-page' style={{ minHeight: '100vh' }}>
       {/* Main Content */}
       <div className='sf-container sf-checkout-container'>
-        {beforeSections.map(
+        {beforeSlots.map(
           ext =>
             ext.component && (
               <div key={ext.id} style={{ marginBottom: '1.5rem' }}>
@@ -713,7 +713,7 @@ const CheckoutPage = () => {
             total={finalTotal}
           />
         </div>
-        {afterSections.map(
+        {afterSlots.map(
           ext =>
             ext.component && (
               <div key={ext.id} style={{ marginTop: '1.5rem' }}>

@@ -34,8 +34,8 @@ import { BaseDataProvider } from '@/contexts/BaseDataContext'
 import { orderSchema } from '@/data/storeSchemas'
 
 // Extension Hooks
-import { usePageSections } from '@/extensions/hooks/usePageSections'
-import { renderSection } from '@/extensions/hooks/renderSection'
+import { usePageSlots } from '@/extensions/hooks/usePageSections'
+import { renderSlot } from '@/extensions/hooks/renderSection'
 
 // API Imports
 import { getOrder, updateOrder, type Order } from '@/services/store'
@@ -93,8 +93,8 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
   const [order, setOrder] = useState<OrderDetail | null>(null)
   const [error, setError] = useState<string | null>(null)
 
-  const { visibleSections, beforeSections, afterSections, replacements } =
-    usePageSections('admin/store/orders/edit')
+  const { visibleSlots, beforeSlots, afterSlots, replacements } =
+    usePageSlots('admin/store/orders/edit')
 
   const fetchOrder = useCallback(async () => {
     try {
@@ -266,7 +266,7 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
         </Grid>
         <Grid size={{ xs: 12, md: 8 }}>
           <Grid container spacing={6}>
-            {beforeSections.map(
+            {beforeSlots.map(
               ext =>
                 ext.component && (
                   <Grid key={ext.id} size={{ xs: 12 }}>
@@ -274,44 +274,44 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
                   </Grid>
                 )
             )}
-            {visibleSections.includes('OrderBasicInfo') && (
+            {visibleSlots.includes('OrderBasicInfo') && (
               <Grid size={{ xs: 12 }}>
-                {renderSection(
+                {renderSlot(
                   'OrderBasicInfo',
-                  visibleSections,
+                  visibleSlots,
                   replacements,
                   OrderBasicInfo,
                   { order, onNavigate: handleNavigate }
                 )}
               </Grid>
             )}
-            {visibleSections.includes('OrderDetails') && (
+            {visibleSlots.includes('OrderDetails') && (
               <Grid size={{ xs: 12 }} id='section-details'>
-                {renderSection(
+                {renderSlot(
                   'OrderDetails',
-                  visibleSections,
+                  visibleSlots,
                   replacements,
                   OrderDetailsCard,
                   { order, onOrderUpdate: () => fetchOrder() }
                 )}
               </Grid>
             )}
-            {visibleSections.includes('Packages') && (
+            {visibleSlots.includes('Packages') && (
               <Grid size={{ xs: 12 }} id='section-packages'>
-                {renderSection(
+                {renderSlot(
                   'Packages',
-                  visibleSections,
+                  visibleSlots,
                   replacements,
                   PackagesCard,
                   { order, onOrderUpdate: debouncedFetchOrderRef }
                 )}
               </Grid>
             )}
-            {visibleSections.includes('Invoice') && (
+            {visibleSlots.includes('Invoice') && (
               <Grid size={{ xs: 12 }} id='section-invoice'>
-                {renderSection(
+                {renderSlot(
                   'Invoice',
-                  visibleSections,
+                  visibleSlots,
                   replacements,
                   InvoiceCard,
                   {
@@ -328,29 +328,29 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
                 )}
               </Grid>
             )}
-            {visibleSections.includes('Payment') && (
+            {visibleSlots.includes('Payment') && (
               <Grid size={{ xs: 12 }} id='section-payment'>
-                {renderSection(
+                {renderSlot(
                   'Payment',
-                  visibleSections,
+                  visibleSlots,
                   replacements,
                   PaymentCard,
                   { payments: order.payments || [] }
                 )}
               </Grid>
             )}
-            {visibleSections.includes('OrderTimeline') && (
+            {visibleSlots.includes('OrderTimeline') && (
               <Grid size={{ xs: 12 }} id='section-timeline'>
-                {renderSection(
+                {renderSlot(
                   'OrderTimeline',
-                  visibleSections,
+                  visibleSlots,
                   replacements,
                   OrderTimeline,
                   { order }
                 )}
               </Grid>
             )}
-            {afterSections.map(
+            {afterSlots.map(
               ext =>
                 ext.component && (
                   <Grid key={ext.id} size={{ xs: 12 }}>
@@ -362,22 +362,22 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
           <Grid container spacing={6}>
-            {visibleSections.includes('CustomerDetails') && (
+            {visibleSlots.includes('CustomerDetails') && (
               <Grid size={{ xs: 12 }} id='section-customer'>
-                {renderSection(
+                {renderSlot(
                   'CustomerDetails',
-                  visibleSections,
+                  visibleSlots,
                   replacements,
                   CustomerDetailsCard,
                   { order }
                 )}
               </Grid>
             )}
-            {visibleSections.includes('Addresses') && (
+            {visibleSlots.includes('Addresses') && (
               <Grid size={{ xs: 12 }} id='section-address'>
-                {renderSection(
+                {renderSlot(
                   'Addresses',
-                  visibleSections,
+                  visibleSlots,
                   replacements,
                   AddressCards,
                   {
@@ -390,11 +390,11 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
                 )}
               </Grid>
             )}
-            {visibleSections.includes('Delivery') && (
+            {visibleSlots.includes('Delivery') && (
               <Grid size={{ xs: 12 }} id='section-delivery'>
-                {renderSection(
+                {renderSlot(
                   'Delivery',
-                  visibleSections,
+                  visibleSlots,
                   replacements,
                   DeliveryCard,
                   { order }

@@ -16,7 +16,7 @@ import { useCart } from '@/contexts/CartContext'
 // Util Imports
 import { getStoreImageUrl } from '@/utils/media'
 import { storefrontApi } from '@/utils/storefrontApi'
-import { usePageSections } from '@/extensions/hooks/usePageSections'
+import { usePageSlots } from '@/extensions/hooks/usePageSections'
 
 // Import CSS
 import '@/styles/storefront.css'
@@ -25,7 +25,7 @@ const CartPage = () => {
   const t = useTranslations('storefront')
   const router = useRouter()
   const { items, loading, removeItem, updateQuantity, getSubtotal } = useCart()
-  const { beforeSections, afterSections } = usePageSections('storefront/cart')
+  const { beforeSlots, afterSlots } = usePageSlots('storefront/cart')
   const [updating, setUpdating] = useState<number | null>(null)
   const [pricePreview, setPricePreview] = useState<{
     subtotal: number
@@ -97,7 +97,7 @@ const CartPage = () => {
   if (items.length === 0) {
     return (
       <div className='sf-container' style={{ padding: '4rem 1rem' }}>
-        {beforeSections.map(
+        {beforeSlots.map(
           ext =>
             ext.component && (
               <div key={ext.id} style={{ marginBottom: '1.5rem' }}>
@@ -130,7 +130,7 @@ const CartPage = () => {
             {t('buttons.continueShopping')}
           </Link>
         </div>
-        {afterSections.map(
+        {afterSlots.map(
           ext =>
             ext.component && (
               <div key={ext.id} style={{ marginTop: '1.5rem' }}>
@@ -144,7 +144,7 @@ const CartPage = () => {
 
   return (
     <div className='sf-container' style={{ padding: '2rem 1rem' }}>
-      {beforeSections.map(
+      {beforeSlots.map(
         ext =>
           ext.component && (
             <div key={ext.id} style={{ marginBottom: '1.5rem' }}>
@@ -325,7 +325,7 @@ const CartPage = () => {
           </div>
         </div>
       </div>
-      {afterSections.map(
+      {afterSlots.map(
         ext =>
           ext.component && (
             <div key={ext.id} style={{ marginTop: '1.5rem' }}>

@@ -41,8 +41,8 @@ import {
 import { useApiData } from '@/hooks/useApiData'
 
 // Extension Hooks
-import { usePageSections } from '@/extensions/hooks/usePageSections'
-import { renderSection } from '@/extensions/hooks/renderSection'
+import { usePageSlots } from '@/extensions/hooks/usePageSections'
+import { renderSlot } from '@/extensions/hooks/renderSection'
 
 export default function CategoryEditPage() {
   const router = useRouter()
@@ -95,8 +95,8 @@ export default function CategoryEditPage() {
   const [categoriesLoading, setCategoriesLoading] = useState(false)
   const [tabIndex, setTabIndex] = useState(0)
 
-  const { visibleSections, beforeSections, afterSections, replacements } =
-    usePageSections('admin/store/categories/edit')
+  const { visibleSlots, beforeSlots, afterSlots, replacements } =
+    usePageSlots('admin/store/categories/edit')
 
   // Filter out current category and its descendants to prevent circular references
   // Must be called before any conditional returns (React Hooks rule)
@@ -383,7 +383,7 @@ export default function CategoryEditPage() {
         <Typography variant='h4' sx={{ mb: 4 }}>
           {t('categories.editPage.title')}
         </Typography>
-        {beforeSections.map(
+        {beforeSlots.map(
           ext =>
             ext.component && (
               <Box key={ext.id} sx={{ mb: 4 }}>
@@ -399,10 +399,10 @@ export default function CategoryEditPage() {
           <Tab label={tabLabels.info} id='category-tab-info' aria-controls='category-tabpanel-info' />
           <Tab label={tabLabels.rules} id='category-tab-rules' aria-controls='category-tabpanel-rules' />
         </Tabs>
-        {tabIndex === 0 && visibleSections.includes('CategoryInfo') &&
-          renderSection(
+        {tabIndex === 0 && visibleSlots.includes('CategoryInfo') &&
+          renderSlot(
             'CategoryInfo',
-            visibleSections,
+            visibleSlots,
             replacements,
             CategoryInfoContent,
             undefined
@@ -448,7 +448,7 @@ export default function CategoryEditPage() {
             ) : null}
           </>
         )}
-        {afterSections.map(
+        {afterSlots.map(
           ext =>
             ext.component && (
               <Box key={ext.id} sx={{ mt: 4 }}>

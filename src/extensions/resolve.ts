@@ -1,4 +1,5 @@
-import type { Extension, PageSectionExtension, StorefrontLayoutProps } from './registry'
+import type { Extension, PageSlotExtension, StorefrontLayoutProps } from './registry'
+import { getTargetSlot } from './registry'
 import type { ComponentType } from 'react'
 
 /**
@@ -16,24 +17,33 @@ export function getStorefrontLayoutOverride(
 }
 
 /**
- * Pure function: get replacement sections for a page from extensions.
- * Used by server (SSR home override) and can be shared with usePageSections.
+ * Pure function: get replacement slots for a page from extensions.
+ * Used by server (SSR home override) and usePageSlots.
  */
-export function getPageSectionReplacements(
+export function getPageSlotReplacements(
   extensions: Extension[],
   page: string
-): Map<string, PageSectionExtension> {
-  const sections = extensions
+): Map<string, PageSlotExtension> {
+  const slots = extensions
     .flatMap((e) => e.sections || [])
     .filter((s) => s.page === page)
     .sort((a, b) => (b.priority ?? 100) - (a.priority ?? 100))
 
-  const replacements = new Map<string, PageSectionExtension>()
-  for (const ext of sections) {
+  const replacements = new Map<string, PageSlotExtension>()
+  for (const ext of slots) {
     if (ext.condition && !ext.condition()) continue
-    if (ext.position === 'replace' && ext.targetSection && !replacements.has(ext.targetSection)) {
-      replacements.set(ext.targetSection, ext)
+    const slotId = getTargetSlot(ext)
+    if (ext.position === 'replace' && slotId && !replacements.has(slotId)) {
+      replacements.set(slotId, ext)
     }
   }
   return replacements
+}
+
+/** @deprecated Use getPageSlotReplacements */
+export function getPageSectionReplacements(
+  extensions: Extension[],
+  page: string
+): Map<string, PageSlotExtension> {
+  return getPageSlotReplacements(extensions, page)
 }

@@ -41,7 +41,7 @@ import {
 import { clearStorefrontConfigCache } from '@/utils/storefrontConfig'
 import { THEME_REGISTRY } from '@/components/storefront/themes/registry.generated'
 import { bfgApi } from '@/utils/api'
-import { usePageSections } from '@/extensions/hooks/usePageSections'
+import { usePageSlots } from '@/extensions/hooks/usePageSections'
 
 const THEME_IDS = Object.keys(THEME_REGISTRY).sort()
 function themeDisplayName(themeId: string): string {
@@ -107,7 +107,7 @@ const initialBasicData: BasicData = {
 
 const GeneralSettingsPage = () => {
   const t = useTranslations('admin')
-  const { beforeSections, afterSections } = usePageSections('admin/settings/general')
+  const { beforeSlots, afterSlots } = usePageSlots('admin/settings/general')
   // States
   const [activeTab, setActiveTab] = useState('basic')
   const [basicData, setBasicData] = useState<BasicData>(initialBasicData)
@@ -337,7 +337,7 @@ const GeneralSettingsPage = () => {
         </Grid>
       )}
 
-      {beforeSections.map(
+      {beforeSlots.map(
         ext =>
           ext.component && (
             <Grid key={ext.id} size={{ xs: 12 }}>
@@ -788,7 +788,7 @@ const GeneralSettingsPage = () => {
         </Card>
       </Grid>
 
-      {afterSections.map(
+      {afterSlots.map(
         ext =>
           ext.component && (
             <Grid key={ext.id} size={{ xs: 12 }}>

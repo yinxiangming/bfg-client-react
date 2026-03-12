@@ -32,8 +32,8 @@ import CustomerPaymentMethods from '@/views/admin/store/customers/edit/CustomerP
 import CustomerInbox from '@/views/admin/store/customers/edit/CustomerInbox'
 
 // Extension Hooks
-import { usePageSections } from '@/extensions/hooks/usePageSections'
-import { renderSection } from '@/extensions/hooks/renderSection'
+import { usePageSlots } from '@/extensions/hooks/usePageSections'
+import { renderSlot } from '@/extensions/hooks/renderSection'
 
 // API Imports
 import { getCustomer, type Customer } from '@/services/store'
@@ -70,8 +70,8 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
     severity: 'success'
   })
 
-  const { visibleSections, beforeSections, afterSections, replacements } =
-    usePageSections('admin/store/customers/detail')
+  const { visibleSlots, beforeSlots, afterSlots, replacements } =
+    usePageSlots('admin/store/customers/detail')
 
   const fetchCustomer = useCallback(async () => {
     try {
@@ -187,7 +187,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
         onResetPassword={handleResetPassword}
       />
 
-      {beforeSections.map(
+      {beforeSlots.map(
         ext =>
           ext.component && (
             <Box key={ext.id} sx={{ mt: 4 }}>
@@ -210,71 +210,71 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
 
       <Box sx={{ mt: 4 }}>
         {activeTab === 0 &&
-          visibleSections.includes('CustomerBasicInfo') &&
-          renderSection(
+          visibleSlots.includes('CustomerBasicInfo') &&
+          renderSlot(
             'CustomerBasicInfo',
-            visibleSections,
+            visibleSlots,
             replacements,
             CustomerBasicInfo,
             { customer, onUpdate: handleCustomerUpdate }
           )}
         {activeTab === 1 &&
-          visibleSections.includes('CustomerWallet') &&
-          renderSection(
+          visibleSlots.includes('CustomerWallet') &&
+          renderSlot(
             'CustomerWallet',
-            visibleSections,
+            visibleSlots,
             replacements,
             CustomerWallet,
             { customer, onUpdate: handleCustomerUpdate }
           )}
         {activeTab === 2 &&
-          visibleSections.includes('CustomerSegments') &&
-          renderSection(
+          visibleSlots.includes('CustomerSegments') &&
+          renderSlot(
             'CustomerSegments',
-            visibleSections,
+            visibleSlots,
             replacements,
             CustomerSegments,
             { customer, onUpdate: handleCustomerUpdate }
           )}
         {activeTab === 3 &&
-          visibleSections.includes('CustomerOrders') &&
-          renderSection(
+          visibleSlots.includes('CustomerOrders') &&
+          renderSlot(
             'CustomerOrders',
-            visibleSections,
+            visibleSlots,
             replacements,
             CustomerOrders,
             { customerId: customer.id }
           )}
         {activeTab === 4 &&
-          visibleSections.includes('CustomerAddresses') &&
-          renderSection(
+          visibleSlots.includes('CustomerAddresses') &&
+          renderSlot(
             'CustomerAddresses',
-            visibleSections,
+            visibleSlots,
             replacements,
             CustomerAddresses,
             { customerId: customer.id, onUpdate: handleCustomerUpdate }
           )}
         {activeTab === 5 &&
-          visibleSections.includes('CustomerPaymentMethods') &&
-          renderSection(
+          visibleSlots.includes('CustomerPaymentMethods') &&
+          renderSlot(
             'CustomerPaymentMethods',
-            visibleSections,
+            visibleSlots,
             replacements,
             CustomerPaymentMethods,
             { customerId: customer.id, onUpdate: handleCustomerUpdate }
           )}
         {activeTab === 6 &&
-          visibleSections.includes('CustomerInbox') &&
-          renderSection(
+          visibleSlots.includes('CustomerInbox') &&
+          renderSlot(
             'CustomerInbox',
-            visibleSections,
+            visibleSlots,
             replacements,
             CustomerInbox,
             { customerId: customer.id }
           )}
       </Box>
 
-      {afterSections.map(
+      {afterSlots.map(
         ext =>
           ext.component && (
             <Box key={ext.id} sx={{ mt: 4 }}>
