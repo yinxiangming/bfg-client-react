@@ -3,6 +3,7 @@
 // Next Imports
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
+import { useEffect, useState } from 'react'
 
 // MUI Imports
 import Grid from '@mui/material/Grid'
@@ -10,12 +11,17 @@ import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 import Avatar from '@mui/material/Avatar'
+import Box from '@mui/material/Box'
+import CircularProgress from '@mui/material/CircularProgress'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import type { Theme } from '@mui/material/styles'
 
 // Third-party Imports
 import classnames from 'classnames'
+import { Icon } from '@iconify/react'
 import { usePageSections } from '@/extensions/hooks/usePageSections'
+import { useStorefrontConfigSafe } from '@/contexts/StorefrontConfigContext'
+import { meApi } from '@/utils/meApi'
 
 interface AccountMenuItem {
   titleKey: string
@@ -64,16 +70,52 @@ const menuItemsConfig: AccountMenuItem[] = [
   }
 ]
 
+interface DashboardStats {
+  wallet_balance: number | null
+  wallet_currency: string | null
+  order_counts: Record<string, number>
+  unread_messages_count: number
+  /** Plugin-provided stats (e.g. extensions inject their own keys here) */
+  pluginStats?: Record<string, unknown>
+}
+
 export default function AccountDashboardClient() {
   const router = useRouter()
   const t = useTranslations('account')
+  const storefrontConfig = useStorefrontConfigSafe()
   const isBelowMdScreen = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'))
   const isBelowSmScreen = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'))
-  const { beforeSections, afterSections } = usePageSections('account/dashboard')
+  const { beforeSections, afterSections, replacements } = usePageSections('account/dashboard')
+  const [stats, setStats] = useState<DashboardStats | null>(null)
+  const [statsLoading, setStatsLoading] = useState(true)
+  const displayCurrency = stats?.wallet_currency ?? storefrontConfig.default_currency
+
+  useEffect(() => {
+    let cancelled = false
+    meApi
+      .getDashboardStats()
+      .then((data) => {
+        if (!cancelled) setStats(data)
+      })
+      .catch(() => {
+        if (!cancelled) setStats(null)
+      })
+      .finally(() => {
+        if (!cancelled) setStatsLoading(false)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
 
   const handleCardClick = (href: string) => {
     router.push(href)
   }
+
+  const orderStatusKeys = ['pending', 'paid', 'shipped', 'completed', 'cancelled'] as const
+  const orderCountTotal = stats
+    ? orderStatusKeys.reduce((sum, s) => sum + (stats.order_counts[s] ?? 0), 0)
+    : 0
 
   return (
     <div className='flex flex-col gap-6'>
@@ -91,6 +133,89 @@ export default function AccountDashboardClient() {
         </Typography>
         <Typography>{t('pages.dashboard.subtitle')}</Typography>
       </div>
+
+      {/* Stats cards: wallet, orders by status, new messages, then plugin slot StatsRowTail */}
+      {statsLoading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
+          <CircularProgress size={32} />
+        </Box>
+      ) : stats ? (
+        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
+          {displayCurrency && (
+            <Card
+              variant='outlined'
+              sx={{ minWidth: 160, flex: 1, cursor: 'pointer' }}
+              onClick={() => handleCardClick('/account/payments')}
+            >
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                  <Icon icon='mdi:wallet-outline' style={{ color: '#6366f1', fontSize: 20 }} />
+                  <Typography variant='caption' color='text.secondary'>
+                    {t('dashboard.stats.walletBalance')}
+                  </Typography>
+                </Box>
+                <Typography variant='h6' fontWeight={600}>
+                  {displayCurrency} {Number(stats.wallet_balance ?? 0).toLocaleString()}
+                </Typography>
+              </CardContent>
+            </Card>
+          )}
+          <Card
+            variant='outlined'
+            sx={{ minWidth: 160, flex: 1, cursor: 'pointer' }}
+            onClick={() => handleCardClick('/account/orders')}
+          >
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                <Icon icon='mdi:cart-outline' style={{ color: '#22c55e', fontSize: 20 }} />
+                <Typography variant='caption' color='text.secondary'>
+                  Orders
+                </Typography>
+              </Box>
+              <Typography variant='h6' fontWeight={600}>
+                {orderCountTotal}
+              </Typography>
+              <Typography variant='caption' color='text.secondary' sx={{ mt: 0.5, display: 'block' }}>
+                {[
+                  stats.order_counts.pending ? `${stats.order_counts.pending} ${t('dashboard.stats.ordersPending')}` : null,
+                  stats.order_counts.paid ? `${stats.order_counts.paid} ${t('dashboard.stats.ordersPaid')}` : null,
+                  stats.order_counts.shipped ? `${stats.order_counts.shipped} ${t('dashboard.stats.ordersShipped')}` : null,
+                  stats.order_counts.completed ? `${stats.order_counts.completed} ${t('dashboard.stats.ordersCompleted')}` : null,
+                  stats.order_counts.cancelled ? `${stats.order_counts.cancelled} ${t('dashboard.stats.ordersCancelled')}` : null
+                ]
+                  .filter(Boolean)
+                  .join(' · ') || '—'}
+              </Typography>
+            </CardContent>
+          </Card>
+          <Card
+            variant='outlined'
+            sx={{ minWidth: 160, flex: 1, cursor: 'pointer' }}
+            onClick={() => handleCardClick('/account/alerts')}
+          >
+            <CardContent>
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
+                <Icon icon='mdi:email-outline' style={{ color: '#f59e0b', fontSize: 20 }} />
+                <Typography variant='caption' color='text.secondary'>
+                  {t('dashboard.stats.newMessages')}
+                </Typography>
+              </Box>
+              <Typography variant='h6' fontWeight={600}>
+                {stats?.unread_messages_count ?? 0}
+              </Typography>
+            </CardContent>
+          </Card>
+          {(() => {
+            const ext = replacements.get('StatsRowTail')
+            const Component = ext?.component
+            return Component ? (
+              <Box key={ext!.id} sx={{ minWidth: 160, flex: 1, display: 'flex', alignSelf: 'stretch' }}>
+                <Component />
+              </Box>
+            ) : null
+          })()}
+        </Box>
+      ) : null}
 
       <Card
         variant='outlined'

@@ -9,14 +9,16 @@ import SideMenuLayout from '@components/layout/SideMenuLayout'
 import TopMenuLayout from '@components/layout/HorizontalLayout'
 import SiteAnnouncementBanner from '@/components/storefront/SiteAnnouncementBanner'
 import { authApi } from '@/utils/authApi'
+import { ExtensionLoaderProvider } from '@/extensions/context'
 import type { MenuNode } from '@/types/menu'
 
 type AccountLayoutClientProps = {
   children: React.ReactNode
   navItems: MenuNode[]
+  extensionIds: string[]
 }
 
-export default function AccountLayoutClient({ children, navItems }: AccountLayoutClientProps) {
+export default function AccountLayoutClient({ children, navItems, extensionIds }: AccountLayoutClientProps) {
   const router = useRouter()
   const pathname = usePathname()
 
@@ -28,14 +30,16 @@ export default function AccountLayoutClient({ children, navItems }: AccountLayou
   }, [router, pathname])
 
   return (
-    <StorefrontConfigProvider>
-      <SiteAnnouncementBanner />
-      <AppLayoutProvider configCookie={null}>
-        <AppLayoutContainer
-          sideMenuLayout={<SideMenuLayout navItems={navItems}>{children}</SideMenuLayout>}
-          topMenuLayout={<TopMenuLayout>{children}</TopMenuLayout>}
-        />
-      </AppLayoutProvider>
-    </StorefrontConfigProvider>
+    <ExtensionLoaderProvider extensionIds={extensionIds}>
+      <StorefrontConfigProvider>
+        <SiteAnnouncementBanner />
+        <AppLayoutProvider configCookie={null}>
+          <AppLayoutContainer
+            sideMenuLayout={<SideMenuLayout navItems={navItems}>{children}</SideMenuLayout>}
+            topMenuLayout={<TopMenuLayout>{children}</TopMenuLayout>}
+          />
+        </AppLayoutProvider>
+      </StorefrontConfigProvider>
+    </ExtensionLoaderProvider>
   )
 }

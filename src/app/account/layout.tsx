@@ -10,6 +10,11 @@ export default async function AccountLayout({ children }: { children: React.Reac
   const extensions = await loadExtensions()
   const accountNavExtensions = extensions.flatMap(e => e.accountNav || [])
   const finalNavItems = applyNavExtensions(defaultNavItems, accountNavExtensions, 100)
+  const extensionIds = extensions.map(e => e.id)
 
-  return <AccountLayoutClient navItems={finalNavItems}>{children}</AccountLayoutClient>
+  return (
+    <AccountLayoutClient navItems={finalNavItems} extensionIds={extensionIds}>
+      {children}
+    </AccountLayoutClient>
+  )
 }

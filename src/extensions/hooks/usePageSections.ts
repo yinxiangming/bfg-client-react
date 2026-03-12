@@ -41,8 +41,8 @@ export const DEFAULT_SECTIONS: Record<string, string[]> = {
   'storefront/cart': ['AboveCart', 'CartContent', 'BelowCart'],
   'storefront/checkout': ['AboveSteps', 'Contact', 'Shipping', 'Payment', 'OrderSummary', 'BelowSteps'],
   'storefront/checkout/success': ['AboveMessage', 'Message', 'BelowActions'],
-  // Account
-  'account/dashboard': ['Welcome', 'QuickLinks', 'RecentOrders'],
+  // Account (StatsRowTail = slot after New Messages for plugin replace, e.g. resale Listings/Sold)
+  'account/dashboard': ['Welcome', 'QuickLinks', 'RecentOrders', 'StatsRowTail'],
   'account/information': ['ProfileForm'],
   'account/orders': ['AboveList', 'OrderList', 'BelowList'],
   'account/orders/detail': ['OrderSummary', 'OrderItems', 'BelowActions'],
@@ -54,7 +54,7 @@ export function usePageSections(page: string) {
 
   return useMemo(() => {
     if (!ctx) {
-      return { 
+      return {
         visibleSections: DEFAULT_SECTIONS[page] || [],
         beforeSections: [],
         afterSections: [],

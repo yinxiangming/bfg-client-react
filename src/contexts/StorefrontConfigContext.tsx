@@ -22,7 +22,7 @@ const defaultConfig: StorefrontConfig = {
   facebook_url: '',
   twitter_url: '',
   instagram_url: '',
-  default_currency: 'NZD',
+  default_currency: 'USD',
   top_bar_announcement: '',
   footer_copyright: '',
   site_announcement: '',

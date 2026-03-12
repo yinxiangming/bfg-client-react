@@ -1,5 +1,6 @@
 {
   "nav": {
+    "dashboard": "仪表盘",
     "orders": "我的订单",
     "addresses": "地址管理",
     "payments": "支付",
@@ -23,12 +24,27 @@
       "title": "支付",
       "subtitle": "管理支付方式、查看支付记录和下载发票"
     },
+    "wallet": {
+      "withdraw": {
+        "title": "提款",
+        "subtitle": "从钱包申请提款"
+      }
+    },
     "settings": {
       "title": "设置",
       "subtitle": "管理您的个人资料、安全、偏好设置和隐私"
     }
   },
   "dashboard": {
+    "stats": {
+      "walletBalance": "钱包余额",
+      "newMessages": "新消息",
+      "ordersPending": "待处理",
+      "ordersPaid": "已支付",
+      "ordersShipped": "已发货",
+      "ordersCompleted": "已完成",
+      "ordersCancelled": "已取消"
+    },
     "menuItems": {
       "orders": {
         "title": "我的订单",
@@ -302,6 +318,27 @@
     "passwordMismatch": "新密码和确认密码不匹配",
     "passwordTooShort": "新密码长度至少为 8 个字符",
     "failedChange": "更改密码失败"
+  },
+  "wallet": {
+    "withdraw": {
+      "title": "提款申请",
+      "subtitle": "从钱包余额申请提款，审核通过后将处理。",
+      "available": "可提现（现金余额）",
+      "amount": "金额",
+      "payoutMethod": "收款方式",
+      "payoutMethodPlaceholder": "如：银行转账、PayPal",
+      "notes": "备注",
+      "submit": "提交申请",
+      "submitting": "提交中...",
+      "cancel": "取消",
+      "backToAccount": "返回账户",
+      "noCashBalance": "暂无可提现余额，需有现金余额方可申请提款。",
+      "validation": {
+        "amountRequired": "请输入有效金额。",
+        "amountExceeds": "金额不能超过您的现金余额。"
+      },
+      "submitFailed": "提交提款申请失败。"
+    }
   },
   "addresses": {
     "title": "我的地址",

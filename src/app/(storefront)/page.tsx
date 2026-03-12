@@ -1,5 +1,6 @@
 import React from 'react'
 import { getLocale } from 'next-intl/server'
+import { headers } from 'next/headers'
 import { loadExtensions } from '@/extensions'
 import { getPageSectionReplacements } from '@/extensions/resolve'
 import { getApiBaseUrl, getApiHeaders } from '@/utils/api'
@@ -15,7 +16,9 @@ export const revalidate = 0
 
 export async function generateMetadata(): Promise<Metadata> {
   const locale = await getLocale()
-  const { site_name } = await getSiteConfig(locale)
+  const headersList = await headers()
+  const requestHost = headersList.get('host') ?? undefined
+  const { site_name } = await getSiteConfig(locale, requestHost)
   return { title: site_name ? `${site_name}` : 'Home' }
 }
 
@@ -40,7 +43,9 @@ async function getPageData(slug: string, locale: string) {
 
 export default async function Page() {
   const locale = await getLocale()
-  const config = await getStorefrontConfigForServer(locale)
+  const headersList = await headers()
+  const requestHost = headersList.get('host') ?? undefined
+  const config = await getStorefrontConfigForServer(locale, requestHost)
   if (config === null) return null
   const theme = config.theme ?? 'store'
   const pageData = await getPageData('home', locale)

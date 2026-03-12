@@ -5,7 +5,7 @@ import {loadPluginMessages} from './plugin-messages'
 
 type Messages = Record<string, any>
 
-const enabledApps = ['storefront', 'account', 'admin'] as const
+const enabledApps = ['storefront', 'account', 'admin', 'auth'] as const
 type EnabledApp = (typeof enabledApps)[number]
 
 function isSupportedLocale(locale: string): locale is AppLocale {
@@ -60,11 +60,12 @@ export default getRequestConfig(async ({requestLocale}) => {
     fromAcceptLanguage ||
     routing.defaultLocale
 
-  const [common, storefront, account, admin, pluginMessages] = await Promise.all([
+  const [common, storefront, account, admin, auth, pluginMessages] = await Promise.all([
     loadCommonMessages(locale),
     loadAppMessages('storefront', locale),
     loadAppMessages('account', locale),
     loadAppMessages('admin', locale),
+    loadAppMessages('auth', locale),
     loadPluginMessages(locale)
   ])
 
@@ -83,6 +84,7 @@ export default getRequestConfig(async ({requestLocale}) => {
       storefront,
       account: accountMerged,
       admin: adminMerged,
+      auth,
       ...pluginNamespaces
     }
   }

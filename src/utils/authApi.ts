@@ -4,7 +4,7 @@
  * Client for authentication endpoints
  */
 
-import { getApiBaseUrl } from './api'
+import { getApiBaseUrl, getApiHeaders } from './api'
 import { getApiLanguageHeaders } from '@/i18n/http'
 
 interface LoginRequest {
@@ -57,10 +57,12 @@ class AuthApiClient {
     return this._baseUrl
   }
 
-  private getJsonHeaders(): Record<string, string> {
+  /** Headers for auth requests. Include request host so backend can resolve workspace by domain (same as storefront). */
+  private getAuthHeaders(): Record<string, string> {
+    const requestHost = typeof window !== 'undefined' ? window.location.host : undefined
     return {
       'Content-Type': 'application/json',
-      ...getApiLanguageHeaders()
+      ...getApiHeaders(undefined, requestHost ? { requestHost } : undefined)
     }
   }
 
@@ -89,11 +91,20 @@ class AuthApiClient {
     }
 
     console.log('Login request body:', requestBody)
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: this.getJsonHeaders(),
-      body: JSON.stringify(requestBody)
-    })
+    let response: Response
+    try {
+      response = await fetch(url, {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(requestBody)
+      })
+    } catch (err: any) {
+      const msg = err?.message ?? ''
+      if (msg === 'Failed to fetch' || err?.name === 'TypeError') {
+        throw new Error('NETWORK_ERROR')
+      }
+      throw err
+    }
 
     console.log('Login response status:', response.status, response.statusText)
 
@@ -176,7 +187,7 @@ class AuthApiClient {
 
     const response = await fetch(url, {
       method: 'POST',
-      headers: this.getJsonHeaders(),
+      headers: this.getAuthHeaders(),
       body: JSON.stringify(data)
     })
 
@@ -287,7 +298,7 @@ class AuthApiClient {
     const url = `${this.baseUrl}/api/v1/auth/token/refresh/`
     const response = await fetch(url, {
       method: 'POST',
-      headers: this.getJsonHeaders(),
+      headers: this.getAuthHeaders(),
       body: JSON.stringify({ refresh: refreshToken })
     })
 
@@ -337,7 +348,7 @@ class AuthApiClient {
 
     const response = await fetch(url, {
       method: 'POST',
-      headers: this.getJsonHeaders(),
+      headers: this.getAuthHeaders(),
       body: JSON.stringify({ email })
     })
 
@@ -380,7 +391,7 @@ class AuthApiClient {
 
     const response = await fetch(url, {
       method: 'POST',
-      headers: this.getJsonHeaders(),
+      headers: this.getAuthHeaders(),
       body: JSON.stringify({
         uid,
         token,
@@ -427,7 +438,7 @@ class AuthApiClient {
 
     const response = await fetch(url, {
       method: 'POST',
-      headers: this.getJsonHeaders(),
+      headers: this.getAuthHeaders(),
       body: JSON.stringify({ key })
     })
 

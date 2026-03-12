@@ -45,7 +45,8 @@ export default async function StorefrontLayoutWrapper({ children }: { children: 
   }
 
   const locale = await getLocale()
-  const config = await getStorefrontConfigForServer(locale)
+  const requestHost = headersList.get('host') ?? undefined
+  const config = await getStorefrontConfigForServer(locale, requestHost)
   if (config === null) {
     return (
       <ExtensionLoaderProvider extensionIds={extensionIds}>

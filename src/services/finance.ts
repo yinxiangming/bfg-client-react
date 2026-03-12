@@ -357,6 +357,44 @@ export type InvoiceCreatePayload = {
   }>
 }
 
+// Wallet API (customer-facing: list returns own wallet only for non-staff)
+export type Wallet = {
+  id: number
+  cash_balance: number | string
+  credit_balance?: number | string
+  balance?: number | string
+  currency?: string
+  currency_code?: string
+  credit_limit?: number | string
+}
+
+export async function getMyWallet(): Promise<Wallet | null> {
+  const response = await apiFetch<{ results?: Wallet[] } | Wallet[]>(bfgApi.wallets())
+  const list = Array.isArray(response) ? response : response.results || []
+  const first = list[0]
+  if (!first) return null
+  const currencyCode =
+    first.currency_code ?? (typeof first.currency === 'string' ? first.currency : null) ?? 'NZD'
+  return {
+    ...first,
+    id: first.id,
+    cash_balance: first.cash_balance,
+    credit_balance: first.credit_balance ?? 0,
+    balance: first.balance ?? (Number(first.cash_balance) + Number(first.credit_balance ?? 0)),
+    currency: currencyCode
+  }
+}
+
+export async function createWithdrawalRequest(
+  walletId: number,
+  payload: { amount: number; payout_method?: string; payout_details?: Record<string, unknown>; notes?: string }
+): Promise<{ id: number; amount: string; status: string }> {
+  return apiFetch(`${bfgApi.wallets()}${walletId}/withdraw/`, {
+    method: 'POST',
+    body: JSON.stringify(payload)
+  })
+}
+
 // Invoice API
 export async function getInvoices(params?: { order?: number }): Promise<Invoice[]> {
   const queryParams = new URLSearchParams()
