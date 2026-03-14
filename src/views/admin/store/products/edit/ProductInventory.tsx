@@ -48,8 +48,8 @@ const ProductInventory = ({ productData, onChange }: ProductInventoryProps) => {
 
     return (
         <Card>
-            <CardHeader title={t('products.inventory.title')} />
-            <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 0, '& > *': { mb: 3 } }}>
+            <CardHeader title={t('products.inventory.title')} sx={{ pb: 0 }} />
+            <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 }, display: 'flex', flexDirection: 'column', gap: 0, '& > *': { mb: 3 } }}>
                 <Box>
                     <CustomTextField
                         fullWidth

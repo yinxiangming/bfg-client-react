@@ -354,9 +354,9 @@ const ProductImage = ({ productId, initialMedia }: ProductImageProps) => {
                         {t('products.media.actions.selectImage')}
                     </Button>
                 }
-                sx={{ '& .MuiCardHeader-action': { alignSelf: 'center' } }}
+                sx={{ pb: 0, '& .MuiCardHeader-action': { alignSelf: 'center' } }}
             />
-            <CardContent>
+            <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 } }}>
                 {media.length > 0 ? (
                     <DndContext
                         sensors={sensors}

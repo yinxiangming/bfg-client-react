@@ -48,6 +48,22 @@ const InnerThemeProvider = ({ children }: InnerThemeProviderProps) => {
       },
       cssVariables: {
         colorSchemeSelector: 'data'
+      },
+      components: {
+        MuiCardHeader: {
+          styleOverrides: {
+            title: {
+              fontSize: '1rem',
+              fontWeight: 600
+            },
+            subheader: {
+              fontSize: '1rem',
+              fontWeight: 400,
+              marginTop: 2,
+              color: 'var(--mui-palette-text-secondary)'
+            }
+          }
+        }
       }
     })
   }, [])

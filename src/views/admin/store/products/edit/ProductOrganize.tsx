@@ -144,8 +144,8 @@ const ProductOrganize = ({ productData, onChange }: ProductOrganizeProps) => {
 
     return (
         <Card>
-            <CardHeader title={t('products.organize.title')} />
-            <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 0, '& > *': { mb: 3 } }}>
+            <CardHeader title={t('products.organize.title')} sx={{ pb: 0 }} />
+            <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 }, display: 'flex', flexDirection: 'column', gap: 0, '& > *': { mb: 3 } }}>
                 <CustomTextField
                     select
                     fullWidth

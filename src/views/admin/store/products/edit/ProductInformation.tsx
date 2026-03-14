@@ -72,12 +72,13 @@ const ProductInformation = ({ productData, onChange }: ProductInformationProps) 
 
     return (
         <Card>
-            <CardHeader title={t('products.information.title')} />
-            <CardContent>
-                <Grid container spacing={6}>
+            <CardHeader title={t('products.information.title')} sx={{ pb: 0 }} />
+            <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 } }}>
+                <Grid container spacing={2}>
                     <Grid size={{ xs: 12 }}>
                         <CustomTextField
                             fullWidth
+                            size="small"
                             label={t('products.information.fields.name.label')}
                             placeholder={t('products.information.fields.name.placeholder')}
                             value={name}
@@ -87,6 +88,7 @@ const ProductInformation = ({ productData, onChange }: ProductInformationProps) 
                     <Grid size={{ xs: 12 }}>
                         <CustomTextField
                             fullWidth
+                            size="small"
                             label={t('products.information.fields.slug.label')}
                             placeholder={t('products.information.fields.slug.placeholder')}
                             value={slug}
@@ -97,6 +99,7 @@ const ProductInformation = ({ productData, onChange }: ProductInformationProps) 
                     <Grid size={{ xs: 12, sm: 6 }}>
                         <CustomTextField
                             fullWidth
+                            size="small"
                             label={t('products.information.fields.sku.label')}
                             placeholder={t('products.information.fields.sku.placeholder')}
                             value={sku}
@@ -106,6 +109,7 @@ const ProductInformation = ({ productData, onChange }: ProductInformationProps) 
                     <Grid size={{ xs: 12, sm: 6 }}>
                         <CustomTextField
                             fullWidth
+                            size="small"
                             label={t('products.information.fields.barcode.label')}
                             placeholder={t('products.information.fields.barcode.placeholder')}
                             value={barcode}
@@ -115,6 +119,7 @@ const ProductInformation = ({ productData, onChange }: ProductInformationProps) 
                     <Grid size={{ xs: 12, sm: 6 }}>
                         <CustomTextField
                             fullWidth
+                            size="small"
                             select
                             label={t('products.information.fields.condition.label')}
                             value={condition}
