@@ -477,6 +477,7 @@ export interface Product {
   is_active?: boolean
   is_featured?: boolean
   status?: 'active' | 'inactive'
+  condition?: string
   thumbnail?: string
   primary_image?: string | null
   category_names?: string[]
@@ -560,36 +561,39 @@ export async function deleteProduct(id: number): Promise<void> {
 }
 
 export async function getCategories(lang: string = 'en'): Promise<Category[]> {
-  // Use lang parameter instead of language (from admin)
   const url = `${bfgApi.products()}categories/?lang=${lang}`
   const response = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(url)
-  if (Array.isArray(response)) {
-    return response
+  let list: Category[] = Array.isArray(response) ? response : (response.results || response.data || [])
+  if (list.length === 0 && lang !== 'en') {
+    const enUrl = `${bfgApi.products()}categories/?lang=en`
+    const enResponse = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(enUrl)
+    list = Array.isArray(enResponse) ? enResponse : (enResponse.results || enResponse.data || [])
   }
-  return response.results || response.data || []
+  return list
 }
 
 export async function getCategoriesTree(lang: string = 'en'): Promise<Category[]> {
   try {
-    // Use tree=true parameter instead of /tree/ endpoint (from admin)
     const url = `${bfgApi.products()}categories/?lang=${lang}&tree=true`
     const response = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(url)
-    
-    if (Array.isArray(response)) {
-      return response
+    let categories: Category[] = Array.isArray(response) ? response : (response.results || response.data || [])
+    if (categories.length === 0 && lang !== 'en') {
+      const enUrl = `${bfgApi.products()}categories/?lang=en&tree=true`
+      const enResponse = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(enUrl)
+      categories = Array.isArray(enResponse) ? enResponse : (enResponse.results || enResponse.data || [])
     }
-    const categories = response.results || response.data || []
     return categories
   } catch (error: any) {
     console.error('[getCategoriesTree] Error:', error)
-    // Try fallback without tree parameter
     try {
       const fallbackUrl = `${bfgApi.products()}categories/?lang=${lang}`
       const fallbackResponse = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(fallbackUrl)
-      if (Array.isArray(fallbackResponse)) {
-        return fallbackResponse
+      let list = Array.isArray(fallbackResponse) ? fallbackResponse : (fallbackResponse.results || fallbackResponse.data || [])
+      if (list.length === 0 && lang !== 'en') {
+        const enFallback = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(`${bfgApi.products()}categories/?lang=en`)
+        list = Array.isArray(enFallback) ? enFallback : (enFallback.results || enFallback.data || [])
       }
-      return fallbackResponse.results || fallbackResponse.data || []
+      return list
     } catch (fallbackError) {
       console.error('[getCategoriesTree] Fallback also failed:', fallbackError)
       return []

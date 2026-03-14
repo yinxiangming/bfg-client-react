@@ -22,7 +22,14 @@
     "settingsStore": "Store",
     "settingsFinance": "Finance",
     "settingsDelivery": "Delivery",
-    "settingsMarketing": "Marketing"
+    "settingsMarketing": "Marketing",
+    "resale": "Resale",
+    "resaleIntake": "Intake",
+    "resaleSettings": "Settings",
+    "resaleTimeslots": "Time Slots",
+    "resaleBookings": "Bookings",
+    "resaleProducts": "Products",
+    "resalePayouts": "Payouts"
   },
   "common": {
     "actions": {
@@ -977,6 +984,11 @@
           "label": "Product Name",
           "placeholder": "iPhone 14"
         },
+        "slug": {
+          "label": "URL slug",
+          "placeholder": "iphone-14",
+          "helper": "Only letters, numbers, underscores or hyphens (used in product URL)"
+        },
         "sku": {
           "label": "SKU",
           "placeholder": "FXSK123U"
@@ -984,6 +996,17 @@
         "barcode": {
           "label": "Barcode",
           "placeholder": "0123-4567"
+        },
+        "condition": {
+          "label": "Condition",
+          "placeholder": "Select condition",
+          "options": {
+            "new": "New",
+            "like_new": "Like New",
+            "good": "Good",
+            "fair": "Fair",
+            "poor": "Poor"
+          }
         }
       }
     },

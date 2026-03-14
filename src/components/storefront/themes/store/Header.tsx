@@ -161,7 +161,12 @@ export default function StoreHeader(_props: StoreHeaderProps) {
             <button className='sf-icon-btn sf-mobile-menu-btn' onClick={() => setMobileMenuOpen(!mobileMenuOpen)} aria-label='Toggle menu'>
               <i className='tabler-menu-2 sf-nav-icon' style={{ fontSize: '1.5rem' }} />
             </button>
-            <Logo color='#ffffff' name={config.site_name || undefined} />
+            <div className='sf-header-logo-wrap'>
+              <Logo color='#ffffff' name={config.site_name || undefined} />
+            </div>
+            <Link href='/' className='sf-header-mobile-site-name' aria-hidden='true'>
+              {config.site_name || 'Store'}
+            </Link>
             <ul className='sf-nav-menu'>
               {loadingCategories ? <li>Loading...</li> : categories.map((category, index) => {
                 const categoryKey = typeof category === 'string' ? category : category.slug || category.name

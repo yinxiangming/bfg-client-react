@@ -111,7 +111,16 @@
       "inStock": "库存：",
       "items": "件",
       "brand": "品牌：",
-      "reviews": "条评价"
+      "reviews": "条评价",
+      "condition": "成色："
+    },
+    "condition": {
+      "new": "全新",
+      "like_new": "近新",
+      "good": "良好",
+      "fair": "一般",
+      "poor": "较差",
+      "notSet": "未设置"
     },
     "tabs": {
       "description": "商品描述",

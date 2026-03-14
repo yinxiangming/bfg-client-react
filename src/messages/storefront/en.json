@@ -111,7 +111,16 @@
       "inStock": "In stock:",
       "items": "Items",
       "brand": "Brand:",
-      "reviews": "reviews"
+      "reviews": "reviews",
+      "condition": "Condition:"
+    },
+    "condition": {
+      "new": "New",
+      "like_new": "Like New",
+      "good": "Good",
+      "fair": "Fair",
+      "poor": "Poor",
+      "notSet": "—"
     },
     "tabs": {
       "description": "Description",

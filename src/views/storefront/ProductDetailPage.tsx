@@ -25,6 +25,7 @@ type Product = {
   id: number
   name: string
   brand: string
+  condition: string
   price: number
   originalPrice: number | null
   discount: number | null
@@ -71,6 +72,7 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
           id: productData.id,
           name: productData.name,
           brand: productData.brand || '',
+          condition: productData.condition || '',
           price: parseFloat(productData.price || '0'),
           originalPrice: productData.compare_price ? parseFloat(productData.compare_price) : null,
           discount: productData.discount_percentage || null,
@@ -84,7 +86,9 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
                 : [getStoreImageUrl('themes/PRS04099/assets/img/megnor/empty-cart.svg')],
           description: productData.description || t('product.descriptionFallback'),
           reference: productData.sku || '',
-          stock: productVariants.reduce((sum: number, v: any) => sum + (v.stock_available || 0), 0) || 0,
+          stock: productVariants.length
+            ? productVariants.reduce((sum: number, v: any) => sum + (v.stock_available || 0), 0) || 0
+            : (productData.stock_quantity ?? 0),
           sizes: productVariants.map((v: any) => v.options?.size).filter(Boolean) || [],
           colors:
             productVariants
@@ -226,8 +230,17 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
     )
   }
 
+  const conditionKey = product.condition ? `product.condition.${product.condition}` : ''
+  const conditionLabel = conditionKey
+    ? (() => {
+        const label = t(conditionKey as any)
+        return label && label !== conditionKey ? label : product.condition
+      })()
+    : ''
+  const displayConditionLabel = conditionLabel || t('product.condition.notSet')
+
   return (
-    <div className='sf-container' style={{ padding: '2rem 1rem' }}>
+    <div className='sf-container sf-product-detail-page'>
       {beforeSections.map(
         ext =>
           ext.component && (
@@ -249,49 +262,52 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
         <span className='sf-breadcrumb-current'>{product.name}</span>
       </nav>
 
-      {/* Product Main Section */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '3rem', marginBottom: '3rem' }}>
+      {/* Product Main Section - responsive grid: 1 col mobile, 2 col desktop */}
+      <div className='sf-product-detail-layout'>
         {/* Product Images */}
-        <div>
-          <div style={{ marginBottom: '1rem' }}>
+        <div className='sf-product-detail-gallery'>
+          <div className='sf-product-detail-main-image'>
             <img
               src={product.images[selectedImage]}
               alt={product.name}
-              style={{ width: '100%', height: '500px', objectFit: 'cover', borderRadius: '12px' }}
             />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '0.5rem' }}>
+          <div className='sf-product-detail-thumbnails'>
             {product.images.map((img, idx) => (
-              <img
+              <button
                 key={idx}
-                src={img}
-                alt={`${product.name} ${idx + 1}`}
+                type='button'
                 onClick={() => setSelectedImage(idx)}
-                style={{
-                  width: '100%',
-                  height: '100px',
-                  objectFit: 'cover',
-                  borderRadius: '8px',
-                  cursor: 'pointer',
-                  border: selectedImage === idx ? '2px solid var(--primary-color, #6366f1)' : '2px solid transparent'
-                }}
-              />
+                className='sf-product-detail-thumb'
+                aria-pressed={selectedImage === idx}
+                aria-label={`View image ${idx + 1}`}
+              >
+                <img src={img} alt={`${product.name} ${idx + 1}`} />
+              </button>
             ))}
           </div>
         </div>
 
         {/* Product Info */}
-        <div>
-          <h1 className='sf-product-title' style={{ fontSize: '1.75rem', fontWeight: 700, marginBottom: '0.5rem' }}>
-            {product.brand} {product.name}
-          </h1>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '1rem' }}>
-            <div style={{ display: 'flex' }}>{renderStars(product.rating)}</div>
-            <span className='sf-text-muted' style={{ fontSize: '0.875rem' }}>
+        <div className='sf-product-detail-info'>
+          <div className='sf-product-title-row'>
+            <h1 className='sf-product-title'>
+              {product.brand} {product.name}
+            </h1>
+            <span
+              className={`sf-condition-badge sf-condition-${product.condition || 'notSet'}`}
+              title={t('product.labels.condition')}
+            >
+              {displayConditionLabel}
+            </span>
+          </div>
+          <div className='sf-product-detail-meta'>
+            <div className='sf-product-stars'>{renderStars(product.rating)}</div>
+            <span className='sf-text-muted sf-product-reviews-count'>
               ({product.reviews} {t('product.labels.reviews')})
             </span>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '1.5rem' }}>
+          <div className='sf-product-detail-price-row'>
             <span style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--primary-color, #6366f1)' }}>
               ${product.price.toFixed(2)}
             </span>
@@ -449,12 +465,12 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
           </button>
 
           {/* Product Info */}
-          <div className='sf-product-info-box' style={{ padding: '1rem', borderRadius: '8px', fontSize: '0.875rem' }}>
-            <p className='sf-product-info-item' style={{ marginBottom: '0.5rem' }}>
+          <div className='sf-product-info-box'>
+            <p className='sf-product-info-item'>
               <strong className='sf-product-info-label'>{t('product.labels.reference')}</strong>{' '}
               <span className='sf-product-info-value'>{product.reference}</span>
             </p>
-            <p className='sf-product-info-item' style={{ marginBottom: '0.5rem' }}>
+            <p className='sf-product-info-item'>
               <strong className='sf-product-info-label'>{t('product.labels.inStock')}</strong>{' '}
               <span className='sf-product-info-value'>
                 {product.stock} {t('product.labels.items')}
@@ -475,7 +491,7 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
 
       {/* Product Tabs */}
       <div className='sf-card' style={{ padding: '0', marginBottom: '3rem' }}>
-        <div style={{ borderBottom: '1px solid #e0e0e0', display: 'flex' }}>
+        <div className='sf-product-detail-tabs' style={{ borderBottom: '1px solid #e0e0e0', display: 'flex' }}>
           <button
             onClick={() => setActiveTab('description')}
             className='sf-tab-btn'
@@ -532,16 +548,18 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
             </div>
           )}
           {activeTab === 'details' && (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '1rem' }}>
-              <div className='sf-detail-item' style={{ padding: '1rem', border: '1px solid #e0e0e0', borderRadius: '8px' }}>
-                <strong className='sf-detail-label' style={{ fontSize: '0.875rem' }}>{t('product.labels.brand')}</strong>
-                <span className='sf-detail-value' style={{ marginLeft: '0.5rem', fontSize: '0.875rem' }}>{product.brand}</span>
+            <div className='sf-product-details-grid'>
+              <div className='sf-detail-item'>
+                <strong className='sf-detail-label'>{t('product.labels.condition')}</strong>
+                <span className='sf-detail-value'>{displayConditionLabel}</span>
               </div>
-              <div className='sf-detail-item' style={{ padding: '1rem', border: '1px solid #e0e0e0', borderRadius: '8px' }}>
-                <strong className='sf-detail-label' style={{ fontSize: '0.875rem' }}>{t('product.labels.reference')}</strong>
-                <span className='sf-detail-value' style={{ marginLeft: '0.5rem', fontSize: '0.875rem' }}>
-                  {product.reference}
-                </span>
+              <div className='sf-detail-item'>
+                <strong className='sf-detail-label'>{t('product.labels.brand')}</strong>
+                <span className='sf-detail-value'>{product.brand}</span>
+              </div>
+              <div className='sf-detail-item'>
+                <strong className='sf-detail-label'>{t('product.labels.reference')}</strong>
+                <span className='sf-detail-value'>{product.reference}</span>
               </div>
             </div>
           )}

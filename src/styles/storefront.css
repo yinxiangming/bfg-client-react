@@ -942,6 +942,11 @@ body {
   }
 }
 
+/* Header: mobile-only site name (hidden on desktop) */
+.sf-header-mobile-site-name {
+  display: none;
+}
+
 @media (max-width: 767px) {
   /* Header Top - Hide on mobile */
   .sf-header-top {
@@ -950,6 +955,32 @@ body {
 
   .sf-header-main-content {
     padding: 0.75rem 1rem;
+    position: relative;
+  }
+
+  /* Mobile: hide Logo, show site name centered */
+  .sf-header-logo-wrap {
+    display: none;
+  }
+
+  .sf-header-mobile-site-name {
+    display: flex;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    top: 0;
+    bottom: 0;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1.125rem;
+    color: #2c3e50;
+    text-decoration: none;
+    pointer-events: auto;
+  }
+
+  .sf-header-mobile-site-name:hover {
+    color: var(--primary-color, #6366f1);
   }
 
   /* Mobile Menu */
@@ -1456,6 +1487,14 @@ body {
 [data-mode='dark'] .sf-header-main {
   background-color: #1f1f1f;
   border-bottom-color: #2d2d2d;
+}
+
+[data-mode='dark'] .sf-header-mobile-site-name {
+  color: #e0e0e0;
+}
+
+[data-mode='dark'] .sf-header-mobile-site-name:hover {
+  color: var(--primary-color, #6366f1);
 }
 
 [data-mode='dark'] .sf-nav-link {
@@ -2697,4 +2736,261 @@ body {
 
 [data-mode='dark'] .sf-btn-secondary:hover {
   background-color: #374151 !important;
+}
+
+/* Product detail page - layout and condition */
+.sf-product-detail-page {
+  padding: 1rem 0.5rem 2rem;
+}
+
+.sf-product-detail-layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+}
+
+.sf-product-detail-gallery {
+  min-width: 0;
+}
+
+.sf-product-detail-main-image {
+  margin-bottom: 0.75rem;
+  border-radius: 12px;
+  overflow: hidden;
+  background: #f5f5f5;
+}
+
+.sf-product-detail-main-image img {
+  width: 100%;
+  height: auto;
+  max-height: 400px;
+  object-fit: contain;
+  display: block;
+}
+
+.sf-product-detail-thumbnails {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.5rem;
+}
+
+.sf-product-detail-thumb {
+  display: block;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  background: none;
+  overflow: hidden;
+  min-height: 72px;
+}
+
+.sf-product-detail-thumb[aria-pressed='true'] {
+  border-color: var(--primary-color, #6366f1);
+}
+
+.sf-product-detail-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.sf-product-detail-info {
+  min-width: 0;
+}
+
+.sf-product-title-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.sf-product-title-row .sf-product-title {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+}
+
+.sf-condition-badge {
+  display: inline-block;
+  flex-shrink: 0;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.sf-condition-badge.sf-condition-new {
+  color: #166534;
+  background: #dcfce7;
+}
+
+.sf-condition-badge.sf-condition-like_new {
+  color: #0d9488;
+  background: #ccfbf1;
+}
+
+.sf-condition-badge.sf-condition-good {
+  color: #1d4ed8;
+  background: #dbeafe;
+}
+
+.sf-condition-badge.sf-condition-fair {
+  color: #c2410c;
+  background: #ffedd5;
+}
+
+.sf-condition-badge.sf-condition-poor {
+  color: #7f1d1d;
+  background: #fee2e2;
+}
+
+.sf-condition-badge.sf-condition-notSet {
+  color: #6b7280;
+  background: #f3f4f6;
+}
+
+.sf-product-detail-info .sf-product-title {
+  font-size: 1.375rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+
+.sf-product-detail-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.sf-product-reviews-count {
+  font-size: 0.875rem;
+}
+
+.sf-product-detail-price-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.sf-product-detail-price-row > span:first-child {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--primary-color, #6366f1);
+}
+
+.sf-product-info-box {
+  padding: 1rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  border: 1px solid #eee;
+  background: #fafafa;
+  margin-top: 0.25rem;
+}
+
+.sf-product-info-item {
+  margin-bottom: 0.5rem;
+}
+
+.sf-product-info-item:last-child {
+  margin-bottom: 0;
+}
+
+.sf-product-details-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+.sf-product-details-grid .sf-detail-item {
+  padding: 1rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+}
+
+.sf-product-details-grid .sf-detail-label {
+  font-size: 0.875rem;
+  display: block;
+  margin-bottom: 0.25rem;
+}
+
+.sf-product-details-grid .sf-detail-value {
+  font-size: 0.875rem;
+}
+
+/* Product detail - tablet and up: 2 columns, larger image */
+@media (min-width: 768px) {
+  .sf-product-detail-page {
+    padding: 2rem 1rem 3rem;
+  }
+
+  .sf-product-detail-layout {
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    margin-bottom: 3rem;
+  }
+
+  .sf-product-detail-main-image img {
+    height: 500px;
+    max-height: none;
+    object-fit: cover;
+  }
+
+  .sf-product-detail-thumbnails {
+    grid-template-columns: repeat(4, 1fr);
+  }
+
+  .sf-product-detail-thumb {
+    min-height: 100px;
+  }
+
+  .sf-product-detail-info .sf-product-title {
+    font-size: 1.75rem;
+    margin-bottom: 0.625rem;
+  }
+
+  .sf-product-detail-price-row > span:first-child {
+    font-size: 2rem;
+  }
+
+  .sf-product-details-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .sf-product-detail-page {
+    padding: 2.5rem 2rem 3rem;
+  }
+
+  .sf-product-detail-layout {
+    gap: 4rem;
+  }
+}
+
+/* Product tabs: scroll on small screens for easier tap */
+@media (max-width: 767px) {
+  .sf-card .sf-product-detail-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .sf-card .sf-product-detail-tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sf-card .sf-product-detail-tabs button {
+    flex-shrink: 0;
+    padding: 1rem 1.25rem;
+    font-size: 0.9375rem;
+  }
 }
