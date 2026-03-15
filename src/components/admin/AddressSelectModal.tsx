@@ -23,6 +23,9 @@ import Divider from '@mui/material/Divider'
 import { getCustomerAddresses, createAddress, updateAddress, type Address } from '@/services/store'
 import { meApi } from '@/utils/meApi'
 
+// Address autocomplete (Google Places)
+import AddressAutocomplete from '@/components/storefront/AddressAutocomplete'
+
 // Icon
 import IconButton from '@mui/material/IconButton'
 
@@ -100,6 +103,17 @@ const AddressSelectModal = ({
         onClose()
       }
     }
+  }
+
+  const handleAddressSelect = (components: { address: string; city: string; state: string; zip: string; country: string }) => {
+    setNewAddress((prev) => ({
+      ...prev,
+      address_line1: components.address || prev.address_line1,
+      city: components.city || prev.city,
+      state: components.state || prev.state,
+      postal_code: components.zip || prev.postal_code,
+      country: components.country || prev.country
+    }))
   }
 
   const handleEditAddress = (address: Address) => {
@@ -375,10 +389,12 @@ const AddressSelectModal = ({
 
                   <Box>
                     <Typography variant='body2' sx={{ mb: 1 }}>Address Line 1 *</Typography>
-                    <input
-                      type='text'
+                    <AddressAutocomplete
                       value={newAddress.address_line1 || ''}
-                      onChange={(e) => setNewAddress({ ...newAddress, address_line1: e.target.value })}
+                      onChange={(v) => setNewAddress({ ...newAddress, address_line1: v })}
+                      onAddressSelect={handleAddressSelect}
+                      placeholder='Start typing address...'
+                      required
                       style={{
                         width: '100%',
                         padding: '8px 12px',
@@ -573,10 +589,12 @@ const AddressSelectModal = ({
 
                   <Box>
                     <Typography variant='body2' sx={{ mb: 1 }}>Address Line 1 *</Typography>
-                    <input
-                      type='text'
+                    <AddressAutocomplete
                       value={newAddress.address_line1 || ''}
-                      onChange={(e) => setNewAddress({ ...newAddress, address_line1: e.target.value })}
+                      onChange={(v) => setNewAddress({ ...newAddress, address_line1: v })}
+                      onAddressSelect={handleAddressSelect}
+                      placeholder='Start typing address...'
+                      required
                       style={{
                         width: '100%',
                         padding: '8px 12px',

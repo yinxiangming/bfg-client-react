@@ -540,6 +540,7 @@ const InvoiceCard = ({ order, onInvoiceUpdate }: InvoiceCardProps) => {
         invoice={editingInvoice}
         customerId={customerId}
         orderId={order.id}
+        orderItems={!editingInvoice && invoices.length === 0 ? order.items : undefined}
         onClose={() => {
           setEditDialogOpen(false)
           setEditingInvoice(null)

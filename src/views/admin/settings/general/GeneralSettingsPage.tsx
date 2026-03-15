@@ -40,6 +40,7 @@ import {
   type StorefrontHeaderOptionsPayload,
   type PluginsSettingsPayload
 } from '@/services/settings'
+import { getCurrencies, type Currency } from '@/services/finance'
 import { clearStorefrontConfigCache } from '@/utils/storefrontConfig'
 import { THEME_REGISTRY } from '@/components/storefront/themes/registry.generated'
 import { bfgApi } from '@/utils/api'
@@ -134,6 +135,7 @@ const GeneralSettingsPage = () => {
   const [settingsId, setSettingsId] = useState<number | null>(null)
   const [storefrontUi, setStorefrontUi] = useState<StorefrontUiData>(initialStorefrontUi)
   const [pluginsData, setPluginsData] = useState<PluginsData>(initialPluginsData)
+  const [currencies, setCurrencies] = useState<Currency[]>([])
 
   const handleTabChange = (event: SyntheticEvent, value: string) => {
     setActiveTab(value)
@@ -187,7 +189,12 @@ const GeneralSettingsPage = () => {
       try {
         setLoading(true)
         console.log('[GeneralSettings] Loading settings...')
-        const settings = await getWorkspaceSettings()
+        const [settings, currenciesData] = await Promise.all([
+          getWorkspaceSettings(),
+          getCurrencies()
+        ])
+        const activeCurrencies = currenciesData.filter(c => c.is_active)
+        setCurrencies(activeCurrencies)
         console.log('[GeneralSettings] Settings loaded:', settings)
         setSettingsId(settings.id)
         console.log('[GeneralSettings] Settings ID set to:', settings.id)
@@ -214,7 +221,11 @@ const GeneralSettingsPage = () => {
             siteName: general.site_name || (settings as any).site_name || initialBasicData.siteName,
             siteDescription: general.site_description || (settings as any).site_description || initialBasicData.siteDescription,
             defaultLanguage: general.default_language || (settings as any).default_language || initialBasicData.defaultLanguage,
-            defaultCurrency: general.default_currency || (settings as any).default_currency || initialBasicData.defaultCurrency,
+            defaultCurrency: (() => {
+              const saved = general.default_currency || (settings as any).default_currency || initialBasicData.defaultCurrency
+              const found = activeCurrencies.some(c => c.code === saved)
+              return found ? saved : (activeCurrencies[0]?.code ?? saved)
+            })(),
             defaultTimezone: general.default_timezone || (settings as any).default_timezone || initialBasicData.defaultTimezone,
             contactEmail: general.contact_email || (settings as any).contact_email || initialBasicData.contactEmail,
             contactPhone: general.contact_phone || (settings as any).contact_phone || initialBasicData.contactPhone,
@@ -244,6 +255,15 @@ const GeneralSettingsPage = () => {
     
     loadSettings()
   }, [])
+
+  // Sync defaultCurrency to first system currency when current value is not in list
+  useEffect(() => {
+    if (currencies.length === 0) return
+    const inList = currencies.some(c => c.code === basicData.defaultCurrency)
+    if (!inList && currencies[0]) {
+      handleBasicChange('defaultCurrency', currencies[0].code)
+    }
+  }, [currencies])
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -503,12 +523,14 @@ const GeneralSettingsPage = () => {
                             select
                             fullWidth
                             label={t('settings.general.basic.fields.defaultCurrency.label')}
-                            value={basicData.defaultCurrency}
+                            value={currencies.some(c => c.code === basicData.defaultCurrency) ? basicData.defaultCurrency : (currencies[0]?.code ?? '')}
                             onChange={e => handleBasicChange('defaultCurrency', e.target.value)}
                           >
-                            <MenuItem value='NZD'>{t('settings.general.basic.fields.defaultCurrency.options.nzd')}</MenuItem>
-                            <MenuItem value='USD'>{t('settings.general.basic.fields.defaultCurrency.options.usd')}</MenuItem>
-                            <MenuItem value='CNY'>{t('settings.general.basic.fields.defaultCurrency.options.cny')}</MenuItem>
+                            {currencies.map(c => (
+                              <MenuItem key={c.id} value={c.code}>
+                                {c.code} ({c.symbol})
+                              </MenuItem>
+                            ))}
                           </CustomTextField>
                         </Grid>
                         <Grid size={{ xs: 12, sm: 4 }}>
