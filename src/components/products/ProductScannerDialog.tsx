@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 // i18n Imports
 import { useTranslations } from 'next-intl'
@@ -24,6 +24,7 @@ import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
 import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
+import Checkbox from '@mui/material/Checkbox'
 
 // Service Imports
 import {
@@ -38,10 +39,18 @@ import {
 // Component Imports
 import ImageViewerDialog, { type ImageViewerItem } from '@/components/ui/ImageViewerDialog'
 
+/** Get list of image URLs for a candidate (all returned images) */
+function getCandidateImageUrls(c: ProductCandidate): string[] {
+  if (c.image_urls?.length) return c.image_urls
+  if (c.image_url) return [c.image_url]
+  return []
+}
+
 type ProductScannerDialogProps = {
   open: boolean
   onClose: () => void
-  onSelect: (product: ProductDetails) => void | Promise<void>
+  /** Second arg: selected image URLs to insert into product (user can toggle per thumbnail). */
+  onSelect: (product: ProductDetails, selectedImageUrls: string[]) => void | Promise<void>
   config: ProductScannerConfig
 }
 
@@ -57,6 +66,18 @@ const ProductScannerDialog = ({ open, onClose, onSelect, config }: ProductScanne
   const [selectedCandidate, setSelectedCandidate] = useState<ProductCandidate | null>(null)
   const [imageViewerOpen, setImageViewerOpen] = useState(false)
   const [imageViewerImages, setImageViewerImages] = useState<ImageViewerItem[]>([])
+  /** For each candidate index, set of image indices that are selected (default all). */
+  const [selectedByRow, setSelectedByRow] = useState<Record<number, Set<number>>>({})
+
+  // When candidates change, default all images selected per row
+  useEffect(() => {
+    const next: Record<number, Set<number>> = {}
+    candidates.forEach((c, i) => {
+      const urls = getCandidateImageUrls(c)
+      next[i] = new Set(urls.map((_, j) => j))
+    })
+    setSelectedByRow(next)
+  }, [candidates])
 
   const handleSearch = async () => {
     setError(null)
@@ -89,14 +110,32 @@ const ProductScannerDialog = ({ open, onClose, onSelect, config }: ProductScanne
     }
   }
 
-  const handleSelectCandidate = async (candidate: ProductCandidate) => {
+  const getSelectedUrls = (candidate: ProductCandidate, rowIndex: number): string[] => {
+    const urls = getCandidateImageUrls(candidate)
+    const selected = selectedByRow[rowIndex]
+    if (!selected?.size) return []
+    return urls.filter((_, j) => selected.has(j))
+  }
+
+  const toggleImageSelected = (rowIndex: number, imageIndex: number, e: React.MouseEvent) => {
+    e.stopPropagation()
+    setSelectedByRow((prev) => {
+      const set = new Set(prev[rowIndex] ?? [])
+      if (set.has(imageIndex)) set.delete(imageIndex)
+      else set.add(imageIndex)
+      return { ...prev, [rowIndex]: set }
+    })
+  }
+
+  const handleSelectCandidate = async (candidate: ProductCandidate, rowIndex: number) => {
     setSelectedCandidate(candidate)
     setLoading(true)
     setError(null)
 
     try {
       const details = await getProductDetails(candidate, config)
-      await onSelect(details)
+      const selectedUrls = getSelectedUrls(candidate, rowIndex)
+      await onSelect(details, selectedUrls)
       handleClose()
     } catch (err: any) {
       console.error('Failed to get product details:', err)
@@ -242,70 +281,91 @@ const ProductScannerDialog = ({ open, onClose, onSelect, config }: ProductScanne
               {t('selectProduct', { count: candidates.length })}
             </Typography>
             <List sx={{ border: '1px solid rgba(0,0,0,0.12)', borderRadius: 1 }}>
-              {candidates.map((candidate, index) => (
-                <ListItem key={index} disablePadding divider={index < candidates.length - 1}>
-                  <ListItemButton
-                    onClick={() => handleSelectCandidate(candidate)}
-                    disabled={loading}
-                    sx={{ alignItems: 'stretch', py: 1.5 }}
-                  >
-                    {/* Thumbnail: click opens ImageViewerDialog; badge when multiple images */}
-                    <Box
-                      component='span'
-                      onClick={(e) => openImageViewer(candidate, e)}
-                      sx={{
-                        position: 'relative',
-                        width: 56,
-                        minWidth: 56,
-                        height: 56,
-                        borderRadius: 1,
-                        overflow: 'hidden',
-                        bgcolor: 'action.hover',
-                        mr: 2,
-                        flexShrink: 0,
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        cursor: candidate.image_url || (candidate.image_urls?.length ?? 0) > 0 ? 'pointer' : 'default'
-                      }}
+              {candidates.map((candidate, rowIndex) => {
+                const urls = getCandidateImageUrls(candidate)
+                const selectedSet = selectedByRow[rowIndex] ?? new Set(urls.map((_, j) => j))
+                return (
+                  <ListItem key={rowIndex} disablePadding divider={rowIndex < candidates.length - 1}>
+                    <ListItemButton
+                      onClick={() => handleSelectCandidate(candidate, rowIndex)}
+                      disabled={loading}
+                      sx={{ alignItems: 'stretch', py: 1.5 }}
                     >
-                      {candidate.image_url ? (
-                        <Box
-                          component='img'
-                          src={candidate.image_url}
-                          alt=''
-                          sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                          onError={(e) => {
-                            const el = e.target as HTMLImageElement
-                            el.style.display = 'none'
-                          }}
-                        />
-                      ) : (
-                        <i className='tabler-photo' style={{ fontSize: 24, color: 'var(--mui-palette-text-secondary)' }} />
-                      )}
-                      {candidate.image_urls && candidate.image_urls.length > 1 && (
-                        <Box
-                          sx={{
-                            position: 'absolute',
-                            top: 4,
-                            right: 4,
-                            minWidth: 18,
-                            height: 18,
-                            px: 0.5,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            borderRadius: 1,
-                            bgcolor: 'error.main',
-                            color: 'white',
-                            fontSize: 11,
-                            fontWeight: 600
-                          }}
-                        >
-                          {candidate.image_urls.length}
-                        </Box>
-                      )}
-                    </Box>
+                      {/* Thumbnails grid: 3 per row; each has image + checkbox bottom-right; click image opens viewer */}
+                      <Box
+                        sx={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(3, 1fr)',
+                          gap: 1,
+                          width: 192,
+                          minWidth: 192,
+                          mr: 2,
+                          flexShrink: 0,
+                          alignSelf: 'center'
+                        }}
+                      >
+                        {urls.length === 0 ? (
+                          <Box
+                            sx={{
+                              gridColumn: '1 / -1',
+                              width: 80,
+                              height: 80,
+                              borderRadius: 1,
+                              bgcolor: 'action.hover',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                          >
+                            <i className='tabler-photo' style={{ fontSize: 32, color: 'var(--mui-palette-text-secondary)' }} />
+                          </Box>
+                        ) : (
+                          urls.map((url, imgIndex) => (
+                            <Box
+                              key={imgIndex}
+                              onClick={(e) => openImageViewer(candidate, e)}
+                              sx={{
+                                position: 'relative',
+                                aspectRatio: '1',
+                                borderRadius: 1,
+                                overflow: 'hidden',
+                                bgcolor: 'action.hover',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                            >
+                              <Box
+                                component='img'
+                                src={url}
+                                alt=''
+                                sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                onError={(e) => {
+                                  const el = e.target as HTMLImageElement
+                                  el.style.display = 'none'
+                                }}
+                              />
+                              <Checkbox
+                                size='small'
+                                checked={selectedSet.has(imgIndex)}
+                                onClick={(e) => toggleImageSelected(rowIndex, imgIndex, e)}
+                                sx={{
+                                  position: 'absolute',
+                                  right: 0,
+                                  bottom: 0,
+                                  p: 0.25,
+                                  color: 'rgba(255,255,255,0.9)',
+                                  bgcolor: 'rgba(0,0,0,0.35)',
+                                  borderRadius: '4px',
+                                  '& .MuiSvgIcon-root': { fontSize: 16 },
+                                  '&.Mui-checked': { color: 'primary.light' }
+                                }}
+                              />
+                            </Box>
+                          ))
+                        )}
+                      </Box>
                     <ListItemText
                       primary={
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexWrap: 'wrap' }}>
@@ -340,7 +400,8 @@ const ProductScannerDialog = ({ open, onClose, onSelect, config }: ProductScanne
                     />
                   </ListItemButton>
                 </ListItem>
-              ))}
+                )
+              })}
             </List>
           </Box>
         )}

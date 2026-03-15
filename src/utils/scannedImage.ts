@@ -28,10 +28,31 @@ export function dataUrlToFile(dataUrl: string, filename = 'scanned-product.png')
 
 /**
  * Fetch image from URL and return as File. Fails if CORS or network error.
+ * Prefer urlToFileViaProxy in browser to avoid CORS with external domains.
  */
 export async function urlToFile(imageUrl: string, filename = 'scanned-product.png'): Promise<File> {
   const res = await fetch(imageUrl, { mode: 'cors' })
   if (!res.ok) throw new Error(`Failed to fetch image: ${res.status}`)
+  const blob = await res.blob()
+  const mime = blob.type || 'image/png'
+  const ext = mime.split('/')[1] || 'png'
+  const name = filename.replace(/\.[^.]+$/, '') + '.' + ext
+  return new File([blob], name, { type: mime })
+}
+
+/**
+ * Fetch image from URL via same-origin API proxy (no CORS). Use for external URLs in browser.
+ */
+export async function urlToFileViaProxy(imageUrl: string, filename = 'scanned-product.png'): Promise<File> {
+  const res = await fetch('/api/proxy-image', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ url: imageUrl })
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error((err as { error?: string })?.error || `Proxy failed: ${res.status}`)
+  }
   const blob = await res.blob()
   const mime = blob.type || 'image/png'
   const ext = mime.split('/')[1] || 'png'

@@ -29,7 +29,7 @@ import type { Product } from '@/services/store'
 import { uploadProductMedia } from '@/services/store'
 import type { ProductDetails } from '@/services/productScanner'
 import { getWorkspaceSettings } from '@/services/settings'
-import { isBase64ImageUrl, dataUrlToFile, urlToFile } from '@/utils/scannedImage'
+import { isBase64ImageUrl, dataUrlToFile, urlToFileViaProxy } from '@/utils/scannedImage'
 
 type ProductInformationProps = {
     productData?: Partial<Product>
@@ -114,7 +114,7 @@ const ProductInformation = ({ productData, onChange, productId, onScannedImageAd
         onChange?.('condition' as keyof Product, value)
     }
 
-    const handleScannerSelect = async (product: ProductDetails) => {
+    const handleScannerSelect = async (product: ProductDetails, selectedImageUrls: string[]) => {
         // Auto-fill product information from scanned data
         if (product.name) {
             setName(product.name)
@@ -130,21 +130,25 @@ const ProductInformation = ({ productData, onChange, productId, onScannedImageAd
         if (product.description) {
             onChange?.('description', product.description)
         }
-        // Image: upload to server when we have productId (base64 or fetchable URL), then refresh media list
-        if (product.image_url && productId && productId !== 'new') {
+        // Upload each selected image when we have productId; refresh media list after each so UI updates
+        const urlsToUpload = selectedImageUrls.length > 0 ? selectedImageUrls : (product.image_url ? [product.image_url] : [])
+        if (productId && productId !== 'new' && urlsToUpload.length > 0) {
             try {
-                const file = isBase64ImageUrl(product.image_url)
-                    ? dataUrlToFile(product.image_url)
-                    : await urlToFile(product.image_url)
-                await uploadProductMedia(parseInt(productId, 10), file)
-                onChange?.('scanned_image_url' as keyof Product, product.image_url)
-                await onScannedImageAdded?.()
+                for (let i = 0; i < urlsToUpload.length; i++) {
+                    const imageUrl = urlsToUpload[i]
+                    const file = isBase64ImageUrl(imageUrl)
+                        ? dataUrlToFile(imageUrl, `scanned-${i}.png`)
+                        : await urlToFileViaProxy(imageUrl, `scanned-${i}.png`)
+                    await uploadProductMedia(parseInt(productId, 10), file)
+                    await onScannedImageAdded?.()
+                }
+                onChange?.('scanned_image_url' as keyof Product, urlsToUpload[0])
             } catch (err) {
-                console.error('Failed to upload scanned image', err)
-                onChange?.('scanned_image_url' as keyof Product, product.image_url)
+                console.error('Failed to upload scanned image(s)', err)
+                onChange?.('scanned_image_url' as keyof Product, urlsToUpload[0])
             }
-        } else if (product.image_url) {
-            onChange?.('scanned_image_url' as keyof Product, product.image_url)
+        } else if (urlsToUpload.length > 0) {
+            onChange?.('scanned_image_url' as keyof Product, urlsToUpload[0])
         }
         if (onSave) {
             setAutoSaveDialogOpen(true)
