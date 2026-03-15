@@ -48,6 +48,7 @@ import { getMediaUrl } from '@/utils/media'
 
 // Component Imports
 import MediaLibraryDialog from '@/components/media/MediaLibraryDialog'
+import ImageViewerDialog from '@/components/ui/ImageViewerDialog'
 
 /** Media from product detail API (MediaLink shape) - avoids separate product-media request */
 type ProductImageProps = {
@@ -60,13 +61,17 @@ const SortableImageItem = ({
     item,
     index,
     onDelete,
+    onPreview,
     deleteTooltip,
+    previewTooltip,
     getAltFallback
 }: {
     item: ProductMedia
     index: number
     onDelete: (id: number) => void
+    onPreview?: (index: number) => void
     deleteTooltip: string
+    previewTooltip: string
     getAltFallback: (index1Based: number) => string
 }) => {
     const {
@@ -122,25 +127,33 @@ const SortableImageItem = ({
                         </Box>
                     )
                 }
+                const alt = item.alt_text || item.media?.alt_text || getAltFallback(index + 1)
                 return (
-                    <Box
-                        component="img"
-                        src={imageUrl}
-                        alt={item.alt_text || item.media?.alt_text || getAltFallback(index + 1)}
-                        sx={{
-                            width: '100%',
-                            height: 120,
-                            objectFit: 'cover',
-                            display: 'block',
-                            backgroundColor: 'action.hover'
-                        }}
-                        draggable={false}
-                        onError={(e) => {
-                            // Hide image if it fails to load
-                            const target = e.target as HTMLImageElement
-                            target.style.display = 'none'
-                        }}
-                    />
+                    <Tooltip title={previewTooltip} placement="top">
+                        <Box
+                            component="img"
+                            src={imageUrl}
+                            alt={alt}
+                            onClick={(e) => {
+                                e.stopPropagation()
+                                onPreview?.(index)
+                            }}
+                            sx={{
+                                width: '100%',
+                                height: 120,
+                                objectFit: 'cover',
+                                display: 'block',
+                                backgroundColor: 'action.hover',
+                                cursor: onPreview ? 'pointer' : 'default'
+                            }}
+                            draggable={false}
+                            onError={(e) => {
+                                // Hide image if it fails to load
+                                const target = e.target as HTMLImageElement
+                                target.style.display = 'none'
+                            }}
+                        />
+                    </Tooltip>
                 )
             })()}
             {/* Order indicator */}
@@ -216,6 +229,8 @@ const ProductImage = ({ productId, initialMedia }: ProductImageProps) => {
     const [deleteDialogOpen, setDeleteDialogOpen] = useState(false)
     const [deleteTargetId, setDeleteTargetId] = useState<number | null>(null)
     const [mediaLibraryOpen, setMediaLibraryOpen] = useState(false)
+    const [previewOpen, setPreviewOpen] = useState(false)
+    const [previewInitialIndex, setPreviewInitialIndex] = useState(0)
 
     const sensors = useSensors(
         useSensor(PointerSensor, {
@@ -378,7 +393,12 @@ const ProductImage = ({ productId, initialMedia }: ProductImageProps) => {
                                         item={item}
                                         index={index}
                                         onDelete={handleDeleteClick}
+                                        onPreview={(index) => {
+                                            setPreviewInitialIndex(index)
+                                            setPreviewOpen(true)
+                                        }}
                                         deleteTooltip={t('products.media.actions.delete')}
+                                        previewTooltip={t('products.media.actions.viewFullSize')}
                                         getAltFallback={(i) => t('products.media.imageAltFallback', { index: i })}
                                     />
                                 ))}
@@ -405,6 +425,31 @@ const ProductImage = ({ productId, initialMedia }: ProductImageProps) => {
                     </Button>
                 </DialogActions>
             </Dialog>
+            <ImageViewerDialog
+                open={previewOpen}
+                onClose={() => setPreviewOpen(false)}
+                images={media
+                    .map((m) => ({
+                        url: getMediaUrl(m.file || m.media?.file) ?? '',
+                        alt: m.alt_text || m.media?.alt_text
+                    }))
+                    .filter((img): img is { url: string; alt?: string } => !!img.url)}
+                initialIndex={Math.max(
+                    0,
+                    media
+                        .slice(0, previewInitialIndex + 1)
+                        .filter((m) => getMediaUrl(m.file || m.media?.file)).length - 1
+                )}
+                labels={{
+                    close: t('common.imageViewer.close'),
+                    zoomIn: t('common.imageViewer.zoomIn'),
+                    zoomOut: t('common.imageViewer.zoomOut'),
+                    rotate: t('common.imageViewer.rotate'),
+                    prev: t('common.imageViewer.prev'),
+                    next: t('common.imageViewer.next'),
+                    imageCounter: (current, total) => t('common.imageViewer.imageCounter', { current, total })
+                }}
+            />
             <MediaLibraryDialog
                 open={mediaLibraryOpen}
                 onClose={() => setMediaLibraryOpen(false)}

@@ -29,7 +29,7 @@ import { usePageSections } from '@/extensions/hooks/usePageSections'
 import { useDataHooks } from '@/extensions/hooks/useDataHooks'
 
 // API Imports
-import { getProduct, updateProduct, type Product } from '@/services/store'
+import { getProduct, getProductMedia, updateProduct, type Product } from '@/services/store'
 
 export default function ProductEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -72,6 +72,22 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
   const handleChange = useCallback((field: keyof Product, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }))
   }, [])
+
+  const refetchProduct = useCallback(async () => {
+    try {
+      const productId = parseInt(id)
+      const [data, mediaRes] = await Promise.all([
+        getProduct(productId),
+        getProductMedia({ productId, isProductImage: true })
+      ])
+      const mediaItems = mediaRes?.items ?? (data as any)?.media ?? []
+      const merged = { ...data, media: mediaItems }
+      setProductData(merged)
+      setFormData(prev => ({ ...prev, media: mediaItems }))
+    } catch (e) {
+      console.error('Failed to refetch product', e)
+    }
+  }, [id])
 
   // Save product
   const handleSave = async () => {
@@ -195,7 +211,10 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
               <Grid key="ProductInformation" size={{ xs: 12 }}>
                 {renderSection('ProductInformation', ProductInformation, {
                   productData: formData,
-                  onChange: handleChange
+                  onChange: handleChange,
+                  productId: id,
+                  onScannedImageAdded: refetchProduct,
+                  onSave: handleSave
                 })}
               </Grid>
             )}

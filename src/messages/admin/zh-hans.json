@@ -45,6 +45,15 @@
       "downloadPdf": "下载PDF",
       "retry": "重试"
     },
+    "imageViewer": {
+      "close": "关闭",
+      "zoomIn": "放大",
+      "zoomOut": "缩小",
+      "rotate": "旋转",
+      "prev": "上一张",
+      "next": "下一张",
+      "imageCounter": "{current} / {total}"
+    },
     "states": {
       "loading": "加载中...",
       "saving": "保存中...",
@@ -1010,6 +1019,39 @@
         }
       }
     },
+    "scanner": {
+      "title": "扫描商品",
+      "button": "扫描商品",
+      "tabs": {
+        "text": "文字搜索",
+        "image": "图片上传"
+      },
+      "fields": {
+        "productNameLabel": "商品名称",
+        "productNamePlaceholder": "例如：iPhone 15 Pro、Nike Air Max",
+        "uploadImage": "上传商品图片"
+      },
+      "actions": {
+        "search": "搜索商品",
+        "scanning": "扫描中...",
+        "cancel": "取消"
+      },
+      "selectProduct": "选择商品（共 {count} 个）",
+      "brand": "品牌",
+      "model": "型号",
+      "errors": {
+        "enterQueryOrImage": "请输入搜索词或上传图片",
+        "noProducts": "未找到商品，请换一个搜索试试。",
+        "searchFailed": "搜索商品失败",
+        "detailsFailed": "获取商品详情失败"
+      },
+      "autoSave": {
+        "title": "是否自动保存？",
+        "message": "是否立即保存并更新商品信息？",
+        "yes": "保存",
+        "no": "暂不"
+      }
+    },
     "pricing": {
       "title": "价格",
       "fields": {
@@ -1260,7 +1302,8 @@
       "imageAltFallback": "图片 {index}",
       "actions": {
         "selectImage": "选择图片",
-        "delete": "删除"
+        "delete": "删除",
+        "viewFullSize": "查看大图"
       },
       "deleteDialog": {
         "title": "移除图片引用",

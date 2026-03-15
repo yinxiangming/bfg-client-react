@@ -56,6 +56,7 @@ export type WorkspaceSettings = {
     web?: WebSettingsPayload
     general?: GeneralSettingsPayload
     storefront_ui?: StorefrontUiSettingsPayload
+    plugins?: PluginsSettingsPayload
   }
   created_at?: string
   updated_at?: string
@@ -109,6 +110,14 @@ export type GeneralSettingsPayload = {
   site_announcement?: string
   footer_contact?: string
   logo?: string
+}
+
+export type PluginsSettingsPayload = {
+  product_scanner?: {
+    enabled?: boolean
+    api_key?: string
+    api_url?: string
+  }
 }
 
 let workspaceSettingsCache: Promise<WorkspaceSettings> | null = null
@@ -223,6 +232,19 @@ export async function updateStorefrontUiSettings(settingsId: number, storefront_
     method: 'PATCH',
     body: JSON.stringify({ custom_settings: nextCustom })
   })
+}
+
+export async function updatePluginsSettings(settingsId: number, plugins: PluginsSettingsPayload) {
+  const url = `${bfgApi.settings()}${settingsId}/`
+  const current = await apiFetch<WorkspaceSettings>(url)
+  const currentCustom = current.custom_settings || {}
+  const nextCustom = { ...currentCustom, plugins }
+  const result = await apiFetch<WorkspaceSettings>(url, {
+    method: 'PATCH',
+    body: JSON.stringify({ custom_settings: nextCustom })
+  })
+  invalidateWorkspaceSettingsCache()
+  return result
 }
 
 // Users management

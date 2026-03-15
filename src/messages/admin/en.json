@@ -45,6 +45,15 @@
       "downloadPdf": "Download PDF",
       "retry": "Retry"
     },
+    "imageViewer": {
+      "close": "Close",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "rotate": "Rotate",
+      "prev": "Previous",
+      "next": "Next",
+      "imageCounter": "{current} / {total}"
+    },
     "states": {
       "loading": "Loading...",
       "saving": "Saving...",
@@ -1010,6 +1019,39 @@
         }
       }
     },
+    "scanner": {
+      "title": "Scan Product",
+      "button": "Scan Product",
+      "tabs": {
+        "text": "Text Search",
+        "image": "Image Upload"
+      },
+      "fields": {
+        "productNameLabel": "Product Name",
+        "productNamePlaceholder": "e.g., iPhone 15 Pro, Nike Air Max",
+        "uploadImage": "Upload Product Image"
+      },
+      "actions": {
+        "search": "Search Products",
+        "scanning": "Scanning...",
+        "cancel": "Cancel"
+      },
+      "selectProduct": "Select a product ({count} found)",
+      "brand": "Brand",
+      "model": "Model",
+      "errors": {
+        "enterQueryOrImage": "Please enter a search query or upload an image",
+        "noProducts": "No products found. Try a different search.",
+        "searchFailed": "Failed to search products",
+        "detailsFailed": "Failed to get product details"
+      },
+      "autoSave": {
+        "title": "Auto save?",
+        "message": "Save product with imported information now?",
+        "yes": "Save",
+        "no": "Not now"
+      }
+    },
     "pricing": {
       "title": "Pricing",
       "fields": {
@@ -1260,7 +1302,8 @@
       "imageAltFallback": "Image {index}",
       "actions": {
         "selectImage": "Select Image",
-        "delete": "Delete"
+        "delete": "Delete",
+        "viewFullSize": "View full size"
       },
       "deleteDialog": {
         "title": "Remove Image Reference",

@@ -34,9 +34,11 @@ import {
   getWorkspaceSettings,
   updateGeneralSettings,
   updateStorefrontUiSettings,
+  updatePluginsSettings,
   type GeneralSettingsPayload,
   type StorefrontUiSettingsPayload,
-  type StorefrontHeaderOptionsPayload
+  type StorefrontHeaderOptionsPayload,
+  type PluginsSettingsPayload
 } from '@/services/settings'
 import { clearStorefrontConfigCache } from '@/utils/storefrontConfig'
 import { THEME_REGISTRY } from '@/components/storefront/themes/registry.generated'
@@ -87,6 +89,18 @@ const initialStorefrontUi: StorefrontUiData = {
   header_options: { ...defaultHeaderOptions }
 }
 
+type PluginsData = {
+  product_scanner_enabled: boolean
+  product_scanner_api_key: string
+  product_scanner_api_url: string
+}
+
+const initialPluginsData: PluginsData = {
+  product_scanner_enabled: false,
+  product_scanner_api_key: '',
+  product_scanner_api_url: ''
+}
+
 // Vars
 const initialBasicData: BasicData = {
   siteName: '',
@@ -119,6 +133,7 @@ const GeneralSettingsPage = () => {
   const [success, setSuccess] = useState(false)
   const [settingsId, setSettingsId] = useState<number | null>(null)
   const [storefrontUi, setStorefrontUi] = useState<StorefrontUiData>(initialStorefrontUi)
+  const [pluginsData, setPluginsData] = useState<PluginsData>(initialPluginsData)
 
   const handleTabChange = (event: SyntheticEvent, value: string) => {
     setActiveTab(value)
@@ -137,6 +152,10 @@ const GeneralSettingsPage = () => {
       ...prev,
       header_options: { ...prev.header_options, [key]: checked }
     }))
+  }
+
+  const handlePluginsChange = (field: keyof PluginsData, value: any) => {
+    setPluginsData(prev => ({ ...prev, [field]: value }))
   }
 
   const handleFileInputChange = (file: ChangeEvent) => {
@@ -181,6 +200,13 @@ const GeneralSettingsPage = () => {
             header_options: { ...defaultHeaderOptions, ...(storefront_ui.header_options || {}) }
           })
         }
+
+        const plugins = (settings.custom_settings as any)?.plugins || {}
+        setPluginsData({
+          product_scanner_enabled: plugins.product_scanner?.enabled ?? initialPluginsData.product_scanner_enabled,
+          product_scanner_api_key: plugins.product_scanner?.api_key ?? initialPluginsData.product_scanner_api_key,
+          product_scanner_api_url: plugins.product_scanner?.api_url ?? initialPluginsData.product_scanner_api_url
+        })
 
         const general = (settings.custom_settings as any)?.general || {}
         if (general || (settings as any).site_name != null || (settings as any).site_description != null) {
@@ -286,6 +312,15 @@ const GeneralSettingsPage = () => {
         header_options: storefrontUi.header_options
       }
       await updateStorefrontUiSettings(currentSettingsId, storefrontPayload)
+
+      const pluginsPayload: PluginsSettingsPayload = {
+        product_scanner: {
+          enabled: pluginsData.product_scanner_enabled,
+          api_key: pluginsData.product_scanner_api_key,
+          api_url: pluginsData.product_scanner_api_url
+        }
+      }
+      await updatePluginsSettings(currentSettingsId, pluginsPayload)
 
       console.log('[GeneralSettings] Save successful')
       clearStorefrontConfigCache()
@@ -742,6 +777,67 @@ const GeneralSettingsPage = () => {
                             }}
                           />
                         </Grid>
+                      </Grid>
+                    </CardContent>
+                  </Card>
+
+                  {/* Plugins Section */}
+                  <Card variant='outlined' sx={{ mb: 6 }}>
+                    <CardContent>
+                      <Typography variant='h6' sx={{ mb: 4 }}>
+                        Plugins & Integrations
+                      </Typography>
+                      <Grid container spacing={4}>
+                        <Grid size={{ xs: 12 }}>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={pluginsData.product_scanner_enabled}
+                                onChange={e => handlePluginsChange('product_scanner_enabled', e.target.checked)}
+                              />
+                            }
+                            label={
+                              <Box>
+                                <Typography variant='body1'>Enable Product Scanner</Typography>
+                                <Typography variant='caption' color='text.secondary'>
+                                  Allow automatic product information scanning using AI (text search or image upload)
+                                </Typography>
+                              </Box>
+                            }
+                          />
+                        </Grid>
+                        {pluginsData.product_scanner_enabled && (
+                          <>
+                            <Grid size={{ xs: 12, sm: 6 }}>
+                              <CustomTextField
+                                fullWidth
+                                label='Product Scanner API URL'
+                                value={pluginsData.product_scanner_api_url}
+                                onChange={e => handlePluginsChange('product_scanner_api_url', e.target.value)}
+                                placeholder='https://product-scanner-appg6r4hzq-de.a.run.app'
+                                slotProps={{
+                                  input: {
+                                    startAdornment: <i className='tabler-link' />
+                                  }
+                                }}
+                              />
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 6 }}>
+                              <CustomTextField
+                                fullWidth
+                                label='Product Scanner API Key'
+                                value={pluginsData.product_scanner_api_key}
+                                onChange={e => handlePluginsChange('product_scanner_api_key', e.target.value)}
+                                placeholder='ps-xxxxxx'
+                                slotProps={{
+                                  input: {
+                                    startAdornment: <i className='tabler-key' />
+                                  }
+                                }}
+                              />
+                            </Grid>
+                          </>
+                        )}
                       </Grid>
                     </CardContent>
                   </Card>
