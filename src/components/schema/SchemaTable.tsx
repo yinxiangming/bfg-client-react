@@ -684,7 +684,7 @@ export default function SchemaTable<T extends { id: number | string }>({
                     </div>
                   </th>
                 ))}
-                {rowActions.length > 0 && <th align="right">Actions</th>}
+                {rowActions.length > 0 && <th align="right">{t('common.schemaTable.actionsColumn')}</th>}
               </tr>
             </thead>
             <tbody>

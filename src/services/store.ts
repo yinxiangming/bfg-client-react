@@ -290,6 +290,11 @@ export async function getWarehouses(): Promise<Warehouse[]> {
 }
 
 // Order types and API
+export interface OrderItemSummary {
+  product_name: string
+  quantity: number
+}
+
 export interface Order {
   id: number
   order_number: string
@@ -299,6 +304,11 @@ export interface Order {
   store_name?: string
   total: number
   item_count?: number
+  /** Brief item list for list view (product_name, quantity) */
+  items?: OrderItemSummary[]
+  customer_note?: string
+  /** Number of packages for logistics column */
+  packages_count?: number
   status: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled'
   payment_status: 'pending' | 'paid' | 'failed'
   created_at: string

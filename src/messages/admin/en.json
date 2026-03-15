@@ -74,6 +74,7 @@
       "message": "Message"
     },
     "schemaTable": {
+      "actionsColumn": "Actions",
       "search": "Search",
       "searchPlaceholder": "Search...",
       "bulkActions": "Bulk Actions",
@@ -138,13 +139,23 @@
         "title": "Orders",
         "columns": {
           "orderNo": "Order No",
+          "copyOrderNo": "Copy order number",
+          "noteLabel": "Note",
           "customer": "Customer",
           "store": "Store",
           "total": "Total",
           "status": "Status",
           "payment": "Payment",
+          "logistics": "Logistics",
+          "packagesCount": "{count} package(s)",
+          "manageLogistics": "Manage",
+          "addPackages": "Add packages",
           "createdAt": "Created At"
         }
+      },
+      "logisticsModal": {
+        "title": "Packages & shipping — Order {orderNumber}",
+        "titleFallback": "Packages & shipping"
       },
       "filters": {
         "status": {
@@ -269,7 +280,8 @@
     },
     "timeline": {
       "title": "Order Timeline",
-      "empty": "No order activity available"
+      "empty": "No order activity available",
+      "byActor": "By {actor}"
     },
     "delivery": {
       "title": "Delivery Information",
@@ -1079,7 +1091,8 @@
           "sku": "SKU",
           "price": "Price",
           "qty": "QTY",
-          "published": "Published"
+          "published": "Published",
+          "featured": "Featured"
         },
         "filters": {
           "status": {

@@ -74,6 +74,7 @@
       "message": "内容"
     },
     "schemaTable": {
+      "actionsColumn": "操作",
       "search": "搜索",
       "searchPlaceholder": "搜索...",
       "bulkActions": "批量操作",
@@ -138,13 +139,23 @@
         "title": "订单",
         "columns": {
           "orderNo": "订单号",
+          "copyOrderNo": "复制订单号",
+          "noteLabel": "留言",
           "customer": "客户",
           "store": "门店",
           "total": "总计",
           "status": "状态",
           "payment": "支付",
+          "logistics": "物流",
+          "packagesCount": "{count} 个包裹",
+          "manageLogistics": "管理",
+          "addPackages": "添加包裹",
           "createdAt": "创建时间"
         }
+      },
+      "logisticsModal": {
+        "title": "包裹与物流 — 订单 {orderNumber}",
+        "titleFallback": "包裹与物流"
       },
       "filters": {
         "status": {
@@ -269,7 +280,8 @@
     },
     "timeline": {
       "title": "订单时间线",
-      "empty": "暂无订单动态"
+      "empty": "暂无订单动态",
+      "byActor": "操作人：{actor}"
     },
     "delivery": {
       "title": "配送信息",
@@ -1079,7 +1091,8 @@
           "sku": "SKU",
           "price": "价格",
           "qty": "数量",
-          "published": "发布状态"
+          "published": "发布状态",
+          "featured": "推荐"
         },
         "filters": {
           "status": {

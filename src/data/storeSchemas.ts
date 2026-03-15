@@ -170,6 +170,15 @@ export const productsSchema: SchemaResponse = {
         render: (value: any) => {
           return value ? 'Published' : 'Inactive'
         }
+      },
+      {
+        field: 'is_featured',
+        label: 'Featured',
+        type: 'boolean',
+        sortable: true,
+        render: (value: any) => {
+          return value ? 'Yes' : 'No'
+        }
       }
     ],
     filters: [

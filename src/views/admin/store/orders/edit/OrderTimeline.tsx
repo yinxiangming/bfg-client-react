@@ -25,6 +25,8 @@ type Activity = {
   time: string
   action: string
   color: 'primary' | 'success' | 'error' | 'warning' | 'secondary'
+  /** Who performed the action (user display name or "System") */
+  actor?: string
 }
 
 type OrderDetail = {
@@ -83,7 +85,8 @@ const OrderTimeline = ({ order }: OrderTimelineProps) => {
         date: formatDate(activity.time),
         time: activity.time,
         color: timelineColor,
-        show: true
+        show: true,
+        actor: activity.actor
       }
     })
     // Remove duplicates based on id (each audit log entry should be unique)
@@ -142,6 +145,11 @@ const OrderTimeline = ({ order }: OrderTimelineProps) => {
                     </Typography>
                   )}
                 </Box>
+                {item.actor && (
+                  <Typography variant='caption' sx={{ fontSize: '0.75rem', color: 'text.secondary', display: 'block', mb: 0.25 }}>
+                    {t('orders.timeline.byActor', { actor: item.actor })}
+                  </Typography>
+                )}
                 {item.description && item.description !== item.title && (
                   <Typography variant='body2' sx={{ fontSize: '0.8125rem', color: 'text.secondary', mb: 0 }}>
                     {item.description}
