@@ -11,6 +11,7 @@ import { useTranslations } from 'next-intl'
 
 // Component Imports
 import ProductCard from './components/ProductCard'
+import ImageViewerDialog from '@/components/ui/ImageViewerDialog'
 import { useCart } from '@/contexts/CartContext'
 
 // Util Imports
@@ -47,6 +48,7 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedImage, setSelectedImage] = useState(0)
+  const [imageViewerOpen, setImageViewerOpen] = useState(false)
   const [selectedSize, setSelectedSize] = useState('')
   const [selectedColor, setSelectedColor] = useState('')
   const [quantity, setQuantity] = useState(1)
@@ -266,12 +268,26 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
       <div className='sf-product-detail-layout'>
         {/* Product Images */}
         <div className='sf-product-detail-gallery'>
-          <div className='sf-product-detail-main-image'>
+          <div
+            className='sf-product-detail-main-image'
+            role='button'
+            tabIndex={0}
+            onClick={() => setImageViewerOpen(true)}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') setImageViewerOpen(true) }}
+            style={{ cursor: 'pointer' }}
+            aria-label='View full size'
+          >
             <img
               src={product.images[selectedImage]}
               alt={product.name}
             />
           </div>
+          <ImageViewerDialog
+            open={imageViewerOpen}
+            onClose={() => setImageViewerOpen(false)}
+            images={product.images.map((url) => ({ url, alt: product.name }))}
+            initialIndex={selectedImage}
+          />
           <div className='sf-product-detail-thumbnails'>
             {product.images.map((img, idx) => (
               <button
@@ -331,9 +347,11 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
               </span>
             )}
           </div>
-          <p className='sf-product-description' style={{ fontSize: '0.875rem', lineHeight: 1.6, marginBottom: '1.5rem' }}>
-            {product.description}
-          </p>
+          <div
+            className='sf-product-description'
+            style={{ fontSize: '0.875rem', lineHeight: 1.6, marginBottom: '1.5rem' }}
+            dangerouslySetInnerHTML={{ __html: product.description || '' }}
+          />
 
           {/* Size Selection */}
           {product.sizes.length > 0 && (
@@ -543,9 +561,11 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
         </div>
         <div style={{ padding: '2rem' }}>
           {activeTab === 'description' && (
-            <div>
-              <p className='sf-text-muted' style={{ lineHeight: 1.8 }}>{product.description}</p>
-            </div>
+            <div
+              className='sf-text-muted sf-product-description-content'
+              style={{ lineHeight: 1.8 }}
+              dangerouslySetInnerHTML={{ __html: product.description || '' }}
+            />
           )}
           {activeTab === 'details' && (
             <div className='sf-product-details-grid'>
