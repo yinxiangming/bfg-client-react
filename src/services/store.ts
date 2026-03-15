@@ -195,16 +195,24 @@ export async function getStore(id: number): Promise<Store> {
 }
 
 export async function createStore(data: StorePayload): Promise<Store> {
+  const { warehouses, ...rest } = data
   return apiFetch<Store>(bfgApi.stores(), {
     method: 'POST',
-    body: JSON.stringify(data)
+    body: JSON.stringify({
+      ...rest,
+      ...(Array.isArray(warehouses) ? { warehouse_ids: warehouses } : {})
+    })
   })
 }
 
 export async function updateStore(id: number, data: Partial<StorePayload>): Promise<Store> {
+  const { warehouses, ...rest } = data
   return apiFetch<Store>(`${bfgApi.stores()}${id}/`, {
     method: 'PATCH',
-    body: JSON.stringify(data)
+    body: JSON.stringify({
+      ...rest,
+      ...(Array.isArray(warehouses) ? { warehouse_ids: warehouses } : {})
+    })
   })
 }
 

@@ -65,14 +65,7 @@ export const adminNavItems: MenuNode[] = [
         i18nKey: 'nav.supportTickets',
         href: '/admin/support/tickets',
         icon: 'tabler-ticket'
-      },
-      {
-        id: 'support-customers',
-        label: 'Customers',
-        i18nKey: 'nav.supportCustomers',
-        href: '/admin/support/customers',
-        icon: 'tabler-users'
-      }
+      }      
     ]
   },
   {

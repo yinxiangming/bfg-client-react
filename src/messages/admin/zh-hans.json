@@ -989,6 +989,7 @@
         "code": "代码",
         "description": "描述",
         "warehouses": "仓库",
+        "status": "状态",
         "createdAt": "创建时间"
       }
     },
@@ -1000,7 +1001,24 @@
       "confirmDelete": "确认删除该门店？"
     },
     "errors": {
-      "deleteFailed": "删除门店失败：{error}"
+      "deleteFailed": "删除门店失败：{error}",
+      "loadFailed": "加载门店失败"
+    },
+    "form": {
+      "title": "门店详情",
+      "fields": {
+        "name": "名称",
+        "code": "代码",
+        "description": "描述",
+        "warehouses": "仓库",
+        "active": "启用",
+        "createdAt": "创建时间",
+        "updatedAt": "更新时间"
+      },
+      "actions": {
+        "save": "保存",
+        "cancel": "取消"
+      }
     },
     "editPage": {
       "states": {
