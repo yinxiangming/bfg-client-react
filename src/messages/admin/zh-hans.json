@@ -91,7 +91,18 @@
       "showing": "显示",
       "to": "到",
       "of": "共",
-      "entries": "条"
+      "entries": "条",
+      "dateRange": {
+        "start": "开始时间",
+        "end": "结束时间",
+        "includeTime": "选择时间",
+        "apply": "确定",
+        "cancel": "取消",
+        "today": "今天",
+        "yesterday": "昨天",
+        "lastWeek": "上周",
+        "selectDate": "选择日期"
+      }
     },
     "schemaForm": {
       "save": "保存",
@@ -163,6 +174,18 @@
         },
         "paymentStatus": {
           "label": "支付状态"
+        },
+        "store": {
+          "label": "门店"
+        },
+        "createdAfter": {
+          "label": "创建时间从"
+        },
+        "createdBefore": {
+          "label": "创建时间至"
+        },
+        "createdTime": {
+          "label": "创建时间"
         }
       },
       "actions": {

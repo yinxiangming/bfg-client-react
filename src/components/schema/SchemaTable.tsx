@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useCallback } from 'react'
 
 // i18n Imports
 import { useTranslations } from 'next-intl'
@@ -36,6 +36,7 @@ import classnames from 'classnames'
 
 // Component Imports
 import CustomTextField from '@/components/ui/TextField'
+import FilterDateRangePicker, { toDateOnly } from '@/components/schema/FilterDateRangePicker'
 
 // Type Imports
 import type { ListSchema, SchemaAction, SchemaFilter } from '@/types/schema'
@@ -54,6 +55,42 @@ import {
 // Style Imports
 import tableStyles from '@/styles/table.module.css'
 
+// Date range preset helpers (date-only YYYY-MM-DD for API)
+function formatDateOnly(d: Date): string {
+  const y = d.getFullYear()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${y}-${m}-${day}`
+}
+
+function getPresetRange(preset: 'today' | 'yesterday' | 'last_week'): { start: string; end: string } {
+  const now = new Date()
+  if (preset === 'today') {
+    return { start: formatDateOnly(now), end: formatDateOnly(now) }
+  }
+  if (preset === 'yesterday') {
+    const d = new Date(now)
+    d.setDate(d.getDate() - 1)
+    return { start: formatDateOnly(d), end: formatDateOnly(d) }
+  }
+  const lastSun = new Date(now)
+  lastSun.setDate(now.getDate() - now.getDay() - 1)
+  const lastMon = new Date(lastSun)
+  lastMon.setDate(lastSun.getDate() - 6)
+  return { start: formatDateOnly(lastMon), end: formatDateOnly(lastSun) }
+}
+
+function getDateRangePreset(start: string, end: string): '' | 'today' | 'yesterday' | 'last_week' | 'custom' {
+  if (!start && !end) return ''
+  const rToday = getPresetRange('today')
+  if (start === rToday.start && end === rToday.end) return 'today'
+  const rYesterday = getPresetRange('yesterday')
+  if (start === rYesterday.start && end === rYesterday.end) return 'yesterday'
+  const rLastWeek = getPresetRange('last_week')
+  if (start === rLastWeek.start && end === rLastWeek.end) return 'last_week'
+  return 'custom'
+}
+
 type SchemaTableProps<T = any> = {
   schema: ListSchema
   data: T[]
@@ -64,6 +101,9 @@ type SchemaTableProps<T = any> = {
   fetchDetailFn?: (id: number | string) => Promise<T> // Function to fetch detail when editing
   statusColors?: Record<string, 'default' | 'primary' | 'success' | 'warning' | 'error' | 'info'> // Custom status color mapping
   customFilters?: React.ReactNode // Custom filter components to render in the toolbar
+  /** Controlled filters for API-mode filtering: parent passes params and refetches when they change */
+  filters?: Record<string, string>
+  onFiltersChange?: (filters: Record<string, string>) => void
 }
 
 // Default status colors - only common/generic statuses
@@ -129,7 +169,9 @@ export default function SchemaTable<T extends { id: number | string }>({
   basePath,
   fetchDetailFn,
   statusColors = defaultStatusColors,
-  customFilters
+  customFilters,
+  filters: controlledFilters,
+  onFiltersChange
 }: SchemaTableProps<T>) {
   const t = useTranslations('admin')
   // State
@@ -137,7 +179,19 @@ export default function SchemaTable<T extends { id: number | string }>({
   const [rowsPerPage, setRowsPerPage] = useState(10)
   const [search, setSearch] = useState('')
   const [debouncedSearch, setDebouncedSearch] = useState('')
-  const [filters, setFilters] = useState<Record<string, string>>({})
+  const [internalFilters, setInternalFilters] = useState<Record<string, string>>({})
+  const filters = controlledFilters !== undefined ? controlledFilters : internalFilters
+  const setFilters = useCallback(
+    (next: Record<string, string> | ((prev: Record<string, string>) => Record<string, string>)) => {
+      if (onFiltersChange) {
+        const nextVal = typeof next === 'function' ? next(filters) : next
+        onFiltersChange(nextVal)
+      } else {
+        setInternalFilters(typeof next === 'function' ? next(internalFilters) : next)
+      }
+    },
+    [onFiltersChange, filters, internalFilters]
+  )
   const [sortField, setSortField] = useState<string | null>(null)
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
   const [actionMenuAnchor, setActionMenuAnchor] = useState<{ el: HTMLElement; item: T } | null>(null)
@@ -147,6 +201,10 @@ export default function SchemaTable<T extends { id: number | string }>({
   const [selectedRows, setSelectedRows] = useState<Set<number | string>>(new Set())
   const [bulkActionMenuAnchor, setBulkActionMenuAnchor] = useState<HTMLElement | null>(null)
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState<boolean>(false)
+  const [dateRangePickerOpen, setDateRangePickerOpen] = useState<string | null>(null)
+  const [dateRangeDraft, setDateRangeDraft] = useState<Record<string, { start: string; end: string }>>({})
+  const [dateRangeDropdownValue, setDateRangeDropdownValue] = useState<Record<string, string>>({})
+  const [dateRangeIncludeTime, setDateRangeIncludeTime] = useState<Record<string, boolean>>({})
 
   // Debounce search
   useEffect(() => {
@@ -173,8 +231,16 @@ export default function SchemaTable<T extends { id: number | string }>({
           setFilterOptionsLoading(prev => ({ ...prev, [filter.field]: true }))
           try {
             if (filter.optionsSource === 'api' && filter.optionsApi) {
-              const options = await fetchOptionsFromApi(filter.optionsApi)
-              setFilterOptions(prev => ({ ...prev, [filter.field]: options }))
+              const raw = await fetchOptionsFromApi(filter.optionsApi)
+              const valueField = filter.optionsValueField ?? 'id'
+              const labelField = filter.optionsLabelField ?? 'name'
+              const options = Array.isArray(raw)
+                ? raw.map((item: any) => ({
+                    value: item[valueField] ?? item.value ?? item.id,
+                    label: String(item[labelField] ?? item.label ?? item.name ?? '')
+                  }))
+                : raw
+              setFilterOptions(prev => ({ ...prev, [filter.field]: options || [] }))
             } else if (filter.optionsSource === 'cache' && filter.optionsCode) {
               const options = getOptionsFromCache(filter.optionsCode)
               if (options.length > 0) {
@@ -210,9 +276,19 @@ export default function SchemaTable<T extends { id: number | string }>({
       )
     }
 
+    // Collect daterange sub-fields (startField/endField) that are API-managed
+    const dateRangeApiFields = new Set<string>()
+    schema.filters?.forEach(f => {
+      if (f.type === 'daterange' && f.dateRange && f.filterMode === 'api') {
+        dateRangeApiFields.add(f.dateRange.startField)
+        dateRangeApiFields.add(f.dateRange.endField)
+      }
+    })
+
     // Apply filters (only for local filter mode)
     Object.entries(filters).forEach(([field, value]) => {
       if (value) {
+        if (dateRangeApiFields.has(field)) return
         const filterConfig = schema.filters?.find(f => f.field === field)
         // Only apply local filtering if filterMode is 'local' or not specified
         if (!filterConfig || filterConfig.filterMode !== 'api') {
@@ -531,6 +607,145 @@ export default function SchemaTable<T extends { id: number | string }>({
             {schema.filters && schema.filters.length > 0 && (
               <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
                 {schema.filters.map((filter) => {
+                  if (filter.type === 'daterange' && filter.dateRange) {
+                    const dr = filter.dateRange
+                    const startField = dr.startField
+                    const endField = dr.endField
+                    const rangeOptionValue = dr.rangeOptionValue ?? 'custom'
+                    const startVal = filters[startField] ?? ''
+                    const endVal = filters[endField] ?? ''
+                    const presetFromRange = startVal || endVal ? getDateRangePreset(startVal, endVal) : ''
+                    const dropdownValue =
+                      startVal || endVal
+                        ? presetFromRange || rangeOptionValue
+                        : dateRangeDropdownValue[filter.field] ?? ''
+                    const presets = ['today', 'yesterday', 'last_week'] as const
+                    const daterangeOptions =
+                      filter.options?.length ? filter.options : [
+                        { value: '', label: t('common.schemaTable.all') },
+                        ...presets.map((p) => ({ value: p, label: t(`common.schemaTable.dateRange.${p === 'last_week' ? 'lastWeek' : p}`) })),
+                        { value: rangeOptionValue, label: t('common.schemaTable.dateRange.selectDate') }
+                      ]
+                    const openDateRangeDialog = () => {
+                      setDateRangeDraft((prev) => ({
+                        ...prev,
+                        [filter.field]: { start: startVal, end: endVal }
+                      }))
+                      setDateRangePickerOpen(filter.field)
+                    }
+                    return (
+                      <Box key={filter.field} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <FormControl size="small" sx={{ minWidth: 160 }}>
+                          <InputLabel>{filter.label}</InputLabel>
+                          <Select
+                            value={dropdownValue}
+                            label={filter.label}
+                            onChange={(e) => {
+                              const v = e.target.value
+                              if (v === '') {
+                                setFilters({ ...filters, [startField]: '', [endField]: '' })
+                                setDateRangeDropdownValue((prev) => ({ ...prev, [filter.field]: '' }))
+                                return
+                              }
+                              if (v === 'today' || v === 'yesterday' || v === 'last_week') {
+                                const { start, end } = getPresetRange(v)
+                                setFilters({ ...filters, [startField]: start, [endField]: end })
+                                setDateRangeDropdownValue((prev) => ({ ...prev, [filter.field]: '' }))
+                                return
+                              }
+                              if (v === rangeOptionValue) {
+                                setDateRangeDropdownValue((prev) => ({ ...prev, [filter.field]: v }))
+                                openDateRangeDialog()
+                              }
+                            }}
+                            sx={{
+                              borderRadius: 1.5,
+                              height: '38px',
+                              fontSize: '0.875rem',
+                              '& .MuiSelect-select': { minWidth: '100px' }
+                            }}
+                          >
+                            {daterangeOptions.map((opt) => (
+                              <MenuItem key={String(opt.value)} value={String(opt.value)}>
+                                {opt.label}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+                        {dropdownValue === rangeOptionValue && (
+                          <Button
+                            size="small"
+                            variant="outlined"
+                            onClick={openDateRangeDialog}
+                          >
+                            {startVal && endVal
+                              ? `${startVal.includes('T') ? formatDateTime(startVal) : formatDate(startVal)} – ${endVal.includes('T') ? formatDateTime(endVal) : formatDate(endVal)}`
+                              : `${t('common.schemaTable.dateRange.start')} – ${t('common.schemaTable.dateRange.end')}`}
+                          </Button>
+                        )}
+                        <Dialog
+                          open={dateRangePickerOpen === filter.field}
+                          onClose={(_e, reason) => {
+                            if (reason === 'backdropClick') return
+                            setDateRangePickerOpen(null)
+                          }}
+                          maxWidth="xs"
+                        >
+                          <FilterDateRangePicker
+                            value={dateRangeDraft[filter.field] ?? { start: startVal, end: endVal }}
+                            onChange={(v) => {
+                              setDateRangeDraft((prev) => ({
+                                ...prev,
+                                [filter.field]: { start: v.start ?? '', end: v.end ?? '' }
+                              }))
+                            }}
+                            includeTimeSwitch={dr.includeTimeSwitch}
+                            defaultTimeEnabled={dr.defaultTimeEnabled}
+                            includeTime={dateRangeIncludeTime[filter.field] ?? dr.defaultTimeEnabled}
+                            onIncludeTimeChange={(v) =>
+                              setDateRangeIncludeTime((prev) => ({ ...prev, [filter.field]: v }))
+                            }
+                            showActions
+                            onApply={() => {
+                              const draft = dateRangeDraft[filter.field]
+                              if (draft) {
+                                setFilters((prev) => ({
+                                  ...prev,
+                                  [startField]: draft.start ? toDateOnly(draft.start) : '',
+                                  [endField]: draft.end ? toDateOnly(draft.end) : ''
+                                }))
+                              }
+                              setDateRangePickerOpen(null)
+                            }}
+                            onCancel={() => setDateRangePickerOpen(null)}
+                          />
+                        </Dialog>
+                      </Box>
+                    )
+                  }
+
+                  if (filter.type === 'date' || filter.type === 'datetime') {
+                    return (
+                      <FormControl key={filter.field} size="small" sx={{ minWidth: 160 }} variant="outlined">
+                        <CustomTextField
+                          type="date"
+                          size="small"
+                          label={filter.label}
+                          value={filters[filter.field] || ''}
+                          onChange={(e) => {
+                            const newFilters = { ...filters, [filter.field]: e.target.value }
+                            setFilters(newFilters)
+                          }}
+                          InputLabelProps={{ shrink: true }}
+                          sx={{
+                            borderRadius: 1.5,
+                            '& .MuiOutlinedInput-root': { height: '38px', fontSize: '0.875rem' }
+                          }}
+                        />
+                      </FormControl>
+                    )
+                  }
+
                   let selectOptions: OptionItemType[] = []
                   if (filter.optionsSource === 'api' || filter.optionsSource === 'cache') {
                     selectOptions = filterOptions[filter.field] || []
@@ -549,9 +764,6 @@ export default function SchemaTable<T extends { id: number | string }>({
                         onChange={(e) => {
                           const newFilters = { ...filters, [filter.field]: e.target.value }
                           setFilters(newFilters)
-                          if (filter.filterMode === 'api') {
-                            console.log(`Server-side filter for ${filter.field}:`, e.target.value)
-                          }
                         }}
                         disabled={isLoading}
                         sx={{

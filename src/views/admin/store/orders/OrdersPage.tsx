@@ -7,7 +7,6 @@ import { useTranslations } from 'next-intl'
 
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
-import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
 import IconButton from '@mui/material/IconButton'
@@ -15,9 +14,10 @@ import IconButton from '@mui/material/IconButton'
 import SchemaTable from '@/components/schema/SchemaTable'
 import type { ListSchema, SchemaAction, SchemaFilter } from '@/types/schema'
 import { useApiData } from '@/hooks/useApiData'
-import { getOrders, getOrder, deleteOrder, updateOrder, type Order, type OrderItemSummary } from '@/services/store'
+import { getOrders, getOrder, deleteOrder, updateOrder, type Order, type OrderItemSummary, type OrderListParams } from '@/services/store'
 import { getWorkspaceSettings } from '@/services/settings'
 import { formatCurrency, formatDate } from '@/utils/format'
+import { bfgApi } from '@/utils/api'
 import Button from '@mui/material/Button'
 import Popover from '@mui/material/Popover'
 import FormControl from '@mui/material/FormControl'
@@ -239,6 +239,7 @@ const buildOrdersSchema = (
       field: 'status',
       label: t('orders.listPage.filters.status.label'),
       type: 'select',
+      filterMode: 'api',
       options: [
         { value: 'pending', label: t('orders.status.pending') },
         { value: 'paid', label: t('orders.status.paid') },
@@ -251,11 +252,42 @@ const buildOrdersSchema = (
       field: 'payment_status',
       label: t('orders.listPage.filters.paymentStatus.label'),
       type: 'select',
+      filterMode: 'api',
       options: [
         { value: 'pending', label: t('orders.paymentStatus.pending') },
         { value: 'paid', label: t('orders.paymentStatus.paid') },
         { value: 'failed', label: t('orders.paymentStatus.failed') }
       ]
+    },
+    {
+      field: 'store',
+      label: t('orders.listPage.filters.store.label'),
+      type: 'select',
+      filterMode: 'api',
+      optionsSource: 'api',
+      optionsApi: bfgApi.stores(),
+      optionsValueField: 'id',
+      optionsLabelField: 'name'
+    },
+    {
+      field: 'created_range',
+      label: t('orders.listPage.filters.createdTime.label'),
+      type: 'daterange',
+      filterMode: 'api',
+      options: [
+        { value: '', label: t('common.schemaTable.all') },
+        { value: 'today', label: t('common.schemaTable.dateRange.today') },
+        { value: 'yesterday', label: t('common.schemaTable.dateRange.yesterday') },
+        { value: 'last_week', label: t('common.schemaTable.dateRange.lastWeek') },
+        { value: 'custom', label: t('common.schemaTable.dateRange.selectDate') }
+      ],
+      dateRange: {
+        startField: 'created_after',
+        endField: 'created_before',
+        rangeOptionValue: 'custom',
+        includeTimeSwitch: true,
+        defaultTimeEnabled: false
+      }
     }
   ] as SchemaFilter[],
   searchFields: ['order_number', 'customer_name'],
@@ -301,8 +333,10 @@ export default function OrdersPage() {
     [t, currency, openLogisticsModal, openStatusPopover, openPaymentPopover]
   )
 
+  const [apiFilters, setApiFilters] = useState<Record<string, string>>({})
   const { data: orders, loading, error, refetch } = useApiData<Order[]>({
-    fetchFn: getOrders
+    fetchFn: useCallback(() => getOrders(apiFilters as OrderListParams), [apiFilters]),
+    deps: [JSON.stringify(apiFilters)]
   })
 
   const orderForStatus = statusPopover.orderId != null ? orders?.find(o => o.id === statusPopover.orderId) : null
@@ -366,15 +400,7 @@ export default function OrdersPage() {
     }
   }
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-        <CircularProgress />
-      </Box>
-    )
-  }
-
-  if (error) {
+  if (error && !orders) {
     return (
       <Box>
         <Alert severity='error' sx={{ mb: 2 }}>
@@ -389,12 +415,20 @@ export default function OrdersPage() {
       <Typography variant='h4' sx={{ mb: 4 }}>
         {t('orders.listPage.title')}
       </Typography>
+      {error && (
+        <Alert severity='error' sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
       <SchemaTable
         schema={ordersSchema}
         data={orders || []}
+        loading={loading}
         onActionClick={handleActionClick}
         fetchDetailFn={(id) => getOrder(typeof id === 'string' ? parseInt(id) : id)}
         basePath='/admin/store/orders'
+        filters={apiFilters}
+        onFiltersChange={setApiFilters}
       />
       <OrderPackagesModal
         open={logisticsModalOrderId != null}

@@ -91,7 +91,18 @@
       "showing": "Showing",
       "to": "to",
       "of": "of",
-      "entries": "entries"
+      "entries": "entries",
+      "dateRange": {
+        "start": "Start",
+        "end": "End",
+        "includeTime": "Include time",
+        "apply": "Apply",
+        "cancel": "Cancel",
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "lastWeek": "Last week",
+        "selectDate": "Select date"
+      }
     },
     "schemaForm": {
       "save": "Save",
@@ -163,6 +174,18 @@
         },
         "paymentStatus": {
           "label": "Payment Status"
+        },
+        "store": {
+          "label": "Store"
+        },
+        "createdAfter": {
+          "label": "Created from"
+        },
+        "createdBefore": {
+          "label": "Created to"
+        },
+        "createdTime": {
+          "label": "Created time"
         }
       },
       "actions": {

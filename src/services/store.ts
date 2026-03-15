@@ -314,8 +314,24 @@ export interface Order {
   created_at: string
 }
 
-export async function getOrders(): Promise<Order[]> {
-  const response = await apiFetch<Order[] | { results: Order[]; data?: Order[] }>(bfgApi.orders())
+export type OrderListParams = {
+  status?: string
+  payment_status?: string
+  store?: string
+  created_after?: string
+  created_before?: string
+}
+
+export async function getOrders(params?: OrderListParams): Promise<Order[]> {
+  let url = bfgApi.orders().replace(/\/+$/, '')
+  if (params && Object.keys(params).length > 0) {
+    const qs = new URLSearchParams()
+    Object.entries(params).forEach(([k, v]) => {
+      if (v != null && v !== '') qs.set(k, v)
+    })
+    if (qs.toString()) url += `?${qs.toString()}`
+  }
+  const response = await apiFetch<Order[] | { results: Order[]; data?: Order[] }>(url)
   if (Array.isArray(response)) {
     return response
   }
