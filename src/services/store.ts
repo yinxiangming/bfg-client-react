@@ -342,7 +342,19 @@ export async function getOrder(id: number): Promise<Order> {
   return apiFetch<Order>(`${bfgApi.orders()}${id}/`)
 }
 
-export async function createOrder(data: Partial<Order>): Promise<Order> {
+/** Payload for staff direct order creation (backend OrderCreateSerializer) */
+export interface CreateOrderPayload {
+  customer_id: number
+  store_id: number
+  shipping_address_id: number
+  billing_address_id?: number
+  status?: Order['status']
+  payment_status?: Order['payment_status']
+  customer_note?: string
+  admin_note?: string
+}
+
+export async function createOrder(data: CreateOrderPayload): Promise<Order> {
   return apiFetch<Order>(bfgApi.orders(), {
     method: 'POST',
     body: JSON.stringify(data)
@@ -353,6 +365,20 @@ export async function updateOrder(id: number, data: Partial<Order>): Promise<Ord
   return apiFetch<Order>(`${bfgApi.orders()}${id}/`, {
     method: 'PATCH',
     body: JSON.stringify(data)
+  })
+}
+
+/** Item payload for update_order_items (product + optional variant + quantity) */
+export interface OrderItemUpdatePayload {
+  product: number
+  variant?: number
+  quantity: number
+}
+
+export async function updateOrderItems(orderId: number, items: OrderItemUpdatePayload[]): Promise<Order> {
+  return apiFetch<Order>(`${bfgApi.orders()}${orderId}/update_items/`, {
+    method: 'POST',
+    body: JSON.stringify({ items })
   })
 }
 

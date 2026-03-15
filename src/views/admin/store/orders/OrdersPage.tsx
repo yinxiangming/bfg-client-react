@@ -24,6 +24,7 @@ import FormControl from '@mui/material/FormControl'
 import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import OrderPackagesModal from '@/views/admin/store/orders/list/OrderPackagesModal'
+import CreateOrderModal from '@/views/admin/store/orders/list/CreateOrderModal'
 
 const STATUS_COLORS: Record<string, 'warning' | 'info' | 'primary' | 'success' | 'error' | 'default'> = {
   pending: 'warning',
@@ -292,6 +293,7 @@ const buildOrdersSchema = (
   ] as SchemaFilter[],
   searchFields: ['order_number', 'customer_name'],
   actions: [
+    { id: 'add', label: t('orders.listPage.actions.add'), type: 'primary', scope: 'global', icon: 'tabler-plus' },
     { id: 'export_excel', label: t('orders.listPage.actions.exportExcel'), type: 'primary', scope: 'global', icon: 'tabler-file-excel' },
     { id: 'view', label: t('orders.listPage.actions.view'), type: 'secondary', scope: 'row' },
     { id: 'edit', label: t('orders.listPage.actions.edit'), type: 'secondary', scope: 'row' },
@@ -310,6 +312,7 @@ export default function OrdersPage() {
   const t = useTranslations('admin')
   const [currency, setCurrency] = useState<string>('USD')
   const [logisticsModalOrderId, setLogisticsModalOrderId] = useState<number | null>(null)
+  const [createOrderModalOpen, setCreateOrderModalOpen] = useState(false)
   const [statusPopover, setStatusPopover] = useState<PopoverState>({ orderId: null, anchorEl: null })
   const [paymentPopover, setPaymentPopover] = useState<PopoverState>({ orderId: null, anchorEl: null })
   const [statusChanging, setStatusChanging] = useState(false)
@@ -396,7 +399,7 @@ export default function OrdersPage() {
     } else if ((action.id === 'edit' || action.id === 'view') && 'id' in item) {
       window.location.href = `/admin/store/orders/${item.id}${action.id === 'edit' ? '/edit' : ''}`
     } else if (action.id === 'add') {
-      window.location.href = '/admin/store/orders/new'
+      setCreateOrderModalOpen(true)
     }
   }
 
@@ -434,6 +437,11 @@ export default function OrdersPage() {
         open={logisticsModalOrderId != null}
         onClose={closeLogisticsModal}
         orderId={logisticsModalOrderId}
+        onSuccess={refetch}
+      />
+      <CreateOrderModal
+        open={createOrderModalOpen}
+        onClose={() => setCreateOrderModalOpen(false)}
         onSuccess={refetch}
       />
       <Popover

@@ -144,6 +144,27 @@
         "paymentGatewayType": "Payment Method"
       }
     },
+    "createOrderModal": {
+      "title": "Create Order",
+      "products": "Products",
+      "productSearchPlaceholder": "Search by name, SKU or barcode",
+      "addProduct": "Add",
+      "customer": "Customer",
+      "customerSearchPlaceholder": "Search by email or phone",
+      "createNewCustomer": "Create new customer",
+      "selectExistingCustomer": "Select existing customer",
+      "newCustomerName": "Name",
+      "newCustomerEmail": "Email",
+      "newCustomerPhone": "Phone",
+      "confirm": "Create and edit order",
+      "errors": {
+        "selectCustomer": "Please select or create a customer",
+        "customerEmailOrPhone": "Email or phone is required for new customer",
+        "createCustomerFailed": "Failed to create customer",
+        "addAtLeastOneProduct": "Add at least one product",
+        "createOrderFailed": "Failed to create order"
+      }
+    },
     "listPage": {
       "title": "Orders",
       "schema": {
@@ -189,6 +210,7 @@
         }
       },
       "actions": {
+        "add": "Create Order",
         "exportExcel": "Export Excel",
         "view": "View",
         "edit": "Edit",
@@ -280,6 +302,12 @@
         "tax": "Tax",
         "discount": "Discount",
         "total": "Total"
+      },
+      "edit": {
+        "editItems": "Edit items",
+        "save": "Save",
+        "addAtLeastOne": "Add at least one product",
+        "saveFailed": "Failed to save items"
       }
     },
     "customerCard": {

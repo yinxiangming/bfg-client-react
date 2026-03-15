@@ -144,6 +144,27 @@
         "paymentGatewayType": "支付方式"
       }
     },
+    "createOrderModal": {
+      "title": "新增订单",
+      "products": "商品",
+      "productSearchPlaceholder": "按名称、条形码或 SKU 搜索",
+      "addProduct": "添加",
+      "customer": "客户",
+      "customerSearchPlaceholder": "按邮箱或电话搜索",
+      "createNewCustomer": "新建客户",
+      "selectExistingCustomer": "选择已有客户",
+      "newCustomerName": "姓名",
+      "newCustomerEmail": "邮箱",
+      "newCustomerPhone": "电话",
+      "confirm": "创建并编辑订单",
+      "errors": {
+        "selectCustomer": "请选择或创建客户",
+        "customerEmailOrPhone": "新建客户需填写邮箱或电话",
+        "createCustomerFailed": "创建客户失败",
+        "addAtLeastOneProduct": "请至少添加一件商品",
+        "createOrderFailed": "创建订单失败"
+      }
+    },
     "listPage": {
       "title": "订单",
       "schema": {
@@ -189,6 +210,7 @@
         }
       },
       "actions": {
+        "add": "新增订单",
         "exportExcel": "导出 Excel",
         "view": "查看",
         "edit": "编辑",
@@ -280,6 +302,12 @@
         "tax": "税费",
         "discount": "折扣",
         "total": "总计"
+      },
+      "edit": {
+        "editItems": "编辑商品",
+        "save": "保存",
+        "addAtLeastOne": "请至少保留一件商品",
+        "saveFailed": "保存失败"
       }
     },
     "customerCard": {
