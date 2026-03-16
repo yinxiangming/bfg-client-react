@@ -148,7 +148,7 @@ export default function CreateOrderModal({ open, onClose, onSuccess }: CreateOrd
       return addresses[0].id
     }
     const created = await createAddress({
-      customer_id: customerId,
+      customer: customerId,
       ...PLACEHOLDER_ADDRESS,
       phone: contact.phone || '—',
       full_name: contact.full_name || '—'

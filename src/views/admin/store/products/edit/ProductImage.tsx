@@ -433,7 +433,7 @@ const ProductImage = ({ productId, initialMedia }: ProductImageProps) => {
                         url: getMediaUrl(m.file || m.media?.file) ?? '',
                         alt: m.alt_text || m.media?.alt_text
                     }))
-                    .filter((img): img is { url: string; alt?: string } => !!img.url)}
+                    .filter((img): img is { url: string; alt: string | undefined } => !!img.url)}
                 initialIndex={Math.max(
                     0,
                     media

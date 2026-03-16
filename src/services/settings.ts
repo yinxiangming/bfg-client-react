@@ -62,6 +62,7 @@ export type WorkspaceSettings = {
     general?: GeneralSettingsPayload
     storefront_ui?: StorefrontUiSettingsPayload
     shop?: ShopSettingsPayload
+    support?: { notice?: string }
     plugins?: PluginsSettingsPayload
   }
   created_at?: string

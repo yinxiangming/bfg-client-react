@@ -122,7 +122,7 @@ export default function SchemaForm<T extends Record<string, any>>({
       if (!Array.isArray(initial) || initial.length === 0) continue
       let seeded: OptionItemType[]
       if (isObjectArray(initial) && initial.some((o: any) => o[valueField(field)] != null || o.id != null)) {
-        seeded = normalizeOptions(initial, field)
+        seeded = normalizeOptions(initial as OptionItemType[], field)
       } else if (isIdArray(initial)) {
         seeded = initial.map((id): OptionItemType => ({ value: id, label: String(id) }))
       } else {

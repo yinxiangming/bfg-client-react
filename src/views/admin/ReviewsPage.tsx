@@ -1,5 +1,6 @@
 'use client'
 
+import type { ReactNode } from 'react'
 import { useMemo, useState, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import Alert from '@mui/material/Alert'
@@ -52,39 +53,39 @@ export default function ReviewsPage() {
           label: 'ID',
           type: 'number',
           sortable: true,
-          render: (value: number) => value
+          render: (value: number): ReactNode => value
         },
         {
           field: 'product_name',
           label: t('reviews.listPage.schema.product'),
           type: 'string',
           sortable: true,
-          render: (value: unknown, row: Review) => row.product_name || value || `#${row.product}`
+          render: (value: unknown, row: Review): ReactNode => String(row.product_name ?? value ?? `#${row.product}`)
         },
         {
           field: 'customer_name',
           label: t('reviews.listPage.schema.customer'),
           type: 'string',
-          render: (value: unknown, row: Review) => row.customer_name || value || '-'
+          render: (value: unknown, row: Review): ReactNode => String(row.customer_name ?? value ?? '-')
         },
         {
           field: 'rating',
           label: t('reviews.listPage.schema.rating'),
           type: 'number',
           sortable: true,
-          render: (value: number) => renderStars(value ?? 0)
+          render: (value: number): ReactNode => renderStars(value ?? 0)
         },
         {
           field: 'title',
           label: t('reviews.listPage.schema.title'),
           type: 'string',
-          render: (v: unknown) => (v ? String(v) : '-')
+          render: (v: unknown): ReactNode => (v ? String(v) : '-')
         },
         {
           field: 'comment',
           label: t('reviews.listPage.schema.comment'),
           type: 'string',
-          render: (v: unknown) => {
+          render: (v: unknown): ReactNode => {
             const s = v ? String(v) : ''
             return s.length > 60 ? `${s.slice(0, 60)}…` : s || '-'
           }
@@ -94,7 +95,7 @@ export default function ReviewsPage() {
           label: t('reviews.listPage.schema.status'),
           type: 'select',
           sortable: true,
-          render: (value: unknown, row: Review) => {
+          render: (value: unknown, row: Review): ReactNode => {
             const approved = row.is_approved ?? value
             return (
               <Chip
@@ -110,14 +111,14 @@ export default function ReviewsPage() {
           field: 'helpful_count',
           label: t('reviews.listPage.schema.helpfulCount'),
           type: 'number',
-          render: (v: unknown) => (v != null ? Number(v) : 0)
+          render: (v: unknown): ReactNode => (v != null ? Number(v) : 0)
         },
         {
           field: 'created_at',
           label: t('reviews.listPage.schema.createdAt'),
           type: 'datetime',
           sortable: true,
-          render: (value: unknown) => (value ? formatDate(value as string, 'yyyy-MM-dd') : '-')
+          render: (value: unknown): ReactNode => (value ? formatDate(value as string, 'yyyy-MM-dd') : '-')
         }
       ],
       filters: [

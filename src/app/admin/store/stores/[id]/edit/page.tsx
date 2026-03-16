@@ -40,6 +40,17 @@ function toWarehouseId(item: WarehouseLike): number | null {
   return Number.isFinite(parsed) ? parsed : null
 }
 
+function normalizeWarehousesForStore(source: any): { id: number; name: string }[] {
+  const raw = pickWarehouseArray(source)
+  return raw
+    .map(item => {
+      const id = toWarehouseId(item)
+      const name = typeof item === 'object' && item !== null && 'name' in item ? String((item as { name?: string }).name ?? '') : ''
+      return id != null ? { id, name } : null
+    })
+    .filter((w): w is { id: number; name: string } => w !== null && Number.isFinite(w.id))
+}
+
 export default function StoreEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const router = useRouter()
@@ -83,7 +94,7 @@ export default function StoreEditPage({ params }: { params: Promise<{ id: string
     code: store.code,
     description: store.description,
     is_active: store.is_active !== undefined ? store.is_active : true,
-    warehouses: pickWarehouseArray(store),
+    warehouses: normalizeWarehousesForStore(store),
     created_at: store.created_at,
     updated_at: store.updated_at
   }
