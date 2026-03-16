@@ -9,6 +9,7 @@ import ThemeSwitcher from '@components/theme/ThemeSwitcher'
 import UserDropdown from '../ui/UserDropdown'
 import CurrentUserDisplay from '../ui/CurrentUserDisplay'
 import LanguageSwitcher from '@/components/i18n/LanguageSwitcher'
+import FeedbackButton from '@/components/feedback/FeedbackButton'
 
 // Hook Imports
 import { useAppLayout } from '@/hooks/useLayoutSettings'
@@ -58,6 +59,7 @@ const Topbar = ({ avatarInitial = 'N', onMenuToggle, showMenuToggle }: Props) =>
         )}
         <ThemeSwitcher />
         <LanguageSwitcher />
+        <FeedbackButton variant='button' />
         <div className='admin-topbar-layout-switcher' ref={menuRef}>
           <button
             type='button'

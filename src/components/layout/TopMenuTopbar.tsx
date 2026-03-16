@@ -13,6 +13,7 @@ import Icon from '@components/Icon'
 import UserDropdown from '../ui/UserDropdown'
 import CurrentUserDisplay from '../ui/CurrentUserDisplay'
 import LanguageSwitcher from '@/components/i18n/LanguageSwitcher'
+import FeedbackButton from '@/components/feedback/FeedbackButton'
 import { getWorkspaceSettings } from '@/services/settings'
 import { useStorefrontConfig } from '@/contexts/StorefrontConfigContext'
 
@@ -70,6 +71,7 @@ const TopMenuTopbar = ({ avatarInitial = 'N' }: Props) => {
         </button>
         <ThemeSwitcher />
         <LanguageSwitcher />
+        <FeedbackButton variant='button' source='account' />
         <UserDropdown avatarInitial={avatarInitial} />
       </div>
     </div>

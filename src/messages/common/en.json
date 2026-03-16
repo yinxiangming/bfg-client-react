@@ -20,6 +20,16 @@
   },
   "common": {
     "loading": "Loading..."
+  },
+  "feedback": {
+    "title": "Submit feedback",
+    "typeBug": "Bug",
+    "typeFeature": "Feature suggestion",
+    "placeholder": "Describe the issue or suggestion...",
+    "pasteHint": "You can paste screenshot or text (Ctrl+V)",
+    "submit": "Submit",
+    "success": "Thank you! Feedback submitted.",
+    "error": "Failed to submit. Please try again."
   }
 }
 

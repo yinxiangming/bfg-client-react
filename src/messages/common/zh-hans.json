@@ -20,6 +20,16 @@
   },
   "common": {
     "loading": "加载中..."
+  },
+  "feedback": {
+    "title": "提交反馈",
+    "typeBug": "Bug",
+    "typeFeature": "功能建议",
+    "placeholder": "描述问题或建议...",
+    "pasteHint": "可粘贴截图或文字（Ctrl+V）",
+    "submit": "提交",
+    "success": "感谢！反馈已提交。",
+    "error": "提交失败，请重试。"
   }
 }
 

@@ -83,6 +83,7 @@ export const bfgApi = {
   menus: () => buildApiUrl('/web/menus/', API_VERSIONS.BFG2),
   media: () => buildApiUrl('/web/media/', API_VERSIONS.BFG2),
   inquiries: () => buildApiUrl('/web/inquiries/', API_VERSIONS.BFG2),
+  feedback: () => buildApiUrl('/web/feedback/', API_VERSIONS.BFG2),
   newsletterSubscriptions: () => buildApiUrl('/web/newsletter-subscriptions/', API_VERSIONS.BFG2),
   newsletterTemplates: () => buildApiUrl('/web/newsletter-templates/', API_VERSIONS.BFG2),
   newsletterSends: () => buildApiUrl('/web/newsletter-sends/', API_VERSIONS.BFG2),

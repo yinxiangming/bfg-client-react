@@ -8,6 +8,7 @@ import Logo from '@components/Logo'
 import { useCart } from '@/contexts/CartContext'
 import { useTheme } from '@/contexts/ThemeContext'
 import LanguageSwitcher from '@/components/i18n/LanguageSwitcher'
+import FeedbackButton from '@/components/feedback/FeedbackButton'
 import { storefrontApi } from '@/utils/storefrontApi'
 import { authApi } from '@/utils/authApi'
 import { useStorefrontConfigSafe } from '@/contexts/StorefrontConfigContext'
@@ -114,6 +115,9 @@ export default function StoreHeader(_props: StoreHeaderProps) {
                 <LanguageSwitcher triggerVariant='minimal' />
               </div>
             )}
+            <div className='sf-dropdown' style={{ position: 'relative' }}>
+              <FeedbackButton variant='minimal' source='storefront' />
+            </div>
             <div className='sf-dropdown' style={{ position: 'relative', cursor: 'pointer' }} onClick={() => setCurrencyMenuOpen(!currencyMenuOpen)}>
               <span>{config.default_currency || 'NZD'}</span>
               <i className='tabler-chevron-down' style={{ fontSize: '0.75rem', marginLeft: '0.25rem' }} />
