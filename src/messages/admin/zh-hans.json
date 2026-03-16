@@ -3041,10 +3041,13 @@
         "description": "在此配置客户支持相关全局选项（如支持邮箱、工单开关等）。",
         "fields": {
           "supportEmail": "支持邮箱",
-          "supportEmailHelp": "用于工单回复及前台展示的联系邮箱。"
+          "supportEmailHelp": "用于工单回复及前台展示的联系邮箱。",
+          "supportNotice": "处理时效与联系方式说明",
+          "supportNoticeHelp": "该说明将展示在账户支持页面（/account/support），可填写处理时效及联系方式。"
         },
         "placeholders": {
-          "supportEmail": "support@example.com"
+          "supportEmail": "support@example.com",
+          "supportNotice": "我们通常在 24 小时内回复。您也可通过邮件或电话联系我们。"
         },
         "actions": {
           "save": "保存"

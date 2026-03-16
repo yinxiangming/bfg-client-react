@@ -1000,7 +1000,7 @@ export default function SchemaForm<T extends Record<string, any>>({
           </Typography>
         )}
 
-        <form id={formId} onSubmit={handleSubmit}>
+        <form id={formId} onSubmit={handleSubmit} noValidate>
           {renderFields()}
 
           {!hideActions && (

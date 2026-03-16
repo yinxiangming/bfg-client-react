@@ -52,6 +52,7 @@ const Support = () => {
     ticket_statuses: { value: string; label: string }[]
     ticket_priorities: { value: number; label: string }[]
     ticket_categories: { value: number; label: string }[]
+    support_notice?: string
   } | null>(null)
   const [formSubject, setFormSubject] = useState('')
   const [formDescription, setFormDescription] = useState('')
@@ -91,6 +92,10 @@ const Support = () => {
   useEffect(() => {
     fetchTickets(currentPage)
   }, [currentPage])
+
+  useEffect(() => {
+    fetchOptions()
+  }, [])
 
   useEffect(() => {
     if (createOpen) fetchOptions()
@@ -177,6 +182,13 @@ const Support = () => {
 
   return (
     <Grid container spacing={3}>
+      {options?.support_notice && (
+        <Grid size={{ xs: 12 }}>
+          <Alert severity='info' sx={{ whiteSpace: 'pre-wrap' }}>
+            {options.support_notice}
+          </Alert>
+        </Grid>
+      )}
       <Grid size={{ xs: 12 }}>
         <Card variant='outlined' sx={{ boxShadow: 'none', borderRadius: 2 }}>
           <CardContent sx={{ px: { xs: 2, md: 3 }, py: { xs: 2, md: 3 } }}>

@@ -21,6 +21,15 @@ const buildSupportFormSchema = (t: (key: string) => string): FormSchema => ({
       type: 'email',
       placeholder: t('settings.support.settingsTab.placeholders.supportEmail'),
       helperText: t('settings.support.settingsTab.fields.supportEmailHelp')
+    },
+    {
+      field: 'support_notice',
+      label: t('settings.support.settingsTab.fields.supportNotice'),
+      type: 'textarea',
+      rows: 6,
+      placeholder: t('settings.support.settingsTab.placeholders.supportNotice'),
+      helperText: t('settings.support.settingsTab.fields.supportNoticeHelp'),
+      newline: true
     }
   ],
   actions: [
@@ -68,8 +77,12 @@ const SupportSettingsTab = () => {
     )
   }
 
+  const supportNotice =
+    settings?.custom_settings && typeof settings.custom_settings === 'object' && settings.custom_settings.support
+      ? (settings.custom_settings as { support?: { notice?: string } }).support?.notice ?? ''
+      : ''
   const initial = settings
-    ? { support_email: settings.support_email ?? '' }
+    ? { support_email: settings.support_email ?? '', support_notice: supportNotice }
     : undefined
 
   return (

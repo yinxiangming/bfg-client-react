@@ -92,6 +92,8 @@ export type MarketingSettingsPayload = {
 
 export type SupportSettingsPayload = {
   support_email?: string
+  /** Notice shown on account support page (response time & contact info). Stored in custom_settings.support.notice */
+  support_notice?: string
 }
 
 export type WebSettingsPayload = {
@@ -208,9 +210,17 @@ export async function updateMarketingSettings(settingsId: number, marketing: Mar
 }
 
 export async function updateSupportSettings(settingsId: number, payload: SupportSettingsPayload) {
+  const { support_notice, ...rest } = payload
+  const body: Record<string, unknown> = { ...rest }
+  if (support_notice !== undefined) {
+    const current = await apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`)
+    const custom = current.custom_settings || {}
+    const support = (custom.support && typeof custom.support === 'object') ? { ...custom.support } : {}
+    body.custom_settings = { ...custom, support: { ...support, notice: support_notice } }
+  }
   return apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`, {
     method: 'PATCH',
-    body: JSON.stringify(payload)
+    body: JSON.stringify(body)
   })
 }
 

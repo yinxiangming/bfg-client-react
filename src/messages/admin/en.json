@@ -3041,10 +3041,13 @@
         "description": "Configure global support options here (e.g. support email, ticket toggles).",
         "fields": {
           "supportEmail": "Support Email",
-          "supportEmailHelp": "Email used for ticket replies and storefront contact display."
+          "supportEmailHelp": "Email used for ticket replies and storefront contact display.",
+          "supportNotice": "Response Time & Contact Notice",
+          "supportNoticeHelp": "This notice is shown on the account support page (/account/support). Describe response time and how customers can reach you."
         },
         "placeholders": {
-          "supportEmail": "support@example.com"
+          "supportEmail": "support@example.com",
+          "supportNotice": "We typically respond within 24 hours. You can also reach us by email or phone."
         },
         "actions": {
           "save": "Save"

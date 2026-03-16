@@ -47,7 +47,16 @@ const buildSiteFormSchema = (t: any): FormSchema => ({
       required: true,
       defaultValue: 'en'
     },
-    { field: 'languages', label: t('settings.web.sites.editDialog.fields.supportedLanguages'), type: 'multiselect', required: true },
+    {
+      field: 'languages',
+      label: t('settings.web.sites.editDialog.fields.supportedLanguages'),
+      type: 'multiselect',
+      required: true,
+      optionsSource: 'api',
+      optionsApi: bfgApi.languages(),
+      optionsValueField: 'code',
+      optionLabelTemplate: '{{native_name}} ({{code}})'
+    },
     { field: 'site_title', label: t('settings.web.sites.editDialog.fields.siteTitle'), type: 'string' },
     { field: 'site_description', label: t('settings.web.sites.editDialog.fields.siteDescription'), type: 'textarea' },
     { field: 'is_active', label: t('settings.web.sites.editDialog.fields.active'), type: 'boolean', defaultValue: true, newline: true },

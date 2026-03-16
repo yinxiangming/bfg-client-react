@@ -526,6 +526,7 @@ class MeApiClient {
     ticket_statuses: { value: string; label: string }[]
     ticket_priorities: { value: number; label: string; level?: number; color?: string }[]
     ticket_categories: { value: number; label: string; order?: number }[]
+    support_notice?: string
   }> {
     return this.request<any>('/api/v1/me/support-options/')
   }
