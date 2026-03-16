@@ -25,7 +25,7 @@ import ProductPricing from '@/views/admin/store/products/edit/ProductPricing'
 import ProductOrganize from '@/views/admin/store/products/edit/ProductOrganize'
 
 // Extension Hooks
-import { usePageSections } from '@/extensions/hooks/usePageSections'
+import { usePageSlots } from '@/extensions/hooks/usePageSections'
 import { useDataHooks } from '@/extensions/hooks/useDataHooks'
 
 // API Imports
@@ -47,8 +47,8 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
   })
 
   // Extension hooks
-  const { visibleSections, beforeSections, afterSections, replacements } = 
-    usePageSections('admin/store/products/edit')
+  const { visibleSlots, beforeSlots, afterSlots, replacements } =
+    usePageSlots('admin/store/products/edit')
   const { runOnLoad, runOnSave, runAfterSave } = useDataHooks('admin/store/products/edit')
 
   useEffect(() => {
@@ -151,10 +151,10 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
     }
   }
 
-  // Render section with support for replace
-  const renderSection = (sectionId: string, DefaultComponent: React.ComponentType<any>, props?: any) => {
-    if (!visibleSections.includes(sectionId)) return null
-    const replacement = replacements.get(sectionId)
+  // Render slot with support for replace
+  const renderSlot = (slotId: string, DefaultComponent: React.ComponentType<any>, props?: any) => {
+    if (!visibleSlots.includes(slotId)) return null
+    const replacement = replacements.get(slotId)
     const Component = replacement?.component || DefaultComponent
     return <Component {...props} />
   }
@@ -197,8 +197,8 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
         </Grid>
         <Grid size={{ xs: 12, md: 8 }}>
           <Grid container spacing={4}>
-            {/* Extension sections before default sections */}
-            {beforeSections.map(ext => (
+            {/* Extension slots before default slots */}
+            {beforeSlots.map(ext => (
               ext.component && (
                 <Grid key={ext.id} size={{ xs: 12 }}>
                   <ext.component productData={formData} onChange={handleChange} />
@@ -206,10 +206,10 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
               )
             ))}
 
-            {/* Default sections with support for hide/replace */}
-            {visibleSections.includes('ProductInformation') && (
+            {/* Default slots with support for hide/replace */}
+            {visibleSlots.includes('ProductInformation') && (
               <Grid key="ProductInformation" size={{ xs: 12 }}>
-                {renderSection('ProductInformation', ProductInformation, {
+                {renderSlot('ProductInformation', ProductInformation, {
                   productData: formData,
                   onChange: handleChange,
                   productId: id,
@@ -218,25 +218,25 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
                 })}
               </Grid>
             )}
-            {visibleSections.includes('ProductImage') && (
+            {visibleSlots.includes('ProductImage') && (
               <Grid key="ProductImage" size={{ xs: 12 }}>
-                {renderSection('ProductImage', ProductImage, {
+                {renderSlot('ProductImage', ProductImage, {
                   productId: id,
                   initialMedia: (productData as any)?.media
                 })}
               </Grid>
             )}
-            {visibleSections.includes('ProductDescription') && (
+            {visibleSlots.includes('ProductDescription') && (
               <Grid key="ProductDescription" size={{ xs: 12 }}>
-                {renderSection('ProductDescription', ProductDescription, {
+                {renderSlot('ProductDescription', ProductDescription, {
                   productData: formData,
                   onChange: handleChange
                 })}
               </Grid>
             )}
-            {visibleSections.includes('ProductVariants') && (
+            {visibleSlots.includes('ProductVariants') && (
               <Grid key="ProductVariants" size={{ xs: 12 }}>
-                {renderSection('ProductVariants', ProductVariants, {
+                {renderSlot('ProductVariants', ProductVariants, {
                   productId: id,
                   productMedia: (productData as any)?.media,
                   initialVariants: (productData as any)?.variants
@@ -244,9 +244,9 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
               </Grid>
             )}
 
-            {/* Extension sections after default sections (left column only; right-column targets rendered in sidebar) */}
-            {afterSections
-              .filter(ext => !ext.targetSection || !['ProductPricing', 'ProductInventory', 'ProductOrganize'].includes(ext.targetSection))
+            {/* Extension slots after default slots (left column only; right-column targets rendered in sidebar) */}
+            {afterSlots
+              .filter(ext => !(ext.targetSlot ?? ext.targetSection) || !['ProductPricing', 'ProductInventory', 'ProductOrganize'].includes(ext.targetSlot ?? ext.targetSection ?? ''))
               .map(ext => ext.component && (
                 <Grid key={ext.id} size={{ xs: 12 }}>
                   <ext.component productData={formData} onChange={handleChange} />
@@ -256,47 +256,47 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
           <Grid container spacing={4}>
-            {visibleSections.includes('ProductPricing') && (
+            {visibleSlots.includes('ProductPricing') && (
               <Grid key="ProductPricing" size={{ xs: 12 }}>
-                {renderSection('ProductPricing', ProductPricing, {
+                {renderSlot('ProductPricing', ProductPricing, {
                   productData: formData,
                   onChange: handleChange
                 })}
               </Grid>
             )}
-            {/* Extension sections after ProductPricing (e.g. Resale) */}
-            {afterSections
-              .filter(ext => ext.targetSection === 'ProductPricing')
+            {/* Extension slots after ProductPricing (e.g. Resale) */}
+            {afterSlots
+              .filter(ext => (ext.targetSlot ?? ext.targetSection) === 'ProductPricing')
               .map(ext => ext.component && (
                 <Grid key={ext.id} size={{ xs: 12 }}>
                   <ext.component productData={formData} onChange={handleChange} />
                 </Grid>
               ))}
-            {visibleSections.includes('ProductInventory') && (
+            {visibleSlots.includes('ProductInventory') && (
               <Grid key="ProductInventory" size={{ xs: 12 }}>
-                {renderSection('ProductInventory', ProductInventory, {
+                {renderSlot('ProductInventory', ProductInventory, {
                   productData: formData,
                   onChange: handleChange
                 })}
               </Grid>
             )}
-            {afterSections
-              .filter(ext => ext.targetSection === 'ProductInventory')
+            {afterSlots
+              .filter(ext => (ext.targetSlot ?? ext.targetSection) === 'ProductInventory')
               .map(ext => ext.component && (
                 <Grid key={ext.id} size={{ xs: 12 }}>
                   <ext.component productData={formData} onChange={handleChange} />
                 </Grid>
               ))}
-            {visibleSections.includes('ProductOrganize') && (
+            {visibleSlots.includes('ProductOrganize') && (
               <Grid key="ProductOrganize" size={{ xs: 12 }}>
-                {renderSection('ProductOrganize', ProductOrganize, {
+                {renderSlot('ProductOrganize', ProductOrganize, {
                   productData: formData,
                   onChange: handleChange
                 })}
               </Grid>
             )}
-            {afterSections
-              .filter(ext => ext.targetSection === 'ProductOrganize')
+            {afterSlots
+              .filter(ext => (ext.targetSlot ?? ext.targetSection) === 'ProductOrganize')
               .map(ext => ext.component && (
                 <Grid key={ext.id} size={{ xs: 12 }}>
                   <ext.component productData={formData} onChange={handleChange} />

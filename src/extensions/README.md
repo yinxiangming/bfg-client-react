@@ -5,10 +5,10 @@ A plugin-like extension system that allows new applications to extend and custom
 ## Features
 
 - **Navigation Extensions**: Add, replace, or hide menu items
-- **Page Section Extensions**: Add custom sections to pages (before/after/replace/hide)
+- **Page Slot Extensions**: Add custom content to page slots (before/after/replace/hide)
 - **Data Hooks**: Intercept data loading and saving operations
 - **Priority-based Conflict Resolution**: Multiple plugins can target the same item, highest priority wins
-- **Server/Client Hybrid**: Navigation computed on server, sections/hooks on client
+- **Server/Client Hybrid**: Navigation computed on server, slots/hooks on client
 
 ## Directory Structure
 
@@ -25,7 +25,7 @@ client/src/
     └── freight/           # Example: Freight module
         ├── index.ts       # Extension definition
         ├── nav.ts         # Navigation config
-        └── sections/      # Page section components
+        └── slots/         # Page slot components (or sections/ for legacy)
 ```
 
 ## Usage
@@ -52,7 +52,7 @@ const myExtension: Extension = {
   priority: 100,
   
   adminNav: [/* ... */],
-  sections: [/* ... */],
+  sections: [/* ... */],   // page slot extensions (legacy key; slots preferred in types)
   dataHooks: [/* ... */]
 }
 
@@ -73,19 +73,42 @@ adminNav: [
 ]
 ```
 
-### 4. Page Section Extensions
+### 4. Page Slot Extensions
+
+Page **slots** define where extension content can be mounted (before/after/replace a slot). Use **blocks** for CMS-driven page content. Slots = "where"; blocks = "what".
 
 ```typescript
 sections: [
   {
-    id: 'my-section',
+    id: 'my-slot-content',
     page: 'admin/store/products/edit',
     position: 'after',
-    targetSection: 'ProductOrganize',
-    component: MySectionComponent,
+    targetSlot: 'ProductOrganize',   // or targetSection (deprecated)
+    component: MySlotComponent,
     priority: 100
   }
 ]
+```
+
+In page components use `usePageSlots(page)` and `renderSlot(slotId, visibleSlots, replacements, DefaultComponent, props)`.
+
+#### Migration from sections (deprecated)
+
+| Old | New |
+|-----|-----|
+| `usePageSections(page)` | `usePageSlots(page)` |
+| `visibleSections` / `beforeSections` / `afterSections` | `visibleSlots` / `beforeSlots` / `afterSlots` |
+| `renderSection(...)` | `renderSlot(slotId, visibleSlots, replacements, Component, props)` |
+| `targetSection` in extension | `targetSlot` (or keep `targetSection` during compat window) |
+
+```ts
+// Before
+const { visibleSections, beforeSections, afterSections, replacements } = usePageSections('admin/store/products/edit')
+renderSection('ProductInfo', visibleSections, replacements, ProductInfo, {})
+
+// After
+const { visibleSlots, beforeSlots, afterSlots, replacements } = usePageSlots('admin/store/products/edit')
+renderSlot('ProductInfo', visibleSlots, replacements, ProductInfo, {})
 ```
 
 ### 5. Data Hooks
@@ -107,6 +130,20 @@ dataHooks: [
   }
 ]
 ```
+
+## Deprecation (section → slot)
+
+The following **section** APIs are deprecated and will be removed in the **next major version**. Use the Slot API instead.
+
+| Deprecated | Use instead |
+|------------|-------------|
+| `usePageSections(page)` | `usePageSlots(page)` |
+| `renderSection(...)` | `renderSlot(...)` |
+| `getPageSectionReplacements(extensions, page)` | `getPageSlotReplacements(extensions, page)` |
+| `DEFAULT_SECTIONS` | `DEFAULT_SLOTS` |
+| Extension field `targetSection` | `targetSlot` |
+
+**Scope:** All of the above remain supported during the compatibility window; only the listed names will be removed. No behavior change until removal.
 
 ## Examples
 

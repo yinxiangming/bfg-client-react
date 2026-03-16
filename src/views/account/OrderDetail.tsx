@@ -23,7 +23,7 @@ import PaymentsCard from './orders/PaymentsCard'
 // Utils Imports
 import { meApi } from '@/utils/meApi'
 import { useAppDialog } from '@/contexts/AppDialogContext'
-import { usePageSections } from '@/extensions/hooks/usePageSections'
+import { usePageSlots } from '@/extensions/hooks/usePageSections'
 
 interface OrderDetailProps {
   orderId: number
@@ -32,7 +32,7 @@ interface OrderDetailProps {
 const OrderDetail = ({ orderId }: OrderDetailProps) => {
   const t = useTranslations('account.orderDetail')
   const { confirm } = useAppDialog()
-  const { beforeSections, afterSections } = usePageSections('account/orders/detail')
+  const { beforeSlots, afterSlots } = usePageSlots('account/orders/detail')
 
   const [order, setOrder] = useState<any>(null)
   const [loading, setLoading] = useState(true)
@@ -96,7 +96,7 @@ const OrderDetail = ({ orderId }: OrderDetailProps) => {
 
   return (
     <>
-      {beforeSections.map(
+      {beforeSlots.map(
         ext =>
           ext.component && (
             <Box key={ext.id} sx={{ mb: 3 }}>
@@ -136,7 +136,7 @@ const OrderDetail = ({ orderId }: OrderDetailProps) => {
           </Grid>
         </Grid>
       </Grid>
-      {afterSections.map(
+      {afterSlots.map(
         ext =>
           ext.component && (
             <Box key={ext.id} sx={{ mt: 3 }}>

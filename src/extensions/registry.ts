@@ -15,16 +15,21 @@ export interface NavExtension {
   condition?: () => boolean   // optional: runtime condition
 }
 
-// Page section extension
-export interface PageSectionExtension {
+// Page slot extension (canonical). Slot = where to mount content on a page.
+export interface PageSlotExtension {
   id: string
-  page: string                // e.g., 'admin/store/products/edit'
+  page: string
   position: ExtensionPosition
-  targetSection?: string      // target section ID
-  component?: ComponentType<any>  // not needed for hide
+  targetSlot?: string
+  /** @deprecated Use targetSlot */
+  targetSection?: string
+  component?: ComponentType<any>
   priority?: number
   condition?: () => boolean
 }
+
+/** @deprecated Use PageSlotExtension and targetSlot */
+export type PageSectionExtension = PageSlotExtension
 
 // Data hook extension
 export interface DataHookExtension {
@@ -44,6 +49,11 @@ export interface StorefrontLayoutProps {
   locale?: string
 }
 
+/** Resolve effective target slot from extension (supports legacy targetSection). */
+export function getTargetSlot(ext: PageSlotExtension): string | undefined {
+  return ext.targetSlot ?? ext.targetSection
+}
+
 // Main extension interface
 export interface Extension {
   id: string
@@ -53,7 +63,8 @@ export interface Extension {
   nav?: NavExtension[]
   adminNav?: NavExtension[]
   accountNav?: NavExtension[] // Account sidebar menu (e.g. My Listing)
-  sections?: PageSectionExtension[]
+  /** Page slot extensions (before/after/replace/hide). Prefer targetSlot; targetSection is legacy. */
+  sections?: PageSlotExtension[]
   dataHooks?: DataHookExtension[]
   /** Dashboard blocks for admin /admin/dashboard */
   dashboardBlocks?: BlockRegistryEntry[]

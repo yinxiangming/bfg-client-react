@@ -19,7 +19,7 @@ import type { Theme } from '@mui/material/styles'
 // Third-party Imports
 import classnames from 'classnames'
 import { Icon } from '@iconify/react'
-import { usePageSections } from '@/extensions/hooks/usePageSections'
+import { usePageSlots } from '@/extensions/hooks/usePageSections'
 import { useStorefrontConfigSafe } from '@/contexts/StorefrontConfigContext'
 import { meApi } from '@/utils/meApi'
 
@@ -91,7 +91,7 @@ export default function AccountDashboardClient() {
   const storefrontConfig = useStorefrontConfigSafe()
   const isBelowMdScreen = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'))
   const isBelowSmScreen = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'))
-  const { beforeSections, afterSections, replacements } = usePageSections('account/dashboard')
+  const { beforeSlots, afterSlots, replacements } = usePageSlots('account/dashboard')
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [statsLoading, setStatsLoading] = useState(true)
   const displayCurrency = stats?.wallet_currency ?? storefrontConfig.default_currency
@@ -125,7 +125,7 @@ export default function AccountDashboardClient() {
 
   return (
     <div className='flex flex-col gap-6'>
-      {beforeSections.map(
+      {beforeSlots.map(
         ext =>
           ext.component && (
             <div key={ext.id}>
@@ -270,7 +270,7 @@ export default function AccountDashboardClient() {
           </Grid>
         </CardContent>
       </Card>
-      {afterSections.map(
+      {afterSlots.map(
         ext =>
           ext.component && (
             <div key={ext.id}>
