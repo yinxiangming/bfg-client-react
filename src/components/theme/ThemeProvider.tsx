@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useMemo } from 'react'
+import { useEffect, useMemo } from 'react'
 
 // MUI Imports
 import { ThemeProvider as MuiThemeProvider, createTheme, useColorScheme } from '@mui/material/styles'
@@ -23,8 +23,7 @@ const InnerThemeProvider = ({ children }: InnerThemeProviderProps) => {
   const { systemMode } = useTheme()
   const { setMode: setMuiMode } = useColorScheme()
 
-  // Sync MUI theme mode with our context
-  useMemo(() => {
+  useEffect(() => {
     setMuiMode(systemMode)
   }, [systemMode, setMuiMode])
 

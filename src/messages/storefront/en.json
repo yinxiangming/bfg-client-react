@@ -98,7 +98,8 @@
     },
     "errors": {
       "loadFailed": "Failed to load product",
-      "notFound": "Product not found"
+      "notFound": "Product not found",
+      "loginRequiredForReview": "Please log in to submit a review"
     },
     "links": {
       "backToHome": "Back to Home"
@@ -126,7 +127,18 @@
       "description": "Description",
       "details": "Product Details",
       "reviews": "Reviews",
-      "noReviews": "No reviews yet. Be the first to review this product!"
+      "noReviews": "No reviews yet. Be the first to review this product!",
+      "loginToReview": "Log in to submit a review.",
+      "writeReview": "Write a review",
+      "yourRating": "Your rating",
+      "reviewTitle": "Title (optional)",
+      "reviewComment": "Your review",
+      "submitReview": "Submit review",
+      "submitSuccess": "Thank you! Your review will appear after approval.",
+      "submitSuccessImmediate": "Thank you! Your review has been published.",
+      "wasHelpful": "Was this helpful?",
+      "helpfulCount": "{count} people found this helpful",
+      "verifiedPurchase": "Verified purchase"
     },
     "badges": {
       "new": "New"

@@ -49,6 +49,13 @@ export const adminNavItems: MenuNode[] = [
         i18nKey: 'nav.storeStores',
         href: '/admin/store/stores',
         icon: 'tabler-building-warehouse'
+      },
+      {
+        id: 'store-reviews',
+        label: 'Reviews',
+        i18nKey: 'nav.storeReviews',
+        href: '/admin/store/reviews',
+        icon: 'tabler-star'
       }
     ]
   },

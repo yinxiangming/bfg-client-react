@@ -43,6 +43,10 @@ export type StorefrontUiSettingsPayload = {
   header_options?: StorefrontHeaderOptionsPayload
 }
 
+export type ShopSettingsPayload = {
+  review_moderation_required?: boolean
+}
+
 export type WorkspaceSettings = {
   id: number
   workspace_id?: number
@@ -57,6 +61,7 @@ export type WorkspaceSettings = {
     web?: WebSettingsPayload
     general?: GeneralSettingsPayload
     storefront_ui?: StorefrontUiSettingsPayload
+    shop?: ShopSettingsPayload
     plugins?: PluginsSettingsPayload
   }
   created_at?: string
@@ -244,6 +249,19 @@ export async function updateStorefrontUiSettings(settingsId: number, storefront_
     method: 'PATCH',
     body: JSON.stringify({ custom_settings: nextCustom })
   })
+}
+
+export async function updateShopSettings(settingsId: number, shop: ShopSettingsPayload) {
+  const url = `${bfgApi.settings()}${settingsId}/`
+  const current = await apiFetch<WorkspaceSettings>(url)
+  const currentCustom = current.custom_settings || {}
+  const nextCustom = { ...currentCustom, shop }
+  const result = await apiFetch<WorkspaceSettings>(url, {
+    method: 'PATCH',
+    body: JSON.stringify({ custom_settings: nextCustom })
+  })
+  invalidateWorkspaceSettingsCache()
+  return result
 }
 
 export async function updatePluginsSettings(settingsId: number, plugins: PluginsSettingsPayload) {

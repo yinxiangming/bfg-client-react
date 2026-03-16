@@ -58,6 +58,8 @@ export type StorefrontConfig = {
   header?: string
   footer?: string
   header_options?: StorefrontHeaderOptions
+  /** When true, new reviews require admin approval before showing. Default false. */
+  review_moderation_required?: boolean
 }
 
 const STALE_MS = 5 * 60 * 1000 // 5 minutes

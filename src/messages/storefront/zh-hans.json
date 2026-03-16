@@ -98,7 +98,8 @@
     },
     "errors": {
       "loadFailed": "商品加载失败",
-      "notFound": "未找到商品"
+      "notFound": "未找到商品",
+      "loginRequiredForReview": "请先登录后再提交评价"
     },
     "links": {
       "backToHome": "返回首页"
@@ -126,7 +127,18 @@
       "description": "商品描述",
       "details": "商品详情",
       "reviews": "评价",
-      "noReviews": "暂无评价，快来成为第一个评价的人吧！"
+      "noReviews": "暂无评价，快来成为第一个评价的人吧！",
+      "loginToReview": "登录后即可发表评价。",
+      "writeReview": "写评价",
+      "yourRating": "您的评分",
+      "reviewTitle": "标题（选填）",
+      "reviewComment": "评价内容",
+      "submitReview": "提交评价",
+      "submitSuccess": "感谢！您的评价将在审核通过后显示。",
+      "submitSuccessImmediate": "感谢！您的评价已发布。",
+      "wasHelpful": "这条评价对您有帮助吗？",
+      "helpfulCount": "{count} 人觉得有帮助",
+      "verifiedPurchase": "已购验证"
     },
     "badges": {
       "new": "新品"

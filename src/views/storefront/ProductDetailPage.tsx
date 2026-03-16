@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 // Next Imports
 import Link from 'next/link'
@@ -18,6 +18,8 @@ import { useCart } from '@/contexts/CartContext'
 import { getStoreImageUrl, getMediaUrl } from '@/utils/media'
 import { storefrontApi } from '@/utils/storefrontApi'
 import { usePageSections } from '@/extensions/hooks/usePageSections'
+import { authApi } from '@/utils/authApi'
+import { useStorefrontConfigSafe } from '@/contexts/StorefrontConfigContext'
 
 // Import CSS
 import '@/styles/storefront.css'
@@ -53,8 +55,31 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
   const [selectedColor, setSelectedColor] = useState('')
   const [quantity, setQuantity] = useState(1)
   const [activeTab, setActiveTab] = useState<'description' | 'details' | 'reviews'>('description')
+  const [reviews, setReviews] = useState<any[]>([])
+  const [reviewsLoading, setReviewsLoading] = useState(false)
+  const [reviewForm, setReviewForm] = useState({ rating: 5, title: '', comment: '' })
+  const [reviewSubmitting, setReviewSubmitting] = useState(false)
+  const [helpfulSent, setHelpfulSent] = useState<Set<number>>(new Set())
+  const [isAuthenticated, setIsAuthenticated] = useState(false)
   const { addItem, loading: cartLoading } = useCart()
   const { beforeSections, afterSections } = usePageSections('storefront/product')
+  const storefrontConfig = useStorefrontConfigSafe()
+
+  const fetchReviews = useCallback(async (pid: string) => {
+    setReviewsLoading(true)
+    try {
+      const list = await storefrontApi.getProductReviews(pid)
+      setReviews(Array.isArray(list) ? list : [])
+    } catch {
+      setReviews([])
+    } finally {
+      setReviewsLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') setIsAuthenticated(authApi.isAuthenticated())
+  }, [])
   const afterProductInfoSections = afterSections.filter(e => e.targetSection === 'ProductInfo')
   const afterContentSections = afterSections.filter(e => e.targetSection !== 'ProductInfo')
 
@@ -146,6 +171,10 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
     fetchProduct()
   }, [productId])
 
+  useEffect(() => {
+    if (activeTab === 'reviews' && productId) fetchReviews(productId)
+  }, [activeTab, productId, fetchReviews])
+
   const handleAddToCart = async () => {
     if (!product) return
     
@@ -197,18 +226,57 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
     }
   }
 
-  const renderStars = (rating: number) => {
+  const renderStars = (rating: number, size = '1rem') => {
     const stars = []
     for (let i = 0; i < 5; i++) {
       stars.push(
         <i
           key={i}
           className={i < Math.floor(rating) ? 'tabler-star-filled' : 'tabler-star'}
-          style={{ color: '#fbbf24', fontSize: '1rem' }}
+          style={{ color: '#fbbf24', fontSize: size }}
         />
       )
     }
     return stars
+  }
+
+  const handleSubmitReview = async () => {
+    if (!productId || !reviewForm.comment.trim()) return
+    setReviewSubmitting(true)
+    try {
+      await storefrontApi.createProductReview(productId, {
+        rating: reviewForm.rating,
+        title: reviewForm.title.trim() || undefined,
+        comment: reviewForm.comment.trim()
+      })
+      setReviewForm({ rating: 5, title: '', comment: '' })
+      setProduct(prev => (prev ? { ...prev, reviews: prev.reviews + 1 } : null))
+      const successMsg = storefrontConfig?.review_moderation_required
+        ? t('product.tabs.submitSuccess')
+        : t('product.tabs.submitSuccessImmediate')
+      alert(successMsg)
+      fetchReviews(productId)
+    } catch (err: any) {
+      const msg = err?.status === 401
+        ? t('product.errors.loginRequiredForReview')
+        : (err?.message || t('product.errors.loadFailed'))
+      alert(msg)
+    } finally {
+      setReviewSubmitting(false)
+    }
+  }
+
+  const handleMarkHelpful = async (reviewId: number) => {
+    if (!productId || helpfulSent.has(reviewId)) return
+    try {
+      await storefrontApi.markProductReviewHelpful(productId, reviewId)
+      setHelpfulSent(prev => new Set(prev).add(reviewId))
+      setReviews(prev =>
+        prev.map(r => (r.id === reviewId ? { ...r, helpful_count: (r.helpful_count || 0) + 1 } : r))
+      )
+    } catch {
+      // ignore
+    }
   }
 
   if (loading) {
@@ -584,8 +652,153 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
             </div>
           )}
           {activeTab === 'reviews' && (
-            <div style={{ textAlign: 'center', padding: '2rem 0' }}>
-              <p className='sf-text-muted'>{t('product.tabs.noReviews')}</p>
+            <div className='sf-product-reviews' style={{ padding: 0 }}>
+              {reviewsLoading ? (
+                <p className='sf-text-muted' style={{ padding: '2rem 0' }}>{t('common.loading')}</p>
+              ) : (
+                <>
+                  {reviews.length === 0 && !isAuthenticated && (
+                    <p className='sf-text-muted' style={{ padding: '2rem 0' }}>
+                      {t('product.tabs.noReviews')}
+                      <span style={{ display: 'block', marginTop: '0.5rem' }}>
+                        {t('product.tabs.loginToReview')}{' '}
+                        <Link href='/auth/login' style={{ color: 'var(--primary-color, #6366f1)', fontWeight: 600 }}>{t('topBar.login')}</Link>
+                      </span>
+                    </p>
+                  )}
+                  {reviews.length > 0 && (
+                    <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                      {reviews.map((rev: any) => (
+                        <li
+                          key={rev.id}
+                          style={{
+                            borderBottom: '1px solid #eee',
+                            padding: '1.25rem 0'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                            <span style={{ display: 'inline-flex' }}>{renderStars(rev.rating || 0, '0.875rem')}</span>
+                            <span style={{ fontWeight: 600, fontSize: '0.9375rem' }}>{rev.customer_name || t('product.labels.reviews')}</span>
+                            {rev.is_verified_purchase && (
+                              <span className='sf-text-muted' style={{ fontSize: '0.75rem' }}>({t('product.tabs.verifiedPurchase')})</span>
+                            )}
+                          </div>
+                          {rev.title && (
+                            <p style={{ fontWeight: 600, margin: '0 0 0.25rem 0', fontSize: '0.9375rem' }}>{rev.title}</p>
+                          )}
+                          <p style={{ margin: 0, fontSize: '0.9375rem', lineHeight: 1.5 }}>{rev.comment || ''}</p>
+                          <div style={{ marginTop: '0.5rem', display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <button
+                              type='button'
+                              onClick={() => handleMarkHelpful(rev.id)}
+                              disabled={helpfulSent.has(rev.id)}
+                              className='sf-btn'
+                              style={{
+                                padding: '0.25rem 0.5rem',
+                                fontSize: '0.8125rem',
+                                border: '1px solid #e0e0e0',
+                                background: 'transparent',
+                                cursor: helpfulSent.has(rev.id) ? 'default' : 'pointer'
+                              }}
+                            >
+                              <i className='tabler-thumb-up' style={{ marginRight: '0.25rem' }} />
+                              {t('product.tabs.wasHelpful')}
+                              {rev.helpful_count > 0 && ` · ${t('product.tabs.helpfulCount', { count: rev.helpful_count })}`}
+                            </button>
+                          </div>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                  {!isAuthenticated && reviews.length > 0 && (
+                    <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #eee' }}>
+                      <h3 style={{ fontSize: '1.125rem', marginBottom: '0.5rem' }}>{t('product.tabs.writeReview')}</h3>
+                      <p className='sf-text-muted' style={{ margin: 0, fontSize: '0.875rem' }}>
+                        {t('product.tabs.loginToReview')}{' '}
+                        <Link href='/auth/login' style={{ color: 'var(--primary-color, #6366f1)', fontWeight: 600 }}>{t('topBar.login')}</Link>
+                      </p>
+                    </div>
+                  )}
+                  {isAuthenticated && (
+                    <div style={{ marginTop: '2rem', paddingTop: '1.5rem', borderTop: '1px solid #eee' }}>
+                      <h3 style={{ fontSize: '1.125rem', marginBottom: '1rem' }}>{t('product.tabs.writeReview')}</h3>
+                      <div style={{ marginBottom: '1rem' }}>
+                        <label className='sf-form-label' style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>
+                          {t('product.tabs.yourRating')}
+                        </label>
+                        <div style={{ display: 'flex', gap: '0.25rem' }}>
+                          {[1, 2, 3, 4, 5].map(star => (
+                            <button
+                              key={star}
+                              type='button'
+                              onClick={() => setReviewForm(f => ({ ...f, rating: star }))}
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: '0.25rem'
+                              }}
+                              aria-label={`${star} stars`}
+                            >
+                              <i
+                                className={star <= reviewForm.rating ? 'tabler-star-filled' : 'tabler-star'}
+                                style={{ color: '#fbbf24', fontSize: '1.5rem' }}
+                              />
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                      <div style={{ marginBottom: '1rem' }}>
+                        <label className='sf-form-label' style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>
+                          {t('product.tabs.reviewTitle')}
+                        </label>
+                        <input
+                          type='text'
+                          value={reviewForm.title}
+                          onChange={e => setReviewForm(f => ({ ...f, title: e.target.value }))}
+                          className='sf-input'
+                          style={{
+                            width: '100%',
+                            maxWidth: '400px',
+                            padding: '0.5rem 0.75rem',
+                            border: '1px solid var(--sf-input-border, #c9cdd0)',
+                            borderRadius: '6px'
+                          }}
+                          placeholder={t('product.tabs.reviewTitle')}
+                        />
+                      </div>
+                      <div style={{ marginBottom: '1rem' }}>
+                        <label className='sf-form-label' style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem' }}>
+                          {t('product.tabs.reviewComment')} *
+                        </label>
+                        <textarea
+                          value={reviewForm.comment}
+                          onChange={e => setReviewForm(f => ({ ...f, comment: e.target.value }))}
+                          className='sf-input'
+                          rows={4}
+                          style={{
+                            width: '100%',
+                            maxWidth: '500px',
+                            padding: '0.5rem 0.75rem',
+                            border: '1px solid var(--sf-input-border, #c9cdd0)',
+                            borderRadius: '6px'
+                          }}
+                          placeholder={t('product.tabs.reviewComment')}
+                        />
+                      </div>
+                      <button
+                        type='button'
+                        onClick={handleSubmitReview}
+                        disabled={reviewSubmitting || !reviewForm.comment.trim()}
+                        className='sf-btn sf-btn-primary'
+                        style={{ padding: '0.5rem 1.5rem' }}
+                      >
+                        {reviewSubmitting ? t('common.loading') : t('product.tabs.submitReview')}
+                      </button>
+                    </div>
+                  )}
+                </>
+              )}
             </div>
           )}
         </div>

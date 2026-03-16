@@ -394,6 +394,51 @@ export async function deleteOrder(id: number): Promise<void> {
   return apiFetch<void>(`${bfgApi.orders()}${id}/`, { method: 'DELETE' })
 }
 
+// Product reviews (admin)
+export interface ProductReview {
+  id: number
+  product: number
+  product_name?: string
+  customer: number
+  customer_name?: string
+  rating: number
+  title?: string
+  comment?: string
+  images?: string[]
+  is_verified_purchase?: boolean
+  is_approved?: boolean
+  helpful_count?: number
+  created_at: string
+  updated_at?: string
+}
+
+export interface GetReviewsParams {
+  product?: number | string
+  is_approved?: string
+}
+
+export async function getReviews(params?: GetReviewsParams): Promise<ProductReview[]> {
+  const q = new URLSearchParams()
+  if (params?.product != null) q.set('product', String(params.product))
+  if (params?.is_approved != null && params.is_approved !== '') q.set('is_approved', params.is_approved)
+  const url = q.toString() ? `${bfgApi.reviews().replace(/\/+$/, '')}?${q}` : bfgApi.reviews()
+  const response = await apiFetch<ProductReview[] | { results: ProductReview[]; data?: ProductReview[] }>(url)
+  if (Array.isArray(response)) return response
+  return response.results || response.data || []
+}
+
+export async function approveReview(id: number): Promise<ProductReview> {
+  return apiFetch<ProductReview>(`${bfgApi.reviews()}${id}/approve/`, { method: 'POST' })
+}
+
+export async function rejectReview(id: number): Promise<ProductReview> {
+  return apiFetch<ProductReview>(`${bfgApi.reviews()}${id}/reject/`, { method: 'POST' })
+}
+
+export async function deleteReview(id: number): Promise<void> {
+  return apiFetch<void>(`${bfgApi.reviews()}${id}/`, { method: 'DELETE' })
+}
+
 export interface DashboardStats {
   orders_today: number
   revenue_today: number
@@ -618,6 +663,30 @@ export async function updateProduct(id: number, data: Partial<Product>): Promise
 
 export async function deleteProduct(id: number): Promise<void> {
   return apiFetch<void>(`${bfgApi.products()}${id}/`, { method: 'DELETE' })
+}
+
+// Wishlist (admin)
+export interface WishlistEntry {
+  id: number
+  workspace: number
+  customer: number
+  customer_name: string
+  product: number
+  product_name: string
+  created_at: string
+}
+
+export async function getWishlists(params?: { customer?: number; product?: number }): Promise<WishlistEntry[]> {
+  const q = new URLSearchParams()
+  if (params?.customer != null) q.set('customer', String(params.customer))
+  if (params?.product != null) q.set('product', String(params.product))
+  const url = q.toString() ? `${bfgApi.wishlists().replace(/\/+$/, '')}?${q}` : bfgApi.wishlists()
+  const response = await apiFetch<WishlistEntry[] | { results: WishlistEntry[] }>(url)
+  return Array.isArray(response) ? response : (response.results || [])
+}
+
+export async function deleteWishlist(id: number): Promise<void> {
+  return apiFetch<void>(`${bfgApi.wishlists()}${id}/`, { method: 'DELETE' })
 }
 
 export async function getCategories(lang: string = 'en'): Promise<Category[]> {

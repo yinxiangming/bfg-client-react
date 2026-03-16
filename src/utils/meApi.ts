@@ -52,32 +52,15 @@ class MeApiClient {
     // Add auth token if available (Bearer token authentication only for account module)
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('auth_token')
-      console.log('meApi: Checking token in localStorage:', { hasToken: !!token, tokenLength: token?.length })
       if (token) {
         headers['Authorization'] = `Bearer ${token}`
-        console.log('meApi: Authorization header set:', { hasAuth: !!headers['Authorization'] })
-      } else {
-        console.warn('meApi: No auth_token found in localStorage. Request will likely fail with 401.')
       }
     }
-
-    console.log('meApi: Making request:', {
-      url,
-      method: options.method || 'GET',
-      hasAuthHeader: !!headers['Authorization']
-    })
 
     const response = await fetch(url, {
       ...options,
       headers
       // Note: Using Bearer token authentication only for account module
-    })
-
-    console.log('meApi: Response received:', {
-      url,
-      status: response.status,
-      statusText: response.statusText,
-      ok: response.ok
     })
 
     // Handle 401 Unauthorized or 403 Forbidden - try to refresh token and retry

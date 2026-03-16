@@ -15,7 +15,7 @@
     },
     "support": {
       "title": "客户支持",
-      "subtitle": "查看工单进度与历史，或提交新工单"
+      "subtitle": "查看咨询进度与历史，或提交新咨询"
     },
     "orders": {
       "title": "订单",
@@ -73,7 +73,7 @@
       },
       "support": {
         "title": "客户支持",
-        "description": "工单进度与历史、提交新工单"
+        "description": "咨询进度与历史、提交新咨询"
       },
       "settings": {
         "title": "设置",
@@ -387,11 +387,11 @@
     "failedDelete": "删除地址失败"
   },
   "support": {
-    "myTickets": "我的工单",
-    "newTicket": "新建工单",
+    "myTickets": "我的咨询",
+    "newTicket": "提交咨询",
     "loading": "加载中...",
-    "noTickets": "暂无工单",
-    "ticketNumber": "工单号",
+    "noTickets": "暂无咨询记录",
+    "ticketNumber": "咨询编号",
     "subject": "主题",
     "status": "状态",
     "createdAt": "创建时间",
@@ -409,8 +409,8 @@
     "submit": "提交",
     "submitting": "提交中...",
     "close": "关闭",
-    "failedLoad": "加载工单失败",
-    "failedCreate": "提交工单失败",
+    "failedLoad": "加载咨询记录失败",
+    "failedCreate": "提交咨询失败",
     "statusNew": "新建",
     "statusOpen": "处理中",
     "statusPending": "待客户回复",

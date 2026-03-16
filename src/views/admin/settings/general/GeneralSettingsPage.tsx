@@ -34,10 +34,12 @@ import {
   getWorkspaceSettings,
   updateGeneralSettings,
   updateStorefrontUiSettings,
+  updateShopSettings,
   updatePluginsSettings,
   type GeneralSettingsPayload,
   type StorefrontUiSettingsPayload,
   type StorefrontHeaderOptionsPayload,
+  type ShopSettingsPayload,
   type PluginsSettingsPayload
 } from '@/services/settings'
 import { getCurrencies, type Currency } from '@/services/finance'
@@ -96,6 +98,9 @@ type PluginsData = {
   product_scanner_api_url: string
 }
 
+type ShopData = { review_moderation_required: boolean }
+const initialShopData: ShopData = { review_moderation_required: false }
+
 const initialPluginsData: PluginsData = {
   product_scanner_enabled: false,
   product_scanner_api_key: '',
@@ -134,6 +139,7 @@ const GeneralSettingsPage = () => {
   const [success, setSuccess] = useState(false)
   const [settingsId, setSettingsId] = useState<number | null>(null)
   const [storefrontUi, setStorefrontUi] = useState<StorefrontUiData>(initialStorefrontUi)
+  const [shopData, setShopData] = useState<ShopData>(initialShopData)
   const [pluginsData, setPluginsData] = useState<PluginsData>(initialPluginsData)
   const [currencies, setCurrencies] = useState<Currency[]>([])
 
@@ -208,6 +214,10 @@ const GeneralSettingsPage = () => {
           })
         }
 
+        const shop = (settings.custom_settings as any)?.shop || {}
+        setShopData({
+          review_moderation_required: shop.review_moderation_required ?? initialShopData.review_moderation_required
+        })
         const plugins = (settings.custom_settings as any)?.plugins || {}
         setPluginsData({
           product_scanner_enabled: plugins.product_scanner?.enabled ?? initialPluginsData.product_scanner_enabled,
@@ -332,6 +342,11 @@ const GeneralSettingsPage = () => {
         header_options: storefrontUi.header_options
       }
       await updateStorefrontUiSettings(currentSettingsId, storefrontPayload)
+
+      const shopPayload: ShopSettingsPayload = {
+        review_moderation_required: shopData.review_moderation_required
+      }
+      await updateShopSettings(currentSettingsId, shopPayload)
 
       const pluginsPayload: PluginsSettingsPayload = {
         product_scanner: {
@@ -747,6 +762,24 @@ const GeneralSettingsPage = () => {
                           </Box>
                         </Grid>
                       </Grid>
+                    </CardContent>
+                  </Card>
+
+                  {/* Shop / Reviews Section */}
+                  <Card variant='outlined' sx={{ mb: 6 }}>
+                    <CardContent>
+                      <Typography variant='h6' sx={{ mb: 2 }}>
+                        {t('settings.general.basic.sections.shop')}
+                      </Typography>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={shopData.review_moderation_required}
+                            onChange={e => setShopData(prev => ({ ...prev, review_moderation_required: e.target.checked }))}
+                          />
+                        }
+                        label={t('settings.general.basic.fields.shop.reviewModerationRequired')}
+                      />
                     </CardContent>
                   </Card>
 

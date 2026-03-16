@@ -102,6 +102,7 @@ export const bfgApi = {
   variants: () => buildApiUrl('/variants/', API_VERSIONS.BFG2),
   orders: () => buildApiUrl('/orders/', API_VERSIONS.BFG2),
   reviews: () => buildApiUrl('/reviews/', API_VERSIONS.BFG2),
+  wishlists: () => buildApiUrl('/wishlists/', API_VERSIONS.BFG2),
   cart: {
     current: () => buildApiUrl('/cart/current/', API_VERSIONS.BFG2),
     addItem: () => buildApiUrl('/cart/add_item/', API_VERSIONS.BFG2),

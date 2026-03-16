@@ -7,6 +7,7 @@
     "storeCustomers": "客户",
     "storeCategories": "分类",
     "storeStores": "门店",
+    "storeReviews": "评价",
     "freight": "货运",
     "freightDashboard": "仪表盘",
     "freightParcels": "包裹",
@@ -504,6 +505,46 @@
       "confirmDelete": {
         "title": "删除发票",
         "message": "确认删除发票 {invoiceNumber}？此操作无法撤销。"
+      }
+    }
+  },
+  "reviews": {
+    "status": {
+      "approved": "已通过",
+      "pending": "待审核"
+    },
+    "listPage": {
+      "title": "商品评价",
+      "schema": {
+        "title": "评价列表",
+        "columns": {
+          "product": "商品",
+          "customer": "客户",
+          "rating": "评分",
+          "title": "标题",
+          "comment": "内容",
+          "status": "状态",
+          "helpfulCount": "有用",
+          "createdAt": "创建时间"
+        }
+      },
+      "filters": {
+        "status": {
+          "label": "状态"
+        },
+        "product": {
+          "label": "商品"
+        }
+      },
+      "actions": {
+        "view": "查看",
+        "approve": "通过",
+        "reject": "拒绝",
+        "delete": "删除",
+        "confirmDelete": "确定要删除这条评价吗？"
+      },
+      "messages": {
+        "actionFailed": "操作失败：{error}"
       }
     }
   },
@@ -3160,6 +3201,7 @@
           "contactInformation": "联系信息",
           "storefrontDisplay": "前台展示",
           "storefrontTheme": "前台主题与页头",
+          "shop": "店铺",
           "socialMediaLinks": "社交媒体链接"
         },
         "logo": {
@@ -3240,6 +3282,9 @@
             "showLanguageSwitcher": "语言",
             "showStyleSelector": "主题（亮/暗）",
             "showLogin": "登录/账户"
+          },
+          "shop": {
+            "reviewModerationRequired": "开启评价审核（新评价需审核通过后才显示）"
           },
           "social": {
             "facebook": {

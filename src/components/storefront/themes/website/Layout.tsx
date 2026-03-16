@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { usePathname } from 'next/navigation'
 import { StorefrontConfigProvider } from '@/contexts/StorefrontConfigContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import WebsiteHeader from './Header'
 import WebsiteFooter from './Footer'
 import './website-theme-blocks.css'
@@ -34,6 +35,12 @@ function useIsDark() {
 export default function WebsiteLayout({ children }: { children: React.ReactNode }) {
   useMaterialSymbols()
   const isDark = useIsDark()
+  const { forceMode } = useTheme()
+
+  useEffect(() => {
+    forceMode('light')
+    return () => forceMode(null)
+  }, [forceMode])
   const pathname = usePathname()
   const isAccountPage = pathname?.startsWith('/account') || false
   const isAdminPage = pathname?.startsWith('/admin') || false
