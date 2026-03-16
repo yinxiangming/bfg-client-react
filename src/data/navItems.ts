@@ -7,7 +7,8 @@ export const defaultNavItems: MenuNode[] = [
     label: 'Dashboard',
     i18nKey: 'nav.dashboard',
     href: '/account/',
-    icon: 'tabler-layout-dashboard'
+    icon: 'tabler-layout-dashboard',
+    activeMatch: 'exact'
   },
   {
     id: 'orders',
