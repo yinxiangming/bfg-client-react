@@ -7,6 +7,7 @@
     "storeCustomers": "客户",
     "storeCategories": "分类",
     "storeStores": "门店",
+    "storeReviews": "评价",
     "freight": "货运",
     "freightDashboard": "仪表盘",
     "freightParcels": "包裹",
@@ -14,7 +15,12 @@
     "freightConsignments": "运单",
     "freightWarehouses": "仓库",
     "support": "支持",
+    "supportTicketsParent": "工单",
+    "supportTicketsUnprocessed": "未处理",
     "supportTickets": "工单",
+    "supportTicketsMy": "我的工单",
+    "supportTicketsInProgress": "进行中",
+    "supportTicketsClosed": "已结束",
     "supportCustomers": "客户",
     "settings": "设置",
     "settingsGeneral": "通用",
@@ -22,7 +28,15 @@
     "settingsStore": "商店",
     "settingsFinance": "财务",
     "settingsDelivery": "配送",
-    "settingsMarketing": "营销"
+    "settingsMarketing": "营销",
+    "settingsSupport": "客户支持",
+    "resale": "代售",
+    "resaleIntake": "代收",
+    "resaleSettings": "设置",
+    "resaleTimeslots": "时段",
+    "resaleBookings": "预约",
+    "resaleProducts": "商品",
+    "resalePayouts": "结算"
   },
   "common": {
     "actions": {
@@ -37,6 +51,15 @@
       "pay": "支付",
       "downloadPdf": "下载PDF",
       "retry": "重试"
+    },
+    "imageViewer": {
+      "close": "关闭",
+      "zoomIn": "放大",
+      "zoomOut": "缩小",
+      "rotate": "旋转",
+      "prev": "上一张",
+      "next": "下一张",
+      "imageCounter": "{current} / {total}"
     },
     "states": {
       "loading": "加载中...",
@@ -58,6 +81,7 @@
       "message": "内容"
     },
     "schemaTable": {
+      "actionsColumn": "操作",
       "search": "搜索",
       "searchPlaceholder": "搜索...",
       "bulkActions": "批量操作",
@@ -74,7 +98,18 @@
       "showing": "显示",
       "to": "到",
       "of": "共",
-      "entries": "条"
+      "entries": "条",
+      "dateRange": {
+        "start": "开始时间",
+        "end": "结束时间",
+        "includeTime": "选择时间",
+        "apply": "确定",
+        "cancel": "取消",
+        "today": "今天",
+        "yesterday": "昨天",
+        "lastWeek": "上周",
+        "selectDate": "选择日期"
+      }
     },
     "schemaForm": {
       "save": "保存",
@@ -116,19 +151,50 @@
         "paymentGatewayType": "支付方式"
       }
     },
+    "createOrderModal": {
+      "title": "新增订单",
+      "products": "商品",
+      "productSearchPlaceholder": "按名称、条形码或 SKU 搜索",
+      "addProduct": "添加",
+      "customer": "客户",
+      "customerSearchPlaceholder": "按邮箱或电话搜索",
+      "createNewCustomer": "新建客户",
+      "selectExistingCustomer": "选择已有客户",
+      "newCustomerName": "姓名",
+      "newCustomerEmail": "邮箱",
+      "newCustomerPhone": "电话",
+      "confirm": "创建并编辑订单",
+      "errors": {
+        "selectCustomer": "请选择或创建客户",
+        "customerEmailOrPhone": "新建客户需填写邮箱或电话",
+        "createCustomerFailed": "创建客户失败",
+        "addAtLeastOneProduct": "请至少添加一件商品",
+        "createOrderFailed": "创建订单失败"
+      }
+    },
     "listPage": {
       "title": "订单",
       "schema": {
         "title": "订单",
         "columns": {
           "orderNo": "订单号",
+          "copyOrderNo": "复制订单号",
+          "noteLabel": "留言",
           "customer": "客户",
           "store": "门店",
           "total": "总计",
           "status": "状态",
           "payment": "支付",
+          "logistics": "物流",
+          "packagesCount": "{count} 个包裹",
+          "manageLogistics": "管理",
+          "addPackages": "添加包裹",
           "createdAt": "创建时间"
         }
+      },
+      "logisticsModal": {
+        "title": "包裹与物流 — 订单 {orderNumber}",
+        "titleFallback": "包裹与物流"
       },
       "filters": {
         "status": {
@@ -136,9 +202,22 @@
         },
         "paymentStatus": {
           "label": "支付状态"
+        },
+        "store": {
+          "label": "门店"
+        },
+        "createdAfter": {
+          "label": "创建时间从"
+        },
+        "createdBefore": {
+          "label": "创建时间至"
+        },
+        "createdTime": {
+          "label": "创建时间"
         }
       },
       "actions": {
+        "add": "新增订单",
         "exportExcel": "导出 Excel",
         "view": "查看",
         "edit": "编辑",
@@ -230,6 +309,12 @@
         "tax": "税费",
         "discount": "折扣",
         "total": "总计"
+      },
+      "edit": {
+        "editItems": "编辑商品",
+        "save": "保存",
+        "addAtLeastOne": "请至少保留一件商品",
+        "saveFailed": "保存失败"
       }
     },
     "customerCard": {
@@ -253,7 +338,8 @@
     },
     "timeline": {
       "title": "订单时间线",
-      "empty": "暂无订单动态"
+      "empty": "暂无订单动态",
+      "byActor": "操作人：{actor}"
     },
     "delivery": {
       "title": "配送信息",
@@ -419,6 +505,46 @@
       "confirmDelete": {
         "title": "删除发票",
         "message": "确认删除发票 {invoiceNumber}？此操作无法撤销。"
+      }
+    }
+  },
+  "reviews": {
+    "status": {
+      "approved": "已通过",
+      "pending": "待审核"
+    },
+    "listPage": {
+      "title": "商品评价",
+      "schema": {
+        "title": "评价列表",
+        "columns": {
+          "product": "商品",
+          "customer": "客户",
+          "rating": "评分",
+          "title": "标题",
+          "comment": "内容",
+          "status": "状态",
+          "helpfulCount": "有用",
+          "createdAt": "创建时间"
+        }
+      },
+      "filters": {
+        "status": {
+          "label": "状态"
+        },
+        "product": {
+          "label": "商品"
+        }
+      },
+      "actions": {
+        "view": "查看",
+        "approve": "通过",
+        "reject": "拒绝",
+        "delete": "删除",
+        "confirmDelete": "确定要删除这条评价吗？"
+      },
+      "messages": {
+        "actionFailed": "操作失败：{error}"
       }
     }
   },
@@ -910,6 +1036,7 @@
         "code": "代码",
         "description": "描述",
         "warehouses": "仓库",
+        "status": "状态",
         "createdAt": "创建时间"
       }
     },
@@ -921,7 +1048,24 @@
       "confirmDelete": "确认删除该门店？"
     },
     "errors": {
-      "deleteFailed": "删除门店失败：{error}"
+      "deleteFailed": "删除门店失败：{error}",
+      "loadFailed": "加载门店失败"
+    },
+    "form": {
+      "title": "门店详情",
+      "fields": {
+        "name": "名称",
+        "code": "代码",
+        "description": "描述",
+        "warehouses": "仓库",
+        "active": "启用",
+        "createdAt": "创建时间",
+        "updatedAt": "更新时间"
+      },
+      "actions": {
+        "save": "保存",
+        "cancel": "取消"
+      }
     },
     "editPage": {
       "states": {
@@ -931,6 +1075,92 @@
       "snackbar": {
         "saved": "门店保存成功！",
         "saveFailed": "保存门店失败"
+      }
+    }
+  },
+  "support": {
+    "tickets": {
+      "page": {
+        "title": "工单",
+        "titleUnprocessed": "未处理",
+        "titleMy": "我的工单",
+        "titleInProgress": "进行中",
+        "titleClosed": "已结束"
+      },
+      "tabs": {
+        "basic": "基本信息",
+        "replies": "回复历史",
+        "assignments": "指派历史"
+      },
+      "assignments": {
+        "title": "指派历史",
+        "noRecords": "暂无指派记录",
+        "by": "操作人"
+      },
+      "schema": {
+        "columns": {
+          "ticketNumber": "工单号",
+          "subject": "主题",
+          "customer": "客户",
+          "priority": "优先级",
+          "status": "状态",
+          "assignedTo": "指派给",
+          "createdAt": "创建时间"
+        },
+        "filters": {
+          "status": "状态",
+          "priority": "优先级"
+        },
+        "actions": {
+          "add": "新建工单",
+          "edit": "编辑",
+          "delete": "删除",
+          "confirmDelete": "确认删除该工单？"
+        }
+      },
+      "form": {
+        "title": "工单详情",
+        "fields": {
+          "ticketNumber": "工单号",
+          "subject": "主题",
+          "description": "描述",
+          "customer": "客户",
+          "category": "分类",
+          "priority": "优先级",
+          "status": "状态",
+          "assignedTo": "指派给",
+          "channel": "渠道",
+          "channelEmail": "邮件",
+          "channelWeb": "网页",
+          "channelPhone": "电话",
+          "channelChat": "在线客服",
+          "channelSocial": "社交媒体",
+          "createdAt": "创建时间",
+          "updatedAt": "更新时间"
+        },
+        "actions": {
+          "save": "保存",
+          "cancel": "取消"
+        }
+      },
+      "errors": {
+        "deleteFailed": "删除失败：{error}",
+        "loadFailed": "加载失败",
+        "saveFailed": "保存失败：{error}",
+        "replyFailed": "回复失败：{error}"
+      },
+      "conversation": {
+        "title": "沟通记录",
+        "noMessages": "暂无回复记录",
+        "staff": "客服",
+        "customer": "客户",
+        "internal": "内部备注",
+        "addReply": "添加回复",
+        "replyPlaceholder": "输入回复内容…",
+        "submit": "发送回复",
+        "submitting": "发送中…",
+        "loadMore": "加载更多",
+        "loadingMore": "加载中…"
       }
     }
   },
@@ -977,6 +1207,11 @@
           "label": "商品名称",
           "placeholder": "例如：iPhone 14"
         },
+        "slug": {
+          "label": "URL 短语",
+          "placeholder": "iphone-14",
+          "helper": "只能包含字母、数字、下划线或中划线（用于商品链接）"
+        },
         "sku": {
           "label": "SKU",
           "placeholder": "例如：FXSK123U"
@@ -984,7 +1219,51 @@
         "barcode": {
           "label": "条码",
           "placeholder": "例如：0123-4567"
+        },
+        "condition": {
+          "label": "成色",
+          "placeholder": "选择成色",
+          "options": {
+            "new": "全新",
+            "like_new": "近新",
+            "good": "良好",
+            "fair": "一般",
+            "poor": "较差"
+          }
         }
+      }
+    },
+    "scanner": {
+      "title": "扫描商品",
+      "button": "扫描商品",
+      "tabs": {
+        "text": "文字搜索",
+        "image": "图片上传"
+      },
+      "fields": {
+        "productNameLabel": "商品名称",
+        "productNamePlaceholder": "例如：iPhone 15 Pro、Nike Air Max",
+        "uploadImage": "上传商品图片"
+      },
+      "actions": {
+        "search": "搜索商品",
+        "scanning": "扫描中...",
+        "cancel": "取消"
+      },
+      "selectProduct": "选择商品（共 {count} 个）",
+      "brand": "品牌",
+      "model": "型号",
+      "errors": {
+        "enterQueryOrImage": "请输入搜索词或上传图片",
+        "noProducts": "未找到商品，请换一个搜索试试。",
+        "searchFailed": "搜索商品失败",
+        "detailsFailed": "获取商品详情失败"
+      },
+      "autoSave": {
+        "title": "是否自动保存？",
+        "message": "是否立即保存并更新商品信息？",
+        "yes": "保存",
+        "no": "暂不"
       }
     },
     "pricing": {
@@ -1014,7 +1293,8 @@
           "sku": "SKU",
           "price": "价格",
           "qty": "数量",
-          "published": "发布状态"
+          "published": "发布状态",
+          "featured": "推荐"
         },
         "filters": {
           "status": {
@@ -1237,7 +1517,8 @@
       "imageAltFallback": "图片 {index}",
       "actions": {
         "selectImage": "选择图片",
-        "delete": "删除"
+        "delete": "删除",
+        "viewFullSize": "查看大图"
       },
       "deleteDialog": {
         "title": "移除图片引用",
@@ -2745,6 +3026,110 @@
         }
       }
     },
+    "support": {
+      "page": {
+        "title": "客户支持",
+        "subtitle": "管理工单分类、优先级与客户支持相关设置",
+        "tabs": {
+          "settings": "设置",
+          "categories": "工单分类",
+          "priorities": "优先级"
+        }
+      },
+      "settingsTab": {
+        "title": "客户支持设置",
+        "description": "在此配置客户支持相关全局选项（如支持邮箱、工单开关等）。",
+        "fields": {
+          "supportEmail": "支持邮箱",
+          "supportEmailHelp": "用于工单回复及前台展示的联系邮箱。",
+          "supportNotice": "处理时效与联系方式说明",
+          "supportNoticeHelp": "该说明将展示在账户支持页面（/account/support），可填写处理时效及联系方式。"
+        },
+        "placeholders": {
+          "supportEmail": "support@example.com",
+          "supportNotice": "我们通常在 24 小时内回复。您也可通过邮件或电话联系我们。"
+        },
+        "actions": {
+          "save": "保存"
+        },
+        "errors": {
+          "noWorkspaceSettings": "未找到工作区设置。",
+          "saveFailed": "保存失败：{error}"
+        },
+        "snackbar": {
+          "saved": "客户支持设置已保存"
+        }
+      },
+      "categoriesTab": {
+        "description": "管理工单分类，便于对工单进行分类与筛选。",
+        "schemaTitle": "工单分类",
+        "columns": {
+          "name": "名称",
+          "description": "描述",
+          "order": "排序",
+          "status": "状态"
+        },
+        "actions": {
+          "add": "新增分类",
+          "edit": "编辑",
+          "delete": "删除",
+          "confirmDelete": "确认删除该分类？"
+        },
+        "form": {
+          "title": "工单分类",
+          "fields": {
+            "name": "名称",
+            "description": "描述",
+            "order": "排序",
+            "active": "启用"
+          },
+          "actions": {
+            "save": "保存"
+          }
+        },
+        "errors": {
+          "deleteFailed": "删除失败：{error}",
+          "saveFailed": "保存失败：{error}"
+        }
+      },
+      "prioritiesTab": {
+        "description": "管理工单优先级与 SLA 响应时间。",
+        "schemaTitle": "优先级",
+        "columns": {
+          "name": "名称",
+          "level": "级别",
+          "color": "颜色",
+          "responseTime": "响应时间（小时）",
+          "resolutionTime": "解决时间（小时）",
+          "status": "状态"
+        },
+        "actions": {
+          "add": "新增优先级",
+          "edit": "编辑",
+          "delete": "删除",
+          "confirmDelete": "确认删除该优先级？"
+        },
+        "form": {
+          "title": "优先级",
+          "fields": {
+            "name": "名称",
+            "level": "级别",
+            "levelHelp": "1=低，5=紧急",
+            "color": "颜色",
+            "responseTime": "响应时间（小时）",
+            "resolutionTime": "解决时间（小时）",
+            "active": "启用"
+          },
+          "actions": {
+            "save": "保存"
+          }
+        },
+        "errors": {
+          "deleteFailed": "删除失败：{error}",
+          "saveFailed": "保存失败：{error}"
+        }
+      }
+    },
     "general": {
       "page": {
         "title": "工作区设置",
@@ -2819,6 +3204,7 @@
           "contactInformation": "联系信息",
           "storefrontDisplay": "前台展示",
           "storefrontTheme": "前台主题与页头",
+          "shop": "店铺",
           "socialMediaLinks": "社交媒体链接"
         },
         "logo": {
@@ -2899,6 +3285,9 @@
             "showLanguageSwitcher": "语言",
             "showStyleSelector": "主题（亮/暗）",
             "showLogin": "登录/账户"
+          },
+          "shop": {
+            "reviewModerationRequired": "开启评价审核（新评价需审核通过后才显示）"
           },
           "social": {
             "facebook": {

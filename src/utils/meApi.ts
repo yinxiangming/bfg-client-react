@@ -52,32 +52,15 @@ class MeApiClient {
     // Add auth token if available (Bearer token authentication only for account module)
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('auth_token')
-      console.log('meApi: Checking token in localStorage:', { hasToken: !!token, tokenLength: token?.length })
       if (token) {
         headers['Authorization'] = `Bearer ${token}`
-        console.log('meApi: Authorization header set:', { hasAuth: !!headers['Authorization'] })
-      } else {
-        console.warn('meApi: No auth_token found in localStorage. Request will likely fail with 401.')
       }
     }
-
-    console.log('meApi: Making request:', {
-      url,
-      method: options.method || 'GET',
-      hasAuthHeader: !!headers['Authorization']
-    })
 
     const response = await fetch(url, {
       ...options,
       headers
       // Note: Using Bearer token authentication only for account module
-    })
-
-    console.log('meApi: Response received:', {
-      url,
-      status: response.status,
-      statusText: response.statusText,
-      ok: response.ok
     })
 
     // Handle 401 Unauthorized or 403 Forbidden - try to refresh token and retry
@@ -535,6 +518,36 @@ class MeApiClient {
   async sendInvoice(id: number): Promise<any> {
     return this.request<any>(`/api/v1/me/invoices/${id}/send/`, {
       method: 'POST'
+    })
+  }
+
+  // Support tickets (my tickets)
+  async getSupportOptions(): Promise<{
+    ticket_statuses: { value: string; label: string }[]
+    ticket_priorities: { value: number; label: string; level?: number; color?: string }[]
+    ticket_categories: { value: number; label: string; order?: number }[]
+    support_notice?: string
+  }> {
+    return this.request<any>('/api/v1/me/support-options/')
+  }
+
+  async getTickets(params?: { status?: string; page?: number; page_size?: number }): Promise<ApiResponse<any>> {
+    const queryParams = new URLSearchParams()
+    if (params?.status) queryParams.append('status', params.status)
+    if (params?.page != null) queryParams.append('page', String(params.page))
+    if (params?.page_size != null) queryParams.append('page_size', String(params.page_size))
+    const query = queryParams.toString()
+    return this.request<ApiResponse<any>>(`/api/v1/me/tickets/${query ? `?${query}` : ''}`)
+  }
+
+  async getTicket(id: number): Promise<any> {
+    return this.request<any>(`/api/v1/me/tickets/${id}/`)
+  }
+
+  async createTicket(data: { subject: string; description: string; category?: number; priority?: number }): Promise<any> {
+    return this.request<any>('/api/v1/me/tickets/', {
+      method: 'POST',
+      body: JSON.stringify(data)
     })
   }
 

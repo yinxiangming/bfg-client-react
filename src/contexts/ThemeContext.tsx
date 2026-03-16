@@ -10,6 +10,7 @@ type ThemeContextType = {
   mode: Mode
   systemMode: SystemMode
   setMode: (mode: Mode) => void
+  forceMode: (forced: SystemMode | null) => void
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
@@ -41,13 +42,26 @@ const getStoredMode = (): Mode => {
   return 'system'
 }
 
+function applyMode(m: SystemMode) {
+  const html = document.documentElement
+  html.setAttribute('data-mode', m)
+  document.body.setAttribute('data-mode', m)
+  // Sync MUI data-* color scheme attributes set by InitColorSchemeScript
+  if (m === 'dark') {
+    html.setAttribute('data-dark', '')
+    html.removeAttribute('data-light')
+  } else {
+    html.setAttribute('data-light', '')
+    html.removeAttribute('data-dark')
+  }
+}
+
 type ThemeProviderProps = {
   children: React.ReactNode
   initialMode?: Mode
 }
 
 export const ThemeContextProvider = ({ children, initialMode }: ThemeProviderProps) => {
-  // Prefer stored mode; fallback to initial or system
   const [mode, setModeState] = useState<Mode>(() => {
     if (typeof window !== 'undefined') {
       const stored = getStoredMode()
@@ -63,16 +77,14 @@ export const ThemeContextProvider = ({ children, initialMode }: ThemeProviderPro
     return 'light'
   })
 
-  // Initialize body data-mode on mount
+  const [forcedMode, setForcedMode] = useState<SystemMode | null>(null)
+
   useEffect(() => {
     if (typeof window === 'undefined') return
+    const effectiveMode = forcedMode ?? (mode === 'system' ? systemMode : mode)
+    applyMode(effectiveMode)
+  }, [mode, systemMode, forcedMode])
 
-    const effectiveMode = mode === 'system' ? systemMode : mode
-    document.body.setAttribute('data-mode', effectiveMode)
-    document.documentElement.setAttribute('data-mode', effectiveMode)
-  }, [])
-
-  // Listen to system theme changes
   useEffect(() => {
     if (typeof window === 'undefined') return
 
@@ -91,15 +103,6 @@ export const ThemeContextProvider = ({ children, initialMode }: ThemeProviderPro
     }
   }, [])
 
-  // Update body data-mode attribute when mode changes
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-
-    const effectiveMode = mode === 'system' ? systemMode : mode
-    document.body.setAttribute('data-mode', effectiveMode)
-    document.documentElement.setAttribute('data-mode', effectiveMode)
-  }, [mode, systemMode])
-
   const setMode = useCallback((newMode: Mode) => {
     setModeState(newMode)
     try {
@@ -109,10 +112,14 @@ export const ThemeContextProvider = ({ children, initialMode }: ThemeProviderPro
     }
   }, [])
 
-  const effectiveMode = mode === 'system' ? systemMode : mode
+  const forceMode = useCallback((forced: SystemMode | null) => {
+    setForcedMode(forced)
+  }, [])
+
+  const effectiveMode = forcedMode ?? (mode === 'system' ? systemMode : mode)
 
   return (
-    <ThemeContext.Provider value={{ mode, systemMode: effectiveMode, setMode }}>
+    <ThemeContext.Provider value={{ mode, systemMode: effectiveMode, setMode, forceMode }}>
       {children}
     </ThemeContext.Provider>
   )

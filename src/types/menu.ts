@@ -20,7 +20,12 @@ export type MenuItemBase = {
   icon?: string
   suffix?: MenuBadge
   disabled?: boolean
-  exactMatch?: boolean
+  /**
+   * When to show this item as active.
+   * - 'exact': only when path === href (e.g. sibling routes /tickets vs /tickets/closed).
+   * - 'prefix' or unset: also active for subpaths (e.g. /products active on /products/123/edit).
+   */
+  activeMatch?: 'exact' | 'prefix'
   activeUrl?: string
 }
 

@@ -35,6 +35,7 @@ import { Icon } from '@iconify/react'
 import {
   getBrands,
   getCurrencies,
+  getDefaultCurrencyCode,
   getFinancialCodes,
   getTaxRates,
   type Brand,
@@ -53,11 +54,19 @@ type InvoiceItem = {
   tax_rate?: number
 }
 
+type OrderItemForInvoice = {
+  product_name: string
+  variant_name?: string
+  quantity: number
+  price: number | string
+}
+
 type InvoiceEditDialogProps = {
   open: boolean
   invoice?: Invoice | null
   customerId: number
   orderId?: number
+  orderItems?: OrderItemForInvoice[]
   onClose: () => void
   onSave: (data: InvoiceCreatePayload) => Promise<void>
 }
@@ -67,6 +76,7 @@ const InvoiceEditDialog = ({
   invoice,
   customerId,
   orderId,
+  orderItems,
   onClose,
   onSave
 }: InvoiceEditDialogProps) => {
@@ -125,7 +135,20 @@ const InvoiceEditDialog = ({
         setIssueDate(today)
         setDueDate(dueDate)
         setNotes('')
-        setItems([{ description: '', quantity: 1, unit_price: 0, financial_code: null, tax_rate: 0 }])
+
+        if (orderItems && orderItems.length > 0) {
+          setItems(orderItems.map(item => ({
+            description: item.variant_name
+              ? `${item.product_name} - ${item.variant_name}`
+              : item.product_name,
+            quantity: item.quantity,
+            unit_price: typeof item.price === 'string' ? parseFloat(item.price) || 0 : item.price,
+            financial_code: null,
+            tax_rate: 0
+          })))
+        } else {
+          setItems([{ description: '', quantity: 1, unit_price: 0, financial_code: null, tax_rate: 0 }])
+        }
       }
       fetchData()
     }
@@ -134,31 +157,26 @@ const InvoiceEditDialog = ({
   const fetchData = async () => {
     try {
       setLoading(true)
-      const [brandsData, currenciesData, financialCodesData, taxRatesData] = await Promise.all([
+      const [brandsData, currenciesData, financialCodesData, taxRatesData, defaultCurrencyCode] = await Promise.all([
         getBrands(),
         getCurrencies(),
         getFinancialCodes(),
-        getTaxRates()
+        getTaxRates(),
+        getDefaultCurrencyCode()
       ])
-      // Brand model doesn't have is_active field, so use all brands
       const activeCurrencies = currenciesData.filter(c => c.is_active)
-      
-      setBrands(brandsData) // All brands from workspace
+
+      setBrands(brandsData)
       setCurrencies(activeCurrencies)
       setFinancialCodes(financialCodesData.filter(fc => fc.is_active))
       setTaxRates(taxRatesData.filter(tr => tr.is_active))
-      
-      // Set default currency if not set (only for new invoice)
-      if (!invoice && !currency && activeCurrencies.length > 0) {
-        const defaultCurrency = activeCurrencies.find(c => c.is_active) || activeCurrencies[0]
+
+      // For new invoice only: always set workspace default currency and default brand
+      if (!invoice) {
+        const defaultCurrency = activeCurrencies.find(c => c.code === defaultCurrencyCode) || activeCurrencies[0]
         if (defaultCurrency) {
           setCurrency(defaultCurrency.id)
         }
-      }
-      
-      // Set default brand if not set (only for new invoice)
-      // Default to is_default brand, or first brand if no default
-      if (!invoice && !brand && brandsData.length > 0) {
         const defaultBrand = brandsData.find(b => b.is_default) || brandsData[0]
         if (defaultBrand) {
           setBrand(defaultBrand.id)

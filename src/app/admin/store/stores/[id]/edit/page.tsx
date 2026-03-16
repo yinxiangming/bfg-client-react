@@ -1,28 +1,44 @@
 'use client'
 
-// React Imports
-import { use, useState } from 'react'
+import { use, useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
-
-// i18n Imports
 import { useTranslations } from 'next-intl'
 
-// MUI Imports
 import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
 import Alert from '@mui/material/Alert'
 
-// Component Imports
 import SchemaForm from '@/components/schema/SchemaForm'
-
-// Data Imports
-import { storesSchema } from '@/data/storeSchemas'
+import { buildStoresSchema } from '@/data/storeSchemas'
 
 // Service Imports
 import { getStore, updateStore, type Store, type StorePayload } from '@/services/store'
 
 // Hook Imports
 import { useApiData } from '@/hooks/useApiData'
+
+type WarehouseLike = number | string | { id?: number | string; value?: number | string; warehouse_id?: number | string }
+
+function pickWarehouseArray(source: any): WarehouseLike[] {
+  const candidates = [
+    source?.warehouses,
+    source?.warehouse_ids,
+    source?.warehouseIds,
+    source?.warehouse_id_list,
+    source?.warehouseIdList
+  ]
+  const found = candidates.find(Array.isArray)
+  return Array.isArray(found) ? found : []
+}
+
+function toWarehouseId(item: WarehouseLike): number | null {
+  const raw =
+    typeof item === 'number' || typeof item === 'string'
+      ? item
+      : item?.id ?? item?.value ?? item?.warehouse_id ?? null
+  const parsed = Number(raw)
+  return Number.isFinite(parsed) ? parsed : null
+}
 
 export default function StoreEditPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
@@ -57,7 +73,8 @@ export default function StoreEditPage({ params }: { params: Promise<{ id: string
     return <Alert severity='error'>{t('stores.editPage.states.notFound')}</Alert>
   }
 
-  if (!storesSchema.form) {
+  const formSchema = useMemo(() => buildStoresSchema(t).form, [t])
+  if (!formSchema) {
     return <Alert severity='error'>{t('stores.editPage.states.schemaNotFound')}</Alert>
   }
 
@@ -66,7 +83,7 @@ export default function StoreEditPage({ params }: { params: Promise<{ id: string
     code: store.code,
     description: store.description,
     is_active: store.is_active !== undefined ? store.is_active : true,
-    warehouses: (store as any).warehouses?.map((w: any) => w.id) || [],
+    warehouses: pickWarehouseArray(store),
     created_at: store.created_at,
     updated_at: store.updated_at
   }
@@ -86,7 +103,7 @@ export default function StoreEditPage({ params }: { params: Promise<{ id: string
       // Normalize warehouses to number[] for API
       if (Array.isArray(warehouses)) {
         payload.warehouses = warehouses
-          .map(w => (typeof w === 'number' ? w : w?.id))
+          .map(w => toWarehouseId(w as WarehouseLike))
           .filter((w): w is number => typeof w === 'number' && Number.isFinite(w))
       }
 
@@ -107,7 +124,7 @@ export default function StoreEditPage({ params }: { params: Promise<{ id: string
 
   return (
     <SchemaForm
-      schema={storesSchema.form}
+      schema={formSchema}
       initialData={formData}
       onSubmit={handleSubmit}
       onCancel={handleCancel}

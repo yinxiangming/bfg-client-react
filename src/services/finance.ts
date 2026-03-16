@@ -103,6 +103,12 @@ export async function getCurrencies(): Promise<Currency[]> {
   return response.results || []
 }
 
+/** Workspace default currency code (e.g. 'USD') for pre-filling invoice/forms */
+export async function getDefaultCurrencyCode(): Promise<string> {
+  const res = await apiFetch<{ code: string }>(`${bfgApi.currencies()}default-code/`)
+  return res?.code ?? 'USD'
+}
+
 export async function getCurrency(id: number): Promise<Currency> {
   return apiFetch<Currency>(`${bfgApi.currencies()}${id}/`)
 }

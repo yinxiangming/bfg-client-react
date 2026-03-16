@@ -240,6 +240,31 @@ const ProductListTable = () => {
               }
             }
           }
+          if (col.field === 'is_featured') {
+            return {
+              ...col,
+              label: t('products.list.schema.columns.featured'),
+              render: (value: any, row: any) => {
+                return (
+                  <Switch
+                    checked={value || false}
+                    size="small"
+                    onChange={async (e) => {
+                      e.stopPropagation()
+                      try {
+                        await updateProduct(row.id, { is_featured: e.target.checked })
+                        await refetch()
+                      } catch (err: any) {
+                        console.error('Failed to update featured:', err)
+                        alert(t('products.list.errors.updateStatusFailed', { error: (err as Error).message }))
+                      }
+                    }}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                )
+              }
+            }
+          }
           return col
         }),
         filters: schema.list.filters?.map(filter => {

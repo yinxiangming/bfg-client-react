@@ -102,6 +102,7 @@ export const bfgApi = {
   variants: () => buildApiUrl('/variants/', API_VERSIONS.BFG2),
   orders: () => buildApiUrl('/orders/', API_VERSIONS.BFG2),
   reviews: () => buildApiUrl('/reviews/', API_VERSIONS.BFG2),
+  wishlists: () => buildApiUrl('/wishlists/', API_VERSIONS.BFG2),
   cart: {
     current: () => buildApiUrl('/cart/current/', API_VERSIONS.BFG2),
     addItem: () => buildApiUrl('/cart/add_item/', API_VERSIONS.BFG2),
@@ -122,8 +123,14 @@ export const bfgApi = {
   trackingEvents: () => buildApiUrl('/tracking-events/', API_VERSIONS.BFG2),
 
   // Support
-  tickets: () => buildApiUrl('/tickets/', API_VERSIONS.BFG2),
-  ticket: (id: string | number) => buildApiUrl(`/tickets/${id}/`, API_VERSIONS.BFG2),
+  tickets: () => buildApiUrl('/support/tickets/', API_VERSIONS.BFG2),
+  ticket: (id: string | number) => buildApiUrl(`/support/tickets/${id}/`, API_VERSIONS.BFG2),
+  ticketMessages: (id: string | number) => buildApiUrl(`/support/tickets/${id}/messages/`, API_VERSIONS.BFG2),
+  supportOptions: () => buildApiUrl('/support/options/', API_VERSIONS.BFG2),
+  ticketCategories: () => buildApiUrl('/support/ticket-categories/', API_VERSIONS.BFG2),
+  ticketCategory: (id: string | number) => buildApiUrl(`/support/ticket-categories/${id}/`, API_VERSIONS.BFG2),
+  ticketPriorities: () => buildApiUrl('/support/ticket-priorities/', API_VERSIONS.BFG2),
+  ticketPriority: (id: string | number) => buildApiUrl(`/support/ticket-priorities/${id}/`, API_VERSIONS.BFG2),
 
   // Finance
   invoices: () => buildApiUrl('/invoices/', API_VERSIONS.BFG2),
@@ -279,17 +286,34 @@ export async function apiFetch<T>(
 
   if (!response.ok) {
     let errorDetail = 'Request failed'
+    let errorData: Record<string, unknown> | null = null
     if (isJson) {
       try {
-        const errorData = await response.json()
-        errorDetail = errorData.detail || errorData.message || errorData.error || errorDetail
-        
-        // Log specific token errors for debugging
+        const parsed = await response.json()
+        errorData = parsed && typeof parsed === 'object' ? parsed : null
+        errorDetail =
+          (parsed?.detail as string) ||
+          (parsed?.message as string) ||
+          (parsed?.error as string) ||
+          errorDetail
+        // DRF validation errors: { "field": ["msg1", "msg2"] } -> show in message
+        if (errorDetail === 'Request failed' && errorData && typeof errorData === 'object') {
+          const parts: string[] = []
+          for (const [key, val] of Object.entries(errorData)) {
+            if (Array.isArray(val) && val.every((v) => typeof v === 'string')) {
+              parts.push(`${key}: ${(val as string[]).join(', ')}`)
+            } else if (typeof val === 'string') {
+              parts.push(`${key}: ${val}`)
+            }
+          }
+          if (parts.length) {
+            errorDetail = parts.join('; ')
+          }
+        }
         if (errorDetail.includes('token') && errorDetail.includes('not valid')) {
           console.error('[apiFetch] Token validation error:', errorDetail)
         }
       } catch {
-        // If JSON parsing fails, use status text
         errorDetail = response.statusText
       }
     } else {
@@ -300,6 +324,7 @@ export async function apiFetch<T>(
 
     const error = new Error(errorDetail)
     ;(error as any).status = response.status
+    if (errorData) (error as any).validationErrors = errorData
     throw error
   }
 

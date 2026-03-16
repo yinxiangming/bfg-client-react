@@ -34,10 +34,15 @@ import {
   getWorkspaceSettings,
   updateGeneralSettings,
   updateStorefrontUiSettings,
+  updateShopSettings,
+  updatePluginsSettings,
   type GeneralSettingsPayload,
   type StorefrontUiSettingsPayload,
-  type StorefrontHeaderOptionsPayload
+  type StorefrontHeaderOptionsPayload,
+  type ShopSettingsPayload,
+  type PluginsSettingsPayload
 } from '@/services/settings'
+import { getCurrencies, type Currency } from '@/services/finance'
 import { clearStorefrontConfigCache } from '@/utils/storefrontConfig'
 import { THEME_REGISTRY } from '@/components/storefront/themes/registry.generated'
 import { bfgApi } from '@/utils/api'
@@ -87,6 +92,21 @@ const initialStorefrontUi: StorefrontUiData = {
   header_options: { ...defaultHeaderOptions }
 }
 
+type PluginsData = {
+  product_scanner_enabled: boolean
+  product_scanner_api_key: string
+  product_scanner_api_url: string
+}
+
+type ShopData = { review_moderation_required: boolean }
+const initialShopData: ShopData = { review_moderation_required: false }
+
+const initialPluginsData: PluginsData = {
+  product_scanner_enabled: false,
+  product_scanner_api_key: '',
+  product_scanner_api_url: ''
+}
+
 // Vars
 const initialBasicData: BasicData = {
   siteName: '',
@@ -119,6 +139,9 @@ const GeneralSettingsPage = () => {
   const [success, setSuccess] = useState(false)
   const [settingsId, setSettingsId] = useState<number | null>(null)
   const [storefrontUi, setStorefrontUi] = useState<StorefrontUiData>(initialStorefrontUi)
+  const [shopData, setShopData] = useState<ShopData>(initialShopData)
+  const [pluginsData, setPluginsData] = useState<PluginsData>(initialPluginsData)
+  const [currencies, setCurrencies] = useState<Currency[]>([])
 
   const handleTabChange = (event: SyntheticEvent, value: string) => {
     setActiveTab(value)
@@ -137,6 +160,10 @@ const GeneralSettingsPage = () => {
       ...prev,
       header_options: { ...prev.header_options, [key]: checked }
     }))
+  }
+
+  const handlePluginsChange = (field: keyof PluginsData, value: any) => {
+    setPluginsData(prev => ({ ...prev, [field]: value }))
   }
 
   const handleFileInputChange = (file: ChangeEvent) => {
@@ -168,7 +195,12 @@ const GeneralSettingsPage = () => {
       try {
         setLoading(true)
         console.log('[GeneralSettings] Loading settings...')
-        const settings = await getWorkspaceSettings()
+        const [settings, currenciesData] = await Promise.all([
+          getWorkspaceSettings(),
+          getCurrencies()
+        ])
+        const activeCurrencies = currenciesData.filter(c => c.is_active)
+        setCurrencies(activeCurrencies)
         console.log('[GeneralSettings] Settings loaded:', settings)
         setSettingsId(settings.id)
         console.log('[GeneralSettings] Settings ID set to:', settings.id)
@@ -182,13 +214,28 @@ const GeneralSettingsPage = () => {
           })
         }
 
+        const shop = (settings.custom_settings as any)?.shop || {}
+        setShopData({
+          review_moderation_required: shop.review_moderation_required ?? initialShopData.review_moderation_required
+        })
+        const plugins = (settings.custom_settings as any)?.plugins || {}
+        setPluginsData({
+          product_scanner_enabled: plugins.product_scanner?.enabled ?? initialPluginsData.product_scanner_enabled,
+          product_scanner_api_key: plugins.product_scanner?.api_key ?? initialPluginsData.product_scanner_api_key,
+          product_scanner_api_url: plugins.product_scanner?.api_url ?? initialPluginsData.product_scanner_api_url
+        })
+
         const general = (settings.custom_settings as any)?.general || {}
         if (general || (settings as any).site_name != null || (settings as any).site_description != null) {
           setBasicData({
             siteName: general.site_name || (settings as any).site_name || initialBasicData.siteName,
             siteDescription: general.site_description || (settings as any).site_description || initialBasicData.siteDescription,
             defaultLanguage: general.default_language || (settings as any).default_language || initialBasicData.defaultLanguage,
-            defaultCurrency: general.default_currency || (settings as any).default_currency || initialBasicData.defaultCurrency,
+            defaultCurrency: (() => {
+              const saved = general.default_currency || (settings as any).default_currency || initialBasicData.defaultCurrency
+              const found = activeCurrencies.some(c => c.code === saved)
+              return found ? saved : (activeCurrencies[0]?.code ?? saved)
+            })(),
             defaultTimezone: general.default_timezone || (settings as any).default_timezone || initialBasicData.defaultTimezone,
             contactEmail: general.contact_email || (settings as any).contact_email || initialBasicData.contactEmail,
             contactPhone: general.contact_phone || (settings as any).contact_phone || initialBasicData.contactPhone,
@@ -218,6 +265,15 @@ const GeneralSettingsPage = () => {
     
     loadSettings()
   }, [])
+
+  // Sync defaultCurrency to first system currency when current value is not in list
+  useEffect(() => {
+    if (currencies.length === 0) return
+    const inList = currencies.some(c => c.code === basicData.defaultCurrency)
+    if (!inList && currencies[0]) {
+      handleBasicChange('defaultCurrency', currencies[0].code)
+    }
+  }, [currencies])
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -286,6 +342,20 @@ const GeneralSettingsPage = () => {
         header_options: storefrontUi.header_options
       }
       await updateStorefrontUiSettings(currentSettingsId, storefrontPayload)
+
+      const shopPayload: ShopSettingsPayload = {
+        review_moderation_required: shopData.review_moderation_required
+      }
+      await updateShopSettings(currentSettingsId, shopPayload)
+
+      const pluginsPayload: PluginsSettingsPayload = {
+        product_scanner: {
+          enabled: pluginsData.product_scanner_enabled,
+          api_key: pluginsData.product_scanner_api_key,
+          api_url: pluginsData.product_scanner_api_url
+        }
+      }
+      await updatePluginsSettings(currentSettingsId, pluginsPayload)
 
       console.log('[GeneralSettings] Save successful')
       clearStorefrontConfigCache()
@@ -468,12 +538,14 @@ const GeneralSettingsPage = () => {
                             select
                             fullWidth
                             label={t('settings.general.basic.fields.defaultCurrency.label')}
-                            value={basicData.defaultCurrency}
+                            value={currencies.some(c => c.code === basicData.defaultCurrency) ? basicData.defaultCurrency : (currencies[0]?.code ?? '')}
                             onChange={e => handleBasicChange('defaultCurrency', e.target.value)}
                           >
-                            <MenuItem value='NZD'>{t('settings.general.basic.fields.defaultCurrency.options.nzd')}</MenuItem>
-                            <MenuItem value='USD'>{t('settings.general.basic.fields.defaultCurrency.options.usd')}</MenuItem>
-                            <MenuItem value='CNY'>{t('settings.general.basic.fields.defaultCurrency.options.cny')}</MenuItem>
+                            {currencies.map(c => (
+                              <MenuItem key={c.id} value={c.code}>
+                                {c.code} ({c.symbol})
+                              </MenuItem>
+                            ))}
                           </CustomTextField>
                         </Grid>
                         <Grid size={{ xs: 12, sm: 4 }}>
@@ -693,6 +765,24 @@ const GeneralSettingsPage = () => {
                     </CardContent>
                   </Card>
 
+                  {/* Shop / Reviews Section */}
+                  <Card variant='outlined' sx={{ mb: 6 }}>
+                    <CardContent>
+                      <Typography variant='h6' sx={{ mb: 2 }}>
+                        {t('settings.general.basic.sections.shop')}
+                      </Typography>
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={shopData.review_moderation_required}
+                            onChange={e => setShopData(prev => ({ ...prev, review_moderation_required: e.target.checked }))}
+                          />
+                        }
+                        label={t('settings.general.basic.fields.shop.reviewModerationRequired')}
+                      />
+                    </CardContent>
+                  </Card>
+
                   {/* Social Media Links Section */}
                   <Card variant='outlined' sx={{ mb: 6 }}>
                     <CardContent>
@@ -742,6 +832,67 @@ const GeneralSettingsPage = () => {
                             }}
                           />
                         </Grid>
+                      </Grid>
+                    </CardContent>
+                  </Card>
+
+                  {/* Plugins Section */}
+                  <Card variant='outlined' sx={{ mb: 6 }}>
+                    <CardContent>
+                      <Typography variant='h6' sx={{ mb: 4 }}>
+                        Plugins & Integrations
+                      </Typography>
+                      <Grid container spacing={4}>
+                        <Grid size={{ xs: 12 }}>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={pluginsData.product_scanner_enabled}
+                                onChange={e => handlePluginsChange('product_scanner_enabled', e.target.checked)}
+                              />
+                            }
+                            label={
+                              <Box>
+                                <Typography variant='body1'>Enable Product Scanner</Typography>
+                                <Typography variant='caption' color='text.secondary'>
+                                  Allow automatic product information scanning using AI (text search or image upload)
+                                </Typography>
+                              </Box>
+                            }
+                          />
+                        </Grid>
+                        {pluginsData.product_scanner_enabled && (
+                          <>
+                            <Grid size={{ xs: 12, sm: 6 }}>
+                              <CustomTextField
+                                fullWidth
+                                label='Product Scanner API URL'
+                                value={pluginsData.product_scanner_api_url}
+                                onChange={e => handlePluginsChange('product_scanner_api_url', e.target.value)}
+                                placeholder='https://product-scanner-appg6r4hzq-de.a.run.app'
+                                slotProps={{
+                                  input: {
+                                    startAdornment: <i className='tabler-link' />
+                                  }
+                                }}
+                              />
+                            </Grid>
+                            <Grid size={{ xs: 12, sm: 6 }}>
+                              <CustomTextField
+                                fullWidth
+                                label='Product Scanner API Key'
+                                value={pluginsData.product_scanner_api_key}
+                                onChange={e => handlePluginsChange('product_scanner_api_key', e.target.value)}
+                                placeholder='ps-xxxxxx'
+                                slotProps={{
+                                  input: {
+                                    startAdornment: <i className='tabler-key' />
+                                  }
+                                }}
+                              />
+                            </Grid>
+                          </>
+                        )}
                       </Grid>
                     </CardContent>
                   </Card>

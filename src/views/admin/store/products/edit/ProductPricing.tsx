@@ -51,8 +51,8 @@ const ProductPricing = ({ productData, onChange }: ProductPricingProps) => {
 
     return (
         <Card>
-            <CardHeader title={t('products.pricing.title')} />
-            <CardContent className='flex flex-col gap-6'>
+            <CardHeader title={t('products.pricing.title')} sx={{ pb: 0 }} />
+            <CardContent className='flex flex-col gap-6' sx={{ pt: 2, '&:last-child': { pb: 2 } }}>
                 <CustomTextField
                     fullWidth
                     label={t('products.pricing.fields.basePrice.label')}

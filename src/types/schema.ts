@@ -6,6 +6,7 @@ export type FieldType =
   | 'number'
   | 'date'
   | 'datetime'
+  | 'daterange'
   | 'select'
   | 'boolean'
   | 'textarea'
@@ -26,6 +27,19 @@ export interface SchemaColumn {
   link?: string // Action ID to trigger when column is clicked (e.g., 'edit', 'view')
 }
 
+/** Config for daterange filter: dropdown + popover with start/end picker */
+export interface SchemaFilterDateRangeConfig {
+  /** Query/state keys for start and end (e.g. created_after, created_before) */
+  startField: string
+  endField: string
+  /** Option value in the dropdown that opens the range picker (e.g. 'created') */
+  rangeOptionValue?: string
+  /** Show switch to toggle date-only vs date+time in the picker */
+  includeTimeSwitch?: boolean
+  /** Default for time switch: true = datetime, false = date only */
+  defaultTimeEnabled?: boolean
+}
+
 export interface SchemaFilter {
   field: string
   label: string
@@ -35,7 +49,11 @@ export interface SchemaFilter {
   optionsSource?: 'static' | 'api' | 'cache' // Source of options: static (from options), api (from server), cache (from cached data)
   optionsApi?: string // API endpoint to fetch options
   optionsCode?: string // Code to filter cached options (used with optionsSource: 'cache')
+  optionsValueField?: string // Field name for value when loading from API (default: 'value' or 'id')
+  optionsLabelField?: string // Field name for label when loading from API (default: 'label' or 'name')
   filterMode?: 'api' | 'local' // Filter mode: 'api' (send to server) or 'local' (filter client-side), default: 'local'
+  // Daterange filter: dropdown with one option that opens a start/end picker popover
+  dateRange?: SchemaFilterDateRangeConfig
 }
 
 export interface SchemaAction {
@@ -80,6 +98,8 @@ export interface FormField {
   displayTemplate?: string // Template for displaying selected value (e.g. "{{user.first_name}} {{user.last_name}} ({{email}})")
   searchable?: boolean // For select: enable server-side search
   searchParam?: string // Query param name for search (default: 'q')
+  /** Prepend an empty option so user can clear selection (e.g. assignee = none) */
+  optionsAllowEmpty?: boolean
   format?: string // Format option for date/datetime fields (e.g., 'date', 'datetime', 'time', 'relative')
   validation?: {
     min?: number

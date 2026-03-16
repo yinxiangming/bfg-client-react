@@ -22,6 +22,8 @@ declare global {
   }
 }
 
+let hasWarnedNoGoogleMapsKey = false
+
 // Common country codes (ISO 3166-1 alpha-2)
 const COUNTRY_CODES = [
   'US',
@@ -129,9 +131,12 @@ const WarehouseEditDialog = ({ open, warehouse, onClose, onSave }: WarehouseEdit
     if (!open) return
 
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-    
+
     if (!apiKey) {
-      console.warn('Google Maps API key not configured')
+      if (!hasWarnedNoGoogleMapsKey) {
+        hasWarnedNoGoogleMapsKey = true
+        console.warn('Google Maps API key not configured (NEXT_PUBLIC_GOOGLE_MAPS_API_KEY). Map picker disabled.')
+      }
       return
     }
 

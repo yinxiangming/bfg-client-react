@@ -7,6 +7,7 @@
     "storeCustomers": "Customers",
     "storeCategories": "Categories",
     "storeStores": "Stores",
+    "storeReviews": "Reviews",
     "freight": "Freight",
     "freightDashboard": "Dashboard",
     "freightParcels": "Parcels",
@@ -14,7 +15,12 @@
     "freightConsignments": "Consignments",
     "freightWarehouses": "Warehouses",
     "support": "Support",
+    "supportTicketsParent": "Tickets",
+    "supportTicketsUnprocessed": "Unprocessed",
     "supportTickets": "Tickets",
+    "supportTicketsMy": "My Tickets",
+    "supportTicketsInProgress": "In Progress",
+    "supportTicketsClosed": "Closed",
     "supportCustomers": "Customers",
     "settings": "Settings",
     "settingsGeneral": "General",
@@ -22,7 +28,15 @@
     "settingsStore": "Store",
     "settingsFinance": "Finance",
     "settingsDelivery": "Delivery",
-    "settingsMarketing": "Marketing"
+    "settingsMarketing": "Marketing",
+    "settingsSupport": "Customer Support",
+    "resale": "Resale",
+    "resaleIntake": "Intake",
+    "resaleSettings": "Settings",
+    "resaleTimeslots": "Time Slots",
+    "resaleBookings": "Bookings",
+    "resaleProducts": "Products",
+    "resalePayouts": "Payouts"
   },
   "common": {
     "actions": {
@@ -37,6 +51,15 @@
       "pay": "Pay",
       "downloadPdf": "Download PDF",
       "retry": "Retry"
+    },
+    "imageViewer": {
+      "close": "Close",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "rotate": "Rotate",
+      "prev": "Previous",
+      "next": "Next",
+      "imageCounter": "{current} / {total}"
     },
     "states": {
       "loading": "Loading...",
@@ -58,6 +81,7 @@
       "message": "Message"
     },
     "schemaTable": {
+      "actionsColumn": "Actions",
       "search": "Search",
       "searchPlaceholder": "Search...",
       "bulkActions": "Bulk Actions",
@@ -74,7 +98,18 @@
       "showing": "Showing",
       "to": "to",
       "of": "of",
-      "entries": "entries"
+      "entries": "entries",
+      "dateRange": {
+        "start": "Start",
+        "end": "End",
+        "includeTime": "Include time",
+        "apply": "Apply",
+        "cancel": "Cancel",
+        "today": "Today",
+        "yesterday": "Yesterday",
+        "lastWeek": "Last week",
+        "selectDate": "Select date"
+      }
     },
     "schemaForm": {
       "save": "Save",
@@ -116,19 +151,50 @@
         "paymentGatewayType": "Payment Method"
       }
     },
+    "createOrderModal": {
+      "title": "Create Order",
+      "products": "Products",
+      "productSearchPlaceholder": "Search by name, SKU or barcode",
+      "addProduct": "Add",
+      "customer": "Customer",
+      "customerSearchPlaceholder": "Search by email or phone",
+      "createNewCustomer": "Create new customer",
+      "selectExistingCustomer": "Select existing customer",
+      "newCustomerName": "Name",
+      "newCustomerEmail": "Email",
+      "newCustomerPhone": "Phone",
+      "confirm": "Create and edit order",
+      "errors": {
+        "selectCustomer": "Please select or create a customer",
+        "customerEmailOrPhone": "Email or phone is required for new customer",
+        "createCustomerFailed": "Failed to create customer",
+        "addAtLeastOneProduct": "Add at least one product",
+        "createOrderFailed": "Failed to create order"
+      }
+    },
     "listPage": {
       "title": "Orders",
       "schema": {
         "title": "Orders",
         "columns": {
           "orderNo": "Order No",
+          "copyOrderNo": "Copy order number",
+          "noteLabel": "Note",
           "customer": "Customer",
           "store": "Store",
           "total": "Total",
           "status": "Status",
           "payment": "Payment",
+          "logistics": "Logistics",
+          "packagesCount": "{count} package(s)",
+          "manageLogistics": "Manage",
+          "addPackages": "Add packages",
           "createdAt": "Created At"
         }
+      },
+      "logisticsModal": {
+        "title": "Packages & shipping — Order {orderNumber}",
+        "titleFallback": "Packages & shipping"
       },
       "filters": {
         "status": {
@@ -136,9 +202,22 @@
         },
         "paymentStatus": {
           "label": "Payment Status"
+        },
+        "store": {
+          "label": "Store"
+        },
+        "createdAfter": {
+          "label": "Created from"
+        },
+        "createdBefore": {
+          "label": "Created to"
+        },
+        "createdTime": {
+          "label": "Created time"
         }
       },
       "actions": {
+        "add": "Create Order",
         "exportExcel": "Export Excel",
         "view": "View",
         "edit": "Edit",
@@ -230,6 +309,12 @@
         "tax": "Tax",
         "discount": "Discount",
         "total": "Total"
+      },
+      "edit": {
+        "editItems": "Edit items",
+        "save": "Save",
+        "addAtLeastOne": "Add at least one product",
+        "saveFailed": "Failed to save items"
       }
     },
     "customerCard": {
@@ -253,7 +338,8 @@
     },
     "timeline": {
       "title": "Order Timeline",
-      "empty": "No order activity available"
+      "empty": "No order activity available",
+      "byActor": "By {actor}"
     },
     "delivery": {
       "title": "Delivery Information",
@@ -419,6 +505,46 @@
       "confirmDelete": {
         "title": "Delete Invoice",
         "message": "Are you sure you want to delete invoice {invoiceNumber}? This action cannot be undone."
+      }
+    }
+  },
+  "reviews": {
+    "status": {
+      "approved": "Approved",
+      "pending": "Pending"
+    },
+    "listPage": {
+      "title": "Reviews",
+      "schema": {
+        "title": "Reviews",
+        "columns": {
+          "product": "Product",
+          "customer": "Customer",
+          "rating": "Rating",
+          "title": "Title",
+          "comment": "Comment",
+          "status": "Status",
+          "helpfulCount": "Helpful",
+          "createdAt": "Created At"
+        }
+      },
+      "filters": {
+        "status": {
+          "label": "Status"
+        },
+        "product": {
+          "label": "Product"
+        }
+      },
+      "actions": {
+        "view": "View",
+        "approve": "Approve",
+        "reject": "Reject",
+        "delete": "Delete",
+        "confirmDelete": "Are you sure you want to delete this review?"
+      },
+      "messages": {
+        "actionFailed": "Action failed: {error}"
       }
     }
   },
@@ -910,6 +1036,7 @@
         "code": "Code",
         "description": "Description",
         "warehouses": "Warehouses",
+        "status": "Status",
         "createdAt": "Created At"
       }
     },
@@ -921,7 +1048,24 @@
       "confirmDelete": "Are you sure you want to delete this store?"
     },
     "errors": {
-      "deleteFailed": "Failed to delete store: {error}"
+      "deleteFailed": "Failed to delete store: {error}",
+      "loadFailed": "Failed to load store"
+    },
+    "form": {
+      "title": "Store Details",
+      "fields": {
+        "name": "Name",
+        "code": "Code",
+        "description": "Description",
+        "warehouses": "Warehouses",
+        "active": "Active",
+        "createdAt": "Created At",
+        "updatedAt": "Updated At"
+      },
+      "actions": {
+        "save": "Save",
+        "cancel": "Cancel"
+      }
     },
     "editPage": {
       "states": {
@@ -931,6 +1075,92 @@
       "snackbar": {
         "saved": "Store saved successfully!",
         "saveFailed": "Failed to update store"
+      }
+    }
+  },
+  "support": {
+    "tickets": {
+      "page": {
+        "title": "Tickets",
+        "titleUnprocessed": "Unprocessed",
+        "titleMy": "My Tickets",
+        "titleInProgress": "In Progress",
+        "titleClosed": "Closed"
+      },
+      "tabs": {
+        "basic": "Basic Info",
+        "replies": "Reply History",
+        "assignments": "Assignment History"
+      },
+      "assignments": {
+        "title": "Assignment History",
+        "noRecords": "No assignment records yet",
+        "by": "By"
+      },
+      "schema": {
+        "columns": {
+          "ticketNumber": "Ticket No",
+          "subject": "Subject",
+          "customer": "Customer",
+          "priority": "Priority",
+          "status": "Status",
+          "assignedTo": "Assigned To",
+          "createdAt": "Created At"
+        },
+        "filters": {
+          "status": "Status",
+          "priority": "Priority"
+        },
+        "actions": {
+          "add": "New Ticket",
+          "edit": "Edit",
+          "delete": "Delete",
+          "confirmDelete": "Are you sure you want to delete this ticket?"
+        }
+      },
+      "form": {
+        "title": "Ticket Details",
+        "fields": {
+          "ticketNumber": "Ticket No",
+          "subject": "Subject",
+          "description": "Description",
+          "customer": "Customer",
+          "category": "Category",
+          "priority": "Priority",
+          "status": "Status",
+          "assignedTo": "Assigned To",
+          "channel": "Channel",
+          "channelEmail": "Email",
+          "channelWeb": "Web",
+          "channelPhone": "Phone",
+          "channelChat": "Live Chat",
+          "channelSocial": "Social Media",
+          "createdAt": "Created At",
+          "updatedAt": "Updated At"
+        },
+        "actions": {
+          "save": "Save",
+          "cancel": "Cancel"
+        }
+      },
+      "errors": {
+        "deleteFailed": "Delete failed: {error}",
+        "loadFailed": "Failed to load ticket",
+        "saveFailed": "Save failed: {error}",
+        "replyFailed": "Reply failed: {error}"
+      },
+      "conversation": {
+        "title": "Conversation",
+        "noMessages": "No replies yet",
+        "staff": "Staff",
+        "customer": "Customer",
+        "internal": "Internal",
+        "addReply": "Add reply",
+        "replyPlaceholder": "Type your reply…",
+        "submit": "Send reply",
+        "submitting": "Sending…",
+        "loadMore": "Load more",
+        "loadingMore": "Loading…"
       }
     }
   },
@@ -977,6 +1207,11 @@
           "label": "Product Name",
           "placeholder": "iPhone 14"
         },
+        "slug": {
+          "label": "URL slug",
+          "placeholder": "iphone-14",
+          "helper": "Only letters, numbers, underscores or hyphens (used in product URL)"
+        },
         "sku": {
           "label": "SKU",
           "placeholder": "FXSK123U"
@@ -984,7 +1219,51 @@
         "barcode": {
           "label": "Barcode",
           "placeholder": "0123-4567"
+        },
+        "condition": {
+          "label": "Condition",
+          "placeholder": "Select condition",
+          "options": {
+            "new": "New",
+            "like_new": "Like New",
+            "good": "Good",
+            "fair": "Fair",
+            "poor": "Poor"
+          }
         }
+      }
+    },
+    "scanner": {
+      "title": "Scan Product",
+      "button": "Scan Product",
+      "tabs": {
+        "text": "Text Search",
+        "image": "Image Upload"
+      },
+      "fields": {
+        "productNameLabel": "Product Name",
+        "productNamePlaceholder": "e.g., iPhone 15 Pro, Nike Air Max",
+        "uploadImage": "Upload Product Image"
+      },
+      "actions": {
+        "search": "Search Products",
+        "scanning": "Scanning...",
+        "cancel": "Cancel"
+      },
+      "selectProduct": "Select a product ({count} found)",
+      "brand": "Brand",
+      "model": "Model",
+      "errors": {
+        "enterQueryOrImage": "Please enter a search query or upload an image",
+        "noProducts": "No products found. Try a different search.",
+        "searchFailed": "Failed to search products",
+        "detailsFailed": "Failed to get product details"
+      },
+      "autoSave": {
+        "title": "Auto save?",
+        "message": "Save product with imported information now?",
+        "yes": "Save",
+        "no": "Not now"
       }
     },
     "pricing": {
@@ -1014,7 +1293,8 @@
           "sku": "SKU",
           "price": "Price",
           "qty": "QTY",
-          "published": "Published"
+          "published": "Published",
+          "featured": "Featured"
         },
         "filters": {
           "status": {
@@ -1237,7 +1517,8 @@
       "imageAltFallback": "Image {index}",
       "actions": {
         "selectImage": "Select Image",
-        "delete": "Delete"
+        "delete": "Delete",
+        "viewFullSize": "View full size"
       },
       "deleteDialog": {
         "title": "Remove Image Reference",
@@ -2745,6 +3026,110 @@
         }
       }
     },
+    "support": {
+      "page": {
+        "title": "Customer Support",
+        "subtitle": "Manage ticket categories, priorities and support-related settings",
+        "tabs": {
+          "settings": "Settings",
+          "categories": "Ticket Categories",
+          "priorities": "Priorities"
+        }
+      },
+      "settingsTab": {
+        "title": "Customer Support Settings",
+        "description": "Configure global support options here (e.g. support email, ticket toggles).",
+        "fields": {
+          "supportEmail": "Support Email",
+          "supportEmailHelp": "Email used for ticket replies and storefront contact display.",
+          "supportNotice": "Response Time & Contact Notice",
+          "supportNoticeHelp": "This notice is shown on the account support page (/account/support). Describe response time and how customers can reach you."
+        },
+        "placeholders": {
+          "supportEmail": "support@example.com",
+          "supportNotice": "We typically respond within 24 hours. You can also reach us by email or phone."
+        },
+        "actions": {
+          "save": "Save"
+        },
+        "errors": {
+          "noWorkspaceSettings": "Workspace settings not found.",
+          "saveFailed": "Save failed: {error}"
+        },
+        "snackbar": {
+          "saved": "Customer support settings saved"
+        }
+      },
+      "categoriesTab": {
+        "description": "Manage ticket categories for organizing and filtering tickets.",
+        "schemaTitle": "Ticket Categories",
+        "columns": {
+          "name": "Name",
+          "description": "Description",
+          "order": "Order",
+          "status": "Status"
+        },
+        "actions": {
+          "add": "Add Category",
+          "edit": "Edit",
+          "delete": "Delete",
+          "confirmDelete": "Are you sure you want to delete this category?"
+        },
+        "form": {
+          "title": "Ticket Category",
+          "fields": {
+            "name": "Name",
+            "description": "Description",
+            "order": "Order",
+            "active": "Active"
+          },
+          "actions": {
+            "save": "Save"
+          }
+        },
+        "errors": {
+          "deleteFailed": "Delete failed: {error}",
+          "saveFailed": "Save failed: {error}"
+        }
+      },
+      "prioritiesTab": {
+        "description": "Manage ticket priorities and SLA response times.",
+        "schemaTitle": "Priorities",
+        "columns": {
+          "name": "Name",
+          "level": "Level",
+          "color": "Color",
+          "responseTime": "Response (hours)",
+          "resolutionTime": "Resolution (hours)",
+          "status": "Status"
+        },
+        "actions": {
+          "add": "Add Priority",
+          "edit": "Edit",
+          "delete": "Delete",
+          "confirmDelete": "Are you sure you want to delete this priority?"
+        },
+        "form": {
+          "title": "Priority",
+          "fields": {
+            "name": "Name",
+            "level": "Level",
+            "levelHelp": "1=Low, 5=Critical",
+            "color": "Color",
+            "responseTime": "Response time (hours)",
+            "resolutionTime": "Resolution time (hours)",
+            "active": "Active"
+          },
+          "actions": {
+            "save": "Save"
+          }
+        },
+        "errors": {
+          "deleteFailed": "Delete failed: {error}",
+          "saveFailed": "Save failed: {error}"
+        }
+      }
+    },
     "general": {
       "page": {
         "title": "Workspace Settings",
@@ -2819,6 +3204,7 @@
           "contactInformation": "Contact Information",
           "storefrontDisplay": "Storefront Display",
           "storefrontTheme": "Storefront Theme & Header",
+          "shop": "Shop",
           "socialMediaLinks": "Social Media Links"
         },
         "logo": {
@@ -2899,6 +3285,9 @@
             "showLanguageSwitcher": "Language",
             "showStyleSelector": "Theme (light/dark)",
             "showLogin": "Login / account"
+          },
+          "shop": {
+            "reviewModerationRequired": "Require review moderation (reviews need approval before showing)"
           },
           "social": {
             "facebook": {

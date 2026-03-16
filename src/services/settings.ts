@@ -43,12 +43,17 @@ export type StorefrontUiSettingsPayload = {
   header_options?: StorefrontHeaderOptionsPayload
 }
 
+export type ShopSettingsPayload = {
+  review_moderation_required?: boolean
+}
+
 export type WorkspaceSettings = {
   id: number
   workspace_id?: number
   site_name?: string
   site_description?: string
   logo?: string
+  support_email?: string
   custom_settings?: {
     invoice?: InvoiceSettingsPayload
     delivery?: DeliverySettingsPayload
@@ -56,6 +61,8 @@ export type WorkspaceSettings = {
     web?: WebSettingsPayload
     general?: GeneralSettingsPayload
     storefront_ui?: StorefrontUiSettingsPayload
+    shop?: ShopSettingsPayload
+    plugins?: PluginsSettingsPayload
   }
   created_at?: string
   updated_at?: string
@@ -81,6 +88,12 @@ export type MarketingSettingsPayload = {
   utm_source?: string
   utm_medium?: string
   utm_campaign?: string
+}
+
+export type SupportSettingsPayload = {
+  support_email?: string
+  /** Notice shown on account support page (response time & contact info). Stored in custom_settings.support.notice */
+  support_notice?: string
 }
 
 export type WebSettingsPayload = {
@@ -109,6 +122,14 @@ export type GeneralSettingsPayload = {
   site_announcement?: string
   footer_contact?: string
   logo?: string
+}
+
+export type PluginsSettingsPayload = {
+  product_scanner?: {
+    enabled?: boolean
+    api_key?: string
+    api_url?: string
+  }
 }
 
 let workspaceSettingsCache: Promise<WorkspaceSettings> | null = null
@@ -188,6 +209,21 @@ export async function updateMarketingSettings(settingsId: number, marketing: Mar
   })
 }
 
+export async function updateSupportSettings(settingsId: number, payload: SupportSettingsPayload) {
+  const { support_notice, ...rest } = payload
+  const body: Record<string, unknown> = { ...rest }
+  if (support_notice !== undefined) {
+    const current = await apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`)
+    const custom = current.custom_settings || {}
+    const support = (custom.support && typeof custom.support === 'object') ? { ...custom.support } : {}
+    body.custom_settings = { ...custom, support: { ...support, notice: support_notice } }
+  }
+  return apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`, {
+    method: 'PATCH',
+    body: JSON.stringify(body)
+  })
+}
+
 export async function updateWebSettings(settingsId: number, web: WebSettingsPayload) {
   // PATCH custom_settings.web only, preserving other custom_settings
   const current = await apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`)
@@ -223,6 +259,32 @@ export async function updateStorefrontUiSettings(settingsId: number, storefront_
     method: 'PATCH',
     body: JSON.stringify({ custom_settings: nextCustom })
   })
+}
+
+export async function updateShopSettings(settingsId: number, shop: ShopSettingsPayload) {
+  const url = `${bfgApi.settings()}${settingsId}/`
+  const current = await apiFetch<WorkspaceSettings>(url)
+  const currentCustom = current.custom_settings || {}
+  const nextCustom = { ...currentCustom, shop }
+  const result = await apiFetch<WorkspaceSettings>(url, {
+    method: 'PATCH',
+    body: JSON.stringify({ custom_settings: nextCustom })
+  })
+  invalidateWorkspaceSettingsCache()
+  return result
+}
+
+export async function updatePluginsSettings(settingsId: number, plugins: PluginsSettingsPayload) {
+  const url = `${bfgApi.settings()}${settingsId}/`
+  const current = await apiFetch<WorkspaceSettings>(url)
+  const currentCustom = current.custom_settings || {}
+  const nextCustom = { ...currentCustom, plugins }
+  const result = await apiFetch<WorkspaceSettings>(url, {
+    method: 'PATCH',
+    body: JSON.stringify({ custom_settings: nextCustom })
+  })
+  invalidateWorkspaceSettingsCache()
+  return result
 }
 
 // Users management

@@ -419,9 +419,9 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                         {t('products.variants.actions.addVariant')}
                     </Button>
                 }
-                sx={{ '& .MuiCardHeader-action': { alignSelf: 'center' } }}
+                sx={{ pb: 0, '& .MuiCardHeader-action': { alignSelf: 'center' } }}
             />
-            <CardContent>
+            <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 } }}>
                 <TableContainer>
                     <Table size='small'>
                         <TableHead>

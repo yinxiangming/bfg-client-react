@@ -5,12 +5,17 @@
     "addresses": "地址管理",
     "payments": "支付",
     "inbox": "消息",
+    "support": "客户支持",
     "settings": "设置"
   },
   "pages": {
     "dashboard": {
       "title": "您的账户",
       "subtitle": "管理您的账户设置和偏好"
+    },
+    "support": {
+      "title": "客户支持",
+      "subtitle": "查看咨询进度与历史，或提交新咨询"
     },
     "orders": {
       "title": "订单",
@@ -65,6 +70,10 @@
       "inbox": {
         "title": "收件箱",
         "description": "查看通知和消息"
+      },
+      "support": {
+        "title": "客户支持",
+        "description": "咨询进度与历史、提交新咨询"
       },
       "settings": {
         "title": "设置",
@@ -376,6 +385,38 @@
     "failedLoad": "加载地址失败",
     "failedSave": "保存地址失败",
     "failedDelete": "删除地址失败"
+  },
+  "support": {
+    "myTickets": "我的咨询",
+    "newTicket": "提交咨询",
+    "loading": "加载中...",
+    "noTickets": "暂无咨询记录",
+    "ticketNumber": "咨询编号",
+    "subject": "主题",
+    "status": "状态",
+    "createdAt": "创建时间",
+    "updatedAt": "更新时间",
+    "actions": "操作",
+    "view": "查看",
+    "subjectPlaceholder": "简要描述问题",
+    "descriptionPlaceholder": "请详细描述您的问题或需求",
+    "description": "描述",
+    "category": "分类",
+    "priority": "优先级",
+    "categoryOptional": "可选",
+    "priorityOptional": "可选",
+    "cancel": "取消",
+    "submit": "提交",
+    "submitting": "提交中...",
+    "close": "关闭",
+    "failedLoad": "加载咨询记录失败",
+    "failedCreate": "提交咨询失败",
+    "statusNew": "新建",
+    "statusOpen": "处理中",
+    "statusPending": "待客户回复",
+    "statusOnHold": "挂起",
+    "statusResolved": "已解决",
+    "statusClosed": "已关闭"
   },
   "orderDetail": {
     "order": "订单",

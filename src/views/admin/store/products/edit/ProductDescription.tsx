@@ -254,8 +254,8 @@ const ProductDescription = ({ productData, onChange }: ProductDescriptionProps) 
     return (
         <>
             <Card>
-                <CardHeader title={t('products.description.cardTitle')} />
-                <CardContent>
+                <CardHeader title={t('products.description.cardTitle')} sx={{ pb: 0 }} />
+                <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 } }}>
                     <Typography className='mbe-1'>{t('products.description.descriptionHint')}</Typography>
                     <Card className='p-0 border shadow-none'>
                         <CardContent className='p-0'>

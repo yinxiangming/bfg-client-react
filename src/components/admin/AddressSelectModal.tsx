@@ -20,8 +20,14 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Divider from '@mui/material/Divider'
 
 // API Imports
-import { getCustomerAddresses, createAddress, type Address } from '@/services/store'
+import { getCustomerAddresses, createAddress, updateAddress, type Address } from '@/services/store'
 import { meApi } from '@/utils/meApi'
+
+// Address autocomplete (Google Places)
+import AddressAutocomplete from '@/components/storefront/AddressAutocomplete'
+
+// Icon
+import IconButton from '@mui/material/IconButton'
 
 type AddressSelectModalProps = {
   open: boolean
@@ -45,6 +51,7 @@ const AddressSelectModal = ({
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [showAddForm, setShowAddForm] = useState(false)
+  const [editingAddress, setEditingAddress] = useState<Address | null>(null)
   const [newAddress, setNewAddress] = useState<Partial<Address>>({
     full_name: '',
     company: '',
@@ -68,6 +75,7 @@ const AddressSelectModal = ({
     if (open) {
       setSelectedAddressId(currentAddressId || null)
       setShowAddForm(false)
+      setEditingAddress(null)
     }
   }, [open, currentAddressId])
 
@@ -94,6 +102,71 @@ const AddressSelectModal = ({
         onSelect(address)
         onClose()
       }
+    }
+  }
+
+  const handleAddressSelect = (components: { address: string; city: string; state: string; zip: string; country: string }) => {
+    setNewAddress((prev) => ({
+      ...prev,
+      address_line1: components.address || prev.address_line1,
+      city: components.city || prev.city,
+      state: components.state || prev.state,
+      postal_code: components.zip || prev.postal_code,
+      country: components.country || prev.country
+    }))
+  }
+
+  const handleEditAddress = (address: Address) => {
+    setEditingAddress(address)
+    setNewAddress({
+      full_name: address.full_name ?? '',
+      company: address.company ?? '',
+      address_line1: address.address_line1 ?? '',
+      address_line2: address.address_line2 ?? '',
+      city: address.city ?? '',
+      state: address.state ?? '',
+      postal_code: address.postal_code ?? '',
+      country: address.country ?? '',
+      phone: address.phone ?? '',
+      email: address.email ?? ''
+    })
+  }
+
+  const handleSaveEditAddress = async () => {
+    if (!editingAddress?.id) return
+    setLoading(true)
+    setError(null)
+    try {
+      await updateAddress(editingAddress.id, {
+        full_name: newAddress.full_name || '',
+        phone: newAddress.phone || '',
+        email: newAddress.email,
+        company: newAddress.company,
+        address_line1: newAddress.address_line1 || '',
+        address_line2: newAddress.address_line2,
+        city: newAddress.city || '',
+        state: newAddress.state,
+        postal_code: newAddress.postal_code || '',
+        country: newAddress.country || ''
+      })
+      await fetchAddresses()
+      setEditingAddress(null)
+      setNewAddress({
+        full_name: '',
+        company: '',
+        address_line1: '',
+        address_line2: '',
+        city: '',
+        state: '',
+        postal_code: '',
+        country: '',
+        phone: '',
+        email: ''
+      })
+    } catch (err: any) {
+      setError(err.message || 'Failed to update address')
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -176,7 +249,7 @@ const AddressSelectModal = ({
           </Box>
         ) : (
           <>
-            {!showAddForm ? (
+            {!showAddForm && !editingAddress ? (
               <>
                 {addresses.length > 0 ? (
                   <FormControl component='fieldset' fullWidth>
@@ -185,40 +258,61 @@ const AddressSelectModal = ({
                       onChange={(e) => setSelectedAddressId(Number(e.target.value))}
                     >
                       {addresses.map((address) => (
-                        <FormControlLabel
+                        <Box
                           key={address.id}
-                          value={address.id}
-                          control={<Radio />}
-                          label={
-                            <Box>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Typography variant='body1' fontWeight={500}>
-                                  {address.full_name || 'Unnamed Address'}
-                                </Typography>
-                                {address.is_default && (
-                                  <Typography variant='caption' color='primary'>
-                                    (Default)
-                                  </Typography>
-                                )}
-                              </Box>
-                              <Typography variant='body2' color='text.secondary'>
-                                {formatAddress(address)}
-                              </Typography>
-                              {address.phone && (
-                                <Typography variant='body2' color='text.secondary'>
-                                  Phone: {address.phone}
-                                </Typography>
-                              )}
-                            </Box>
-                          }
                           sx={{
                             mb: 2,
                             p: 2,
                             border: selectedAddressId === address.id ? '2px solid' : '1px solid',
                             borderColor: selectedAddressId === address.id ? 'primary.main' : 'divider',
-                            borderRadius: 1
+                            borderRadius: 1,
+                            display: 'flex',
+                            alignItems: 'flex-start',
+                            justifyContent: 'space-between',
+                            gap: 1
                           }}
-                        />
+                        >
+                          <FormControlLabel
+                            value={address.id}
+                            control={<Radio />}
+                            label={
+                              <Box sx={{ flex: 1 }}>
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                  <Typography variant='body1' fontWeight={500}>
+                                    {address.full_name || 'Unnamed Address'}
+                                  </Typography>
+                                  {address.is_default && (
+                                    <Typography variant='caption' color='primary'>
+                                      (Default)
+                                    </Typography>
+                                  )}
+                                </Box>
+                                <Typography variant='body2' color='text.secondary'>
+                                  {formatAddress(address)}
+                                </Typography>
+                                {address.phone && (
+                                  <Typography variant='body2' color='text.secondary'>
+                                    Phone: {address.phone}
+                                  </Typography>
+                                )}
+                              </Box>
+                            }
+                            sx={{ flex: 1, m: 0 }}
+                          />
+                          {selectedAddressId === address.id && (
+                            <IconButton
+                              size='small'
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleEditAddress(address)
+                              }}
+                              title='Edit address'
+                              sx={{ flexShrink: 0 }}
+                            >
+                              <i className='tabler-edit' style={{ fontSize: 20 }} />
+                            </IconButton>
+                          )}
+                        </Box>
                       ))}
                     </RadioGroup>
                   </FormControl>
@@ -242,6 +336,206 @@ const AddressSelectModal = ({
                   </>
                 )}
               </>
+            ) : editingAddress ? (
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                <Typography variant='h6'>Edit Address</Typography>
+
+                <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  <Box sx={{ display: 'flex', gap: 2 }}>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant='body2' sx={{ mb: 1 }}>Full Name *</Typography>
+                      <input
+                        type='text'
+                        value={newAddress.full_name || ''}
+                        onChange={(e) => setNewAddress({ ...newAddress, full_name: e.target.value })}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #ccc',
+                          borderRadius: '4px'
+                        }}
+                      />
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant='body2' sx={{ mb: 1 }}>Phone *</Typography>
+                      <input
+                        type='text'
+                        value={newAddress.phone || ''}
+                        onChange={(e) => setNewAddress({ ...newAddress, phone: e.target.value })}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #ccc',
+                          borderRadius: '4px'
+                        }}
+                      />
+                    </Box>
+                  </Box>
+
+                  <Box>
+                    <Typography variant='body2' sx={{ mb: 1 }}>Company</Typography>
+                    <input
+                      type='text'
+                      value={newAddress.company || ''}
+                      onChange={(e) => setNewAddress({ ...newAddress, company: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px'
+                      }}
+                    />
+                  </Box>
+
+                  <Box>
+                    <Typography variant='body2' sx={{ mb: 1 }}>Address Line 1 *</Typography>
+                    <AddressAutocomplete
+                      value={newAddress.address_line1 || ''}
+                      onChange={(v) => setNewAddress({ ...newAddress, address_line1: v })}
+                      onAddressSelect={handleAddressSelect}
+                      placeholder='Start typing address...'
+                      required
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px'
+                      }}
+                    />
+                  </Box>
+
+                  <Box>
+                    <Typography variant='body2' sx={{ mb: 1 }}>Address Line 2</Typography>
+                    <input
+                      type='text'
+                      value={newAddress.address_line2 || ''}
+                      onChange={(e) => setNewAddress({ ...newAddress, address_line2: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px'
+                      }}
+                    />
+                  </Box>
+
+                  <Box sx={{ display: 'flex', gap: 2 }}>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant='body2' sx={{ mb: 1 }}>City *</Typography>
+                      <input
+                        type='text'
+                        value={newAddress.city || ''}
+                        onChange={(e) => setNewAddress({ ...newAddress, city: e.target.value })}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #ccc',
+                          borderRadius: '4px'
+                        }}
+                      />
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant='body2' sx={{ mb: 1 }}>State</Typography>
+                      <input
+                        type='text'
+                        value={newAddress.state || ''}
+                        onChange={(e) => setNewAddress({ ...newAddress, state: e.target.value })}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #ccc',
+                          borderRadius: '4px'
+                        }}
+                      />
+                    </Box>
+                  </Box>
+
+                  <Box sx={{ display: 'flex', gap: 2 }}>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant='body2' sx={{ mb: 1 }}>Postal Code *</Typography>
+                      <input
+                        type='text'
+                        value={newAddress.postal_code || ''}
+                        onChange={(e) => setNewAddress({ ...newAddress, postal_code: e.target.value })}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #ccc',
+                          borderRadius: '4px'
+                        }}
+                      />
+                    </Box>
+                    <Box sx={{ flex: 1 }}>
+                      <Typography variant='body2' sx={{ mb: 1 }}>Country *</Typography>
+                      <input
+                        type='text'
+                        value={newAddress.country || ''}
+                        onChange={(e) => setNewAddress({ ...newAddress, country: e.target.value })}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px',
+                          border: '1px solid #ccc',
+                          borderRadius: '4px'
+                        }}
+                      />
+                    </Box>
+                  </Box>
+
+                  <Box>
+                    <Typography variant='body2' sx={{ mb: 1 }}>Email</Typography>
+                    <input
+                      type='email'
+                      value={newAddress.email || ''}
+                      onChange={(e) => setNewAddress({ ...newAddress, email: e.target.value })}
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        border: '1px solid #ccc',
+                        borderRadius: '4px'
+                      }}
+                    />
+                  </Box>
+                </Box>
+
+                <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
+                  <Button
+                    variant='outlined'
+                    onClick={() => {
+                      setEditingAddress(null)
+                      setNewAddress({
+                        full_name: '',
+                        company: '',
+                        address_line1: '',
+                        address_line2: '',
+                        city: '',
+                        state: '',
+                        postal_code: '',
+                        country: '',
+                        phone: '',
+                        email: ''
+                      })
+                    }}
+                    disabled={loading}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant='contained'
+                    onClick={handleSaveEditAddress}
+                    disabled={
+                      loading ||
+                      !newAddress.full_name ||
+                      !newAddress.address_line1 ||
+                      !newAddress.city ||
+                      !newAddress.postal_code ||
+                      !newAddress.country ||
+                      !newAddress.phone
+                    }
+                  >
+                    {loading ? <CircularProgress size={20} /> : 'Save'}
+                  </Button>
+                </Box>
+              </Box>
             ) : (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Typography variant='h6'>Add New Address</Typography>
@@ -295,10 +589,12 @@ const AddressSelectModal = ({
 
                   <Box>
                     <Typography variant='body2' sx={{ mb: 1 }}>Address Line 1 *</Typography>
-                    <input
-                      type='text'
+                    <AddressAutocomplete
                       value={newAddress.address_line1 || ''}
-                      onChange={(e) => setNewAddress({ ...newAddress, address_line1: e.target.value })}
+                      onChange={(v) => setNewAddress({ ...newAddress, address_line1: v })}
+                      onAddressSelect={handleAddressSelect}
+                      placeholder='Start typing address...'
+                      required
                       style={{
                         width: '100%',
                         padding: '8px 12px',
@@ -449,7 +745,7 @@ const AddressSelectModal = ({
         <Button
           variant='contained'
           onClick={handleSelect}
-          disabled={!selectedAddressId || loading || showAddForm}
+          disabled={!selectedAddressId || loading || showAddForm || !!editingAddress}
         >
           Select
         </Button>

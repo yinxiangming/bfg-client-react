@@ -1,5 +1,8 @@
 // Store-specific schemas
-import type { SchemaResponse } from '@/types/schema'
+import type { ListSchema, FormSchema, SchemaResponse } from '@/types/schema'
+import { bfgApi } from '@/utils/api'
+
+type StoresTranslation = (key: string) => string
 
 // Orders Schema
 export const orderSchema: SchemaResponse = {
@@ -82,7 +85,7 @@ export const orderSchema: SchemaResponse = {
   }
 }
 
-// Stores Schema
+// Stores Schema (static, for non-i18n usage e.g. edit page)
 export const storesSchema: SchemaResponse = {
   list: {
     title: 'Stores',
@@ -106,7 +109,7 @@ export const storesSchema: SchemaResponse = {
       { field: 'name', label: 'Name', type: 'string', required: true },
       { field: 'code', label: 'Code', type: 'string', required: true },
       { field: 'description', label: 'Description', type: 'textarea' },
-      { field: 'warehouses', label: 'Warehouses', type: 'select', optionsSource: 'api', optionsApi: '/api/v2/bfg/delivery/warehouses/', multiple: true },
+      { field: 'warehouses', label: 'Warehouses', type: 'multiselect', optionsSource: 'api', optionsApi: bfgApi.warehouses(), optionsValueField: 'id', optionsLabelField: 'name' },
       { field: 'is_active', label: 'Active', type: 'boolean', defaultValue: true, newline: true },
       { field: 'created_at', label: 'Created At', type: 'datetime', readonly: true, format: 'datetime' },
       { field: 'updated_at', label: 'Updated At', type: 'datetime', readonly: true, format: 'datetime' }
@@ -116,6 +119,58 @@ export const storesSchema: SchemaResponse = {
       { id: 'cancel', label: 'Cancel', type: 'cancel' }
     ]
   }
+}
+
+/** Build stores list + form schema with i18n labels. Use in StoresPage with useTranslations('admin'). */
+export function buildStoresSchema(t: StoresTranslation): SchemaResponse {
+  const list: ListSchema = {
+    title: t('stores.schema.title'),
+    columns: [
+      { field: 'name', label: t('stores.schema.columns.name'), type: 'string', sortable: true, link: 'edit' },
+      { field: 'code', label: t('stores.schema.columns.code'), type: 'string', sortable: true },
+      { field: 'description', label: t('stores.schema.columns.description'), type: 'string' },
+      {
+        field: 'warehouses',
+        label: t('stores.schema.columns.warehouses'),
+        type: 'string',
+        render: (_v: unknown, row: { warehouses?: { name?: string }[] }) =>
+          Array.isArray(row.warehouses) ? row.warehouses.map((w) => w.name ?? w).join(', ') : ''
+      },
+      { field: 'is_active', label: t('stores.schema.columns.status'), type: 'boolean', sortable: true },
+      { field: 'created_at', label: t('stores.schema.columns.createdAt'), type: 'datetime', sortable: true }
+    ],
+    searchFields: ['name', 'code'],
+    actions: [
+      { id: 'add', label: t('stores.actions.add'), type: 'primary', scope: 'global', icon: 'tabler-plus' },
+      { id: 'edit', label: t('stores.actions.edit'), type: 'secondary', scope: 'row', icon: 'tabler-edit' },
+      { id: 'delete', label: t('stores.actions.delete'), type: 'danger', scope: 'row', icon: 'tabler-trash', confirm: t('stores.actions.confirmDelete') }
+    ]
+  }
+  const form: FormSchema = {
+    title: t('stores.form.title'),
+    fields: [
+      { field: 'name', label: t('stores.form.fields.name'), type: 'string', required: true },
+      { field: 'code', label: t('stores.form.fields.code'), type: 'string', required: true },
+      { field: 'description', label: t('stores.form.fields.description'), type: 'textarea' },
+      {
+        field: 'warehouses',
+        label: t('stores.form.fields.warehouses'),
+        type: 'multiselect',
+        optionsSource: 'api',
+        optionsApi: bfgApi.warehouses(),
+        optionsValueField: 'id',
+        optionsLabelField: 'name'
+      },
+      { field: 'is_active', label: t('stores.form.fields.active'), type: 'boolean', defaultValue: true, newline: true },
+      { field: 'created_at', label: t('stores.form.fields.createdAt'), type: 'datetime', readonly: true, format: 'datetime' },
+      { field: 'updated_at', label: t('stores.form.fields.updatedAt'), type: 'datetime', readonly: true, format: 'datetime' }
+    ],
+    actions: [
+      { id: 'submit', label: t('stores.form.actions.save'), type: 'submit' },
+      { id: 'cancel', label: t('stores.form.actions.cancel'), type: 'cancel' }
+    ]
+  }
+  return { list, form }
 }
 
 // Products Schema
@@ -169,6 +224,15 @@ export const productsSchema: SchemaResponse = {
         sortable: true,
         render: (value: any) => {
           return value ? 'Published' : 'Inactive'
+        }
+      },
+      {
+        field: 'is_featured',
+        label: 'Featured',
+        type: 'boolean',
+        sortable: true,
+        render: (value: any) => {
+          return value ? 'Yes' : 'No'
         }
       }
     ],

@@ -70,14 +70,6 @@ class StorefrontApiClient {
     const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`
     const url = `${base}${path}`
 
-    // Debug logging
-    console.log('[storefrontApi] Request:', {
-      method: options.method || 'GET',
-      url,
-      baseUrl: this.baseUrl,
-      endpoint
-    })
-
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...getApiLanguageHeaders(),
@@ -91,9 +83,6 @@ class StorefrontApiClient {
       const token = localStorage.getItem('auth_token')
       if (token) {
         headers['Authorization'] = `Bearer ${token}`
-        console.log('[storefrontApi] Auth token present:', token.substring(0, 20) + '...')
-      } else {
-        console.log('[storefrontApi] No auth token found')
       }
     }
 
@@ -101,14 +90,6 @@ class StorefrontApiClient {
       ...options,
       headers,
       credentials: 'include' // Include cookies for session support
-    })
-
-    console.log('[storefrontApi] Response:', {
-      url,
-      status: response.status,
-      statusText: response.statusText,
-      contentType: response.headers.get('content-type'),
-      ok: response.ok
     })
 
     // Handle 401 Unauthorized or 403 Forbidden - try to refresh token and retry
@@ -181,11 +162,12 @@ class StorefrontApiClient {
         }
       }
 
-      // Handle 401 after refresh attempt - redirect to login
+      // Redirect to login on 401 only for account pages (product review etc. should show error, not redirect)
       if (response.status === 401 && typeof window !== 'undefined') {
         const { pathname, href } = window.location
         const isLogin = pathname.startsWith('/auth/login')
-        if (!isLogin) {
+        const isAccountPage = pathname.startsWith('/account')
+        if (isAccountPage && !isLogin) {
           const redirect = encodeURIComponent(href)
           window.location.href = `/auth/login?redirect=${redirect}`
         }
@@ -214,22 +196,18 @@ class StorefrontApiClient {
       ;(error as any).data = errorData
       ;(error as any).url = url
 
-      // Build comprehensive error log
-      const errorLog: any = {
+      // Build comprehensive error log (plain object so console always shows keys)
+      const errorLog: Record<string, unknown> = {
         url,
         method: options.method || 'GET',
         status: response.status,
         statusText: response.statusText,
         error: errorDetail,
-        contentType
+        contentType: contentType || '(none)'
       }
-      
-      // Only include errorData if it has meaningful content
       if (errorData && Object.keys(errorData).length > 0) {
         errorLog.errorData = errorData
       }
-      
-      // Include request body if available (for debugging)
       if (options.body) {
         try {
           errorLog.requestBody = JSON.parse(options.body as string)
@@ -237,8 +215,7 @@ class StorefrontApiClient {
           errorLog.requestBody = options.body
         }
       }
-      
-      console.error('API Request failed:', errorLog)
+      console.error(`API Request failed: ${response.status} ${errorDetail}`, errorLog)
       throw error
     }
 
@@ -325,11 +302,28 @@ class StorefrontApiClient {
       title?: string
       comment: string
       images?: string[]
+      order_id?: number
     }
   ): Promise<any> {
     return this.request<any>(`/api/v1/store/products/${productIdOrSlug}/reviews/`, {
       method: 'POST',
       body: JSON.stringify(data)
+    })
+  }
+
+  async markProductReviewHelpful(
+    productIdOrSlug: string | number,
+    reviewId: number
+  ): Promise<any> {
+    return this.request<any>(
+      `/api/v1/store/products/${productIdOrSlug}/reviews/${reviewId}/helpful/`,
+      { method: 'POST' }
+    )
+  }
+
+  async markReviewHelpful(productIdOrSlug: string | number, reviewId: number): Promise<any> {
+    return this.request<any>(`/api/v1/store/products/${productIdOrSlug}/reviews/${reviewId}/helpful/`, {
+      method: 'POST'
     })
   }
 
@@ -581,6 +575,25 @@ class StorefrontApiClient {
   async processPayment(id: number): Promise<any> {
     return this.request<any>(`/api/v1/store/payments/${id}/process/`, {
       method: 'POST'
+    })
+  }
+
+  // Wishlist
+  async getWishlist(): Promise<any[]> {
+    return this.request<any[]>('/api/v1/store/wishlist/')
+  }
+
+  async addToWishlist(productId: number): Promise<{ id: number; product: number; created: boolean }> {
+    return this.request<{ id: number; product: number; created: boolean }>('/api/v1/store/wishlist/add/', {
+      method: 'POST',
+      body: JSON.stringify({ product: productId })
+    })
+  }
+
+  async removeFromWishlist(productId: number): Promise<{ removed: boolean }> {
+    return this.request<{ removed: boolean }>('/api/v1/store/wishlist/remove/', {
+      method: 'POST',
+      body: JSON.stringify({ product: productId })
     })
   }
 }

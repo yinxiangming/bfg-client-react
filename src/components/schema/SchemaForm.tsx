@@ -107,17 +107,40 @@ export default function SchemaForm<T extends Record<string, any>>({
     return customFields
   }, [fields, customFieldRenderer])
 
+  // Seed options from initialData for api-sourced multi select so selected items show before API load
+  useEffect(() => {
+    const valueField = (f: FormField) => (f as any)?.optionsValueField || 'id'
+    const isObjectArray = (arr: unknown): arr is Record<string, unknown>[] =>
+      Array.isArray(arr) && arr.length > 0 && typeof arr[0] === 'object' && arr[0] !== null
+    const isIdArray = (arr: unknown): arr is (number | string)[] =>
+      Array.isArray(arr) && arr.length > 0 && (typeof arr[0] === 'number' || typeof arr[0] === 'string')
+    let next: Record<string, OptionItemType[]> = {}
+    for (const field of fields) {
+      if ((field.type !== 'select' && field.type !== 'multiselect') || field.optionsSource !== 'api') continue
+      if (fieldsWithCustomRenderers.has(field.field)) continue
+      const initial = (initialData as any)?.[field.field]
+      if (!Array.isArray(initial) || initial.length === 0) continue
+      let seeded: OptionItemType[]
+      if (isObjectArray(initial) && initial.some((o: any) => o[valueField(field)] != null || o.id != null)) {
+        seeded = normalizeOptions(initial, field)
+      } else if (isIdArray(initial)) {
+        seeded = initial.map((id): OptionItemType => ({ value: id, label: String(id) }))
+      } else {
+        continue
+      }
+      if (seeded.length > 0) next[field.field] = seeded
+    }
+    if (Object.keys(next).length > 0) {
+      setDynamicOptions(prev => ({ ...prev, ...Object.fromEntries(Object.entries(next).map(([k, v]) => [k, [...(prev[k] || []), ...v]])) }))
+    }
+  }, [fields, initialData, fieldsWithCustomRenderers])
+
   // Load dynamic options for fields
   useEffect(() => {
     const loadOptions = async () => {
       for (const field of fields) {
         if ((field.type === 'select' || field.type === 'multiselect') && field.optionsSource) {
-          // Skip if custom renderer is provided for this field
-          if (fieldsWithCustomRenderers.has(field.field)) {
-            continue
-          }
-          
-          // For searchable fields, avoid fetching all data; only fetch when there is an initial value
+          if (fieldsWithCustomRenderers.has(field.field)) continue
           if (field.searchable) {
             const initialValue = (initialData as any)?.[field.field]
             if (initialValue !== undefined && initialValue !== null && initialValue !== '') {
@@ -151,7 +174,13 @@ export default function SchemaForm<T extends Record<string, any>>({
         }
         const rawOptions = await fetchOptionsFromApi(query)
         const options = normalizeOptions(rawOptions, field)
-        setDynamicOptions(prev => ({ ...prev, [field.field]: options }))
+        setDynamicOptions(prev => {
+          const existing = prev[field.field] || []
+          const byValue = new Map< string | number, OptionItemType>()
+          existing.forEach(o => byValue.set(o.value, o))
+          options.forEach(o => byValue.set(o.value, o))
+          return { ...prev, [field.field]: [...byValue.values()] }
+        })
       } catch (error: any) {
         // Don't log 404 errors as errors - they might be expected for optional fields
         if (error?.status === 404) {
@@ -215,6 +244,45 @@ export default function SchemaForm<T extends Record<string, any>>({
 
   function getByPath(obj: any, path: string) {
     return path.split('.').reduce((acc, key) => (acc && acc[key] !== undefined ? acc[key] : undefined), obj)
+  }
+
+  function getSelectedOptionValue(field: FormField, item: any) {
+    const valueField = (field as any)?.optionsValueField || 'id'
+    if (item === null || item === undefined) return null
+    if (typeof item !== 'object') return item
+    return item[valueField] ?? item.id ?? item.value ?? item.warehouse_id ?? getByPath(item, valueField)
+  }
+
+  function getSelectedOptionLabel(field: FormField, item: any, matched?: OptionItemType) {
+    if (matched?.label) return String(matched.label)
+    const labelField = (field as any)?.optionsLabelField || 'label'
+    if (item && typeof item === 'object') {
+      const raw =
+        item[labelField] ??
+        item.label ??
+        item.name ??
+        item.title ??
+        item.code ??
+        getByPath(item, labelField) ??
+        getByPath(item, 'warehouse.name')
+      if (raw !== undefined && raw !== null && raw !== '') return String(raw)
+    }
+    const value = getSelectedOptionValue(field, item)
+    return value === null || value === undefined ? '' : String(value)
+  }
+
+  function buildSelectedOptions(field: FormField, rawValue: any, options: OptionItemType[]) {
+    if (!Array.isArray(rawValue)) return []
+    return rawValue
+      .map(item => {
+        const selectedValue = getSelectedOptionValue(field, item)
+        if (selectedValue === null || selectedValue === undefined || selectedValue === '') return null
+        const matched = options.find(
+          opt => opt.value === selectedValue || String(opt.value) === String(selectedValue)
+        )
+        return matched || { value: selectedValue, label: getSelectedOptionLabel(field, item, matched) }
+      })
+      .filter((item): item is OptionItemType => item !== null)
   }
 
   useEffect(() => {
@@ -531,18 +599,21 @@ export default function SchemaForm<T extends Record<string, any>>({
         } else {
           selectOptions = field.options || []
         }
+        if (field.optionsAllowEmpty) {
+          selectOptions = [{ value: '', label: '—' }, ...selectOptions]
+        }
 
         const isLoading = optionsLoading[field.field]
 
         // Legacy support: allow multi-value select using `multiple: true`
         if (field.multiple) {
-          const selectedValues = Array.isArray(value) ? value : []
+          const selectedOptions = buildSelectedOptions(field, value, selectOptions)
           return (
             <FormControl fullWidth required={field.required} error={!!error}>
               <Autocomplete
                 multiple
                 options={selectOptions}
-                value={selectOptions.filter(opt => selectedValues.includes(opt.value))}
+                value={selectedOptions}
                 onChange={(_, newValue) => handleChange(field.field, newValue.map(opt => opt.value))}
                 loading={isLoading}
                 renderInput={(params) => (
@@ -591,6 +662,7 @@ export default function SchemaForm<T extends Record<string, any>>({
               loading={isLoading}
               value={selectedOption}
               onChange={(_, option) => handleChange(field.field, option?.value ?? '')}
+              disableClearable={field.required}
               onInputChange={(_, input, reason) => {
                 // Avoid firing search when value is set by selection or clear
                 if (reason !== 'input') return
@@ -658,14 +730,14 @@ export default function SchemaForm<T extends Record<string, any>>({
         }
 
         const multiIsLoading = optionsLoading[field.field]
-        const selectedValues = Array.isArray(value) ? value : []
+        const selectedOptions = buildSelectedOptions(field, value, multiSelectOptions)
 
         return (
           <FormControl fullWidth required={field.required} error={!!error}>
             <Autocomplete
               multiple
               options={multiSelectOptions}
-              value={multiSelectOptions.filter(opt => selectedValues.includes(opt.value))}
+              value={selectedOptions}
               onChange={(_, newValue) => handleChange(field.field, newValue.map(opt => opt.value))}
               loading={multiIsLoading}
               renderInput={(params) => (
@@ -928,7 +1000,7 @@ export default function SchemaForm<T extends Record<string, any>>({
           </Typography>
         )}
 
-        <form id={formId} onSubmit={handleSubmit}>
+        <form id={formId} onSubmit={handleSubmit} noValidate>
           {renderFields()}
 
           {!hideActions && (

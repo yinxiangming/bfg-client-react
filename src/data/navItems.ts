@@ -7,7 +7,8 @@ export const defaultNavItems: MenuNode[] = [
     label: 'Dashboard',
     i18nKey: 'nav.dashboard',
     href: '/account/',
-    icon: 'tabler-layout-dashboard'
+    icon: 'tabler-layout-dashboard',
+    activeMatch: 'exact'
   },
   {
     id: 'orders',
@@ -36,6 +37,13 @@ export const defaultNavItems: MenuNode[] = [
     i18nKey: 'nav.inbox',
     href: '/account/alerts',
     icon: 'tabler-mail'
+  },
+  {
+    id: 'support',
+    label: 'Customer Support',
+    i18nKey: 'nav.support',
+    href: '/account/support',
+    icon: 'tabler-headset'
   },
   {
     id: 'settings',

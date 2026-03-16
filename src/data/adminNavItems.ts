@@ -49,29 +49,54 @@ export const adminNavItems: MenuNode[] = [
         i18nKey: 'nav.storeStores',
         href: '/admin/store/stores',
         icon: 'tabler-building-warehouse'
+      },
+      {
+        id: 'store-reviews',
+        label: 'Reviews',
+        i18nKey: 'nav.storeReviews',
+        href: '/admin/store/reviews',
+        icon: 'tabler-star'
       }
     ]
   },
   {
     id: 'support',
-    label: 'Support',
-    i18nKey: 'nav.support',
+    label: 'Tickets',
+    i18nKey: 'nav.supportTicketsParent',
     icon: 'tabler-headset',
     type: 'submenu',
     children: [
       {
         id: 'support-tickets',
-        label: 'Tickets',
-        i18nKey: 'nav.supportTickets',
+        label: 'Unprocessed',
+        i18nKey: 'nav.supportTicketsUnprocessed',
         href: '/admin/support/tickets',
-        icon: 'tabler-ticket'
+        icon: 'tabler-ticket',
+        activeMatch: 'exact'
       },
       {
-        id: 'support-customers',
-        label: 'Customers',
-        i18nKey: 'nav.supportCustomers',
-        href: '/admin/support/customers',
-        icon: 'tabler-users'
+        id: 'support-tickets-my',
+        label: 'My Tickets',
+        i18nKey: 'nav.supportTicketsMy',
+        href: '/admin/support/tickets/my',
+        icon: 'tabler-user-check',
+        activeMatch: 'exact'
+      },
+      {
+        id: 'support-tickets-in-progress',
+        label: 'In Progress',
+        i18nKey: 'nav.supportTicketsInProgress',
+        href: '/admin/support/tickets/in-progress',
+        icon: 'tabler-clock-play',
+        activeMatch: 'exact'
+      },
+      {
+        id: 'support-tickets-closed',
+        label: 'Closed',
+        i18nKey: 'nav.supportTicketsClosed',
+        href: '/admin/support/tickets/closed',
+        icon: 'tabler-circle-check',
+        activeMatch: 'exact'
       }
     ]
   },
@@ -123,6 +148,13 @@ export const adminNavItems: MenuNode[] = [
         i18nKey: 'nav.settingsMarketing',
         href: '/admin/settings/marketing',
         icon: 'tabler-speakerphone'
+      },
+      {
+        id: 'settings-support',
+        label: 'Customer Support',
+        i18nKey: 'nav.settingsSupport',
+        href: '/admin/settings/support',
+        icon: 'tabler-headset'
       }
     ]
   }

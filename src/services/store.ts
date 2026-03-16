@@ -195,16 +195,24 @@ export async function getStore(id: number): Promise<Store> {
 }
 
 export async function createStore(data: StorePayload): Promise<Store> {
+  const { warehouses, ...rest } = data
   return apiFetch<Store>(bfgApi.stores(), {
     method: 'POST',
-    body: JSON.stringify(data)
+    body: JSON.stringify({
+      ...rest,
+      ...(Array.isArray(warehouses) ? { warehouse_ids: warehouses } : {})
+    })
   })
 }
 
 export async function updateStore(id: number, data: Partial<StorePayload>): Promise<Store> {
+  const { warehouses, ...rest } = data
   return apiFetch<Store>(`${bfgApi.stores()}${id}/`, {
     method: 'PATCH',
-    body: JSON.stringify(data)
+    body: JSON.stringify({
+      ...rest,
+      ...(Array.isArray(warehouses) ? { warehouse_ids: warehouses } : {})
+    })
   })
 }
 
@@ -290,6 +298,11 @@ export async function getWarehouses(): Promise<Warehouse[]> {
 }
 
 // Order types and API
+export interface OrderItemSummary {
+  product_name: string
+  quantity: number
+}
+
 export interface Order {
   id: number
   order_number: string
@@ -299,13 +312,34 @@ export interface Order {
   store_name?: string
   total: number
   item_count?: number
+  /** Brief item list for list view (product_name, quantity) */
+  items?: OrderItemSummary[]
+  customer_note?: string
+  /** Number of packages for logistics column */
+  packages_count?: number
   status: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled'
   payment_status: 'pending' | 'paid' | 'failed'
   created_at: string
 }
 
-export async function getOrders(): Promise<Order[]> {
-  const response = await apiFetch<Order[] | { results: Order[]; data?: Order[] }>(bfgApi.orders())
+export type OrderListParams = {
+  status?: string
+  payment_status?: string
+  store?: string
+  created_after?: string
+  created_before?: string
+}
+
+export async function getOrders(params?: OrderListParams): Promise<Order[]> {
+  let url = bfgApi.orders().replace(/\/+$/, '')
+  if (params && Object.keys(params).length > 0) {
+    const qs = new URLSearchParams()
+    Object.entries(params).forEach(([k, v]) => {
+      if (v != null && v !== '') qs.set(k, v)
+    })
+    if (qs.toString()) url += `?${qs.toString()}`
+  }
+  const response = await apiFetch<Order[] | { results: Order[]; data?: Order[] }>(url)
   if (Array.isArray(response)) {
     return response
   }
@@ -316,7 +350,19 @@ export async function getOrder(id: number): Promise<Order> {
   return apiFetch<Order>(`${bfgApi.orders()}${id}/`)
 }
 
-export async function createOrder(data: Partial<Order>): Promise<Order> {
+/** Payload for staff direct order creation (backend OrderCreateSerializer) */
+export interface CreateOrderPayload {
+  customer_id: number
+  store_id: number
+  shipping_address_id: number
+  billing_address_id?: number
+  status?: Order['status']
+  payment_status?: Order['payment_status']
+  customer_note?: string
+  admin_note?: string
+}
+
+export async function createOrder(data: CreateOrderPayload): Promise<Order> {
   return apiFetch<Order>(bfgApi.orders(), {
     method: 'POST',
     body: JSON.stringify(data)
@@ -330,8 +376,67 @@ export async function updateOrder(id: number, data: Partial<Order>): Promise<Ord
   })
 }
 
+/** Item payload for update_order_items (product + optional variant + quantity) */
+export interface OrderItemUpdatePayload {
+  product: number
+  variant?: number
+  quantity: number
+}
+
+export async function updateOrderItems(orderId: number, items: OrderItemUpdatePayload[]): Promise<Order> {
+  return apiFetch<Order>(`${bfgApi.orders()}${orderId}/update_items/`, {
+    method: 'POST',
+    body: JSON.stringify({ items })
+  })
+}
+
 export async function deleteOrder(id: number): Promise<void> {
   return apiFetch<void>(`${bfgApi.orders()}${id}/`, { method: 'DELETE' })
+}
+
+// Product reviews (admin)
+export interface ProductReview {
+  id: number
+  product: number
+  product_name?: string
+  customer: number
+  customer_name?: string
+  rating: number
+  title?: string
+  comment?: string
+  images?: string[]
+  is_verified_purchase?: boolean
+  is_approved?: boolean
+  helpful_count?: number
+  created_at: string
+  updated_at?: string
+}
+
+export interface GetReviewsParams {
+  product?: number | string
+  is_approved?: string
+}
+
+export async function getReviews(params?: GetReviewsParams): Promise<ProductReview[]> {
+  const q = new URLSearchParams()
+  if (params?.product != null) q.set('product', String(params.product))
+  if (params?.is_approved != null && params.is_approved !== '') q.set('is_approved', params.is_approved)
+  const url = q.toString() ? `${bfgApi.reviews().replace(/\/+$/, '')}?${q}` : bfgApi.reviews()
+  const response = await apiFetch<ProductReview[] | { results: ProductReview[]; data?: ProductReview[] }>(url)
+  if (Array.isArray(response)) return response
+  return response.results || response.data || []
+}
+
+export async function approveReview(id: number): Promise<ProductReview> {
+  return apiFetch<ProductReview>(`${bfgApi.reviews()}${id}/approve/`, { method: 'POST' })
+}
+
+export async function rejectReview(id: number): Promise<ProductReview> {
+  return apiFetch<ProductReview>(`${bfgApi.reviews()}${id}/reject/`, { method: 'POST' })
+}
+
+export async function deleteReview(id: number): Promise<void> {
+  return apiFetch<void>(`${bfgApi.reviews()}${id}/`, { method: 'DELETE' })
 }
 
 export interface DashboardStats {
@@ -477,6 +582,7 @@ export interface Product {
   is_active?: boolean
   is_featured?: boolean
   status?: 'active' | 'inactive'
+  condition?: string
   thumbnail?: string
   primary_image?: string | null
   category_names?: string[]
@@ -559,37 +665,64 @@ export async function deleteProduct(id: number): Promise<void> {
   return apiFetch<void>(`${bfgApi.products()}${id}/`, { method: 'DELETE' })
 }
 
+// Wishlist (admin)
+export interface WishlistEntry {
+  id: number
+  workspace: number
+  customer: number
+  customer_name: string
+  product: number
+  product_name: string
+  created_at: string
+}
+
+export async function getWishlists(params?: { customer?: number; product?: number }): Promise<WishlistEntry[]> {
+  const q = new URLSearchParams()
+  if (params?.customer != null) q.set('customer', String(params.customer))
+  if (params?.product != null) q.set('product', String(params.product))
+  const url = q.toString() ? `${bfgApi.wishlists().replace(/\/+$/, '')}?${q}` : bfgApi.wishlists()
+  const response = await apiFetch<WishlistEntry[] | { results: WishlistEntry[] }>(url)
+  return Array.isArray(response) ? response : (response.results || [])
+}
+
+export async function deleteWishlist(id: number): Promise<void> {
+  return apiFetch<void>(`${bfgApi.wishlists()}${id}/`, { method: 'DELETE' })
+}
+
 export async function getCategories(lang: string = 'en'): Promise<Category[]> {
-  // Use lang parameter instead of language (from admin)
   const url = `${bfgApi.products()}categories/?lang=${lang}`
   const response = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(url)
-  if (Array.isArray(response)) {
-    return response
+  let list: Category[] = Array.isArray(response) ? response : (response.results || response.data || [])
+  if (list.length === 0 && lang !== 'en') {
+    const enUrl = `${bfgApi.products()}categories/?lang=en`
+    const enResponse = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(enUrl)
+    list = Array.isArray(enResponse) ? enResponse : (enResponse.results || enResponse.data || [])
   }
-  return response.results || response.data || []
+  return list
 }
 
 export async function getCategoriesTree(lang: string = 'en'): Promise<Category[]> {
   try {
-    // Use tree=true parameter instead of /tree/ endpoint (from admin)
     const url = `${bfgApi.products()}categories/?lang=${lang}&tree=true`
     const response = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(url)
-    
-    if (Array.isArray(response)) {
-      return response
+    let categories: Category[] = Array.isArray(response) ? response : (response.results || response.data || [])
+    if (categories.length === 0 && lang !== 'en') {
+      const enUrl = `${bfgApi.products()}categories/?lang=en&tree=true`
+      const enResponse = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(enUrl)
+      categories = Array.isArray(enResponse) ? enResponse : (enResponse.results || enResponse.data || [])
     }
-    const categories = response.results || response.data || []
     return categories
   } catch (error: any) {
     console.error('[getCategoriesTree] Error:', error)
-    // Try fallback without tree parameter
     try {
       const fallbackUrl = `${bfgApi.products()}categories/?lang=${lang}`
       const fallbackResponse = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(fallbackUrl)
-      if (Array.isArray(fallbackResponse)) {
-        return fallbackResponse
+      let list = Array.isArray(fallbackResponse) ? fallbackResponse : (fallbackResponse.results || fallbackResponse.data || [])
+      if (list.length === 0 && lang !== 'en') {
+        const enFallback = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(`${bfgApi.products()}categories/?lang=en`)
+        list = Array.isArray(enFallback) ? enFallback : (enFallback.results || enFallback.data || [])
       }
-      return fallbackResponse.results || fallbackResponse.data || []
+      return list
     } catch (fallbackError) {
       console.error('[getCategoriesTree] Fallback also failed:', fallbackError)
       return []

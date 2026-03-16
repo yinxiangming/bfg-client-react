@@ -42,15 +42,13 @@ const TopMenuHeader = ({ navItems }: Props) => {
 
   // Check if a path matches the current path
   const isActive = useCallback(
-    (href?: string, exactMatch = true, activeUrl?: string) => {
+    (href?: string, activeUrl?: string, activeMatch?: 'exact' | 'prefix') => {
       if (!href) return false
-      if (exactMatch) {
-        return pathname === href
+      if (activeMatch === 'prefix') {
+        if (activeUrl && pathname?.includes(activeUrl)) return true
+        return pathname?.startsWith(href) ?? false
       }
-      if (activeUrl) {
-        return pathname?.includes(activeUrl)
-      }
-      return pathname?.startsWith(href)
+      return pathname === href
     },
     [pathname]
   )
@@ -148,7 +146,7 @@ const TopMenuHeader = ({ navItems }: Props) => {
           (hoveredMenu && hoveredMenu.startsWith(submenuKey))
       )
       const hasActiveChild = item.children?.some(child =>
-        isMenuItem(child) && isActive(child.href, child.exactMatch, child.activeUrl)
+        isMenuItem(child) && isActive(child.href, child.activeUrl, child.activeMatch)
       )
       const position = submenuPositions[submenuKey] || 'right'
       const isNested = !!parentKey
@@ -195,7 +193,7 @@ const TopMenuHeader = ({ navItems }: Props) => {
     }
 
     if (isMenuItem(item)) {
-      const active = isActive(item.href, item.exactMatch, item.activeUrl)
+      const active = isActive(item.href, item.activeUrl, item.activeMatch)
 
       return (
         <Link

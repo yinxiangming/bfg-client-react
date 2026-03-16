@@ -53,7 +53,7 @@ const Logo = ({ color, href = '/', skipLink = false, name, logoSrc }: LogoProps)
   )
 
   return (
-    <div className='flex items-center sidebar-logo-wrapper' style={{ gap: '1.25rem' }}>
+    <div className='flex items-center sidebar-logo-wrapper' style={{ gap: '0.25rem' }}>
       {skipLink ? (
         content
       ) : (

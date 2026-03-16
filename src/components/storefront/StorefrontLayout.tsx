@@ -1,6 +1,7 @@
 'use client'
 
 // React Imports
+import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 
 // Component Imports
@@ -8,6 +9,7 @@ import StoreHeader from './themes/store/Header'
 import StoreFooter from './themes/store/Footer'
 import SiteAnnouncementBanner from './SiteAnnouncementBanner'
 import { StorefrontConfigProvider } from '@/contexts/StorefrontConfigContext'
+import { useTheme } from '@/contexts/ThemeContext'
 import { ChildrenType } from '@/types/core'
 import { SystemMode } from '@/types/core'
 
@@ -17,6 +19,13 @@ type StorefrontLayoutProps = ChildrenType & {
 
 /** Inner layout shell (header + main + footer). Used by theme registry when provider is already above. */
 export function StorefrontLayoutInner({ children, mode = 'light' }: StorefrontLayoutProps) {
+  const { forceMode } = useTheme()
+
+  useEffect(() => {
+    forceMode('light')
+    return () => forceMode(null)
+  }, [forceMode])
+
   const pathname = usePathname()
   const isAccountPage = pathname?.startsWith('/account') || false
   const isAdminPage = pathname?.startsWith('/admin') || false

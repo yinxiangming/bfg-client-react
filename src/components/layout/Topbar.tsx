@@ -7,6 +7,7 @@ import { useState, useRef, useEffect } from 'react'
 import Icon from '@components/Icon'
 import ThemeSwitcher from '@components/theme/ThemeSwitcher'
 import UserDropdown from '../ui/UserDropdown'
+import CurrentUserDisplay from '../ui/CurrentUserDisplay'
 import LanguageSwitcher from '@/components/i18n/LanguageSwitcher'
 
 // Hook Imports
@@ -92,6 +93,7 @@ const Topbar = ({ avatarInitial = 'N', onMenuToggle, showMenuToggle }: Props) =>
         </div>
       </div>
       <div className='admin-topbar-right'>
+        <CurrentUserDisplay />
         <UserDropdown avatarInitial={avatarInitial} />
       </div>
     </header>

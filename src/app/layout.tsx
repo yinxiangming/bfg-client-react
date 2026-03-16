@@ -1,9 +1,6 @@
 // Next
 import { headers } from 'next/headers'
 
-// MUI Imports
-import InitColorSchemeScript from '@mui/material/InitColorSchemeScript'
-
 // i18n Imports
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
@@ -58,12 +55,12 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   )
 
   return (
-    <html id='__next' lang={locale} dir={direction} suppressHydrationWarning>
+    <html id='__next' lang={locale} dir={direction} data-light='' suppressHydrationWarning>
       <head>
         <script src='https://code.iconify.design/3/3.1.1/iconify.min.js' async></script>
       </head>
-      <body className='flex is-full min-bs-full flex-auto flex-col' data-mode={defaultSystemMode}>
-        <InitColorSchemeScript attribute='data' defaultMode={defaultSystemMode} />
+      <body className='flex is-full min-bs-full flex-auto flex-col' data-mode={defaultSystemMode} data-light=''>
+
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider initialMode={initialMode}>
             <AppDialogProvider>

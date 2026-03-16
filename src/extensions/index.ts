@@ -31,18 +31,12 @@ async function loadExtensionsImpl(pluginIds?: string[]): Promise<Extension[]> {
       if (ext.enabled === false) continue
       if (typeof ext.enabled === 'function' && !ext.enabled()) continue
       extensions.push(ext)
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[Extensions] Loaded plugin: ${ext.id}`)
-      }
     } catch (e) {
       console.warn(`[Extensions] Plugin "${pluginId}" failed to load:`, e)
     }
   }
 
   const sorted = extensions.sort((a, b) => (b.priority ?? 100) - (a.priority ?? 100))
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[Extensions] Loaded ${sorted.length} extension(s)`)
-  }
   return sorted
 }
 
