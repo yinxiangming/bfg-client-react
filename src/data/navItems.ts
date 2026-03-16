@@ -38,6 +38,13 @@ export const defaultNavItems: MenuNode[] = [
     icon: 'tabler-mail'
   },
   {
+    id: 'support',
+    label: 'Customer Support',
+    i18nKey: 'nav.support',
+    href: '/account/support',
+    icon: 'tabler-headset'
+  },
+  {
     id: 'settings',
     label: 'Settings',
     i18nKey: 'nav.settings',

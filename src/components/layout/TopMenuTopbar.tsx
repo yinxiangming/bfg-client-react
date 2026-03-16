@@ -11,6 +11,7 @@ import Logo from '@components/Logo'
 import ThemeSwitcher from '@components/theme/ThemeSwitcher'
 import Icon from '@components/Icon'
 import UserDropdown from '../ui/UserDropdown'
+import CurrentUserDisplay from '../ui/CurrentUserDisplay'
 import LanguageSwitcher from '@/components/i18n/LanguageSwitcher'
 import { getWorkspaceSettings } from '@/services/settings'
 import { useStorefrontConfig } from '@/contexts/StorefrontConfigContext'
@@ -58,6 +59,7 @@ const TopMenuTopbar = ({ avatarInitial = 'N' }: Props) => {
         <Logo name={displayName} logoSrc={workspaceLogoSrc} />
       </div>
       <div className='topmenu-topbar-right'>
+        <CurrentUserDisplay />
         <button
           type='button'
           className='topmenu-layout-btn'

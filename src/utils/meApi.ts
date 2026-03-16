@@ -538,6 +538,35 @@ class MeApiClient {
     })
   }
 
+  // Support tickets (my tickets)
+  async getSupportOptions(): Promise<{
+    ticket_statuses: { value: string; label: string }[]
+    ticket_priorities: { value: number; label: string; level?: number; color?: string }[]
+    ticket_categories: { value: number; label: string; order?: number }[]
+  }> {
+    return this.request<any>('/api/v1/me/support-options/')
+  }
+
+  async getTickets(params?: { status?: string; page?: number; page_size?: number }): Promise<ApiResponse<any>> {
+    const queryParams = new URLSearchParams()
+    if (params?.status) queryParams.append('status', params.status)
+    if (params?.page != null) queryParams.append('page', String(params.page))
+    if (params?.page_size != null) queryParams.append('page_size', String(params.page_size))
+    const query = queryParams.toString()
+    return this.request<ApiResponse<any>>(`/api/v1/me/tickets/${query ? `?${query}` : ''}`)
+  }
+
+  async getTicket(id: number): Promise<any> {
+    return this.request<any>(`/api/v1/me/tickets/${id}/`)
+  }
+
+  async createTicket(data: { subject: string; description: string; category?: number; priority?: number }): Promise<any> {
+    return this.request<any>('/api/v1/me/tickets/', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  }
+
   // Payment Gateways (use storefront API)
   async getPaymentGateways(): Promise<any[]> {
     return this.request<any[]>('/api/v1/store/payments/gateways/')

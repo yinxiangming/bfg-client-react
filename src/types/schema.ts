@@ -98,6 +98,8 @@ export interface FormField {
   displayTemplate?: string // Template for displaying selected value (e.g. "{{user.first_name}} {{user.last_name}} ({{email}})")
   searchable?: boolean // For select: enable server-side search
   searchParam?: string // Query param name for search (default: 'q')
+  /** Prepend an empty option so user can clear selection (e.g. assignee = none) */
+  optionsAllowEmpty?: boolean
   format?: string // Format option for date/datetime fields (e.g., 'date', 'datetime', 'time', 'relative')
   validation?: {
     min?: number

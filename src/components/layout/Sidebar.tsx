@@ -22,10 +22,11 @@ import { useStorefrontConfig } from '@/contexts/StorefrontConfigContext'
 
 const normalizePath = (path?: string | null) => {
   if (!path) return path
-
-  // Strip optional locale prefix such as /en or /zh-CN to keep matching stable
-  // Only match short locale codes (2-5 chars with optional region like zh-CN)
-  return path.replace(/^\/[a-z]{2}(-[A-Z]{2})?(?=\/|$)/, '') || '/'
+  // Strip optional locale prefix (e.g. /en, /zh-CN)
+  let p = path.replace(/^\/[a-z]{2}(-[A-Z]{2})?(?=\/|$)/, '') || '/'
+  // Strip trailing slash so /admin/support/tickets and /admin/support/tickets/ match equally
+  if (p.length > 1 && p.endsWith('/')) p = p.slice(0, -1)
+  return p
 }
 
 type Props = {
@@ -90,36 +91,21 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
 
   // Check if a path matches the current path
   const isActive = useCallback(
-    (href?: string, exactMatch = true, activeUrl?: string) => {
+    (href?: string, activeUrl?: string, activeMatch?: 'exact' | 'prefix') => {
       if (!href) return false
 
       const pathToCheck = normalizedPath || currentPath
       const hrefToCheck = normalizePath(href)
       const activeUrlToCheck = activeUrl ? normalizePath(activeUrl) : undefined
 
-      // Priority 1: Check activeUrl if provided
       if (activeUrlToCheck) {
         return Boolean(pathToCheck && pathToCheck.includes(activeUrlToCheck))
       }
-
-      // Priority 2: Check exact match (default behavior)
-      if (exactMatch !== false) {
-        // First try exact match
-        if (pathToCheck === hrefToCheck) {
-          return true
-        }
-        // If no exact match, try prefix match (current path starts with href)
-        // Ensure href is followed by '/' to avoid partial matches
-        // e.g., /admin/store/products should match /admin/store/products/83/edit
-        // but /admin/store/product should NOT match /admin/store/products
-        if (pathToCheck && hrefToCheck) {
-          return pathToCheck.startsWith(hrefToCheck + '/')
-        }
-        return false
+      if (activeMatch === 'exact') {
+        return pathToCheck === hrefToCheck
       }
-
-      // Priority 3: Check prefix match when exactMatch is false
-      return Boolean(pathToCheck && hrefToCheck && pathToCheck.startsWith(hrefToCheck))
+      // prefix (default): exact or subpath (href + /)
+      return pathToCheck === hrefToCheck || Boolean(pathToCheck && hrefToCheck && pathToCheck.startsWith(hrefToCheck + '/'))
     },
     [currentPath, normalizedPath]
   )
@@ -129,7 +115,7 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
     (children: MenuNode[]): boolean => {
       return children.some(child => {
         if (isMenuItem(child) && child.href) {
-          return isActive(child.href, child.exactMatch, child.activeUrl)
+          return isActive(child.href, child.activeUrl, child.activeMatch)
         }
         if (isMenuSubMenu(child)) {
           return hasActiveChild(child.children)
@@ -235,7 +221,7 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
     }
 
     if (isMenuItem(item)) {
-      const active = item.href ? isActive(item.href, item.exactMatch, item.activeUrl) : false
+      const active = item.href ? isActive(item.href, item.activeUrl, item.activeMatch) : false
 
       return (
         <li key={item.id} className={`menu-item level-${level}`}>

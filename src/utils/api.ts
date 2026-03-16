@@ -122,8 +122,14 @@ export const bfgApi = {
   trackingEvents: () => buildApiUrl('/tracking-events/', API_VERSIONS.BFG2),
 
   // Support
-  tickets: () => buildApiUrl('/tickets/', API_VERSIONS.BFG2),
-  ticket: (id: string | number) => buildApiUrl(`/tickets/${id}/`, API_VERSIONS.BFG2),
+  tickets: () => buildApiUrl('/support/tickets/', API_VERSIONS.BFG2),
+  ticket: (id: string | number) => buildApiUrl(`/support/tickets/${id}/`, API_VERSIONS.BFG2),
+  ticketMessages: (id: string | number) => buildApiUrl(`/support/tickets/${id}/messages/`, API_VERSIONS.BFG2),
+  supportOptions: () => buildApiUrl('/support/options/', API_VERSIONS.BFG2),
+  ticketCategories: () => buildApiUrl('/support/ticket-categories/', API_VERSIONS.BFG2),
+  ticketCategory: (id: string | number) => buildApiUrl(`/support/ticket-categories/${id}/`, API_VERSIONS.BFG2),
+  ticketPriorities: () => buildApiUrl('/support/ticket-priorities/', API_VERSIONS.BFG2),
+  ticketPriority: (id: string | number) => buildApiUrl(`/support/ticket-priorities/${id}/`, API_VERSIONS.BFG2),
 
   // Finance
   invoices: () => buildApiUrl('/invoices/', API_VERSIONS.BFG2),

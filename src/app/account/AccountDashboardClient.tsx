@@ -63,6 +63,12 @@ const menuItemsConfig: AccountMenuItem[] = [
     href: '/account/alerts'
   },
   {
+    titleKey: 'support.title',
+    descriptionKey: 'support.description',
+    icon: 'tabler-headset',
+    href: '/account/support'
+  },
+  {
     titleKey: 'settings.title',
     descriptionKey: 'settings.description',
     icon: 'tabler-settings',

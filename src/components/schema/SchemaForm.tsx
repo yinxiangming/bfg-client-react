@@ -599,6 +599,9 @@ export default function SchemaForm<T extends Record<string, any>>({
         } else {
           selectOptions = field.options || []
         }
+        if (field.optionsAllowEmpty) {
+          selectOptions = [{ value: '', label: '—' }, ...selectOptions]
+        }
 
         const isLoading = optionsLoading[field.field]
 
@@ -659,6 +662,7 @@ export default function SchemaForm<T extends Record<string, any>>({
               loading={isLoading}
               value={selectedOption}
               onChange={(_, option) => handleChange(field.field, option?.value ?? '')}
+              disableClearable={field.required}
               onInputChange={(_, input, reason) => {
                 // Avoid firing search when value is set by selection or clear
                 if (reason !== 'input') return

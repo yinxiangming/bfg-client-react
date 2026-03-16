@@ -49,6 +49,7 @@ export type WorkspaceSettings = {
   site_name?: string
   site_description?: string
   logo?: string
+  support_email?: string
   custom_settings?: {
     invoice?: InvoiceSettingsPayload
     delivery?: DeliverySettingsPayload
@@ -82,6 +83,10 @@ export type MarketingSettingsPayload = {
   utm_source?: string
   utm_medium?: string
   utm_campaign?: string
+}
+
+export type SupportSettingsPayload = {
+  support_email?: string
 }
 
 export type WebSettingsPayload = {
@@ -194,6 +199,13 @@ export async function updateMarketingSettings(settingsId: number, marketing: Mar
   return apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`, {
     method: 'PATCH',
     body: JSON.stringify({ custom_settings: nextCustom })
+  })
+}
+
+export async function updateSupportSettings(settingsId: number, payload: SupportSettingsPayload) {
+  return apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`, {
+    method: 'PATCH',
+    body: JSON.stringify(payload)
   })
 }
 

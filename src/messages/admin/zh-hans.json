@@ -14,7 +14,12 @@
     "freightConsignments": "运单",
     "freightWarehouses": "仓库",
     "support": "支持",
+    "supportTicketsParent": "工单",
+    "supportTicketsUnprocessed": "未处理",
     "supportTickets": "工单",
+    "supportTicketsMy": "我的工单",
+    "supportTicketsInProgress": "进行中",
+    "supportTicketsClosed": "已结束",
     "supportCustomers": "客户",
     "settings": "设置",
     "settingsGeneral": "通用",
@@ -23,6 +28,7 @@
     "settingsFinance": "财务",
     "settingsDelivery": "配送",
     "settingsMarketing": "营销",
+    "settingsSupport": "客户支持",
     "resale": "代售",
     "resaleIntake": "代收",
     "resaleSettings": "设置",
@@ -1028,6 +1034,92 @@
       "snackbar": {
         "saved": "门店保存成功！",
         "saveFailed": "保存门店失败"
+      }
+    }
+  },
+  "support": {
+    "tickets": {
+      "page": {
+        "title": "工单",
+        "titleUnprocessed": "未处理",
+        "titleMy": "我的工单",
+        "titleInProgress": "进行中",
+        "titleClosed": "已结束"
+      },
+      "tabs": {
+        "basic": "基本信息",
+        "replies": "回复历史",
+        "assignments": "指派历史"
+      },
+      "assignments": {
+        "title": "指派历史",
+        "noRecords": "暂无指派记录",
+        "by": "操作人"
+      },
+      "schema": {
+        "columns": {
+          "ticketNumber": "工单号",
+          "subject": "主题",
+          "customer": "客户",
+          "priority": "优先级",
+          "status": "状态",
+          "assignedTo": "指派给",
+          "createdAt": "创建时间"
+        },
+        "filters": {
+          "status": "状态",
+          "priority": "优先级"
+        },
+        "actions": {
+          "add": "新建工单",
+          "edit": "编辑",
+          "delete": "删除",
+          "confirmDelete": "确认删除该工单？"
+        }
+      },
+      "form": {
+        "title": "工单详情",
+        "fields": {
+          "ticketNumber": "工单号",
+          "subject": "主题",
+          "description": "描述",
+          "customer": "客户",
+          "category": "分类",
+          "priority": "优先级",
+          "status": "状态",
+          "assignedTo": "指派给",
+          "channel": "渠道",
+          "channelEmail": "邮件",
+          "channelWeb": "网页",
+          "channelPhone": "电话",
+          "channelChat": "在线客服",
+          "channelSocial": "社交媒体",
+          "createdAt": "创建时间",
+          "updatedAt": "更新时间"
+        },
+        "actions": {
+          "save": "保存",
+          "cancel": "取消"
+        }
+      },
+      "errors": {
+        "deleteFailed": "删除失败：{error}",
+        "loadFailed": "加载失败",
+        "saveFailed": "保存失败：{error}",
+        "replyFailed": "回复失败：{error}"
+      },
+      "conversation": {
+        "title": "沟通记录",
+        "noMessages": "暂无回复记录",
+        "staff": "客服",
+        "customer": "客户",
+        "internal": "内部备注",
+        "addReply": "添加回复",
+        "replyPlaceholder": "输入回复内容…",
+        "submit": "发送回复",
+        "submitting": "发送中…",
+        "loadMore": "加载更多",
+        "loadingMore": "加载中…"
       }
     }
   },
@@ -2890,6 +2982,107 @@
             "minimumPurchase": "最低消费",
             "active": "启用"
           }
+        }
+      }
+    },
+    "support": {
+      "page": {
+        "title": "客户支持",
+        "subtitle": "管理工单分类、优先级与客户支持相关设置",
+        "tabs": {
+          "settings": "设置",
+          "categories": "工单分类",
+          "priorities": "优先级"
+        }
+      },
+      "settingsTab": {
+        "title": "客户支持设置",
+        "description": "在此配置客户支持相关全局选项（如支持邮箱、工单开关等）。",
+        "fields": {
+          "supportEmail": "支持邮箱",
+          "supportEmailHelp": "用于工单回复及前台展示的联系邮箱。"
+        },
+        "placeholders": {
+          "supportEmail": "support@example.com"
+        },
+        "actions": {
+          "save": "保存"
+        },
+        "errors": {
+          "noWorkspaceSettings": "未找到工作区设置。",
+          "saveFailed": "保存失败：{error}"
+        },
+        "snackbar": {
+          "saved": "客户支持设置已保存"
+        }
+      },
+      "categoriesTab": {
+        "description": "管理工单分类，便于对工单进行分类与筛选。",
+        "schemaTitle": "工单分类",
+        "columns": {
+          "name": "名称",
+          "description": "描述",
+          "order": "排序",
+          "status": "状态"
+        },
+        "actions": {
+          "add": "新增分类",
+          "edit": "编辑",
+          "delete": "删除",
+          "confirmDelete": "确认删除该分类？"
+        },
+        "form": {
+          "title": "工单分类",
+          "fields": {
+            "name": "名称",
+            "description": "描述",
+            "order": "排序",
+            "active": "启用"
+          },
+          "actions": {
+            "save": "保存"
+          }
+        },
+        "errors": {
+          "deleteFailed": "删除失败：{error}",
+          "saveFailed": "保存失败：{error}"
+        }
+      },
+      "prioritiesTab": {
+        "description": "管理工单优先级与 SLA 响应时间。",
+        "schemaTitle": "优先级",
+        "columns": {
+          "name": "名称",
+          "level": "级别",
+          "color": "颜色",
+          "responseTime": "响应时间（小时）",
+          "resolutionTime": "解决时间（小时）",
+          "status": "状态"
+        },
+        "actions": {
+          "add": "新增优先级",
+          "edit": "编辑",
+          "delete": "删除",
+          "confirmDelete": "确认删除该优先级？"
+        },
+        "form": {
+          "title": "优先级",
+          "fields": {
+            "name": "名称",
+            "level": "级别",
+            "levelHelp": "1=低，5=紧急",
+            "color": "颜色",
+            "responseTime": "响应时间（小时）",
+            "resolutionTime": "解决时间（小时）",
+            "active": "启用"
+          },
+          "actions": {
+            "save": "保存"
+          }
+        },
+        "errors": {
+          "deleteFailed": "删除失败：{error}",
+          "saveFailed": "保存失败：{error}"
         }
       }
     },
