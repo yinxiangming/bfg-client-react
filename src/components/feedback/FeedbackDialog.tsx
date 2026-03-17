@@ -117,12 +117,14 @@ export default function FeedbackDialog({ open, onClose, source, onSuccess }: Pro
       <div
         role="dialog"
         aria-labelledby="feedback-dialog-title"
+        className="feedback-dialog-panel"
         style={{
           position: 'fixed',
           left: '50%',
           top: '50%',
           transform: 'translate(-50%, -50%)',
-          background: 'var(--background, #fff)',
+          background: 'var(--feedback-dialog-bg, #fff)',
+          color: 'var(--feedback-dialog-fg, #1a1a1a)',
           borderRadius: '12px',
           boxShadow: '0 12px 40px rgba(0,0,0,0.15)',
           minWidth: '360px',
@@ -142,9 +144,6 @@ export default function FeedbackDialog({ open, onClose, source, onSuccess }: Pro
           </h2>
           <form onSubmit={handleSubmit}>
             <div style={{ marginBottom: '1rem' }}>
-              <span style={{ fontSize: '0.875rem', fontWeight: 500, display: 'block', marginBottom: '0.5rem' }}>
-                Type
-              </span>
               <div style={{ display: 'flex', gap: '1rem' }}>
                 <label style={{ display: 'flex', alignItems: 'center', gap: '0.35rem', cursor: 'pointer' }}>
                   <input
@@ -176,11 +175,13 @@ export default function FeedbackDialog({ open, onClose, source, onSuccess }: Pro
                 style={{
                   width: '100%',
                   padding: '0.75rem',
-                  border: '1px solid var(--border, #e0e0e0)',
+                  border: '1px solid var(--feedback-dialog-border, #e0e0e0)',
                   borderRadius: '8px',
                   fontSize: '0.875rem',
                   resize: 'vertical',
                   boxSizing: 'border-box',
+                  background: 'var(--feedback-dialog-input-bg, #fff)',
+                  color: 'inherit',
                 }}
               />
             </div>
@@ -189,7 +190,7 @@ export default function FeedbackDialog({ open, onClose, source, onSuccess }: Pro
                 <img
                   src={imageBase64}
                   alt="Pasted"
-                  style={{ maxWidth: '200px', maxHeight: '120px', objectFit: 'contain', borderRadius: '8px', border: '1px solid var(--border, #e0e0e0)' }}
+                  style={{ maxWidth: '200px', maxHeight: '120px', objectFit: 'contain', borderRadius: '8px', border: '1px solid var(--feedback-dialog-border, #e0e0e0)' }}
                 />
                 <button
                   type="button"
@@ -214,16 +215,16 @@ export default function FeedbackDialog({ open, onClose, source, onSuccess }: Pro
                 </button>
               </div>
             )}
-            <p style={{ margin: '0 0 1rem', fontSize: '0.75rem', color: 'var(--muted, #666)' }}>
+            <p style={{ margin: '0 0 1rem', fontSize: '0.75rem', color: 'var(--feedback-dialog-muted, #666)' }}>
               {t('feedback.pasteHint')}
             </p>
             {errorMessage && (
-              <p style={{ margin: '0 0 0.75rem', fontSize: '0.875rem', color: 'var(--error, #c00)' }}>
+              <p style={{ margin: '0 0 0.75rem', fontSize: '0.875rem', color: 'var(--feedback-dialog-error, #c00)' }}>
                 {errorMessage}
               </p>
             )}
             {status === 'success' && (
-              <p style={{ margin: '0 0 0.75rem', fontSize: '0.875rem', color: 'var(--success, #0a0)' }}>
+              <p style={{ margin: '0 0 0.75rem', fontSize: '0.875rem', color: 'var(--feedback-dialog-success, #0a0)' }}>
                 {t('feedback.success')}
               </p>
             )}
@@ -234,9 +235,10 @@ export default function FeedbackDialog({ open, onClose, source, onSuccess }: Pro
                 disabled={status === 'submitting'}
                 style={{
                   padding: '0.5rem 1rem',
-                  border: '1px solid var(--border, #e0e0e0)',
+                  border: '1px solid var(--feedback-dialog-border, #e0e0e0)',
                   borderRadius: '8px',
                   background: 'transparent',
+                  color: 'inherit',
                   cursor: status === 'submitting' ? 'not-allowed' : 'pointer',
                   fontSize: '0.875rem',
                 }}

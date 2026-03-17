@@ -1382,6 +1382,17 @@ body {
   color: #e0e0e0 !important;
 }
 
+/* Feedback dialog: readable in dark mode */
+[data-mode='dark'] {
+  --feedback-dialog-bg: #252525;
+  --feedback-dialog-fg: #e0e0e0;
+  --feedback-dialog-border: #444;
+  --feedback-dialog-input-bg: #1a1a1a;
+  --feedback-dialog-muted: #9e9e9e;
+  --feedback-dialog-error: #f87171;
+  --feedback-dialog-success: #4ade80;
+}
+
 /* Override dark mode rules for light mode - ensure text is dark */
 [data-mode='light'] .sf-header-top,
 :not([data-mode='dark']) .sf-header-top {
