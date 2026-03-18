@@ -14,6 +14,7 @@ import Logo from '@components/Logo'
 import CustomTextField from '@components/ui/TextField'
 import Icon from '@components/Icon'
 import { authApi } from '@/utils/authApi'
+import { getApiBaseUrl } from '@/utils/api'
 import { useStorefrontConfigSafe } from '@/contexts/StorefrontConfigContext'
 
 export default function AuthLoginClient() {
@@ -28,6 +29,15 @@ export default function AuthLoginClient() {
   const searchParams = useSearchParams()
   const storefrontConfig = useStorefrontConfigSafe()
   const siteName = storefrontConfig.site_name?.trim() || 'BFG'
+
+  const redirect = searchParams.get('redirect') ? decodeURIComponent(searchParams.get('redirect')!) : '/account'
+  const host = typeof window !== 'undefined' ? window.location.host : ''
+
+  const socialLogin = (provider: string) => {
+    const apiBase = getApiBaseUrl().replace(/\/+$/, '')
+    const params = new URLSearchParams({ redirect, host })
+    window.location.href = `${apiBase}/api/v1/auth/${provider}/login/?${params}`
+  }
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -128,17 +138,29 @@ export default function AuthLoginClient() {
           </div>
 
           <div className='auth-social'>
-            <IconButton className='text-facebook' size='small'>
+            <IconButton
+              className='text-error'
+              size='small'
+              onClick={() => socialLogin('google')}
+              aria-label='Google'
+            >
+              <i className='tabler-brand-google-filled' />
+            </IconButton>
+            <IconButton
+              className='text-facebook'
+              size='small'
+              onClick={() => socialLogin('facebook')}
+              aria-label='Facebook'
+            >
               <i className='tabler-brand-facebook-filled' />
             </IconButton>
-            <IconButton className='text-twitter' size='small'>
-              <i className='tabler-brand-twitter-filled' />
-            </IconButton>
-            <IconButton className='text-textPrimary' size='small'>
-              <i className='tabler-brand-github-filled' />
-            </IconButton>
-            <IconButton className='text-error' size='small'>
-              <i className='tabler-brand-google-filled' />
+            <IconButton
+              className='text-textPrimary'
+              size='small'
+              onClick={() => socialLogin('apple')}
+              aria-label='Apple'
+            >
+              <i className='tabler-brand-apple-filled' />
             </IconButton>
           </div>
         </form>
