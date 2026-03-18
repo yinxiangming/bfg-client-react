@@ -56,7 +56,7 @@ export function buildTicketsSchema(t: SupportTranslation, supportOptions: Suppor
         optionsValueField: 'id',
         optionsLabelField: 'name',
         searchable: true,
-        searchParam: 'q'
+        searchParam: 'search'
       },
       {
         field: 'category',

@@ -10,6 +10,7 @@ import UserDropdown from '../ui/UserDropdown'
 import CurrentUserDisplay from '../ui/CurrentUserDisplay'
 import LanguageSwitcher from '@/components/i18n/LanguageSwitcher'
 import FeedbackButton from '@/components/feedback/FeedbackButton'
+import AgentDialog from '@/views/admin/agent/AgentDialog'
 
 // Hook Imports
 import { useAppLayout } from '@/hooks/useLayoutSettings'
@@ -23,6 +24,7 @@ type Props = {
 const Topbar = ({ avatarInitial = 'N', onMenuToggle, showMenuToggle }: Props) => {
   const { config, updateConfig } = useAppLayout()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [agentDialogOpen, setAgentDialogOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
 
   // Close menu when clicking outside
@@ -60,6 +62,14 @@ const Topbar = ({ avatarInitial = 'N', onMenuToggle, showMenuToggle }: Props) =>
         <ThemeSwitcher />
         <LanguageSwitcher />
         <FeedbackButton variant='button' />
+        <button
+          type='button'
+          className='admin-topbar-btn'
+          onClick={() => setAgentDialogOpen(true)}
+          aria-label='AI Assistant'
+        >
+          <Icon icon='tabler-robot' />          
+        </button>
         <div className='admin-topbar-layout-switcher' ref={menuRef}>
           <button
             type='button'
@@ -98,6 +108,7 @@ const Topbar = ({ avatarInitial = 'N', onMenuToggle, showMenuToggle }: Props) =>
         <CurrentUserDisplay />
         <UserDropdown avatarInitial={avatarInitial} />
       </div>
+      <AgentDialog open={agentDialogOpen} onClose={() => setAgentDialogOpen(false)} />
     </header>
   )
 }
