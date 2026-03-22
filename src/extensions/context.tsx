@@ -1,7 +1,7 @@
 'use client'
 
 import { createContext, useContext, useMemo, useEffect, useState, ReactNode } from 'react'
-import { loadExtensions } from '@/extensions'
+import { loadPluginExtensions } from './loadExtensionsCore'
 import type { Extension, PageSlotExtension, DataHookExtension } from './registry'
 
 interface ExtensionContextValue {
@@ -32,7 +32,7 @@ export function ExtensionLoaderProvider({
       setExtensions([])
       return
     }
-    loadExtensions(extensionIds)
+    loadPluginExtensions(extensionIds)
       .then(setExtensions)
       .catch((err) => console.error('[ExtensionLoaderProvider] Failed to load extensions:', err))
   }, [extensionIds.join(',')])
