@@ -61,11 +61,13 @@ export default function FeedbackDialog({ open, onClose, source, onSuccess }: Pro
     setStatus('submitting')
     setErrorMessage('')
     try {
-      const headers = getApiHeaders({ 'Content-Type': 'application/json' })
+      const headers = getApiHeaders({ 'Content-Type': 'application/json' }, { withAuth: true })
+      const pageUrl = typeof window !== 'undefined' ? window.location.href : ''
       const body: Record<string, string> = {
         type,
         content: text,
         source,
+        page_url: pageUrl,
       }
       if (imageBase64) body.image_base64 = imageBase64
       const res = await fetch(bfgApi.feedback(), {

@@ -200,6 +200,8 @@ export function getWorkspaceId(): string | null {
 export type GetApiHeadersOptions = {
   /** When set (e.g. request host for auth/storefront), backend can resolve workspace by domain. */
   requestHost?: string
+  /** Attach Bearer token from storage when present (browser only). */
+  withAuth?: boolean
 }
 
 /**
@@ -219,6 +221,12 @@ export function getApiHeaders(
   }
   if (options?.requestHost) {
     headers['X-Forwarded-Host'] = options.requestHost
+  }
+  if (options?.withAuth) {
+    const token = getAuthToken()
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
   }
   if (overrides) {
     Object.assign(headers, overrides)
