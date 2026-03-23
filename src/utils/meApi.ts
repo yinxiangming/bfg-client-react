@@ -17,6 +17,30 @@ interface ApiResponse<T> {
   error?: string
 }
 
+/** Maps browser fetch network failures to Error('NETWORK_ERROR') for consistent UI handling. */
+async function fetchWithNetworkHandling(url: string, init: RequestInit): Promise<Response> {
+  try {
+    return await fetch(url, init)
+  } catch (err: unknown) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw err
+    }
+    const msg = err instanceof Error ? err.message : String(err)
+    const looksNetwork =
+      msg === 'Failed to fetch' ||
+      msg.includes('NetworkError') ||
+      msg.includes('Load failed') ||
+      (err instanceof Error && err.name === 'TypeError')
+    if (looksNetwork) {
+      const error = new Error('NETWORK_ERROR')
+      ;(error as any).code = 'NETWORK_ERROR'
+      ;(error as any).url = url
+      throw error
+    }
+    throw err
+  }
+}
+
 class MeApiClient {
   private _baseUrl?: string
   private _customBaseUrl?: string
@@ -57,7 +81,7 @@ class MeApiClient {
       }
     }
 
-    const response = await fetch(url, {
+    const response = await fetchWithNetworkHandling(url, {
       ...options,
       headers
       // Note: Using Bearer token authentication only for account module
@@ -472,7 +496,7 @@ class MeApiClient {
       }
     }
 
-    const response = await fetch(url, {
+    const response = await fetchWithNetworkHandling(url, {
       method: 'GET',
       headers
     })

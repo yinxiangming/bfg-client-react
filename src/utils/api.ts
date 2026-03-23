@@ -71,6 +71,7 @@ export const bfgApi = {
   emailConfigs: () => buildApiUrl('/email-configs/', API_VERSIONS.BFG2),
   users: () => buildApiUrl('/users/', API_VERSIONS.BFG2),
   staffRoles: () => buildApiUrl('/staff-roles/', API_VERSIONS.BFG2),
+  apiKeys: () => buildApiUrl('/api-keys/', API_VERSIONS.BFG2),
 
   // Web/CMS
   sites: () => buildApiUrl('/web/sites/', API_VERSIONS.BFG2),

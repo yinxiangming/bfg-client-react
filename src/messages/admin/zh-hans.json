@@ -39,6 +39,7 @@
     "resalePayouts": "结算"
   },
   "common": {
+    "networkUnreachable": "无法连接服务器，请确认 API 已启动且 NEXT_PUBLIC_API_URL 配置正确。",
     "actions": {
       "add": "新增",
       "update": "更新",
@@ -664,16 +665,36 @@
     },
     "basicInfo": {
       "fields": {
-        "status": { "label": "状态" },
-        "email": { "label": "邮箱" },
-        "firstName": { "label": "名" },
-        "lastName": { "label": "姓" },
-        "phone": { "label": "电话" },
-        "notes": { "label": "备注" },
-        "companyName": { "label": "公司名称" },
-        "taxNumber": { "label": "税号" },
-        "creditLimit": { "label": "信用额度" },
-        "verified": { "label": "已验证" }
+        "status": {
+          "label": "状态"
+        },
+        "email": {
+          "label": "邮箱"
+        },
+        "firstName": {
+          "label": "名"
+        },
+        "lastName": {
+          "label": "姓"
+        },
+        "phone": {
+          "label": "电话"
+        },
+        "notes": {
+          "label": "备注"
+        },
+        "companyName": {
+          "label": "公司名称"
+        },
+        "taxNumber": {
+          "label": "税号"
+        },
+        "creditLimit": {
+          "label": "信用额度"
+        },
+        "verified": {
+          "label": "已验证"
+        }
       },
       "sidebar": {
         "title": "基本信息"
@@ -708,16 +729,36 @@
         "message": "确认删除该地址？"
       },
       "fields": {
-        "fullName": { "label": "姓名" },
-        "company": { "label": "公司" },
-        "addressLine1": { "label": "地址行1" },
-        "addressLine2": { "label": "地址行2" },
-        "city": { "label": "城市" },
-        "state": { "label": "省/州" },
-        "postalCode": { "label": "邮编" },
-        "country": { "label": "国家" },
-        "phone": { "label": "电话" },
-        "email": { "label": "邮箱" }
+        "fullName": {
+          "label": "姓名"
+        },
+        "company": {
+          "label": "公司"
+        },
+        "addressLine1": {
+          "label": "地址行1"
+        },
+        "addressLine2": {
+          "label": "地址行2"
+        },
+        "city": {
+          "label": "城市"
+        },
+        "state": {
+          "label": "省/州"
+        },
+        "postalCode": {
+          "label": "邮编"
+        },
+        "country": {
+          "label": "国家"
+        },
+        "phone": {
+          "label": "电话"
+        },
+        "email": {
+          "label": "邮箱"
+        }
       },
       "snackbar": {
         "saved": "地址保存成功！",
@@ -738,7 +779,9 @@
       "topUp": {
         "title": "充值钱包",
         "fields": {
-          "amount": { "label": "金额" },
+          "amount": {
+            "label": "金额"
+          },
           "note": {
             "label": "备注（可选）",
             "placeholder": "充值原因..."
@@ -915,21 +958,44 @@
     "form": {
       "title": "分类详情",
       "fields": {
-        "name": { "label": "名称", "validationMessage": "名称不能超过 100 个字符" },
-        "slug": { "label": "Slug", "validationMessage": "Slug 不能超过 100 个字符" },
-        "parent": { "label": "父级分类", "placeholder": "选择父级分类" },
-        "description": { "label": "描述" },
+        "name": {
+          "label": "名称",
+          "validationMessage": "名称不能超过 100 个字符"
+        },
+        "slug": {
+          "label": "Slug",
+          "validationMessage": "Slug 不能超过 100 个字符"
+        },
+        "parent": {
+          "label": "父级分类",
+          "placeholder": "选择父级分类"
+        },
+        "description": {
+          "label": "描述"
+        },
         "icon": {
           "label": "图标",
           "placeholder": "如 tabler-home",
           "helperText": "图标类名或 emoji（最多 50 字符）",
           "validationMessage": "图标不能超过 50 个字符"
         },
-        "order": { "label": "排序", "validationMessage": "排序值必须大于等于 0" },
-        "is_active": { "label": "启用" },
-        "language": { "label": "语言", "validationMessage": "语言不能超过 10 个字符" }
+        "order": {
+          "label": "排序",
+          "validationMessage": "排序值必须大于等于 0"
+        },
+        "is_active": {
+          "label": "启用"
+        },
+        "language": {
+          "label": "语言",
+          "validationMessage": "语言不能超过 10 个字符"
+        }
       },
-      "actions": { "save": "保存", "submit": "保存", "cancel": "取消" }
+      "actions": {
+        "save": "保存",
+        "submit": "保存",
+        "cancel": "取消"
+      }
     },
     "newPage": {
       "title": "新增分类",
@@ -3138,7 +3204,8 @@
           "basic": "基础",
           "users": "用户",
           "roles": "角色",
-          "email": "邮件"
+          "email": "邮件",
+          "apiKeys": "API 密钥"
         }
       },
       "email": {
@@ -3431,8 +3498,68 @@
           "saveFailed": "保存角色失败：{error}",
           "schemaNotFound": "未找到 Schema"
         }
+      },
+      "apiKeys": {
+        "schema": {
+          "title": "API 密钥",
+          "columns": {
+            "name": "名称",
+            "apiKey": "API Key",
+            "status": "状态",
+            "lastUsed": "最后使用",
+            "createdBy": "创建者",
+            "createdAt": "创建时间"
+          },
+          "neverUsed": "从未使用"
+        },
+        "filters": {
+          "status": {
+            "label": "状态",
+            "options": {
+              "active": "启用",
+              "inactive": "停用"
+            }
+          }
+        },
+        "searchPlaceholder": "搜索 API 密钥...",
+        "actions": {
+          "add": "创建 API 密钥",
+          "edit": "编辑",
+          "delete": "删除",
+          "regenerate": "重新生成",
+          "confirmDelete": "确定要删除此 API 密钥吗？使用该密钥的集成将停止工作。",
+          "confirmDeleteWithName": "确定要删除 \"{name}\" 吗？使用该密钥的集成将停止工作。",
+          "confirmRegenerate": "确定要重新生成密钥吗？当前密钥将失效，使用该密钥的集成需要更新。"
+        },
+        "form": {
+          "title": "API 密钥",
+          "fields": {
+            "name": "名称",
+            "expiresAt": "过期时间",
+            "isActive": "启用"
+          },
+          "actions": {
+            "save": "保存",
+            "cancel": "取消"
+          }
+        },
+        "secretDialog": {
+          "title": "API 密钥已创建",
+          "warning": "请复制并安全保存这些凭证。API Secret 不会再次显示。",
+          "apiKeyLabel": "API Key",
+          "apiSecretLabel": "API Secret",
+          "copy": "复制",
+          "copied": "已复制！",
+          "done": "完成"
+        },
+        "errors": {
+          "fetchFailed": "加载 API 密钥失败：{error}",
+          "saveFailed": "保存 API 密钥失败：{error}",
+          "deleteFailed": "删除 API 密钥失败：{error}",
+          "regenerateFailed": "重新生成密钥失败：{error}",
+          "schemaNotFound": "未找到 API 密钥配置"
+        }
       }
     }
   }
 }
-

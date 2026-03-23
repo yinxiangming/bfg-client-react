@@ -39,6 +39,7 @@
     "resalePayouts": "Payouts"
   },
   "common": {
+    "networkUnreachable": "Unable to reach the server. Check that the API is running and NEXT_PUBLIC_API_URL is set correctly.",
     "actions": {
       "add": "Add",
       "update": "Update",
@@ -664,16 +665,36 @@
     },
     "basicInfo": {
       "fields": {
-        "status": { "label": "Status" },
-        "email": { "label": "Email" },
-        "firstName": { "label": "First Name" },
-        "lastName": { "label": "Last Name" },
-        "phone": { "label": "Phone" },
-        "notes": { "label": "Notes" },
-        "companyName": { "label": "Company Name" },
-        "taxNumber": { "label": "Tax Number" },
-        "creditLimit": { "label": "Credit Limit" },
-        "verified": { "label": "Verified" }
+        "status": {
+          "label": "Status"
+        },
+        "email": {
+          "label": "Email"
+        },
+        "firstName": {
+          "label": "First Name"
+        },
+        "lastName": {
+          "label": "Last Name"
+        },
+        "phone": {
+          "label": "Phone"
+        },
+        "notes": {
+          "label": "Notes"
+        },
+        "companyName": {
+          "label": "Company Name"
+        },
+        "taxNumber": {
+          "label": "Tax Number"
+        },
+        "creditLimit": {
+          "label": "Credit Limit"
+        },
+        "verified": {
+          "label": "Verified"
+        }
       },
       "sidebar": {
         "title": "Basic Information"
@@ -708,16 +729,36 @@
         "message": "Are you sure you want to delete this address?"
       },
       "fields": {
-        "fullName": { "label": "Full Name" },
-        "company": { "label": "Company" },
-        "addressLine1": { "label": "Address Line 1" },
-        "addressLine2": { "label": "Address Line 2" },
-        "city": { "label": "City" },
-        "state": { "label": "State" },
-        "postalCode": { "label": "Postal Code" },
-        "country": { "label": "Country" },
-        "phone": { "label": "Phone" },
-        "email": { "label": "Email" }
+        "fullName": {
+          "label": "Full Name"
+        },
+        "company": {
+          "label": "Company"
+        },
+        "addressLine1": {
+          "label": "Address Line 1"
+        },
+        "addressLine2": {
+          "label": "Address Line 2"
+        },
+        "city": {
+          "label": "City"
+        },
+        "state": {
+          "label": "State"
+        },
+        "postalCode": {
+          "label": "Postal Code"
+        },
+        "country": {
+          "label": "Country"
+        },
+        "phone": {
+          "label": "Phone"
+        },
+        "email": {
+          "label": "Email"
+        }
       },
       "snackbar": {
         "saved": "Address saved successfully!",
@@ -738,7 +779,9 @@
       "topUp": {
         "title": "Top Up Wallet",
         "fields": {
-          "amount": { "label": "Amount" },
+          "amount": {
+            "label": "Amount"
+          },
           "note": {
             "label": "Note (Optional)",
             "placeholder": "Reason for top-up..."
@@ -915,21 +958,44 @@
     "form": {
       "title": "Category Details",
       "fields": {
-        "name": { "label": "Name", "validationMessage": "Name must be 100 characters or less" },
-        "slug": { "label": "Slug", "validationMessage": "Slug must be 100 characters or less" },
-        "parent": { "label": "Parent Category", "placeholder": "Select parent category" },
-        "description": { "label": "Description" },
+        "name": {
+          "label": "Name",
+          "validationMessage": "Name must be 100 characters or less"
+        },
+        "slug": {
+          "label": "Slug",
+          "validationMessage": "Slug must be 100 characters or less"
+        },
+        "parent": {
+          "label": "Parent Category",
+          "placeholder": "Select parent category"
+        },
+        "description": {
+          "label": "Description"
+        },
         "icon": {
           "label": "Icon",
           "placeholder": "e.g. tabler-home",
           "helperText": "Icon class name or emoji (max 50 characters)",
           "validationMessage": "Icon must be 50 characters or less"
         },
-        "order": { "label": "Order", "validationMessage": "Order must be 0 or greater" },
-        "is_active": { "label": "Is Active" },
-        "language": { "label": "Language", "validationMessage": "Language must be 10 characters or less" }
+        "order": {
+          "label": "Order",
+          "validationMessage": "Order must be 0 or greater"
+        },
+        "is_active": {
+          "label": "Is Active"
+        },
+        "language": {
+          "label": "Language",
+          "validationMessage": "Language must be 10 characters or less"
+        }
       },
-      "actions": { "save": "Save", "submit": "Save", "cancel": "Cancel" }
+      "actions": {
+        "save": "Save",
+        "submit": "Save",
+        "cancel": "Cancel"
+      }
     },
     "newPage": {
       "title": "Add Category",
@@ -3138,7 +3204,8 @@
           "basic": "Basic",
           "users": "Users",
           "roles": "Roles",
-          "email": "Email"
+          "email": "Email",
+          "apiKeys": "API Keys"
         }
       },
       "email": {
@@ -3431,8 +3498,68 @@
           "saveFailed": "Failed to save role: {error}",
           "schemaNotFound": "Schema not found"
         }
+      },
+      "apiKeys": {
+        "schema": {
+          "title": "API Keys",
+          "columns": {
+            "name": "Name",
+            "apiKey": "API Key",
+            "status": "Status",
+            "lastUsed": "Last Used",
+            "createdBy": "Created By",
+            "createdAt": "Created"
+          },
+          "neverUsed": "Never"
+        },
+        "filters": {
+          "status": {
+            "label": "Status",
+            "options": {
+              "active": "Active",
+              "inactive": "Inactive"
+            }
+          }
+        },
+        "searchPlaceholder": "Search API keys...",
+        "actions": {
+          "add": "Create API Key",
+          "edit": "Edit",
+          "delete": "Delete",
+          "regenerate": "Regenerate",
+          "confirmDelete": "Are you sure you want to delete this API key? Any integrations using it will stop working.",
+          "confirmDeleteWithName": "Are you sure you want to delete \"{name}\"? Any integrations using it will stop working.",
+          "confirmRegenerate": "Are you sure you want to regenerate this secret? The current secret will be invalidated and any integrations using it will need to be updated."
+        },
+        "form": {
+          "title": "API Key",
+          "fields": {
+            "name": "Name",
+            "expiresAt": "Expires At",
+            "isActive": "Active"
+          },
+          "actions": {
+            "save": "Save",
+            "cancel": "Cancel"
+          }
+        },
+        "secretDialog": {
+          "title": "API Key Created",
+          "warning": "Please copy and store these credentials securely. The API Secret will not be shown again.",
+          "apiKeyLabel": "API Key",
+          "apiSecretLabel": "API Secret",
+          "copy": "Copy",
+          "copied": "Copied!",
+          "done": "Done"
+        },
+        "errors": {
+          "fetchFailed": "Failed to load API key: {error}",
+          "saveFailed": "Failed to save API key: {error}",
+          "deleteFailed": "Failed to delete API key: {error}",
+          "regenerateFailed": "Failed to regenerate secret: {error}",
+          "schemaNotFound": "API Keys schema not found"
+        }
       }
     }
   }
 }
-

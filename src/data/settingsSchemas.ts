@@ -176,3 +176,91 @@ export const buildStaffRolesSchema = (t: any): SchemaResponse => ({
   }
 })
 
+// API Keys Schema (i18n via builder)
+export const buildAPIKeysSchema = (t: any): SchemaResponse => ({
+  list: {
+    title: t('settings.general.apiKeys.schema.title'),
+    columns: [
+      {
+        field: 'name',
+        label: t('settings.general.apiKeys.schema.columns.name'),
+        type: 'string',
+        sortable: true
+      },
+      {
+        field: 'prefix',
+        label: t('settings.general.apiKeys.schema.columns.apiKey'),
+        type: 'string',
+        render: (value: any) => value ? `${value}...` : '-'
+      },
+      {
+        field: 'is_active',
+        label: t('settings.general.apiKeys.schema.columns.status'),
+        type: 'select',
+        sortable: true
+      },
+      {
+        field: 'last_used_at',
+        label: t('settings.general.apiKeys.schema.columns.lastUsed'),
+        type: 'datetime',
+        render: (value: any) => value || t('settings.general.apiKeys.schema.neverUsed')
+      },
+      {
+        field: 'created_by_name',
+        label: t('settings.general.apiKeys.schema.columns.createdBy'),
+        type: 'string',
+        render: (value: any) => value || '-'
+      },
+      {
+        field: 'created_at',
+        label: t('settings.general.apiKeys.schema.columns.createdAt'),
+        type: 'datetime',
+        sortable: true
+      }
+    ],
+    filters: [
+      {
+        field: 'is_active',
+        label: t('settings.general.apiKeys.filters.status.label'),
+        type: 'select',
+        options: [
+          { value: 'true', label: t('settings.general.apiKeys.filters.status.options.active') },
+          { value: 'false', label: t('settings.general.apiKeys.filters.status.options.inactive') }
+        ]
+      }
+    ],
+    searchFields: ['name', 'prefix'],
+    searchPlaceholder: t('settings.general.apiKeys.searchPlaceholder'),
+    actions: [
+      {
+        id: 'add',
+        label: t('settings.general.apiKeys.actions.add'),
+        type: 'primary',
+        scope: 'global',
+        icon: 'tabler-plus'
+      },
+      { id: 'edit', label: t('settings.general.apiKeys.actions.edit'), type: 'secondary', scope: 'row' },
+      { id: 'regenerate', label: t('settings.general.apiKeys.actions.regenerate'), type: 'secondary', scope: 'row' },
+      {
+        id: 'delete',
+        label: t('settings.general.apiKeys.actions.delete'),
+        type: 'danger',
+        scope: 'row',
+        confirm: t('settings.general.apiKeys.actions.confirmDelete')
+      }
+    ]
+  },
+  form: {
+    title: t('settings.general.apiKeys.form.title'),
+    fields: [
+      { field: 'name', label: t('settings.general.apiKeys.form.fields.name'), type: 'string', required: true },
+      { field: 'expires_at', label: t('settings.general.apiKeys.form.fields.expiresAt'), type: 'datetime' },
+      { field: 'is_active', label: t('settings.general.apiKeys.form.fields.isActive'), type: 'boolean' }
+    ],
+    actions: [
+      { id: 'submit', label: t('settings.general.apiKeys.form.actions.save'), type: 'submit' },
+      { id: 'cancel', label: t('settings.general.apiKeys.form.actions.cancel'), type: 'cancel' }
+    ]
+  }
+})
+

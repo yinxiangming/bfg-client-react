@@ -354,3 +354,65 @@ export async function deleteStaffRole(id: number): Promise<void> {
   })
 }
 
+// ── API Keys management ──────────────────────────────────────────
+
+export type APIKey = {
+  id: number
+  name: string
+  prefix: string
+  is_active: boolean
+  created_by?: number
+  created_by_name?: string
+  last_used_at?: string
+  expires_at?: string
+  created_at?: string
+  updated_at?: string
+}
+
+export type APIKeyCreateResponse = {
+  id: number
+  name: string
+  api_key: string    // prefix
+  api_secret: string // one-time plain text secret
+  expires_at?: string
+  created_at?: string
+}
+
+export async function getAPIKeys(): Promise<APIKey[]> {
+  const res = await apiFetch<{ results: APIKey[] } | APIKey[]>(bfgApi.apiKeys())
+  if ('results' in res) {
+    return res.results
+  }
+  return res
+}
+
+export async function getAPIKey(id: number): Promise<APIKey> {
+  return apiFetch<APIKey>(`${bfgApi.apiKeys()}${id}/`)
+}
+
+export async function createAPIKey(data: { name: string; expires_at?: string }): Promise<APIKeyCreateResponse> {
+  return apiFetch<APIKeyCreateResponse>(bfgApi.apiKeys(), {
+    method: 'POST',
+    body: JSON.stringify(data)
+  })
+}
+
+export async function updateAPIKey(id: number, data: Partial<APIKey>): Promise<APIKey> {
+  return apiFetch<APIKey>(`${bfgApi.apiKeys()}${id}/`, {
+    method: 'PATCH',
+    body: JSON.stringify(data)
+  })
+}
+
+export async function deleteAPIKey(id: number): Promise<void> {
+  await apiFetch<void>(`${bfgApi.apiKeys()}${id}/`, {
+    method: 'DELETE'
+  })
+}
+
+export async function regenerateAPIKey(id: number): Promise<APIKeyCreateResponse> {
+  return apiFetch<APIKeyCreateResponse>(`${bfgApi.apiKeys()}${id}/regenerate/`, {
+    method: 'POST'
+  })
+}
+

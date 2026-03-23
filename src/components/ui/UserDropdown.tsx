@@ -4,6 +4,11 @@ import { useEffect, useRef, useState } from 'react'
 
 // Next Imports
 import { useRouter } from 'next/navigation'
+import { useTranslations } from 'next-intl'
+
+// MUI Imports
+import Alert from '@mui/material/Alert'
+import Snackbar from '@mui/material/Snackbar'
 
 // Component Imports
 import Icon from '@components/Icon'
@@ -34,8 +39,10 @@ const menuItems = [
 ]
 
 const UserDropdown = (_props: Props) => {
+  const t = useTranslations('admin')
   const [open, setOpen] = useState(false)
   const [user, setUser] = useState<UserInfo | null>(null)
+  const [networkBannerOpen, setNetworkBannerOpen] = useState(false)
   const menuRef = useRef<HTMLDivElement>(null)
   const router = useRouter()
 
@@ -54,7 +61,12 @@ const UserDropdown = (_props: Props) => {
           avatar: data.avatar || ''
         })
       } catch (error) {
-        console.error('Failed to load user info:', error)
+        const isOffline = error instanceof Error && error.message === 'NETWORK_ERROR'
+        if (isOffline) {
+          setNetworkBannerOpen(true)
+        } else {
+          console.error('Failed to load user info:', error)
+        }
         setUser(null)
       }
     }
@@ -126,6 +138,24 @@ const UserDropdown = (_props: Props) => {
 
   return (
     <div className='user-menu' ref={menuRef}>
+      <Snackbar
+        open={networkBannerOpen}
+        autoHideDuration={8000}
+        onClose={(_, reason) => {
+          if (reason === 'clickaway') return
+          setNetworkBannerOpen(false)
+        }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+      >
+        <Alert
+          severity='warning'
+          variant='filled'
+          onClose={() => setNetworkBannerOpen(false)}
+          sx={{ width: '100%' }}
+        >
+          {t('common.networkUnreachable')}
+        </Alert>
+      </Snackbar>
       <button
         type='button'
         className='user-avatar-trigger'
