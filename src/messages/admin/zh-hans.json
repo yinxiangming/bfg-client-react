@@ -2224,6 +2224,111 @@
           "settings": "网站设置"
         }
       },
+      "newsletterTab": {
+        "tabs": {
+          "subscribers": "订阅用户",
+          "sends": "发送任务",
+          "sendLogs": "发送结果",
+          "templates": "模板"
+        },
+        "errors": {
+          "addFailed": "新增订阅用户失败",
+          "unsubscribeFailed": "取消订阅失败",
+          "deleteFailed": "删除订阅失败",
+          "sendNowFailed": "立即发送失败",
+          "createSendFailed": "创建发送任务失败"
+        },
+        "subscribers": {
+          "columns": {
+            "email": "邮箱",
+            "status": "状态",
+            "createdAt": "创建时间"
+          },
+          "filters": {
+            "status": {
+              "label": "状态",
+              "options": {
+                "all": "全部",
+                "subscribed": "已订阅",
+                "unsubscribed": "已退订"
+              }
+            }
+          },
+          "actions": {
+            "add": "新增订阅用户",
+            "edit": "编辑",
+            "unsubscribe": "取消订阅",
+            "delete": "删除",
+            "confirmUnsubscribe": "确认取消该邮箱订阅？",
+            "confirmDelete": "确认删除该订阅？"
+          }
+        },
+        "sends": {
+          "columns": {
+            "subject": "主题",
+            "status": "状态",
+            "scheduledAt": "计划发送时间",
+            "sentAt": "发送时间"
+          },
+          "filters": {
+            "status": {
+              "label": "状态",
+              "options": {
+                "all": "全部",
+                "draft": "草稿",
+                "scheduled": "已计划",
+                "sent": "已发送"
+              }
+            }
+          },
+          "actions": {
+            "add": "创建发送任务",
+            "sendNow": "立即发送",
+            "confirmSendNow": "确认立即发送这条邮件？"
+          }
+        },
+        "sendLogs": {
+          "columns": {
+            "send": "发送任务",
+            "email": "邮箱",
+            "status": "状态",
+            "sentAt": "发送时间",
+            "error": "错误"
+          }
+        },
+        "templates": {
+          "columns": {
+            "name": "名称",
+            "subjectTemplate": "主题模板"
+          }
+        },
+        "dialogs": {
+          "addSubscriber": {
+            "title": "新增订阅用户",
+            "fields": {
+              "email": "邮箱"
+            }
+          },
+          "subscription": {
+            "title": "订阅详情"
+          },
+          "addSend": {
+            "title": "创建发送任务",
+            "fields": {
+              "subject": "主题",
+              "content": "内容（纯文本或 HTML）",
+              "template": "模板（可选）",
+              "scheduledAt": "计划发送时间（可选）"
+            },
+            "placeholders": {
+              "content": "未选择模板时可填写纯文本，选填。"
+            },
+            "options": {
+              "none": "无"
+            }
+          }
+        }
+      },
       "sites": {
         "tab": {
           "title": "站点",

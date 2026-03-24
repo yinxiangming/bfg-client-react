@@ -2224,6 +2224,111 @@
           "settings": "Web Settings"
         }
       },
+      "newsletterTab": {
+        "tabs": {
+          "subscribers": "Subscribers",
+          "sends": "Send tasks",
+          "sendLogs": "Send results",
+          "templates": "Templates"
+        },
+        "errors": {
+          "addFailed": "Failed to add subscriber",
+          "unsubscribeFailed": "Failed to unsubscribe subscriber",
+          "deleteFailed": "Failed to delete subscription",
+          "sendNowFailed": "Failed to send newsletter",
+          "createSendFailed": "Failed to create send task"
+        },
+        "subscribers": {
+          "columns": {
+            "email": "Email",
+            "status": "Status",
+            "createdAt": "Created"
+          },
+          "filters": {
+            "status": {
+              "label": "Status",
+              "options": {
+                "all": "All",
+                "subscribed": "Subscribed",
+                "unsubscribed": "Unsubscribed"
+              }
+            }
+          },
+          "actions": {
+            "add": "Add subscriber",
+            "edit": "Edit",
+            "unsubscribe": "Unsubscribe",
+            "delete": "Delete",
+            "confirmUnsubscribe": "Unsubscribe this email?",
+            "confirmDelete": "Delete this subscription?"
+          }
+        },
+        "sends": {
+          "columns": {
+            "subject": "Subject",
+            "status": "Status",
+            "scheduledAt": "Scheduled",
+            "sentAt": "Sent"
+          },
+          "filters": {
+            "status": {
+              "label": "Status",
+              "options": {
+                "all": "All",
+                "draft": "Draft",
+                "scheduled": "Scheduled",
+                "sent": "Sent"
+              }
+            }
+          },
+          "actions": {
+            "add": "Create send task",
+            "sendNow": "Send now",
+            "confirmSendNow": "Send this newsletter now?"
+          }
+        },
+        "sendLogs": {
+          "columns": {
+            "send": "Send",
+            "email": "Email",
+            "status": "Status",
+            "sentAt": "Sent at",
+            "error": "Error"
+          }
+        },
+        "templates": {
+          "columns": {
+            "name": "Name",
+            "subjectTemplate": "Subject template"
+          }
+        },
+        "dialogs": {
+          "addSubscriber": {
+            "title": "Add subscriber",
+            "fields": {
+              "email": "Email"
+            }
+          },
+          "subscription": {
+            "title": "Subscription"
+          },
+          "addSend": {
+            "title": "Create send task",
+            "fields": {
+              "subject": "Subject",
+              "content": "Content (plain text or HTML)",
+              "template": "Template (optional)",
+              "scheduledAt": "Scheduled at (optional)"
+            },
+            "placeholders": {
+              "content": "Plain text when no template; optional."
+            },
+            "options": {
+              "none": "None"
+            }
+          }
+        }
+      },
       "sites": {
         "tab": {
           "title": "Sites",

@@ -167,7 +167,7 @@ export default function NewsletterTab() {
       setAddSubOpen(false)
       fetchSubscriptions()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to add')
+      setError(e instanceof Error ? e.message : t('newsletterTab.errors.addFailed'))
     } finally {
       setAddSubSaving(false)
     }
@@ -180,7 +180,7 @@ export default function NewsletterTab() {
       setEditSubOpen(false)
       setEditSubRow(null)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to unsubscribe')
+      setError(e instanceof Error ? e.message : t('newsletterTab.errors.unsubscribeFailed'))
     }
   }
 
@@ -191,7 +191,7 @@ export default function NewsletterTab() {
       setEditSubOpen(false)
       setEditSubRow(null)
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to delete')
+      setError(e instanceof Error ? e.message : t('newsletterTab.errors.deleteFailed'))
     }
   }
 
@@ -200,7 +200,7 @@ export default function NewsletterTab() {
       await apiFetch(`${bfgApi.newsletterSends()}${id}/send-now/`, { method: 'POST' })
       fetchSends()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to send')
+      setError(e instanceof Error ? e.message : t('newsletterTab.errors.sendNowFailed'))
     }
   }
 
@@ -226,7 +226,7 @@ export default function NewsletterTab() {
       setAddSendOpen(false)
       fetchSends()
     } catch (e) {
-      setError(e instanceof Error ? e.message : 'Failed to create send task')
+      setError(e instanceof Error ? e.message : t('newsletterTab.errors.createSendFailed'))
     } finally {
       setAddSendSaving(false)
     }
@@ -236,28 +236,28 @@ export default function NewsletterTab() {
     () => ({
       title: t('page.tabs.newsletter'),
       columns: [
-        { field: 'email', label: 'Email', type: 'string', sortable: true },
-        { field: 'status', label: 'Status', type: 'select', sortable: true },
-        { field: 'created_at', label: 'Created', type: 'datetime', sortable: true },
+        { field: 'email', label: t('newsletterTab.subscribers.columns.email'), type: 'string', sortable: true },
+        { field: 'status', label: t('newsletterTab.subscribers.columns.status'), type: 'select', sortable: true },
+        { field: 'created_at', label: t('newsletterTab.subscribers.columns.createdAt'), type: 'datetime', sortable: true },
       ],
       searchFields: ['email'],
       filters: [
         {
           field: 'status',
-          label: 'Status',
+          label: t('newsletterTab.subscribers.filters.status.label'),
           type: 'select',
           options: [
-            { value: '', label: 'All' },
-            { value: 'subscribed', label: 'Subscribed' },
-            { value: 'unsubscribed', label: 'Unsubscribed' },
+            { value: '', label: t('newsletterTab.subscribers.filters.status.options.all') },
+            { value: 'subscribed', label: t('newsletterTab.subscribers.filters.status.options.subscribed') },
+            { value: 'unsubscribed', label: t('newsletterTab.subscribers.filters.status.options.unsubscribed') },
           ],
         },
       ],
       actions: [
-        { id: 'add', label: 'Add subscriber', type: 'primary', scope: 'global', icon: 'tabler-plus' },
-        { id: 'edit', label: 'Edit', type: 'secondary', scope: 'row' },
-        { id: 'unsubscribe', label: 'Unsubscribe', type: 'secondary', scope: 'row', confirm: 'Unsubscribe this email?' },
-        { id: 'delete', label: 'Delete', type: 'danger', scope: 'row', confirm: 'Delete this subscription?' },
+        { id: 'add', label: t('newsletterTab.subscribers.actions.add'), type: 'primary', scope: 'global', icon: 'tabler-plus' },
+        { id: 'edit', label: t('newsletterTab.subscribers.actions.edit'), type: 'secondary', scope: 'row' },
+        { id: 'unsubscribe', label: t('newsletterTab.subscribers.actions.unsubscribe'), type: 'secondary', scope: 'row', confirm: t('newsletterTab.subscribers.actions.confirmUnsubscribe') },
+        { id: 'delete', label: t('newsletterTab.subscribers.actions.delete'), type: 'danger', scope: 'row', confirm: t('newsletterTab.subscribers.actions.confirmDelete') },
       ],
     }),
     [t]
@@ -267,27 +267,27 @@ export default function NewsletterTab() {
     () => ({
       title: t('page.tabs.newsletter'),
       columns: [
-        { field: 'subject', label: 'Subject', type: 'string', sortable: true },
-        { field: 'status', label: 'Status', type: 'select', sortable: true },
-        { field: 'scheduled_at', label: 'Scheduled', type: 'datetime' },
-        { field: 'sent_at', label: 'Sent', type: 'datetime' },
+        { field: 'subject', label: t('newsletterTab.sends.columns.subject'), type: 'string', sortable: true },
+        { field: 'status', label: t('newsletterTab.sends.columns.status'), type: 'select', sortable: true },
+        { field: 'scheduled_at', label: t('newsletterTab.sends.columns.scheduledAt'), type: 'datetime' },
+        { field: 'sent_at', label: t('newsletterTab.sends.columns.sentAt'), type: 'datetime' },
       ],
       filters: [
         {
           field: 'status',
-          label: 'Status',
+          label: t('newsletterTab.sends.filters.status.label'),
           type: 'select',
           options: [
-            { value: '', label: 'All' },
-            { value: 'draft', label: 'Draft' },
-            { value: 'scheduled', label: 'Scheduled' },
-            { value: 'sent', label: 'Sent' },
+            { value: '', label: t('newsletterTab.sends.filters.status.options.all') },
+            { value: 'draft', label: t('newsletterTab.sends.filters.status.options.draft') },
+            { value: 'scheduled', label: t('newsletterTab.sends.filters.status.options.scheduled') },
+            { value: 'sent', label: t('newsletterTab.sends.filters.status.options.sent') },
           ],
         },
       ],
       actions: [
-        { id: 'add', label: 'Create send task', type: 'primary', scope: 'global', icon: 'tabler-plus' },
-        { id: 'send_now', label: 'Send now', type: 'primary', scope: 'row', confirm: 'Send this newsletter now?' },
+        { id: 'add', label: t('newsletterTab.sends.actions.add'), type: 'primary', scope: 'global', icon: 'tabler-plus' },
+        { id: 'send_now', label: t('newsletterTab.sends.actions.sendNow'), type: 'primary', scope: 'row', confirm: t('newsletterTab.sends.actions.confirmSendNow') },
       ],
     }),
     [t]
@@ -297,11 +297,11 @@ export default function NewsletterTab() {
     () => ({
       title: t('page.tabs.newsletter'),
       columns: [
-        { field: 'newsletter_send_subject', label: 'Send', type: 'string' },
-        { field: 'email', label: 'Email', type: 'string' },
-        { field: 'status', label: 'Status', type: 'select' },
-        { field: 'sent_at', label: 'Sent at', type: 'datetime' },
-        { field: 'error_message', label: 'Error', type: 'string' },
+        { field: 'newsletter_send_subject', label: t('newsletterTab.sendLogs.columns.send'), type: 'string' },
+        { field: 'email', label: t('newsletterTab.sendLogs.columns.email'), type: 'string' },
+        { field: 'status', label: t('newsletterTab.sendLogs.columns.status'), type: 'select' },
+        { field: 'sent_at', label: t('newsletterTab.sendLogs.columns.sentAt'), type: 'datetime' },
+        { field: 'error_message', label: t('newsletterTab.sendLogs.columns.error'), type: 'string' },
       ],
     }),
     [t]
@@ -311,8 +311,8 @@ export default function NewsletterTab() {
     () => ({
       title: t('page.tabs.newsletter'),
       columns: [
-        { field: 'name', label: 'Name', type: 'string', sortable: true },
-        { field: 'subject_template', label: 'Subject template', type: 'string' },
+        { field: 'name', label: t('newsletterTab.templates.columns.name'), type: 'string', sortable: true },
+        { field: 'subject_template', label: t('newsletterTab.templates.columns.subjectTemplate'), type: 'string' },
       ],
       searchFields: ['name', 'subject_template'],
     }),
@@ -378,10 +378,10 @@ export default function NewsletterTab() {
         </Alert>
       )}
       <Tabs value={innerTab} onChange={handleInnerTabChange} sx={{ mb: 2 }}>
-        <Tab label='Subscribers' value='subscribers' />
-        <Tab label='Send tasks' value='sends' />
-        <Tab label='Send results' value='sendLogs' />
-        <Tab label='Templates' value='templates' />
+        <Tab label={t('newsletterTab.tabs.subscribers')} value='subscribers' />
+        <Tab label={t('newsletterTab.tabs.sends')} value='sends' />
+        <Tab label={t('newsletterTab.tabs.sendLogs')} value='sendLogs' />
+        <Tab label={t('newsletterTab.tabs.templates')} value='templates' />
       </Tabs>
 
       {innerTab === 'subscribers' && (
@@ -422,12 +422,12 @@ export default function NewsletterTab() {
       )}
 
       <Dialog open={addSubOpen} onClose={() => setAddSubOpen(false)}>
-        <DialogTitle>Add subscriber</DialogTitle>
+        <DialogTitle>{t('newsletterTab.dialogs.addSubscriber.title')}</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
             margin='dense'
-            label='Email'
+            label={t('newsletterTab.dialogs.addSubscriber.fields.email')}
             type='email'
             fullWidth
             value={addSubEmail}
@@ -443,7 +443,7 @@ export default function NewsletterTab() {
       </Dialog>
 
       <Dialog open={editSubOpen} onClose={() => { setEditSubOpen(false); setEditSubRow(null) }}>
-        <DialogTitle>Subscription</DialogTitle>
+        <DialogTitle>{t('newsletterTab.dialogs.subscription.title')}</DialogTitle>
         <DialogContent>
           {editSubRow && (
             <Typography>
@@ -457,7 +457,7 @@ export default function NewsletterTab() {
             <>
               {editSubRow.status === 'subscribed' && (
                 <Button color='warning' onClick={() => handleUnsubscribe(editSubRow.id)}>
-                  Unsubscribe
+                  {t('newsletterTab.subscribers.actions.unsubscribe')}
                 </Button>
               )}
               <Button color='error' onClick={() => editSubRow && handleDeleteSubscription(editSubRow.id)}>
@@ -469,20 +469,20 @@ export default function NewsletterTab() {
       </Dialog>
 
       <Dialog open={addSendOpen} onClose={() => setAddSendOpen(false)} maxWidth='sm' fullWidth>
-        <DialogTitle>Create send task</DialogTitle>
+        <DialogTitle>{t('newsletterTab.dialogs.addSend.title')}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
             <TextField
               autoFocus
-              label='Subject'
+              label={t('newsletterTab.dialogs.addSend.fields.subject')}
               required
               fullWidth
               value={addSendSubject}
               onChange={(e) => setAddSendSubject(e.target.value)}
             />
             <TextField
-              label='Content (plain text or HTML)'
-              placeholder='Plain text when no template; optional.'
+              label={t('newsletterTab.dialogs.addSend.fields.content')}
+              placeholder={t('newsletterTab.dialogs.addSend.placeholders.content')}
               fullWidth
               multiline
               rows={4}
@@ -490,16 +490,16 @@ export default function NewsletterTab() {
               onChange={(e) => setAddSendContent(e.target.value)}
             />
             <FormControl fullWidth>
-              <InputLabel>Template (optional)</InputLabel>
+              <InputLabel>{t('newsletterTab.dialogs.addSend.fields.template')}</InputLabel>
               <Select
                 value={addSendTemplateId === '' ? '' : String(addSendTemplateId)}
-                label='Template (optional)'
+                label={t('newsletterTab.dialogs.addSend.fields.template')}
                 onChange={(e) => {
                   const v = e.target.value
                   setAddSendTemplateId(v === '' ? '' : Number(v))
                 }}
               >
-                <MenuItem value=''>None</MenuItem>
+                <MenuItem value=''>{t('newsletterTab.dialogs.addSend.options.none')}</MenuItem>
                 {templates.map((tmpl) => (
                   <MenuItem key={tmpl.id} value={String(tmpl.id)}>
                     {tmpl.name}
@@ -508,7 +508,7 @@ export default function NewsletterTab() {
               </Select>
             </FormControl>
             <TextField
-              label='Scheduled at (optional)'
+              label={t('newsletterTab.dialogs.addSend.fields.scheduledAt')}
               type='datetime-local'
               fullWidth
               value={addSendScheduledAt}
