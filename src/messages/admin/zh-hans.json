@@ -1297,6 +1297,11 @@
             "poor": "较差"
           }
         }
+      },
+      "labelActions": {
+        "print": "打印标签",
+        "popupBlocked": "浏览器拦截了弹窗，请允许后重试打印。",
+        "printFailed": "打印标签失败"
       }
     },
     "scanner": {
@@ -2661,7 +2666,8 @@
           "stores": "门店",
           "salesChannels": "销售渠道",
           "subscriptionPlans": "订阅计划",
-          "messageTemplates": "消息模板"
+          "messageTemplates": "消息模板",
+          "settings": "设置"
         }
       },
       "stores": {
@@ -2854,6 +2860,50 @@
             "zhCn": "简体中文",
             "zhTw": "繁体中文"
           }
+        }
+      },
+      "settings": {
+        "title": "商店设置",
+        "description": "维护商品前缀与商品扫描器集成配置。",
+        "fields": {
+          "productIdentifiers": {
+            "title": "商品标识前缀",
+            "skuPrefix": {
+              "label": "默认 SKU 前缀",
+              "placeholder": "SKU-"
+            },
+            "barcodePrefix": {
+              "label": "默认产品前缀",
+              "placeholder": "P-"
+            }
+          },
+          "productScanner": {
+            "title": "商品扫描器",
+            "enabled": {
+              "label": "启用商品扫描器",
+              "help": "启用基于 AI 的商品信息扫描（文字搜索或图片上传）。"
+            },
+            "apiUrl": {
+              "label": "商品扫描器 API URL",
+              "placeholder": "https://product-scanner.example.com"
+            },
+            "apiKey": {
+              "label": "商品扫描器 API Key",
+              "placeholder": "ps-xxxxxx"
+            }
+          }
+        },
+        "actions": {
+          "save": "保存",
+          "saving": "保存中..."
+        },
+        "snackbar": {
+          "saved": "商店设置已保存。"
+        },
+        "errors": {
+          "loadFailed": "加载商店设置失败：{error}",
+          "settingsIdMissing": "未找到设置 ID，请刷新页面。",
+          "saveFailed": "保存商店设置失败：{error}"
         }
       }
     },
@@ -3354,7 +3404,16 @@
             "showLogin": "登录/账户"
           },
           "shop": {
-            "reviewModerationRequired": "开启评价审核（新评价需审核通过后才显示）"
+            "reviewModerationRequired": "开启评价审核（新评价需审核通过后才显示）",
+            "identifierManageHint": "SKU 和产品前缀已移至 商店 > 设置 维护。",
+            "skuPrefix": {
+              "label": "默认 SKU 前缀",
+              "placeholder": "SKU-"
+            },
+            "barcodePrefix": {
+              "label": "默认条码前缀",
+              "placeholder": "P-"
+            }
           },
           "social": {
             "facebook": {

@@ -14,11 +14,15 @@ import Grid from '@mui/material/Grid'
 import MenuItem from '@mui/material/MenuItem'
 import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
+import IconButton from '@mui/material/IconButton'
+import InputAdornment from '@mui/material/InputAdornment'
+import Tooltip from '@mui/material/Tooltip'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogActions from '@mui/material/DialogActions'
+import CircularProgress from '@mui/material/CircularProgress'
 
 // Component Imports
 import CustomTextField from '@/components/ui/TextField'
@@ -29,9 +33,10 @@ import type { Product } from '@/services/store'
 import { uploadProductMedia } from '@/services/store'
 import type { ProductDetails } from '@/services/productScanner'
 import { getWorkspaceSettings } from '@/services/settings'
+import { apiFetch, buildApiUrl, API_VERSIONS } from '@/utils/api'
 import { isBase64ImageUrl, dataUrlToFile, urlToFileViaProxy } from '@/utils/scannedImage'
 
-type ProductInformationProps = {
+export type ProductInformationProps = {
     productData?: Partial<Product>
     onChange?: (field: keyof Product, value: any) => void
     /** When set (edit page), base64 images will be uploaded and linked to this product. */
@@ -40,11 +45,21 @@ type ProductInformationProps = {
     onScannedImageAdded?: () => void | Promise<void>
     /** When set (edit page), after import we ask user if they want to save; if yes this is called. */
     onSave?: () => Promise<void>
+    /** Optional override for label printing behavior (e.g. extension-specific label endpoint). */
+    onPrintLabel?: (productId: number, printTab: Window) => Promise<void>
 }
 
 const CONDITION_VALUES = ['new', 'like_new', 'good', 'fair', 'poor'] as const
+const LABEL_BLOB_URL_REVOKE_MS = 120_000
 
-const ProductInformation = ({ productData, onChange, productId, onScannedImageAdded, onSave }: ProductInformationProps) => {
+const ProductInformation = ({
+    productData,
+    onChange,
+    productId,
+    onScannedImageAdded,
+    onSave,
+    onPrintLabel,
+}: ProductInformationProps) => {
     const t = useTranslations('admin')
     const [name, setName] = useState(productData?.name || '')
     const [slug, setSlug] = useState(productData?.slug || '')
@@ -55,6 +70,48 @@ const ProductInformation = ({ productData, onChange, productId, onScannedImageAd
     const [scannerEnabled, setScannerEnabled] = useState(false)
     const [scannerConfig, setScannerConfig] = useState({ apiUrl: '', apiKey: '' })
     const [autoSaveDialogOpen, setAutoSaveDialogOpen] = useState(false)
+    const [printingLabel, setPrintingLabel] = useState(false)
+
+    const openLabelPrintTab = (): Window | null => window.open('about:blank', '_blank')
+
+    const assignPdfBlobToPrintTab = (win: Window, blob: Blob): void => {
+        const url = URL.createObjectURL(blob)
+        win.location.assign(url)
+        window.setTimeout(() => URL.revokeObjectURL(url), LABEL_BLOB_URL_REVOKE_MS)
+    }
+
+    const handlePrintProductLabel = async () => {
+        if (!productId || productId === 'new') return
+        const productNumericId = Number(productId)
+        if (!Number.isFinite(productNumericId) || productNumericId <= 0) return
+
+        const printTab = openLabelPrintTab()
+        if (!printTab) {
+            alert(t('products.information.labelActions.popupBlocked'))
+            return
+        }
+
+        setPrintingLabel(true)
+        try {
+            if (onPrintLabel) {
+                await onPrintLabel(productNumericId, printTab)
+            } else {
+                const labelUrl = buildApiUrl(`/products/${productNumericId}/label/`, API_VERSIONS.BFG2)
+                const raw = await apiFetch<unknown>(labelUrl, {
+                    method: 'GET',
+                    headers: { Accept: 'application/pdf' }
+                })
+                const response = raw as Response
+                const blob = await response.blob()
+                assignPdfBlobToPrintTab(printTab, blob)
+            }
+        } catch (err) {
+            printTab.close()
+            alert(err instanceof Error ? err.message : t('products.information.labelActions.printFailed'))
+        } finally {
+            setPrintingLabel(false)
+        }
+    }
 
     // Load Product Scanner settings
     useEffect(() => {
@@ -215,6 +272,23 @@ const ProductInformation = ({ productData, onChange, productId, onScannedImageAd
                             placeholder={t('products.information.fields.barcode.placeholder')}
                             value={barcode}
                             onChange={handleBarcodeChange}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position='end'>
+                                        <Tooltip title={t('products.information.labelActions.print')}>
+                                            <span>
+                                                <IconButton
+                                                    size='small'
+                                                    onClick={() => void handlePrintProductLabel()}
+                                                    disabled={!productId || productId === 'new' || printingLabel}
+                                                >
+                                                    {printingLabel ? <CircularProgress size={16} /> : <i className='tabler-printer' />}
+                                                </IconButton>
+                                            </span>
+                                        </Tooltip>
+                                    </InputAdornment>
+                                )
+                            }}
                         />
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6 }}>

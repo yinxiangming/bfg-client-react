@@ -45,6 +45,10 @@ export type StorefrontUiSettingsPayload = {
 
 export type ShopSettingsPayload = {
   review_moderation_required?: boolean
+  product_identifiers?: {
+    sku_prefix?: string
+    barcode_prefix?: string
+  }
 }
 
 export type WorkspaceSettings = {

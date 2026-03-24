@@ -36,12 +36,10 @@ import {
   updateGeneralSettings,
   updateStorefrontUiSettings,
   updateShopSettings,
-  updatePluginsSettings,
   type GeneralSettingsPayload,
   type StorefrontUiSettingsPayload,
   type StorefrontHeaderOptionsPayload,
-  type ShopSettingsPayload,
-  type PluginsSettingsPayload
+  type ShopSettingsPayload
 } from '@/services/settings'
 import { getCurrencies, type Currency } from '@/services/finance'
 import { clearStorefrontConfigCache } from '@/utils/storefrontConfig'
@@ -93,19 +91,15 @@ const initialStorefrontUi: StorefrontUiData = {
   header_options: { ...defaultHeaderOptions }
 }
 
-type PluginsData = {
-  product_scanner_enabled: boolean
-  product_scanner_api_key: string
-  product_scanner_api_url: string
+type ShopData = {
+  review_moderation_required: boolean
+  sku_prefix: string
+  barcode_prefix: string
 }
-
-type ShopData = { review_moderation_required: boolean }
-const initialShopData: ShopData = { review_moderation_required: false }
-
-const initialPluginsData: PluginsData = {
-  product_scanner_enabled: false,
-  product_scanner_api_key: '',
-  product_scanner_api_url: ''
+const initialShopData: ShopData = {
+  review_moderation_required: false,
+  sku_prefix: 'SKU-',
+  barcode_prefix: 'P-'
 }
 
 // Vars
@@ -141,7 +135,6 @@ const GeneralSettingsPage = () => {
   const [settingsId, setSettingsId] = useState<number | null>(null)
   const [storefrontUi, setStorefrontUi] = useState<StorefrontUiData>(initialStorefrontUi)
   const [shopData, setShopData] = useState<ShopData>(initialShopData)
-  const [pluginsData, setPluginsData] = useState<PluginsData>(initialPluginsData)
   const [currencies, setCurrencies] = useState<Currency[]>([])
 
   const handleTabChange = (event: SyntheticEvent, value: string) => {
@@ -161,10 +154,6 @@ const GeneralSettingsPage = () => {
       ...prev,
       header_options: { ...prev.header_options, [key]: checked }
     }))
-  }
-
-  const handlePluginsChange = (field: keyof PluginsData, value: any) => {
-    setPluginsData(prev => ({ ...prev, [field]: value }))
   }
 
   const handleFileInputChange = (file: ChangeEvent) => {
@@ -217,15 +206,10 @@ const GeneralSettingsPage = () => {
 
         const shop = (settings.custom_settings as any)?.shop || {}
         setShopData({
-          review_moderation_required: shop.review_moderation_required ?? initialShopData.review_moderation_required
+          review_moderation_required: shop.review_moderation_required ?? initialShopData.review_moderation_required,
+          sku_prefix: shop.product_identifiers?.sku_prefix ?? initialShopData.sku_prefix,
+          barcode_prefix: shop.product_identifiers?.barcode_prefix ?? initialShopData.barcode_prefix
         })
-        const plugins = (settings.custom_settings as any)?.plugins || {}
-        setPluginsData({
-          product_scanner_enabled: plugins.product_scanner?.enabled ?? initialPluginsData.product_scanner_enabled,
-          product_scanner_api_key: plugins.product_scanner?.api_key ?? initialPluginsData.product_scanner_api_key,
-          product_scanner_api_url: plugins.product_scanner?.api_url ?? initialPluginsData.product_scanner_api_url
-        })
-
         const general = (settings.custom_settings as any)?.general || {}
         if (general || (settings as any).site_name != null || (settings as any).site_description != null) {
           setBasicData({
@@ -345,18 +329,13 @@ const GeneralSettingsPage = () => {
       await updateStorefrontUiSettings(currentSettingsId, storefrontPayload)
 
       const shopPayload: ShopSettingsPayload = {
-        review_moderation_required: shopData.review_moderation_required
-      }
-      await updateShopSettings(currentSettingsId, shopPayload)
-
-      const pluginsPayload: PluginsSettingsPayload = {
-        product_scanner: {
-          enabled: pluginsData.product_scanner_enabled,
-          api_key: pluginsData.product_scanner_api_key,
-          api_url: pluginsData.product_scanner_api_url
+        review_moderation_required: shopData.review_moderation_required,
+        product_identifiers: {
+          sku_prefix: shopData.sku_prefix,
+          barcode_prefix: shopData.barcode_prefix
         }
       }
-      await updatePluginsSettings(currentSettingsId, pluginsPayload)
+      await updateShopSettings(currentSettingsId, shopPayload)
 
       console.log('[GeneralSettings] Save successful')
       clearStorefrontConfigCache()
@@ -782,6 +761,13 @@ const GeneralSettingsPage = () => {
                         }
                         label={t('settings.general.basic.fields.shop.reviewModerationRequired')}
                       />
+                      <Grid container spacing={4} sx={{ mt: 1 }}>
+                        <Grid size={{ xs: 12 }}>
+                          <Typography variant='body2' color='text.secondary'>
+                            {t('settings.general.basic.fields.shop.identifierManageHint')}
+                          </Typography>
+                        </Grid>
+                      </Grid>
                     </CardContent>
                   </Card>
 
@@ -834,67 +820,6 @@ const GeneralSettingsPage = () => {
                             }}
                           />
                         </Grid>
-                      </Grid>
-                    </CardContent>
-                  </Card>
-
-                  {/* Plugins Section */}
-                  <Card variant='outlined' sx={{ mb: 6 }}>
-                    <CardContent>
-                      <Typography variant='h6' sx={{ mb: 4 }}>
-                        Plugins & Integrations
-                      </Typography>
-                      <Grid container spacing={4}>
-                        <Grid size={{ xs: 12 }}>
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                checked={pluginsData.product_scanner_enabled}
-                                onChange={e => handlePluginsChange('product_scanner_enabled', e.target.checked)}
-                              />
-                            }
-                            label={
-                              <Box>
-                                <Typography variant='body1'>Enable Product Scanner</Typography>
-                                <Typography variant='caption' color='text.secondary'>
-                                  Allow automatic product information scanning using AI (text search or image upload)
-                                </Typography>
-                              </Box>
-                            }
-                          />
-                        </Grid>
-                        {pluginsData.product_scanner_enabled && (
-                          <>
-                            <Grid size={{ xs: 12, sm: 6 }}>
-                              <CustomTextField
-                                fullWidth
-                                label='Product Scanner API URL'
-                                value={pluginsData.product_scanner_api_url}
-                                onChange={e => handlePluginsChange('product_scanner_api_url', e.target.value)}
-                                placeholder='https://product-scanner-appg6r4hzq-de.a.run.app'
-                                slotProps={{
-                                  input: {
-                                    startAdornment: <i className='tabler-link' />
-                                  }
-                                }}
-                              />
-                            </Grid>
-                            <Grid size={{ xs: 12, sm: 6 }}>
-                              <CustomTextField
-                                fullWidth
-                                label='Product Scanner API Key'
-                                value={pluginsData.product_scanner_api_key}
-                                onChange={e => handlePluginsChange('product_scanner_api_key', e.target.value)}
-                                placeholder='ps-xxxxxx'
-                                slotProps={{
-                                  input: {
-                                    startAdornment: <i className='tabler-key' />
-                                  }
-                                }}
-                              />
-                            </Grid>
-                          </>
-                        )}
                       </Grid>
                     </CardContent>
                   </Card>

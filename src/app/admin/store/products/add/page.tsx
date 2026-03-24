@@ -93,7 +93,6 @@ export default function ProductAddPage() {
       if (editableData.is_active === undefined) {
         editableData.is_active = true
       }
-
       // Generate slug from name if not provided
       if (!editableData.slug && editableData.name) {
         // Simple slugify function
@@ -166,7 +165,7 @@ export default function ProductAddPage() {
                   visibleSlots,
                   replacements,
                   ProductInformation,
-                  { productData: formData, onChange: handleChange }
+                  { productData: formData, onChange: handleChange, productId: 'new' }
                 )}
               </Grid>
             )}

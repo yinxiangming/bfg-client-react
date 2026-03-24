@@ -1297,6 +1297,11 @@
             "poor": "Poor"
           }
         }
+      },
+      "labelActions": {
+        "print": "Print Label",
+        "popupBlocked": "Popup blocked. Allow popups, then try printing again.",
+        "printFailed": "Failed to print label"
       }
     },
     "scanner": {
@@ -2661,7 +2666,8 @@
           "stores": "Stores",
           "salesChannels": "Sales Channels",
           "subscriptionPlans": "Subscription Plans",
-          "messageTemplates": "Message Templates"
+          "messageTemplates": "Message Templates",
+          "settings": "Settings"
         }
       },
       "stores": {
@@ -2854,6 +2860,50 @@
             "zhCn": "Simplified Chinese",
             "zhTw": "Traditional Chinese"
           }
+        }
+      },
+      "settings": {
+        "title": "Store Settings",
+        "description": "Manage product identifiers and product scanner integration.",
+        "fields": {
+          "productIdentifiers": {
+            "title": "Product Identifiers",
+            "skuPrefix": {
+              "label": "Default SKU Prefix",
+              "placeholder": "SKU-"
+            },
+            "barcodePrefix": {
+              "label": "Default Product Prefix",
+              "placeholder": "P-"
+            }
+          },
+          "productScanner": {
+            "title": "Product Scanner",
+            "enabled": {
+              "label": "Enable Product Scanner",
+              "help": "Allow AI-powered product information scanning (text search or image upload)."
+            },
+            "apiUrl": {
+              "label": "Product Scanner API URL",
+              "placeholder": "https://product-scanner.example.com"
+            },
+            "apiKey": {
+              "label": "Product Scanner API Key",
+              "placeholder": "ps-xxxxxx"
+            }
+          }
+        },
+        "actions": {
+          "save": "Save",
+          "saving": "Saving..."
+        },
+        "snackbar": {
+          "saved": "Store settings saved."
+        },
+        "errors": {
+          "loadFailed": "Failed to load store settings: {error}",
+          "settingsIdMissing": "Settings ID is missing. Please refresh the page.",
+          "saveFailed": "Failed to save store settings: {error}"
         }
       }
     },
@@ -3354,7 +3404,16 @@
             "showLogin": "Login / account"
           },
           "shop": {
-            "reviewModerationRequired": "Require review moderation (reviews need approval before showing)"
+            "reviewModerationRequired": "Require review moderation (reviews need approval before showing)",
+            "identifierManageHint": "SKU and product prefix are now managed in Store > Settings.",
+            "skuPrefix": {
+              "label": "Default SKU prefix",
+              "placeholder": "SKU-"
+            },
+            "barcodePrefix": {
+              "label": "Default barcode prefix",
+              "placeholder": "P-"
+            }
           },
           "social": {
             "facebook": {

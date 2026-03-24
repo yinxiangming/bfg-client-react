@@ -24,6 +24,7 @@ import StoresTab from './StoresTab'
 import SalesChannelsTab from './SalesChannelsTab'
 import SubscriptionPlansTab from './SubscriptionPlansTab'
 import MessageTemplatesTab from './MessageTemplatesTab'
+import StorePluginsTab from './StorePluginsTab'
 
 const tabPanelSx = {
   p: 0,
@@ -104,6 +105,7 @@ const StoreSettingsPage = () => {
                     <Tab label={t('settings.store.page.tabs.salesChannels')} icon={<i className='tabler-shopping-cart' />} iconPosition='start' value='channels' />
                     <Tab label={t('settings.store.page.tabs.subscriptionPlans')} icon={<i className='tabler-crown' />} iconPosition='start' value='plans' />
                     <Tab label={t('settings.store.page.tabs.messageTemplates')} icon={<i className='tabler-mail' />} iconPosition='start' value='templates' />
+                    <Tab label={t('settings.store.page.tabs.settings')} icon={<i className='tabler-settings' />} iconPosition='start' value='settings' />
                   </CustomTabList>
                 </CardContent>
               </Grid>
@@ -127,6 +129,9 @@ const StoreSettingsPage = () => {
                 </TabPanel>
                 <TabPanel value='templates' sx={tabPanelSx}>
                   <MessageTemplatesTab />
+                </TabPanel>
+                <TabPanel value='settings' sx={tabPanelSx}>
+                  <StorePluginsTab />
                 </TabPanel>
               </Grid>
             </Grid>
