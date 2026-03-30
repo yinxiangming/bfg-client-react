@@ -26,6 +26,7 @@ import CustomTextField from '@components/ui/TextField'
 
 // Utils Imports
 import { meApi } from '@/utils/meApi'
+import { getWorkspaceToken } from '@/utils/authTokens'
 
 import { DEFAULT_AVATAR_URL } from '@/utils/media'
 
@@ -107,7 +108,7 @@ const Information = () => {
         console.error('Failed to fetch user data:', err)
 
         // Check if token exists
-        const hasToken = typeof window !== 'undefined' && localStorage.getItem('auth_token')
+        const hasToken = typeof window !== 'undefined' && getWorkspaceToken()
 
         // If unauthorized or forbidden, show login prompt
         if (err.status === 401 || err.status === 403) {

@@ -2,6 +2,8 @@
 
 import { refreshTokenIfNeeded } from './tokenRefresh'
 import { getApiLanguageHeaders } from '@/i18n/http'
+import { getWorkspaceApiBaseUrlFromEnv } from './apiUrls'
+import { getWorkspaceToken } from './authTokens'
 
 /**
  * Get API base URL from environment variable.
@@ -9,14 +11,7 @@ import { getApiLanguageHeaders } from '@/i18n/http'
  * In browser: use NEXT_PUBLIC_API_URL only.
  */
 export function getApiBaseUrl(): string {
-  const serverUrl = typeof window === 'undefined' ? process.env.API_URL : undefined
-  const apiBaseUrl = serverUrl || process.env.NEXT_PUBLIC_API_URL
-  if (!apiBaseUrl) {
-    throw new Error(
-      'NEXT_PUBLIC_API_URL is not set. Copy .env.example to .env.local and set NEXT_PUBLIC_API_URL (e.g. your API base URL).'
-    )
-  }
-  return apiBaseUrl
+  return getWorkspaceApiBaseUrlFromEnv()
 }
 
 /**
@@ -168,13 +163,10 @@ export const bfgApi = {
 }
 
 /**
- * Get auth token from storage
+ * Get workspace auth token from partitioned storage (migrates legacy `auth_token` once).
  */
 function getAuthToken(): string | null {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('auth_token')
-  }
-  return null
+  return getWorkspaceToken()
 }
 
 /**

@@ -6,6 +6,7 @@
 
 import { refreshTokenIfNeeded } from './tokenRefresh'
 import { getApiBaseUrl, getWorkspaceId } from './api'
+import { getWorkspaceToken } from './authTokens'
 import { getApiLanguageHeaders } from '@/i18n/http'
 
 interface ApiResponse<T> {
@@ -78,9 +79,8 @@ class StorefrontApiClient {
     const workspaceId = getWorkspaceId()
     if (workspaceId) headers['X-Workspace-ID'] = workspaceId
 
-    // Add auth token if available
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('auth_token')
+      const token = getWorkspaceToken()
       if (token) {
         headers['Authorization'] = `Bearer ${token}`
       }

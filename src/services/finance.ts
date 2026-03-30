@@ -1,6 +1,7 @@
 // Finance API service (BFG2 Finance module)
 
 import { apiFetch, bfgApi, getApiBaseUrl, getWorkspaceId } from '@/utils/api'
+import { getWorkspaceToken } from '@/utils/authTokens'
 
 export type Currency = {
   id: number
@@ -454,7 +455,7 @@ export async function downloadInvoice(id: number): Promise<Blob> {
   // Use apiFetch helper but handle blob response
   const API_BASE_URL = getApiBaseUrl()
   const url = `${API_BASE_URL}/api/v1/invoices/${id}/download_pdf/`
-  const token = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null
+  const token = typeof window !== 'undefined' ? getWorkspaceToken() : null
   const workspaceId = getWorkspaceId()
 
   const headers: Record<string, string> = {}

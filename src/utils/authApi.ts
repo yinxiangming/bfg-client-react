@@ -6,6 +6,13 @@
 
 import { getApiBaseUrl, getApiHeaders } from './api'
 import { getApiLanguageHeaders } from '@/i18n/http'
+import {
+  clearWorkspaceAuthTokens,
+  getWorkspaceRefreshToken,
+  getWorkspaceToken,
+  setWorkspaceRefreshToken,
+  setWorkspaceToken,
+} from './authTokens'
 
 interface LoginRequest {
   username?: string
@@ -159,20 +166,18 @@ class AuthApiClient {
 
     const data: TokenResponse = await response.json()
 
-    // Store tokens in localStorage
     // JWT returns 'access' and 'refresh' tokens
     const token = data.access || data.token
     if (token && typeof window !== 'undefined') {
-      localStorage.setItem('auth_token', token)
-      console.log('Login successful: Access token stored in localStorage')
+      setWorkspaceToken(token)
+      console.log('Login successful: Access token stored')
     } else {
       console.warn('Login response did not contain a token:', data)
     }
 
-    // Store refresh token if available
     if (data.refresh && typeof window !== 'undefined') {
-      localStorage.setItem('refresh_token', data.refresh)
-      console.log('Login successful: Refresh token stored in localStorage')
+      setWorkspaceRefreshToken(data.refresh)
+      console.log('Login successful: Refresh token stored')
     }
 
     return data
@@ -236,15 +241,14 @@ class AuthApiClient {
 
     const result: RegisterResponse = await response.json()
 
-    // Store tokens in localStorage
     if (result.access && typeof window !== 'undefined') {
-      localStorage.setItem('auth_token', result.access)
-      console.log('Registration successful: Access token stored in localStorage')
+      setWorkspaceToken(result.access)
+      console.log('Registration successful: Access token stored')
     }
 
     if (result.refresh && typeof window !== 'undefined') {
-      localStorage.setItem('refresh_token', result.refresh)
-      console.log('Registration successful: Refresh token stored in localStorage')
+      setWorkspaceRefreshToken(result.refresh)
+      console.log('Registration successful: Refresh token stored')
     }
 
     return result
@@ -255,9 +259,8 @@ class AuthApiClient {
    */
   logout(): void {
     if (typeof window !== 'undefined') {
-      localStorage.removeItem('auth_token')
-      localStorage.removeItem('refresh_token')
-      console.log('Logged out: Tokens removed from localStorage')
+      clearWorkspaceAuthTokens()
+      console.log('Logged out: Tokens cleared')
     }
   }
 
@@ -266,23 +269,21 @@ class AuthApiClient {
    */
   isAuthenticated(): boolean {
     if (typeof window === 'undefined') return false
-    return !!localStorage.getItem('auth_token')
+    return !!getWorkspaceToken()
   }
 
   /**
-   * Get current access token from localStorage
+   * Get current access token from partitioned storage
    */
   getToken(): string | null {
-    if (typeof window === 'undefined') return null
-    return localStorage.getItem('auth_token')
+    return getWorkspaceToken()
   }
 
   /**
-   * Get refresh token from localStorage
+   * Get refresh token from partitioned storage
    */
   getRefreshToken(): string | null {
-    if (typeof window === 'undefined') return null
-    return localStorage.getItem('refresh_token')
+    return getWorkspaceRefreshToken()
   }
 
   /**
@@ -325,15 +326,13 @@ class AuthApiClient {
 
     const data: TokenResponse = await response.json()
 
-    // Store new tokens
     if (data.access && typeof window !== 'undefined') {
-      localStorage.setItem('auth_token', data.access)
+      setWorkspaceToken(data.access)
       console.log('Token refreshed: New access token stored')
     }
 
-    // Store new refresh token if provided (token rotation)
     if (data.refresh && typeof window !== 'undefined') {
-      localStorage.setItem('refresh_token', data.refresh)
+      setWorkspaceRefreshToken(data.refresh)
       console.log('Token refreshed: New refresh token stored')
     }
 

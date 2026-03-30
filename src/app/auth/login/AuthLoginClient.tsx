@@ -16,6 +16,7 @@ import Icon from '@components/Icon'
 import { authApi } from '@/utils/authApi'
 import { getApiBaseUrl } from '@/utils/api'
 import { useStorefrontConfigSafe } from '@/contexts/StorefrontConfigContext'
+import { isPlatformInstance, handlePlatformPostLogin } from '@/services/platform'
 
 export default function AuthLoginClient() {
   const t = useTranslations('auth.login')
@@ -46,11 +47,14 @@ export default function AuthLoginClient() {
 
     try {
       await authApi.login({ email, password })
-      const redirect = searchParams.get('redirect')
-      if (redirect) {
-        router.push(decodeURIComponent(redirect))
+
+      if (isPlatformInstance()) {
+        await handlePlatformPostLogin(
+          (url: string) => router.push(url),
+          redirect,
+        )
       } else {
-        router.push('/account')
+        router.push(redirect)
       }
     } catch (err: any) {
       setError(err?.message === 'NETWORK_ERROR' ? t('networkError') : (err?.message || t('loginFailed')))

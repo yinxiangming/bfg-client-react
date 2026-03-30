@@ -6,6 +6,7 @@
 
 import { refreshTokenIfNeeded } from './tokenRefresh'
 import { getApiBaseUrl, getWorkspaceId } from './api'
+import { getWorkspaceToken } from './authTokens'
 import { getApiLanguageHeaders } from '@/i18n/http'
 
 interface ApiResponse<T> {
@@ -73,9 +74,8 @@ class MeApiClient {
       headers['Content-Type'] = 'application/json'
     }
 
-    // Add auth token if available (Bearer token authentication only for account module)
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('auth_token')
+      const token = getWorkspaceToken()
       if (token) {
         headers['Authorization'] = `Bearer ${token}`
       }
@@ -160,7 +160,7 @@ class MeApiClient {
           }
         }
         // Check if we have a token - if not, suggest login
-        const hasToken = typeof window !== 'undefined' && localStorage.getItem('auth_token')
+        const hasToken = typeof window !== 'undefined' && getWorkspaceToken()
         if (!hasToken) {
           errorDetail = 'Please log in to access your account information.'
         } else {
@@ -180,7 +180,7 @@ class MeApiClient {
       ;(error as any).data = errorData
       ;(error as any).url = url
 
-      const hasToken = typeof window !== 'undefined' && localStorage.getItem('auth_token')
+      const hasToken = typeof window !== 'undefined' && getWorkspaceToken()
 
       console.error('API Request failed:', {
         url,
@@ -488,9 +488,8 @@ class MeApiClient {
 
     const headers: Record<string, string> = {}
 
-    // Add auth token if available
     if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('auth_token')
+      const token = getWorkspaceToken()
       if (token) {
         headers['Authorization'] = `Bearer ${token}`
       }
@@ -501,13 +500,10 @@ class MeApiClient {
       headers
     })
 
-    // Handle 401 Unauthorized or 403 Forbidden - try to refresh token and retry
-    // Both can indicate an expired token
     if ((response.status === 401 || response.status === 403) && retryOn401) {
       const newToken = await refreshTokenIfNeeded()
       if (newToken) {
-        // Retry the request with new token
-        return this.downloadInvoice(id, false) // Don't retry again if it fails
+        return this.downloadInvoice(id, false)
       }
       // If refresh failed, fall through to error handling
     }
