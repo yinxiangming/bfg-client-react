@@ -94,6 +94,7 @@ export default function AccountDashboardClient() {
   const { beforeSlots, afterSlots, replacements } = usePageSlots('account/dashboard')
   const [stats, setStats] = useState<DashboardStats | null>(null)
   const [statsLoading, setStatsLoading] = useState(true)
+  const [isStaff, setIsStaff] = useState(false)
   const displayCurrency = stats?.wallet_currency ?? storefrontConfig.default_currency
 
   useEffect(() => {
@@ -109,6 +110,9 @@ export default function AccountDashboardClient() {
       .finally(() => {
         if (!cancelled) setStatsLoading(false)
       })
+    meApi.getMe().then((me) => {
+      if (!cancelled) setIsStaff(!!(me?.is_staff || me?.is_superuser))
+    }).catch(() => {})
     return () => {
       cancelled = true
     }
@@ -222,6 +226,37 @@ export default function AccountDashboardClient() {
           })()}
         </Box>
       ) : null}
+
+      {isStaff && (
+        <Card
+          variant='outlined'
+          sx={{
+            borderRadius: 2,
+            boxShadow: 'none',
+            border: theme => `1px solid ${theme.palette.primary.main}`,
+            cursor: 'pointer',
+            '&:hover': { bgcolor: 'action.hover' }
+          }}
+          onClick={() => handleCardClick(isBelowMdScreen ? '/admin/m' : '/admin')}
+        >
+          <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+            <Avatar variant='rounded' sx={{ bgcolor: 'primary.main', width: 48, height: 48 }}>
+              <Icon icon='tabler-shield-check' style={{ fontSize: 28, color: '#fff' }} />
+            </Avatar>
+            <div>
+              <Typography variant='subtitle1' fontWeight={600} color='primary'>
+                {t('dashboard.adminShortcut.title')}
+              </Typography>
+              <Typography variant='body2' color='text.secondary'>
+                {t('dashboard.adminShortcut.description')}
+              </Typography>
+            </div>
+            <Box sx={{ ml: 'auto' }}>
+              <Icon icon='tabler-chevron-right' style={{ fontSize: 20, color: 'inherit', opacity: 0.5 }} />
+            </Box>
+          </CardContent>
+        </Card>
+      )}
 
       <Card
         variant='outlined'

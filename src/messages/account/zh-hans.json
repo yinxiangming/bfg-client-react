@@ -50,6 +50,10 @@
       "ordersCompleted": "已完成",
       "ordersCancelled": "已取消"
     },
+    "adminShortcut": {
+      "title": "管理后台",
+      "description": "管理产品、订单和店铺设置"
+    },
     "menuItems": {
       "orders": {
         "title": "我的订单",

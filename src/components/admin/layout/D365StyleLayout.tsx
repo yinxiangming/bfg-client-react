@@ -55,8 +55,6 @@ const D365StyleLayout = ({ children, navItems = adminNavItems }: D365StyleLayout
     }
   }
 
-  const handleOverlayClick = () => setMobileOpen(false)
-
   return (
     <div className={`d365-admin-layout ${collapsed ? 'sidebar-collapsed' : ''}`}>
       {/* Main Container */}
@@ -71,11 +69,6 @@ const D365StyleLayout = ({ children, navItems = adminNavItems }: D365StyleLayout
             mobileOpen={mobileOpen}
           />
         </aside>
-        
-        {isMobile && mobileOpen && (
-          <div className='sidebar-overlay' onClick={handleOverlayClick} />
-        )}
-
         {/* Main Content Area with Topbar */}
         <div className='d365-content-wrapper'>
           {/* Topbar - Only spans content area */}

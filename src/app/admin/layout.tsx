@@ -7,10 +7,10 @@ export const metadata = {
   title: { template: 'Admin - %s', default: 'Admin' },
 }
 
-export default async function AdminLayout({ 
-  children 
-}: { 
-  children: React.ReactNode 
+export default async function AdminLayout({
+  children
+}: {
+  children: React.ReactNode
 }) {
   // Server-side: load extensions and compute final navigation
   const extensions = await loadExtensions()

@@ -1143,6 +1143,14 @@
     display: inline-flex;
   }
 
+  .admin-topbar-layout-switcher {
+    display: none;
+  }
+
+  .d365-admin-layout .sidebar-header {
+    display: none;
+  }
+
   .admin-table-head,
   .admin-table-row {
     grid-template-columns: 1.6fr 1fr 1fr 1fr 1.2fr;

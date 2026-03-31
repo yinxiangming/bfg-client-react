@@ -9,6 +9,7 @@ const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   outputFileTracingRoot: process.env.NEXT_FILE_TRACING_ROOT || join(__dirname, '../..'),
+  allowedDevOrigins: process.env.ALLOWED_DEV_ORIGINS?.split(',').map(s => s.trim()).filter(Boolean) ?? [],
 }
 
 export default withNextIntl(nextConfig)

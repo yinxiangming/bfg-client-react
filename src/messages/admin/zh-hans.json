@@ -3725,5 +3725,43 @@
         }
       }
     }
+  },
+  "mobileAdmin": {
+    "title": "管理",
+    "logout": "退出登录",
+    "menu": {
+      "theme": "主题",
+      "language": "语言"
+    },
+    "hub": {
+      "title": "管理工具",
+      "productEntry": "录入产品",
+      "productEntryDesc": "录入产品型号、数量、存放位置和照片"
+    },
+    "quickEntry": {
+      "title": "快捷录入",
+      "back": "返回",
+      "product": "录入产品",
+      "productDesc": "录入产品型号、数量、位置及照片"
+    },
+    "productEntry": {
+      "title": "录入产品",
+      "back": "返回",
+      "name": "产品型号",
+      "namePlaceholder": "输入产品型号或名称",
+      "quantity": "数量",
+      "location": "存放位置",
+      "locationPlaceholder": "位置编码，如 A1-03",
+      "locationHelper": "提交后保留，供连续录入使用",
+      "category": "目录",
+      "categoryNone": "不选择",
+      "photos": "照片",
+      "addPhoto": "拍照 / 选择图片",
+      "submit": "提交并新建",
+      "submitting": "提交中…",
+      "successMessage": "已添加：{name}",
+      "errorRequired": "请填写产品型号",
+      "errorSubmit": "提交失败，请重试"
+    }
   }
 }

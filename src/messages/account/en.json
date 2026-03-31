@@ -50,6 +50,10 @@
       "ordersCompleted": "Completed",
       "ordersCancelled": "Cancelled"
     },
+    "adminShortcut": {
+      "title": "Admin Panel",
+      "description": "Manage products, orders, and store settings"
+    },
     "menuItems": {
       "orders": {
         "title": "My Orders",

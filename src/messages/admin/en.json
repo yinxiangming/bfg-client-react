@@ -3725,5 +3725,43 @@
         }
       }
     }
+  },
+  "mobileAdmin": {
+    "title": "Admin",
+    "logout": "Logout",
+    "menu": {
+      "theme": "Theme",
+      "language": "Language"
+    },
+    "hub": {
+      "title": "Tools",
+      "productEntry": "Log Product",
+      "productEntryDesc": "Log product model, quantity, location and photos"
+    },
+    "quickEntry": {
+      "title": "Quick Entry",
+      "back": "Back",
+      "product": "Log Product",
+      "productDesc": "Log product model, quantity, location and photos"
+    },
+    "productEntry": {
+      "title": "Log Product",
+      "back": "Back",
+      "name": "Product Model",
+      "namePlaceholder": "Enter model or product name",
+      "quantity": "Quantity",
+      "location": "Storage Location",
+      "locationPlaceholder": "Location code, e.g. A1-03",
+      "locationHelper": "Preserved between submissions",
+      "category": "Category",
+      "categoryNone": "None",
+      "photos": "Photos",
+      "addPhoto": "Take Photo / Select Image",
+      "submit": "Submit & Add Another",
+      "submitting": "Submitting…",
+      "successMessage": "Added: {name}",
+      "errorRequired": "Product model is required",
+      "errorSubmit": "Submission failed, please try again"
+    }
   }
 }
