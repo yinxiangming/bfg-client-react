@@ -1301,7 +1301,9 @@
       "labelActions": {
         "print": "Print Label",
         "popupBlocked": "Popup blocked. Allow popups, then try printing again.",
-        "printFailed": "Failed to print label"
+        "printFailed": "Failed to print label",
+        "regenerateSku": "Regenerate SKU",
+        "regenerateBarcode": "Regenerate Barcode"
       }
     },
     "scanner": {

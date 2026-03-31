@@ -1301,7 +1301,9 @@
       "labelActions": {
         "print": "打印标签",
         "popupBlocked": "浏览器拦截了弹窗，请允许后重试打印。",
-        "printFailed": "打印标签失败"
+        "printFailed": "打印标签失败",
+        "regenerateSku": "重新生成 SKU",
+        "regenerateBarcode": "重新生成条码"
       }
     },
     "scanner": {

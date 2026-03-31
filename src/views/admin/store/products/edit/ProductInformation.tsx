@@ -71,6 +71,8 @@ const ProductInformation = ({
     const [scannerConfig, setScannerConfig] = useState({ apiUrl: '', apiKey: '' })
     const [autoSaveDialogOpen, setAutoSaveDialogOpen] = useState(false)
     const [printingLabel, setPrintingLabel] = useState(false)
+    const [regeneratingSku, setRegeneratingSku] = useState(false)
+    const [regeneratingBarcode, setRegeneratingBarcode] = useState(false)
 
     const openLabelPrintTab = (): Window | null => window.open('about:blank', '_blank')
 
@@ -110,6 +112,32 @@ const ProductInformation = ({
             alert(err instanceof Error ? err.message : t('products.information.labelActions.printFailed'))
         } finally {
             setPrintingLabel(false)
+        }
+    }
+
+    const handleRegenerateIdentifier = async (field: 'sku' | 'barcode') => {
+        if (!productId || productId === 'new') return
+        const productNumericId = Number(productId)
+        if (!Number.isFinite(productNumericId) || productNumericId <= 0) return
+
+        const setter = field === 'sku' ? setRegeneratingSku : setRegeneratingBarcode
+        setter(true)
+        try {
+            const params = new URLSearchParams({ fields: field, name })
+            const url = buildApiUrl(`/products/${productNumericId}/generate_identifiers/?${params}`, API_VERSIONS.BFG2)
+            const data = await apiFetch<Record<string, string>>(url)
+            if (field === 'sku' && data.sku) {
+                setSku(data.sku)
+                onChange?.('sku', data.sku)
+            } else if (field === 'barcode' && data.barcode) {
+                setBarcode(data.barcode)
+                // @ts-ignore
+                onChange?.('barcode' as keyof Product, data.barcode)
+            }
+        } catch (err) {
+            console.error(`Failed to regenerate ${field}:`, err)
+        } finally {
+            setter(false)
         }
     }
 
@@ -262,6 +290,23 @@ const ProductInformation = ({
                             placeholder={t('products.information.fields.sku.placeholder')}
                             value={sku}
                             onChange={handleSkuChange}
+                            InputProps={{
+                                endAdornment: (
+                                    <InputAdornment position='end'>
+                                        <Tooltip title={t('products.information.labelActions.regenerateSku', { defaultValue: '重新生成 SKU' })}>
+                                            <span>
+                                                <IconButton
+                                                    size='small'
+                                                    onClick={() => void handleRegenerateIdentifier('sku')}
+                                                    disabled={!productId || productId === 'new' || regeneratingSku}
+                                                >
+                                                    {regeneratingSku ? <CircularProgress size={16} /> : <i className='tabler-refresh' />}
+                                                </IconButton>
+                                            </span>
+                                        </Tooltip>
+                                    </InputAdornment>
+                                )
+                            }}
                         />
                     </Grid>
                     <Grid size={{ xs: 12, sm: 6 }}>
@@ -275,6 +320,17 @@ const ProductInformation = ({
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position='end'>
+                                        <Tooltip title={t('products.information.labelActions.regenerateBarcode', { defaultValue: '重新生成条码' })}>
+                                            <span>
+                                                <IconButton
+                                                    size='small'
+                                                    onClick={() => void handleRegenerateIdentifier('barcode')}
+                                                    disabled={!productId || productId === 'new' || regeneratingBarcode}
+                                                >
+                                                    {regeneratingBarcode ? <CircularProgress size={16} /> : <i className='tabler-refresh' />}
+                                                </IconButton>
+                                            </span>
+                                        </Tooltip>
                                         <Tooltip title={t('products.information.labelActions.print')}>
                                             <span>
                                                 <IconButton
