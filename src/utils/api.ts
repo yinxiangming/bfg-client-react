@@ -175,14 +175,13 @@ function getAuthToken(): string | null {
  */
 export function getWorkspaceId(): string | null {
   if (typeof window !== 'undefined') {
+    // Always prefer localStorage override (set during token exchange from platform login)
+    const workspaceId = localStorage.getItem('workspace_id')
+    if (workspaceId) return workspaceId
     if (process.env.NODE_ENV === 'development') {
       return process.env.NEXT_PUBLIC_WORKSPACE_ID || '1'
     }
     const envWorkspaceId = process.env.NEXT_PUBLIC_WORKSPACE_ID || null
-    const workspaceId = localStorage.getItem('workspace_id')
-    if (workspaceId) {
-      return workspaceId
-    }
     if (envWorkspaceId) return envWorkspaceId
   } else if (process.env.NEXT_PUBLIC_WORKSPACE_ID) {
     return process.env.NEXT_PUBLIC_WORKSPACE_ID

@@ -21,11 +21,17 @@ export default function AuthCallbackPage() {
     const refresh = params.get('refresh')
     const redirect = params.get('redirect') || '/account'
 
+    const workspaceId = params.get('workspace_id')
+    const workspaceApiUrl = params.get('workspace_api_url')
+
     if (access) {
       setWorkspaceToken(access)
       if (refresh) {
         setWorkspaceRefreshToken(refresh)
       }
+      // Store workspace routing info passed from platform login
+      if (workspaceId) localStorage.setItem('workspace_id', workspaceId)
+      if (workspaceApiUrl) localStorage.setItem('workspace_api_url', workspaceApiUrl)
       window.history.replaceState(null, '', window.location.pathname)
 
       if (isPlatformInstance()) {
