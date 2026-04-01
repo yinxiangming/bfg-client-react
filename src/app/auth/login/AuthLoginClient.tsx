@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { ChangeEvent, FormEvent, MouseEvent } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -33,6 +33,14 @@ export default function AuthLoginClient() {
 
   const redirect = searchParams.get('redirect') ? decodeURIComponent(searchParams.get('redirect')!) : '/account'
   const host = typeof window !== 'undefined' ? window.location.host : ''
+
+  // If this workspace is linked to a Platform, redirect to Platform login instead.
+  const platformLoginUrl = process.env.NEXT_PUBLIC_PLATFORM_LOGIN_URL
+  useEffect(() => {
+    if (platformLoginUrl) {
+      window.location.replace(platformLoginUrl)
+    }
+  }, [platformLoginUrl])
 
   const socialLogin = (provider: string) => {
     const apiBase = getApiBaseUrl().replace(/\/+$/, '')
