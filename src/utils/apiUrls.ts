@@ -1,30 +1,49 @@
 /**
- * Workspace BFG API base URL resolution. Single place for env reads; no hardcoded localhost fallbacks.
+ * API base URL resolution for Platform vs Workspace (BFG) servers.
+ * Single place for env reads; no hardcoded localhost fallbacks.
+ *
+ * Embedded mode:  getPlatformApiBaseUrl() === getWorkspaceApiBaseUrlFromEnv()
+ * Standalone mode: they may differ (Platform :8011, Workspace :8000)
  */
 
 export function normalizeApiBaseUrl(url: string): string {
   return url.replace(/\/+$/, '')
 }
 
+/** Platform admin API base (NEXT_PUBLIC_API_URL). */
+export function getPlatformApiBaseUrl(): string {
+  const u = process.env.NEXT_PUBLIC_API_URL
+  if (!u) {
+    throw new Error(
+      'NEXT_PUBLIC_API_URL is not set. Copy .env.example to .env.local and set it to your API base URL.'
+    )
+  }
+  return normalizeApiBaseUrl(u)
+}
+
 /**
  * Default workspace BFG base from env (SSR and browser).
- * Mirrors getApiBaseUrl() semantics: API_URL on server when set, else NEXT_PUBLIC_API_URL.
+ * Standalone: NEXT_PUBLIC_WORKSPACE_API_URL (separate workspace server)
+ * Embedded:   falls back to NEXT_PUBLIC_API_URL (same server)
  */
 export function getWorkspaceApiBaseUrlFromEnv(): string {
   const serverUrl = typeof window === 'undefined' ? process.env.API_URL : undefined
-  const apiBaseUrl = serverUrl || process.env.NEXT_PUBLIC_API_URL
-  if (!apiBaseUrl) {
+  const u = serverUrl
+    || process.env.NEXT_PUBLIC_WORKSPACE_API_URL
+    || process.env.NEXT_PUBLIC_API_URL
+  if (!u) {
     throw new Error(
-      'NEXT_PUBLIC_API_URL is not set. Copy .env.example to .env.local and set NEXT_PUBLIC_API_URL (e.g. your API base URL).'
+      'Set NEXT_PUBLIC_API_URL or NEXT_PUBLIC_WORKSPACE_API_URL for the workspace BFG API base URL.'
     )
   }
-  return normalizeApiBaseUrl(apiBaseUrl)
+  return normalizeApiBaseUrl(u)
 }
 
 const WORKSPACE_URL_KEY = 'workspace_api_url'
 
 /**
- * Workspace BFG base for storage keys and requests: optional per-tenant override after token exchange, then env.
+ * Workspace BFG base for client storage and requests:
+ * optional per-tenant override (after token exchange in standalone mode) → env.
  */
 export function getWorkspaceApiBaseUrlForStorage(): string {
   if (typeof window !== 'undefined') {
