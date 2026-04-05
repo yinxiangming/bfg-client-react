@@ -51,6 +51,7 @@ export default async function StorefrontLayoutWrapper({ children }: { children: 
   const hostDomain = (requestHost ?? '').split(':')[0]
   const workspaceDomain = config?.workspace_domain ?? ''
   const isLocal = !hostDomain || hostDomain === 'localhost' || hostDomain.startsWith('127.') || hostDomain.startsWith('192.168.')
+  // Non-local hosts must match workspace_domain from settings (hostname only) to render the storefront.
   const domainMismatch = !isLocal && (!workspaceDomain || hostDomain !== workspaceDomain)
   if (config === null || domainMismatch) {
     redirect('/unknown')

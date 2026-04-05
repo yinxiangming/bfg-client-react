@@ -10,7 +10,8 @@ node_modules/
 .vercel
 next-env.d.ts
 
-# Plugin dir: ignore generated file only; track loaders.generated.ts and plugin subdirs (e.g. resale submodule)
+# prepare.js copies plugin routes into src/app/.../plugins/<id>/; keep those generated trees untracked.
+# Still track src/plugins/<name>/index.ts etc. via selective un-ignore if needed.
 src/plugins/*
 src/app/account/plugins/
 src/app/admin/plugins/
