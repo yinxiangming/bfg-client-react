@@ -60,6 +60,8 @@ export type StorefrontConfig = {
   header_options?: StorefrontHeaderOptions
   /** When true, new reviews require admin approval before showing. Default false. */
   review_moderation_required?: boolean
+  /** Primary domain configured for this workspace (hostname only, no port). */
+  workspace_domain?: string
 }
 
 const STALE_MS = 5 * 60 * 1000 // 5 minutes
