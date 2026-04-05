@@ -48,7 +48,11 @@ export default async function StorefrontLayoutWrapper({ children }: { children: 
   const locale = await getLocale()
   const requestHost = headersList.get('host') ?? undefined
   const config = await getStorefrontConfigForServer(locale, requestHost)
-  if (config === null) {
+  const hostDomain = (requestHost ?? '').split(':')[0]
+  const workspaceDomain = config?.workspace_domain ?? ''
+  const isLocal = !hostDomain || hostDomain === 'localhost' || hostDomain.startsWith('127.') || hostDomain.startsWith('192.168.')
+  const domainMismatch = !isLocal && (!workspaceDomain || hostDomain !== workspaceDomain)
+  if (config === null || domainMismatch) {
     redirect('/unknown')
   }
   const theme = config.theme ?? 'store'
