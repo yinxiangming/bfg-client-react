@@ -11,7 +11,7 @@ import { loadExtensions } from '@/extensions'
 import { ExtensionLoaderProvider } from '@/extensions/context'
 import { getPageSlotReplacements, getStorefrontLayoutOverride } from '@/extensions/resolve'
 import { ROOT_SLOT_ID } from '@/extensions/terminology'
-import StorefrontSetupRequired from '@/components/storefront/StorefrontSetupRequired'
+import { redirect } from 'next/navigation'
 
 export default async function StorefrontLayoutWrapper({ children }: { children: React.ReactNode }) {
   const extensions = await loadExtensions()
@@ -49,13 +49,7 @@ export default async function StorefrontLayoutWrapper({ children }: { children: 
   const requestHost = headersList.get('host') ?? undefined
   const config = await getStorefrontConfigForServer(locale, requestHost)
   if (config === null) {
-    return (
-      <ExtensionLoaderProvider extensionIds={extensionIds}>
-        <StorefrontConfigProvider initialConfig={null}>
-          <StorefrontSetupRequired />
-        </StorefrontConfigProvider>
-      </ExtensionLoaderProvider>
-    )
+    redirect('/unknown')
   }
   const theme = config.theme ?? 'store'
 

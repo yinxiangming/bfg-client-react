@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   outputFileTracingRoot: process.env.NEXT_FILE_TRACING_ROOT || (process.env.VERCEL ? process.cwd() : join(__dirname, '../..')),
   allowedDevOrigins: process.env.ALLOWED_DEV_ORIGINS?.split(',').map(s => s.trim()).filter(Boolean) ?? [],
+  webpack: (config) => {
+    // Fallback for --no-turbopack: resolve node_modules from the client directory.
+    config.resolve.modules = [join(__dirname, 'node_modules'), 'node_modules']
+    return config
+  },
 }
 
 export default withNextIntl(nextConfig)
