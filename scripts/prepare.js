@@ -127,7 +127,24 @@ function syncPluginRoutes() {
       return stat.isDirectory() && fs.existsSync(path.join(p, 'app'))
     })
     for (const plugin of plugins) {
-      copyRecursive(path.join(PLUGINS_DIR, plugin, 'app'), APP_DIR, syncedFiles)
+      const pluginAppDir = path.join(PLUGINS_DIR, plugin, 'app')
+      const topLevel = fs.readdirSync(pluginAppDir, { withFileTypes: true })
+      for (const dirent of topLevel) {
+        if (dirent.name.startsWith('.')) continue
+        if (!dirent.isDirectory()) continue
+        const segment = dirent.name
+        const segmentDir = path.join(pluginAppDir, segment)
+        for (const child of fs.readdirSync(segmentDir, { withFileTypes: true })) {
+          if (!child.isDirectory() || child.name.startsWith('.')) continue
+          const name = child.name
+          const srcPath = path.join(segmentDir, name)
+          const destPath =
+            name === plugin
+              ? path.join(APP_DIR, segment, 'plugins', plugin)
+              : path.join(APP_DIR, segment, name)
+          copyRecursive(srcPath, destPath, syncedFiles)
+        }
+      }
     }
     if (plugins.length > 0) {
       console.log('Plugin routes:', plugins.join(', '), '->', syncedFiles.length, 'file(s)')

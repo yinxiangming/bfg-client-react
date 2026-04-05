@@ -14,6 +14,7 @@ next-env.d.ts
 src/plugins/*
 src/app/account/plugins/
 src/app/admin/plugins/
+src/app/(storefront)/plugins/
 src/.plugin-routes-manifest.json
 src/components/storefront/themes/registry.generated.ts
 .env*.local
