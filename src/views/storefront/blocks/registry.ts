@@ -9,9 +9,13 @@ import type { BlockDefinition, BlockComponent, BlockSettingsComponent, BlockRegi
 
 // Import block modules manually (Next.js/Turbopack doesn't support import.meta.glob)
 import * as HeroCarouselV1Module from './library/hero/HeroCarouselV1/definition'
+import * as InsuranceHeroV1Module from './library/hero/InsuranceHeroV1/definition'
 import * as PostListV1Module from './library/list/PostListV1/definition'
 import * as TextBlockV1Module from './library/content/TextBlockV1/definition'
 import * as CtaBlockV1Module from './library/content/CtaBlockV1/definition'
+import * as InsuranceServiceGridV1Module from './library/content/InsuranceServiceGridV1/definition'
+import * as InsuranceStatsV1Module from './library/content/InsuranceStatsV1/definition'
+import * as InsuranceFaqV1Module from './library/content/InsuranceFaqV1/definition'
 import * as ContactFormV1Module from './library/form/ContactFormV1/definition'
 import * as CategoryGridV1Module from './library/list/CategoryGridV1/definition'
 import * as BannerGridV1Module from './library/media/BannerGridV1/definition'
@@ -21,9 +25,13 @@ import * as SectionV1Module from './library/layout/SectionV1/definition'
 // All block modules
 const blockModules = [
   HeroCarouselV1Module,
+  InsuranceHeroV1Module,
   PostListV1Module,
   TextBlockV1Module,
   CtaBlockV1Module,
+  InsuranceServiceGridV1Module,
+  InsuranceStatsV1Module,
+  InsuranceFaqV1Module,
   ContactFormV1Module,
   CategoryGridV1Module,
   BannerGridV1Module,

@@ -1,0 +1,68 @@
+.section {
+  padding: 4rem 2rem;
+}
+
+.section.brand {
+  background-color: #2563eb;
+  color: #ffffff;
+}
+
+.section.dark {
+  background-color: #0f172a;
+  color: #ffffff;
+}
+
+.section.light {
+  background-color: #f8fafc;
+  color: #0f172a;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.grid {
+  display: flex;
+  justify-content: space-around;
+  flex-wrap: wrap;
+  gap: 2rem;
+}
+
+.statItem {
+  text-align: center;
+  flex: 1;
+  min-width: 200px;
+}
+
+.value {
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+.label {
+  font-size: 1.125rem;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .value {
+    font-size: 2.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
