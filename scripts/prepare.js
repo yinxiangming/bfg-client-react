@@ -3,6 +3,9 @@
 /**
  * Run all pre-build tasks: plugin loaders, plugin routes, theme registry.
  * Usage: node scripts/prepare.js
+ *
+ * Plugin routes: each plugin may ship `plugins/<id>/app/<segment>/...` (e.g. admin, account).
+ * See syncPluginRoutes() for how that maps into `src/app/`.
  */
 
 const fs = require('fs')
@@ -134,10 +137,13 @@ function syncPluginRoutes() {
         if (!dirent.isDirectory()) continue
         const segment = dirent.name
         const segmentDir = path.join(pluginAppDir, segment)
+        // One top-level folder per area (admin / account / (storefront) / …).
         for (const child of fs.readdirSync(segmentDir, { withFileTypes: true })) {
           if (!child.isDirectory() || child.name.startsWith('.')) continue
           const name = child.name
           const srcPath = path.join(segmentDir, name)
+          // Folder name === plugin id → isolate under app/<segment>/plugins/<id>/ (rewritten in next.config).
+          // Otherwise merge into app/<segment>/<name>/ (shared routes, e.g. settings).
           const destPath =
             name === plugin
               ? path.join(APP_DIR, segment, 'plugins', plugin)

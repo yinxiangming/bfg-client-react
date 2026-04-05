@@ -7,6 +7,9 @@ import type { NextConfig } from 'next'
 const withNextIntl = createNextIntlPlugin('./src/i18n/request.ts')
 
 /**
+ * Maps public URLs like `/admin/<pluginId>` to the on-disk path `/admin/plugins/<pluginId>/...`
+ * produced by scripts/prepare.js when the plugin ships `plugins/<id>/app/admin/<id>/`.
+ * Skips `(storefront)` here; storefront plugin routing is handled separately if needed.
  */
 function buildPluginRewrites() {
   const rules = []
