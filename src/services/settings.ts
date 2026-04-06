@@ -1,6 +1,6 @@
 // Settings API service (BFG2 Settings module)
 
-import { apiFetch, bfgApi } from '@/utils/api'
+import { apiFetch, bfgApi, getWorkspaceId } from '@/utils/api'
 
 export type User = {
   id: number
@@ -127,6 +127,31 @@ export type GeneralSettingsPayload = {
   site_announcement?: string
   footer_contact?: string
   logo?: string
+  /** Optional internal note (e.g. from site-config workspace_bootstrap) */
+  workspace_note?: string
+}
+
+export type WorkspaceRecord = {
+  id: number
+  name: string
+  slug: string
+  is_active?: boolean
+}
+
+export async function fetchWorkspaceRecord(): Promise<WorkspaceRecord | null> {
+  const id = getWorkspaceId()
+  if (!id) return null
+  return apiFetch<WorkspaceRecord>(`${bfgApi.workspaces()}${id}/`)
+}
+
+export async function patchWorkspaceRecord(
+  id: number,
+  data: Partial<Pick<WorkspaceRecord, 'name' | 'slug'>>
+): Promise<WorkspaceRecord> {
+  return apiFetch<WorkspaceRecord>(`${bfgApi.workspaces()}${id}/`, {
+    method: 'PATCH',
+    body: JSON.stringify(data)
+  })
 }
 
 export type PluginsSettingsPayload = {

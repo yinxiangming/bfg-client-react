@@ -7,7 +7,7 @@
 import { refreshTokenIfNeeded } from './tokenRefresh'
 import { getApiBaseUrl, getWorkspaceId } from './api'
 import { getWorkspaceToken } from './authTokens'
-import { getApiLanguageHeaders } from '@/i18n/http'
+import { getApiLanguageHeaders, getCurrentLocale } from '@/i18n/http'
 
 interface ApiResponse<T> {
   data?: T
@@ -78,6 +78,10 @@ class StorefrontApiClient {
     }
     const workspaceId = getWorkspaceId()
     if (workspaceId) headers['X-Workspace-ID'] = workspaceId
+    // Match SSR / settings fetch: let WorkspaceMiddleware resolve tenant by site host when ID is unset.
+    if (typeof window !== 'undefined' && typeof window.location?.host === 'string' && window.location.host) {
+      headers['X-Forwarded-Host'] = window.location.host
+    }
 
     if (typeof window !== 'undefined') {
       const token = getWorkspaceToken()
@@ -331,6 +335,9 @@ class StorefrontApiClient {
   async getCategories(params?: { tree?: boolean }): Promise<ApiResponse<any>> {
     const queryParams = new URLSearchParams()
     if (params?.tree) queryParams.append('tree', 'true')
+    if (typeof window !== 'undefined') {
+      queryParams.append('lang', getCurrentLocale())
+    }
 
     const query = queryParams.toString()
     return this.request<ApiResponse<any>>(`/api/v1/store/categories/${query ? `?${query}` : ''}`)

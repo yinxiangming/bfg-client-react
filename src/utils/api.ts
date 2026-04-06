@@ -170,17 +170,16 @@ function getAuthToken(): string | null {
 }
 
 /**
- * Get workspace ID from storage or use default.
- * On server (SSR), uses NEXT_PUBLIC_WORKSPACE_ID so port-specific site (e.g. 3001) gets correct workspace.
+ * Get workspace ID from storage or env.
+ * Do not default to a numeric id in development: that forces the wrong tenant when the API should
+ * resolve workspace by Host / X-Forwarded-Host (e.g. Geeker on localhost). Set NEXT_PUBLIC_WORKSPACE_ID
+ * explicitly when you need a fixed workspace without domain routing.
  */
 export function getWorkspaceId(): string | null {
   if (typeof window !== 'undefined') {
     // Always prefer localStorage override (set during token exchange from platform login)
     const workspaceId = localStorage.getItem('workspace_id')
     if (workspaceId) return workspaceId
-    if (process.env.NODE_ENV === 'development') {
-      return process.env.NEXT_PUBLIC_WORKSPACE_ID || '1'
-    }
     const envWorkspaceId = process.env.NEXT_PUBLIC_WORKSPACE_ID || null
     if (envWorkspaceId) return envWorkspaceId
   } else if (process.env.NEXT_PUBLIC_WORKSPACE_ID) {

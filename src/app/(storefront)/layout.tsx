@@ -12,6 +12,7 @@ import { ExtensionLoaderProvider } from '@/extensions/context'
 import { getPageSlotReplacements, getStorefrontLayoutOverride } from '@/extensions/resolve'
 import { ROOT_SLOT_ID } from '@/extensions/terminology'
 import { redirect } from 'next/navigation'
+import { isLocalStorefrontHost, normalizeStorefrontHostname } from '@/utils/storefrontHost'
 
 export default async function StorefrontLayoutWrapper({ children }: { children: React.ReactNode }) {
   const extensions = await loadExtensions()
@@ -49,10 +50,14 @@ export default async function StorefrontLayoutWrapper({ children }: { children: 
   const requestHost = headersList.get('host') ?? undefined
   const config = await getStorefrontConfigForServer(locale, requestHost)
   const hostDomain = (requestHost ?? '').split(':')[0]
-  const workspaceDomain = config?.workspace_domain ?? ''
-  const isLocal = !hostDomain || hostDomain === 'localhost' || hostDomain.startsWith('127.') || hostDomain.startsWith('192.168.')
-  // Non-local hosts must match workspace_domain from settings (hostname only) to render the storefront.
-  const domainMismatch = !isLocal && (!workspaceDomain || hostDomain !== workspaceDomain)
+  const workspaceDomainRaw = (config?.workspace_domain ?? '').trim()
+  const isLocal = isLocalStorefrontHost(hostDomain)
+  // Non-local hosts: only block when API reports a primary domain and it disagrees with the browser host
+  // (after normalizing case / www). Empty workspace_domain no longer forces /unknown — backend already
+  // resolved the workspace via X-Forwarded-Host / Site.domain.
+  const hostNorm = normalizeStorefrontHostname(hostDomain)
+  const wsNorm = workspaceDomainRaw ? normalizeStorefrontHostname(workspaceDomainRaw) : ''
+  const domainMismatch = !isLocal && wsNorm !== '' && hostNorm !== wsNorm
   if (config === null || domainMismatch) {
     redirect('/unknown')
   }

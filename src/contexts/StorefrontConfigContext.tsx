@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import {
   getStorefrontConfig,
+  seedStorefrontConfigCache,
   type StorefrontConfig,
 } from '@/utils/storefrontConfig'
 
@@ -70,6 +71,7 @@ export function StorefrontConfigProvider({ children, initialConfig }: Storefront
     if (initialConfig != null) {
       setConfig(initialConfig)
       setLoading(false)
+      seedStorefrontConfigCache(initialConfig)
       return
     }
     fetchConfig()

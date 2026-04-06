@@ -5,6 +5,7 @@ import { loadExtensions } from '@/extensions'
 import { getPageSlotReplacements } from '@/extensions/resolve'
 import { ROOT_SLOT_ID } from '@/extensions/terminology'
 import { getApiBaseUrl, getApiHeaders } from '@/utils/api'
+import { getCmsPageFetchLanguages } from '@/utils/storefrontCmsPage'
 import { getSiteConfig } from '@/utils/siteMetadata'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 import StorefrontDevBadge from '@components/storefront/StorefrontDevBadge'
@@ -23,19 +24,26 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: site_name ? `${site_name}` : 'Home' }
 }
 
-async function getPageData(slug: string, locale: string) {
+async function getPageData(slug: string, locale: string, requestHost?: string) {
+  const langs = getCmsPageFetchLanguages(locale)
+  const headerOpts = requestHost ? { requestHost } : undefined
   try {
     const apiUrl = getApiBaseUrl()
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 10000)
-    const res = await fetch(`${apiUrl}/api/v1/web/pages/${slug}/rendered/?lang=${locale}`, {
-      cache: 'no-store',
-      headers: getApiHeaders(),
-      signal: controller.signal,
-    })
-    clearTimeout(timeoutId)
-    if (!res.ok) return null
-    return res.json()
+    for (const lang of langs) {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000)
+      const res = await fetch(
+        `${apiUrl}/api/v1/web/pages/${encodeURIComponent(slug)}/rendered/?lang=${encodeURIComponent(lang)}`,
+        {
+          cache: 'no-store',
+          headers: getApiHeaders({}, headerOpts),
+          signal: controller.signal,
+        }
+      )
+      clearTimeout(timeoutId)
+      if (res.ok) return res.json()
+    }
+    return null
   } catch (error) {
     console.error('Failed to fetch page data:', error)
     return null
@@ -49,7 +57,7 @@ export default async function Page() {
   const config = await getStorefrontConfigForServer(locale, requestHost)
   if (config === null) return null
   const theme = config.theme ?? 'store'
-  const pageData = await getPageData('home', locale)
+  const pageData = await getPageData('home', locale, requestHost)
 
   const extensions = await loadExtensions()
   const replacements = getPageSlotReplacements(extensions, 'storefront/home')
