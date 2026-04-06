@@ -1,7 +1,6 @@
 'use client'
 
 // React Imports
-import { useEffect } from 'react'
 import { usePathname } from 'next/navigation'
 
 // Component Imports
@@ -9,7 +8,6 @@ import StoreHeader from './themes/store/Header'
 import StoreFooter from './themes/store/Footer'
 import SiteAnnouncementBanner from './SiteAnnouncementBanner'
 import { StorefrontConfigProvider } from '@/contexts/StorefrontConfigContext'
-import { useTheme } from '@/contexts/ThemeContext'
 import { ChildrenType } from '@/types/core'
 import { SystemMode } from '@/types/core'
 
@@ -19,19 +17,10 @@ type StorefrontLayoutProps = ChildrenType & {
 
 /** Inner layout shell (header + main + footer). Used by theme registry when provider is already above. */
 export function StorefrontLayoutInner({ children, mode = 'light' }: StorefrontLayoutProps) {
-  const { forceMode } = useTheme()
   const pathname = usePathname()
   const isAccountPage = pathname?.startsWith('/account') || false
   const isAdminPage = pathname?.startsWith('/admin') || false
   const isAuthPage = pathname?.startsWith('/auth/') || false
-
-  // Only force light mode on account/admin/auth; let storefront respect user theme choice
-  useEffect(() => {
-    if (isAccountPage || isAdminPage || isAuthPage) {
-      forceMode('light')
-      return () => forceMode(null)
-    }
-  }, [forceMode, isAccountPage, isAdminPage, isAuthPage])
 
   if (isAccountPage || isAdminPage || isAuthPage) {
     return (

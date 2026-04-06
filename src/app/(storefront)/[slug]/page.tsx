@@ -1,9 +1,8 @@
 import { getLocale } from 'next-intl/server'
 import { headers } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
-import { getApiBaseUrl, getApiHeaders } from '@/utils/api'
-import { getCmsPageFetchLanguages } from '@/utils/storefrontCmsPage'
 import { getSiteConfig } from '@/utils/siteMetadata'
+import { fetchRenderedCmsPage } from '@/services/storefrontCmsApi'
 import DynamicPage from '@views/storefront/DynamicPage'
 import type { Metadata } from 'next'
 
@@ -20,29 +19,7 @@ const RESERVED_ASSET_SLUGS = new Set([
 
 async function getPageData(slug: string, locale: string, requestHost?: string) {
   if (RESERVED_ASSET_SLUGS.has(slug)) return null
-  const langs = getCmsPageFetchLanguages(locale)
-  const headerOpts = requestHost ? { requestHost, storefrontScope: true as const } : { storefrontScope: true as const }
-  try {
-    const apiUrl = getApiBaseUrl()
-    for (const lang of langs) {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 10000)
-      const res = await fetch(
-        `${apiUrl}/api/v1/web/pages/${encodeURIComponent(slug)}/rendered/?lang=${encodeURIComponent(lang)}`,
-        {
-          next: { revalidate: 60 },
-          headers: getApiHeaders({}, headerOpts),
-          signal: controller.signal,
-        }
-      )
-      clearTimeout(timeoutId)
-      if (res.ok) return res.json()
-    }
-    return null
-  } catch (error) {
-    console.error('Failed to fetch page data:', error)
-    return null
-  }
+  return fetchRenderedCmsPage(slug, locale, requestHost, { revalidate: 60 })
 }
 
 type Props = {

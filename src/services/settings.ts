@@ -1,6 +1,18 @@
 // Settings API service (BFG2 Settings module)
 
-import { apiFetch, bfgApi, getWorkspaceId } from '@/utils/api'
+import { apiFetch, bfgApi } from '@/utils/api'
+
+export function getSiteAdminRequestHost(): string | undefined {
+  return typeof window !== 'undefined' ? window.location.host : undefined
+}
+
+export function getSiteAdminOptions() {
+  const requestHost = getSiteAdminRequestHost()
+  return {
+    requestHost,
+    siteAdminScope: true as const,
+  }
+}
 
 export type User = {
   id: number
@@ -139,9 +151,12 @@ export type WorkspaceRecord = {
 }
 
 export async function fetchWorkspaceRecord(): Promise<WorkspaceRecord | null> {
-  const id = getWorkspaceId()
+  const requestHost = getSiteAdminRequestHost()
+  if (!requestHost) return null
+  const settings = await getWorkspaceSettings()
+  const id = settings.workspace_id
   if (!id) return null
-  return apiFetch<WorkspaceRecord>(`${bfgApi.workspaces()}${id}/`)
+  return apiFetch<WorkspaceRecord>(`${bfgApi.workspaces()}${id}/`, getSiteAdminOptions())
 }
 
 export async function patchWorkspaceRecord(
@@ -149,6 +164,7 @@ export async function patchWorkspaceRecord(
   data: Partial<Pick<WorkspaceRecord, 'name' | 'slug'>>
 ): Promise<WorkspaceRecord> {
   return apiFetch<WorkspaceRecord>(`${bfgApi.workspaces()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
@@ -173,8 +189,9 @@ export async function getWorkspaceSettings(): Promise<WorkspaceSettings> {
     return workspaceSettingsCache
   }
   const url = bfgApi.settings()
+  const requestOptions = getSiteAdminOptions()
   const promise = (async () => {
-    const res = await apiFetch<WorkspaceSettings | WorkspaceSettings[] | { results: WorkspaceSettings[] }>(url)
+    const res = await apiFetch<WorkspaceSettings | WorkspaceSettings[] | { results: WorkspaceSettings[] }>(url, requestOptions)
     
     // Handle paginated response
     if (res && typeof res === 'object' && 'results' in res) {
@@ -205,11 +222,12 @@ export async function getWorkspaceSettings(): Promise<WorkspaceSettings> {
 
 export async function updateInvoiceSettings(settingsId: number, invoice: InvoiceSettingsPayload) {
   // PATCH custom_settings.invoice only, preserving other custom_settings
-  const current = await apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`)
+  const current = await apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`, getSiteAdminOptions())
   const currentCustom = current.custom_settings || {}
   const nextCustom = { ...currentCustom, invoice }
 
   return apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify({ custom_settings: nextCustom })
   })
@@ -217,11 +235,12 @@ export async function updateInvoiceSettings(settingsId: number, invoice: Invoice
 
 export async function updateDeliverySettings(settingsId: number, delivery: DeliverySettingsPayload) {
   // PATCH custom_settings.delivery only, preserving other custom_settings
-  const current = await apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`)
+  const current = await apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`, getSiteAdminOptions())
   const currentCustom = current.custom_settings || {}
   const nextCustom = { ...currentCustom, delivery }
 
   return apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify({ custom_settings: nextCustom })
   })
@@ -229,11 +248,12 @@ export async function updateDeliverySettings(settingsId: number, delivery: Deliv
 
 export async function updateMarketingSettings(settingsId: number, marketing: MarketingSettingsPayload) {
   // PATCH custom_settings.marketing only, preserving other custom_settings
-  const current = await apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`)
+  const current = await apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`, getSiteAdminOptions())
   const currentCustom = current.custom_settings || {}
   const nextCustom = { ...currentCustom, marketing }
 
   return apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify({ custom_settings: nextCustom })
   })
@@ -243,12 +263,13 @@ export async function updateSupportSettings(settingsId: number, payload: Support
   const { support_notice, ...rest } = payload
   const body: Record<string, unknown> = { ...rest }
   if (support_notice !== undefined) {
-    const current = await apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`)
+    const current = await apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`, getSiteAdminOptions())
     const custom = current.custom_settings || {}
     const support = (custom.support && typeof custom.support === 'object') ? { ...custom.support } : {}
     body.custom_settings = { ...custom, support: { ...support, notice: support_notice } }
   }
   return apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(body)
   })
@@ -256,11 +277,12 @@ export async function updateSupportSettings(settingsId: number, payload: Support
 
 export async function updateWebSettings(settingsId: number, web: WebSettingsPayload) {
   // PATCH custom_settings.web only, preserving other custom_settings
-  const current = await apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`)
+  const current = await apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`, getSiteAdminOptions())
   const currentCustom = current.custom_settings || {}
   const nextCustom = { ...currentCustom, web }
 
   return apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify({ custom_settings: nextCustom })
   })
@@ -269,10 +291,11 @@ export async function updateWebSettings(settingsId: number, web: WebSettingsPayl
 export async function updateGeneralSettings(settingsId: number, general: GeneralSettingsPayload) {
   // PATCH custom_settings.general only, preserving other custom_settings
   const url = `${bfgApi.settings()}${settingsId}/`
-  const current = await apiFetch<WorkspaceSettings>(url)
+  const current = await apiFetch<WorkspaceSettings>(url, getSiteAdminOptions())
   const currentCustom = current.custom_settings || {}
   const nextCustom = { ...currentCustom, general }
   const result = await apiFetch<WorkspaceSettings>(url, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify({ custom_settings: nextCustom })
   })
@@ -282,10 +305,11 @@ export async function updateGeneralSettings(settingsId: number, general: General
 
 export async function updateStorefrontUiSettings(settingsId: number, storefront_ui: StorefrontUiSettingsPayload) {
   const url = `${bfgApi.settings()}${settingsId}/`
-  const current = await apiFetch<WorkspaceSettings>(url)
+  const current = await apiFetch<WorkspaceSettings>(url, getSiteAdminOptions())
   const currentCustom = current.custom_settings || {}
   const nextCustom = { ...currentCustom, storefront_ui }
   return apiFetch<WorkspaceSettings>(url, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify({ custom_settings: nextCustom })
   })
@@ -293,10 +317,11 @@ export async function updateStorefrontUiSettings(settingsId: number, storefront_
 
 export async function updateShopSettings(settingsId: number, shop: ShopSettingsPayload) {
   const url = `${bfgApi.settings()}${settingsId}/`
-  const current = await apiFetch<WorkspaceSettings>(url)
+  const current = await apiFetch<WorkspaceSettings>(url, getSiteAdminOptions())
   const currentCustom = current.custom_settings || {}
   const nextCustom = { ...currentCustom, shop }
   const result = await apiFetch<WorkspaceSettings>(url, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify({ custom_settings: nextCustom })
   })
@@ -306,10 +331,11 @@ export async function updateShopSettings(settingsId: number, shop: ShopSettingsP
 
 export async function updatePluginsSettings(settingsId: number, plugins: PluginsSettingsPayload) {
   const url = `${bfgApi.settings()}${settingsId}/`
-  const current = await apiFetch<WorkspaceSettings>(url)
+  const current = await apiFetch<WorkspaceSettings>(url, getSiteAdminOptions())
   const currentCustom = current.custom_settings || {}
   const nextCustom = { ...currentCustom, plugins }
   const result = await apiFetch<WorkspaceSettings>(url, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify({ custom_settings: nextCustom })
   })

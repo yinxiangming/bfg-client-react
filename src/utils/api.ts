@@ -206,6 +206,18 @@ export type GetApiHeadersOptions = {
    * This never uses localStorage and currently returns null so no X-Workspace-ID is sent.
    */
   storefrontScope?: boolean
+  /**
+   * Site-bound admin scope: prefer domain routing and do not send X-Workspace-ID.
+   * Use for admin pages hosted on a business domain like geeker.co.nz.
+   */
+  siteAdminScope?: boolean
+}
+
+export type ApiFetchOptions = RequestInit & {
+  requestHost?: string
+  withAuth?: boolean
+  storefrontScope?: boolean
+  siteAdminScope?: boolean
 }
 
 /**
@@ -219,7 +231,7 @@ export function getApiHeaders(
   const headers: Record<string, string> = {
     ...getApiLanguageHeaders(),
   }
-  const workspaceId = options?.storefrontScope ? getStorefrontWorkspaceId() : getWorkspaceId()
+  const workspaceId = options?.storefrontScope || options?.siteAdminScope ? getStorefrontWorkspaceId() : getWorkspaceId()
   if (workspaceId) {
     headers['X-Workspace-ID'] = workspaceId
   }
@@ -273,25 +285,26 @@ export function getAgentChatRequestInit(body: Record<string, unknown>): RequestI
  */
 export async function apiFetch<T>(
   url: string,
-  options?: RequestInit,
+  options?: ApiFetchOptions,
   retryOn401: boolean = true
 ): Promise<T> {
   const token = getAuthToken()
-  const workspaceId = getWorkspaceId()
+  const { requestHost, withAuth, storefrontScope, siteAdminScope, ...fetchOptions } = options || {}
+  const workspaceId = storefrontScope || siteAdminScope ? getStorefrontWorkspaceId() : getWorkspaceId()
   const headers: Record<string, string> = {
-    ...(options?.headers as Record<string, string>)
+    ...(fetchOptions?.headers as Record<string, string>)
   }
 
   // Add locale for backend i18n (Django LocaleMiddleware)
   Object.assign(headers, getApiLanguageHeaders())
 
   // Only set Content-Type for JSON, not for FormData
-  if (!(options?.body instanceof FormData)) {
+  if (!(fetchOptions?.body instanceof FormData)) {
     headers['Content-Type'] = 'application/json'
   }
 
   // Add auth token if available
-  if (token) {
+  if (token && withAuth !== false) {
     headers['Authorization'] = `Bearer ${token}`
   }
 
@@ -300,8 +313,12 @@ export async function apiFetch<T>(
     headers['X-Workspace-ID'] = workspaceId
   }
 
+  if (requestHost) {
+    headers['X-Forwarded-Host'] = requestHost
+  }
+
   const response = await fetch(url, {
-    ...options,
+    ...fetchOptions,
     headers
   })
 

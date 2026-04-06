@@ -1,6 +1,7 @@
 // Web/CMS API services
 
 import { apiFetch, bfgApi } from '@/utils/api'
+import { getSiteAdminOptions } from '@/services/settings'
 
 export type Site = {
   id: number
@@ -203,13 +204,13 @@ export type MediaPayload = {
 
 // Sites API
 export async function getSites(): Promise<Site[]> {
-  const response = await apiFetch<Site[] | { results: Site[] }>(bfgApi.sites())
+  const response = await apiFetch<Site[] | { results: Site[] }>(bfgApi.sites(), getSiteAdminOptions())
   if (Array.isArray(response)) return response
   return response.results || []
 }
 
 export async function getSite(id: number): Promise<Site> {
-  return apiFetch<Site>(`${bfgApi.sites()}${id}/`)
+  return apiFetch<Site>(`${bfgApi.sites()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createSite(data: SitePayload) {
@@ -231,11 +232,13 @@ export async function createSite(data: SitePayload) {
       }
     })
     return apiFetch<Site>(bfgApi.sites(), {
+      ...getSiteAdminOptions(),
       method: 'POST',
       body: formData
     })
   } else {
     return apiFetch<Site>(bfgApi.sites(), {
+      ...getSiteAdminOptions(),
       method: 'POST',
       body: JSON.stringify(data)
     })
@@ -244,6 +247,7 @@ export async function createSite(data: SitePayload) {
 
 export async function updateSite(id: number, data: Partial<SitePayload>) {
   return apiFetch<Site>(`${bfgApi.sites()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
@@ -251,19 +255,20 @@ export async function updateSite(id: number, data: Partial<SitePayload>) {
 
 export async function deleteSite(id: number) {
   return apiFetch<void>(`${bfgApi.sites()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
 
 // Themes API
 export async function getThemes(): Promise<Theme[]> {
-  const response = await apiFetch<Theme[] | { results: Theme[] }>(bfgApi.themes())
+  const response = await apiFetch<Theme[] | { results: Theme[] }>(bfgApi.themes(), getSiteAdminOptions())
   if (Array.isArray(response)) return response
   return response.results || []
 }
 
 export async function getTheme(id: number): Promise<Theme> {
-  return apiFetch<Theme>(`${bfgApi.themes()}${id}/`)
+  return apiFetch<Theme>(`${bfgApi.themes()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createTheme(data: ThemePayload) {
@@ -287,11 +292,13 @@ export async function createTheme(data: ThemePayload) {
       }
     })
     return apiFetch<Theme>(bfgApi.themes(), {
+    ...getSiteAdminOptions(),
       method: 'POST',
       body: formData
     })
   } else {
     return apiFetch<Theme>(bfgApi.themes(), {
+    ...getSiteAdminOptions(),
       method: 'POST',
       body: JSON.stringify(data)
     })
@@ -319,11 +326,13 @@ export async function updateTheme(id: number, data: Partial<ThemePayload>) {
       }
     })
     return apiFetch<Theme>(`${bfgApi.themes()}${id}/`, {
+    ...getSiteAdminOptions(),
       method: 'PATCH',
       body: formData
     })
   } else {
     return apiFetch<Theme>(`${bfgApi.themes()}${id}/`, {
+    ...getSiteAdminOptions(),
       method: 'PATCH',
       body: JSON.stringify(data)
     })
@@ -332,23 +341,25 @@ export async function updateTheme(id: number, data: Partial<ThemePayload>) {
 
 export async function deleteTheme(id: number) {
   return apiFetch<void>(`${bfgApi.themes()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
 
 // Languages API
 export async function getLanguages(): Promise<Language[]> {
-  const response = await apiFetch<Language[] | { results: Language[] }>(bfgApi.languages())
+  const response = await apiFetch<Language[] | { results: Language[] }>(bfgApi.languages(), getSiteAdminOptions())
   if (Array.isArray(response)) return response
   return response.results || []
 }
 
 export async function getLanguage(id: number): Promise<Language> {
-  return apiFetch<Language>(`${bfgApi.languages()}${id}/`)
+  return apiFetch<Language>(`${bfgApi.languages()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createLanguage(data: LanguagePayload) {
   return apiFetch<Language>(bfgApi.languages(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -356,6 +367,7 @@ export async function createLanguage(data: LanguagePayload) {
 
 export async function updateLanguage(id: number, data: Partial<LanguagePayload>) {
   return apiFetch<Language>(`${bfgApi.languages()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
@@ -363,23 +375,25 @@ export async function updateLanguage(id: number, data: Partial<LanguagePayload>)
 
 export async function deleteLanguage(id: number) {
   return apiFetch<void>(`${bfgApi.languages()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
 
 // Pages API
 export async function getPages(): Promise<Page[]> {
-  const response = await apiFetch<Page[] | { results: Page[] }>(bfgApi.pages())
+  const response = await apiFetch<Page[] | { results: Page[] }>(bfgApi.pages(), getSiteAdminOptions())
   if (Array.isArray(response)) return response
   return response.results || []
 }
 
 export async function getPage(id: number): Promise<Page> {
-  return apiFetch<Page>(`${bfgApi.pages()}${id}/`)
+  return apiFetch<Page>(`${bfgApi.pages()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createPage(data: PagePayload) {
   return apiFetch<Page>(bfgApi.pages(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -387,6 +401,7 @@ export async function createPage(data: PagePayload) {
 
 export async function updatePage(id: number, data: Partial<PagePayload>) {
   return apiFetch<Page>(`${bfgApi.pages()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
@@ -394,6 +409,7 @@ export async function updatePage(id: number, data: Partial<PagePayload>) {
 
 export async function updatePageBlocks(id: number, blocks: PageBlockItem[]) {
   return apiFetch<Page>(`${bfgApi.pages()}${id}/blocks/`, {
+    ...getSiteAdminOptions(),
     method: 'PUT',
     body: JSON.stringify({ blocks })
   })
@@ -401,19 +417,20 @@ export async function updatePageBlocks(id: number, blocks: PageBlockItem[]) {
 
 export async function deletePage(id: number) {
   return apiFetch<void>(`${bfgApi.pages()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
 
 // Posts API
 export async function getPosts(): Promise<Post[]> {
-  const response = await apiFetch<Post[] | { results: Post[] }>(bfgApi.posts())
+  const response = await apiFetch<Post[] | { results: Post[] }>(bfgApi.posts(), getSiteAdminOptions())
   if (Array.isArray(response)) return response
   return response.results || []
 }
 
 export async function getPost(id: number): Promise<Post> {
-  return apiFetch<Post>(`${bfgApi.posts()}${id}/`)
+  return apiFetch<Post>(`${bfgApi.posts()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createPost(data: PostPayload) {
@@ -430,6 +447,7 @@ export async function createPost(data: PostPayload) {
     }
   })
   return apiFetch<Post>(bfgApi.posts(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: formData
   })
@@ -449,6 +467,7 @@ export async function updatePost(id: number, data: Partial<PostPayload>) {
     }
   })
   return apiFetch<Post>(`${bfgApi.posts()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: formData
   })
@@ -456,6 +475,7 @@ export async function updatePost(id: number, data: Partial<PostPayload>) {
 
 export async function deletePost(id: number) {
   return apiFetch<void>(`${bfgApi.posts()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
@@ -463,17 +483,18 @@ export async function deletePost(id: number) {
 // Categories API
 export async function getCategories(contentType?: string): Promise<Category[]> {
   const url = contentType ? `${bfgApi.categories()}?content_type=${contentType}` : bfgApi.categories()
-  const response = await apiFetch<Category[] | { results: Category[] }>(url)
+  const response = await apiFetch<Category[] | { results: Category[] }>(url, getSiteAdminOptions())
   if (Array.isArray(response)) return response
   return response.results || []
 }
 
 export async function getCategory(id: number): Promise<Category> {
-  return apiFetch<Category>(`${bfgApi.categories()}${id}/`)
+  return apiFetch<Category>(`${bfgApi.categories()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createCategory(data: CategoryPayload) {
   return apiFetch<Category>(bfgApi.categories(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -481,6 +502,7 @@ export async function createCategory(data: CategoryPayload) {
 
 export async function updateCategory(id: number, data: Partial<CategoryPayload>) {
   return apiFetch<Category>(`${bfgApi.categories()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
@@ -488,23 +510,25 @@ export async function updateCategory(id: number, data: Partial<CategoryPayload>)
 
 export async function deleteCategory(id: number) {
   return apiFetch<void>(`${bfgApi.categories()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
 
 // Tags API
 export async function getTags(): Promise<Tag[]> {
-  const response = await apiFetch<Tag[] | { results: Tag[] }>(bfgApi.tags())
+  const response = await apiFetch<Tag[] | { results: Tag[] }>(bfgApi.tags(), getSiteAdminOptions())
   if (Array.isArray(response)) return response
   return response.results || []
 }
 
 export async function getTag(id: number): Promise<Tag> {
-  return apiFetch<Tag>(`${bfgApi.tags()}${id}/`)
+  return apiFetch<Tag>(`${bfgApi.tags()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createTag(data: TagPayload) {
   return apiFetch<Tag>(bfgApi.tags(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -512,6 +536,7 @@ export async function createTag(data: TagPayload) {
 
 export async function updateTag(id: number, data: Partial<TagPayload>) {
   return apiFetch<Tag>(`${bfgApi.tags()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
@@ -519,23 +544,25 @@ export async function updateTag(id: number, data: Partial<TagPayload>) {
 
 export async function deleteTag(id: number) {
   return apiFetch<void>(`${bfgApi.tags()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
 
 // Menus API
 export async function getMenus(): Promise<Menu[]> {
-  const response = await apiFetch<Menu[] | { results: Menu[] }>(bfgApi.menus())
+  const response = await apiFetch<Menu[] | { results: Menu[] }>(bfgApi.menus(), getSiteAdminOptions())
   if (Array.isArray(response)) return response
   return response.results || []
 }
 
 export async function getMenu(id: number): Promise<Menu> {
-  return apiFetch<Menu>(`${bfgApi.menus()}${id}/`)
+  return apiFetch<Menu>(`${bfgApi.menus()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createMenu(data: MenuPayload) {
   return apiFetch<Menu>(bfgApi.menus(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -543,6 +570,7 @@ export async function createMenu(data: MenuPayload) {
 
 export async function updateMenu(id: number, data: Partial<MenuPayload>) {
   return apiFetch<Menu>(`${bfgApi.menus()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
@@ -550,19 +578,20 @@ export async function updateMenu(id: number, data: Partial<MenuPayload>) {
 
 export async function deleteMenu(id: number) {
   return apiFetch<void>(`${bfgApi.menus()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
 
 // Media API
 export async function getMedia(): Promise<Media[]> {
-  const response = await apiFetch<Media[] | { results: Media[] }>(bfgApi.media())
+  const response = await apiFetch<Media[] | { results: Media[] }>(bfgApi.media(), getSiteAdminOptions())
   if (Array.isArray(response)) return response
   return response.results || []
 }
 
 export async function getMediaItem(id: number): Promise<Media> {
-  return apiFetch<Media>(`${bfgApi.media()}${id}/`)
+  return apiFetch<Media>(`${bfgApi.media()}${id}/`, getSiteAdminOptions())
 }
 
 export async function uploadMedia(data: MediaPayload) {
@@ -580,6 +609,7 @@ export async function uploadMedia(data: MediaPayload) {
     formData.append('caption', data.caption)
   }
   return apiFetch<Media>(bfgApi.media(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: formData
   })
@@ -600,6 +630,7 @@ export async function updateMedia(id: number, data: Partial<MediaPayload>) {
     formData.append('caption', data.caption || '')
   }
   return apiFetch<Media>(`${bfgApi.media()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: formData
   })
@@ -607,6 +638,7 @@ export async function updateMedia(id: number, data: Partial<MediaPayload>) {
 
 export async function deleteMedia(id: number) {
   return apiFetch<void>(`${bfgApi.media()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }

@@ -1,14 +1,10 @@
-// Next
-import { headers } from 'next/headers'
-
 // i18n Imports
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 
 // Component Imports
 import ThemeProvider from '@components/theme/ThemeProvider'
-import BlankLayout from '@components/layout/BlankLayout'
-import StorefrontLayout from '@/components/storefront/StorefrontLayout'
+import RootLayoutChrome from '@components/layout/RootLayoutChrome'
 import { CartProvider } from '@/contexts/CartContext'
 import { AppDialogProvider } from '@/contexts/AppDialogContext'
 
@@ -41,17 +37,8 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   const direction = 'ltr'
   const defaultSystemMode: 'light' | 'dark' = 'light'
 
-  const headersList = await headers()
-  const pathname = headersList.get('x-pathname') ?? ''
-  const useStorefrontChrome =
-    pathname.startsWith('/account') || pathname.startsWith('/admin') || pathname.startsWith('/auth/')
-
-  const content = useStorefrontChrome ? (
-    <BlankLayout>
-      <StorefrontLayout mode={defaultSystemMode}>{children}</StorefrontLayout>
-    </BlankLayout>
-  ) : (
-    <BlankLayout>{children}</BlankLayout>
+  const content = (
+    <RootLayoutChrome defaultSystemMode={defaultSystemMode}>{children}</RootLayoutChrome>
   )
 
   return (

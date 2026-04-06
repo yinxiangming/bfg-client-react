@@ -1,6 +1,7 @@
 // Store API service (BFG2 Shop module)
 
 import { apiFetch, bfgApi } from '@/utils/api'
+import { getSiteAdminOptions } from '@/services/settings'
 import type { FormSchema } from '@/types/schema'
 
 export interface ProductVariant {
@@ -47,7 +48,7 @@ export interface ProductMediaListResponse {
  * Variants API
  */
 export async function getProductVariants(productId: number): Promise<ProductVariant[]> {
-  const response = await apiFetch<{ results?: ProductVariant[]; data?: ProductVariant[] }>(`${bfgApi.variants()}?product=${productId}`)
+  const response = await apiFetch<{ results?: ProductVariant[]; data?: ProductVariant[] }>(`${bfgApi.variants()}?product=${productId}`, getSiteAdminOptions())
   if (Array.isArray(response)) {
     return response
   }
@@ -56,6 +57,7 @@ export async function getProductVariants(productId: number): Promise<ProductVari
 
 export async function createProductVariant(data: Partial<ProductVariant>): Promise<ProductVariant> {
   return apiFetch<ProductVariant>(bfgApi.variants(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -63,6 +65,7 @@ export async function createProductVariant(data: Partial<ProductVariant>): Promi
 
 export async function updateProductVariant(id: number, data: Partial<ProductVariant>): Promise<ProductVariant> {
   return apiFetch<ProductVariant>(`${bfgApi.variants()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
@@ -70,6 +73,7 @@ export async function updateProductVariant(id: number, data: Partial<ProductVari
 
 export async function deleteProductVariant(id: number): Promise<void> {
   return apiFetch<void>(`${bfgApi.variants()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
@@ -85,7 +89,8 @@ export interface VariantInventory {
 
 export async function getVariantInventories(productId: number): Promise<VariantInventory[]> {
   const response = await apiFetch<VariantInventory[] | { results?: VariantInventory[] }>(
-    `${bfgApi.products()}${productId}/inventory/`
+    `${bfgApi.products()}${productId}/inventory/`,
+    getSiteAdminOptions()
   )
   if (Array.isArray(response)) {
     return response
@@ -95,6 +100,7 @@ export async function getVariantInventories(productId: number): Promise<VariantI
 
 export async function updateVariantInventories(productId: number, inventories: VariantInventory[]): Promise<void> {
   return apiFetch<void>(`${bfgApi.products()}${productId}/inventory/`, {
+    ...getSiteAdminOptions(),
     method: 'PUT',
     body: JSON.stringify({ inventories })
   })
@@ -183,7 +189,7 @@ export interface Warehouse {
 
 // Stores API
 export async function getStores(): Promise<Store[]> {
-  const response = await apiFetch<Store[] | { results: Store[]; data?: Store[] }>(bfgApi.stores())
+  const response = await apiFetch<Store[] | { results: Store[]; data?: Store[] }>(bfgApi.stores(), getSiteAdminOptions())
   if (Array.isArray(response)) {
     return response
   }
@@ -191,12 +197,13 @@ export async function getStores(): Promise<Store[]> {
 }
 
 export async function getStore(id: number): Promise<Store> {
-  return apiFetch<Store>(`${bfgApi.stores()}${id}/`)
+  return apiFetch<Store>(`${bfgApi.stores()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createStore(data: StorePayload): Promise<Store> {
   const { warehouses, ...rest } = data
   return apiFetch<Store>(bfgApi.stores(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify({
       ...rest,
@@ -208,6 +215,7 @@ export async function createStore(data: StorePayload): Promise<Store> {
 export async function updateStore(id: number, data: Partial<StorePayload>): Promise<Store> {
   const { warehouses, ...rest } = data
   return apiFetch<Store>(`${bfgApi.stores()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify({
       ...rest,
@@ -218,13 +226,14 @@ export async function updateStore(id: number, data: Partial<StorePayload>): Prom
 
 export async function deleteStore(id: number): Promise<void> {
   return apiFetch<void>(`${bfgApi.stores()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
 
 // Sales Channels API
 export async function getSalesChannels(): Promise<SalesChannel[]> {
-  const response = await apiFetch<SalesChannel[] | { results: SalesChannel[]; data?: SalesChannel[] }>(bfgApi.salesChannels())
+  const response = await apiFetch<SalesChannel[] | { results: SalesChannel[]; data?: SalesChannel[] }>(bfgApi.salesChannels(), getSiteAdminOptions())
   if (Array.isArray(response)) {
     return response
   }
@@ -232,11 +241,12 @@ export async function getSalesChannels(): Promise<SalesChannel[]> {
 }
 
 export async function getSalesChannel(id: number): Promise<SalesChannel> {
-  return apiFetch<SalesChannel>(`${bfgApi.salesChannels()}${id}/`)
+  return apiFetch<SalesChannel>(`${bfgApi.salesChannels()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createSalesChannel(data: SalesChannelPayload): Promise<SalesChannel> {
   return apiFetch<SalesChannel>(bfgApi.salesChannels(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -244,6 +254,7 @@ export async function createSalesChannel(data: SalesChannelPayload): Promise<Sal
 
 export async function updateSalesChannel(id: number, data: Partial<SalesChannelPayload>): Promise<SalesChannel> {
   return apiFetch<SalesChannel>(`${bfgApi.salesChannels()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
@@ -251,13 +262,14 @@ export async function updateSalesChannel(id: number, data: Partial<SalesChannelP
 
 export async function deleteSalesChannel(id: number): Promise<void> {
   return apiFetch<void>(`${bfgApi.salesChannels()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
 
 // Subscription Plans API
 export async function getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
-  const response = await apiFetch<SubscriptionPlan[] | { results: SubscriptionPlan[]; data?: SubscriptionPlan[] }>(bfgApi.subscriptionPlans())
+  const response = await apiFetch<SubscriptionPlan[] | { results: SubscriptionPlan[]; data?: SubscriptionPlan[] }>(bfgApi.subscriptionPlans(), getSiteAdminOptions())
   if (Array.isArray(response)) {
     return response
   }
@@ -265,11 +277,12 @@ export async function getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
 }
 
 export async function getSubscriptionPlan(id: number): Promise<SubscriptionPlan> {
-  return apiFetch<SubscriptionPlan>(`${bfgApi.subscriptionPlans()}${id}/`)
+  return apiFetch<SubscriptionPlan>(`${bfgApi.subscriptionPlans()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createSubscriptionPlan(data: SubscriptionPlanPayload): Promise<SubscriptionPlan> {
   return apiFetch<SubscriptionPlan>(bfgApi.subscriptionPlans(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -277,6 +290,7 @@ export async function createSubscriptionPlan(data: SubscriptionPlanPayload): Pro
 
 export async function updateSubscriptionPlan(id: number, data: Partial<SubscriptionPlanPayload>): Promise<SubscriptionPlan> {
   return apiFetch<SubscriptionPlan>(`${bfgApi.subscriptionPlans()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
@@ -284,13 +298,14 @@ export async function updateSubscriptionPlan(id: number, data: Partial<Subscript
 
 export async function deleteSubscriptionPlan(id: number): Promise<void> {
   return apiFetch<void>(`${bfgApi.subscriptionPlans()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
 
 // Warehouses API (for dropdowns)
 export async function getWarehouses(): Promise<Warehouse[]> {
-  const response = await apiFetch<Warehouse[] | { results: Warehouse[] }>(bfgApi.warehouses())
+  const response = await apiFetch<Warehouse[] | { results: Warehouse[] }>(bfgApi.warehouses(), getSiteAdminOptions())
   if (Array.isArray(response)) {
     return response
   }
@@ -339,7 +354,7 @@ export async function getOrders(params?: OrderListParams): Promise<Order[]> {
     })
     if (qs.toString()) url += `?${qs.toString()}`
   }
-  const response = await apiFetch<Order[] | { results: Order[]; data?: Order[] }>(url)
+  const response = await apiFetch<Order[] | { results: Order[]; data?: Order[] }>(url, getSiteAdminOptions())
   if (Array.isArray(response)) {
     return response
   }
@@ -347,7 +362,7 @@ export async function getOrders(params?: OrderListParams): Promise<Order[]> {
 }
 
 export async function getOrder(id: number): Promise<Order> {
-  return apiFetch<Order>(`${bfgApi.orders()}${id}/`)
+  return apiFetch<Order>(`${bfgApi.orders()}${id}/`, getSiteAdminOptions())
 }
 
 /** Payload for staff direct order creation (backend OrderCreateSerializer) */
@@ -364,6 +379,7 @@ export interface CreateOrderPayload {
 
 export async function createOrder(data: CreateOrderPayload): Promise<Order> {
   return apiFetch<Order>(bfgApi.orders(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -371,6 +387,7 @@ export async function createOrder(data: CreateOrderPayload): Promise<Order> {
 
 export async function updateOrder(id: number, data: Partial<Order>): Promise<Order> {
   return apiFetch<Order>(`${bfgApi.orders()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
@@ -385,13 +402,14 @@ export interface OrderItemUpdatePayload {
 
 export async function updateOrderItems(orderId: number, items: OrderItemUpdatePayload[]): Promise<Order> {
   return apiFetch<Order>(`${bfgApi.orders()}${orderId}/update_items/`, {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify({ items })
   })
 }
 
 export async function deleteOrder(id: number): Promise<void> {
-  return apiFetch<void>(`${bfgApi.orders()}${id}/`, { method: 'DELETE' })
+  return apiFetch<void>(`${bfgApi.orders()}${id}/`, { ...getSiteAdminOptions(), method: 'DELETE' })
 }
 
 // Product reviews (admin)
@@ -422,21 +440,21 @@ export async function getReviews(params?: GetReviewsParams): Promise<ProductRevi
   if (params?.product != null) q.set('product', String(params.product))
   if (params?.is_approved != null && params.is_approved !== '') q.set('is_approved', params.is_approved)
   const url = q.toString() ? `${bfgApi.reviews().replace(/\/+$/, '')}?${q}` : bfgApi.reviews()
-  const response = await apiFetch<ProductReview[] | { results: ProductReview[]; data?: ProductReview[] }>(url)
+  const response = await apiFetch<ProductReview[] | { results: ProductReview[]; data?: ProductReview[] }>(url, getSiteAdminOptions())
   if (Array.isArray(response)) return response
   return response.results || response.data || []
 }
 
 export async function approveReview(id: number): Promise<ProductReview> {
-  return apiFetch<ProductReview>(`${bfgApi.reviews()}${id}/approve/`, { method: 'POST' })
+  return apiFetch<ProductReview>(`${bfgApi.reviews()}${id}/approve/`, { ...getSiteAdminOptions(), method: 'POST' })
 }
 
 export async function rejectReview(id: number): Promise<ProductReview> {
-  return apiFetch<ProductReview>(`${bfgApi.reviews()}${id}/reject/`, { method: 'POST' })
+  return apiFetch<ProductReview>(`${bfgApi.reviews()}${id}/reject/`, { ...getSiteAdminOptions(), method: 'POST' })
 }
 
 export async function deleteReview(id: number): Promise<void> {
-  return apiFetch<void>(`${bfgApi.reviews()}${id}/`, { method: 'DELETE' })
+  return apiFetch<void>(`${bfgApi.reviews()}${id}/`, { ...getSiteAdminOptions(), method: 'DELETE' })
 }
 
 export interface DashboardStats {
@@ -449,7 +467,7 @@ export interface DashboardStats {
 
 export async function getDashboardStats(): Promise<DashboardStats> {
   const base = bfgApi.orders().replace(/\/+$/, '')
-  return apiFetch<DashboardStats>(`${base}/dashboard-stats/`)
+  return apiFetch<DashboardStats>(`${base}/dashboard-stats/`, getSiteAdminOptions())
 }
 
 // Customer types and API
@@ -487,7 +505,7 @@ export async function getCustomers(params?: GetCustomersParams): Promise<Custome
   const q = new URLSearchParams()
   if (params?.search?.trim()) q.set('search', params.search.trim())
   const url = q.toString() ? `${bfgApi.customers().replace(/\/+$/, '')}?${q}` : bfgApi.customers()
-  const response = await apiFetch<Customer[] | { results: Customer[]; data?: Customer[] }>(url)
+  const response = await apiFetch<Customer[] | { results: Customer[]; data?: Customer[] }>(url, getSiteAdminOptions())
   if (Array.isArray(response)) {
     return response
   }
@@ -495,7 +513,7 @@ export async function getCustomers(params?: GetCustomersParams): Promise<Custome
 }
 
 export async function getCustomer(id: number): Promise<Customer> {
-  return apiFetch<Customer>(`${bfgApi.customers()}${id}/`)
+  return apiFetch<Customer>(`${bfgApi.customers()}${id}/`, getSiteAdminOptions())
 }
 
 // Address types and API
@@ -516,7 +534,7 @@ export interface Address {
 }
 
 export async function getCustomerAddresses(customerId: number): Promise<Address[]> {
-  const response = await apiFetch<Address[] | { results: Address[] }>(`${bfgApi.addresses()}?customer=${customerId}`)
+  const response = await apiFetch<Address[] | { results: Address[] }>(`${bfgApi.addresses()}?customer=${customerId}`, getSiteAdminOptions())
   if (Array.isArray(response)) {
     return response
   }
@@ -525,6 +543,7 @@ export async function getCustomerAddresses(customerId: number): Promise<Address[
 
 export async function createAddress(data: Partial<Address>): Promise<Address> {
   return apiFetch<Address>(bfgApi.addresses(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -532,17 +551,19 @@ export async function createAddress(data: Partial<Address>): Promise<Address> {
 
 export async function updateAddress(id: number, data: Partial<Address>): Promise<Address> {
   return apiFetch<Address>(`${bfgApi.addresses()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
 }
 
 export async function deleteAddress(id: number): Promise<void> {
-  return apiFetch<void>(`${bfgApi.addresses()}${id}/`, { method: 'DELETE' })
+  return apiFetch<void>(`${bfgApi.addresses()}${id}/`, { ...getSiteAdminOptions(), method: 'DELETE' })
 }
 
 export async function createCustomer(data: Partial<Customer>): Promise<Customer> {
   return apiFetch<Customer>(bfgApi.customers(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -550,13 +571,14 @@ export async function createCustomer(data: Partial<Customer>): Promise<Customer>
 
 export async function updateCustomer(id: number, data: Partial<Customer>): Promise<Customer> {
   return apiFetch<Customer>(`${bfgApi.customers()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
 }
 
 export async function deleteCustomer(id: number): Promise<void> {
-  return apiFetch<void>(`${bfgApi.customers()}${id}/`, { method: 'DELETE' })
+  return apiFetch<void>(`${bfgApi.customers()}${id}/`, { ...getSiteAdminOptions(), method: 'DELETE' })
 }
 
 // Product types and API
@@ -636,7 +658,7 @@ export async function getProducts(params?: {
   if (params?.page_size) searchParams.append('page_size', params.page_size.toString())
 
   const url = `${bfgApi.products()}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
-  const response = await apiFetch<Product[] | { results?: Product[]; data?: Product[] }>(url)
+  const response = await apiFetch<Product[] | { results?: Product[]; data?: Product[] }>(url, getSiteAdminOptions())
   if (Array.isArray(response)) {
     return response
   }
@@ -644,11 +666,12 @@ export async function getProducts(params?: {
 }
 
 export async function getProduct(id: number): Promise<Product> {
-  return apiFetch<Product>(`${bfgApi.products()}${id}/`)
+  return apiFetch<Product>(`${bfgApi.products()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createProduct(data: Partial<Product>): Promise<Product> {
   return apiFetch<Product>(bfgApi.products(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -656,13 +679,14 @@ export async function createProduct(data: Partial<Product>): Promise<Product> {
 
 export async function updateProduct(id: number, data: Partial<Product>): Promise<Product> {
   return apiFetch<Product>(`${bfgApi.products()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
 }
 
 export async function deleteProduct(id: number): Promise<void> {
-  return apiFetch<void>(`${bfgApi.products()}${id}/`, { method: 'DELETE' })
+  return apiFetch<void>(`${bfgApi.products()}${id}/`, { ...getSiteAdminOptions(), method: 'DELETE' })
 }
 
 // Wishlist (admin)
@@ -681,21 +705,21 @@ export async function getWishlists(params?: { customer?: number; product?: numbe
   if (params?.customer != null) q.set('customer', String(params.customer))
   if (params?.product != null) q.set('product', String(params.product))
   const url = q.toString() ? `${bfgApi.wishlists().replace(/\/+$/, '')}?${q}` : bfgApi.wishlists()
-  const response = await apiFetch<WishlistEntry[] | { results: WishlistEntry[] }>(url)
+  const response = await apiFetch<WishlistEntry[] | { results: WishlistEntry[] }>(url, getSiteAdminOptions())
   return Array.isArray(response) ? response : (response.results || [])
 }
 
 export async function deleteWishlist(id: number): Promise<void> {
-  return apiFetch<void>(`${bfgApi.wishlists()}${id}/`, { method: 'DELETE' })
+  return apiFetch<void>(`${bfgApi.wishlists()}${id}/`, { ...getSiteAdminOptions(), method: 'DELETE' })
 }
 
 export async function getCategories(lang: string = 'en'): Promise<Category[]> {
   const url = `${bfgApi.products()}categories/?lang=${lang}`
-  const response = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(url)
+  const response = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(url, getSiteAdminOptions())
   let list: Category[] = Array.isArray(response) ? response : (response.results || response.data || [])
   if (list.length === 0 && lang !== 'en') {
     const enUrl = `${bfgApi.products()}categories/?lang=en`
-    const enResponse = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(enUrl)
+    const enResponse = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(enUrl, getSiteAdminOptions())
     list = Array.isArray(enResponse) ? enResponse : (enResponse.results || enResponse.data || [])
   }
   return list
@@ -704,11 +728,11 @@ export async function getCategories(lang: string = 'en'): Promise<Category[]> {
 export async function getCategoriesTree(lang: string = 'en'): Promise<Category[]> {
   try {
     const url = `${bfgApi.products()}categories/?lang=${lang}&tree=true`
-    const response = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(url)
+    const response = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(url, getSiteAdminOptions())
     let categories: Category[] = Array.isArray(response) ? response : (response.results || response.data || [])
     if (categories.length === 0 && lang !== 'en') {
       const enUrl = `${bfgApi.products()}categories/?lang=en&tree=true`
-      const enResponse = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(enUrl)
+      const enResponse = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(enUrl, getSiteAdminOptions())
       categories = Array.isArray(enResponse) ? enResponse : (enResponse.results || enResponse.data || [])
     }
     return categories
@@ -716,10 +740,10 @@ export async function getCategoriesTree(lang: string = 'en'): Promise<Category[]
     console.error('[getCategoriesTree] Error:', error)
     try {
       const fallbackUrl = `${bfgApi.products()}categories/?lang=${lang}`
-      const fallbackResponse = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(fallbackUrl)
+      const fallbackResponse = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(fallbackUrl, getSiteAdminOptions())
       let list = Array.isArray(fallbackResponse) ? fallbackResponse : (fallbackResponse.results || fallbackResponse.data || [])
       if (list.length === 0 && lang !== 'en') {
-        const enFallback = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(`${bfgApi.products()}categories/?lang=en`)
+        const enFallback = await apiFetch<Category[] | { results?: Category[]; data?: Category[] }>(`${bfgApi.products()}categories/?lang=en`, getSiteAdminOptions())
         list = Array.isArray(enFallback) ? enFallback : (enFallback.results || enFallback.data || [])
       }
       return list
@@ -731,7 +755,7 @@ export async function getCategoriesTree(lang: string = 'en'): Promise<Category[]
 }
 
 export async function getCategory(id: number): Promise<Category> {
-  return apiFetch<Category>(`${bfgApi.products()}categories/${id}/`)
+  return apiFetch<Category>(`${bfgApi.products()}categories/${id}/`, getSiteAdminOptions())
 }
 
 export interface CategoryRulesSchemaResponse {
@@ -739,7 +763,7 @@ export interface CategoryRulesSchemaResponse {
 }
 
 export async function getCategoryRulesSchema(): Promise<FormSchema> {
-  const res = await apiFetch<CategoryRulesSchemaResponse>(bfgApi.productCategoryRulesSchema())
+  const res = await apiFetch<CategoryRulesSchemaResponse>(bfgApi.productCategoryRulesSchema(), getSiteAdminOptions())
   return res.form_schema
 }
 
@@ -747,6 +771,7 @@ export type CategoryPayload = Omit<Category, 'id' | 'created_at' | 'updated_at' 
 
 export async function createCategory(data: CategoryPayload): Promise<Category> {
   return apiFetch<Category>(`${bfgApi.products()}categories/`, {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -754,6 +779,7 @@ export async function createCategory(data: CategoryPayload): Promise<Category> {
 
 export async function updateCategory(id: number, data: Partial<CategoryPayload>): Promise<Category> {
   return apiFetch<Category>(`${bfgApi.products()}categories/${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
@@ -761,6 +787,7 @@ export async function updateCategory(id: number, data: Partial<CategoryPayload>)
 
 export async function deleteCategory(id: number): Promise<void> {
   return apiFetch<void>(`${bfgApi.products()}categories/${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
@@ -770,7 +797,7 @@ export async function deleteCategory(id: number): Promise<void> {
  */
 export async function getTags(lang: string = 'en'): Promise<Tag[]> {
   const url = `${bfgApi.products()}tags/?lang=${lang}`
-  const response = await apiFetch<Tag[] | { results?: Tag[]; data?: Tag[] }>(url)
+  const response = await apiFetch<Tag[] | { results?: Tag[]; data?: Tag[] }>(url, getSiteAdminOptions())
   if (Array.isArray(response)) {
     return response
   }
@@ -790,7 +817,7 @@ export async function getProductMedia(params: { productId?: number; variantId?: 
   if (params.dir) qs.set('dir', params.dir)
   if (params.folder) qs.set('folder', params.folder)
   if (params.isProductImage !== undefined) qs.set('is_product_image', params.isProductImage.toString())
-  const response = await apiFetch<{ results?: ProductMedia[]; data?: ProductMedia[]; count?: number; next?: string | null; previous?: string | null }>(`${bfgApi.productMedia()}?${qs.toString()}`)
+  const response = await apiFetch<{ results?: ProductMedia[]; data?: ProductMedia[]; count?: number; next?: string | null; previous?: string | null }>(`${bfgApi.productMedia()}?${qs.toString()}`, getSiteAdminOptions())
   if (Array.isArray(response)) {
     return { items: response, total: response.length }
   }
@@ -817,6 +844,7 @@ export async function uploadProductMedia(productId: number, file: File, variantI
   // Use apiFetch which already handles FormData correctly
   // apiFetch doesn't set Content-Type for FormData, letting browser set it with boundary
   return apiFetch<ProductMedia>(bfgApi.productMedia(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: formData
   })
@@ -824,11 +852,12 @@ export async function uploadProductMedia(productId: number, file: File, variantI
 
 // Folder management APIs
 export async function getProductMediaFolders(): Promise<{ folders: string[]; count: number }> {
-  return apiFetch<{ folders: string[]; count: number }>(`${bfgApi.productMedia()}folders/`)
+  return apiFetch<{ folders: string[]; count: number }>(`${bfgApi.productMedia()}folders/`, getSiteAdminOptions())
 }
 
 export async function createProductMediaFolder(folder: string): Promise<{ folder: string; message: string }> {
   return apiFetch<{ folder: string; message: string }>(`${bfgApi.productMedia()}create_folder/`, {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify({ folder })
   })
@@ -838,24 +867,28 @@ export async function deleteProductMediaFolder(folder: string): Promise<{ folder
   const qs = new URLSearchParams()
   qs.set('folder', folder)
   return apiFetch<{ folder: string; deleted_count: number; message: string }>(`${bfgApi.productMedia()}delete_folder/?${qs.toString()}`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
 
 export async function deleteProductMedia(id: number): Promise<void> {
   return apiFetch<void>(`${bfgApi.productMedia()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
 
 export async function deleteProductMediaFile(id: number): Promise<{ message: string }> {
   return apiFetch<{ message: string }>(`${bfgApi.productMedia()}${id}/delete_file/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
 
 export async function updateProductMedia(id: number, data: Partial<ProductMedia>): Promise<ProductMedia> {
   return apiFetch<ProductMedia>(`${bfgApi.productMedia()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
@@ -863,6 +896,7 @@ export async function updateProductMedia(id: number, data: Partial<ProductMedia>
 
 export async function copyProductMediaToProduct(mediaId: number, targetProductId: number, isProductImage: boolean = true): Promise<ProductMedia> {
   return apiFetch<ProductMedia>(`${bfgApi.productMedia()}${mediaId}/copy_to_product/`, {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify({ product_id: targetProductId, is_product_image: isProductImage })
   })

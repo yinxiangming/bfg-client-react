@@ -2,8 +2,7 @@
 
 import React, { useState, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
-import { bfgApi } from '@/utils/api'
-import { getApiHeaders } from '@/utils/api'
+import { apiFetch, bfgApi } from '@/utils/api'
 
 const MAX_IMAGE_BASE64_LENGTH = 500000
 
@@ -61,24 +60,18 @@ export default function FeedbackDialog({ open, onClose, source, onSuccess }: Pro
     setStatus('submitting')
     setErrorMessage('')
     try {
-      const headers = getApiHeaders({ 'Content-Type': 'application/json' }, { withAuth: true })
       const pageUrl = typeof window !== 'undefined' ? window.location.href : ''
-      const body: Record<string, string> = {
-        type,
-        content: text,
-        source,
-        page_url: pageUrl,
-      }
-      if (imageBase64) body.image_base64 = imageBase64
-      const res = await fetch(bfgApi.feedback(), {
+      await apiFetch(bfgApi.feedback(), {
         method: 'POST',
-        headers,
-        body: JSON.stringify(body),
+        withAuth: true,
+        body: JSON.stringify({
+          type,
+          content: text,
+          source,
+          page_url: pageUrl,
+          ...(imageBase64 ? { image_base64: imageBase64 } : {}),
+        }),
       })
-      if (!res.ok) {
-        const data = await res.json().catch(() => ({}))
-        throw new Error(data.detail || res.statusText)
-      }
       setStatus('success')
       setContent('')
       setImageBase64(null)

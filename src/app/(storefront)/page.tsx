@@ -4,10 +4,9 @@ import { headers } from 'next/headers'
 import { loadExtensions } from '@/extensions'
 import { getPageSlotReplacements } from '@/extensions/resolve'
 import { ROOT_SLOT_ID } from '@/extensions/terminology'
-import { getApiBaseUrl, getApiHeaders } from '@/utils/api'
-import { getCmsPageFetchLanguages } from '@/utils/storefrontCmsPage'
 import { getSiteConfig } from '@/utils/siteMetadata'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
+import { fetchRenderedCmsPage } from '@/services/storefrontCmsApi'
 import StorefrontDevBadge from '@components/storefront/StorefrontDevBadge'
 import { HOME_REGISTRY } from '@/components/storefront/themes/registry.generated'
 import DynamicPage from '@views/storefront/DynamicPage'
@@ -25,29 +24,7 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 async function getPageData(slug: string, locale: string, requestHost?: string) {
-  const langs = getCmsPageFetchLanguages(locale)
-  const headerOpts = requestHost ? { requestHost, storefrontScope: true as const } : { storefrontScope: true as const }
-  try {
-    const apiUrl = getApiBaseUrl()
-    for (const lang of langs) {
-      const controller = new AbortController()
-      const timeoutId = setTimeout(() => controller.abort(), 10000)
-      const res = await fetch(
-        `${apiUrl}/api/v1/web/pages/${encodeURIComponent(slug)}/rendered/?lang=${encodeURIComponent(lang)}`,
-        {
-          cache: 'no-store',
-          headers: getApiHeaders({}, headerOpts),
-          signal: controller.signal,
-        }
-      )
-      clearTimeout(timeoutId)
-      if (res.ok) return res.json()
-    }
-    return null
-  } catch (error) {
-    console.error('Failed to fetch page data:', error)
-    return null
-  }
+  return fetchRenderedCmsPage(slug, locale, requestHost, { cache: 'no-store' })
 }
 
 export default async function Page() {

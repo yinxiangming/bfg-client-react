@@ -1,6 +1,7 @@
 // Delivery API service (BFG2 Freight module)
 
 import { apiFetch, bfgApi } from '@/utils/api'
+import { getSiteAdminOptions } from '@/services/settings'
 import type { FormSchema } from '@/types/schema'
 
 export type Warehouse = {
@@ -144,7 +145,7 @@ export type TrackingEventPayload = Omit<TrackingEvent, 'id' | 'created_at'>
 
 // Warehouses
 export async function getWarehouses(): Promise<Warehouse[]> {
-  const response = await apiFetch<Warehouse[] | { results: Warehouse[]; data?: Warehouse[] }>(bfgApi.warehouses())
+  const response = await apiFetch<Warehouse[] | { results: Warehouse[]; data?: Warehouse[] }>(bfgApi.warehouses(), getSiteAdminOptions())
   if (Array.isArray(response)) {
     return response
   }
@@ -152,11 +153,12 @@ export async function getWarehouses(): Promise<Warehouse[]> {
 }
 
 export async function getWarehouse(id: number): Promise<Warehouse> {
-  return apiFetch<Warehouse>(`${bfgApi.warehouses()}${id}/`)
+  return apiFetch<Warehouse>(`${bfgApi.warehouses()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createWarehouse(data: WarehousePayload): Promise<Warehouse> {
   return apiFetch<Warehouse>(bfgApi.warehouses(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -164,18 +166,19 @@ export async function createWarehouse(data: WarehousePayload): Promise<Warehouse
 
 export async function updateWarehouse(id: number, data: Partial<WarehousePayload>): Promise<Warehouse> {
   return apiFetch<Warehouse>(`${bfgApi.warehouses()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PUT',
     body: JSON.stringify(data)
   })
 }
 
 export async function deleteWarehouse(id: number): Promise<void> {
-  return apiFetch<void>(`${bfgApi.warehouses()}${id}/`, { method: 'DELETE' })
+  return apiFetch<void>(`${bfgApi.warehouses()}${id}/`, { ...getSiteAdminOptions(), method: 'DELETE' })
 }
 
 // Carriers
 export async function getCarriers(): Promise<Carrier[]> {
-  const response = await apiFetch<Carrier[] | { results: Carrier[]; data?: Carrier[] }>(bfgApi.carriers())
+  const response = await apiFetch<Carrier[] | { results: Carrier[]; data?: Carrier[] }>(bfgApi.carriers(), getSiteAdminOptions())
   if (Array.isArray(response)) {
     return response
   }
@@ -183,11 +186,12 @@ export async function getCarriers(): Promise<Carrier[]> {
 }
 
 export async function getCarrier(id: number): Promise<Carrier> {
-  return apiFetch<Carrier>(`${bfgApi.carriers()}${id}/`)
+  return apiFetch<Carrier>(`${bfgApi.carriers()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createCarrier(data: CarrierPayload): Promise<Carrier> {
   return apiFetch<Carrier>(bfgApi.carriers(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -195,22 +199,23 @@ export async function createCarrier(data: CarrierPayload): Promise<Carrier> {
 
 export async function updateCarrier(id: number, data: Partial<CarrierPayload>): Promise<Carrier> {
   return apiFetch<Carrier>(`${bfgApi.carriers()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PUT',
     body: JSON.stringify(data)
   })
 }
 
 export async function deleteCarrier(id: number): Promise<void> {
-  return apiFetch<void>(`${bfgApi.carriers()}${id}/`, { method: 'DELETE' })
+  return apiFetch<void>(`${bfgApi.carriers()}${id}/`, { ...getSiteAdminOptions(), method: 'DELETE' })
 }
 
 export async function getCarrierPlugins(): Promise<CarrierPluginInfo[]> {
-  return apiFetch<CarrierPluginInfo[]>(`${bfgApi.carriers()}plugins/`)
+  return apiFetch<CarrierPluginInfo[]>(`${bfgApi.carriers()}plugins/`, getSiteAdminOptions())
 }
 
 // Packaging Types
 export async function getPackagingTypes(): Promise<PackagingType[]> {
-  const response = await apiFetch<PackagingType[] | { results: PackagingType[]; data?: PackagingType[] }>(bfgApi.packagingTypes())
+  const response = await apiFetch<PackagingType[] | { results: PackagingType[]; data?: PackagingType[] }>(bfgApi.packagingTypes(), getSiteAdminOptions())
   if (Array.isArray(response)) {
     return response
   }
@@ -218,11 +223,12 @@ export async function getPackagingTypes(): Promise<PackagingType[]> {
 }
 
 export async function getPackagingType(id: number): Promise<PackagingType> {
-  return apiFetch<PackagingType>(`${bfgApi.packagingTypes()}${id}/`)
+  return apiFetch<PackagingType>(`${bfgApi.packagingTypes()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createPackagingType(data: PackagingTypePayload): Promise<PackagingType> {
   return apiFetch<PackagingType>(bfgApi.packagingTypes(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -230,18 +236,19 @@ export async function createPackagingType(data: PackagingTypePayload): Promise<P
 
 export async function updatePackagingType(id: number, data: Partial<PackagingTypePayload>): Promise<PackagingType> {
   return apiFetch<PackagingType>(`${bfgApi.packagingTypes()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PUT',
     body: JSON.stringify(data)
   })
 }
 
 export async function deletePackagingType(id: number): Promise<void> {
-  return apiFetch<void>(`${bfgApi.packagingTypes()}${id}/`, { method: 'DELETE' })
+  return apiFetch<void>(`${bfgApi.packagingTypes()}${id}/`, { ...getSiteAdminOptions(), method: 'DELETE' })
 }
 
 // Freight Service
 export async function getFreightServices(): Promise<FreightService[]> {
-  const response = await apiFetch<FreightService[] | { results: FreightService[]; data?: FreightService[] }>(bfgApi.freightServices())
+  const response = await apiFetch<FreightService[] | { results: FreightService[]; data?: FreightService[] }>(bfgApi.freightServices(), getSiteAdminOptions())
   if (Array.isArray(response)) {
     return response
   }
@@ -249,7 +256,7 @@ export async function getFreightServices(): Promise<FreightService[]> {
 }
 
 export async function getFreightService(id: number): Promise<FreightService> {
-  return apiFetch<FreightService>(`${bfgApi.freightServices()}${id}/`)
+  return apiFetch<FreightService>(`${bfgApi.freightServices()}${id}/`, getSiteAdminOptions())
 }
 
 export interface FreightServiceConfigSchemaResponse {
@@ -258,7 +265,7 @@ export interface FreightServiceConfigSchemaResponse {
 
 export async function getFreightServiceFormSchema(templateId?: string): Promise<FormSchema> {
   const url = bfgApi.freightServiceConfigSchema(templateId)
-  const res = await apiFetch<{ form_schema: FormSchema | unknown[] }>(url)
+  const res = await apiFetch<{ form_schema: FormSchema | unknown[] }>(url, getSiteAdminOptions())
   const raw = res.form_schema
   if (Array.isArray(raw)) {
     return { title: '', fields: raw as FormSchema['fields'] }
@@ -267,11 +274,12 @@ export async function getFreightServiceFormSchema(templateId?: string): Promise<
 }
 
 export async function getFreightTemplates(): Promise<FreightTemplate[]> {
-  return apiFetch<FreightTemplate[]>(bfgApi.freightServiceTemplates())
+  return apiFetch<FreightTemplate[]>(bfgApi.freightServiceTemplates(), getSiteAdminOptions())
 }
 
 export async function createFreightService(data: FreightServicePayload): Promise<FreightService> {
   return apiFetch<FreightService>(bfgApi.freightServices(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -279,6 +287,7 @@ export async function createFreightService(data: FreightServicePayload): Promise
 
 export async function updateFreightService(id: number, data: Partial<FreightServicePayload>): Promise<FreightService> {
   return apiFetch<FreightService>(`${bfgApi.freightServices()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PUT',
     body: JSON.stringify(data)
   })
@@ -291,18 +300,19 @@ export async function updateFreightServiceConfig(
   templateParams: Record<string, unknown>
 ): Promise<FreightService> {
   return apiFetch<FreightService>(`${bfgApi.freightServices()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify({ template_id: templateId, template_params: templateParams })
   })
 }
 
 export async function deleteFreightService(id: number): Promise<void> {
-  return apiFetch<void>(`${bfgApi.freightServices()}${id}/`, { method: 'DELETE' })
+  return apiFetch<void>(`${bfgApi.freightServices()}${id}/`, { ...getSiteAdminOptions(), method: 'DELETE' })
 }
 
 // Freight Status
 export async function getFreightStatuses(): Promise<FreightStatus[]> {
-  const response = await apiFetch<FreightStatus[] | { results: FreightStatus[]; data?: FreightStatus[] }>(bfgApi.freightStatuses())
+  const response = await apiFetch<FreightStatus[] | { results: FreightStatus[]; data?: FreightStatus[] }>(bfgApi.freightStatuses(), getSiteAdminOptions())
   if (Array.isArray(response)) {
     return response
   }
@@ -310,11 +320,12 @@ export async function getFreightStatuses(): Promise<FreightStatus[]> {
 }
 
 export async function getFreightStatus(id: number): Promise<FreightStatus> {
-  return apiFetch<FreightStatus>(`${bfgApi.freightStatuses()}${id}/`)
+  return apiFetch<FreightStatus>(`${bfgApi.freightStatuses()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createFreightStatus(data: FreightStatusPayload): Promise<FreightStatus> {
   return apiFetch<FreightStatus>(bfgApi.freightStatuses(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -322,18 +333,19 @@ export async function createFreightStatus(data: FreightStatusPayload): Promise<F
 
 export async function updateFreightStatus(id: number, data: Partial<FreightStatusPayload>): Promise<FreightStatus> {
   return apiFetch<FreightStatus>(`${bfgApi.freightStatuses()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PUT',
     body: JSON.stringify(data)
   })
 }
 
 export async function deleteFreightStatus(id: number): Promise<void> {
-  return apiFetch<void>(`${bfgApi.freightStatuses()}${id}/`, { method: 'DELETE' })
+  return apiFetch<void>(`${bfgApi.freightStatuses()}${id}/`, { ...getSiteAdminOptions(), method: 'DELETE' })
 }
 
 // Delivery Zone
 export async function getDeliveryZones(): Promise<DeliveryZone[]> {
-  const response = await apiFetch<DeliveryZone[] | { results: DeliveryZone[]; data?: DeliveryZone[] }>(bfgApi.deliveryZones())
+  const response = await apiFetch<DeliveryZone[] | { results: DeliveryZone[]; data?: DeliveryZone[] }>(bfgApi.deliveryZones(), getSiteAdminOptions())
   if (Array.isArray(response)) {
     return response
   }
@@ -341,11 +353,12 @@ export async function getDeliveryZones(): Promise<DeliveryZone[]> {
 }
 
 export async function getDeliveryZone(id: number): Promise<DeliveryZone> {
-  return apiFetch<DeliveryZone>(`${bfgApi.deliveryZones()}${id}/`)
+  return apiFetch<DeliveryZone>(`${bfgApi.deliveryZones()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createDeliveryZone(data: DeliveryZonePayload): Promise<DeliveryZone> {
   return apiFetch<DeliveryZone>(bfgApi.deliveryZones(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -353,18 +366,19 @@ export async function createDeliveryZone(data: DeliveryZonePayload): Promise<Del
 
 export async function updateDeliveryZone(id: number, data: Partial<DeliveryZonePayload>): Promise<DeliveryZone> {
   return apiFetch<DeliveryZone>(`${bfgApi.deliveryZones()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PUT',
     body: JSON.stringify(data)
   })
 }
 
 export async function deleteDeliveryZone(id: number): Promise<void> {
-  return apiFetch<void>(`${bfgApi.deliveryZones()}${id}/`, { method: 'DELETE' })
+  return apiFetch<void>(`${bfgApi.deliveryZones()}${id}/`, { ...getSiteAdminOptions(), method: 'DELETE' })
 }
 
 // Tracking Event
 export async function getTrackingEvents(): Promise<TrackingEvent[]> {
-  const response = await apiFetch<TrackingEvent[] | { results: TrackingEvent[]; data?: TrackingEvent[] }>(bfgApi.trackingEvents())
+  const response = await apiFetch<TrackingEvent[] | { results: TrackingEvent[]; data?: TrackingEvent[] }>(bfgApi.trackingEvents(), getSiteAdminOptions())
   if (Array.isArray(response)) {
     return response
   }
@@ -372,11 +386,12 @@ export async function getTrackingEvents(): Promise<TrackingEvent[]> {
 }
 
 export async function getTrackingEvent(id: number): Promise<TrackingEvent> {
-  return apiFetch<TrackingEvent>(`${bfgApi.trackingEvents()}${id}/`)
+  return apiFetch<TrackingEvent>(`${bfgApi.trackingEvents()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createTrackingEvent(data: TrackingEventPayload): Promise<TrackingEvent> {
   return apiFetch<TrackingEvent>(bfgApi.trackingEvents(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -384,12 +399,13 @@ export async function createTrackingEvent(data: TrackingEventPayload): Promise<T
 
 export async function updateTrackingEvent(id: number, data: Partial<TrackingEventPayload>): Promise<TrackingEvent> {
   return apiFetch<TrackingEvent>(`${bfgApi.trackingEvents()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PUT',
     body: JSON.stringify(data)
   })
 }
 
 export async function deleteTrackingEvent(id: number): Promise<void> {
-  return apiFetch<void>(`${bfgApi.trackingEvents()}${id}/`, { method: 'DELETE' })
+  return apiFetch<void>(`${bfgApi.trackingEvents()}${id}/`, { ...getSiteAdminOptions(), method: 'DELETE' })
 }
 
