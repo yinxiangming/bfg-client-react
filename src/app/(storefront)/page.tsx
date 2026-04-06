@@ -26,7 +26,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 async function getPageData(slug: string, locale: string, requestHost?: string) {
   const langs = getCmsPageFetchLanguages(locale)
-  const headerOpts = requestHost ? { requestHost } : undefined
+  const headerOpts = requestHost ? { requestHost, storefrontScope: true as const } : { storefrontScope: true as const }
   try {
     const apiUrl = getApiBaseUrl()
     for (const lang of langs) {

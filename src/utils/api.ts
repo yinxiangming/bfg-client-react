@@ -188,11 +188,24 @@ export function getWorkspaceId(): string | null {
   return null
 }
 
+/**
+ * Workspace id for public storefront fetches only: never localStorage, never header by default.
+ * Storefront tenant resolution should come from Host / X-Forwarded-Host.
+ */
+export function getStorefrontWorkspaceId(): string | null {
+  return null
+}
+
 export type GetApiHeadersOptions = {
   /** When set (e.g. request host for auth/storefront), backend can resolve workspace by domain. */
   requestHost?: string
   /** Attach Bearer token from storage when present (browser only). */
   withAuth?: boolean
+  /**
+   * Public storefront requests should resolve tenant by Host / X-Forwarded-Host only.
+   * This never uses localStorage and currently returns null so no X-Workspace-ID is sent.
+   */
+  storefrontScope?: boolean
 }
 
 /**
@@ -206,7 +219,7 @@ export function getApiHeaders(
   const headers: Record<string, string> = {
     ...getApiLanguageHeaders(),
   }
-  const workspaceId = getWorkspaceId()
+  const workspaceId = options?.storefrontScope ? getStorefrontWorkspaceId() : getWorkspaceId()
   if (workspaceId) {
     headers['X-Workspace-ID'] = workspaceId
   }
@@ -245,12 +258,12 @@ function redirectToLoginIfAdminUnauthorized(status: number): void {
  */
 export function getAgentChatRequestInit(body: Record<string, unknown>): RequestInit {
   const token = getAuthToken()
-  const workspaceId = getWorkspaceId()
   const headers: Record<string, string> = {
     ...getApiLanguageHeaders(),
     'Content-Type': 'application/json'
   }
   if (token) headers['Authorization'] = `Bearer ${token}`
+  const workspaceId = getWorkspaceId()
   if (workspaceId) headers['X-Workspace-ID'] = workspaceId
   return { method: 'POST', headers, body: JSON.stringify(body) }
 }

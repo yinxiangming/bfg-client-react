@@ -21,7 +21,7 @@ const RESERVED_ASSET_SLUGS = new Set([
 async function getPageData(slug: string, locale: string, requestHost?: string) {
   if (RESERVED_ASSET_SLUGS.has(slug)) return null
   const langs = getCmsPageFetchLanguages(locale)
-  const headerOpts = requestHost ? { requestHost } : undefined
+  const headerOpts = requestHost ? { requestHost, storefrontScope: true as const } : { storefrontScope: true as const }
   try {
     const apiUrl = getApiBaseUrl()
     for (const lang of langs) {

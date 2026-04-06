@@ -107,7 +107,7 @@ export async function getStorefrontConfig(locale?: string): Promise<StorefrontCo
   const res = await fetch(url, {
     headers: getApiHeaders(
       { 'Content-Type': 'application/json' },
-      requestHost ? { requestHost } : undefined
+      { requestHost, storefrontScope: true }
     ),
     credentials: 'include',
   })
@@ -145,7 +145,7 @@ export const getStorefrontConfigForServer = cache(
       const res = await fetch(url, {
         headers: getApiHeaders(
           { 'Content-Type': 'application/json' },
-          requestHost ? { requestHost } : undefined
+          { requestHost, storefrontScope: true }
         ),
         next: { revalidate: 300 },
         signal: controller.signal,
