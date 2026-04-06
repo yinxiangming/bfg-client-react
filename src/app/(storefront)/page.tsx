@@ -4,9 +4,9 @@ import { headers } from 'next/headers'
 import { loadExtensions } from '@/extensions'
 import { getPageSlotReplacements } from '@/extensions/resolve'
 import { ROOT_SLOT_ID } from '@/extensions/terminology'
-import { getApiBaseUrl, getApiHeaders } from '@/utils/api'
 import { getSiteConfig } from '@/utils/siteMetadata'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
+import { fetchRenderedCmsPage } from '@/services/storefrontCmsApi'
 import StorefrontDevBadge from '@components/storefront/StorefrontDevBadge'
 import { HOME_REGISTRY } from '@/components/storefront/themes/registry.generated'
 import DynamicPage from '@views/storefront/DynamicPage'
@@ -23,23 +23,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: site_name ? `${site_name}` : 'Home' }
 }
 
-async function getPageData(slug: string, locale: string) {
-  try {
-    const apiUrl = getApiBaseUrl()
-    const controller = new AbortController()
-    const timeoutId = setTimeout(() => controller.abort(), 10000)
-    const res = await fetch(`${apiUrl}/api/v1/web/pages/${slug}/rendered/?lang=${locale}`, {
-      cache: 'no-store',
-      headers: getApiHeaders(),
-      signal: controller.signal,
-    })
-    clearTimeout(timeoutId)
-    if (!res.ok) return null
-    return res.json()
-  } catch (error) {
-    console.error('Failed to fetch page data:', error)
-    return null
-  }
+async function getPageData(slug: string, locale: string, requestHost?: string) {
+  return fetchRenderedCmsPage(slug, locale, requestHost, { cache: 'no-store' })
 }
 
 export default async function Page() {
@@ -49,7 +34,7 @@ export default async function Page() {
   const config = await getStorefrontConfigForServer(locale, requestHost)
   if (config === null) return null
   const theme = config.theme ?? 'store'
-  const pageData = await getPageData('home', locale)
+  const pageData = await getPageData('home', locale, requestHost)
 
   const extensions = await loadExtensions()
   const replacements = getPageSlotReplacements(extensions, 'storefront/home')

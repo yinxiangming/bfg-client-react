@@ -11,7 +11,8 @@ import TextField from '@mui/material/TextField'
 import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
 import Alert from '@mui/material/Alert'
-import { bfgApi, getAgentChatRequestInit, getWorkspaceId } from '@/utils/api'
+import { getWorkspaceId } from '@/utils/api'
+import { sendAgentChat } from '@/services/agentApi'
 
 type AgentDialogProps = {
   open: boolean
@@ -80,7 +81,7 @@ export default function AgentDialog({ open, onClose }: AgentDialogProps) {
       if (!Number.isNaN(wid)) body.workspace_id = wid
     }
     try {
-      const res = await fetch(bfgApi.agentChat(), getAgentChatRequestInit(body))
+      const res = await sendAgentChat(body)
       if (!res.ok) {
         const err = await res.text()
         setChatError(err || '请求失败')

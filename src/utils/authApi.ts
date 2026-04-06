@@ -73,6 +73,16 @@ class AuthApiClient {
     }
   }
 
+  /** Centralized JSON POST for auth endpoints. */
+  private async postJson(path: string, body: Record<string, unknown>): Promise<Response> {
+    const url = `${this.baseUrl}${path}`
+    return fetch(url, {
+      method: 'POST',
+      headers: this.getAuthHeaders(),
+      body: JSON.stringify(body)
+    })
+  }
+
   /**
    * Login with username/email and password
    * Stores token in localStorage on success
@@ -100,11 +110,7 @@ class AuthApiClient {
     console.log('Login request body:', requestBody)
     let response: Response
     try {
-      response = await fetch(url, {
-        method: 'POST',
-        headers: this.getAuthHeaders(),
-        body: JSON.stringify(requestBody)
-      })
+      response = await this.postJson('/api/v1/auth/token/', requestBody)
     } catch (err: any) {
       const msg = err?.message ?? ''
       if (msg === 'Failed to fetch' || err?.name === 'TypeError') {
@@ -190,11 +196,7 @@ class AuthApiClient {
   async register(data: RegisterRequest): Promise<RegisterResponse> {
     const url = `${this.baseUrl}/api/v1/auth/register/`
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify(data)
-    })
+    const response = await this.postJson('/api/v1/auth/register/', data as unknown as Record<string, unknown>)
 
     if (!response.ok) {
       let errorDetail = 'Registration failed'
@@ -297,11 +299,7 @@ class AuthApiClient {
     }
 
     const url = `${this.baseUrl}/api/v1/auth/token/refresh/`
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify({ refresh: refreshToken })
-    })
+    const response = await this.postJson('/api/v1/auth/token/refresh/', { refresh: refreshToken })
 
     if (!response.ok) {
       // If refresh fails, clear tokens and throw error
@@ -345,11 +343,7 @@ class AuthApiClient {
   async forgotPassword(email: string): Promise<{ detail: string }> {
     const url = `${this.baseUrl}/api/v1/auth/forgot-password/`
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify({ email })
-    })
+    const response = await this.postJson('/api/v1/auth/forgot-password/', { email })
 
     if (!response.ok) {
       let errorDetail = 'Failed to send password reset email'
@@ -388,15 +382,11 @@ class AuthApiClient {
   ): Promise<{ detail: string }> {
     const url = `${this.baseUrl}/api/v1/auth/reset-password-confirm/`
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify({
-        uid,
-        token,
-        new_password: newPassword,
-        new_password_confirm: newPasswordConfirm
-      })
+    const response = await this.postJson('/api/v1/auth/reset-password-confirm/', {
+      uid,
+      token,
+      new_password: newPassword,
+      new_password_confirm: newPasswordConfirm
     })
 
     if (!response.ok) {
@@ -435,11 +425,7 @@ class AuthApiClient {
   async verifyEmail(key: string): Promise<{ detail: string }> {
     const url = `${this.baseUrl}/api/v1/auth/verify-email/`
 
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: this.getAuthHeaders(),
-      body: JSON.stringify({ key })
-    })
+    const response = await this.postJson('/api/v1/auth/verify-email/', { key })
 
     if (!response.ok) {
       let errorDetail = 'Failed to verify email'

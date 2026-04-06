@@ -1,7 +1,6 @@
 // Options API service for dynamic select fields
 
 import { apiFetch, buildApiUrl, API_VERSIONS, getApiBaseUrl } from '@/utils/api'
-import { getWorkspaceToken } from '@/utils/authTokens'
 
 export interface OptionItem {
   value: string | number
@@ -71,23 +70,13 @@ export async function fetchAllOptionsFromCache(cacheEndpoint: string = '/api/v1/
       fullUrl = buildApiUrl(cacheEndpoint, API_VERSIONS.BFG2)
     }
 
-    // Try to fetch, but handle gracefully if endpoint doesn't exist
-    const token = typeof window !== 'undefined' ? getWorkspaceToken() : null
-    const response = await fetch(fullUrl, {
+    const response = await apiFetch<Record<string, OptionItem[]>>(fullUrl, {
       headers: {
         'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },
     })
 
-    // If endpoint doesn't exist (404) or returns HTML, return empty cache
-    if (!response.ok || !response.headers.get('content-type')?.includes('application/json')) {
-      console.warn(`Options cache endpoint not available: ${fullUrl} (status: ${response.status})`)
-      return optionsCache
-    }
-
-    const data = await response.json()
-    optionsCache = data || {}
+    optionsCache = response || {}
     return optionsCache
   } catch (error: any) {
     // Silently fail if endpoint doesn't exist - this is expected in some setups

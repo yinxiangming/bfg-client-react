@@ -1,7 +1,7 @@
 // Finance API service (BFG2 Finance module)
 
-import { apiFetch, bfgApi, getApiBaseUrl, getWorkspaceId } from '@/utils/api'
-import { getWorkspaceToken } from '@/utils/authTokens'
+import { apiFetch, bfgApi, getApiBaseUrl } from '@/utils/api'
+import { getSiteAdminOptions } from '@/services/settings'
 
 export type Currency = {
   id: number
@@ -99,23 +99,24 @@ export type InvoiceSettingPayload = Omit<InvoiceSetting, 'id' | 'created_at' | '
 
 // Currency API
 export async function getCurrencies(): Promise<Currency[]> {
-  const response = await apiFetch<Currency[] | { results: Currency[] }>(bfgApi.currencies())
+  const response = await apiFetch<Currency[] | { results: Currency[] }>(bfgApi.currencies(), getSiteAdminOptions())
   if (Array.isArray(response)) return response
   return response.results || []
 }
 
 /** Workspace default currency code (e.g. 'USD') for pre-filling invoice/forms */
 export async function getDefaultCurrencyCode(): Promise<string> {
-  const res = await apiFetch<{ code: string }>(`${bfgApi.currencies()}default-code/`)
+  const res = await apiFetch<{ code: string }>(`${bfgApi.currencies()}default-code/`, getSiteAdminOptions())
   return res?.code ?? 'USD'
 }
 
 export async function getCurrency(id: number): Promise<Currency> {
-  return apiFetch<Currency>(`${bfgApi.currencies()}${id}/`)
+  return apiFetch<Currency>(`${bfgApi.currencies()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createCurrency(data: CurrencyPayload) {
   return apiFetch<Currency>(bfgApi.currencies(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -123,6 +124,7 @@ export async function createCurrency(data: CurrencyPayload) {
 
 export async function updateCurrency(id: number, data: Partial<CurrencyPayload>) {
   return apiFetch<Currency>(`${bfgApi.currencies()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
@@ -130,23 +132,28 @@ export async function updateCurrency(id: number, data: Partial<CurrencyPayload>)
 
 export async function deleteCurrency(id: number) {
   return apiFetch<void>(`${bfgApi.currencies()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
 
 // Payment Gateway API
 export async function getPaymentGateways(): Promise<PaymentGateway[]> {
-  const response = await apiFetch<PaymentGateway[] | { results: PaymentGateway[] }>(bfgApi.paymentGateways())
+  const response = await apiFetch<PaymentGateway[] | { results: PaymentGateway[] }>(
+    bfgApi.paymentGateways(),
+    getSiteAdminOptions()
+  )
   if (Array.isArray(response)) return response
   return response.results || []
 }
 
 export async function getPaymentGateway(id: number): Promise<PaymentGateway> {
-  return apiFetch<PaymentGateway>(`${bfgApi.paymentGateways()}${id}/`)
+  return apiFetch<PaymentGateway>(`${bfgApi.paymentGateways()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createPaymentGateway(data: PaymentGatewayPayload) {
   return apiFetch<PaymentGateway>(bfgApi.paymentGateways(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -154,6 +161,7 @@ export async function createPaymentGateway(data: PaymentGatewayPayload) {
 
 export async function updatePaymentGateway(id: number, data: Partial<PaymentGatewayPayload>) {
   return apiFetch<PaymentGateway>(`${bfgApi.paymentGateways()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
@@ -161,27 +169,29 @@ export async function updatePaymentGateway(id: number, data: Partial<PaymentGate
 
 export async function deletePaymentGateway(id: number) {
   return apiFetch<void>(`${bfgApi.paymentGateways()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
 
 export async function getPaymentGatewayPlugins(): Promise<PaymentGatewayPluginInfo[]> {
-  return apiFetch<PaymentGatewayPluginInfo[]>(bfgApi.paymentGatewayPlugins())
+  return apiFetch<PaymentGatewayPluginInfo[]>(bfgApi.paymentGatewayPlugins(), getSiteAdminOptions())
 }
 
 // Tax Rate API
 export async function getTaxRates(): Promise<TaxRate[]> {
-  const response = await apiFetch<TaxRate[] | { results: TaxRate[] }>(bfgApi.taxRates())
+  const response = await apiFetch<TaxRate[] | { results: TaxRate[] }>(bfgApi.taxRates(), getSiteAdminOptions())
   if (Array.isArray(response)) return response
   return response.results || []
 }
 
 export async function getTaxRate(id: number): Promise<TaxRate> {
-  return apiFetch<TaxRate>(`${bfgApi.taxRates()}${id}/`)
+  return apiFetch<TaxRate>(`${bfgApi.taxRates()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createTaxRate(data: TaxRatePayload) {
   return apiFetch<TaxRate>(bfgApi.taxRates(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -189,6 +199,7 @@ export async function createTaxRate(data: TaxRatePayload) {
 
 export async function updateTaxRate(id: number, data: Partial<TaxRatePayload>) {
   return apiFetch<TaxRate>(`${bfgApi.taxRates()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
@@ -196,19 +207,20 @@ export async function updateTaxRate(id: number, data: Partial<TaxRatePayload>) {
 
 export async function deleteTaxRate(id: number) {
   return apiFetch<void>(`${bfgApi.taxRates()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
 
 // Brand API
 export async function getBrands(): Promise<Brand[]> {
-  const response = await apiFetch<Brand[] | { results: Brand[] }>(bfgApi.brands())
+  const response = await apiFetch<Brand[] | { results: Brand[] }>(bfgApi.brands(), getSiteAdminOptions())
   if (Array.isArray(response)) return response
   return response.results || []
 }
 
 export async function getBrand(id: number): Promise<Brand> {
-  return apiFetch<Brand>(`${bfgApi.brands()}${id}/`)
+  return apiFetch<Brand>(`${bfgApi.brands()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createBrand(data: BrandPayload) {
@@ -224,6 +236,7 @@ export async function createBrand(data: BrandPayload) {
     }
   })
   return apiFetch<Brand>(bfgApi.brands(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: formData
   })
@@ -242,6 +255,7 @@ export async function updateBrand(id: number, data: Partial<BrandPayload>) {
     }
   })
   return apiFetch<Brand>(`${bfgApi.brands()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: formData
   })
@@ -249,23 +263,28 @@ export async function updateBrand(id: number, data: Partial<BrandPayload>) {
 
 export async function deleteBrand(id: number) {
   return apiFetch<void>(`${bfgApi.brands()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
 
 // Financial Code API
 export async function getFinancialCodes(): Promise<FinancialCode[]> {
-  const response = await apiFetch<FinancialCode[] | { results: FinancialCode[] }>(bfgApi.financialCodes())
+  const response = await apiFetch<FinancialCode[] | { results: FinancialCode[] }>(
+    bfgApi.financialCodes(),
+    getSiteAdminOptions()
+  )
   if (Array.isArray(response)) return response
   return response.results || []
 }
 
 export async function getFinancialCode(id: number): Promise<FinancialCode> {
-  return apiFetch<FinancialCode>(`${bfgApi.financialCodes()}${id}/`)
+  return apiFetch<FinancialCode>(`${bfgApi.financialCodes()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createFinancialCode(data: FinancialCodePayload) {
   return apiFetch<FinancialCode>(bfgApi.financialCodes(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -273,6 +292,7 @@ export async function createFinancialCode(data: FinancialCodePayload) {
 
 export async function updateFinancialCode(id: number, data: Partial<FinancialCodePayload>) {
   return apiFetch<FinancialCode>(`${bfgApi.financialCodes()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
@@ -280,23 +300,28 @@ export async function updateFinancialCode(id: number, data: Partial<FinancialCod
 
 export async function deleteFinancialCode(id: number) {
   return apiFetch<void>(`${bfgApi.financialCodes()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
 
 // Invoice Setting API
 export async function getInvoiceSettings(): Promise<InvoiceSetting[]> {
-  const response = await apiFetch<InvoiceSetting[] | { results: InvoiceSetting[] }>(bfgApi.invoiceSettings())
+  const response = await apiFetch<InvoiceSetting[] | { results: InvoiceSetting[] }>(
+    bfgApi.invoiceSettings(),
+    getSiteAdminOptions()
+  )
   if (Array.isArray(response)) return response
   return response.results || []
 }
 
 export async function getInvoiceSetting(id: number): Promise<InvoiceSetting> {
-  return apiFetch<InvoiceSetting>(`${bfgApi.invoiceSettings()}${id}/`)
+  return apiFetch<InvoiceSetting>(`${bfgApi.invoiceSettings()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createInvoiceSetting(data: InvoiceSettingPayload) {
   return apiFetch<InvoiceSetting>(bfgApi.invoiceSettings(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -304,6 +329,7 @@ export async function createInvoiceSetting(data: InvoiceSettingPayload) {
 
 export async function updateInvoiceSetting(id: number, data: Partial<InvoiceSettingPayload>) {
   return apiFetch<InvoiceSetting>(`${bfgApi.invoiceSettings()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
@@ -311,6 +337,7 @@ export async function updateInvoiceSetting(id: number, data: Partial<InvoiceSett
 
 export async function deleteInvoiceSetting(id: number) {
   return apiFetch<void>(`${bfgApi.invoiceSettings()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
@@ -409,17 +436,18 @@ export async function getInvoices(params?: { order?: number }): Promise<Invoice[
     queryParams.append('order', params.order.toString())
   }
   const url = `${bfgApi.invoices()}${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
-  const response = await apiFetch<Invoice[] | { results: Invoice[] }>(url)
+  const response = await apiFetch<Invoice[] | { results: Invoice[] }>(url, getSiteAdminOptions())
   if (Array.isArray(response)) return response
   return response.results || []
 }
 
 export async function getInvoice(id: number): Promise<Invoice> {
-  return apiFetch<Invoice>(`${bfgApi.invoices()}${id}/`)
+  return apiFetch<Invoice>(`${bfgApi.invoices()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createInvoice(data: InvoiceCreatePayload): Promise<Invoice> {
   return apiFetch<Invoice>(bfgApi.invoices(), {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
   })
@@ -427,6 +455,7 @@ export async function createInvoice(data: InvoiceCreatePayload): Promise<Invoice
 
 export async function updateInvoice(id: number, data: Partial<InvoiceCreatePayload>): Promise<Invoice> {
   return apiFetch<Invoice>(`${bfgApi.invoices()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
@@ -434,6 +463,7 @@ export async function updateInvoice(id: number, data: Partial<InvoiceCreatePaylo
 
 export async function updateInvoiceItems(id: number, items: InvoiceCreatePayload['items']): Promise<Invoice> {
   return apiFetch<Invoice>(`${bfgApi.invoices()}${id}/update_items/`, {
+    ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify({ items })
   })
@@ -441,30 +471,25 @@ export async function updateInvoiceItems(id: number, items: InvoiceCreatePayload
 
 export async function deleteInvoice(id: number): Promise<void> {
   return apiFetch<void>(`${bfgApi.invoices()}${id}/`, {
+    ...getSiteAdminOptions(),
     method: 'DELETE'
   })
 }
 
 export async function sendInvoice(id: number): Promise<{ status?: string; message?: string; [key: string]: any }> {
   return apiFetch<{ status?: string; message?: string; [key: string]: any }>(`${bfgApi.invoices()}${id}/send/`, {
+    ...getSiteAdminOptions(),
     method: 'POST'
   })
 }
 
 export async function downloadInvoice(id: number): Promise<Blob> {
-  // Use apiFetch helper but handle blob response
   const API_BASE_URL = getApiBaseUrl()
   const url = `${API_BASE_URL}/api/v1/invoices/${id}/download_pdf/`
-  const token = typeof window !== 'undefined' ? getWorkspaceToken() : null
-  const workspaceId = getWorkspaceId()
 
-  const headers: Record<string, string> = {}
-  if (token) headers['Authorization'] = `Bearer ${token}`
-  if (workspaceId) headers['X-Workspace-ID'] = workspaceId
-
-  const response = await fetch(url, {
+  const response = await apiFetch<Response>(url, {
+    ...getSiteAdminOptions(),
     method: 'GET',
-    headers
   })
 
   if (!response.ok) {

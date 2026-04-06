@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl'
 import Logo from '@components/Logo'
 import { useStorefrontConfigSafe } from '@/contexts/StorefrontConfigContext'
 import { getStoreImageUrl } from '@/utils/media'
-import { bfgApi, getApiHeaders } from '@/utils/api'
+import { apiFetch, bfgApi } from '@/utils/api'
 
 /** Inline SVG fallback when payment.png is not available from media. */
 function PaymentMethodsFallback() {
@@ -45,21 +45,20 @@ export default function StoreFooter(_props: StoreFooterProps) {
     setNewsletterLoading(true)
     setNewsletterMessage(null)
     try {
-      const res = await fetch(bfgApi.newsletterSubscriptions(), {
+      const requestHost = typeof window !== 'undefined' ? window.location.host : undefined
+      await apiFetch(bfgApi.newsletterSubscriptions(), {
         method: 'POST',
-        headers: getApiHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ email }),
         credentials: 'include',
+        requestHost,
+        storefrontScope: true,
+        withAuth: false,
       })
-      if (res.ok) {
-        setNewsletterMessage({ type: 'success', text: t('footer.newsletterSuccess') })
-        setNewsletterEmail('')
-      } else {
-        const data = await res.json().catch(() => ({}))
-        setNewsletterMessage({ type: 'error', text: (data.email?.[0] || data.detail) || t('footer.newsletterError') })
-      }
-    } catch {
-      setNewsletterMessage({ type: 'error', text: t('footer.newsletterError') })
+      setNewsletterMessage({ type: 'success', text: t('footer.newsletterSuccess') })
+      setNewsletterEmail('')
+    } catch (error: any) {
+      const data = error?.validationErrors || {}
+      setNewsletterMessage({ type: 'error', text: (data.email?.[0] || data.detail || error?.message) || t('footer.newsletterError') })
     } finally {
       setNewsletterLoading(false)
     }

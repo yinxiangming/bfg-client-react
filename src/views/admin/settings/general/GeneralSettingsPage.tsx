@@ -36,6 +36,8 @@ import {
   updateGeneralSettings,
   updateStorefrontUiSettings,
   updateShopSettings,
+  fetchWorkspaceRecord,
+  patchWorkspaceRecord,
   type GeneralSettingsPayload,
   type StorefrontUiSettingsPayload,
   type StorefrontHeaderOptionsPayload,
@@ -59,6 +61,7 @@ const DEFAULT_AVATAR = DEFAULT_AVATAR_URL
 type BasicData = {
   siteName: string
   siteDescription: string
+  workspaceNote: string
   defaultLanguage: string
   defaultCurrency: string
   defaultTimezone: string
@@ -106,6 +109,7 @@ const initialShopData: ShopData = {
 const initialBasicData: BasicData = {
   siteName: '',
   siteDescription: '',
+  workspaceNote: '',
   defaultLanguage: 'en',
   defaultCurrency: 'NZD',
   defaultTimezone: 'Pacific/Auckland',
@@ -136,6 +140,9 @@ const GeneralSettingsPage = () => {
   const [storefrontUi, setStorefrontUi] = useState<StorefrontUiData>(initialStorefrontUi)
   const [shopData, setShopData] = useState<ShopData>(initialShopData)
   const [currencies, setCurrencies] = useState<Currency[]>([])
+  const [workspaceId, setWorkspaceId] = useState<number | null>(null)
+  const [workspaceOrgName, setWorkspaceOrgName] = useState('')
+  const [workspaceSlug, setWorkspaceSlug] = useState('')
 
   const handleTabChange = (event: SyntheticEvent, value: string) => {
     setActiveTab(value)
@@ -185,10 +192,16 @@ const GeneralSettingsPage = () => {
       try {
         setLoading(true)
         console.log('[GeneralSettings] Loading settings...')
-        const [settings, currenciesData] = await Promise.all([
+        const [settings, currenciesData, workspace] = await Promise.all([
           getWorkspaceSettings(),
-          getCurrencies()
+          getCurrencies(),
+          fetchWorkspaceRecord()
         ])
+        if (workspace) {
+          setWorkspaceId(workspace.id)
+          setWorkspaceOrgName(workspace.name || '')
+          setWorkspaceSlug(workspace.slug || '')
+        }
         const activeCurrencies = currenciesData.filter(c => c.is_active)
         setCurrencies(activeCurrencies)
         console.log('[GeneralSettings] Settings loaded:', settings)
@@ -230,7 +243,8 @@ const GeneralSettingsPage = () => {
             topBarAnnouncement: general.top_bar_announcement || initialBasicData.topBarAnnouncement,
             footerCopyright: general.footer_copyright || initialBasicData.footerCopyright,
             siteAnnouncement: general.site_announcement || initialBasicData.siteAnnouncement,
-            footerContact: general.footer_contact || initialBasicData.footerContact
+            footerContact: general.footer_contact || initialBasicData.footerContact,
+            workspaceNote: general.workspace_note || initialBasicData.workspaceNote
           })
           
           const logoUrl = general.logo || (settings as any).logo
@@ -314,6 +328,7 @@ const GeneralSettingsPage = () => {
         footer_copyright: basicData.footerCopyright,
         site_announcement: basicData.siteAnnouncement,
         footer_contact: basicData.footerContact,
+        workspace_note: basicData.workspaceNote,
         logo: fileInput || undefined
       }
       
@@ -321,6 +336,13 @@ const GeneralSettingsPage = () => {
       console.log('[GeneralSettings] API URL will be:', `${bfgApi.settings()}${currentSettingsId}/`)
       
       await updateGeneralSettings(currentSettingsId, payload)
+
+      if (workspaceId != null) {
+        await patchWorkspaceRecord(workspaceId, {
+          name: workspaceOrgName.trim(),
+          slug: workspaceSlug.trim()
+        })
+      }
 
       const storefrontPayload: StorefrontUiSettingsPayload = {
         theme: storefrontUi.theme || undefined,
@@ -413,6 +435,45 @@ const GeneralSettingsPage = () => {
             <TabPanel value='basic' className='p-0'>
               <CardContent>
                 <form onSubmit={handleSubmit}>
+                  <Card variant='outlined' sx={{ mb: 6 }}>
+                    <CardContent>
+                      <Typography variant='h6' sx={{ mb: 4 }}>
+                        {t('settings.general.basic.sections.workspaceAccount')}
+                      </Typography>
+                      <Grid container spacing={4}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
+                          <CustomTextField
+                            fullWidth
+                            label={t('settings.general.basic.fields.workspaceOrgName.label')}
+                            value={workspaceOrgName}
+                            onChange={e => setWorkspaceOrgName(e.target.value)}
+                            helperText={t('settings.general.basic.fields.workspaceOrgName.helper')}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 6 }}>
+                          <CustomTextField
+                            fullWidth
+                            label={t('settings.general.basic.fields.workspaceSlug.label')}
+                            value={workspaceSlug}
+                            onChange={e => setWorkspaceSlug(e.target.value)}
+                            helperText={t('settings.general.basic.fields.workspaceSlug.helper')}
+                          />
+                        </Grid>
+                        <Grid size={{ xs: 12 }}>
+                          <CustomTextField
+                            fullWidth
+                            label={t('settings.general.basic.fields.workspaceNote.label')}
+                            value={basicData.workspaceNote}
+                            onChange={e => handleBasicChange('workspaceNote', e.target.value)}
+                            multiline
+                            rows={2}
+                            helperText={t('settings.general.basic.fields.workspaceNote.helper')}
+                          />
+                        </Grid>
+                      </Grid>
+                    </CardContent>
+                  </Card>
+
                   {/* Site Information Section */}
                   <Card variant='outlined' sx={{ mb: 6 }}>
                     <CardContent>

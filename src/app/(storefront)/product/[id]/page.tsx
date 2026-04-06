@@ -1,8 +1,9 @@
 import { cache } from 'react'
 import { headers } from 'next/headers'
-import { getApiBaseUrl, getApiHeaders, getSiteBaseUrl } from '@/utils/api'
+import { getSiteBaseUrl } from '@/utils/api'
 import { getSiteConfig } from '@/utils/siteMetadata'
 import { getMediaUrl } from '@/utils/media'
+import { storefrontApi } from '@/utils/storefrontApi'
 import ProductDetailPage from '@views/storefront/ProductDetailPage'
 import type { Metadata } from 'next'
 
@@ -21,15 +22,12 @@ type ProductMeta = {
   variants: { stock_available?: number }[]
 }
 
-async function fetchProductRaw(id: string): Promise<ProductMeta | null> {
+async function fetchProductRaw(id: string, requestHost?: string): Promise<ProductMeta | null> {
   try {
-    const base = getApiBaseUrl()
-    const res = await fetch(`${base}/api/v1/store/products/${id}/`, {
-      headers: getApiHeaders(),
+    const data = await storefrontApi.getProduct(id, {
+      requestHost,
       next: { revalidate: 60 },
     })
-    if (!res.ok) return null
-    const data = await res.json()
     const variants = data?.variants || []
     return {
       name: data?.name ?? '',
@@ -88,8 +86,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params
   const headersList = await headers()
   const locale = headersList.get('x-locale') || 'en'
+  const requestHost = headersList.get('host') ?? undefined
   const [product, { site_name }] = await Promise.all([
-    getProductForServer(id),
+    getProductForServer(id, requestHost),
     getSiteConfig(locale),
   ])
   const title = product?.name ?? `Product ${id}`
@@ -127,7 +126,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function Page(props: Props) {
   const { id } = await props.params
-  const product = await getProductForServer(id)
+  const headersList = await headers()
+  const requestHost = headersList.get('host') ?? undefined
+  const product = await getProductForServer(id, requestHost)
 
   return (
     <>

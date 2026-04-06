@@ -7,11 +7,18 @@ import { cache } from 'react'
 import { getApiBaseUrl, getApiHeaders } from './api'
 import { getApiLanguageHeaders, getCurrentLocale } from '@/i18n/http'
 
+export type StorefrontMenuKind = 'link' | 'category' | 'page' | 'post'
+
 export type StorefrontMenuItem = {
   title: string
   url: string
   order: number
   open_in_new_tab: boolean
+  /** From API when MenuItem links to CMS; store Header uses for merged nav. */
+  kind?: StorefrontMenuKind
+  category_slug?: string | null
+  page_slug?: string | null
+  post_slug?: string | null
 }
 
 export type StorefrontFooterMenuGroup = {
@@ -72,6 +79,11 @@ export function clearStorefrontConfigCache(): void {
   cached = null
 }
 
+/** Align client module cache with SSR payload so other callers of getStorefrontConfig() see menus immediately. */
+export function seedStorefrontConfigCache(data: StorefrontConfig): void {
+  cached = { data, at: Date.now() }
+}
+
 function getStorefrontConfigUrl(locale: string): string {
   const base = getApiBaseUrl()
   const path = `/api/v1/settings/storefront/`
@@ -95,7 +107,7 @@ export async function getStorefrontConfig(locale?: string): Promise<StorefrontCo
   const res = await fetch(url, {
     headers: getApiHeaders(
       { 'Content-Type': 'application/json' },
-      requestHost ? { requestHost } : undefined
+      { requestHost, storefrontScope: true }
     ),
     credentials: 'include',
   })
@@ -133,7 +145,7 @@ export const getStorefrontConfigForServer = cache(
       const res = await fetch(url, {
         headers: getApiHeaders(
           { 'Content-Type': 'application/json' },
-          requestHost ? { requestHost } : undefined
+          { requestHost, storefrontScope: true }
         ),
         next: { revalidate: 300 },
         signal: controller.signal,

@@ -170,17 +170,16 @@ function getAuthToken(): string | null {
 }
 
 /**
- * Get workspace ID from storage or use default.
- * On server (SSR), uses NEXT_PUBLIC_WORKSPACE_ID so port-specific site (e.g. 3001) gets correct workspace.
+ * Get workspace ID from storage or env.
+ * Do not default to a numeric id in development: that forces the wrong tenant when the API should
+ * resolve workspace by Host / X-Forwarded-Host (e.g. Geeker on localhost). Set NEXT_PUBLIC_WORKSPACE_ID
+ * explicitly when you need a fixed workspace without domain routing.
  */
 export function getWorkspaceId(): string | null {
   if (typeof window !== 'undefined') {
     // Always prefer localStorage override (set during token exchange from platform login)
     const workspaceId = localStorage.getItem('workspace_id')
     if (workspaceId) return workspaceId
-    if (process.env.NODE_ENV === 'development') {
-      return process.env.NEXT_PUBLIC_WORKSPACE_ID || '1'
-    }
     const envWorkspaceId = process.env.NEXT_PUBLIC_WORKSPACE_ID || null
     if (envWorkspaceId) return envWorkspaceId
   } else if (process.env.NEXT_PUBLIC_WORKSPACE_ID) {
@@ -189,11 +188,36 @@ export function getWorkspaceId(): string | null {
   return null
 }
 
+/**
+ * Workspace id for public storefront fetches only: never localStorage, never header by default.
+ * Storefront tenant resolution should come from Host / X-Forwarded-Host.
+ */
+export function getStorefrontWorkspaceId(): string | null {
+  return null
+}
+
 export type GetApiHeadersOptions = {
   /** When set (e.g. request host for auth/storefront), backend can resolve workspace by domain. */
   requestHost?: string
   /** Attach Bearer token from storage when present (browser only). */
   withAuth?: boolean
+  /**
+   * Public storefront requests should resolve tenant by Host / X-Forwarded-Host only.
+   * This never uses localStorage and currently returns null so no X-Workspace-ID is sent.
+   */
+  storefrontScope?: boolean
+  /**
+   * Site-bound admin scope: prefer domain routing and do not send X-Workspace-ID.
+   * Use for admin pages hosted on a business domain like geeker.co.nz.
+   */
+  siteAdminScope?: boolean
+}
+
+export type ApiFetchOptions = RequestInit & {
+  requestHost?: string
+  withAuth?: boolean
+  storefrontScope?: boolean
+  siteAdminScope?: boolean
 }
 
 /**
@@ -207,7 +231,7 @@ export function getApiHeaders(
   const headers: Record<string, string> = {
     ...getApiLanguageHeaders(),
   }
-  const workspaceId = getWorkspaceId()
+  const workspaceId = options?.storefrontScope || options?.siteAdminScope ? getStorefrontWorkspaceId() : getWorkspaceId()
   if (workspaceId) {
     headers['X-Workspace-ID'] = workspaceId
   }
@@ -246,12 +270,12 @@ function redirectToLoginIfAdminUnauthorized(status: number): void {
  */
 export function getAgentChatRequestInit(body: Record<string, unknown>): RequestInit {
   const token = getAuthToken()
-  const workspaceId = getWorkspaceId()
   const headers: Record<string, string> = {
     ...getApiLanguageHeaders(),
     'Content-Type': 'application/json'
   }
   if (token) headers['Authorization'] = `Bearer ${token}`
+  const workspaceId = getWorkspaceId()
   if (workspaceId) headers['X-Workspace-ID'] = workspaceId
   return { method: 'POST', headers, body: JSON.stringify(body) }
 }
@@ -261,25 +285,26 @@ export function getAgentChatRequestInit(body: Record<string, unknown>): RequestI
  */
 export async function apiFetch<T>(
   url: string,
-  options?: RequestInit,
+  options?: ApiFetchOptions,
   retryOn401: boolean = true
 ): Promise<T> {
   const token = getAuthToken()
-  const workspaceId = getWorkspaceId()
+  const { requestHost, withAuth, storefrontScope, siteAdminScope, ...fetchOptions } = options || {}
+  const workspaceId = storefrontScope || siteAdminScope ? getStorefrontWorkspaceId() : getWorkspaceId()
   const headers: Record<string, string> = {
-    ...(options?.headers as Record<string, string>)
+    ...(fetchOptions?.headers as Record<string, string>)
   }
 
   // Add locale for backend i18n (Django LocaleMiddleware)
   Object.assign(headers, getApiLanguageHeaders())
 
   // Only set Content-Type for JSON, not for FormData
-  if (!(options?.body instanceof FormData)) {
+  if (!(fetchOptions?.body instanceof FormData)) {
     headers['Content-Type'] = 'application/json'
   }
 
   // Add auth token if available
-  if (token) {
+  if (token && withAuth !== false) {
     headers['Authorization'] = `Bearer ${token}`
   }
 
@@ -288,8 +313,12 @@ export async function apiFetch<T>(
     headers['X-Workspace-ID'] = workspaceId
   }
 
+  if (requestHost) {
+    headers['X-Forwarded-Host'] = requestHost
+  }
+
   const response = await fetch(url, {
-    ...options,
+    ...fetchOptions,
     headers
   })
 

@@ -5,7 +5,7 @@
  */
 
 import { refreshTokenIfNeeded } from './tokenRefresh'
-import { getApiBaseUrl, getWorkspaceId } from './api'
+import { getApiBaseUrl } from './api'
 import { getWorkspaceToken } from './authTokens'
 import { getApiLanguageHeaders } from '@/i18n/http'
 
@@ -65,8 +65,8 @@ class MeApiClient {
       ...getApiLanguageHeaders(),
       ...(options.headers as Record<string, string> || {})
     }
-    const workspaceId = getWorkspaceId()
-    if (workspaceId) headers['X-Workspace-ID'] = workspaceId
+    const requestHost = typeof window !== 'undefined' ? window.location.host : undefined
+    if (requestHost) headers['X-Forwarded-Host'] = requestHost
 
     // Only set Content-Type for non-FormData requests
     // For FormData, browser will automatically set Content-Type with boundary

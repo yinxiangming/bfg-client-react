@@ -3423,6 +3423,7 @@
       },
       "basic": {
         "sections": {
+          "workspaceAccount": "Workspace account",
           "siteInformation": "Workspace Information",
           "localization": "Localization",
           "contactInformation": "Contact Information",
@@ -3436,6 +3437,18 @@
           "help": "Allowed JPG, GIF or PNG. Max size of 800K"
         },
         "fields": {
+          "workspaceOrgName": {
+            "label": "Organization name",
+            "helper": "Display name of this tenant / workspace (API: Workspace.name)."
+          },
+          "workspaceSlug": {
+            "label": "Workspace slug",
+            "helper": "URL-safe identifier; must be unique. Changing it may affect integrations that use the slug."
+          },
+          "workspaceNote": {
+            "label": "Internal note",
+            "helper": "Optional note (e.g. from site-config import); not shown on the storefront."
+          },
           "siteName": {
             "label": "Workspace Name",
             "placeholder": "Enter your workspace name"

@@ -1,0 +1,181 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Manrope:wght@300;400;500&display=swap');
+
+.section {
+  padding: 8rem 2rem;
+  font-family: 'Manrope', sans-serif;
+}
+
+.section.light { background-color: #FDFBF7; color: #0A192F; }
+.section.dark { background-color: #0A192F; color: #FDFBF7; }
+.section.forest { background-color: #0A221C; color: #FDFBF7; }
+
+.container {
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 5rem;
+  gap: 4rem;
+}
+
+.headerContent {
+  max-width: 600px;
+}
+
+.title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: clamp(2.5rem, 4vw, 4rem);
+  font-weight: 300;
+  line-height: 1.1;
+  margin-bottom: 1.5rem;
+}
+
+.subtitle {
+  font-size: 1.125rem;
+  line-height: 1.7;
+  font-weight: 300;
+  opacity: 0.8;
+}
+
+.headerLine {
+  flex-grow: 1;
+  height: 1px;
+  background-color: currentColor;
+  opacity: 0.2;
+  margin-bottom: 1rem;
+}
+
+.grid {
+  display: grid;
+  gap: 0; /* No gap, we use borders for the grid effect */
+  border-top: 1px solid rgba(0,0,0,0.1);
+  border-left: 1px solid rgba(0,0,0,0.1);
+}
+
+.section.dark .grid, .section.forest .grid {
+  border-color: rgba(255,255,255,0.1);
+}
+
+.card {
+  padding: 4rem 3rem;
+  border-right: 1px solid rgba(0,0,0,0.1);
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  transition: background-color 0.4s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.section.dark .card, .section.forest .card {
+  border-color: rgba(255,255,255,0.1);
+}
+
+.card:hover {
+  background-color: rgba(0,0,0,0.02);
+}
+
+.section.dark .card:hover, .section.forest .card:hover {
+  background-color: rgba(255,255,255,0.03);
+}
+
+.cardHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 4rem;
+}
+
+.cardNumber {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.5rem;
+  color: #D4AF37;
+}
+
+.iconWrapper {
+  width: 2.5rem;
+  height: 2.5rem;
+  opacity: 0.8;
+  filter: grayscale(100%);
+  transition: all 0.4s ease;
+}
+
+.section.dark .iconWrapper, .section.forest .iconWrapper {
+  filter: grayscale(100%) invert(100%);
+}
+
+.card:hover .iconWrapper {
+  opacity: 1;
+  transform: scale(1.1);
+}
+
+.cardTitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  font-weight: 400;
+  margin-bottom: 1rem;
+}
+
+.cardDescription {
+  font-size: 1rem;
+  line-height: 1.6;
+  font-weight: 300;
+  opacity: 0.7;
+  margin-bottom: 3rem;
+  flex-grow: 1;
+}
+
+.link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: currentColor;
+  font-size: 0.875rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  text-decoration: none;
+  margin-top: auto;
+  position: relative;
+  width: fit-content;
+}
+
+.link::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0; width: 100%; height: 1px;
+  background-color: #D4AF37;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.4s ease;
+}
+
+.card:hover .link::after {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+
+.linkArrow {
+  font-size: 1.25rem;
+  transition: transform 0.4s ease;
+}
+
+.card:hover .linkArrow {
+  transform: translate(4px, -4px);
+  color: #D4AF37;
+}
+
+@media (max-width: 1024px) {
+  .header { flex-direction: column; align-items: flex-start; gap: 2rem; }
+  .headerLine { width: 100%; height: 1px; flex-grow: 0; }
+  .grid { grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+@media (max-width: 640px) {
+  .grid { grid-template-columns: 1fr !important; }
+  .card { padding: 3rem 2rem; }
+}

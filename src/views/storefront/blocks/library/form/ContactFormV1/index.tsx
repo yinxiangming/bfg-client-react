@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import { useTranslations } from 'next-intl'
 import { getLocalizedText } from '@/utils/i18n'
-import { getApiUrl, getApiHeaders } from '@/utils/api'
+import { apiFetch, getApiUrl } from '@/utils/api'
 import type { BlockProps } from '../../../types'
 import styles from './styles.module.css'
 
@@ -57,9 +57,12 @@ export function ContactFormV1({
     setErrorMessage('')
 
     try {
-      const response = await fetch(`${getApiUrl()}/api/web/inquiries/`, {
+      const requestHost = typeof window !== 'undefined' ? window.location.host : undefined
+      await apiFetch(`${getApiUrl()}/api/web/inquiries/`, {
         method: 'POST',
-        headers: getApiHeaders({ 'Content-Type': 'application/json' }),
+        requestHost,
+        storefrontScope: true,
+        withAuth: false,
         body: JSON.stringify({
           inquiry_type: inquiryType,
           name: formData.name,
@@ -70,10 +73,6 @@ export function ContactFormV1({
           source_url: typeof window !== 'undefined' ? window.location.href : '',
         }),
       })
-
-      if (!response.ok) {
-        throw new Error('Failed to submit form')
-      }
 
       setStatus('success')
       setFormData({ name: '', email: '', phone: '', subject: '', message: '' })

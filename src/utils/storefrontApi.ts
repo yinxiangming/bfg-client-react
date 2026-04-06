@@ -5,9 +5,9 @@
  */
 
 import { refreshTokenIfNeeded } from './tokenRefresh'
-import { getApiBaseUrl, getWorkspaceId } from './api'
+import { getApiBaseUrl, getStorefrontWorkspaceId } from './api'
 import { getWorkspaceToken } from './authTokens'
-import { getApiLanguageHeaders } from '@/i18n/http'
+import { getApiLanguageHeaders, getCurrentLocale } from '@/i18n/http'
 
 interface ApiResponse<T> {
   data?: T
@@ -16,6 +16,14 @@ interface ApiResponse<T> {
   next?: string | null
   previous?: string | null
   error?: string
+}
+
+/**
+ * Extends RequestInit for storefront fetches.
+ * `requestHost` is set on the Next.js server so WorkspaceMiddleware can resolve the tenant from the incoming Host (no `window`).
+ */
+export type StorefrontRequestInit = RequestInit & {
+  requestHost?: string
 }
 
 /** Storefront promo API: GET /api/v1/store/promo/?context=home (CampaignDisplay slides, etc.) */
@@ -66,7 +74,8 @@ class StorefrontApiClient {
     return this._baseUrl
   }
 
-  private async request<T>(endpoint: string, options: RequestInit = {}, retryOn401: boolean = true): Promise<T> {
+  private async request<T>(endpoint: string, options: StorefrontRequestInit = {}, retryOn401: boolean = true): Promise<T> {
+    const { requestHost, ...fetchOptions } = options
     const base = this.baseUrl.replace(/\/$/, '')
     const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`
     const url = `${base}${path}`
@@ -74,10 +83,18 @@ class StorefrontApiClient {
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...getApiLanguageHeaders(),
-      ...(options.headers as Record<string, string> || {})
+      ...(fetchOptions.headers as Record<string, string> || {})
     }
-    const workspaceId = getWorkspaceId()
+    const workspaceId = getStorefrontWorkspaceId()
     if (workspaceId) headers['X-Workspace-ID'] = workspaceId
+    const forwardedHost =
+      requestHost ||
+      (typeof window !== 'undefined' && typeof window.location?.host === 'string' && window.location.host
+        ? window.location.host
+        : undefined)
+    if (forwardedHost) {
+      headers['X-Forwarded-Host'] = forwardedHost
+    }
 
     if (typeof window !== 'undefined') {
       const token = getWorkspaceToken()
@@ -87,7 +104,7 @@ class StorefrontApiClient {
     }
 
     const response = await fetch(url, {
-      ...options,
+      ...fetchOptions,
       headers,
       credentials: 'include' // Include cookies for session support
     })
@@ -199,7 +216,7 @@ class StorefrontApiClient {
       // Build comprehensive error log (plain object so console always shows keys)
       const errorLog: Record<string, unknown> = {
         url,
-        method: options.method || 'GET',
+        method: fetchOptions.method || 'GET',
         status: response.status,
         statusText: response.statusText,
         error: errorDetail,
@@ -208,11 +225,11 @@ class StorefrontApiClient {
       if (errorData && Object.keys(errorData).length > 0) {
         errorLog.errorData = errorData
       }
-      if (options.body) {
+      if (fetchOptions.body) {
         try {
-          errorLog.requestBody = JSON.parse(options.body as string)
+          errorLog.requestBody = JSON.parse(fetchOptions.body as string)
         } catch {
-          errorLog.requestBody = options.body
+          errorLog.requestBody = fetchOptions.body
         }
       }
       console.error(`API Request failed: ${response.status} ${errorDetail}`, errorLog)
@@ -278,8 +295,11 @@ class StorefrontApiClient {
     return this.request<ApiResponse<any>>(`/api/v1/store/products/${query ? `?${query}` : ''}`)
   }
 
-  async getProduct(idOrSlug: string | number): Promise<any> {
-    return this.request<any>(`/api/v1/store/products/${idOrSlug}/`)
+  async getProduct(
+    idOrSlug: string | number,
+    init?: Pick<StorefrontRequestInit, 'requestHost' | 'next'>
+  ): Promise<any> {
+    return this.request<any>(`/api/v1/store/products/${idOrSlug}/`, init || {})
   }
 
   async getProductReviews(
@@ -328,12 +348,26 @@ class StorefrontApiClient {
   }
 
   // Categories
-  async getCategories(params?: { tree?: boolean }): Promise<ApiResponse<any>> {
+  async getCategories(params?: {
+    tree?: boolean
+    /** Next.js server: incoming Host for tenant resolution (pass `headers().get('host')`). */
+    requestHost?: string
+    /** Next.js server: `lang` query when `window` is unavailable. */
+    lang?: string
+    /** Next.js fetch cache (server components / metadata). */
+    next?: { revalidate?: number }
+  }): Promise<ApiResponse<any>> {
     const queryParams = new URLSearchParams()
     if (params?.tree) queryParams.append('tree', 'true')
+    const lang =
+      typeof window !== 'undefined' ? getCurrentLocale() : (params?.lang ?? 'en')
+    queryParams.append('lang', lang)
 
     const query = queryParams.toString()
-    return this.request<ApiResponse<any>>(`/api/v1/store/categories/${query ? `?${query}` : ''}`)
+    return this.request<ApiResponse<any>>(`/api/v1/store/categories/${query ? `?${query}` : ''}`, {
+      next: params?.next,
+      requestHost: params?.requestHost,
+    })
   }
 
   async getCategory(id: number): Promise<any> {

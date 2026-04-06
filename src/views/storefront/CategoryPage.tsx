@@ -35,6 +35,26 @@ type Product = {
 
 type SortOption = 'relevance' | 'sales' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc'
 
+function findCategoryInTree(
+  items: any[],
+  targetSlug: string
+): { name: string; description: string; children: any[] } | null {
+  for (const c of items) {
+    if (c.slug === targetSlug) {
+      return {
+        name: c.name ?? targetSlug,
+        description: c.description ?? '',
+        children: Array.isArray(c.children) ? c.children : []
+      }
+    }
+    if (c.children?.length) {
+      const found = findCategoryInTree(c.children, targetSlug)
+      if (found) return found
+    }
+  }
+  return null
+}
+
 const CategoryPage = ({ slug }: { slug: string }) => {
   const t = useTranslations('storefront')
   const { beforeSlots, afterSlots } = usePageSlots('storefront/category')
@@ -45,6 +65,7 @@ const CategoryPage = ({ slug }: { slug: string }) => {
   const [currentPage, setCurrentPage] = useState(1)
   const [totalCount, setTotalCount] = useState(0)
   const [categoryInfo, setCategoryInfo] = useState<{ name: string; description: string } | null>(null)
+  const [subcategories, setSubcategories] = useState<{ slug: string; name: string }[]>([])
   const [showFilters, setShowFilters] = useState(false)
 
   const productsPerPage = 12
@@ -95,21 +116,28 @@ const CategoryPage = ({ slug }: { slug: string }) => {
         setProducts(productsList.map(transformProduct))
         setTotalCount(response.count || productsList.length)
 
-        // Fetch category info
+        // Fetch category info + subcategories (tree)
         try {
-          const categoriesRes = await storefrontApi.getCategories()
+          const categoriesRes = await storefrontApi.getCategories({ tree: true })
           const categoriesList = Array.isArray(categoriesRes)
             ? categoriesRes
             : categoriesRes.results || categoriesRes.data || []
-          const category = categoriesList.find((c: any) => c.slug === slug)
-          if (category) {
+          const found = findCategoryInTree(categoriesList, slug)
+          if (found) {
             setCategoryInfo({
-              name: category.name,
-              description: category.description || ''
+              name: found.name,
+              description: found.description || ''
             })
+            const subs = found.children
+              .filter((ch: any) => ch?.slug && ch?.name)
+              .map((ch: any) => ({ slug: ch.slug as string, name: ch.name as string }))
+            setSubcategories(subs)
+          } else {
+            setSubcategories([])
           }
         } catch (err) {
           console.warn('Failed to fetch category info:', err)
+          setSubcategories([])
         }
       } catch (err) {
         console.error('Error fetching products:', err)
@@ -149,36 +177,26 @@ const CategoryPage = ({ slug }: { slug: string }) => {
       <div className='sf-category-layout'>
         {/* Sidebar */}
         <aside className={`sf-category-sidebar ${showFilters ? 'sf-show' : ''}`}>
-          <div className='sf-card' style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
-            <h3 className='sf-sidebar-title' style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem' }}>
-              {t('category.sidebar.categoriesTitle')}
-            </h3>
-            <ul className='sf-sidebar-list' style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-              <li style={{ marginBottom: '0.5rem' }}>
-                <Link
-                  href='/category/clothes'
-                  className='sf-sidebar-link'
-                  style={{ textDecoration: 'none', fontSize: '0.875rem' }}
-                >
-                  {t('category.sidebar.sampleClothes')}
-                </Link>
-              </li>
-              <li style={{ marginBottom: '0.5rem' }}>
-                <Link href='/category/shoes' className='sf-sidebar-link' style={{ textDecoration: 'none', fontSize: '0.875rem' }}>
-                  {t('category.sidebar.sampleShoes')}
-                </Link>
-              </li>
-              <li style={{ marginBottom: '0.5rem' }}>
-                <Link
-                  href='/category/accessories'
-                  className='sf-sidebar-link'
-                  style={{ textDecoration: 'none', fontSize: '0.875rem' }}
-                >
-                  {t('category.sidebar.sampleAccessories')}
-                </Link>
-              </li>
-            </ul>
-          </div>
+          {subcategories.length > 0 && (
+            <div className='sf-card' style={{ padding: '1.5rem', marginBottom: '1.5rem' }}>
+              <h3 className='sf-sidebar-title' style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem' }}>
+                {t('category.sidebar.categoriesTitle')}
+              </h3>
+              <ul className='sf-sidebar-list' style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                {subcategories.map(sub => (
+                  <li key={sub.slug} style={{ marginBottom: '0.5rem' }}>
+                    <Link
+                      href={`/category/${sub.slug}`}
+                      className='sf-sidebar-link'
+                      style={{ textDecoration: 'none', fontSize: '0.875rem' }}
+                    >
+                      {sub.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div className='sf-card' style={{ padding: '1.5rem' }}>
             <h3 className='sf-sidebar-title' style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem' }}>

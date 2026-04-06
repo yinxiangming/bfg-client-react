@@ -12,13 +12,103 @@ import FeedbackButton from '@/components/feedback/FeedbackButton'
 import { storefrontApi } from '@/utils/storefrontApi'
 import { authApi } from '@/utils/authApi'
 import { useStorefrontConfigSafe } from '@/contexts/StorefrontConfigContext'
+import type { StorefrontMenuItem, StorefrontMenuKind } from '@/utils/storefrontConfig'
 
 type CategoryItem = { name: string; slug: string }
 type CategorySubcategory = { name: string; slug: string; items: CategoryItem[] }
 type CategoryWithSubs = { name: string; slug: string; subcategories: CategorySubcategory[] }
 type CategoryType = string | CategoryWithSubs
 
+type NavRow =
+  | { kind: 'mega'; key: string; title: string; slug: string; subcategories: CategorySubcategory[] }
+  | { kind: 'link'; key: string; title: string; href: string; newTab: boolean }
+
 type StoreHeaderProps = { mode?: 'light' | 'dark' }
+
+function transformCategoryTree(apiCategories: any[]): CategoryType[] {
+  return apiCategories.map(category => {
+    if (category.children && category.children.length > 0) {
+      const subcategories: CategorySubcategory[] = category.children.map((child: any) => {
+        if (child.children && child.children.length > 0) {
+          const items: CategoryItem[] = child.children.map((grandchild: any) => ({
+            name: grandchild.name,
+            slug: grandchild.slug || grandchild.name.toLowerCase().replace(/\s+/g, '-')
+          }))
+          return { name: child.name, slug: child.slug || child.name.toLowerCase().replace(/\s+/g, '-'), items }
+        }
+        return { name: child.name, slug: child.slug || child.name.toLowerCase().replace(/\s+/g, '-'), items: [] }
+      })
+      return {
+        name: category.name,
+        slug: category.slug || category.name.toLowerCase().replace(/\s+/g, '-'),
+        subcategories: subcategories.length > 0 ? subcategories : []
+      }
+    }
+    return category.name
+  })
+}
+
+function findCategoryNode(nodes: any[], slug: string): any | null {
+  for (const n of nodes || []) {
+    if (n.slug === slug) return n
+    const inner = findCategoryNode(n.children || [], slug)
+    if (inner) return inner
+  }
+  return null
+}
+
+function inferMenuKind(item: StorefrontMenuItem): StorefrontMenuKind {
+  if (item.kind) return item.kind
+  if (item.category_slug) return 'category'
+  if (item.post_slug) return 'post'
+  if (item.page_slug) return 'page'
+  const u = item.url || ''
+  if (/^https?:\/\//i.test(u)) return 'link'
+  if (/^\/?category\/[^/]+/i.test(u)) return 'category'
+  return 'link'
+}
+
+function buildNavRows(menuItems: StorefrontMenuItem[], categoryTree: any[], transformCategoryTree: (t: any[]) => CategoryType[]): NavRow[] {
+  const sorted = [...menuItems].sort((a, b) => a.order - b.order)
+  const rows: NavRow[] = []
+  sorted.forEach((item, index) => {
+    const mk = inferMenuKind(item)
+    const key = `nav-${item.order}-${index}`
+    if (mk === 'category') {
+      const slug =
+        item.category_slug ||
+        (item.url || '').replace(/^\/?category\//, '').replace(/\/$/, '').split('/')[0] ||
+        ''
+      if (slug) {
+        const node = findCategoryNode(categoryTree, slug)
+        if (node?.children?.length) {
+          const transformed = transformCategoryTree([node])
+          const top = transformed[0]
+          if (typeof top !== 'string' && top.subcategories?.length) {
+            rows.push({
+              kind: 'mega',
+              key,
+              title: item.title,
+              slug: top.slug || node.slug,
+              subcategories: top.subcategories,
+            })
+            return
+          }
+        }
+        rows.push({ kind: 'link', key, title: item.title, href: `/category/${slug}`, newTab: item.open_in_new_tab })
+        return
+      }
+    }
+    rows.push({
+      kind: 'link',
+      key,
+      title: item.title,
+      href: item.url || '/',
+      newTab: item.open_in_new_tab,
+    })
+  })
+  return rows
+}
 
 export default function StoreHeader(_props: StoreHeaderProps) {
   const [currencyMenuOpen, setCurrencyMenuOpen] = useState(false)
@@ -27,6 +117,9 @@ export default function StoreHeader(_props: StoreHeaderProps) {
   const [categoryOpen, setCategoryOpen] = useState<string | null>(null)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [categories, setCategories] = useState<CategoryType[]>([])
+  /** Raw API tree for merging CMS header menus with category subtrees. */
+  const [categoryTreeRaw, setCategoryTreeRaw] = useState<any[]>([])
+  const [navRows, setNavRows] = useState<NavRow[] | null>(null)
   const [loadingCategories, setLoadingCategories] = useState(true)
   const [mounted, setMounted] = useState(false)
   const [searchKeyword, setSearchKeyword] = useState('')
@@ -58,35 +151,13 @@ export default function StoreHeader(_props: StoreHeaderProps) {
     }
   }, [])
 
-  const transformCategoryTree = (apiCategories: any[]): CategoryType[] => {
-    return apiCategories.map(category => {
-      if (category.children && category.children.length > 0) {
-        const subcategories: CategorySubcategory[] = category.children.map((child: any) => {
-          if (child.children && child.children.length > 0) {
-            const items: CategoryItem[] = child.children.map((grandchild: any) => ({
-              name: grandchild.name,
-              slug: grandchild.slug || grandchild.name.toLowerCase().replace(/\s+/g, '-')
-            }))
-            return { name: child.name, slug: child.slug || child.name.toLowerCase().replace(/\s+/g, '-'), items }
-          }
-          return { name: child.name, slug: child.slug || child.name.toLowerCase().replace(/\s+/g, '-'), items: [] }
-        })
-        return {
-          name: category.name,
-          slug: category.slug || category.name.toLowerCase().replace(/\s+/g, '-'),
-          subcategories: subcategories.length > 0 ? subcategories : []
-        }
-      }
-      return category.name
-    })
-  }
-
   useEffect(() => {
     const fetchCategories = async () => {
       try {
         setLoadingCategories(true)
         const response = await storefrontApi.getCategories({ tree: true })
         const categoriesList = Array.isArray(response) ? response : response.results || response.data || []
+        setCategoryTreeRaw(categoriesList)
         setCategories(transformCategoryTree(categoriesList))
       } catch (err) {
         console.error('Failed to fetch categories:', err)
@@ -97,6 +168,20 @@ export default function StoreHeader(_props: StoreHeaderProps) {
     }
     fetchCategories()
   }, [])
+
+  useEffect(() => {
+    const menus = config?.header_menus
+    if (menus?.length) {
+      setNavRows(buildNavRows(menus, categoryTreeRaw, transformCategoryTree))
+    } else {
+      setNavRows(null)
+    }
+  }, [config?.header_menus, categoryTreeRaw])
+
+  const useMergedNav = Boolean(navRows?.length)
+  /** Do not block the whole nav on category API when CMS header menus exist (merged nav can render links immediately). */
+  const hasHeaderMenus = (config.header_menus?.length ?? 0) > 0
+  const navListLoading = loadingCategories && !hasHeaderMenus
 
   return (
     <>
@@ -172,21 +257,34 @@ export default function StoreHeader(_props: StoreHeaderProps) {
               {config.site_name || 'Store'}
             </Link>
             <ul className='sf-nav-menu'>
-              {loadingCategories ? <li>Loading...</li> : categories.map((category, index) => {
-                const categoryKey = typeof category === 'string' ? category : category.slug || category.name
-                return (
-                  <li key={categoryKey || index} className='sf-nav-item'>
-                    {typeof category === 'string' ? (
-                      <Link href={`/category/${category.toLowerCase()}`} className='sf-nav-link'>{category}</Link>
-                    ) : (
+              {navListLoading ? (
+                <li>Loading...</li>
+              ) : useMergedNav && navRows ? (
+                navRows.map(row => {
+                  if (row.kind === 'link') {
+                    return (
+                      <li key={row.key} className='sf-nav-item'>
+                        <Link
+                          href={row.href}
+                          className='sf-nav-link'
+                          target={row.newTab ? '_blank' : undefined}
+                          rel={row.newTab ? 'noopener noreferrer' : undefined}
+                        >
+                          {row.title}
+                        </Link>
+                      </li>
+                    )
+                  }
+                  return (
+                    <li key={row.key} className='sf-nav-item'>
                       <>
-                        <a href='#' className='sf-nav-link' onClick={e => { e.preventDefault(); setCategoryOpen(categoryOpen === category.name ? null : category.name) }}>
-                          {category.name}
+                        <a href='#' className='sf-nav-link' onClick={e => { e.preventDefault(); setCategoryOpen(categoryOpen === row.key ? null : row.key) }}>
+                          {row.title}
                         </a>
-                        {categoryOpen === category.name && category.subcategories.length > 0 && (
+                        {categoryOpen === row.key && row.subcategories.length > 0 && (
                           <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '0.5rem', background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '8px', padding: '1rem', minWidth: '600px', zIndex: 50 }} onMouseLeave={() => setCategoryOpen(null)}>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
-                              {category.subcategories.map((sub, subIndex) => (
+                              {row.subcategories.map((sub, subIndex) => (
                                 <div key={sub.slug || subIndex}>
                                   <Link href={`/category/${sub.slug}`} className='sf-category-sub-link' style={{ fontWeight: 600, textDecoration: 'none', fontSize: '0.875rem', display: 'block', marginBottom: '0.5rem' }}>{sub.name}</Link>
                                   {sub.items?.length > 0 && sub.items.map((item, itemIndex) => (
@@ -198,10 +296,41 @@ export default function StoreHeader(_props: StoreHeaderProps) {
                           </div>
                         )}
                       </>
-                    )}
-                  </li>
-                )
-              })}
+                    </li>
+                  )
+                })
+              ) : (
+                categories.map((category, index) => {
+                  const categoryKey = typeof category === 'string' ? category : category.slug || category.name
+                  return (
+                    <li key={categoryKey || index} className='sf-nav-item'>
+                      {typeof category === 'string' ? (
+                        <Link href={`/category/${category.toLowerCase()}`} className='sf-nav-link'>{category}</Link>
+                      ) : (
+                        <>
+                          <a href='#' className='sf-nav-link' onClick={e => { e.preventDefault(); setCategoryOpen(categoryOpen === category.name ? null : category.name) }}>
+                            {category.name}
+                          </a>
+                          {categoryOpen === category.name && category.subcategories.length > 0 && (
+                            <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '0.5rem', background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '8px', padding: '1rem', minWidth: '600px', zIndex: 50 }} onMouseLeave={() => setCategoryOpen(null)}>
+                              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
+                                {category.subcategories.map((sub, subIndex) => (
+                                  <div key={sub.slug || subIndex}>
+                                    <Link href={`/category/${sub.slug}`} className='sf-category-sub-link' style={{ fontWeight: 600, textDecoration: 'none', fontSize: '0.875rem', display: 'block', marginBottom: '0.5rem' }}>{sub.name}</Link>
+                                    {sub.items?.length > 0 && sub.items.map((item, itemIndex) => (
+                                      <Link key={item.slug || itemIndex} href={`/category/${item.slug}`} className='sf-category-item-link' style={{ display: 'block', textDecoration: 'none', fontSize: '0.8125rem', marginBottom: '0.25rem' }}>{item.name}</Link>
+                                    ))}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </>
+                      )}
+                    </li>
+                  )
+                })
+              )}
             </ul>
           </nav>
           <div className='sf-header-actions'>
@@ -267,23 +396,37 @@ export default function StoreHeader(_props: StoreHeaderProps) {
               </form>
             )}
             <nav>
-              <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#757575', marginBottom: '0.75rem', textTransform: 'uppercase' }}>Categories</h3>
+              <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#757575', marginBottom: '0.75rem', textTransform: 'uppercase' }}>{useMergedNav ? 'Menu' : 'Categories'}</h3>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
-                {loadingCategories ? <li style={{ padding: '0.75rem 0', color: '#757575' }}>Loading...</li> : categories.map((category, index) => {
-                  const categoryKey = typeof category === 'string' ? category : category.slug || category.name
-                  return (
-                    <li key={categoryKey || index} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                      {typeof category === 'string' ? (
-                        <Link href={`/category/${category.toLowerCase()}`} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: '#2c3e50', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}>{category}</Link>
-                      ) : (
+                {navListLoading ? (
+                  <li style={{ padding: '0.75rem 0', color: '#757575' }}>Loading...</li>
+                ) : useMergedNav && navRows ? (
+                  navRows.map(row => {
+                    if (row.kind === 'link') {
+                      return (
+                        <li key={row.key} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                          <Link
+                            href={row.href}
+                            onClick={() => setMobileMenuOpen(false)}
+                            target={row.newTab ? '_blank' : undefined}
+                            rel={row.newTab ? 'noopener noreferrer' : undefined}
+                            style={{ display: 'block', padding: '0.75rem 0', color: '#2c3e50', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}
+                          >
+                            {row.title}
+                          </Link>
+                        </li>
+                      )
+                    }
+                    return (
+                      <li key={row.key} style={{ borderBottom: '1px solid #f0f0f0' }}>
                         <div>
-                          <button onClick={() => setCategoryOpen(categoryOpen === category.name ? null : category.name)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 0', background: 'none', border: 'none', color: '#2c3e50', fontSize: '0.9375rem', fontWeight: 500, cursor: 'pointer', textAlign: 'left' }}>
-                            <span>{category.name}</span>
-                            <i className={`tabler-chevron-${categoryOpen === category.name ? 'up' : 'down'}`} style={{ fontSize: '1rem' }} />
+                          <button type='button' onClick={() => setCategoryOpen(categoryOpen === row.key ? null : row.key)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 0', background: 'none', border: 'none', color: '#2c3e50', fontSize: '0.9375rem', fontWeight: 500, cursor: 'pointer', textAlign: 'left' }}>
+                            <span>{row.title}</span>
+                            <i className={`tabler-chevron-${categoryOpen === row.key ? 'up' : 'down'}`} style={{ fontSize: '1rem' }} />
                           </button>
-                          {categoryOpen === category.name && category.subcategories.length > 0 && (
+                          {categoryOpen === row.key && row.subcategories.length > 0 && (
                             <ul style={{ listStyle: 'none', padding: '0 0 0.5rem 1rem', margin: 0, backgroundColor: '#fafafa' }}>
-                              {category.subcategories.map((sub, subIndex) => (
+                              {row.subcategories.map((sub, subIndex) => (
                                 <li key={sub.slug || subIndex}>
                                   <Link href={`/category/${sub.slug}`} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.5rem 0', color: '#757575', textDecoration: 'none', fontSize: '0.875rem' }}>{sub.name}</Link>
                                 </li>
@@ -291,10 +434,37 @@ export default function StoreHeader(_props: StoreHeaderProps) {
                             </ul>
                           )}
                         </div>
-                      )}
-                    </li>
-                  )
-                })}
+                      </li>
+                    )
+                  })
+                ) : (
+                  categories.map((category, index) => {
+                    const categoryKey = typeof category === 'string' ? category : category.slug || category.name
+                    return (
+                      <li key={categoryKey || index} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                        {typeof category === 'string' ? (
+                          <Link href={`/category/${category.toLowerCase()}`} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: '#2c3e50', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}>{category}</Link>
+                        ) : (
+                          <div>
+                            <button type='button' onClick={() => setCategoryOpen(categoryOpen === category.name ? null : category.name)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 0', background: 'none', border: 'none', color: '#2c3e50', fontSize: '0.9375rem', fontWeight: 500, cursor: 'pointer', textAlign: 'left' }}>
+                              <span>{category.name}</span>
+                              <i className={`tabler-chevron-${categoryOpen === category.name ? 'up' : 'down'}`} style={{ fontSize: '1rem' }} />
+                            </button>
+                            {categoryOpen === category.name && category.subcategories.length > 0 && (
+                              <ul style={{ listStyle: 'none', padding: '0 0 0.5rem 1rem', margin: 0, backgroundColor: '#fafafa' }}>
+                                {category.subcategories.map((sub, subIndex) => (
+                                  <li key={sub.slug || subIndex}>
+                                    <Link href={`/category/${sub.slug}`} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.5rem 0', color: '#757575', textDecoration: 'none', fontSize: '0.875rem' }}>{sub.name}</Link>
+                                  </li>
+                                ))}
+                              </ul>
+                            )}
+                          </div>
+                        )}
+                      </li>
+                    )
+                  })
+                )}
               </ul>
             </nav>
             {showLogin && (
