@@ -19,6 +19,10 @@ export default function AdminLayoutClient({ navItems, extensionIds, children }: 
   const pathname = usePathname()
 
   useEffect(() => {
+    // SSO landing page must run before tokens exist; do not send users to login mid-exchange.
+    if (pathname?.startsWith('/admin/sso')) {
+      return
+    }
     if (!authApi.isAuthenticated()) {
       const redirect = pathname || '/admin'
       router.push(`/auth/login?redirect=${encodeURIComponent(redirect)}`)

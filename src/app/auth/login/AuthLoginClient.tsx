@@ -48,8 +48,8 @@ export default function AuthLoginClient() {
     window.location.href = `${apiBase}/api/v1/auth/${provider}/login/?${params}`
   }
 
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault()
+  const runLogin = async () => {
+    if (loading) return
     setError(null)
     setLoading(true)
 
@@ -69,6 +69,11 @@ export default function AuthLoginClient() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault()
+    void runLogin()
   }
 
   return (
@@ -134,7 +139,14 @@ export default function AuthLoginClient() {
             </Link>
           </div>
 
-          <Button fullWidth variant='contained' type='submit' disabled={loading} className='auth-button'>
+          <Button
+            fullWidth
+            variant='contained'
+            type='button'
+            disabled={loading}
+            className='auth-button'
+            onClick={() => void runLogin()}
+          >
             {loading ? t('submitting') : t('submit')}
           </Button>
 

@@ -39,7 +39,7 @@
     "resalePayouts": "结算"
   },
   "common": {
-    "networkUnreachable": "无法连接服务器，请确认 API 已启动且 NEXT_PUBLIC_API_URL 配置正确。",
+    "networkUnreachable": "无法连接服务器，请确认 API 已启动。",
     "actions": {
       "add": "新增",
       "update": "更新",
