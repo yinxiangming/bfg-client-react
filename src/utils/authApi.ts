@@ -88,7 +88,17 @@ class AuthApiClient {
    * Stores token in localStorage on success
    */
   async login(credentials: LoginRequest): Promise<TokenResponse> {
-    const url = `${this.baseUrl}/api/v1/auth/token/`
+    let base: string
+    try {
+      base = this.baseUrl
+    } catch (e: unknown) {
+      const msg = e instanceof Error ? e.message : String(e)
+      throw new Error(
+        msg ||
+          'API base URL is not configured. Set NEXT_PUBLIC_API_URL in .env.local and restart the Next.js dev server.',
+      )
+    }
+    const tokenPath = '/api/v1/auth/token/'
 
     // Determine if the input is an email or username
     const usernameOrEmail = credentials.username || credentials.email || ''
@@ -108,9 +118,12 @@ class AuthApiClient {
     }
 
     console.log('Login request body:', requestBody)
+    if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+      console.info('[auth] Login POST', `${base}${tokenPath}`)
+    }
     let response: Response
     try {
-      response = await this.postJson('/api/v1/auth/token/', requestBody)
+      response = await this.postJson(tokenPath, requestBody)
     } catch (err: any) {
       const msg = err?.message ?? ''
       if (msg === 'Failed to fetch' || err?.name === 'TypeError') {
