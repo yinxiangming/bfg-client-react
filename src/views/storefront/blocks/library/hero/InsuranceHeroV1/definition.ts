@@ -1,4 +1,4 @@
-import { BlockDefinition } from '../../../../types'
+import { BlockDefinition } from '../../../types'
 import InsuranceHeroV1 from './index'
 
 export const definition: BlockDefinition = {
@@ -7,24 +7,39 @@ export const definition: BlockDefinition = {
   category: 'hero',
   description: 'High-end editorial hero section with majestic typography',
   settingsSchema: {
-    type: 'object',
-    properties: {
-      height: { type: 'string', title: 'Min Height' },
-      align: { type: 'string', enum: ['left', 'center'], title: 'Alignment' },
-      theme: { type: 'string', enum: ['light', 'dark', 'forest'], title: 'Theme' },
+    height: {
+      type: 'string',
+      label: 'Min Height',
+      default: '85vh',
+    },
+    align: {
+      type: 'select',
+      label: 'Alignment',
+      default: 'left',
+      options: [
+        { label: 'Left', value: 'left' },
+        { label: 'Center', value: 'center' },
+      ],
+    },
+    theme: {
+      type: 'select',
+      label: 'Theme',
+      default: 'forest',
+      options: [
+        { label: 'Light', value: 'light' },
+        { label: 'Dark', value: 'dark' },
+        { label: 'Forest', value: 'forest' },
+      ],
     },
   },
   dataSchema: {
-    type: 'object',
-    properties: {
-      title: { type: 'string', title: 'Title (use *text* for italics)' },
-      subtitle: { type: 'string', title: 'Subtitle' },
-      primaryButtonText: { type: 'string', title: 'Primary Button Text' },
-      primaryButtonLink: { type: 'string', title: 'Primary Button Link' },
-      secondaryButtonText: { type: 'string', title: 'Secondary Button Text' },
-      secondaryButtonLink: { type: 'string', title: 'Secondary Button Link' },
-      image: { type: 'string', title: 'Image URL' },
-    },
+    title: { type: 'string', label: 'Title (use *text* for italics)' },
+    subtitle: { type: 'string', label: 'Subtitle' },
+    primaryButtonText: { type: 'string', label: 'Primary Button Text' },
+    primaryButtonLink: { type: 'string', label: 'Primary Button Link' },
+    secondaryButtonText: { type: 'string', label: 'Secondary Button Text' },
+    secondaryButtonLink: { type: 'string', label: 'Secondary Button Link' },
+    image: { type: 'string', label: 'Image URL' },
   },
   defaultSettings: {
     height: '85vh',

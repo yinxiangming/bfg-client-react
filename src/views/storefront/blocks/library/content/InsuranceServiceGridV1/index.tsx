@@ -1,13 +1,22 @@
 import React from 'react'
-import type { BlockProps } from '../../../../types'
+import type { BlockProps } from '../../../types'
 import styles from './styles.module.css'
 
+type ServiceItem = { title?: string; description?: string; icon?: string; link?: string }
+
 export default function InsuranceServiceGridV1({ data, settings }: BlockProps) {
-  const { title, subtitle, services = [] } = data
-  const { columns = 3, theme = 'light' } = settings
+  const { title, subtitle, services = [] } = data as {
+    title?: string
+    subtitle?: string
+    services?: ServiceItem[]
+  }
+  const cols = typeof settings?.columns === 'number' ? settings.columns : Number(settings?.columns) || 3
+  const rawTheme = settings?.theme
+  const themeVariant =
+    rawTheme === 'dark' || rawTheme === 'forest' ? rawTheme : 'light'
 
   return (
-    <section className={`${styles.section} ${styles[theme]}`}>
+    <section className={`${styles.section} ${styles[themeVariant]}`}>
       <div className={styles.container}>
         <div className={styles.header}>
           <div className={styles.headerContent}>
@@ -16,8 +25,8 @@ export default function InsuranceServiceGridV1({ data, settings }: BlockProps) {
           </div>
           <div className={styles.headerLine}></div>
         </div>
-        <div className={styles.grid} style={{ gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))` }}>
-          {services.map((service: any, index: number) => (
+        <div className={styles.grid} style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
+          {services.map((service: ServiceItem, index: number) => (
             <div key={index} className={styles.card}>
               <div className={styles.cardHeader}>
                 <span className={styles.cardNumber}>0{index + 1}</span>
