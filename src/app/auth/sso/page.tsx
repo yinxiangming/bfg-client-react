@@ -9,12 +9,12 @@ import { setWorkspaceApiUrlOverride } from '@/utils/apiUrls'
 type SSOState = 'loading' | 'success' | 'error'
 
 /**
- * SSO landing page: receives a one-time code from the platform redirect,
- * exchanges it for workspace JWT tokens, stores them, and redirects to admin.
+ * Workspace SSO landing (platform redirect): exchange one-time code for JWT, then go to admin.
+ * Lives under /auth so it uses the light auth layout (no admin shell / settings fetch).
  *
- * URL: /admin/sso?code=xxx&next=/admin
+ * URL: /auth/sso?code=xxx&next=/admin
  */
-export default function SSOPage() {
+export default function AuthSSOPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const [state, setState] = useState<SSOState>('loading')
@@ -36,13 +36,6 @@ export default function SSOPage() {
 
         if (cancelled) return
 
-        // Store tokens using existing utils
-        setWorkspaceToken(result.access)
-        if (result.refresh) {
-          setWorkspaceRefreshToken(result.refresh)
-        }
-
-        // Store workspace info
         if (result.workspace_url) {
           setWorkspaceApiUrlOverride(result.workspace_url)
         }
@@ -50,9 +43,13 @@ export default function SSOPage() {
           localStorage.setItem('workspace_id', String(result.workspace.id))
         }
 
+        setWorkspaceToken(result.access)
+        if (result.refresh) {
+          setWorkspaceRefreshToken(result.refresh)
+        }
+
         setState('success')
 
-        // Redirect to target page
         const next = searchParams.get('next') || result.next || '/admin'
         router.replace(next)
       } catch (err: unknown) {

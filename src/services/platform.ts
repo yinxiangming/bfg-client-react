@@ -105,7 +105,7 @@ export async function tokenExchange(workspaceId: number): Promise<TokenExchangeR
 
 /**
  * Exchange a one-time SSO code for workspace JWT tokens.
- * Called by /admin/sso page after redirect from platform.
+ * Called by /auth/sso page after redirect from platform.
  */
 export async function ssoExchange(code: string): Promise<SSOExchangeResponse> {
   const url = buildApiUrl('/platform/auth/sso/exchange/')
@@ -137,7 +137,7 @@ export async function ssoStart(
  * Flow:
  *   1. Fetch user's workspaces
  *   2. If single workspace → call sso/start → browser redirect to workspace domain
- *   3. Workspace frontend /admin/sso exchanges code for JWT
+ *   3. Workspace frontend /auth/sso exchanges code for JWT
  *
  * @param routerPush - router.push function (used for fallback only)
  * @param fallbackRedirect - where to go if no workspace or on error (default: '/account')
