@@ -1,4 +1,4 @@
-import { BlockDefinition } from '../../../../types'
+import { BlockDefinition } from '../../../types'
 import InsuranceServiceGridV1 from './index'
 
 export const definition: BlockDefinition = {
@@ -7,31 +7,26 @@ export const definition: BlockDefinition = {
   category: 'content',
   description: 'High-end structural grid of insurance products',
   settingsSchema: {
-    type: 'object',
-    properties: {
-      columns: { type: 'number', title: 'Columns', default: 3 },
-      theme: { type: 'string', enum: ['light', 'dark', 'forest'], title: 'Theme' },
+    columns: {
+      type: 'integer',
+      label: 'Columns',
+      default: 3,
+    },
+    theme: {
+      type: 'select',
+      label: 'Theme',
+      default: 'light',
+      options: [
+        { label: 'Light', value: 'light' },
+        { label: 'Dark', value: 'dark' },
+        { label: 'Forest', value: 'forest' },
+      ],
     },
   },
   dataSchema: {
-    type: 'object',
-    properties: {
-      title: { type: 'string', title: 'Section Title' },
-      subtitle: { type: 'string', title: 'Section Subtitle' },
-      services: {
-        type: 'array',
-        title: 'Services',
-        items: {
-          type: 'object',
-          properties: {
-            title: { type: 'string', title: 'Title' },
-            description: { type: 'string', title: 'Description' },
-            icon: { type: 'string', title: 'Icon URL' },
-            link: { type: 'string', title: 'Link URL' },
-          },
-        },
-      },
-    },
+    title: { type: 'string', label: 'Section Title' },
+    subtitle: { type: 'string', label: 'Section Subtitle' },
+    services: { type: 'array', label: 'Services' },
   },
   defaultSettings: {
     columns: 3,

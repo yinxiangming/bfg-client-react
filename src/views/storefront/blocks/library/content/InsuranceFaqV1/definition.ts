@@ -1,4 +1,4 @@
-import { BlockDefinition } from '../../../../types'
+import { BlockDefinition } from '../../../types'
 import InsuranceFaqV1 from './index'
 
 export const definition: BlockDefinition = {
@@ -7,28 +7,20 @@ export const definition: BlockDefinition = {
   category: 'content',
   description: 'Accordion style FAQ section',
   settingsSchema: {
-    type: 'object',
-    properties: {
-      theme: { type: 'string', enum: ['light', 'gray'], title: 'Theme' },
+    theme: {
+      type: 'select',
+      label: 'Theme',
+      default: 'light',
+      options: [
+        { label: 'Light', value: 'light' },
+        { label: 'Gray', value: 'gray' },
+      ],
     },
   },
   dataSchema: {
-    type: 'object',
-    properties: {
-      title: { type: 'string', title: 'Section Title' },
-      subtitle: { type: 'string', title: 'Section Subtitle' },
-      faqs: {
-        type: 'array',
-        title: 'FAQs',
-        items: {
-          type: 'object',
-          properties: {
-            question: { type: 'string', title: 'Question' },
-            answer: { type: 'string', title: 'Answer' },
-          },
-        },
-      },
-    },
+    title: { type: 'string', label: 'Section Title' },
+    subtitle: { type: 'string', label: 'Section Subtitle' },
+    faqs: { type: 'array', label: 'FAQs' },
   },
   defaultSettings: {
     theme: 'light',

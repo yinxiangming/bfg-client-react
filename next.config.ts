@@ -36,10 +36,15 @@ function buildPluginRewrites() {
   return rules
 }
 
-// Local: parent root for symlink tracing. Docker: set NEXT_FILE_TRACING_ROOT=/app
+// Local: parent repo root for symlink tracing. Docker: set NEXT_FILE_TRACING_ROOT=/app.
+// On Vercel, omit outputFileTracingRoot (Next 16.2 + monorepo Root Directory can break finalize if this is set).
+const tracingRoot =
+  process.env.NEXT_FILE_TRACING_ROOT ||
+  (process.env.VERCEL ? undefined : join(__dirname, '../..'))
+
 const nextConfig: NextConfig = {
   reactStrictMode: true,
-  outputFileTracingRoot: process.env.NEXT_FILE_TRACING_ROOT || (process.env.VERCEL ? process.cwd() : join(__dirname, '../..')),
+  ...(tracingRoot != null && tracingRoot !== '' ? { outputFileTracingRoot: tracingRoot } : {}),
   allowedDevOrigins: process.env.ALLOWED_DEV_ORIGINS?.split(',').map(s => s.trim()).filter(Boolean) ?? [],
   async rewrites() {
     return { beforeFiles: buildPluginRewrites() }

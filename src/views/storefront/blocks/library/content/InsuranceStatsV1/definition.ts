@@ -1,4 +1,4 @@
-import { BlockDefinition } from '../../../../types'
+import { BlockDefinition } from '../../../types'
 import InsuranceStatsV1 from './index'
 
 export const definition: BlockDefinition = {
@@ -7,26 +7,19 @@ export const definition: BlockDefinition = {
   category: 'content',
   description: 'Statistics bar showing key metrics like customers served',
   settingsSchema: {
-    type: 'object',
-    properties: {
-      theme: { type: 'string', enum: ['brand', 'dark', 'light'], title: 'Theme' },
+    theme: {
+      type: 'select',
+      label: 'Theme',
+      default: 'brand',
+      options: [
+        { label: 'Brand', value: 'brand' },
+        { label: 'Dark', value: 'dark' },
+        { label: 'Light', value: 'light' },
+      ],
     },
   },
   dataSchema: {
-    type: 'object',
-    properties: {
-      stats: {
-        type: 'array',
-        title: 'Statistics',
-        items: {
-          type: 'object',
-          properties: {
-            value: { type: 'string', title: 'Value (e.g. "500K+")' },
-            label: { type: 'string', title: 'Label' },
-          },
-        },
-      },
-    },
+    stats: { type: 'array', label: 'Statistics' },
   },
   defaultSettings: {
     theme: 'brand',

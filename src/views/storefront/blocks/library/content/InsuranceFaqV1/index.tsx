@@ -1,12 +1,19 @@
 'use client'
 
 import React, { useState } from 'react'
-import type { BlockProps } from '../../../../types'
+import type { BlockProps } from '../../../types'
 import styles from './styles.module.css'
 
+type FaqItem = { question: string; answer: string }
+
 export default function InsuranceFaqV1({ data, settings }: BlockProps) {
-  const { title, subtitle, faqs = [] } = data
-  const { theme = 'light' } = settings
+  const { title, subtitle, faqs = [] } = data as {
+    title?: string
+    subtitle?: string
+    faqs?: FaqItem[]
+  }
+  const rawTheme = settings?.theme
+  const themeVariant = rawTheme === 'gray' ? 'gray' : 'light'
 
   const [openIndex, setOpenIndex] = useState<number | null>(0)
 
@@ -15,14 +22,14 @@ export default function InsuranceFaqV1({ data, settings }: BlockProps) {
   }
 
   return (
-    <section className={`${styles.section} ${styles[theme]}`}>
+    <section className={`${styles.section} ${styles[themeVariant]}`}>
       <div className={styles.container}>
         <div className={styles.header}>
           {title && <h2 className={styles.title}>{title}</h2>}
           {subtitle && <p className={styles.subtitle}>{subtitle}</p>}
         </div>
         <div className={styles.faqList}>
-          {faqs.map((faq: any, index: number) => {
+          {faqs.map((faq: FaqItem, index: number) => {
             const isOpen = openIndex === index
             return (
               <div key={index} className={`${styles.faqItem} ${isOpen ? styles.open : ''}`}>
