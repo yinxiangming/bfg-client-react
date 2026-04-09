@@ -8,9 +8,7 @@ import { useTranslations } from 'next-intl'
 
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
-import Typography from '@mui/material/Typography'
 
 import SchemaTable from '@/components/schema/SchemaTable'
 import type { ListSchema, SchemaAction } from '@/types/schema'
@@ -104,25 +102,13 @@ const FreightServicesTab = () => {
   }
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h6">{t('settings.delivery.freightServices.tab.title')}</Typography>
-        <Button
-          variant="contained"
-          startIcon={<i className="tabler-plus" style={{ fontSize: '1rem' }} />}
-          onClick={() => router.push('/admin/settings/delivery/freight-services/new')}
-        >
-          {t('settings.delivery.freightServices.tab.actions.newService')}
-        </Button>
-      </Box>
-      <SchemaTable
-        schema={freightServicesSchema}
-        data={data || []}
-        onActionClick={handleActionClick}
-        basePath="/admin/settings/delivery/freight-services"
-        fetchDetailFn={(id) => getFreightService(typeof id === 'string' ? parseInt(id) : id)}
-      />
-    </Box>
+    <SchemaTable
+      schema={freightServicesSchema}
+      data={data || []}
+      onActionClick={handleActionClick}
+      basePath="/admin/settings/delivery/freight-services"
+      fetchDetailFn={(id) => getFreightService(typeof id === 'string' ? parseInt(id) : id)}
+    />
   )
 }
 

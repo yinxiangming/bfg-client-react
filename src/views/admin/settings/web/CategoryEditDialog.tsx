@@ -82,6 +82,7 @@ const CategoryEditDialog = ({ open, category, onClose, onSave }: CategoryEditDia
       description: data.description,
       parent_id: data.parent_id,
       content_type_name: data.content_type_name || '',
+      fields_schema: category?.fields_schema ?? {},
       icon: data.icon,
       color: data.color,
       order: Number(data.order) || 100,

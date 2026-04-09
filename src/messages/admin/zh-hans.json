@@ -42,6 +42,7 @@
     "networkUnreachable": "无法连接服务器，请确认 API 已启动。",
     "actions": {
       "add": "新增",
+      "save": "保存",
       "update": "更新",
       "cancel": "取消",
       "delete": "删除",
@@ -2525,6 +2526,7 @@
           "actions": {
             "newCategory": "新增分类",
             "edit": "编辑",
+            "editSchema": "编辑字段模板",
             "delete": "删除"
           },
           "headers": {
@@ -2570,6 +2572,41 @@
             "project": "项目",
             "service": "服务",
             "faq": "FAQ"
+          }
+        },
+        "fieldsSchemaDialog": {
+          "title": "自定义字段模板 — {name}",
+          "intro": "为当前分类下的内容定义额外字段（写入文章的自定义字段）。键名请使用小写字母、数字和下划线。",
+          "applyTemplate": "预设模板",
+          "templatePlaceholder": "选择模板…",
+          "loadTemplate": "载入模板",
+          "confirmReplaceTemplate": "用该模板替换当前所有字段定义？",
+          "loadTemplateFailed": "无法加载模板",
+          "saveFailed": "保存模板失败",
+          "fieldsHeading": "字段定义",
+          "addField": "添加字段",
+          "noFields": "暂无自定义字段，可添加字段或载入模板。",
+          "fieldNumber": "字段 {n}",
+          "fieldKey": "字段键（API）",
+          "fieldType": "类型",
+          "label": "标签",
+          "labelZh": "标签（中文）",
+          "description": "说明 / 帮助文案",
+          "defaultValue": "默认值",
+          "defaultValueHint": "选填。布尔类型请填 true 或 false。",
+          "required": "必填",
+          "optionsHeading": "下拉选项",
+          "optionLabel": "显示文字",
+          "optionValue": "值",
+          "optionLabelEn": "英文标签",
+          "addOption": "添加选项",
+          "moveUp": "上移",
+          "moveDown": "下移",
+          "validation": {
+            "emptyKey": "每个字段必须填写键名。",
+            "invalidKey": "键名「{key}」无效，请使用字母、数字、下划线，并以字母开头。",
+            "duplicateKey": "重复的字段键「{key}」。",
+            "selectNeedsOptions": "下拉字段「{key}」至少需要一个带值的选项。"
           }
         }
       },
@@ -2647,6 +2684,11 @@
           "errors": {
             "deleteFailed": "删除失败：{error}",
             "saveFailed": "保存失败：{error}"
+          },
+          "filters": {
+            "language": "语言",
+            "status": "状态",
+            "category": "分类"
           }
         },
         "editDialog": {
@@ -2670,7 +2712,27 @@
             "draft": "草稿",
             "published": "已发布",
             "archived": "已归档"
-          }
+          },
+          "languageOptions": {
+            "en": "English",
+            "zhHans": "简体中文"
+          },
+          "categoryNone": "不选分类",
+          "loadingCategorySchema": "正在加载分类字段定义…",
+          "loadDetailFailed": "无法加载完整文章，已显示列表中的数据。",
+          "customFieldsSection": "分类自定义字段",
+          "customFieldsHint": "内容会随文章保存，结构由所选分类的字段模板决定。",
+          "customFieldSelectEmpty": "无",
+          "customFieldImageHint": "图片 URL 或路径（例如媒体库地址）。",
+          "customFieldImagePlaceholder": "https://…",
+          "customFieldRequired": "请填写必填自定义字段：{key}"
+        },
+        "editPage": {
+          "back": "返回网站设置",
+          "titleNew": "新建文章",
+          "titleEdit": "编辑：{title}",
+          "createdSuccess": "文章已创建",
+          "updatedSuccess": "已保存"
         }
       },
       "media": {
