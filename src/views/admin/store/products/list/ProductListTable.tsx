@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, useCallback } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
 // i18n Imports
@@ -15,6 +15,7 @@ import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
 import Link from '@mui/material/Link'
 import Switch from '@mui/material/Switch'
+import Avatar from '@mui/material/Avatar'
 
 // Component Imports
 import SchemaTable from '@/components/schema/SchemaTable'
@@ -34,6 +35,8 @@ import { useApiData } from '@/hooks/useApiData'
 // Type Imports
 import type { SchemaAction } from '@/types/schema'
 import { useAppDialog } from '@/contexts/AppDialogContext'
+
+const PRODUCTS_REFRESH_EVENT = 'bfg:products-refresh'
 
 const ProductListTable = () => {
   const router = useRouter()
@@ -92,6 +95,15 @@ const ProductListTable = () => {
   const [inventoryModalOpen, setInventoryModalOpen] = useState(false)
   const [inventoryModalProductId, setInventoryModalProductId] = useState<number | undefined>(undefined)
 
+  const refreshProducts = useCallback(() => {
+    refetch()
+  }, [refetch])
+
+  useEffect(() => {
+    window.addEventListener(PRODUCTS_REFRESH_EVENT, refreshProducts)
+    return () => window.removeEventListener(PRODUCTS_REFRESH_EVENT, refreshProducts)
+  }, [refreshProducts])
+
   // Handle category filter change
   const handleCategoryChange = (selectedCategories: Category[]) => {
     const category = selectedCategories.length > 0 ? selectedCategories[0] : null
@@ -123,27 +135,48 @@ const ProductListTable = () => {
               ...col,
               label: t('products.list.schema.columns.product'),
               render: (value: any, row: any) => {
-                const imageUrl = row.primary_image || '/images/placeholder.png'
+                const imageUrl = row.primary_image
                 return (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                    <img 
-                      src={imageUrl} 
-                      alt={value}
-                      style={{ 
-                        width: '38px', 
-                        height: '38px', 
-                        borderRadius: '4px',
-                        objectFit: 'cover',
-                        backgroundColor: '#f3f4f6'
-                      }} 
-                    />
-                    <div>
-                      <div style={{ fontWeight: 500, color: 'inherit' }}>{value}</div>
-                      <Typography variant="body2" sx={{ fontSize: '0.75rem', color: 'text.secondary', mt: 0.25 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, minWidth: 0 }}>
+                    {imageUrl ? (
+                      <Box
+                        component='img'
+                        src={imageUrl}
+                        alt=''
+                        sx={{
+                          width: 38,
+                          height: 38,
+                          borderRadius: 1,
+                          objectFit: 'cover',
+                          backgroundColor: '#f3f4f6',
+                          flexShrink: 0
+                        }}
+                      />
+                    ) : (
+                      <Avatar
+                        variant='rounded'
+                        sx={{
+                          width: 38,
+                          height: 38,
+                          borderRadius: 1,
+                          bgcolor: 'grey.100',
+                          color: 'text.secondary',
+                          fontSize: 16,
+                          flexShrink: 0
+                        }}
+                      >
+                        <i className='tabler-photo-off' />
+                      </Avatar>
+                    )}
+                    <Box sx={{ minWidth: 0 }}>
+                      <Typography sx={{ fontWeight: 500 }} noWrap>
+                        {value}
+                      </Typography>
+                      <Typography variant="body2" sx={{ fontSize: '0.75rem', color: 'text.secondary', mt: 0.25 }} noWrap>
                         {row.product_type || '-'}
                       </Typography>
-                    </div>
-                  </div>
+                    </Box>
+                  </Box>
                 )
               }
             }
