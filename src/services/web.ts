@@ -93,6 +93,19 @@ export type Page = {
 
 export type PagePayload = Omit<Page, 'id' | 'parent_title' | 'created_at' | 'updated_at'>
 
+/** Single custom field definition on a CMS category (drives post custom_fields UI). */
+export type CategoryFieldSchemaEntry = {
+  type?: 'string' | 'text' | 'integer' | 'number' | 'boolean' | 'select' | 'image'
+  required?: boolean
+  label?: string
+  label_zh?: string
+  description?: string
+  default?: string | number | boolean
+  options?: Array<{ label: string; value: string; label_en?: string }>
+}
+
+export type CategoryFieldsSchema = Record<string, CategoryFieldSchemaEntry>
+
 export type Post = {
   id: number
   title: string
@@ -100,8 +113,12 @@ export type Post = {
   content: string
   excerpt?: string
   featured_image?: string
+  /** Normalized from API `category` (FK id) */
   category_id?: number
   category_name?: string
+  /** Category template for custom field inputs (detail API only) */
+  category_fields_schema?: CategoryFieldsSchema
+  custom_fields?: Record<string, unknown>
   tag_ids?: number[]
   tag_names?: string[]
   meta_title?: string
@@ -117,9 +134,18 @@ export type Post = {
 
 export type PostPayload = Omit<
   Post,
-  'id' | 'category_name' | 'tag_names' | 'view_count' | 'created_at' | 'updated_at' | 'featured_image'
+  | 'id'
+  | 'category_name'
+  | 'tag_names'
+  | 'view_count'
+  | 'created_at'
+  | 'updated_at'
+  | 'featured_image'
+  | 'category_fields_schema'
 > & {
-  featured_image?: string | File
+  featured_image?: string | File | null
+  /** When true, remove featured image (multipart PATCH). Ignored if a new file is uploaded in the same request. */
+  clear_featured_image?: boolean
 }
 
 export type Category = {
@@ -127,9 +153,13 @@ export type Category = {
   name: string
   slug: string
   description?: string
+  /** API returns `parent` (FK id); normalized to `parent_id` in some callers */
+  parent?: number | null
   parent_id?: number
   parent_name?: string
   content_type_name?: string
+  fields_schema?: CategoryFieldsSchema
+  fields_count?: number
   icon?: string
   color?: string
   order: number
@@ -139,7 +169,22 @@ export type Category = {
   updated_at?: string
 }
 
-export type CategoryPayload = Omit<Category, 'id' | 'parent_name' | 'created_at' | 'updated_at'>
+export type CategoryPayload = Omit<Category, 'id' | 'parent_name' | 'created_at' | 'updated_at' | 'fields_count'>
+
+export type CategoryTemplateSummary = {
+  key: string
+  name: string
+  name_zh?: string
+  content_type_name: string
+  icon?: string
+  description?: string
+  description_zh?: string
+  fields_count?: number
+}
+
+export type CategorySchemaTemplateDetail = CategoryTemplateSummary & {
+  fields_schema: CategoryFieldsSchema
+}
 
 export type Tag = {
   id: number
@@ -423,54 +468,111 @@ export async function deletePage(id: number) {
 }
 
 // Posts API
+function normalizePost(raw: Record<string, unknown>): Post {
+  const tags = raw.tags as { id: number }[] | undefined
+  const tag_ids =
+    (raw.tag_ids as number[] | undefined) ?? (Array.isArray(tags) ? tags.map(t => t.id) : undefined) ?? []
+  const category_id = (raw.category_id as number | undefined) ?? (raw.category as number | null | undefined) ?? undefined
+  return {
+    ...(raw as unknown as Post),
+    tag_ids,
+    category_id,
+    custom_fields: (raw.custom_fields as Record<string, unknown>) ?? {},
+    category_fields_schema: raw.category_fields_schema as CategoryFieldsSchema | undefined
+  }
+}
+
+function appendPostToFormData(formData: FormData, data: Partial<PostPayload>): void {
+  const { category_id, custom_fields, tag_ids, featured_image, clear_featured_image, ...rest } = data
+
+  Object.entries(rest).forEach(([key, value]) => {
+    if (value === undefined || value === null) return
+    if (key === 'clear_featured_image') return
+    formData.append(key, String(value))
+  })
+
+  if (category_id !== undefined && category_id !== null) {
+    formData.append('category', String(category_id))
+  }
+
+  if (custom_fields !== undefined) {
+    formData.append('custom_fields', JSON.stringify(custom_fields ?? {}))
+  }
+
+  if (Array.isArray(tag_ids)) {
+    tag_ids.forEach(tagId => formData.append('tag_ids', String(tagId)))
+  }
+
+  if (clear_featured_image) {
+    formData.append('clear_featured_image', 'true')
+  }
+
+  // DRF ImageField with multipart only accepts an actual file upload, not a string URL.
+  // Omit the field when unchanged so the server keeps the existing image.
+  if (featured_image instanceof File) {
+    formData.append('featured_image', featured_image)
+  }
+}
+
+type PostsListPage = {
+  results?: Record<string, unknown>[]
+  next?: string | null
+}
+
+/**
+ * Fetches all posts for the workspace (follows DRF pagination until exhausted).
+ */
 export async function getPosts(): Promise<Post[]> {
-  const response = await apiFetch<Post[] | { results: Post[] }>(bfgApi.posts(), getSiteAdminOptions())
-  if (Array.isArray(response)) return response
-  return response.results || []
+  const opts = getSiteAdminOptions()
+  const collected: Post[] = []
+  let url: string | null = bfgApi.posts()
+
+  while (url) {
+    const page: PostsListPage | Record<string, unknown>[] = await apiFetch<
+      PostsListPage | Record<string, unknown>[]
+    >(url, opts)
+    if (Array.isArray(page)) {
+      for (const row of page) {
+        collected.push(normalizePost(row as Record<string, unknown>))
+      }
+      break
+    }
+    const rows = page.results ?? []
+    for (const row of rows) {
+      collected.push(normalizePost(row as Record<string, unknown>))
+    }
+    const nextLink: string | null | undefined = page.next
+    url = typeof nextLink === 'string' && nextLink.length > 0 ? nextLink : null
+  }
+
+  return collected
 }
 
 export async function getPost(id: number): Promise<Post> {
-  return apiFetch<Post>(`${bfgApi.posts()}${id}/`, getSiteAdminOptions())
+  const raw = await apiFetch<Record<string, unknown>>(`${bfgApi.posts()}${id}/`, getSiteAdminOptions())
+  return normalizePost(raw)
 }
 
 export async function createPost(data: PostPayload) {
   const formData = new FormData()
-  Object.entries(data).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
-      if (key === 'featured_image' && value instanceof File) {
-        formData.append(key, value)
-      } else if (key === 'tag_ids' && Array.isArray(value)) {
-        value.forEach((tagId) => formData.append('tag_ids', String(tagId)))
-      } else {
-        formData.append(key, String(value))
-      }
-    }
-  })
-  return apiFetch<Post>(bfgApi.posts(), {
+  appendPostToFormData(formData, data)
+  const raw = await apiFetch<Record<string, unknown>>(bfgApi.posts(), {
     ...getSiteAdminOptions(),
     method: 'POST',
     body: formData
   })
+  return normalizePost(raw)
 }
 
 export async function updatePost(id: number, data: Partial<PostPayload>) {
   const formData = new FormData()
-  Object.entries(data).forEach(([key, value]) => {
-    if (value !== undefined && value !== null) {
-      if (key === 'featured_image' && value instanceof File) {
-        formData.append(key, value)
-      } else if (key === 'tag_ids' && Array.isArray(value)) {
-        value.forEach((tagId) => formData.append('tag_ids', String(tagId)))
-      } else {
-        formData.append(key, String(value))
-      }
-    }
-  })
-  return apiFetch<Post>(`${bfgApi.posts()}${id}/`, {
+  appendPostToFormData(formData, data)
+  const raw = await apiFetch<Record<string, unknown>>(`${bfgApi.posts()}${id}/`, {
     ...getSiteAdminOptions(),
     method: 'PATCH',
     body: formData
   })
+  return normalizePost(raw)
 }
 
 export async function deletePost(id: number) {
@@ -481,31 +583,84 @@ export async function deletePost(id: number) {
 }
 
 // Categories API
+function normalizeCategory(c: Category & { parent?: number | null }): Category {
+  const parent_id = c.parent_id ?? c.parent ?? undefined
+  return { ...c, parent_id, parent: c.parent }
+}
+
+type CategoriesListPage = {
+  results?: (Category & { parent?: number | null })[]
+  next?: string | null
+}
+
+/**
+ * Fetches all categories for the workspace (follows DRF pagination until exhausted).
+ */
 export async function getCategories(contentType?: string): Promise<Category[]> {
-  const url = contentType ? `${bfgApi.categories()}?content_type=${contentType}` : bfgApi.categories()
-  const response = await apiFetch<Category[] | { results: Category[] }>(url, getSiteAdminOptions())
-  if (Array.isArray(response)) return response
-  return response.results || []
+  const qs = contentType ? `?content_type=${encodeURIComponent(contentType)}` : ''
+  const opts = getSiteAdminOptions()
+  const collected: (Category & { parent?: number | null })[] = []
+  let url: string | null = `${bfgApi.categories()}${qs}`
+
+  while (url) {
+    const page: CategoriesListPage | (Category & { parent?: number | null })[] = await apiFetch<
+      CategoriesListPage | (Category & { parent?: number | null })[]
+    >(url, opts)
+    if (Array.isArray(page)) {
+      collected.push(...page)
+      break
+    }
+    const rows = page.results ?? []
+    collected.push(...rows)
+    const nextLink: string | null | undefined = page.next
+    url = typeof nextLink === 'string' && nextLink.length > 0 ? nextLink : null
+  }
+
+  return collected.map(normalizeCategory)
 }
 
 export async function getCategory(id: number): Promise<Category> {
-  return apiFetch<Category>(`${bfgApi.categories()}${id}/`, getSiteAdminOptions())
+  const c = await apiFetch<Category & { parent?: number | null }>(`${bfgApi.categories()}${id}/`, getSiteAdminOptions())
+  return normalizeCategory(c)
+}
+
+export async function getCategoryTemplateSummaries(): Promise<CategoryTemplateSummary[]> {
+  return apiFetch<CategoryTemplateSummary[]>(`${bfgApi.categories()}templates/`, getSiteAdminOptions())
+}
+
+export async function getCategorySchemaTemplate(key: string): Promise<CategorySchemaTemplateDetail> {
+  const q = new URLSearchParams({ key })
+  return apiFetch<CategorySchemaTemplateDetail>(
+    `${bfgApi.categories()}schema-template/?${q.toString()}`,
+    getSiteAdminOptions()
+  )
+}
+
+function categoryBodyForApi(data: Partial<CategoryPayload>): Record<string, unknown> {
+  const { parent_id, ...rest } = data
+  const body: Record<string, unknown> = { ...rest }
+  if ('parent_id' in data) {
+    body.parent = parent_id ?? null
+  }
+  return body
 }
 
 export async function createCategory(data: CategoryPayload) {
-  return apiFetch<Category>(bfgApi.categories(), {
+  const c = await apiFetch<Category & { parent?: number | null }>(bfgApi.categories(), {
     ...getSiteAdminOptions(),
     method: 'POST',
-    body: JSON.stringify(data)
+    body: JSON.stringify(categoryBodyForApi(data))
   })
+  return normalizeCategory(c)
 }
 
 export async function updateCategory(id: number, data: Partial<CategoryPayload>) {
-  return apiFetch<Category>(`${bfgApi.categories()}${id}/`, {
+  const c = await apiFetch<Category & { parent?: number | null }>(`${bfgApi.categories()}${id}/`, {
     ...getSiteAdminOptions(),
     method: 'PATCH',
-    body: JSON.stringify(data)
+    body: JSON.stringify(categoryBodyForApi(data))
   })
+  return normalizeCategory(c)
 }
 
 export async function deleteCategory(id: number) {

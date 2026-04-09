@@ -1,7 +1,8 @@
 'use client'
 
 // React Imports
-import { useState, useEffect, useMemo, useRef } from 'react'
+import { useState, useEffect, useMemo, useRef, Fragment } from 'react'
+import type { ReactNode } from 'react'
 
 // i18n Imports
 import { useTranslations } from 'next-intl'
@@ -34,6 +35,7 @@ import type { OptionItem } from '@/services/options'
 
 // Util Imports
 import { formatCurrency, formatDate, formatDateTime } from '@/utils/format'
+import { getMediaUrl } from '@/utils/media'
 
 // Service Imports
 import { 
@@ -43,6 +45,47 @@ import {
   filterOptionsFromCache,
   type OptionItem as OptionItemType
 } from '@/services/options'
+
+function resolveFileImagePreviewSrc(value: unknown): string | null {
+  if (typeof value !== 'string' || !value) return null
+  if (value.startsWith('data:')) return value
+  return getMediaUrl(value)
+}
+
+function FileFieldImagePreview({ value, enabled }: { value: unknown; enabled: boolean }) {
+  const [blobUrl, setBlobUrl] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!enabled || !(value instanceof File)) {
+      setBlobUrl(null)
+      return
+    }
+    const u = URL.createObjectURL(value)
+    setBlobUrl(u)
+    return () => URL.revokeObjectURL(u)
+  }, [value, enabled])
+
+  const src = enabled ? resolveFileImagePreviewSrc(value) || blobUrl : null
+  if (!src) return null
+
+  return (
+    <Box
+      component='img'
+      src={src}
+      alt=''
+      sx={{
+        maxWidth: 280,
+        maxHeight: 180,
+        width: '100%',
+        objectFit: 'contain',
+        borderRadius: 1,
+        border: 1,
+        borderColor: 'divider',
+        bgcolor: 'action.hover'
+      }}
+    />
+  )
+}
 
 type SchemaFormProps<T = any> = {
   schema: FormSchema
@@ -54,6 +97,8 @@ type SchemaFormProps<T = any> = {
   hideTitle?: boolean
   formId?: string
   customFieldRenderer?: (field: FormField, value: any, onChange: (value: any) => void, error?: string) => React.ReactNode
+  /** Injected rows inside the form after the given field (legacy flat `fields` only). */
+  formSlots?: { afterField: string; children: ReactNode }[]
 }
 
 export default function SchemaForm<T extends Record<string, any>>({
@@ -65,7 +110,8 @@ export default function SchemaForm<T extends Record<string, any>>({
   hideActions = false,
   hideTitle = false,
   formId,
-  customFieldRenderer
+  customFieldRenderer,
+  formSlots
 }: SchemaFormProps<T>) {
   const t = useTranslations('admin')
   const [formData, setFormData] = useState<Partial<T>>(initialData || {})
@@ -548,7 +594,8 @@ export default function SchemaForm<T extends Record<string, any>>({
             error={!!error}
             helperText={helperText}
             placeholder={field.placeholder}
-            sx={requiredAsteriskSx}
+            InputLabelProps={{ shrink: true }}
+            sx={{ ...requiredAsteriskSx, mt: 0.5 }}
           />
         )
 
@@ -839,45 +886,67 @@ export default function SchemaForm<T extends Record<string, any>>({
         )
 
       case 'image':
-      case 'file':
+      case 'file': {
+        const imageFilePreview =
+          field.type === 'file' && field.accept?.includes('image')
         return (
           <Box>
             <InputLabel>{field.label}</InputLabel>
-            <Box sx={{ display: 'flex', gap: 2, mt: 1, alignItems: 'center' }}>
-              {field.type === 'image' && value && (
-                <Avatar src={value} alt="" sx={{ width: 80, height: 80 }} variant="rounded" />
-              )}
-              <Button variant="outlined" component="label">
-                {t('common.schemaForm.upload')}
-                <input
-                  type="file"
-                  hidden
-                  accept={field.accept}
-                  onChange={(e) => {
-                    const file = e.target.files?.[0]
-                    if (file) {
-                      if (field.type === 'image') {
-                        const reader = new FileReader()
-                        reader.onload = (event) => {
-                          handleChange(field.field, event.target?.result)
-                        }
-                        reader.readAsDataURL(file)
-                      } else {
-                        handleChange(field.field, file)
-                      }
-                    }
-                  }}
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
+              {field.type === 'image' && value && typeof value === 'string' && (
+                <Avatar
+                  src={value.startsWith('data:') ? value : getMediaUrl(value)}
+                  alt=''
+                  sx={{ width: 80, height: 80 }}
+                  variant='rounded'
                 />
-              </Button>
-              {value && typeof value === 'string' && field.type === 'file' && (
-                <Typography variant="body2" color="text.secondary">
-                  {value}
-                </Typography>
               )}
+              {imageFilePreview ? <FileFieldImagePreview value={value} enabled /> : null}
+              <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
+                <Button variant='outlined' component='label' disabled={isReadonly}>
+                  {t('common.schemaForm.upload')}
+                  <input
+                    type='file'
+                    hidden
+                    accept={field.accept}
+                    onChange={e => {
+                      const file = e.target.files?.[0]
+                      if (file) {
+                        if (field.type === 'image') {
+                          const reader = new FileReader()
+                          reader.onload = event => {
+                            handleChange(field.field, event.target?.result)
+                          }
+                          reader.readAsDataURL(file)
+                        } else {
+                          handleChange(field.field, file)
+                        }
+                      }
+                    }}
+                  />
+                </Button>
+                {(imageFilePreview || field.type === 'image') && value ? (
+                  <Button
+                    type='button'
+                    variant='text'
+                    color='inherit'
+                    disabled={isReadonly}
+                    onClick={() => handleChange(field.field, null)}
+                  >
+                    {t('common.schemaForm.removeFile')}
+                  </Button>
+                ) : null}
+                {value && typeof value === 'string' && field.type === 'file' && !imageFilePreview && (
+                  <Typography variant='body2' color='text.secondary' sx={{ wordBreak: 'break-all' }}>
+                    {value}
+                  </Typography>
+                )}
+              </Box>
             </Box>
             {error && <FormHelperText error>{error}</FormHelperText>}
           </Box>
         )
+      }
 
       default:
         return (
@@ -976,16 +1045,24 @@ export default function SchemaForm<T extends Record<string, any>>({
     // Legacy: render fields directly
     return (
       <Grid container spacing={4}>
-        {fields.map((field) => (
-          <Grid
-            key={field.field}
-            size={{
-              xs: 12,
-              md: field.fullWidth || field.newline ? 12 : (field.type === 'textarea' || field.type === 'image' || field.type === 'file' ? 12 : 6)
-            }}
-          >
-            {renderField(field)}
-          </Grid>
+        {fields.map(field => (
+          <Fragment key={field.field}>
+            <Grid
+              size={{
+                xs: 12,
+                md: field.fullWidth || field.newline ? 12 : (field.type === 'textarea' || field.type === 'image' || field.type === 'file' ? 12 : 6)
+              }}
+            >
+              {renderField(field)}
+            </Grid>
+            {formSlots
+              ?.filter(s => s.afterField === field.field)
+              .map((s, idx) => (
+                <Grid key={`form-slot-${field.field}-${idx}`} size={{ xs: 12 }}>
+                  {s.children}
+                </Grid>
+              ))}
+          </Fragment>
         ))}
       </Grid>
     )

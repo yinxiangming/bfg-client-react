@@ -42,6 +42,7 @@
     "networkUnreachable": "Unable to reach the server. Check that the API is running and NEXT_PUBLIC_API_URL is set correctly.",
     "actions": {
       "add": "Add",
+      "save": "Save",
       "update": "Update",
       "cancel": "Cancel",
       "delete": "Delete",
@@ -117,6 +118,7 @@
       "cancel": "Cancel",
       "saving": "Saving...",
       "upload": "Upload",
+      "removeFile": "Remove",
       "typeToSearch": "Type to search...",
       "details": "Details",
       "required": "Required",
@@ -2525,6 +2527,7 @@
           "actions": {
             "newCategory": "New Category",
             "edit": "Edit",
+            "editSchema": "Edit field schema",
             "delete": "Delete"
           },
           "headers": {
@@ -2570,6 +2573,41 @@
             "project": "Project",
             "service": "Service",
             "faq": "FAQ"
+          }
+        },
+        "fieldsSchemaDialog": {
+          "title": "Custom fields schema — {name}",
+          "intro": "Define extra fields for content in this category (stored in post custom_fields). Use lowercase keys with letters, numbers, and underscores.",
+          "applyTemplate": "Preset template",
+          "templatePlaceholder": "Choose a template…",
+          "loadTemplate": "Load template",
+          "confirmReplaceTemplate": "Replace all current field definitions with this template?",
+          "loadTemplateFailed": "Could not load template",
+          "saveFailed": "Failed to save schema",
+          "fieldsHeading": "Field definitions",
+          "addField": "Add field",
+          "noFields": "No custom fields yet. Add a field or load a template.",
+          "fieldNumber": "Field {n}",
+          "fieldKey": "Field key (API)",
+          "fieldType": "Type",
+          "label": "Label",
+          "labelZh": "Label (Chinese)",
+          "description": "Description / help text",
+          "defaultValue": "Default value",
+          "defaultValueHint": "Optional. For boolean use true or false.",
+          "required": "Required",
+          "optionsHeading": "Select options",
+          "optionLabel": "Label",
+          "optionValue": "Value",
+          "optionLabelEn": "Label (EN)",
+          "addOption": "Add option",
+          "moveUp": "Move up",
+          "moveDown": "Move down",
+          "validation": {
+            "emptyKey": "Each field must have a non-empty key.",
+            "invalidKey": "Invalid key \"{key}\". Use letters, numbers, underscores; start with a letter.",
+            "duplicateKey": "Duplicate field key \"{key}\".",
+            "selectNeedsOptions": "Select field \"{key}\" needs at least one option with a value."
           }
         }
       },
@@ -2647,6 +2685,11 @@
           "errors": {
             "deleteFailed": "Failed to delete post: {error}",
             "saveFailed": "Failed to save post: {error}"
+          },
+          "filters": {
+            "language": "Language",
+            "status": "Status",
+            "category": "Category"
           }
         },
         "editDialog": {
@@ -2670,7 +2713,51 @@
             "draft": "Draft",
             "published": "Published",
             "archived": "Archived"
+          },
+          "languageOptions": {
+            "en": "English",
+            "zhHans": "简体中文"
+          },
+          "categoryNone": "No category",
+          "loadingCategorySchema": "Loading category field definitions…",
+          "loadDetailFailed": "Could not load full post; showing list data.",
+          "customFieldsSection": "Category custom fields",
+          "customFieldsHint": "Values are saved with this post and follow the schema of the selected category.",
+          "customFieldSelectEmpty": "None",
+          "customFieldImageHint": "Image URL or path (e.g. from media library).",
+          "customFieldImagePlaceholder": "https://…",
+          "customFieldRequired": "Please fill required custom field: {key}",
+          "contentEmpty": "Please enter post content (text or media)."
+        },
+        "contentEditor": {
+          "hint": "Format text with the toolbar and insert images from the site media library.",
+          "placeholder": "Write your post…",
+          "mediaDialogTitle": "Choose image",
+          "searchPlaceholder": "Search by file name…",
+          "upload": "Upload",
+          "mediaEmpty": "No images in the media library yet. Upload one above.",
+          "toastImageInserted": "Image inserted",
+          "toolbar": {
+            "insertFromLibrary": "Insert from media library",
+            "resizeImage": "Resize selected image"
+          },
+          "warnings": {
+            "selectImageFirst": "Select an image in the editor first."
+          },
+          "resizeDialog": {
+            "title": "Resize image",
+            "width": "Width (e.g. 320px)",
+            "height": "Height (e.g. 240px)",
+            "keepRatioHint": "Aspect ratio is locked from the current image.",
+            "apply": "Apply"
           }
+        },
+        "editPage": {
+          "back": "Back to Web settings",
+          "titleNew": "New post",
+          "titleEdit": "Edit: {title}",
+          "createdSuccess": "Post created",
+          "updatedSuccess": "Post saved"
         }
       },
       "media": {
