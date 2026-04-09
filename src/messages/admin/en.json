@@ -118,6 +118,7 @@
       "cancel": "Cancel",
       "saving": "Saving...",
       "upload": "Upload",
+      "removeFile": "Remove",
       "typeToSearch": "Type to search...",
       "details": "Details",
       "required": "Required",
@@ -2725,7 +2726,31 @@
           "customFieldSelectEmpty": "None",
           "customFieldImageHint": "Image URL or path (e.g. from media library).",
           "customFieldImagePlaceholder": "https://…",
-          "customFieldRequired": "Please fill required custom field: {key}"
+          "customFieldRequired": "Please fill required custom field: {key}",
+          "contentEmpty": "Please enter post content (text or media)."
+        },
+        "contentEditor": {
+          "hint": "Format text with the toolbar and insert images from the site media library.",
+          "placeholder": "Write your post…",
+          "mediaDialogTitle": "Choose image",
+          "searchPlaceholder": "Search by file name…",
+          "upload": "Upload",
+          "mediaEmpty": "No images in the media library yet. Upload one above.",
+          "toastImageInserted": "Image inserted",
+          "toolbar": {
+            "insertFromLibrary": "Insert from media library",
+            "resizeImage": "Resize selected image"
+          },
+          "warnings": {
+            "selectImageFirst": "Select an image in the editor first."
+          },
+          "resizeDialog": {
+            "title": "Resize image",
+            "width": "Width (e.g. 320px)",
+            "height": "Height (e.g. 240px)",
+            "keepRatioHint": "Aspect ratio is locked from the current image.",
+            "apply": "Apply"
+          }
         },
         "editPage": {
           "back": "Back to Web settings",

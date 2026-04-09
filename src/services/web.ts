@@ -143,7 +143,9 @@ export type PostPayload = Omit<
   | 'featured_image'
   | 'category_fields_schema'
 > & {
-  featured_image?: string | File
+  featured_image?: string | File | null
+  /** When true, remove featured image (multipart PATCH). Ignored if a new file is uploaded in the same request. */
+  clear_featured_image?: boolean
 }
 
 export type Category = {
@@ -481,10 +483,11 @@ function normalizePost(raw: Record<string, unknown>): Post {
 }
 
 function appendPostToFormData(formData: FormData, data: Partial<PostPayload>): void {
-  const { category_id, custom_fields, tag_ids, featured_image, ...rest } = data
+  const { category_id, custom_fields, tag_ids, featured_image, clear_featured_image, ...rest } = data
 
   Object.entries(rest).forEach(([key, value]) => {
     if (value === undefined || value === null) return
+    if (key === 'clear_featured_image') return
     formData.append(key, String(value))
   })
 
@@ -500,12 +503,14 @@ function appendPostToFormData(formData: FormData, data: Partial<PostPayload>): v
     tag_ids.forEach(tagId => formData.append('tag_ids', String(tagId)))
   }
 
-  if (featured_image !== undefined && featured_image !== null) {
-    if (featured_image instanceof File) {
-      formData.append('featured_image', featured_image)
-    } else if (typeof featured_image === 'string') {
-      formData.append('featured_image', featured_image)
-    }
+  if (clear_featured_image) {
+    formData.append('clear_featured_image', 'true')
+  }
+
+  // DRF ImageField with multipart only accepts an actual file upload, not a string URL.
+  // Omit the field when unchanged so the server keeps the existing image.
+  if (featured_image instanceof File) {
+    formData.append('featured_image', featured_image)
   }
 }
 

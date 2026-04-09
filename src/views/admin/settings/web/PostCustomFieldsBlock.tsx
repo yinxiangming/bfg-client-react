@@ -37,6 +37,11 @@ function resolveOptionLabel(
   return opt.label
 }
 
+/** MUI default required asterisk uses primary text color; match SchemaForm (error). */
+const requiredAsteriskSx = {
+  '& .MuiInputLabel-asterisk': { color: 'error.main' }
+} as const
+
 export default function PostCustomFieldsBlock({
   schema,
   value,
@@ -71,10 +76,12 @@ export default function PostCustomFieldsBlock({
       <Typography variant='subtitle1' fontWeight={600} sx={{ mb: 1 }}>
         {t('settings.web.posts.editDialog.customFieldsSection')}
       </Typography>
-      <Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
-        {t('settings.web.posts.editDialog.customFieldsHint')}
-      </Typography>
       <Grid container spacing={2}>
+        <Grid size={{ xs: 12 }}>
+          <Typography variant='body2' color='text.secondary' sx={{ mb: 0 }}>
+            {t('settings.web.posts.editDialog.customFieldsHint')}
+          </Typography>
+        </Grid>
         {entries.map(([key, def]) => {
           const label = resolveLabel(def, locale) || key
           const helper = def.description
@@ -93,7 +100,16 @@ export default function PostCustomFieldsBlock({
                       disabled={disabled}
                     />
                   }
-                  label={label}
+                  label={
+                    <>
+                      {label}
+                      {def.required ? (
+                        <Typography component='span' sx={{ color: 'error.main', ml: 0.25 }} aria-hidden>
+                          *
+                        </Typography>
+                      ) : null}
+                    </>
+                  }
                 />
                 {helper ? (
                   <Typography variant='caption' color='text.secondary' display='block'>
@@ -108,7 +124,13 @@ export default function PostCustomFieldsBlock({
             const strVal = raw !== undefined && raw !== null ? String(raw) : ''
             return (
               <Grid key={key} size={{ xs: 12, md: 6 }}>
-                <FormControl fullWidth size='small' required={def.required} disabled={disabled}>
+                <FormControl
+                  fullWidth
+                  size='small'
+                  required={def.required}
+                  disabled={disabled}
+                  sx={def.required ? requiredAsteriskSx : undefined}
+                >
                   <InputLabel>{label}</InputLabel>
                   <Select
                     label={label}
@@ -146,6 +168,7 @@ export default function PostCustomFieldsBlock({
                   required={def.required}
                   helperText={helper}
                   disabled={disabled}
+                  sx={def.required ? requiredAsteriskSx : undefined}
                 />
               </Grid>
             )
@@ -172,6 +195,7 @@ export default function PostCustomFieldsBlock({
                   helperText={helper}
                   disabled={disabled}
                   inputProps={typ === 'integer' ? { step: 1 } : undefined}
+                  sx={def.required ? requiredAsteriskSx : undefined}
                 />
               </Grid>
             )
@@ -190,6 +214,7 @@ export default function PostCustomFieldsBlock({
                   helperText={helper || t('settings.web.posts.editDialog.customFieldImageHint')}
                   disabled={disabled}
                   placeholder={t('settings.web.posts.editDialog.customFieldImagePlaceholder')}
+                  sx={def.required ? requiredAsteriskSx : undefined}
                 />
               </Grid>
             )
@@ -206,6 +231,7 @@ export default function PostCustomFieldsBlock({
                 required={def.required}
                 helperText={helper}
                 disabled={disabled}
+                sx={def.required ? requiredAsteriskSx : undefined}
               />
             </Grid>
           )
