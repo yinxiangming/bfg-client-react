@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 
 import Alert from '@mui/material/Alert'
@@ -143,13 +143,6 @@ export default function CategoryFieldsSchemaDialog({ open, category, onClose, on
   const [loadingTemplates, setLoadingTemplates] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-
-  const filteredTemplates = useMemo(() => {
-    const ct = (category?.content_type_name || '').trim().toLowerCase()
-    if (!ct) return templates
-    const match = templates.filter(x => (x.content_type_name || '').toLowerCase() === ct)
-    return match.length > 0 ? match : templates
-  }, [templates, category?.content_type_name])
 
   useEffect(() => {
     if (!open || !category) return
@@ -322,7 +315,7 @@ export default function CategoryFieldsSchemaDialog({ open, category, onClose, on
                 <MenuItem value=''>
                   <em>{t('settings.web.categories.fieldsSchemaDialog.templatePlaceholder')}</em>
                 </MenuItem>
-                {filteredTemplates.map(tp => (
+                {templates.map(tp => (
                   <MenuItem key={tp.key} value={tp.key}>
                     {tp.name} ({tp.content_type_name})
                   </MenuItem>
@@ -400,20 +393,20 @@ export default function CategoryFieldsSchemaDialog({ open, category, onClose, on
                     />
                   </Grid>
                   <Grid size={{ xs: 12, sm: 6 }}>
-                    <FormControl fullWidth size='small'>
-                      <InputLabel>{t('settings.web.categories.fieldsSchemaDialog.fieldType')}</InputLabel>
-                      <Select
-                        label={t('settings.web.categories.fieldsSchemaDialog.fieldType')}
-                        value={r.type}
-                        onChange={e => updateRow(r.rid, { type: e.target.value as FieldType })}
-                      >
-                        {FIELD_TYPES.map(ft => (
-                          <MenuItem key={ft} value={ft}>
-                            {ft}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
+                    <CustomTextField
+                      select
+                      fullWidth
+                      size='small'
+                      label={t('settings.web.categories.fieldsSchemaDialog.fieldType')}
+                      value={r.type}
+                      onChange={e => updateRow(r.rid, { type: e.target.value as FieldType })}
+                    >
+                      {FIELD_TYPES.map(ft => (
+                        <MenuItem key={ft} value={ft}>
+                          {ft}
+                        </MenuItem>
+                      ))}
+                    </CustomTextField>
                   </Grid>
                   <Grid size={{ xs: 12, sm: 6 }}>
                     <CustomTextField

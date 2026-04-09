@@ -118,6 +118,7 @@
       "cancel": "取消",
       "saving": "保存中...",
       "upload": "上传",
+      "removeFile": "移除",
       "typeToSearch": "输入以搜索...",
       "details": "详情",
       "required": "必填",
@@ -2725,7 +2726,31 @@
           "customFieldSelectEmpty": "无",
           "customFieldImageHint": "图片 URL 或路径（例如媒体库地址）。",
           "customFieldImagePlaceholder": "https://…",
-          "customFieldRequired": "请填写必填自定义字段：{key}"
+          "customFieldRequired": "请填写必填自定义字段：{key}",
+          "contentEmpty": "请填写正文内容（文字或图片）。"
+        },
+        "contentEditor": {
+          "hint": "使用工具栏排版，并从网站媒体库插入图片（与商品描述编辑器类似）。",
+          "placeholder": "撰写正文…",
+          "mediaDialogTitle": "选择图片",
+          "searchPlaceholder": "按文件名搜索…",
+          "upload": "上传",
+          "mediaEmpty": "媒体库中还没有图片，可先上传。",
+          "toastImageInserted": "已插入图片",
+          "toolbar": {
+            "insertFromLibrary": "从媒体库插入",
+            "resizeImage": "调整选中图片尺寸"
+          },
+          "warnings": {
+            "selectImageFirst": "请先在编辑器中选中一张图片。"
+          },
+          "resizeDialog": {
+            "title": "调整图片尺寸",
+            "width": "宽度（如 320px）",
+            "height": "高度（如 240px）",
+            "keepRatioHint": "已按当前图片锁定宽高比。",
+            "apply": "应用"
+          }
         },
         "editPage": {
           "back": "返回网站设置",

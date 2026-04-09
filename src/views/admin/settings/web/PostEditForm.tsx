@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo, useState, useEffect, useCallback } from 'react'
+import { useMemo, useState, useEffect, useCallback, type ReactNode } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import Alert from '@mui/material/Alert'
@@ -17,7 +17,7 @@ import Snackbar from '@mui/material/Snackbar'
 import Typography from '@mui/material/Typography'
 
 import SchemaForm from '@/components/schema/SchemaForm'
-import type { FormSchema } from '@/types/schema'
+import type { FormField, FormSchema } from '@/types/schema'
 import type { Post, PostPayload } from '@/services/web'
 import type { CategoryFieldsSchema } from '@/services/web'
 import {
@@ -30,10 +30,11 @@ import {
 import type { Category } from '@/services/web'
 import { bfgApi } from '@/utils/api'
 
+import PostContentEditor from './PostContentEditor'
 import PostCustomFieldsBlock from './PostCustomFieldsBlock'
 
-type PostFormData = Omit<PostPayload, 'featured_image'> & {
-  featured_image?: File
+type PostFormData = Omit<PostPayload, 'featured_image' | 'clear_featured_image'> & {
+  featured_image?: File | string | null
 }
 
 export type PostEditFormProps = {
@@ -46,12 +47,43 @@ export type PostEditFormProps = {
   onCreated?: (post: Post) => void
 }
 
+function postBodyHasText(html: string): boolean {
+  const text = html.replace(/<[^>]+>/g, '').replace(/&nbsp;/gi, ' ')
+  return text.trim().length > 0
+}
+
 const buildPostFormSchema = (t: (key: string) => string): FormSchema => ({
   title: t('settings.web.posts.editDialog.title'),
   fields: [
-    { field: 'title', label: t('settings.web.posts.editDialog.fields.title'), type: 'string', required: true },
-    { field: 'slug', label: t('settings.web.posts.editDialog.fields.slug'), type: 'string', required: true },
-    { field: 'featured_image', label: t('settings.web.posts.editDialog.fields.featuredImage'), type: 'file', accept: 'image/*' },
+    {
+      field: 'title',
+      label: t('settings.web.posts.editDialog.fields.title'),
+      type: 'string',
+      required: true,
+      fullWidth: true
+    },
+    {
+      field: 'slug',
+      label: t('settings.web.posts.editDialog.fields.slug'),
+      type: 'string',
+      required: true,
+      fullWidth: true
+    },
+    {
+      field: 'content',
+      label: t('settings.web.posts.editDialog.fields.content'),
+      type: 'textarea',
+      required: true,
+      rows: 10,
+      fullWidth: true
+    },
+    {
+      field: 'featured_image',
+      label: t('settings.web.posts.editDialog.fields.featuredImage'),
+      type: 'file',
+      accept: 'image/*',
+      fullWidth: true
+    },
     {
       field: 'language',
       label: t('settings.web.posts.editDialog.fields.language'),
@@ -64,7 +96,6 @@ const buildPostFormSchema = (t: (key: string) => string): FormSchema => ({
       defaultValue: 'en'
     },
     { field: 'excerpt', label: t('settings.web.posts.editDialog.fields.excerpt'), type: 'textarea', rows: 3 },
-    { field: 'content', label: t('settings.web.posts.editDialog.fields.content'), type: 'textarea', required: true, rows: 10 },
     {
       field: 'tag_ids',
       label: t('settings.web.posts.editDialog.fields.tags'),
@@ -271,6 +302,7 @@ export default function PostEditForm({ postId, listFallback, onCancel, onCreated
       title: src.title,
       slug: src.slug,
       content: src.content,
+      featured_image: src.featured_image,
       excerpt: src.excerpt,
       tag_ids: src.tag_ids ?? [],
       meta_title: src.meta_title,
@@ -293,12 +325,25 @@ export default function PostEditForm({ postId, listFallback, onCancel, onCreated
       return
     }
 
+    const contentHtml = data.content || ''
+    if (!postBodyHasText(contentHtml)) {
+      setSnackbar({
+        open: true,
+        message: t('settings.web.posts.editDialog.contentEmpty'),
+        severity: 'error'
+      })
+      return
+    }
+
+    const img = data.featured_image
     const payload: PostPayload = {
       title: data.title || '',
       slug: data.slug || '',
-      content: data.content || '',
+      content: contentHtml,
       excerpt: data.excerpt,
-      featured_image: data.featured_image,
+      featured_image:
+        img instanceof File ? img : typeof img === 'string' && img.length > 0 ? img : undefined,
+      clear_featured_image: img === null,
       category_id: categoryId === '' ? undefined : Number(categoryId),
       custom_fields: customFields,
       tag_ids: Array.isArray(data.tag_ids) ? data.tag_ids : [],
@@ -343,6 +388,25 @@ export default function PostEditForm({ postId, listFallback, onCancel, onCreated
   }
 
   const busy = loadingDetail || loadingCategory || saving
+
+  const renderPostFormField = useCallback(
+    (field: FormField, value: unknown, onFieldChange: (v: unknown) => void, err?: string): ReactNode => {
+      if (field.field === 'content') {
+        return (
+          <PostContentEditor
+            label={field.label}
+            value={typeof value === 'string' ? value : ''}
+            onChange={html => onFieldChange(html)}
+            error={err}
+            disabled={busy}
+            required={Boolean(field.required)}
+          />
+        )
+      }
+      return null
+    },
+    [busy]
+  )
   const pageTitle =
     postId == null
       ? t('settings.web.posts.editPage.titleNew')
@@ -359,7 +423,11 @@ export default function PostEditForm({ postId, listFallback, onCancel, onCreated
         <Button variant='outlined' color='inherit' startIcon={<i className='tabler-arrow-left' />} onClick={onCancel}>
           {t('settings.web.posts.editPage.back')}
         </Button>
-        <Typography variant='h4' component='h1' sx={{ flex: '1 1 auto' }}>
+        <Typography
+          variant='h4'
+          component='h1'
+          sx={{ flex: '1 1 auto', minWidth: 0, overflowWrap: 'anywhere', wordBreak: 'break-word' }}
+        >
           {pageTitle}
         </Typography>
       </Box>
@@ -378,44 +446,6 @@ export default function PostEditForm({ postId, listFallback, onCancel, onCreated
               {detailError}
             </Alert>
           ) : null}
-
-          <FormControl fullWidth size='small' disabled={busy} sx={{ mb: 2 }}>
-            <InputLabel id='post-edit-category-label'>{t('settings.web.posts.editDialog.fields.category')}</InputLabel>
-            <Select<number | ''>
-              labelId='post-edit-category-label'
-              label={t('settings.web.posts.editDialog.fields.category')}
-              value={categoryId}
-              onChange={e => {
-                const v = e.target.value
-                handleCategoryChange(v === '' ? '' : Number(v))
-              }}
-            >
-              <MenuItem value=''>
-                <em>{t('settings.web.posts.editDialog.categoryNone')}</em>
-              </MenuItem>
-              {categoryOptions.map(c => (
-                <MenuItem key={c.id} value={c.id}>
-                  {c.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          {loadingCategory ? (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-              <CircularProgress size={18} />
-              <Typography variant='caption' color='text.secondary'>
-                {t('settings.web.posts.editDialog.loadingCategorySchema')}
-              </Typography>
-            </Box>
-          ) : null}
-
-          <PostCustomFieldsBlock
-            schema={fieldsSchema}
-            value={customFields}
-            onChange={setCustomFields}
-            disabled={busy}
-          />
 
           {loadingDetail ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
@@ -444,6 +474,55 @@ export default function PostEditForm({ postId, listFallback, onCancel, onCreated
                 onCancel={onCancel}
                 hideTitle
                 loading={saving}
+                customFieldRenderer={renderPostFormField}
+                formSlots={[
+                  {
+                    afterField: 'featured_image',
+                    children: (
+                      <>
+                        <FormControl fullWidth size='small' disabled={busy} sx={{ mb: 2 }}>
+                          <InputLabel id='post-edit-category-label'>
+                            {t('settings.web.posts.editDialog.fields.category')}
+                          </InputLabel>
+                          <Select<number | ''>
+                            labelId='post-edit-category-label'
+                            label={t('settings.web.posts.editDialog.fields.category')}
+                            value={categoryId}
+                            onChange={e => {
+                              const v = e.target.value
+                              handleCategoryChange(v === '' ? '' : Number(v))
+                            }}
+                          >
+                            <MenuItem value=''>
+                              <em>{t('settings.web.posts.editDialog.categoryNone')}</em>
+                            </MenuItem>
+                            {categoryOptions.map(c => (
+                              <MenuItem key={c.id} value={c.id}>
+                                {c.name}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl>
+
+                        {loadingCategory ? (
+                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                            <CircularProgress size={18} />
+                            <Typography variant='caption' color='text.secondary'>
+                              {t('settings.web.posts.editDialog.loadingCategorySchema')}
+                            </Typography>
+                          </Box>
+                        ) : null}
+
+                        <PostCustomFieldsBlock
+                          schema={fieldsSchema}
+                          value={customFields}
+                          onChange={setCustomFields}
+                          disabled={busy}
+                        />
+                      </>
+                    )
+                  }
+                ]}
               />
             </Box>
           )}
