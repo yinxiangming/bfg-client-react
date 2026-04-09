@@ -35,6 +35,8 @@ import { getProductVariants, createProductVariant, deleteProductVariant, uploadP
 import MediaLibraryDialog from '@/components/media/MediaLibraryDialog'
 import VariantInventoryModal from './VariantInventoryModal'
 
+const PRODUCTS_REFRESH_EVENT = 'bfg:products-refresh'
+
 type ProductVariantsProps = {
     productId: string
     productMedia?: ProductMedia[]
@@ -64,6 +66,10 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
         if (productId === 'new') return undefined
         return parseInt(productId)
     }, [productId])
+
+    const notifyProductsRefresh = () => {
+        window.dispatchEvent(new Event(PRODUCTS_REFRESH_EVENT))
+    }
 
     const fetchVariants = async () => {
         // Skip fetching for new products
@@ -183,7 +189,8 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                 }
             }
             setNewVariant(null)
-            fetchVariants()
+            await fetchVariants()
+            notifyProductsRefresh()
             setSnackbar({ open: true, message: t('products.variants.snackbar.created'), severity: 'success' })
         } catch (error) {
             console.error("Failed to create variant", error)
@@ -398,7 +405,8 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
         try {
             await deleteProductVariant(deleteTarget.id)
             setDeleteTarget(null)
-            fetchVariants()
+            await fetchVariants()
+            notifyProductsRefresh()
             setSnackbar({ open: true, message: t('products.variants.snackbar.deleted'), severity: 'success' })
         } catch (error) {
             console.error("Failed to delete variant", error)
@@ -422,8 +430,8 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                 sx={{ pb: 0, '& .MuiCardHeader-action': { alignSelf: 'center' } }}
             />
             <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 } }}>
-                <TableContainer>
-                    <Table size='small'>
+                <TableContainer sx={{ overflowX: 'auto' }}>
+                    <Table size='small' sx={{ minWidth: 760 }}>
                         <TableHead>
                             <TableRow>
                                 <TableCell width={80}>{t('products.variants.table.headers.image')}</TableCell>
@@ -466,7 +474,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                                             )}
                                         </Box>
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell sx={{ minWidth: 180 }}>
                                         {editingId === variant.id ? (
                                             <TextField
                                                 variant='outlined'
@@ -479,7 +487,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                                             variant.name
                                         )}
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell sx={{ minWidth: 180 }}>
                                         {editingId === variant.id ? (
                                             <TextField
                                                 variant='outlined'
@@ -492,7 +500,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                                             variant.sku
                                         )}
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell sx={{ minWidth: 180 }}>
                                         {editingId === variant.id ? (
                                             <TextField
                                                 variant='outlined'
@@ -500,13 +508,13 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                                                 type='number'
                                                 value={editDraft.price ?? ''}
                                                 onChange={e => setEditDraft(prev => ({ ...prev, price: Number(e.target.value) }))}
-                                                sx={{ maxWidth: 120 }}
+                                                sx={{ width: 120, minWidth: 120 }}
                                             />
                                         ) : (
                                             variant.price
                                         )}
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell sx={{ minWidth: 180 }}>
                                         {editingId === variant.id ? (
                                             <Link
                                                 component='button'
@@ -530,7 +538,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                                             variant.stock_quantity
                                         )}
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell sx={{ width: 120, minWidth: 120 }}>
                                         <IconButton size='small' disabled={index === 0} onClick={() => handleMove(index, -1)}>
                                             <i className='tabler-arrow-up' />
                                         </IconButton>
@@ -553,7 +561,8 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                                                             setSnackbar({ open: true, message: t('products.variants.snackbar.updated'), severity: 'success' })
                                                             setEditingId(null)
                                                             setEditDraft({})
-                                                            fetchVariants()
+                                                            await fetchVariants()
+                                                            notifyProductsRefresh()
                                                         } catch (error) {
                                                             console.error('Failed to update variant', error)
                                                             const detail =
@@ -601,7 +610,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                             ))}
                             {newVariant && (
                                 <TableRow>
-                                    <TableCell>
+                                    <TableCell sx={{ width: 80, minWidth: 80 }}>
                                         <Box
                                             onClick={() => handleImageClick('new')}
                                             sx={{
@@ -630,7 +639,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                                             )}
                                         </Box>
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell sx={{ minWidth: 180 }}>
                                         <TextField
                                             variant='outlined'
                                             size='small'
@@ -640,7 +649,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                                             sx={{ minWidth: 180 }}
                                         />
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell sx={{ minWidth: 140 }}>
                                         <TextField
                                             variant='outlined'
                                             size='small'
@@ -650,7 +659,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                                             sx={{ minWidth: 140 }}
                                         />
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell sx={{ minWidth: 140 }}>
                                         <TextField
                                             variant='outlined'
                                             size='small'
@@ -658,10 +667,10 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                                             placeholder={t('products.variants.new.placeholders.price')}
                                             value={newVariant.price || ''}
                                             onChange={e => setNewVariant(prev => prev ? { ...prev, price: Number(e.target.value) } : { price: Number(e.target.value) })}
-                                            sx={{ maxWidth: 120 }}
+                                            sx={{ width: 120, minWidth: 120 }}
                                         />
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell sx={{ minWidth: 120 }}>
                                         <TextField
                                             variant='outlined'
                                             size='small'
@@ -669,10 +678,10 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                                             placeholder={t('products.variants.new.placeholders.stock')}
                                             value={newVariant.stock_quantity || ''}
                                             onChange={e => setNewVariant(prev => prev ? { ...prev, stock_quantity: Number(e.target.value) } : { stock_quantity: Number(e.target.value) })}
-                                            sx={{ maxWidth: 120 }}
+                                            sx={{ width: 120, minWidth: 120 }}
                                         />
                                     </TableCell>
-                                    <TableCell>
+                                    <TableCell sx={{ width: 120, minWidth: 120 }}>
                                         <IconButton
                                             color='primary'
                                             size='small'
@@ -744,6 +753,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                 variantId={inventoryModalVariantId}
                 onUpdate={() => {
                     fetchVariants()
+                    notifyProductsRefresh()
                 }}
             />
         )}
