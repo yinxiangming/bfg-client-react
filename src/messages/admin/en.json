@@ -3356,9 +3356,10 @@
     "general": {
       "page": {
         "title": "Workspace Settings",
-        "subtitle": "Manage workspace settings and preferences",
+        "subtitle": "Workspace: tenant identity, locale defaults (custom settings), and shop toggles. Storefront: branding, contact, and content visible to visitors.",
         "tabs": {
-          "basic": "Basic",
+          "workspace": "Workspace",
+          "storefront": "Storefront",
           "users": "Users",
           "roles": "Roles",
           "email": "Email",
@@ -3422,9 +3423,10 @@
         }
       },
       "basic": {
+        "helperTipAria": "Show field description",
         "sections": {
-          "workspaceAccount": "Workspace account",
-          "siteInformation": "Workspace Information",
+          "workspaceAndSite": "Workspace & site",
+          "storefrontBrandingIntro": "The logo, site name, and description below are shown to storefront visitors.",
           "localization": "Localization",
           "contactInformation": "Contact Information",
           "storefrontDisplay": "Storefront Display",
@@ -3432,30 +3434,36 @@
           "shop": "Shop",
           "socialMediaLinks": "Social Media Links"
         },
+        "subsections": {
+          "adminIdentity": "Admin & system identity",
+          "storefrontBranding": "Storefront name & branding"
+        },
         "logo": {
           "alt": "Workspace Logo",
           "help": "Allowed JPG, GIF or PNG. Max size of 800K"
         },
         "fields": {
           "workspaceOrgName": {
-            "label": "Organization name",
-            "helper": "Display name of this tenant / workspace (API: Workspace.name)."
+            "label": "Workspace name (admin)",
+            "helper": "Shown in the admin UI and workspace switcher. Can differ from the storefront site name below."
           },
           "workspaceSlug": {
             "label": "Workspace slug",
-            "helper": "URL-safe identifier; must be unique. Changing it may affect integrations that use the slug."
+            "helper": "URL-safe ID for APIs and URLs; must be unique. Changing it may break integrations."
           },
           "workspaceNote": {
-            "label": "Internal note",
-            "helper": "Optional note (e.g. from site-config import); not shown on the storefront."
+            "label": "Team-only note",
+            "helper": "Visible to signed-in admins only; customers never see this. Use for client names, project codes, etc."
           },
           "siteName": {
-            "label": "Workspace Name",
-            "placeholder": "Enter your workspace name"
+            "label": "Site name (storefront)",
+            "placeholder": "e.g. My Brand Store",
+            "helper": "Shown in the browser title, header, and other customer-facing places."
           },
           "siteDescription": {
-            "label": "Workspace Description",
-            "placeholder": "Brief description of your workspace"
+            "label": "Site description (SEO)",
+            "placeholder": "A short tagline for your brand or store",
+            "helper": "Used for SEO snippets and storefront copy; independent of the admin workspace name."
           },
           "defaultLanguage": {
             "label": "Default Language"

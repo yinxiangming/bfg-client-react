@@ -216,6 +216,8 @@ function generateThemeRegistry() {
   lines.push('  // eslint-disable-next-line @typescript-eslint/no-explicit-any')
   lines.push('  pageData: any | null')
   lines.push('  locale: string')
+  lines.push('  workspace_id?: number')
+  lines.push('  workspace_slug?: string')
   lines.push('}')
   lines.push('')
   lines.push('export const THEME_REGISTRY: Record<string, ThemeShell> = {')

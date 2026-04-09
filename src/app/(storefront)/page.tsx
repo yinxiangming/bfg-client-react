@@ -46,7 +46,14 @@ export default async function Page() {
 
   const ThemeHome = theme ? HOME_REGISTRY[theme] : null
   if (ThemeHome) {
-    return <ThemeHome pageData={pageData} locale={locale} />
+    return (
+      <ThemeHome
+        pageData={pageData}
+        locale={locale}
+        workspace_id={config.workspace_id}
+        workspace_slug={config.workspace_slug}
+      />
+    )
   }
 
   const hasNoBlocks = !pageData?.blocks || pageData.blocks.length === 0
@@ -60,7 +67,12 @@ export default async function Page() {
   const wrapper = (children: React.ReactNode) => (
     <div data-home-source={useDefaultHome ? 'default' : 'cms'} data-home-source-label={sourceLabel}>
       {children}
-      <StorefrontDevBadge label={sourceLabel} isDefaultHome={useDefaultHome} />
+      <StorefrontDevBadge
+        label={sourceLabel}
+        isDefaultHome={useDefaultHome}
+        workspaceId={config.workspace_id}
+        workspaceSlug={config.workspace_slug}
+      />
     </div>
   )
 

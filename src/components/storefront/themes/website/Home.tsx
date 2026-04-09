@@ -5,14 +5,24 @@ import DynamicPage from '@views/storefront/DynamicPage'
 import StorefrontDevBadge from '@components/storefront/StorefrontDevBadge'
 import type { ThemeHomeProps } from '../registry.generated'
 
-export default function WebsiteHome({ pageData, locale }: ThemeHomeProps) {
+export default function WebsiteHome({
+  pageData,
+  locale,
+  workspace_id: workspaceId,
+  workspace_slug: workspaceSlug,
+}: ThemeHomeProps) {
   const hasBlocks = pageData?.blocks && pageData.blocks.length > 0
 
   if (hasBlocks) {
     return (
       <div data-home-source="cms" data-home-source-label="CMS Page">
         <DynamicPage pageData={pageData} locale={locale} />
-        <StorefrontDevBadge label="CMS Page" isDefaultHome={false} />
+        <StorefrontDevBadge
+          label="CMS Page"
+          isDefaultHome={false}
+          workspaceId={workspaceId}
+          workspaceSlug={workspaceSlug}
+        />
       </div>
     )
   }

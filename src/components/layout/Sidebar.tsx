@@ -17,7 +17,7 @@ import { useTranslations } from 'next-intl'
 // Type Imports
 import type { MenuNode } from '@/types/menu'
 import { isMenuSection, isMenuSubMenu, isMenuItem } from '@/types/menu'
-import { getWorkspaceSettings } from '@/services/settings'
+import { fetchWorkspaceRecord, getWorkspaceSettings } from '@/services/settings'
 import { useStorefrontConfig } from '@/contexts/StorefrontConfigContext'
 
 const normalizePath = (path?: string | null) => {
@@ -47,15 +47,18 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
   const normalizedPath = useMemo(() => normalizePath(currentPath), [currentPath])
   const { config: storefrontConfig } = useStorefrontConfig()
   const [openSubmenus, setOpenSubmenus] = useState<OpenSubmenuState>({})
-  const [workspaceName, setWorkspaceName] = useState<string | undefined>(undefined)
+  /** Workspace organization name (API) preferred; falls back to settings `site_name`. */
+  const [brandingName, setBrandingName] = useState<string | undefined>(undefined)
   const [workspaceLogoSrc, setWorkspaceLogoSrc] = useState<string | undefined>(undefined)
 
   useEffect(() => {
     const isAdminOrAccount = normalizedPath?.startsWith('/admin') || normalizedPath?.startsWith('/account')
     if (!isAdminOrAccount) return
-    getWorkspaceSettings()
-      .then(s => {
-        setWorkspaceName(s.site_name ?? undefined)
+    Promise.all([getWorkspaceSettings(), fetchWorkspaceRecord().catch(() => null)])
+      .then(([s, record]) => {
+        const orgName = record?.name?.trim() || undefined
+        const siteName = s.site_name?.trim() || undefined
+        setBrandingName(orgName || siteName)
         const logo = s.custom_settings?.general?.logo ?? s.logo
         setWorkspaceLogoSrc(logo ?? undefined)
       })
@@ -65,7 +68,7 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
   const isAccount = Boolean(normalizedPath?.startsWith('/account'))
   const displayName = isAccount && storefrontConfig?.site_name
     ? storefrontConfig.site_name
-    : workspaceName
+    : brandingName
 
   const i18nNamespace = useMemo(() => {
     if (normalizedPath?.startsWith('/admin')) return 'admin'
