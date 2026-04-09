@@ -1,6 +1,7 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useMemo } from 'react'
+import { useRouter } from 'next/navigation'
 
 // i18n Imports
 import { useTranslations } from 'next-intl'
@@ -12,18 +13,12 @@ import CircularProgress from '@mui/material/CircularProgress'
 import SchemaTable from '@/components/schema/SchemaTable'
 import type { ListSchema, SchemaAction } from '@/types/schema'
 import { useApiData } from '@/hooks/useApiData'
-import PostEditDialog from './PostEditDialog'
-import {
-  getPosts,
-  getPost,
-  createPost,
-  updatePost,
-  deletePost,
-  type Post,
-  type PostPayload
-} from '@/services/web'
+import { getPosts, getCategories, deletePost, type Post, type Category } from '@/services/web'
 
-const buildPostsSchema = (t: any): ListSchema => ({
+const buildPostsSchema = (
+  t: (key: string) => string,
+  categoryOptions: Array<{ value: number; label: string }>
+): ListSchema => ({
   title: t('settings.web.posts.tab.title'),
   columns: [
     { field: 'title', label: t('settings.web.posts.tab.columns.title'), type: 'string', sortable: true, link: 'edit' },
@@ -33,6 +28,33 @@ const buildPostsSchema = (t: any): ListSchema => ({
     { field: 'language', label: t('settings.web.posts.tab.columns.language'), type: 'string' },
     { field: 'view_count', label: t('settings.web.posts.tab.columns.views'), type: 'number', sortable: true },
     { field: 'published_at', label: t('settings.web.posts.tab.columns.publishedAt'), type: 'date', sortable: true }
+  ],
+  filters: [
+    {
+      field: 'language',
+      label: t('settings.web.posts.tab.filters.language'),
+      type: 'select',
+      options: [
+        { value: 'en', label: t('settings.web.posts.editDialog.languageOptions.en') },
+        { value: 'zh-hans', label: t('settings.web.posts.editDialog.languageOptions.zhHans') }
+      ]
+    },
+    {
+      field: 'status',
+      label: t('settings.web.posts.tab.filters.status'),
+      type: 'select',
+      options: [
+        { value: 'draft', label: t('settings.web.posts.editDialog.statusOptions.draft') },
+        { value: 'published', label: t('settings.web.posts.editDialog.statusOptions.published') },
+        { value: 'archived', label: t('settings.web.posts.editDialog.statusOptions.archived') }
+      ]
+    },
+    {
+      field: 'category_id',
+      label: t('settings.web.posts.tab.filters.category'),
+      type: 'select',
+      options: categoryOptions.map(o => ({ value: o.value, label: o.label }))
+    }
   ],
   searchFields: ['title', 'slug'],
   actions: [
@@ -50,30 +72,29 @@ const buildPostsSchema = (t: any): ListSchema => ({
 
 const PostsTab = () => {
   const t = useTranslations('admin')
-  const postsSchema = useMemo(() => buildPostsSchema(t), [t])
+  const router = useRouter()
+
+  const { data: categories } = useApiData<Category[]>({
+    fetchFn: () => getCategories('post')
+  })
+
+  const categoryFilterOptions = useMemo(
+    () => (categories ?? []).map(c => ({ value: c.id, label: c.name })),
+    [categories]
+  )
+
+  const postsSchema = useMemo(() => buildPostsSchema(t, categoryFilterOptions), [t, categoryFilterOptions])
 
   const { data, loading, error, refetch } = useApiData<Post[]>({
-    fetchFn: async () => {
-      const result = await getPosts()
-      if (Array.isArray(result)) return result
-      if (result && typeof result === 'object' && 'results' in result && Array.isArray((result as any).results)) {
-        return (result as any).results
-      }
-      return []
-    }
+    fetchFn: () => getPosts()
   })
-  const [editOpen, setEditOpen] = useState(false)
-  const [selected, setSelected] = useState<Post | null>(null)
-
   const handleActionClick = async (action: SchemaAction, item: Post | {}) => {
     if (action.id === 'add') {
-      setSelected(null)
-      setEditOpen(true)
+      router.push('/admin/settings/web/posts/new')
       return
     }
     if (action.id === 'edit' && 'id' in item) {
-      setSelected(item as Post)
-      setEditOpen(true)
+      router.push(`/admin/settings/web/posts/${(item as Post).id}/edit`)
       return
     }
     if (action.id === 'delete' && 'id' in item) {
@@ -83,20 +104,6 @@ const PostsTab = () => {
       } catch (err: any) {
         alert(t('settings.web.posts.tab.errors.deleteFailed', { error: err.message }))
       }
-    }
-  }
-
-  const handleSave = async (payload: PostPayload) => {
-    try {
-      if (selected) {
-        await updatePost(selected.id, payload)
-      } else {
-        await createPost(payload)
-      }
-      await refetch()
-      setEditOpen(false)
-    } catch (err: any) {
-      alert(t('settings.web.posts.tab.errors.saveFailed', { error: err.message }))
     }
   }
 
@@ -117,20 +124,7 @@ const PostsTab = () => {
   }
 
   return (
-    <>
-      <SchemaTable
-        schema={postsSchema}
-        data={data || []}
-        onActionClick={handleActionClick}
-        fetchDetailFn={(id) => getPost(typeof id === 'string' ? parseInt(id) : id)}
-      />
-      <PostEditDialog
-        open={editOpen}
-        post={selected}
-        onClose={() => setEditOpen(false)}
-        onSave={handleSave}
-      />
-    </>
+    <SchemaTable schema={postsSchema} data={data || []} onActionClick={handleActionClick} />
   )
 }
 
