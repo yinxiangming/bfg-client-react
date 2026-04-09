@@ -65,6 +65,7 @@ export type ShopSettingsPayload = {
 
 export type WorkspaceSettings = {
   id: number
+  /** FK to Workspace; required for admin UI to PATCH workspace name/slug */
   workspace_id?: number
   site_name?: string
   site_description?: string
@@ -150,24 +151,41 @@ export type WorkspaceRecord = {
   is_active?: boolean
 }
 
+/** Coalesces concurrent GET /workspaces/{id}/ (layout + settings page + header all call fetchWorkspaceRecord on load). */
+let workspaceRecordInFlight: Promise<WorkspaceRecord> | null = null
+
+export function invalidateWorkspaceRecordCache(): void {
+  workspaceRecordInFlight = null
+}
+
 export async function fetchWorkspaceRecord(): Promise<WorkspaceRecord | null> {
   const requestHost = getSiteAdminRequestHost()
   if (!requestHost) return null
   const settings = await getWorkspaceSettings()
   const id = settings.workspace_id
   if (!id) return null
-  return apiFetch<WorkspaceRecord>(`${bfgApi.workspaces()}${id}/`, getSiteAdminOptions())
+
+  if (!workspaceRecordInFlight) {
+    workspaceRecordInFlight = apiFetch<WorkspaceRecord>(`${bfgApi.workspaces()}${id}/`, getSiteAdminOptions()).finally(
+      () => {
+        workspaceRecordInFlight = null
+      }
+    )
+  }
+  return workspaceRecordInFlight
 }
 
 export async function patchWorkspaceRecord(
   id: number,
   data: Partial<Pick<WorkspaceRecord, 'name' | 'slug'>>
 ): Promise<WorkspaceRecord> {
-  return apiFetch<WorkspaceRecord>(`${bfgApi.workspaces()}${id}/`, {
+  const result = await apiFetch<WorkspaceRecord>(`${bfgApi.workspaces()}${id}/`, {
     ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
   })
+  invalidateWorkspaceRecordCache()
+  return result
 }
 
 export type PluginsSettingsPayload = {

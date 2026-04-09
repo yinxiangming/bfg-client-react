@@ -18,6 +18,8 @@ export interface ThemeHomeProps {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   pageData: any | null
   locale: string
+  workspace_id?: number
+  workspace_slug?: string
 }
 
 export const THEME_REGISTRY: Record<string, ThemeShell> = {
