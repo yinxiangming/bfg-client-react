@@ -5,7 +5,12 @@ import HomePage from '@views/storefront/HomePage'
 import StorefrontDevBadge from '@components/storefront/StorefrontDevBadge'
 import type { ThemeHomeProps } from '../registry.generated'
 
-export default function StoreHome({ pageData, locale }: ThemeHomeProps) {
+export default function StoreHome({
+  pageData,
+  locale,
+  workspace_id: workspaceId,
+  workspace_slug: workspaceSlug,
+}: ThemeHomeProps) {
   const hasNoBlocks = !pageData?.blocks || pageData.blocks.length === 0
   const singleBlock = pageData?.blocks?.length === 1 ? pageData.blocks[0] : null
   const isLegacyWelcomeBlock =
@@ -22,7 +27,12 @@ export default function StoreHome({ pageData, locale }: ThemeHomeProps) {
       ) : (
         <DynamicPage pageData={pageData} locale={locale} fallback={<HomePage />} />
       )}
-      <StorefrontDevBadge label={sourceLabel} isDefaultHome={useDefaultHome} />
+      <StorefrontDevBadge
+        label={sourceLabel}
+        isDefaultHome={useDefaultHome}
+        workspaceId={workspaceId}
+        workspaceSlug={workspaceSlug}
+      />
     </div>
   )
 }

@@ -69,6 +69,9 @@ export type StorefrontConfig = {
   review_moderation_required?: boolean
   /** Primary domain configured for this workspace (hostname only, no port). */
   workspace_domain?: string
+  /** Resolved workspace (public storefront context). */
+  workspace_id?: number
+  workspace_slug?: string
 }
 
 const STALE_MS = 5 * 60 * 1000 // 5 minutes

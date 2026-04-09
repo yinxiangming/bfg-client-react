@@ -3356,9 +3356,10 @@
     "general": {
       "page": {
         "title": "工作区设置",
-        "subtitle": "管理工作区设置与偏好",
+        "subtitle": "「工作区」：租户身份、默认语言/货币/时区与店铺相关开关。「前台展现」：访客可见的品牌、联系信息与展示内容。",
         "tabs": {
-          "basic": "基础",
+          "workspace": "工作区",
+          "storefront": "前台展现",
           "users": "用户",
           "roles": "角色",
           "email": "邮件",
@@ -3422,9 +3423,10 @@
         }
       },
       "basic": {
+        "helperTipAria": "查看字段说明",
         "sections": {
-          "workspaceAccount": "工作区账户",
-          "siteInformation": "工作区信息",
+          "workspaceAndSite": "工作区与站点",
+          "storefrontBrandingIntro": "以下 Logo、站点名称与描述会展示给网店访客。",
           "localization": "本地化",
           "contactInformation": "联系信息",
           "storefrontDisplay": "前台展示",
@@ -3432,30 +3434,36 @@
           "shop": "店铺",
           "socialMediaLinks": "社交媒体链接"
         },
+        "subsections": {
+          "adminIdentity": "后台与系统标识",
+          "storefrontBranding": "前台站点名称与品牌"
+        },
         "logo": {
           "alt": "工作区 Logo",
           "help": "支持 JPG、GIF 或 PNG，最大 800KB"
         },
         "fields": {
           "workspaceOrgName": {
-            "label": "组织名称",
-            "helper": "租户 / 工作区的显示名称（对应 Workspace.name）。"
+            "label": "后台工作区名称",
+            "helper": "在管理后台、工作区切换等处显示的系统名称，可与下方「前台站点名称」不同。"
           },
           "workspaceSlug": {
-            "label": "工作区 slug",
-            "helper": "URL 安全标识，全局唯一；修改可能影响依赖 slug 的集成。"
+            "label": "工作区标识（slug）",
+            "helper": "用于 URL 与 API 的英文标识，全局唯一；修改可能影响已配置的集成或链接。"
           },
           "workspaceNote": {
-            "label": "内部备注",
-            "helper": "可选备注（例如来自 site-config 导入）；不会显示在前台。"
+            "label": "团队内部备注",
+            "helper": "仅登录本工作区的管理员可见，顾客在网店看不到；可记录客户名、项目代号等。"
           },
           "siteName": {
-            "label": "工作区名称",
-            "placeholder": "输入工作区名称"
+            "label": "前台站点名称",
+            "placeholder": "例如：我的品牌旗舰店",
+            "helper": "显示在浏览器标题、网店页眉等顾客可见位置。"
           },
           "siteDescription": {
-            "label": "工作区描述",
-            "placeholder": "简要描述你的工作区"
+            "label": "站点描述（SEO）",
+            "placeholder": "一句话介绍你的站点或品牌",
+            "helper": "用于搜索摘要等前台展示；可与后台工作区名称不同。"
           },
           "defaultLanguage": {
             "label": "默认语言"

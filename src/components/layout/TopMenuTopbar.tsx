@@ -15,7 +15,7 @@ import CurrentUserDisplay from '../ui/CurrentUserDisplay'
 import LanguageSwitcher from '@/components/i18n/LanguageSwitcher'
 import FeedbackButton from '@/components/feedback/FeedbackButton'
 import AgentDialog from '@/views/admin/agent/AgentDialog'
-import { getWorkspaceSettings } from '@/services/settings'
+import { fetchWorkspaceRecord, getWorkspaceSettings } from '@/services/settings'
 import { useStorefrontConfig } from '@/contexts/StorefrontConfigContext'
 
 // Hook Imports
@@ -33,14 +33,17 @@ const TopMenuTopbar = ({ avatarInitial = 'N' }: Props) => {
   const pathname = usePathname()
   const normalizedPath = normalizePath(pathname ?? null)
   const { config: storefrontConfig } = useStorefrontConfig()
-  const [workspaceName, setWorkspaceName] = useState<string | undefined>(undefined)
+  /** Workspace organization name (API) preferred; falls back to settings `site_name`. */
+  const [brandingName, setBrandingName] = useState<string | undefined>(undefined)
   const [workspaceLogoSrc, setWorkspaceLogoSrc] = useState<string | undefined>(undefined)
   const [agentDialogOpen, setAgentDialogOpen] = useState(false)
 
   useEffect(() => {
-    getWorkspaceSettings()
-      .then(s => {
-        setWorkspaceName(s.site_name ?? undefined)
+    Promise.all([getWorkspaceSettings(), fetchWorkspaceRecord().catch(() => null)])
+      .then(([s, record]) => {
+        const orgName = record?.name?.trim() || undefined
+        const siteName = s.site_name?.trim() || undefined
+        setBrandingName(orgName || siteName)
         const logo = s.custom_settings?.general?.logo ?? s.logo
         setWorkspaceLogoSrc(logo ?? undefined)
       })
@@ -50,7 +53,7 @@ const TopMenuTopbar = ({ avatarInitial = 'N' }: Props) => {
   const isAccount = normalizedPath.startsWith('/account')
   const displayName = isAccount && storefrontConfig?.site_name
     ? storefrontConfig.site_name
-    : workspaceName
+    : brandingName
 
   const handleSwitchToVertical = () => {
     updateConfig({ menuPosition: 'vertical' })
