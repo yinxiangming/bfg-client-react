@@ -40,7 +40,7 @@
     "apexcharts": "^5.3.6",
     "classnames": "2.5.1",
     "lightningcss": "^1.30.2",
-    "next": "^16.2.1",
+    "next": "^16.2.3",
     "next-intl": "^4.9.1",
     "react": "19.2.0",
     "react-apexcharts": "^1.9.0",
