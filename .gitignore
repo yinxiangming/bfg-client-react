@@ -19,3 +19,4 @@ src/app/(storefront)/plugins/
 src/.plugin-routes-manifest.json
 src/components/storefront/themes/registry.generated.ts
 .env*.local
+.claude/settings.local.json
