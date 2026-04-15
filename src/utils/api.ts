@@ -196,6 +196,27 @@ export function getStorefrontWorkspaceId(): string | null {
   return null
 }
 
+/**
+ * Site admin requests normally omit X-Workspace-ID so the backend resolves the tenant from
+ * Host / X-Forwarded-Host (e.g. geeker.co.nz). When NEXT_PUBLIC_WORKSPACE_ID is set—typical for
+ * localhost where Site maps to the wrong workspace—send X-Workspace-ID like other API calls.
+ */
+function resolveWorkspaceIdForApi(options?: {
+  storefrontScope?: boolean
+  siteAdminScope?: boolean
+}): string | null {
+  if (options?.storefrontScope) {
+    return getStorefrontWorkspaceId()
+  }
+  if (options?.siteAdminScope) {
+    if (process.env.NEXT_PUBLIC_WORKSPACE_ID) {
+      return getWorkspaceId()
+    }
+    return getStorefrontWorkspaceId()
+  }
+  return getWorkspaceId()
+}
+
 export type GetApiHeadersOptions = {
   /** When set (e.g. request host for auth/storefront), backend can resolve workspace by domain. */
   requestHost?: string
@@ -207,8 +228,8 @@ export type GetApiHeadersOptions = {
    */
   storefrontScope?: boolean
   /**
-   * Site-bound admin scope: prefer domain routing and do not send X-Workspace-ID.
-   * Use for admin pages hosted on a business domain like geeker.co.nz.
+   * Site-bound admin scope: prefer domain routing (no X-Workspace-ID unless
+   * NEXT_PUBLIC_WORKSPACE_ID is set for local dev pinning).
    */
   siteAdminScope?: boolean
 }
@@ -231,8 +252,7 @@ export function getApiHeaders(
   const headers: Record<string, string> = {
     ...getApiLanguageHeaders(),
   }
-  const useHostScopedRouting = options?.storefrontScope || options?.siteAdminScope
-  const workspaceId = useHostScopedRouting ? getStorefrontWorkspaceId() : getWorkspaceId()
+  const workspaceId = resolveWorkspaceIdForApi(options)
   if (workspaceId) {
     headers['X-Workspace-ID'] = workspaceId
   }
@@ -291,8 +311,7 @@ export async function apiFetch<T>(
 ): Promise<T> {
   const token = getAuthToken()
   const { requestHost, withAuth, storefrontScope, siteAdminScope, ...fetchOptions } = options || {}
-  const useHostScopedRouting = storefrontScope || siteAdminScope
-  const workspaceId = useHostScopedRouting ? getStorefrontWorkspaceId() : getWorkspaceId()
+  const workspaceId = resolveWorkspaceIdForApi({ storefrontScope, siteAdminScope })
   const headers: Record<string, string> = {
     ...(fetchOptions?.headers as Record<string, string>)
   }
