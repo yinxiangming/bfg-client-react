@@ -61,6 +61,49 @@ export const getMediaUrl = (relativePath: string | null | undefined): string => 
 }
 
 /**
+ * Safe URL for `<img>` / `Avatar` `src` from stored or user-supplied strings.
+ * Rejects `javascript:`, HTML-like payloads, and `data:` URLs that are not image/* (svg+xml is excluded
+ * because embedded scripts in SVG data URLs are a known XSS footgun).
+ */
+export function sanitizeImageElementSrc(raw: string | null | undefined): string {
+  if (raw == null || typeof raw !== 'string') return ''
+  const s = raw.trim()
+  if (!s) return ''
+
+  if (s.startsWith('blob:')) {
+    try {
+      const u = new URL(s)
+      return u.protocol === 'blob:' ? s : ''
+    } catch {
+      return ''
+    }
+  }
+
+  if (s.startsWith('data:')) {
+    if (/^data:image\/svg\+xml/i.test(s)) return ''
+    if (/^data:image\//i.test(s)) return s
+    return ''
+  }
+
+  if (/[\u0000<>]/.test(s)) return ''
+
+  const resolved = normalizeMediaUrl(s)
+  if (!resolved) return ''
+
+  try {
+    const base =
+      typeof window !== 'undefined' && window.location?.origin
+        ? window.location.origin
+        : 'https://localhost'
+    const u = /^https?:\/\//i.test(resolved) ? new URL(resolved) : new URL(resolved, base)
+    if (u.protocol !== 'http:' && u.protocol !== 'https:') return ''
+    return u.href
+  } catch {
+    return ''
+  }
+}
+
+/**
  * Get avatar image URL
  * @param avatarPath - Avatar path (relative to seed_images/avatars/, or legacy images/avatars/, or full path)
  * @returns Full avatar URL using NEXT_PUBLIC_MEDIA_URL

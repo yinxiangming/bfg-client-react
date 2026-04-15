@@ -35,7 +35,7 @@ import type { OptionItem } from '@/services/options'
 
 // Util Imports
 import { formatCurrency, formatDate, formatDateTime } from '@/utils/format'
-import { getMediaUrl } from '@/utils/media'
+import { getMediaUrl, sanitizeImageElementSrc } from '@/utils/media'
 
 // Service Imports
 import { 
@@ -48,8 +48,9 @@ import {
 
 function resolveFileImagePreviewSrc(value: unknown): string | null {
   if (typeof value !== 'string' || !value) return null
-  if (value.startsWith('data:')) return value
-  return getMediaUrl(value)
+  const raw = value.startsWith('data:') ? value : getMediaUrl(value)
+  const safe = sanitizeImageElementSrc(raw)
+  return safe || null
 }
 
 function FileFieldImagePreview({ value, enabled }: { value: unknown; enabled: boolean }) {
@@ -889,18 +890,23 @@ export default function SchemaForm<T extends Record<string, any>>({
       case 'file': {
         const imageFilePreview =
           field.type === 'file' && field.accept?.includes('image')
+        const stringValue = value && typeof value === 'string' ? value : ''
+        const safeAvatarSrc =
+          field.type === 'image' && stringValue
+            ? sanitizeImageElementSrc(stringValue.startsWith('data:') ? stringValue : getMediaUrl(stringValue))
+            : ''
         return (
           <Box>
             <InputLabel>{field.label}</InputLabel>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, mt: 1 }}>
-              {field.type === 'image' && value && typeof value === 'string' && (
+              {safeAvatarSrc ? (
                 <Avatar
-                  src={value.startsWith('data:') ? value : getMediaUrl(value)}
+                  src={safeAvatarSrc}
                   alt=''
                   sx={{ width: 80, height: 80 }}
                   variant='rounded'
                 />
-              )}
+              ) : null}
               {imageFilePreview ? <FileFieldImagePreview value={value} enabled /> : null}
               <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap' }}>
                 <Button variant='outlined' component='label' disabled={isReadonly}>
