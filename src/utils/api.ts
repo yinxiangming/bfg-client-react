@@ -252,7 +252,8 @@ export function getApiHeaders(
   const headers: Record<string, string> = {
     ...getApiLanguageHeaders(),
   }
-  const workspaceId = resolveWorkspaceIdForApi(options)
+  const useHostScopedRouting = options?.storefrontScope || options?.siteAdminScope
+  const workspaceId = useHostScopedRouting ? getStorefrontWorkspaceId() : getWorkspaceId()
   if (workspaceId) {
     headers['X-Workspace-ID'] = workspaceId
   }
@@ -311,7 +312,8 @@ export async function apiFetch<T>(
 ): Promise<T> {
   const token = getAuthToken()
   const { requestHost, withAuth, storefrontScope, siteAdminScope, ...fetchOptions } = options || {}
-  const workspaceId = resolveWorkspaceIdForApi({ storefrontScope, siteAdminScope })
+  const useHostScopedRouting = storefrontScope || siteAdminScope
+  const workspaceId = useHostScopedRouting ? getStorefrontWorkspaceId() : getWorkspaceId()
   const headers: Record<string, string> = {
     ...(fetchOptions?.headers as Record<string, string>)
   }
