@@ -238,7 +238,10 @@ export default function StoreHeader(_props: StoreHeaderProps) {
             {showLogin && (isAuthenticated ? (
               <Link href='/account' className='sf-header-top-link' style={{ textDecoration: 'none' }}>{t('topBar.myAccount')}</Link>
             ) : (
-              <Link href='/auth/login' className='sf-header-top-link' style={{ textDecoration: 'none' }}>{t('topBar.login')}</Link>
+              <>
+                <Link href='/auth/login' className='sf-header-top-link' style={{ textDecoration: 'none' }}>{t('topBar.login')}</Link>
+                <Link href='/auth/register' className='sf-header-top-link' style={{ textDecoration: 'none' }}>{t('topBar.register')}</Link>
+              </>
             ))}
           </div>
         </div>

@@ -2,7 +2,8 @@
   "topBar": {
     "promo": "节日大促，最高立减 20%，立即购买！",
     "myAccount": "我的账户",
-    "login": "登录"
+    "login": "登录",
+    "register": "注册"
   },
   "search": {
     "placeholder": "搜索",

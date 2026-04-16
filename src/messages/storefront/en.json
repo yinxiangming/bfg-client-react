@@ -2,7 +2,8 @@
   "topBar": {
     "promo": "Super sale up to 20% in this holiday Shop Now!",
     "myAccount": "My Account",
-    "login": "Login"
+    "login": "Login",
+    "register": "Register"
   },
   "search": {
     "placeholder": "Search",
