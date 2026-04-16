@@ -160,6 +160,11 @@
       "productSearchPlaceholder": "Search by name, SKU or barcode",
       "addProduct": "Add",
       "customer": "Customer",
+      "fulfillmentMethod": "Fulfillment Method",
+      "fulfillment": {
+        "shipping": "Shipping",
+        "pickup": "Pickup"
+      },
       "customerSearchPlaceholder": "Search by email or phone",
       "createNewCustomer": "Create new customer",
       "selectExistingCustomer": "Select existing customer",

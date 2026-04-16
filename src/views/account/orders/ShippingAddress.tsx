@@ -15,6 +15,7 @@ interface ShippingAddressProps {
 const ShippingAddress = ({ order }: ShippingAddressProps) => {
   const t = useTranslations('account.orderDetail')
   const address = order.shipping_address || order.addresses?.shipping || {}
+  const isPickup = (order.fulfillment_method || 'shipping') === 'pickup'
   const fullName = address.full_name || t('na')
   const addressLine1 = address.address_line1 || ''
   const addressLine2 = address.address_line2 || ''
@@ -29,8 +30,13 @@ const ShippingAddress = ({ order }: ShippingAddressProps) => {
     <Card variant='outlined' sx={{ boxShadow: 'none', borderRadius: 2 }}>
       <CardContent sx={{ px: 3, py: 3 }}>
         <Typography variant='h6' sx={{ fontSize: '1.125rem', fontWeight: 500, mb: 2 }}>
-          {t('shippingAddress')}
+          {isPickup ? t('pickupDetails') : t('shippingAddress')}
         </Typography>
+        {isPickup ? (
+          <Typography variant='body2' color='text.secondary'>
+            {t('pickupNoAddress')}
+          </Typography>
+        ) : (
         <div className='flex flex-col gap-0.5'>
           {fullName && (
             <Typography color='text.primary' sx={{ fontWeight: 500, mb: 0.5 }}>
@@ -59,6 +65,7 @@ const ShippingAddress = ({ order }: ShippingAddressProps) => {
             </Typography>
           )}
         </div>
+        )}
       </CardContent>
     </Card>
   )

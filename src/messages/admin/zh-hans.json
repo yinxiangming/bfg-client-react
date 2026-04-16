@@ -160,6 +160,11 @@
       "productSearchPlaceholder": "按名称、条形码或 SKU 搜索",
       "addProduct": "添加",
       "customer": "客户",
+      "fulfillmentMethod": "履约方式",
+      "fulfillment": {
+        "shipping": "配送",
+        "pickup": "自取"
+      },
       "customerSearchPlaceholder": "按邮箱或电话搜索",
       "createNewCustomer": "新建客户",
       "selectExistingCustomer": "选择已有客户",

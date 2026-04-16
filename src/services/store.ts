@@ -325,6 +325,7 @@ export interface Order {
   customer_name?: string
   store?: number | string
   store_name?: string
+  fulfillment_method?: 'shipping' | 'pickup'
   total: number
   item_count?: number
   /** Brief item list for list view (product_name, quantity) */
@@ -369,8 +370,9 @@ export async function getOrder(id: number): Promise<Order> {
 export interface CreateOrderPayload {
   customer_id: number
   store_id: number
-  shipping_address_id: number
-  billing_address_id?: number
+  fulfillment_method?: 'shipping' | 'pickup'
+  shipping_address_id?: number | null
+  billing_address_id?: number | null
   status?: Order['status']
   payment_status?: Order['payment_status']
   customer_note?: string
