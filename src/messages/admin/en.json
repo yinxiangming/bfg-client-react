@@ -2849,6 +2849,46 @@
         "errors": {
           "deleteFailed": "Failed to delete",
           "saveFailed": "Failed to save"
+        },
+        "messages": {
+          "created": "Time slot created.",
+          "updated": "Time slot updated.",
+          "deleted": "Time slot deleted."
+        },
+        "batch": {
+          "action": "Batch Generate",
+          "title": "Batch Generate Time Slots",
+          "description": "Create multiple time slots by date range and weekdays.",
+          "generate": "Generate",
+          "generating": "Generating...",
+          "cancel": "Cancel",
+          "fields": {
+            "startDate": "Start Date",
+            "endDate": "End Date",
+            "startTime": "Start Time",
+            "endTime": "End Time",
+            "maxBookings": "Max Bookings",
+            "weekdays": "Weekdays"
+          },
+          "weekdays": {
+            "sun": "Sun",
+            "mon": "Mon",
+            "tue": "Tue",
+            "wed": "Wed",
+            "thu": "Thu",
+            "fri": "Fri",
+            "sat": "Sat"
+          },
+          "errors": {
+            "missingDateRange": "Please choose a start date and end date.",
+            "missingWeekdays": "Please select at least one weekday.",
+            "noMatchingDates": "No matching dates were found in the selected range.",
+            "allExist": "All matching time slots already exist.",
+            "generateFailed": "Failed to generate time slots."
+          },
+          "messages": {
+            "generated": "Generated {count} time slots."
+          }
         }
       }
     },

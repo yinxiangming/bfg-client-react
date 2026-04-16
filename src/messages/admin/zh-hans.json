@@ -2849,6 +2849,46 @@
         "errors": {
           "deleteFailed": "删除失败",
           "saveFailed": "保存失败"
+        },
+        "messages": {
+          "created": "时段已创建。",
+          "updated": "时段已更新。",
+          "deleted": "时段已删除。"
+        },
+        "batch": {
+          "action": "批量生成",
+          "title": "批量生成时段",
+          "description": "按日期范围和星期几批量创建多个时段。",
+          "generate": "生成",
+          "generating": "生成中...",
+          "cancel": "取消",
+          "fields": {
+            "startDate": "开始日期",
+            "endDate": "结束日期",
+            "startTime": "开始时间",
+            "endTime": "结束时间",
+            "maxBookings": "最大预约数",
+            "weekdays": "星期"
+          },
+          "weekdays": {
+            "sun": "周日",
+            "mon": "周一",
+            "tue": "周二",
+            "wed": "周三",
+            "thu": "周四",
+            "fri": "周五",
+            "sat": "周六"
+          },
+          "errors": {
+            "missingDateRange": "请选择开始日期和结束日期。",
+            "missingWeekdays": "请至少选择一个星期。",
+            "noMatchingDates": "所选范围内没有匹配的日期。",
+            "allExist": "匹配的时段都已存在。",
+            "generateFailed": "批量生成时段失败。"
+          },
+          "messages": {
+            "generated": "已生成 {count} 个时段。"
+          }
         }
       }
     },
