@@ -25,6 +25,7 @@ import DeliveryCard from '@/views/admin/store/orders/edit/DeliveryCard'
 import OrderTimeline from '@/views/admin/store/orders/edit/OrderTimeline'
 import InvoiceCard from '@/views/admin/store/orders/edit/InvoiceCard'
 import PackagesCard from '@/views/admin/store/orders/edit/PackagesCard'
+import ShippingFulfillmentDialog from '@/views/admin/store/orders/edit/ShippingFulfillmentDialog'
 import SchemaForm from '@/components/schema/SchemaForm'
 
 // Context Imports
@@ -38,7 +39,7 @@ import { usePageSlots } from '@/extensions/hooks/usePageSections'
 import { renderSlot } from '@/extensions/hooks/renderSection'
 
 // API Imports
-import { getOrder, updateOrder, type Order } from '@/services/store'
+import { getOrder, updateOrder, cancelOrder, refundOrder, createReturnRequest, createReturnLineItem, relistResaleByOrder, type Order } from '@/services/store'
 
 // Extended Order type for detail view
 type OrderDetail = Order & {
@@ -90,6 +91,7 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
   const t = useTranslations('admin')
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(true)
+  const [shippingWizardOpen, setShippingWizardOpen] = useState(false)
   const [order, setOrder] = useState<OrderDetail | null>(null)
   const [error, setError] = useState<string | null>(null)
 
@@ -219,6 +221,49 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
     router.push(`/admin/store/orders/${id}`)
   }
 
+  const handleShip = () => {
+    setShippingWizardOpen(true)
+  }
+
+  const handleCancelOrder = async (reason?: string) => {
+    await cancelOrder(parseInt(id), reason)
+    await fetchOrder()
+  }
+
+  const handleRefund = async () => {
+    await refundOrder(parseInt(id))
+    await fetchOrder()
+  }
+
+  const handleRelist = async () => {
+    await relistResaleByOrder(parseInt(id))
+    await fetchOrder()
+  }
+
+  const handleCreateReturn = async (payload: {
+    reason_category?: string
+    customer_note?: string
+    restock_action: 'no_restock' | 'restock' | 'damage'
+  }) => {
+    const returnRequest = await createReturnRequest({
+      order: parseInt(id),
+      reason_category: payload.reason_category,
+      customer_note: payload.customer_note,
+      admin_note: payload.customer_note
+    })
+
+    for (const item of order.items || []) {
+      await createReturnLineItem(returnRequest.id, {
+        order_item: item.id,
+        quantity: item.quantity,
+        reason: payload.reason_category,
+        restock_action: payload.restock_action
+      })
+    }
+
+    await fetchOrder()
+  }
+
   const handleOrderUpdate = () => {
     // Refresh order data
     fetchOrder()
@@ -254,18 +299,28 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
 
   return (
     <BaseDataProvider>
-      <Box sx={{ p: 4 }}>
-        <Grid container spacing={6}>
+      <Grid container spacing={4}>
         <Grid size={{ xs: 12 }}>
           <OrderEditHeader 
             order={order} 
-            onCancel={handleCancel}
+            onBack={handleCancel}
+            onShip={handleShip}
+            onRefund={handleRefund}
+            onRelist={handleRelist}
+            onCreateReturn={handleCreateReturn}
+            onCancelOrder={handleCancelOrder}
             onStatusChange={handleStatusChange}
             onPaymentStatusChange={handlePaymentStatusChange}
           />
+          <ShippingFulfillmentDialog
+            open={shippingWizardOpen}
+            order={order}
+            onClose={() => setShippingWizardOpen(false)}
+            onCompleted={fetchOrder}
+          />
         </Grid>
         <Grid size={{ xs: 12, md: 8 }}>
-          <Grid container spacing={6}>
+          <Grid container spacing={4}>
             {beforeSlots.map(
               ext =>
                 ext.component && (
@@ -361,7 +416,7 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
           </Grid>
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
-          <Grid container spacing={6}>
+          <Grid container spacing={4}>
             {visibleSlots.includes('CustomerDetails') && (
               <Grid size={{ xs: 12 }} id='section-customer'>
                 {renderSlot(
@@ -404,7 +459,6 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
           </Grid>
         </Grid>
       </Grid>
-      </Box>
     </BaseDataProvider>
   )
 }

@@ -52,7 +52,8 @@
       "send": "Send",
       "pay": "Pay",
       "downloadPdf": "Download PDF",
-      "retry": "Retry"
+      "retry": "Retry",
+      "back": "Back"
     },
     "imageViewer": {
       "close": "Close",
@@ -270,7 +271,59 @@
       "orderStatusLabel": "Order Status",
       "paymentStatusLabel": "Payment Status",
       "cancelOrder": "Cancel Order",
-      "createdAt": "Created: {date}"
+      "createdAt": "Created: {date}",
+      "errors": {
+        "actionFailed": "Action failed"
+      },
+      "actions": {
+        "ship": "Ship",
+        "shipping": "Shipping...",
+        "more": "More",
+        "refund": "Refund",
+        "refunding": "Refunding...",
+        "return": "Create Return",
+        "relist": "Relist",
+        "relisting": "Relisting...",
+        "cancelOrder": "Cancel Order"
+      },
+      "dialogs": {
+        "cancelTitle": "Cancel Order",
+        "cancelReason": "Reason",
+        "returnTitle": "Create Return",
+        "returnCategory": "Reason Category",
+        "returnNote": "Notes"
+      },
+      "restock": {
+        "restock": "Restock",
+        "noRestock": "No Restock",
+        "damage": "Damaged/Dispose"
+      }
+    },
+    "shippingWizard": {
+      "title": "Ship Order",
+      "subtitle": "Manage packaging and choose how this order will be fulfilled in one place.",
+      "modes": {
+        "shipping": "Freight Shipping",
+        "pickup": "Customer Pickup"
+      },
+      "pickup": {
+        "title": "Notify customer for pickup",
+        "description": "Send the customer a pickup-ready message, then mark the order as shipped/ready.",
+        "subject": "Message subject",
+        "message": "Message",
+        "sendAndMarkReady": "Send message and mark ready",
+        "loadingCustomerLanguage": "Loading customer language...",
+        "statusHint": "This will send an inbox message and email to the customer, then update the order status to shipped.",
+        "defaultSubject": "Order #{orderNumber} is ready for pickup",
+        "defaultMessage": "Hi {customerName}, your order #{orderNumber} is ready for pickup. Please come to the store when convenient.",
+        "customerFallback": "customer",
+        "viewOrderAction": "View order"
+      },
+      "errors": {
+        "markShippedFailed": "Shipment was created, but failed to mark the order as shipped.",
+        "pickupNotifyFailed": "Failed to notify customer for pickup.",
+        "customerRequired": "This order has no customer linked, so pickup message cannot be sent."
+      }
     },
     "editPage": {
       "errors": {

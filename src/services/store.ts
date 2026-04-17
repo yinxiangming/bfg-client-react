@@ -1,6 +1,6 @@
 // Store API service (BFG2 Shop module)
 
-import { apiFetch, bfgApi } from '@/utils/api'
+import { apiFetch, bfgApi, buildApiUrl, API_VERSIONS } from '@/utils/api'
 import { getSiteAdminOptions } from '@/services/settings'
 import type { FormSchema } from '@/types/schema'
 
@@ -387,6 +387,79 @@ export async function createOrder(data: CreateOrderPayload): Promise<Order> {
   })
 }
 
+export async function cancelOrder(id: number, reason?: string): Promise<Order> {
+  return apiFetch<Order>(`${bfgApi.orders()}${id}/cancel/`, {
+    ...getSiteAdminOptions(),
+    method: 'POST',
+    body: JSON.stringify(reason ? { reason } : {})
+  })
+}
+
+export async function refundOrder(id: number): Promise<Order> {
+  return apiFetch<Order>(`${bfgApi.orders()}${id}/refund/`, {
+    ...getSiteAdminOptions(),
+    method: 'POST'
+  })
+}
+
+export interface ReturnRequest {
+  id: number
+  order: number
+  customer: number
+  return_number: string
+  status: 'open' | 'approved' | 'rejected' | 'received' | 'inspected' | 'refunded' | 'closed' | 'cancelled'
+  reason_category?: string
+  customer_note?: string
+  admin_note?: string
+  created_at?: string
+}
+
+export interface ReturnLineItemPayload {
+  order_item: number
+  quantity: number
+  reason?: string
+  restock_action?: 'no_restock' | 'restock' | 'damage'
+}
+
+const returnsApi = () => buildApiUrl('/returns/', API_VERSIONS.BFG2)
+const returnItemsApi = () => buildApiUrl('/return-items/', API_VERSIONS.BFG2)
+
+export async function createReturnRequest(data: {
+  order: number
+  reason_category?: string
+  customer_note?: string
+  admin_note?: string
+}): Promise<ReturnRequest> {
+  return apiFetch<ReturnRequest>(returnsApi(), {
+    ...getSiteAdminOptions(),
+    method: 'POST',
+    body: JSON.stringify(data)
+  })
+}
+
+export async function createReturnLineItem(returnId: number, data: ReturnLineItemPayload): Promise<any> {
+  return apiFetch<any>(returnItemsApi(), {
+    ...getSiteAdminOptions(),
+    method: 'POST',
+    body: JSON.stringify({ ...data, return_request: returnId })
+  })
+}
+
+export async function processReturnRefund(returnId: number): Promise<ReturnRequest> {
+  return apiFetch<ReturnRequest>(`${returnsApi()}${returnId}/process_refund/`, {
+    ...getSiteAdminOptions(),
+    method: 'POST'
+  })
+}
+
+export async function relistResaleByOrder(orderId: number): Promise<{ count: number; results: any[] }> {
+  return apiFetch<{ count: number; results: any[] }>(buildApiUrl('/resale/products/relist-by-order/', API_VERSIONS.BFG2), {
+    ...getSiteAdminOptions(),
+    method: 'POST',
+    body: JSON.stringify({ order_id: orderId })
+  })
+}
+
 export async function updateOrder(id: number, data: Partial<Order>): Promise<Order> {
   return apiFetch<Order>(`${bfgApi.orders()}${id}/`, {
     ...getSiteAdminOptions(),
@@ -485,6 +558,7 @@ export interface Customer {
     first_name?: string
     last_name?: string
     phone?: string
+    language?: string
   }
   user_id?: number
   workspace?: number | string

@@ -52,7 +52,8 @@
       "send": "发送",
       "pay": "支付",
       "downloadPdf": "下载PDF",
-      "retry": "重试"
+      "retry": "重试",
+      "back": "返回"
     },
     "imageViewer": {
       "close": "关闭",
@@ -270,7 +271,59 @@
       "orderStatusLabel": "订单状态",
       "paymentStatusLabel": "支付状态",
       "cancelOrder": "取消订单",
-      "createdAt": "创建时间：{date}"
+      "createdAt": "创建时间：{date}",
+      "errors": {
+        "actionFailed": "操作失败"
+      },
+      "actions": {
+        "ship": "发货",
+        "shipping": "发货中...",
+        "more": "更多操作",
+        "refund": "退款",
+        "refunding": "退款中...",
+        "return": "创建退货",
+        "relist": "重新上架",
+        "relisting": "重新上架中...",
+        "cancelOrder": "取消订单"
+      },
+      "dialogs": {
+        "cancelTitle": "取消订单",
+        "cancelReason": "原因",
+        "returnTitle": "创建退货",
+        "returnCategory": "退货原因",
+        "returnNote": "备注"
+      },
+      "restock": {
+        "restock": "重新上架",
+        "noRestock": "不重新上架",
+        "damage": "损坏/报废"
+      }
+    },
+    "shippingWizard": {
+      "title": "发货向导",
+      "subtitle": "在一个弹窗里集中处理包裹、运单和客户自提。",
+      "modes": {
+        "shipping": "货运发货",
+        "pickup": "客户自提"
+      },
+      "pickup": {
+        "title": "通知客户自提",
+        "description": "给客户发送自提通知，然后把订单标记为已发货/待自提。",
+        "subject": "消息标题",
+        "message": "消息内容",
+        "sendAndMarkReady": "发送消息并标记就绪",
+        "loadingCustomerLanguage": "正在加载客户语言设置...",
+        "statusHint": "这会给客户发送站内消息和邮件，并把订单状态更新为已发货。",
+        "defaultSubject": "订单 #{orderNumber} 可自提了",
+        "defaultMessage": "您好 {customerName}，您的订单 #{orderNumber} 已可到店自提。方便时请前来领取。",
+        "customerFallback": "客户",
+        "viewOrderAction": "查看订单"
+      },
+      "errors": {
+        "markShippedFailed": "运单已创建，但更新订单为已发货失败。",
+        "pickupNotifyFailed": "发送自提通知失败。",
+        "customerRequired": "该订单没有关联客户，无法发送自提通知。"
+      }
     },
     "editPage": {
       "errors": {

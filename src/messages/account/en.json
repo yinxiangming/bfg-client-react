@@ -193,6 +193,7 @@
     "addCard": "Add Card",
     "selectGateway": "Select Payment Gateway",
     "noGateways": "No payment gateways are configured. Please contact the administrator.",
+    "stripeMissingKey": "Stripe payment gateway is not properly configured (missing publishable key). Please contact the administrator.",
     "noGatewaySelected": "No payment gateway selected",
     "deleteConfirm": "Are you sure you want to delete this payment method?",
     "failedSave": "Failed to save payment method",

@@ -20,7 +20,7 @@ const ProductEditHeader = ({ productId, onSave, onDiscard, saving }: ProductEdit
     const isNew = productId === 'new'
     
     return (
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2, mb: 4 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                 <Typography variant='h4'>{isNew ? t('products.edit.header.title.add') : t('products.edit.header.title.edit')}</Typography>
                 <Typography variant='body2' color='text.secondary'>

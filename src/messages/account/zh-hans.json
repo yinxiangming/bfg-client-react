@@ -193,6 +193,7 @@
     "addCard": "添加卡片",
     "selectGateway": "选择支付网关",
     "noGateways": "未配置支付网关。请联系管理员。",
+    "stripeMissingKey": "Stripe 未正确配置（缺少可公开密钥）。请联系管理员。",
     "noGatewaySelected": "未选择支付网关",
     "deleteConfirm": "确定要删除此支付方式吗？",
     "failedSave": "保存支付方式失败",

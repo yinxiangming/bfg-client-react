@@ -180,7 +180,7 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
   }
 
   return (
-    <Box sx={{ p: 4 }}>
+    <>
       <CustomerEditHeader
         customer={customer}
         onDelete={handleDelete}
@@ -328,6 +328,6 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Box>
+    </>
   )
 }
