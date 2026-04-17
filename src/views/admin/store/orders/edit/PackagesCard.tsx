@@ -549,7 +549,7 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
   if (loading) {
     return (
       <Card>
-        <CardHeader title={t('orders.packages.title')} />
+        <CardHeader title={t('orders.packages.title')} sx={{ pb: 0 }} />
         <CardContent sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
           <CircularProgress />
         </CardContent>
@@ -559,8 +559,9 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
 
   return (
     <Card>
-      <CardHeader 
-        title={t('orders.packages.title')} 
+      <CardHeader
+        title={t('orders.packages.title')}
+        sx={{ pb: 0 }}
         action={
           <Button
             variant='contained'
@@ -572,7 +573,7 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
           </Button>
         }
       />
-      <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 }, display: 'flex', flexDirection: 'column', gap: 3 }}>
         {error && <Alert severity='error'>{error}</Alert>}
         
         {packages.length === 0 ? (
