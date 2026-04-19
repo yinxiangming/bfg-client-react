@@ -135,6 +135,7 @@
       "paid": "已支付",
       "processing": "处理中",
       "shipped": "已发货",
+      "readyToPickup": "待自提",
       "completed": "已完成",
       "cancelled": "已取消",
       "delivered": "已送达"
@@ -197,7 +198,7 @@
           "logistics": "物流",
           "packagesCount": "{count} 个包裹",
           "manageLogistics": "管理",
-          "addPackages": "添加包裹",
+          "addPackages": "发货",
           "createdAt": "创建时间"
         }
       },

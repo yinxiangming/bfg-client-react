@@ -110,6 +110,9 @@ const OrderEditHeader = ({
   const formatStatusLabel = (status: string) => status.charAt(0).toUpperCase() + status.slice(1)
 
   const getOrderStatusLabel = (status: string) => {
+    if (status === 'shipped' && order.fulfillment_method === 'pickup') {
+      return t('orders.status.readyToPickup')
+    }
     const key = `orders.status.${status}`
     const has = (t as any).has ? (t as any).has(key) : true
     return has ? t(key as any) : formatStatusLabel(status)

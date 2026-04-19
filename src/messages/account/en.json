@@ -508,7 +508,7 @@
     "statusOverdue": "Overdue",
     "statusDelivered": "Delivered",
     "statusOutForDelivery": "Out for Delivery",
-    "statusReadyToPickup": "Ready to Pickup",
+    "statusReadyToPickup": "Ready for Pickup",
     "statusDispatched": "Dispatched",
     "statusCancelled": "Cancelled",
     "invoiceDetails": "Invoice Details",

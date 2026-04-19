@@ -508,7 +508,7 @@
     "statusOverdue": "逾期",
     "statusDelivered": "已送达",
     "statusOutForDelivery": "配送中",
-    "statusReadyToPickup": "待取货",
+    "statusReadyToPickup": "待自提",
     "statusDispatched": "已发货",
     "statusCancelled": "已取消",
     "invoiceDetails": "发票详情",

@@ -135,6 +135,7 @@
       "paid": "Paid",
       "processing": "Processing",
       "shipped": "Shipped",
+      "readyToPickup": "Ready for Pickup",
       "completed": "Completed",
       "cancelled": "Cancelled",
       "delivered": "Delivered"
