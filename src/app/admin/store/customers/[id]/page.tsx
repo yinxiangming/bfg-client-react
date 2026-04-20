@@ -288,12 +288,15 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
       .filter(ext => getTargetSlot(ext) === slotKeyToSlotId(tab.key))
       .map(ext => {
         const Component = ext.component as React.ComponentType<any> & {
-          tabLabel?: (t: (key: string) => string) => string
+          tabLabel?: string | ((t: (key: string) => string) => string)
         }
 
         return {
           key: ext.id,
-          label: Component.tabLabel ? Component.tabLabel(t) : Component.displayName || ext.id,
+          label:
+            typeof Component.tabLabel === 'function'
+              ? Component.tabLabel(t)
+              : Component.tabLabel || Component.displayName || ext.id,
           render: () => <Component customer={customer} onUpdate={handleCustomerUpdate} />,
         }
       })
