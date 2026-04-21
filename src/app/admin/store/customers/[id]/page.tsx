@@ -2,6 +2,7 @@
 
 // React Imports
 import { use, useState, useEffect, useCallback } from 'react'
+import type React from 'react'
 import { useRouter } from 'next/navigation'
 
 // i18n Imports
@@ -34,6 +35,7 @@ import CustomerInbox from '@/views/admin/store/customers/edit/CustomerInbox'
 // Extension Hooks
 import { usePageSlots } from '@/extensions/hooks/usePageSections'
 import { renderSlot } from '@/extensions/hooks/renderSection'
+import { buildTabbedPageTabs } from '@/extensions/hooks/buildTabbedPageTabs'
 
 // API Imports
 import { getCustomer, type Customer } from '@/services/store'
@@ -179,8 +181,121 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
     )
   }
 
+  const slotKeyToSlotId = (key: string) => {
+    switch (key) {
+      case 'basicInfo':
+        return 'CustomerBasicInfo'
+      case 'wallet':
+        return 'CustomerWallet'
+      case 'segments':
+        return 'CustomerSegments'
+      case 'orders':
+        return 'CustomerOrders'
+      case 'addresses':
+        return 'CustomerAddresses'
+      case 'paymentMethods':
+        return 'CustomerPaymentMethods'
+      case 'inbox':
+        return 'CustomerInbox'
+      default:
+        return key
+    }
+  }
+
+  const tabExtensions = afterSlots.filter(ext => ext.component && (ext.targetSlot ?? ext.targetSection))
+  const panelExtensions = afterSlots.filter(ext => ext.component && !(ext.targetSlot ?? ext.targetSection))
+
+  const defaultTabs = [
+    {
+      key: 'basicInfo',
+      label: t('customers.detailPage.tabs.basicInfo'),
+      render: () =>
+        visibleSlots.includes('CustomerBasicInfo')
+          ? renderSlot('CustomerBasicInfo', visibleSlots, replacements, CustomerBasicInfo, {
+              customer,
+              onUpdate: handleCustomerUpdate,
+            })
+          : null,
+    },
+    {
+      key: 'wallet',
+      label: t('customers.detailPage.tabs.wallet'),
+      render: () =>
+        visibleSlots.includes('CustomerWallet')
+          ? renderSlot('CustomerWallet', visibleSlots, replacements, CustomerWallet, {
+              customer,
+              onUpdate: handleCustomerUpdate,
+            })
+          : null,
+    },
+    {
+      key: 'segments',
+      label: t('customers.detailPage.tabs.segments'),
+      render: () =>
+        visibleSlots.includes('CustomerSegments')
+          ? renderSlot('CustomerSegments', visibleSlots, replacements, CustomerSegments, {
+              customer,
+              onUpdate: handleCustomerUpdate,
+            })
+          : null,
+    },
+    {
+      key: 'orders',
+      label: t('customers.detailPage.tabs.orders'),
+      render: () =>
+        visibleSlots.includes('CustomerOrders')
+          ? renderSlot('CustomerOrders', visibleSlots, replacements, CustomerOrders, {
+              customerId: customer.id,
+            })
+          : null,
+    },
+    {
+      key: 'addresses',
+      label: t('customers.detailPage.tabs.addresses'),
+      render: () =>
+        visibleSlots.includes('CustomerAddresses')
+          ? renderSlot('CustomerAddresses', visibleSlots, replacements, CustomerAddresses, {
+              customerId: customer.id,
+              onUpdate: handleCustomerUpdate,
+            })
+          : null,
+    },
+    {
+      key: 'paymentMethods',
+      label: t('customers.detailPage.tabs.paymentMethods'),
+      render: () =>
+        visibleSlots.includes('CustomerPaymentMethods')
+          ? renderSlot('CustomerPaymentMethods', visibleSlots, replacements, CustomerPaymentMethods, {
+              customerId: customer.id,
+              onUpdate: handleCustomerUpdate,
+            })
+          : null,
+    },
+    {
+      key: 'inbox',
+      label: t('customers.detailPage.tabs.inbox'),
+      render: () =>
+        visibleSlots.includes('CustomerInbox')
+          ? renderSlot('CustomerInbox', visibleSlots, replacements, CustomerInbox, {
+              customerId: customer.id,
+            })
+          : null,
+    },
+  ]
+
+  const allTabs = buildTabbedPageTabs({
+    defaultTabs,
+    tabExtensions,
+    getAnchorSlotId: slotKeyToSlotId,
+    translate: t,
+    extensionProps: {
+      customer,
+      onUpdate: handleCustomerUpdate,
+    },
+  })
+
   return (
-    <Box sx={{ p: 4 }}>
+    <>
       <CustomerEditHeader
         customer={customer}
         onDelete={handleDelete}
@@ -198,83 +313,15 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
       
       <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 4, mb: 4 }}>
         <Tabs value={activeTab} onChange={handleTabChange}>
-          <Tab label={t('customers.detailPage.tabs.basicInfo')} />
-          <Tab label={t('customers.detailPage.tabs.wallet')} />
-          <Tab label={t('customers.detailPage.tabs.segments')} />
-          <Tab label={t('customers.detailPage.tabs.orders')} />
-          <Tab label={t('customers.detailPage.tabs.addresses')} />
-          <Tab label={t('customers.detailPage.tabs.paymentMethods')} />
-          <Tab label={t('customers.detailPage.tabs.inbox')} />
+          {allTabs.map(tab => (
+            <Tab key={tab.key} label={tab.label} />
+          ))}
         </Tabs>
       </Box>
 
-      <Box sx={{ mt: 4 }}>
-        {activeTab === 0 &&
-          visibleSlots.includes('CustomerBasicInfo') &&
-          renderSlot(
-            'CustomerBasicInfo',
-            visibleSlots,
-            replacements,
-            CustomerBasicInfo,
-            { customer, onUpdate: handleCustomerUpdate }
-          )}
-        {activeTab === 1 &&
-          visibleSlots.includes('CustomerWallet') &&
-          renderSlot(
-            'CustomerWallet',
-            visibleSlots,
-            replacements,
-            CustomerWallet,
-            { customer, onUpdate: handleCustomerUpdate }
-          )}
-        {activeTab === 2 &&
-          visibleSlots.includes('CustomerSegments') &&
-          renderSlot(
-            'CustomerSegments',
-            visibleSlots,
-            replacements,
-            CustomerSegments,
-            { customer, onUpdate: handleCustomerUpdate }
-          )}
-        {activeTab === 3 &&
-          visibleSlots.includes('CustomerOrders') &&
-          renderSlot(
-            'CustomerOrders',
-            visibleSlots,
-            replacements,
-            CustomerOrders,
-            { customerId: customer.id }
-          )}
-        {activeTab === 4 &&
-          visibleSlots.includes('CustomerAddresses') &&
-          renderSlot(
-            'CustomerAddresses',
-            visibleSlots,
-            replacements,
-            CustomerAddresses,
-            { customerId: customer.id, onUpdate: handleCustomerUpdate }
-          )}
-        {activeTab === 5 &&
-          visibleSlots.includes('CustomerPaymentMethods') &&
-          renderSlot(
-            'CustomerPaymentMethods',
-            visibleSlots,
-            replacements,
-            CustomerPaymentMethods,
-            { customerId: customer.id, onUpdate: handleCustomerUpdate }
-          )}
-        {activeTab === 6 &&
-          visibleSlots.includes('CustomerInbox') &&
-          renderSlot(
-            'CustomerInbox',
-            visibleSlots,
-            replacements,
-            CustomerInbox,
-            { customerId: customer.id }
-          )}
-      </Box>
+      <Box sx={{ mt: 4 }}>{allTabs[activeTab]?.render?.() ?? null}</Box>
 
-      {afterSlots.map(
+      {panelExtensions.map(
         ext =>
           ext.component && (
             <Box key={ext.id} sx={{ mt: 4 }}>
@@ -283,7 +330,6 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           )
       )}
 
-      {/* Delete Confirmation Dialog */}
       <Dialog open={deleteDialogOpen} onClose={() => setDeleteDialogOpen(false)}>
         <DialogTitle>{t('customers.detailPage.deleteDialog.title')}</DialogTitle>
         <DialogContent>
@@ -301,7 +347,6 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
         </DialogActions>
       </Dialog>
 
-      {/* Reset Password Confirmation Dialog */}
       <Dialog open={resetPasswordDialogOpen} onClose={() => setResetPasswordDialogOpen(false)}>
         <DialogTitle>{t('customers.detailPage.resetPasswordDialog.title')}</DialogTitle>
         <DialogContent>
@@ -317,7 +362,6 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
         </DialogActions>
       </Dialog>
 
-      {/* Snackbar for notifications */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={4000}
@@ -328,6 +372,6 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Box>
+    </>
   )
 }

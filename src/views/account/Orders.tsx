@@ -43,6 +43,7 @@ interface Order {
   id: number
   order_number: string
   status: string
+  fulfillment_method?: 'shipping' | 'pickup'
   payment_status?: string
   total?: string
   amounts?: {
@@ -159,13 +160,17 @@ const Orders = () => {
     }
   }
 
-  const getStatusLabel = (status: string) => {
+  const getStatusLabel = (status: string, fulfillmentMethod?: string) => {
     const key = status?.toLowerCase()
+    if (key === 'shipped' && fulfillmentMethod === 'pickup') {
+      return t('statusReadyToPickup')
+    }
     const map: Record<string, string> = {
       pending: 'statusPending',
       processing: 'statusProcessing',
       completed: 'statusCompleted',
-      cancelled: 'statusCancelled'
+      cancelled: 'statusCancelled',
+      shipped: 'statusDispatched'
     }
     return key && map[key] ? t(map[key]) : (status || t('unknown'))
   }
@@ -340,7 +345,7 @@ const Orders = () => {
                         </TableCell>
                         <TableCell sx={{ py: 1.75 }}>
                           <Chip
-                            label={getStatusLabel(order.status ?? '')}
+                            label={getStatusLabel(order.status ?? '', order.fulfillment_method)}
                             color={getStatusColor(order.status)}
                             size='small'
                             sx={{ px: 1.25, fontWeight: 600 }}

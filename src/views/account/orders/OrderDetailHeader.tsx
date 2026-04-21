@@ -72,12 +72,13 @@ const OrderDetailHeader = ({ order, onCancel, onRefresh }: OrderDetailHeaderProp
   const orderNumber = order.order_number || `ORD-${order.id}`
   const orderStatusRaw = order.status || 'pending'
   const orderStatus = orderStatusRaw.toLowerCase()
+  const isPickupReady = orderStatus === 'shipped' && order.fulfillment_method === 'pickup'
   const paymentStatusValue = order.payment_status?.toLowerCase() || 'pending'
   const createdDate = order.created_at ? new Date(order.created_at) : new Date()
 
   // Get status color - check both with and without spaces
-  const statusColorKey = orderStatusRaw.toLowerCase()
-  const statusColorKeyNoSpaces = orderStatusRaw.toLowerCase().replace(/\s+/g, '')
+  const statusColorKey = isPickupReady ? 'ready to pickup' : orderStatusRaw.toLowerCase()
+  const statusColorKeyNoSpaces = isPickupReady ? 'readytopickup' : orderStatusRaw.toLowerCase().replace(/\s+/g, '')
   const statusColor = statusChipColor[statusColorKey]?.color || statusChipColor[statusColorKeyNoSpaces]?.color || 'default'
   const paymentColor = paymentStatusColors[paymentStatusValue] || 'warning'
 
@@ -112,6 +113,9 @@ const OrderDetailHeader = ({ order, onCancel, onRefresh }: OrderDetailHeaderProp
   // Get translated order status
   const getOrderStatusText = (status: string) => {
     if (!status) return t('statusPending')
+    if (status.toLowerCase() === 'shipped' && order.fulfillment_method === 'pickup') {
+      return t('statusReadyToPickup')
+    }
     const normalizedStatus = status.toLowerCase().replace(/\s+/g, '')
     const statusMap: { [key: string]: string } = {
       'delivered': 'statusDelivered',

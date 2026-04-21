@@ -86,7 +86,7 @@ export default function NewCustomerPage() {
   }
 
   return (
-    <Box sx={{ p: 4 }}>
+    <>
       <Grid container spacing={4}>
         <Grid size={{ xs: 12 }}>
           <CustomerEditHeader
@@ -172,6 +172,6 @@ export default function NewCustomerPage() {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Box>
+    </>
   )
 }

@@ -52,7 +52,8 @@
       "send": "发送",
       "pay": "支付",
       "downloadPdf": "下载PDF",
-      "retry": "重试"
+      "retry": "重试",
+      "back": "返回"
     },
     "imageViewer": {
       "close": "关闭",
@@ -134,6 +135,7 @@
       "paid": "已支付",
       "processing": "处理中",
       "shipped": "已发货",
+      "readyToPickup": "待自提",
       "completed": "已完成",
       "cancelled": "已取消",
       "delivered": "已送达"
@@ -160,6 +162,11 @@
       "productSearchPlaceholder": "按名称、条形码或 SKU 搜索",
       "addProduct": "添加",
       "customer": "客户",
+      "fulfillmentMethod": "履约方式",
+      "fulfillment": {
+        "shipping": "配送",
+        "pickup": "自取"
+      },
       "customerSearchPlaceholder": "按邮箱或电话搜索",
       "createNewCustomer": "新建客户",
       "selectExistingCustomer": "选择已有客户",
@@ -191,7 +198,7 @@
           "logistics": "物流",
           "packagesCount": "{count} 个包裹",
           "manageLogistics": "管理",
-          "addPackages": "添加包裹",
+          "addPackages": "发货",
           "createdAt": "创建时间"
         }
       },
@@ -265,7 +272,59 @@
       "orderStatusLabel": "订单状态",
       "paymentStatusLabel": "支付状态",
       "cancelOrder": "取消订单",
-      "createdAt": "创建时间：{date}"
+      "createdAt": "创建时间：{date}",
+      "errors": {
+        "actionFailed": "操作失败"
+      },
+      "actions": {
+        "ship": "发货",
+        "shipping": "发货中...",
+        "more": "更多操作",
+        "refund": "退款",
+        "refunding": "退款中...",
+        "return": "创建退货",
+        "relist": "重新上架",
+        "relisting": "重新上架中...",
+        "cancelOrder": "取消订单"
+      },
+      "dialogs": {
+        "cancelTitle": "取消订单",
+        "cancelReason": "原因",
+        "returnTitle": "创建退货",
+        "returnCategory": "退货原因",
+        "returnNote": "备注"
+      },
+      "restock": {
+        "restock": "重新上架",
+        "noRestock": "不重新上架",
+        "damage": "损坏/报废"
+      }
+    },
+    "shippingWizard": {
+      "title": "发货向导",
+      "subtitle": "在一个弹窗里集中处理包裹、运单和客户自提。",
+      "modes": {
+        "shipping": "货运发货",
+        "pickup": "客户自提"
+      },
+      "pickup": {
+        "title": "通知客户自提",
+        "description": "给客户发送自提通知，然后把订单标记为已发货/待自提。",
+        "subject": "消息标题",
+        "message": "消息内容",
+        "sendAndMarkReady": "发送消息并标记就绪",
+        "loadingCustomerLanguage": "正在加载客户语言设置...",
+        "statusHint": "这会给客户发送站内消息和邮件，并把订单状态更新为已发货。",
+        "defaultSubject": "订单 #{orderNumber} 可自提了",
+        "defaultMessage": "您好 {customerName}，您的订单 #{orderNumber} 已可到店自提。方便时请前来领取。",
+        "customerFallback": "客户",
+        "viewOrderAction": "查看订单"
+      },
+      "errors": {
+        "markShippedFailed": "运单已创建，但更新订单为已发货失败。",
+        "pickupNotifyFailed": "发送自提通知失败。",
+        "customerRequired": "该订单没有关联客户，无法发送自提通知。"
+      }
     },
     "editPage": {
       "errors": {
@@ -2849,6 +2908,46 @@
         "errors": {
           "deleteFailed": "删除失败",
           "saveFailed": "保存失败"
+        },
+        "messages": {
+          "created": "时段已创建。",
+          "updated": "时段已更新。",
+          "deleted": "时段已删除。"
+        },
+        "batch": {
+          "action": "批量生成",
+          "title": "批量生成时段",
+          "description": "按日期范围和星期几批量创建多个时段。",
+          "generate": "生成",
+          "generating": "生成中...",
+          "cancel": "取消",
+          "fields": {
+            "startDate": "开始日期",
+            "endDate": "结束日期",
+            "startTime": "开始时间",
+            "endTime": "结束时间",
+            "maxBookings": "最大预约数",
+            "weekdays": "星期"
+          },
+          "weekdays": {
+            "sun": "周日",
+            "mon": "周一",
+            "tue": "周二",
+            "wed": "周三",
+            "thu": "周四",
+            "fri": "周五",
+            "sat": "周六"
+          },
+          "errors": {
+            "missingDateRange": "请选择开始日期和结束日期。",
+            "missingWeekdays": "请至少选择一个星期。",
+            "noMatchingDates": "所选范围内没有匹配的日期。",
+            "allExist": "匹配的时段都已存在。",
+            "generateFailed": "批量生成时段失败。"
+          },
+          "messages": {
+            "generated": "已生成 {count} 个时段。"
+          }
         }
       }
     },

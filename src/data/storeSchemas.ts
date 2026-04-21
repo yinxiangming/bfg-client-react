@@ -321,7 +321,7 @@ export const categoriesSchema: SchemaResponse = {
         label: 'Parent Category', 
         type: 'select',
         optionsSource: 'api',
-        optionsApi: '/api/v1/categories/?language=en',
+        optionsApi: '/api/v1/shop/categories/?language=en',
         optionsValueField: 'id',
         optionsLabelField: 'name'
       },

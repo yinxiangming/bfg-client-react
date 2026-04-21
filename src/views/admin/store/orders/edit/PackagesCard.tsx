@@ -100,7 +100,8 @@ type OrderDetail = {
 
 type PackagesCardProps = {
   order: OrderDetail
-  onOrderUpdate?: () => void
+  onOrderUpdate?: () => void | Promise<void>
+  onShipmentCreated?: () => void | Promise<void>
 }
 
 // Cookie helper functions
@@ -133,7 +134,7 @@ const setSelectedWarehouseToCookie = (warehouseId: number) => {
   document.cookie = `${WAREHOUSE_COOKIE_KEY}=${warehouseId};expires=${expires.toUTCString()};path=/`
 }
 
-const PackagesCard = ({ order, onOrderUpdate }: PackagesCardProps) => {
+const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardProps) => {
   const t = useTranslations('admin')
   // Get base data from context
   const { carriers, warehouses } = useBaseData()
@@ -361,7 +362,7 @@ const PackagesCard = ({ order, onOrderUpdate }: PackagesCardProps) => {
       await refreshPackages()
       // Delay order update to avoid triggering multiple component refreshes
       setTimeout(() => {
-        onOrderUpdate?.()
+        void onOrderUpdate?.()
       }, 100)
     } catch (err) {
       setSnackbar({ open: true, message: t('orders.packages.errors.deletePackage'), severity: 'error' })
@@ -485,9 +486,10 @@ const PackagesCard = ({ order, onOrderUpdate }: PackagesCardProps) => {
         // Refresh only consignments
         const consignmentsData = await getOrderConsignments(order.id)
         setConsignments(consignmentsData)
+        await onShipmentCreated?.()
         // Delay order update to avoid triggering multiple component refreshes
         setTimeout(() => {
-          onOrderUpdate?.()
+          void onOrderUpdate?.()
         }, 100)
       } else {
         setSnackbar({ open: true, message: result.error || t('orders.packages.errors.createShipment'), severity: 'error' })
@@ -526,7 +528,7 @@ const PackagesCard = ({ order, onOrderUpdate }: PackagesCardProps) => {
       setConsignments(consignmentsData)
       // Delay order update to avoid triggering multiple component refreshes
       setTimeout(() => {
-        onOrderUpdate?.()
+        void onOrderUpdate?.()
       }, 100)
     } catch (err: any) {
       setSnackbar({ open: true, message: err.message || t('orders.packages.errors.deleteConsignment'), severity: 'error' })
@@ -547,7 +549,7 @@ const PackagesCard = ({ order, onOrderUpdate }: PackagesCardProps) => {
   if (loading) {
     return (
       <Card>
-        <CardHeader title={t('orders.packages.title')} />
+        <CardHeader title={t('orders.packages.title')} sx={{ pb: 0 }} />
         <CardContent sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
           <CircularProgress />
         </CardContent>
@@ -557,8 +559,9 @@ const PackagesCard = ({ order, onOrderUpdate }: PackagesCardProps) => {
 
   return (
     <Card>
-      <CardHeader 
-        title={t('orders.packages.title')} 
+      <CardHeader
+        title={t('orders.packages.title')}
+        sx={{ pb: 0 }}
         action={
           <Button
             variant='contained'
@@ -570,7 +573,7 @@ const PackagesCard = ({ order, onOrderUpdate }: PackagesCardProps) => {
           </Button>
         }
       />
-      <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 }, display: 'flex', flexDirection: 'column', gap: 3 }}>
         {error && <Alert severity='error'>{error}</Alert>}
         
         {packages.length === 0 ? (

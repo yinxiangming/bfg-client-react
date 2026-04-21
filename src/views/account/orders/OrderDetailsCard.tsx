@@ -32,6 +32,8 @@ const OrderDetailsCard = ({ order }: OrderDetailsCardProps) => {
   const discount = amounts.discount || order.discount || 0
   const total = amounts.total || order.total || 0
   const freightService = order.freight_service
+  const fulfillmentMethod = order.fulfillment_method || 'shipping'
+  const isPickup = fulfillmentMethod === 'pickup'
 
   return (
     <Card variant='outlined' sx={{ boxShadow: 'none', borderRadius: 2 }}>
@@ -112,27 +114,25 @@ const OrderDetailsCard = ({ order }: OrderDetailsCardProps) => {
       <CardContent sx={{ px: 3, py: 3 }}>
         <Box sx={{ borderTop: 1, borderColor: 'divider', pt: 2 }}>
           <Grid container spacing={3}>
-            {freightService && (
-              <Grid size={{ xs: 12, md: 6 }}>
-                <Typography variant='body2' color='text.secondary' sx={{ mb: 1, fontWeight: 500 }}>
-                  {t('shippingMethod')}
+            <Grid size={{ xs: 12, md: 6 }}>
+              <Typography variant='body2' color='text.secondary' sx={{ mb: 1, fontWeight: 500 }}>
+                {t('shippingMethod')}
+              </Typography>
+              <Typography variant='body1' color='text.primary' sx={{ mb: 0.5 }}>
+                {isPickup ? t('pickup') : freightService?.name || t('shipping')}
+              </Typography>
+              {!isPickup && freightService?.carrier_name && (
+                <Typography variant='caption' color='text.secondary' sx={{ display: 'block' }}>
+                  {t('carrier')}: {freightService.carrier_name}
                 </Typography>
-                <Typography variant='body1' color='text.primary' sx={{ mb: 0.5 }}>
-                  {freightService.name}
+              )}
+              {!isPickup && freightService?.estimated_days_min && freightService?.estimated_days_max && (
+                <Typography variant='caption' color='text.secondary' sx={{ display: 'block', mt: 0.5 }}>
+                  {t('estimatedDelivery', { min: freightService.estimated_days_min, max: freightService.estimated_days_max })}
                 </Typography>
-                {freightService.carrier_name && (
-                  <Typography variant='caption' color='text.secondary' sx={{ display: 'block' }}>
-                    {t('carrier')}: {freightService.carrier_name}
-                  </Typography>
-                )}
-                {freightService.estimated_days_min && freightService.estimated_days_max && (
-                  <Typography variant='caption' color='text.secondary' sx={{ display: 'block', mt: 0.5 }}>
-                    {t('estimatedDelivery', { min: freightService.estimated_days_min, max: freightService.estimated_days_max })}
-                  </Typography>
-                )}
-              </Grid>
-            )}
-            <Grid size={{ xs: 12, md: freightService ? 6 : 12 }}>
+              )}
+            </Grid>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
                 <Box sx={{ minWidth: 200 }}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1.5 }}>

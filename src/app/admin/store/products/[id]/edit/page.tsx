@@ -185,7 +185,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <Box sx={{ p: 4 }}>
+    <>
       <Grid container spacing={4}>
         <Grid size={{ xs: 12 }}>
           <ProductEditHeader
@@ -316,7 +316,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Box>
+    </>
   )
 }
 

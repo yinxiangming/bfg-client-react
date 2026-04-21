@@ -351,8 +351,9 @@ const InvoiceCard = ({ order, onInvoiceUpdate }: InvoiceCardProps) => {
         onPaymentSuccess={handlePaymentSuccess}
       />
       <Card>
-        <CardHeader 
+        <CardHeader
           title={t('orders.invoice.title', { count: invoices.length })}
+          sx={{ pb: 0 }}
           action={
             <Button
               variant='contained'
@@ -370,7 +371,7 @@ const InvoiceCard = ({ order, onInvoiceUpdate }: InvoiceCardProps) => {
             </Button>
           }
         />
-        <CardContent>
+        <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 } }}>
           {error && (
             <Alert severity='error' sx={{ mb: 2 }} onClose={() => setError(null)}>
               {error}

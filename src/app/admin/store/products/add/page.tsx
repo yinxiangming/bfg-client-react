@@ -139,7 +139,7 @@ export default function ProductAddPage() {
 
   return (
     <>
-      <Grid container spacing={6}>
+      <Grid container spacing={4}>
         <Grid size={{ xs: 12 }}>
           <ProductEditHeader
             productId="new"
@@ -149,7 +149,7 @@ export default function ProductAddPage() {
           />
         </Grid>
         <Grid size={{ xs: 12, md: 8 }}>
-          <Grid container spacing={6}>
+          <Grid container spacing={4}>
             {beforeSlots.map(
               ext =>
                 ext.component && (
@@ -209,7 +209,7 @@ export default function ProductAddPage() {
           </Grid>
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
-          <Grid container spacing={6}>
+          <Grid container spacing={4}>
             {visibleSlots.includes('ProductPricing') && (
               <Grid size={{ xs: 12 }}>
                 {renderSlot(

@@ -72,8 +72,8 @@ const PaymentCard = ({ payments = [] }: PaymentCardProps) => {
   if (payments.length === 0) {
     return (
       <Card>
-        <CardHeader title={t('payments.title', { count: payments.length })} />
-        <CardContent sx={{ py: 3 }}>
+        <CardHeader title={t('payments.title', { count: payments.length })} sx={{ pb: 0 }} />
+        <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 } }}>
           <Typography variant='body2' color='text.secondary' align='center'>
             {t('payments.empty')}
           </Typography>
@@ -84,8 +84,8 @@ const PaymentCard = ({ payments = [] }: PaymentCardProps) => {
 
   return (
     <Card>
-      <CardHeader title={t('payments.title', { count: payments.length })} />
-      <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <CardHeader title={t('payments.title', { count: payments.length })} sx={{ pb: 0 }} />
+      <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 }, display: 'flex', flexDirection: 'column', gap: 3 }}>
         {payments.map((payment, index) => (
           <Box key={payment.id}>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>

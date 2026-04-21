@@ -70,8 +70,8 @@ const DeliveryCard = ({ order }: DeliveryCardProps) => {
 
   return (
     <Card>
-      <CardHeader title={t('orders.delivery.title')} />
-      <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+      <CardHeader title={t('orders.delivery.title')} sx={{ pb: 0 }} />
+      <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 }, display: 'flex', flexDirection: 'column', gap: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Avatar sx={{ width: 40, height: 40, bgcolor: `${deliveryStatus.color}.main` }}>

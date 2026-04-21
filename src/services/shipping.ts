@@ -308,7 +308,7 @@ export type LabelResult = {
 }
 
 export async function getCarriers(): Promise<Carrier[]> {
-  const url = buildApiUrl('/carriers/', API_VERSIONS.BFG2)
+  const url = buildApiUrl('/carriers/', API_VERSIONS.BFG2, 'delivery')
   const response = await apiFetch<Carrier[] | { results?: Carrier[]; data?: Carrier[] }>(url)
   if (Array.isArray(response)) {
     return response
@@ -317,7 +317,7 @@ export async function getCarriers(): Promise<Carrier[]> {
 }
 
 export async function getShippingOptions(orderId: number, carrierId: number, pickupAddress?: PickupAddress): Promise<ShippingOptionsResult> {
-  const url = buildApiUrl(`/carriers/${carrierId}/get_shipping_options/`, API_VERSIONS.BFG2)
+  const url = buildApiUrl(`/carriers/${carrierId}/get_shipping_options/`, API_VERSIONS.BFG2, 'delivery')
   const payload: ShippingOptionsParams = { order_id: orderId }
   if (pickupAddress) {
     payload.pickup_address = pickupAddress
@@ -335,7 +335,7 @@ export async function shipOrder(
   serviceName?: string,
   price?: string
 ): Promise<ShipOrderResult> {
-  const url = buildApiUrl(`/carriers/${carrierId}/ship_order/`, API_VERSIONS.BFG2)
+  const url = buildApiUrl(`/carriers/${carrierId}/ship_order/`, API_VERSIONS.BFG2, 'delivery')
   return apiFetch<ShipOrderResult>(url, {
     method: 'POST',
     body: JSON.stringify({
@@ -348,7 +348,7 @@ export async function shipOrder(
 }
 
 export async function getOrderConsignments(orderId: number): Promise<ConsignmentListItem[]> {
-  const url = buildApiUrl(`/consignments/?order=${orderId}`, API_VERSIONS.BFG2)
+  const url = buildApiUrl(`/consignments/?order=${orderId}`, API_VERSIONS.BFG2, 'delivery')
   const response = await apiFetch<ConsignmentListItem[] | { results?: ConsignmentListItem[]; data?: ConsignmentListItem[] }>(url)
   if (Array.isArray(response)) {
     return response
@@ -357,14 +357,14 @@ export async function getOrderConsignments(orderId: number): Promise<Consignment
 }
 
 export async function getConsignmentLabel(consignmentNumber: string): Promise<LabelResult> {
-  const url = buildApiUrl(`/consignments/${consignmentNumber}/generate_label/`, API_VERSIONS.BFG2)
+  const url = buildApiUrl(`/consignments/${consignmentNumber}/generate_label/`, API_VERSIONS.BFG2, 'delivery')
   return apiFetch<LabelResult>(url, {
     method: 'POST'
   })
 }
 
 export async function deleteConsignment(consignmentId: number): Promise<void> {
-  const url = buildApiUrl(`/consignments/by-id/${consignmentId}/`, API_VERSIONS.BFG2)
+  const url = buildApiUrl(`/consignments/by-id/${consignmentId}/`, API_VERSIONS.BFG2, 'delivery')
   await apiFetch<void>(url, {
     method: 'DELETE'
   })
@@ -391,7 +391,7 @@ export type Warehouse = {
 }
 
 export async function getWarehouses(): Promise<Warehouse[]> {
-  const url = buildApiUrl('/warehouses/', API_VERSIONS.BFG2)
+  const url = buildApiUrl('/warehouses/', API_VERSIONS.BFG2, 'delivery')
   const response = await apiFetch<Warehouse[] | { results?: Warehouse[]; data?: Warehouse[] }>(url)
   if (Array.isArray(response)) {
     return response

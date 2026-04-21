@@ -114,8 +114,8 @@ const OrderTimeline = ({ order }: OrderTimelineProps) => {
 
   return (
     <Card>
-      <CardHeader title={t('orders.timeline.title')} />
-      <CardContent sx={{ pt: 2 }}>
+      <CardHeader title={t('orders.timeline.title')} sx={{ pb: 0 }} />
+      <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 } }}>
         <Timeline 
           sx={{ 
             p: 0, 

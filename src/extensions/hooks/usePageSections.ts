@@ -21,6 +21,10 @@ export const DEFAULT_SLOTS: Record<string, string[]> = {
     'CustomerBasicInfo', 'CustomerWallet', 'CustomerSegments', 'CustomerOrders',
     'CustomerAddresses', 'CustomerPaymentMethods', 'CustomerInbox'
   ],
+  'admin/settings/delivery/freight-services/edit': ['FreightServiceInfo', 'FreightServiceConfig'],
+  'admin/settings/web/page-edit-dialog': ['PageEditBasic', 'PageEditBlocks'],
+  'admin/settings/web/newsletter-tab': ['NewsletterSubscribers', 'NewsletterSends', 'NewsletterSendLogs', 'NewsletterTemplates'],
+  'admin/support/tickets/detail-dialog': ['SupportTicketBasic', 'SupportTicketReplies', 'SupportTicketAssignments'],
   'admin/store/categories/edit': ['CategoryInfo'],
   'admin/store/categories/new': ['CategoryInfo'],
   // Admin - Settings
