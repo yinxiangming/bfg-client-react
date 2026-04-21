@@ -26,7 +26,11 @@ import DeleteOutline from '@mui/icons-material/DeleteOutline'
 import Add from '@mui/icons-material/Add'
 
 import SchemaForm from '@/components/schema/SchemaForm'
-import type { FormSchema, FormField } from '@/types/schema'
+import type { FormField, FormSchema } from '@/types/schema'
+
+import { usePageSlots } from '@/extensions/hooks/usePageSections'
+import { buildTabbedPageTabs, splitTabbedPageExtensions } from '@/extensions/hooks/buildTabbedPageTabs'
+
 import { bfgApi } from '@/utils/api'
 import { useApiData } from '@/hooks/useApiData'
 import {
@@ -85,8 +89,12 @@ function templateToFormSchema(template: FreightTemplate, locale: string): FormSc
 /** Infer template id from existing config for edit prefill; returns null if unknown. */
 function inferTemplateFromConfig(config: Record<string, unknown> | undefined): string | null {
   if (!config || typeof config !== 'object') return null
+  const storedId = config.template_id
+  if (typeof storedId === 'string' && storedId.trim()) {
+    return storedId.trim()
+  }
   const mode = config.mode as string
-  const rules = (config.rules || {}) as Record<string, unknown>
+  const rules = (config.rules && typeof config.rules === 'object' ? config.rules : {}) as Record<string, unknown>
   const pricingRules = (config.pricing_rules || []) as unknown[]
   if (mode === 'linear') {
     if (rules.fixed_price != null) return 'flat_rate'

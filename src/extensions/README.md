@@ -111,6 +111,49 @@ const { visibleSlots, beforeSlots, afterSlots, replacements } = usePageSlots('ad
 renderSlot('ProductInfo', visibleSlots, replacements, ProductInfo, {})
 ```
 
+### Tabbed Admin Pages Pattern
+
+For admin pages that render a local `Tabs` UI (for example customer detail, freight-service edit, settings dialogs), keep the core page generic and let extensions inject extra tabs by targeting an existing slot with `position: 'after'`.
+
+Recommended pattern in the page component:
+
+```typescript
+const { visibleSlots, afterSlots, replacements } = usePageSlots('admin/store/customers/detail')
+
+const tabExtensions = afterSlots.filter(ext => ext.component && (ext.targetSlot ?? ext.targetSection))
+const panelExtensions = afterSlots.filter(ext => ext.component && !(ext.targetSlot ?? ext.targetSection))
+
+const allTabs = buildTabbedPageTabs({
+  defaultTabs,
+  tabExtensions,
+  getAnchorSlotId: slotKeyToSlotId,
+  translate: t,
+  extensionProps: { customer, onUpdate: handleCustomerUpdate }
+})
+```
+
+Plugin side:
+
+```typescript
+sections: [{
+  id: 'resale-customer-products-tab',
+  page: 'admin/store/customers/detail',
+  position: 'after',
+  targetSlot: 'CustomerInbox',
+  component: CustomerResaleProductsTab,
+}]
+```
+
+Optional convention for plugin tab labels:
+
+```typescript
+MyTabComponent.tabLabel = 'My Tab'
+// or
+MyTabComponent.tabLabel = (t) => t('myPlugin.tabs.myTab')
+```
+
+This keeps `src/client` unaware of plugin namespaces like `resale`, while still allowing each extension to own its own label/i18n.
+
 ### 5. Data Hooks
 
 ```typescript
