@@ -5,7 +5,7 @@
  */
 
 import { refreshTokenIfNeeded } from './tokenRefresh'
-import { getApiBaseUrl } from './api'
+import { getApiBaseUrl, getWorkspaceId } from './api'
 import { getWorkspaceToken } from './authTokens'
 import { getApiLanguageHeaders } from '@/i18n/http'
 
@@ -67,6 +67,8 @@ class MeApiClient {
     }
     const requestHost = typeof window !== 'undefined' ? window.location.host : undefined
     if (requestHost) headers['X-Forwarded-Host'] = requestHost
+    const workspaceId = typeof window !== 'undefined' ? getWorkspaceId() : null
+    if (workspaceId) headers['X-Workspace-ID'] = workspaceId
 
     // Only set Content-Type for non-FormData requests
     // For FormData, browser will automatically set Content-Type with boundary
@@ -182,15 +184,9 @@ class MeApiClient {
 
       const hasToken = typeof window !== 'undefined' && getWorkspaceToken()
 
-      console.error('API Request failed:', {
-        url,
-        method: options.method || 'GET',
-        status: response.status,
-        statusText: response.statusText,
-        error: errorDetail,
-        errorData: errorData,
-        hasToken: !!hasToken
-      })
+      console.error(
+        `[meApi] ${options.method || 'GET'} ${url} → ${response.status} ${response.statusText || ''} | ${errorDetail} | hasToken=${!!hasToken} | body=${JSON.stringify(errorData)}`
+      )
       throw error
     }
 
