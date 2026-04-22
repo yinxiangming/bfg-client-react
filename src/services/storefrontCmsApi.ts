@@ -8,7 +8,7 @@ export async function fetchRenderedCmsPage(
   options?: { revalidate?: number; cache?: RequestCache }
 ): Promise<any | null> {
   const langs = getCmsPageFetchLanguages(locale)
-  const headerOpts = requestHost ? { requestHost, storefrontScope: true as const } : { storefrontScope: true as const }
+  const headerOpts = requestHost ? { requestHost } : {}
   const apiUrl = getApiBaseUrl()
 
   for (const lang of langs) {
