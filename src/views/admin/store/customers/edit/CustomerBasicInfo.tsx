@@ -9,6 +9,7 @@ import { useTranslations } from 'next-intl'
 // MUI Imports
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
+import CardHeader from '@mui/material/CardHeader'
 import Typography from '@mui/material/Typography'
 import Grid from '@mui/material/Grid'
 import TextField from '@mui/material/TextField'
@@ -166,10 +167,8 @@ const CustomerBasicInfo = ({ customer, onUpdate }: CustomerBasicInfoProps) => {
       </Grid>
       <Grid size={{ xs: 12, md: 4 }}>
         <Card>
-          <CardContent>
-            <Typography variant='h6' sx={{ mb: 4 }}>
-              {t('customers.basicInfo.sidebar.title')}
-            </Typography>
+          <CardHeader title={t('customers.basicInfo.sidebar.title')} sx={{ pb: 0 }} />
+          <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 } }}>
             <Grid container spacing={4}>
               <Grid size={{ xs: 12 }}>
                 <TextField

@@ -52,9 +52,9 @@ export default async function StorefrontLayoutWrapper({ children }: { children: 
   const hostDomain = (requestHost ?? '').split(':')[0]
   const workspaceDomainRaw = (config?.workspace_domain ?? '').trim()
   const isLocal = isLocalStorefrontHost(hostDomain)
-  // Non-local hosts: only block when API reports a primary domain and it disagrees with the browser host
-  // (after normalizing case / www). Empty workspace_domain no longer forces /unknown — backend already
-  // resolved the workspace via X-Forwarded-Host / Site.domain.
+  // Non-local hosts: only block when API reports a canonical storefront host and it disagrees with the browser host
+  // (after normalizing case / www). Empty workspace_domain does not force /unknown — backend resolved workspace
+  // via hostname / X-Forwarded-Host on WorkspaceDomain (same as account/admin).
   const hostNorm = normalizeStorefrontHostname(hostDomain)
   const wsNorm = workspaceDomainRaw ? normalizeStorefrontHostname(workspaceDomainRaw) : ''
   const domainMismatch = !isLocal && wsNorm !== '' && hostNorm !== wsNorm

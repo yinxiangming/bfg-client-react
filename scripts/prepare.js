@@ -4,7 +4,8 @@
  * Run all pre-build tasks: plugin loaders, plugin routes, theme registry.
  * Usage: node scripts/prepare.js
  *
- * Plugin routes: each plugin may ship `plugins/<id>/app/<segment>/...` (e.g. admin, account).
+ * Plugin routes: each plugin may ship `plugins/<id>/app/<segment>/...` (e.g. admin, account, storefront).
+ * Storefront segment is copied under `app/(storefront)/plugins/<id>/...` so routes use the storefront layout.
  * See syncPluginRoutes() for how that maps into `src/app/`.
  */
 
@@ -142,12 +143,23 @@ function syncPluginRoutes() {
           if (!child.isDirectory() || child.name.startsWith('.')) continue
           const name = child.name
           const srcPath = path.join(segmentDir, name)
-          // Folder name === plugin id → isolate under app/<segment>/plugins/<id>/ (rewritten in next.config).
-          // Otherwise merge into app/<segment>/<name>/ (shared routes, e.g. settings).
-          const destPath =
-            name === plugin
-              ? path.join(APP_DIR, segment, 'plugins', plugin)
-              : path.join(APP_DIR, segment, name)
+          // Storefront lives in the `(storefront)` route group (not a literal `storefront` URL segment).
+          // Always nest under app/(storefront)/plugins/<id>/ so pages get the storefront layout; mirrors
+          // admin/account using .../plugins/<id>/ in the extension tree.
+          let destPath
+          if (segment === 'storefront') {
+            destPath =
+              name === plugin
+                ? path.join(APP_DIR, '(storefront)', 'plugins', plugin)
+                : path.join(APP_DIR, '(storefront)', 'plugins', plugin, name)
+          } else {
+            // Folder name === plugin id → isolate under app/<segment>/plugins/<id>/ (rewritten in next.config).
+            // Otherwise merge into app/<segment>/<name>/ (shared routes, e.g. settings).
+            destPath =
+              name === plugin
+                ? path.join(APP_DIR, segment, 'plugins', plugin)
+                : path.join(APP_DIR, segment, name)
+          }
           copyRecursive(srcPath, destPath, syncedFiles)
         }
       }

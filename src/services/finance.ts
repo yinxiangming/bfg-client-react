@@ -485,7 +485,7 @@ export async function sendInvoice(id: number): Promise<{ status?: string; messag
 
 export async function downloadInvoice(id: number): Promise<Blob> {
   const API_BASE_URL = getApiBaseUrl()
-  const url = `${API_BASE_URL}/api/v1/invoices/${id}/download_pdf/`
+  const url = `${API_BASE_URL}/api/v1/finance/invoices/${id}/download_pdf/`
 
   const response = await apiFetch<Response>(url, {
     ...getSiteAdminOptions(),

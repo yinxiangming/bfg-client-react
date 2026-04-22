@@ -15,6 +15,9 @@ import IconButton from '@mui/material/IconButton'
 import Autocomplete from '@mui/material/Autocomplete'
 import CircularProgress from '@mui/material/CircularProgress'
 import Alert from '@mui/material/Alert'
+import Radio from '@mui/material/Radio'
+import RadioGroup from '@mui/material/RadioGroup'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -66,6 +69,7 @@ export default function CreateOrderModal({ open, onClose, onSuccess }: CreateOrd
   const [newCustomerPhone, setNewCustomerPhone] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [fulfillmentMethod, setFulfillmentMethod] = useState<'shipping' | 'pickup'>('shipping')
 
   const fetchProducts = useCallback(async (q: string) => {
     if (!q.trim()) {
@@ -204,13 +208,16 @@ export default function CreateOrderModal({ open, onClose, onSuccess }: CreateOrd
                 ? `${selectedCustomer.user.first_name} ${selectedCustomer.user.last_name}`.trim()
                 : '') || selectedCustomer?.user_email || selectedCustomer?.user?.email || '—'
           }
-      const shippingAddressId = await ensureShippingAddress(customerId, contact)
+      const shippingAddressId = fulfillmentMethod === 'shipping'
+        ? await ensureShippingAddress(customerId, contact)
+        : null
       const stores = await getStores()
       const storeId = stores.length > 0 ? stores[0].id : 1
 
       const payload: CreateOrderPayload = {
         customer_id: customerId,
         store_id: storeId,
+        fulfillment_method: fulfillmentMethod,
         shipping_address_id: shippingAddressId
       }
       const order = await createOrder(payload)
@@ -241,6 +248,7 @@ export default function CreateOrderModal({ open, onClose, onSuccess }: CreateOrd
       setNewCustomerName('')
       setNewCustomerEmail('')
       setNewCustomerPhone('')
+      setFulfillmentMethod('shipping')
       setError(null)
       onClose()
     }
@@ -357,6 +365,19 @@ export default function CreateOrderModal({ open, onClose, onSuccess }: CreateOrd
             </TableBody>
           </Table>
         )}
+
+        <Typography variant='subtitle2' color='text.secondary' sx={{ mt: 3, mb: 1 }}>
+          {t('orders.createOrderModal.fulfillmentMethod')}
+        </Typography>
+        <RadioGroup
+          row
+          value={fulfillmentMethod}
+          onChange={e => setFulfillmentMethod(e.target.value as 'shipping' | 'pickup')}
+          sx={{ mb: 2 }}
+        >
+          <FormControlLabel value='shipping' control={<Radio />} label={t('orders.createOrderModal.fulfillment.shipping')} />
+          <FormControlLabel value='pickup' control={<Radio />} label={t('orders.createOrderModal.fulfillment.pickup')} />
+        </RadioGroup>
 
         <Typography variant='subtitle2' color='text.secondary' sx={{ mt: 3, mb: 1 }}>
           {t('orders.createOrderModal.customer')}

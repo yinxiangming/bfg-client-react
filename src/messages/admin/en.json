@@ -52,7 +52,8 @@
       "send": "Send",
       "pay": "Pay",
       "downloadPdf": "Download PDF",
-      "retry": "Retry"
+      "retry": "Retry",
+      "back": "Back"
     },
     "imageViewer": {
       "close": "Close",
@@ -134,6 +135,7 @@
       "paid": "Paid",
       "processing": "Processing",
       "shipped": "Shipped",
+      "readyToPickup": "Ready for Pickup",
       "completed": "Completed",
       "cancelled": "Cancelled",
       "delivered": "Delivered"
@@ -160,6 +162,11 @@
       "productSearchPlaceholder": "Search by name, SKU or barcode",
       "addProduct": "Add",
       "customer": "Customer",
+      "fulfillmentMethod": "Fulfillment Method",
+      "fulfillment": {
+        "shipping": "Shipping",
+        "pickup": "Pickup"
+      },
       "customerSearchPlaceholder": "Search by email or phone",
       "createNewCustomer": "Create new customer",
       "selectExistingCustomer": "Select existing customer",
@@ -265,7 +272,59 @@
       "orderStatusLabel": "Order Status",
       "paymentStatusLabel": "Payment Status",
       "cancelOrder": "Cancel Order",
-      "createdAt": "Created: {date}"
+      "createdAt": "Created: {date}",
+      "errors": {
+        "actionFailed": "Action failed"
+      },
+      "actions": {
+        "ship": "Ship",
+        "shipping": "Shipping...",
+        "more": "More",
+        "refund": "Refund",
+        "refunding": "Refunding...",
+        "return": "Create Return",
+        "relist": "Relist",
+        "relisting": "Relisting...",
+        "cancelOrder": "Cancel Order"
+      },
+      "dialogs": {
+        "cancelTitle": "Cancel Order",
+        "cancelReason": "Reason",
+        "returnTitle": "Create Return",
+        "returnCategory": "Reason Category",
+        "returnNote": "Notes"
+      },
+      "restock": {
+        "restock": "Restock",
+        "noRestock": "No Restock",
+        "damage": "Damaged/Dispose"
+      }
+    },
+    "shippingWizard": {
+      "title": "Ship Order",
+      "subtitle": "Manage packaging and choose how this order will be fulfilled in one place.",
+      "modes": {
+        "shipping": "Freight Shipping",
+        "pickup": "Customer Pickup"
+      },
+      "pickup": {
+        "title": "Notify customer for pickup",
+        "description": "Send the customer a pickup-ready message, then mark the order as shipped/ready.",
+        "subject": "Message subject",
+        "message": "Message",
+        "sendAndMarkReady": "Send message and mark ready",
+        "loadingCustomerLanguage": "Loading customer language...",
+        "statusHint": "This will send an inbox message and email to the customer, then update the order status to shipped.",
+        "defaultSubject": "Order #{orderNumber} is ready for pickup",
+        "defaultMessage": "Hi {customerName}, your order #{orderNumber} is ready for pickup. Please come to the store when convenient.",
+        "customerFallback": "customer",
+        "viewOrderAction": "View order"
+      },
+      "errors": {
+        "markShippedFailed": "Shipment was created, but failed to mark the order as shipped.",
+        "pickupNotifyFailed": "Failed to notify customer for pickup.",
+        "customerRequired": "This order has no customer linked, so pickup message cannot be sent."
+      }
     },
     "editPage": {
       "errors": {
@@ -2849,6 +2908,46 @@
         "errors": {
           "deleteFailed": "Failed to delete",
           "saveFailed": "Failed to save"
+        },
+        "messages": {
+          "created": "Time slot created.",
+          "updated": "Time slot updated.",
+          "deleted": "Time slot deleted."
+        },
+        "batch": {
+          "action": "Batch Generate",
+          "title": "Batch Generate Time Slots",
+          "description": "Create multiple time slots by date range and weekdays.",
+          "generate": "Generate",
+          "generating": "Generating...",
+          "cancel": "Cancel",
+          "fields": {
+            "startDate": "Start Date",
+            "endDate": "End Date",
+            "startTime": "Start Time",
+            "endTime": "End Time",
+            "maxBookings": "Max Bookings",
+            "weekdays": "Weekdays"
+          },
+          "weekdays": {
+            "sun": "Sun",
+            "mon": "Mon",
+            "tue": "Tue",
+            "wed": "Wed",
+            "thu": "Thu",
+            "fri": "Fri",
+            "sat": "Sat"
+          },
+          "errors": {
+            "missingDateRange": "Please choose a start date and end date.",
+            "missingWeekdays": "Please select at least one weekday.",
+            "noMatchingDates": "No matching dates were found in the selected range.",
+            "allExist": "All matching time slots already exist.",
+            "generateFailed": "Failed to generate time slots."
+          },
+          "messages": {
+            "generated": "Generated {count} time slots."
+          }
         }
       }
     },

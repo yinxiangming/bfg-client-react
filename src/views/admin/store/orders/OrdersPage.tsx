@@ -130,7 +130,7 @@ const buildOrdersSchema = (
             : status === 'paid'
               ? t('orders.status.paid')
               : status === 'shipped'
-                ? t('orders.status.shipped')
+                ? (row?.fulfillment_method === 'pickup' ? t('orders.status.readyToPickup') : t('orders.status.shipped'))
                 : status === 'completed'
                   ? t('orders.status.completed')
                   : status === 'cancelled'

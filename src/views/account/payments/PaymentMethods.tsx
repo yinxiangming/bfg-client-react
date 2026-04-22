@@ -466,10 +466,7 @@ const PaymentMethods = () => {
         </Box>
         {!canAddPaymentMethod && (
           <Alert severity='info' sx={{ mb: 2 }}>
-            {paymentGateways.length === 0 
-              ? t('noGateways')
-              : 'Stripe payment gateway is not properly configured (missing publishable key). Please contact the administrator.'
-            }
+            {paymentGateways.length === 0 ? t('noGateways') : t('stripeMissingKey')}
           </Alert>
         )}
       </Grid>

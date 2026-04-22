@@ -9,6 +9,7 @@ import { useTranslations } from 'next-intl'
 // MUI Imports
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
+import CardHeader from '@mui/material/CardHeader'
 import Typography from '@mui/material/Typography'
 import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
@@ -22,6 +23,18 @@ type OrderDetail = {
   customer?: number | string | Customer
   customer_name?: string
   item_count?: number
+  /** Detail API returns line items with quantities; list may omit or simplify. */
+  items?: Array<{ quantity?: number }>
+}
+
+function getOrderItemsPieceCount(order: OrderDetail): number {
+  if (order.items?.length) {
+    return order.items.reduce((sum, line) => sum + (Number(line.quantity) || 0), 0)
+  }
+  if (typeof order.item_count === 'number' && order.item_count > 0) {
+    return order.item_count
+  }
+  return 0
 }
 
 type CustomerDetailsCardProps = {
@@ -30,6 +43,7 @@ type CustomerDetailsCardProps = {
 
 const CustomerDetailsCard = ({ order }: CustomerDetailsCardProps) => {
   const t = useTranslations('admin')
+  const itemsPieceCount = getOrderItemsPieceCount(order)
   // Get customer info
   const customer = typeof order.customer === 'object' && order.customer !== null ? order.customer : null
   const customerId = customer ? customer.id : (typeof order.customer === 'number' ? order.customer : 0)
@@ -49,10 +63,11 @@ const CustomerDetailsCard = ({ order }: CustomerDetailsCardProps) => {
 
   return (
     <Card>
-      <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Typography variant='h5'>{t('orders.customerCard.title')}</Typography>
-          {customerId > 0 && (
+      <CardHeader
+        title={t('orders.customerCard.title')}
+        sx={{ pb: 0 }}
+        action={
+          customerId > 0 ? (
             <Typography
               component={Link}
               href={`/admin/store/customers/${customerId}`}
@@ -61,8 +76,10 @@ const CustomerDetailsCard = ({ order }: CustomerDetailsCardProps) => {
             >
               {t('orders.customerCard.actions.viewDetails')}
             </Typography>
-          )}
-        </Box>
+          ) : undefined
+        }
+      />
+      <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 }, display: 'flex', flexDirection: 'column', gap: 3 }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
           <Avatar sx={{ width: 40, height: 40 }}>
             {getInitials(customerName)}
@@ -104,7 +121,7 @@ const CustomerDetailsCard = ({ order }: CustomerDetailsCardProps) => {
           </Avatar>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
             <Typography color='text.primary' sx={{ fontWeight: 500 }}>
-              {t('orders.customerCard.itemsCount', { count: order.item_count || 0 })}
+              {t('orders.customerCard.itemsCount', { count: itemsPieceCount })}
             </Typography>
             <Typography variant='body2' color='text.secondary'>
               {t('orders.customerCard.itemsSubtitle')}

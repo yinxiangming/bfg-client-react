@@ -1,5 +1,26 @@
 import { apiFetch, bfgApi } from '@/utils/api'
 
+export type AdminMessagePayload = {
+  subject: string
+  message: string
+  message_type?: 'notification' | 'message' | 'system'
+  action_url?: string | null
+  action_label?: string | null
+  send_email?: boolean
+  send_sms?: boolean
+  send_push?: boolean
+  expires_at?: string | null
+}
+
+export type AdminMessage = {
+  id: number
+  subject: string
+  message: string
+  message_type: string
+  recipient_count?: number
+  created_at?: string
+}
+
 export type InboxMessage = {
   id: number
   message?: number
@@ -27,6 +48,26 @@ export type PaginatedResponse<T> = {
   next: string | null
   previous: string | null
   results: T[]
+}
+
+export async function createAdminMessage(payload: AdminMessagePayload): Promise<AdminMessage> {
+  return apiFetch<AdminMessage>(bfgApi.messages(), {
+    method: 'POST',
+    body: JSON.stringify({
+      message_type: 'notification',
+      send_email: false,
+      send_sms: false,
+      send_push: false,
+      ...payload
+    })
+  })
+}
+
+export async function sendAdminMessage(messageId: number, recipientIds: number[]): Promise<{ status: string; recipient_count: number }> {
+  return apiFetch<{ status: string; recipient_count: number }>(`${bfgApi.messages()}${messageId}/send/`, {
+    method: 'POST',
+    body: JSON.stringify({ recipient_ids: recipientIds })
+  })
 }
 
 export async function listInboxMessages(params?: {

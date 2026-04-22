@@ -33,7 +33,7 @@ import type { Product } from '@/services/store'
 import { uploadProductMedia } from '@/services/store'
 import type { ProductDetails } from '@/services/productScanner'
 import { getWorkspaceSettings } from '@/services/settings'
-import { apiFetch, buildApiUrl, API_VERSIONS } from '@/utils/api'
+import { apiFetch, bfgApi } from '@/utils/api'
 import { isBase64ImageUrl, dataUrlToFile, urlToFileViaProxy } from '@/utils/scannedImage'
 
 export type ProductInformationProps = {
@@ -98,7 +98,7 @@ const ProductInformation = ({
             if (onPrintLabel) {
                 await onPrintLabel(productNumericId, printTab)
             } else {
-                const labelUrl = buildApiUrl(`/products/${productNumericId}/label/`, API_VERSIONS.BFG2)
+                const labelUrl = `${bfgApi.products()}${productNumericId}/label/`
                 const raw = await apiFetch<unknown>(labelUrl, {
                     method: 'GET',
                     headers: { Accept: 'application/pdf' }
@@ -124,7 +124,7 @@ const ProductInformation = ({
         setter(true)
         try {
             const params = new URLSearchParams({ fields: field, name })
-            const url = buildApiUrl(`/products/${productNumericId}/generate_identifiers/?${params}`, API_VERSIONS.BFG2)
+            const url = `${bfgApi.products()}${productNumericId}/generate_identifiers/?${params}`
             const data = await apiFetch<Record<string, string>>(url)
             if (field === 'sku' && data.sku) {
                 setSku(data.sku)

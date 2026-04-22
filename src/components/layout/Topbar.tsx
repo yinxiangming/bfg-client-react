@@ -11,6 +11,7 @@ import CurrentUserDisplay from '../ui/CurrentUserDisplay'
 import LanguageSwitcher from '@/components/i18n/LanguageSwitcher'
 import FeedbackButton from '@/components/feedback/FeedbackButton'
 import AgentDialog from '@/views/admin/agent/AgentDialog'
+import WorkspaceSwitcher from '@/components/admin/WorkspaceSwitcher'
 
 // Hook Imports
 import { useAppLayout } from '@/hooks/useLayoutSettings'
@@ -105,6 +106,7 @@ const Topbar = ({ avatarInitial = 'N', onMenuToggle, showMenuToggle }: Props) =>
         </div>
       </div>
       <div className='admin-topbar-right'>
+        <WorkspaceSwitcher />
         <CurrentUserDisplay />
         <UserDropdown avatarInitial={avatarInitial} />
       </div>

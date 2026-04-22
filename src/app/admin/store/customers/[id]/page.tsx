@@ -35,7 +35,7 @@ import CustomerInbox from '@/views/admin/store/customers/edit/CustomerInbox'
 // Extension Hooks
 import { usePageSlots } from '@/extensions/hooks/usePageSections'
 import { renderSlot } from '@/extensions/hooks/renderSection'
-import { getTargetSlot } from '@/extensions/registry'
+import { buildTabbedPageTabs } from '@/extensions/hooks/buildTabbedPageTabs'
 
 // API Imports
 import { getCustomer, type Customer } from '@/services/store'
@@ -202,8 +202,8 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
     }
   }
 
-  const tabExtensions = afterSlots.filter(ext => ext.component && getTargetSlot(ext))
-  const panelExtensions = afterSlots.filter(ext => ext.component && !getTargetSlot(ext))
+  const tabExtensions = afterSlots.filter(ext => ext.component && (ext.targetSlot ?? ext.targetSection))
+  const panelExtensions = afterSlots.filter(ext => ext.component && !(ext.targetSlot ?? ext.targetSection))
 
   const defaultTabs = [
     {
@@ -283,26 +283,19 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
     },
   ]
 
-  const allTabs = defaultTabs.flatMap(tab => {
-    const injected = tabExtensions
-      .filter(ext => getTargetSlot(ext) === slotKeyToSlotId(tab.key))
-      .map(ext => {
-        const Component = ext.component as React.ComponentType<any> & {
-          tabLabel?: (t: (key: string) => string) => string
-        }
-
-        return {
-          key: ext.id,
-          label: Component.tabLabel ? Component.tabLabel(t) : Component.displayName || ext.id,
-          render: () => <Component customer={customer} onUpdate={handleCustomerUpdate} />,
-        }
-      })
-
-    return [tab, ...injected]
+  const allTabs = buildTabbedPageTabs({
+    defaultTabs,
+    tabExtensions,
+    getAnchorSlotId: slotKeyToSlotId,
+    translate: t,
+    extensionProps: {
+      customer,
+      onUpdate: handleCustomerUpdate,
+    },
   })
 
   return (
-    <Box sx={{ p: 4 }}>
+    <>
       <CustomerEditHeader
         customer={customer}
         onDelete={handleDelete}
@@ -379,6 +372,6 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Box>
+    </>
   )
 }

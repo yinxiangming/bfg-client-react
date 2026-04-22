@@ -9,6 +9,7 @@ import { useTranslations } from 'next-intl'
 // MUI Imports
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
+import CardHeader from '@mui/material/CardHeader'
 import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
@@ -83,9 +84,10 @@ const AddressCards = ({ orderId, customerId, shippingAddress, billingAddress, on
     <>
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
         <Card>
-          <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant='h6'>{t('orders.addressCards.shipping.title')}</Typography>
+          <CardHeader
+            title={t('orders.addressCards.shipping.title')}
+            sx={{ pb: 0 }}
+            action={
               <Tooltip title={t('orders.addressCards.shipping.actions.editTooltip')}>
                 <IconButton
                   size='small'
@@ -95,7 +97,9 @@ const AddressCards = ({ orderId, customerId, shippingAddress, billingAddress, on
                   <Icon icon='mdi:pencil' />
                 </IconButton>
               </Tooltip>
-            </Box>
+            }
+          />
+          <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 }, display: 'flex', flexDirection: 'column', gap: 2 }}>
             {shippingAddress ? (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                 {formatAddress(shippingAddress)?.map((line, index) => (
@@ -122,9 +126,10 @@ const AddressCards = ({ orderId, customerId, shippingAddress, billingAddress, on
           </CardContent>
         </Card>
         <Card>
-          <CardContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              <Typography variant='h6'>{t('orders.addressCards.billing.title')}</Typography>
+          <CardHeader
+            title={t('orders.addressCards.billing.title')}
+            sx={{ pb: 0 }}
+            action={
               <Tooltip title={t('orders.addressCards.billing.actions.editTooltip')}>
                 <IconButton
                   size='small'
@@ -134,7 +139,9 @@ const AddressCards = ({ orderId, customerId, shippingAddress, billingAddress, on
                   <Icon icon='mdi:pencil' />
                 </IconButton>
               </Tooltip>
-            </Box>
+            }
+          />
+          <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 }, display: 'flex', flexDirection: 'column', gap: 2 }}>
             {billingAddress ? (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
                 {formatAddress(billingAddress)?.map((line, index) => (

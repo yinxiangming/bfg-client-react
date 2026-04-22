@@ -101,34 +101,34 @@ export const bfgApi = {
   bookings: () => buildApiUrl('/web/bookings/', API_VERSIONS.BFG2),
 
   // Shop
-  stores: () => buildApiUrl('/stores/', API_VERSIONS.BFG2),
-  salesChannels: () => buildApiUrl('/sales-channels/', API_VERSIONS.BFG2),
-  subscriptionPlans: () => buildApiUrl('/subscription-plans/', API_VERSIONS.BFG2),
-  products: () => buildApiUrl('/products/', API_VERSIONS.BFG2),
-  productCategoryRulesSchema: () => buildApiUrl('/categories/rules_schema/', API_VERSIONS.BFG2),
-  productMedia: () => buildApiUrl('/product-media/', API_VERSIONS.BFG2),
-  variants: () => buildApiUrl('/variants/', API_VERSIONS.BFG2),
-  orders: () => buildApiUrl('/orders/', API_VERSIONS.BFG2),
-  reviews: () => buildApiUrl('/reviews/', API_VERSIONS.BFG2),
-  wishlists: () => buildApiUrl('/wishlists/', API_VERSIONS.BFG2),
+  stores: () => buildApiUrl('/stores/', API_VERSIONS.BFG2, 'shop'),
+  salesChannels: () => buildApiUrl('/sales-channels/', API_VERSIONS.BFG2, 'shop'),
+  subscriptionPlans: () => buildApiUrl('/subscription-plans/', API_VERSIONS.BFG2, 'shop'),
+  products: () => buildApiUrl('/products/', API_VERSIONS.BFG2, 'shop'),
+  productCategoryRulesSchema: () => buildApiUrl('/categories/rules_schema/', API_VERSIONS.BFG2, 'shop'),
+  productMedia: () => buildApiUrl('/product-media/', API_VERSIONS.BFG2, 'shop'),
+  variants: () => buildApiUrl('/variants/', API_VERSIONS.BFG2, 'shop'),
+  orders: () => buildApiUrl('/orders/', API_VERSIONS.BFG2, 'shop'),
+  reviews: () => buildApiUrl('/reviews/', API_VERSIONS.BFG2, 'shop'),
+  wishlists: () => buildApiUrl('/wishlists/', API_VERSIONS.BFG2, 'shop'),
   cart: {
-    current: () => buildApiUrl('/cart/current/', API_VERSIONS.BFG2),
-    addItem: () => buildApiUrl('/cart/add_item/', API_VERSIONS.BFG2),
-    checkout: () => buildApiUrl('/cart/checkout/', API_VERSIONS.BFG2)
+    current: () => buildApiUrl('/cart/current/', API_VERSIONS.BFG2, 'shop'),
+    addItem: () => buildApiUrl('/cart/add_item/', API_VERSIONS.BFG2, 'shop'),
+    checkout: () => buildApiUrl('/cart/checkout/', API_VERSIONS.BFG2, 'shop')
   },
 
   // Delivery
-  warehouses: () => buildApiUrl('/warehouses/', API_VERSIONS.BFG2),
-  consignments: () => buildApiUrl('/consignments/', API_VERSIONS.BFG2),
-  carriers: () => buildApiUrl('/carriers/', API_VERSIONS.BFG2),
-  packagingTypes: () => buildApiUrl('/packaging-types/', API_VERSIONS.BFG2),
-  freightServices: () => buildApiUrl('/freight-services/', API_VERSIONS.BFG2),
+  warehouses: () => buildApiUrl('/warehouses/', API_VERSIONS.BFG2, 'delivery'),
+  consignments: () => buildApiUrl('/consignments/', API_VERSIONS.BFG2, 'delivery'),
+  carriers: () => buildApiUrl('/carriers/', API_VERSIONS.BFG2, 'delivery'),
+  packagingTypes: () => buildApiUrl('/packaging-types/', API_VERSIONS.BFG2, 'delivery'),
+  freightServices: () => buildApiUrl('/freight-services/', API_VERSIONS.BFG2, 'delivery'),
   freightServiceConfigSchema: (templateId?: string) =>
-    buildApiUrl('/freight-services/config_schema/', API_VERSIONS.BFG2) + (templateId ? `?template=${encodeURIComponent(templateId)}` : ''),
-  freightServiceTemplates: () => buildApiUrl('/freight-services/templates/', API_VERSIONS.BFG2),
-  freightStatuses: () => buildApiUrl('/freight-statuses/', API_VERSIONS.BFG2),
-  deliveryZones: () => buildApiUrl('/delivery-zones/', API_VERSIONS.BFG2),
-  trackingEvents: () => buildApiUrl('/tracking-events/', API_VERSIONS.BFG2),
+    buildApiUrl('/freight-services/config_schema/', API_VERSIONS.BFG2, 'delivery') + (templateId ? `?template=${encodeURIComponent(templateId)}` : ''),
+  freightServiceTemplates: () => buildApiUrl('/freight-services/templates/', API_VERSIONS.BFG2, 'delivery'),
+  freightStatuses: () => buildApiUrl('/freight-statuses/', API_VERSIONS.BFG2, 'delivery'),
+  deliveryZones: () => buildApiUrl('/delivery-zones/', API_VERSIONS.BFG2, 'delivery'),
+  trackingEvents: () => buildApiUrl('/tracking-events/', API_VERSIONS.BFG2, 'delivery'),
 
   // Support
   tickets: () => buildApiUrl('/support/tickets/', API_VERSIONS.BFG2),
@@ -141,25 +141,25 @@ export const bfgApi = {
   ticketPriority: (id: string | number) => buildApiUrl(`/support/ticket-priorities/${id}/`, API_VERSIONS.BFG2),
 
   // Finance
-  invoices: () => buildApiUrl('/invoices/', API_VERSIONS.BFG2),
-  brands: () => buildApiUrl('/brands/', API_VERSIONS.BFG2),
-  currencies: () => buildApiUrl('/currencies/', API_VERSIONS.BFG2),
-  financialCodes: () => buildApiUrl('/financial-codes/', API_VERSIONS.BFG2),
-  payments: () => buildApiUrl('/payments/', API_VERSIONS.BFG2),
-  paymentMethods: () => buildApiUrl('/payment-methods/', API_VERSIONS.BFG2),
-  paymentGateways: () => buildApiUrl('/payment-gateways/', API_VERSIONS.BFG2),
-  paymentGatewayPlugins: () => buildApiUrl('/payment-gateways/plugins/', API_VERSIONS.BFG2),
-  taxRates: () => buildApiUrl('/tax-rates/', API_VERSIONS.BFG2),
-  invoiceSettings: () => buildApiUrl('/invoice-settings/', API_VERSIONS.BFG2),
-  wallets: () => buildApiUrl('/finance/wallets/', API_VERSIONS.BFG2),
+  invoices: () => buildApiUrl('/invoices/', API_VERSIONS.BFG2, 'finance'),
+  brands: () => buildApiUrl('/brands/', API_VERSIONS.BFG2, 'finance'),
+  currencies: () => buildApiUrl('/currencies/', API_VERSIONS.BFG2, 'finance'),
+  financialCodes: () => buildApiUrl('/financial-codes/', API_VERSIONS.BFG2, 'finance'),
+  payments: () => buildApiUrl('/payments/', API_VERSIONS.BFG2, 'finance'),
+  paymentMethods: () => buildApiUrl('/payment-methods/', API_VERSIONS.BFG2, 'finance'),
+  paymentGateways: () => buildApiUrl('/payment-gateways/', API_VERSIONS.BFG2, 'finance'),
+  paymentGatewayPlugins: () => buildApiUrl('/payment-gateways/plugins/', API_VERSIONS.BFG2, 'finance'),
+  taxRates: () => buildApiUrl('/tax-rates/', API_VERSIONS.BFG2, 'finance'),
+  invoiceSettings: () => buildApiUrl('/invoice-settings/', API_VERSIONS.BFG2, 'finance'),
+  wallets: () => buildApiUrl('/wallets/', API_VERSIONS.BFG2, 'finance'),
 
   // Marketing
-  campaigns: () => buildApiUrl('/campaigns/', API_VERSIONS.BFG2),
-  campaignDisplays: () => buildApiUrl('/campaign-displays/', API_VERSIONS.BFG2),
-  coupons: () => buildApiUrl('/coupons/', API_VERSIONS.BFG2),
-  giftCards: () => buildApiUrl('/gift-cards/', API_VERSIONS.BFG2),
-  referralPrograms: () => buildApiUrl('/referral-programs/', API_VERSIONS.BFG2),
-  discountRules: () => buildApiUrl('/discount-rules/', API_VERSIONS.BFG2),
+  campaigns: () => buildApiUrl('/campaigns/', API_VERSIONS.BFG2, 'marketing'),
+  campaignDisplays: () => buildApiUrl('/campaign-displays/', API_VERSIONS.BFG2, 'marketing'),
+  coupons: () => buildApiUrl('/coupons/', API_VERSIONS.BFG2, 'marketing'),
+  giftCards: () => buildApiUrl('/gift-cards/', API_VERSIONS.BFG2, 'marketing'),
+  referralPrograms: () => buildApiUrl('/referral-programs/', API_VERSIONS.BFG2, 'marketing'),
+  discountRules: () => buildApiUrl('/discount-rules/', API_VERSIONS.BFG2, 'marketing'),
 
   // Inbox/Notifications
   messageTemplates: () => buildApiUrl('/inbox/templates/', API_VERSIONS.BFG2),
@@ -210,6 +210,23 @@ export function getWorkspaceId(): string | null {
   return null
 }
 
+/**
+ * Read workspace_id from the JWT access token payload (for UI display).
+ * The backend embeds workspace_id as a signed claim so this is authoritative
+ * for the active tenant context without an extra API call.
+ */
+export function getWorkspaceIdFromJwt(): number | null {
+  if (typeof window === 'undefined') return null
+  const token = getWorkspaceToken()
+  if (!token) return null
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    return (payload as { workspace_id?: number }).workspace_id ?? null
+  } catch {
+    return null
+  }
+}
+
 export type GetApiHeadersOptions = {
   /** When set (e.g. request host for auth/storefront), backend can resolve workspace by domain. */
   requestHost?: string
@@ -240,12 +257,17 @@ export function getApiHeaders(
   const headers: Record<string, string> = {
     ...getApiLanguageHeaders(),
   }
-  const workspaceId = getWorkspaceId()
+  const pinnedWorkspaceId = getWorkspaceId()
+  const isAuthenticated = Boolean(options?.withAuth && getWorkspaceToken())
+  const workspaceId = isAuthenticated && !pinnedWorkspaceId ? null : pinnedWorkspaceId
   if (workspaceId) {
     headers['X-Workspace-ID'] = workspaceId
   }
-  if (options?.requestHost) {
-    headers['X-Forwarded-Host'] = options.requestHost
+  const forwardedHost =
+    options?.requestHost ??
+    (typeof window !== 'undefined' && !workspaceId ? window.location.host : undefined)
+  if (forwardedHost) {
+    headers['X-Forwarded-Host'] = forwardedHost
   }
   if (options?.withAuth) {
     const token = getAuthToken()
@@ -283,9 +305,16 @@ export function getAgentChatRequestInit(body: Record<string, unknown>): RequestI
     ...getApiLanguageHeaders(),
     'Content-Type': 'application/json'
   }
-  if (token) headers['Authorization'] = `Bearer ${token}`
-  const workspaceId = getWorkspaceId()
-  if (workspaceId) headers['X-Workspace-ID'] = workspaceId
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+    // Workspace resolved from JWT claim by backend; no X-Workspace-ID needed.
+  } else {
+    const workspaceId = getWorkspaceId()
+    if (workspaceId) headers['X-Workspace-ID'] = workspaceId
+    else if (typeof window !== 'undefined') {
+      headers['X-Forwarded-Host'] = window.location.host
+    }
+  }
   return { method: 'POST', headers, body: JSON.stringify(body) }
 }
 
@@ -300,7 +329,9 @@ export async function apiFetch<T>(
   const token = getAuthToken()
   const { requestHost, withAuth, siteAdminScope, ...fetchOptions } = options || {}
   void siteAdminScope
-  const workspaceId = getWorkspaceId()
+  const pinnedWorkspaceId = getWorkspaceId()
+  const sendsAuth = Boolean(token && withAuth !== false)
+  const workspaceId = sendsAuth && !pinnedWorkspaceId ? null : pinnedWorkspaceId
   const headers: Record<string, string> = {
     ...(fetchOptions?.headers as Record<string, string>)
   }
@@ -323,8 +354,15 @@ export async function apiFetch<T>(
     headers['X-Workspace-ID'] = workspaceId
   }
 
-  if (requestHost) {
-    headers['X-Forwarded-Host'] = requestHost
+  // Split-host production: browser is on preloved.kiwi but API is api.preloved.kiwi.
+  // WorkspaceMiddleware resolves tenant from Host / X-Forwarded-Host via WorkspaceDomain.
+  // When there is no X-Workspace-ID (no localStorage / env pin), send the site hostname so
+  // the API can resolve workspace without trusting api.* as a tenant domain.
+  const forwardedHost =
+    requestHost ??
+    (typeof window !== 'undefined' && !workspaceId ? window.location.host : undefined)
+  if (forwardedHost) {
+    headers['X-Forwarded-Host'] = forwardedHost
   }
 
   const response = await fetch(url, {

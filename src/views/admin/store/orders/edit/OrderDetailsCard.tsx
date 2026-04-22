@@ -195,6 +195,7 @@ const OrderDetailsCard = ({ order, onOrderUpdate }: OrderDetailsCardProps) => {
     <Card>
       <CardHeader
         title={t('orders.detailsCard.title')}
+        sx={{ pb: 0 }}
         action={
           !editing ? (
             <Button size='small' variant='outlined' startIcon={<i className='tabler-edit' />} onClick={startEditing}>
@@ -212,7 +213,7 @@ const OrderDetailsCard = ({ order, onOrderUpdate }: OrderDetailsCardProps) => {
           )
         }
       />
-      <CardContent>
+      <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 } }}>
         {error && (
           <Alert severity='error' sx={{ mb: 2 }} onClose={() => setError(null)}>
             {error}
