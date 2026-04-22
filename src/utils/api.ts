@@ -219,27 +219,6 @@ export function getStorefrontWorkspaceId(): string | null {
   return null
 }
 
-/**
- * Site admin requests normally omit X-Workspace-ID so the backend resolves the tenant from
- * Host / X-Forwarded-Host (e.g. geeker.co.nz). When NEXT_PUBLIC_WORKSPACE_ID is set—typical for
- * localhost where Site maps to the wrong workspace—send X-Workspace-ID like other API calls.
- */
-function resolveWorkspaceIdForApi(options?: {
-  storefrontScope?: boolean
-  siteAdminScope?: boolean
-}): string | null {
-  if (options?.storefrontScope) {
-    return getStorefrontWorkspaceId()
-  }
-  if (options?.siteAdminScope) {
-    if (process.env.NEXT_PUBLIC_WORKSPACE_ID) {
-      return getWorkspaceId()
-    }
-    return getStorefrontWorkspaceId()
-  }
-  return getWorkspaceId()
-}
-
 export type GetApiHeadersOptions = {
   /** When set (e.g. request host for auth/storefront), backend can resolve workspace by domain. */
   requestHost?: string
@@ -251,8 +230,8 @@ export type GetApiHeadersOptions = {
    */
   storefrontScope?: boolean
   /**
-   * Site-bound admin scope: prefer domain routing (no X-Workspace-ID unless
-   * NEXT_PUBLIC_WORKSPACE_ID is set for local dev pinning).
+   * Site-bound admin scope: omit X-Workspace-ID (same as storefrontScope here) and rely on
+   * requestHost / Host so the backend resolves the tenant by domain.
    */
   siteAdminScope?: boolean
 }
