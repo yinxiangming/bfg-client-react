@@ -51,7 +51,6 @@ export default function StoreFooter(_props: StoreFooterProps) {
         body: JSON.stringify({ email }),
         credentials: 'include',
         requestHost,
-        storefrontScope: true,
         withAuth: false,
       })
       setNewsletterMessage({ type: 'success', text: t('footer.newsletterSuccess') })

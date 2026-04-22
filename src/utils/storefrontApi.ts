@@ -5,7 +5,7 @@
  */
 
 import { refreshTokenIfNeeded } from './tokenRefresh'
-import { getApiBaseUrl, getStorefrontWorkspaceId } from './api'
+import { getApiBaseUrl, getWorkspaceId } from './api'
 import { getWorkspaceToken } from './authTokens'
 import { getApiLanguageHeaders, getCurrentLocale } from '@/i18n/http'
 
@@ -85,7 +85,7 @@ class StorefrontApiClient {
       ...getApiLanguageHeaders(),
       ...(fetchOptions.headers as Record<string, string> || {})
     }
-    const workspaceId = getStorefrontWorkspaceId()
+    const workspaceId = getWorkspaceId()
     if (workspaceId) headers['X-Workspace-ID'] = workspaceId
     const forwardedHost =
       requestHost ||

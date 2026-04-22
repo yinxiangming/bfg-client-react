@@ -96,7 +96,7 @@ function getStorefrontConfigUrl(locale: string): string {
 
 /**
  * Fetch storefront config (sanitized settings + header/footer menus).
- * Uses request host when in browser so backend can resolve workspace by domain (same as storefront).
+ * Uses request host when in browser; workspace id header follows `getWorkspaceId()` when set (same as account/admin).
  * Returns null when server returns 404 or request fails (e.g. not configured yet).
  * Uses in-memory cache for 5 minutes when config is loaded.
  */
@@ -110,7 +110,7 @@ export async function getStorefrontConfig(locale?: string): Promise<StorefrontCo
   const res = await fetch(url, {
     headers: getApiHeaders(
       { 'Content-Type': 'application/json' },
-      { requestHost, storefrontScope: true }
+      { requestHost }
     ),
     credentials: 'include',
   })
@@ -135,7 +135,7 @@ export function getDefaultHeaderOptions(): StorefrontHeaderOptions {
 
 /**
  * Fetch storefront config on server (e.g. in layout or page).
- * Pass requestHost (e.g. from headers().get('host')) so backend resolves workspace by domain (same as storefront).
+ * Pass requestHost (e.g. from headers().get('host')); workspace id from env when set (same as other app surfaces).
  * Returns null when server returns 404 (e.g. workspace/site not configured yet).
  * Deduped per request via React.cache() so layout + page share one fetch.
  */
@@ -148,7 +148,7 @@ export const getStorefrontConfigForServer = cache(
       const res = await fetch(url, {
         headers: getApiHeaders(
           { 'Content-Type': 'application/json' },
-          { requestHost, storefrontScope: true }
+          { requestHost }
         ),
         next: { revalidate: 300 },
         signal: controller.signal,

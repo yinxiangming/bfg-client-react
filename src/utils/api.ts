@@ -38,6 +38,14 @@ export const API_VERSIONS = {
   BFG2: 'v1'
 } as const
 
+/** Response shape for GET /api/v1/system/version/ */
+export type ServerVersionResponse = {
+  api_version: string
+  schema_version: string
+  bfg_version: string
+  build_id?: string
+}
+
 /**
  * Build API URL with version prefix
  */
@@ -58,6 +66,9 @@ export function buildApiUrl(
  * BFG API endpoints (v1)
  */
 export const bfgApi = {
+  // System (public)
+  serverVersion: () => buildApiUrl('/system/version/', API_VERSIONS.BFG2),
+
   // Common
   workspaces: () => buildApiUrl('/workspaces/', API_VERSIONS.BFG2),
   customers: () => buildApiUrl('/customers/', API_VERSIONS.BFG2),
@@ -163,6 +174,18 @@ export const bfgApi = {
 }
 
 /**
+ * Fetch running server version metadata (no auth).
+ */
+export async function fetchServerVersion(
+  options?: Pick<ApiFetchOptions, 'requestHost' | 'siteAdminScope'>
+): Promise<ServerVersionResponse> {
+  return apiFetch<ServerVersionResponse>(bfgApi.serverVersion(), {
+    ...options,
+    withAuth: false
+  })
+}
+
+/**
  * Get workspace auth token from partitioned storage (migrates legacy `auth_token` once).
  */
 function getAuthToken(): string | null {
@@ -170,10 +193,9 @@ function getAuthToken(): string | null {
 }
 
 /**
- * Get workspace ID from storage or env.
- * Do not default to a numeric id in development: that forces the wrong tenant when the API should
- * resolve workspace by Host / X-Forwarded-Host (e.g. Geeker on localhost). Set NEXT_PUBLIC_WORKSPACE_ID
- * explicitly when you need a fixed workspace without domain routing.
+ * Workspace id for API headers: `localStorage.workspace_id` (if set), else `NEXT_PUBLIC_WORKSPACE_ID`.
+ * When null, callers should pass `requestHost` so the backend can resolve the tenant by domain.
+ * Storefront, account, and admin all use the same source so pinned dev tenants behave consistently.
  */
 export function getWorkspaceId(): string | null {
   if (typeof window !== 'undefined') {
@@ -205,48 +227,15 @@ export function getWorkspaceIdFromJwt(): number | null {
   }
 }
 
-/**
- * Workspace id for public storefront fetches only: never localStorage, never header by default.
- * Storefront tenant resolution should come from Host / X-Forwarded-Host.
- */
-export function getStorefrontWorkspaceId(): string | null {
-  return null
-}
-
-/**
- * Site admin requests normally omit X-Workspace-ID so the backend resolves the tenant from
- * Host / X-Forwarded-Host (e.g. geeker.co.nz). When NEXT_PUBLIC_WORKSPACE_ID is set—typical for
- * localhost where Site maps to the wrong workspace—send X-Workspace-ID like other API calls.
- */
-function resolveWorkspaceIdForApi(options?: {
-  storefrontScope?: boolean
-  siteAdminScope?: boolean
-}): string | null {
-  if (options?.storefrontScope) {
-    return getStorefrontWorkspaceId()
-  }
-  if (options?.siteAdminScope) {
-    if (process.env.NEXT_PUBLIC_WORKSPACE_ID) {
-      return getWorkspaceId()
-    }
-    return getStorefrontWorkspaceId()
-  }
-  return getWorkspaceId()
-}
-
 export type GetApiHeadersOptions = {
   /** When set (e.g. request host for auth/storefront), backend can resolve workspace by domain. */
   requestHost?: string
   /** Attach Bearer token from storage when present (browser only). */
   withAuth?: boolean
   /**
-   * Public storefront requests should resolve tenant by Host / X-Forwarded-Host only.
-   * This never uses localStorage and currently returns null so no X-Workspace-ID is sent.
-   */
-  storefrontScope?: boolean
-  /**
-   * Site-bound admin scope: prefer domain routing (no X-Workspace-ID unless
-   * NEXT_PUBLIC_WORKSPACE_ID is set for local dev pinning).
+   * Site-bound admin scope: send `X-Workspace-ID` when `getWorkspaceId()` is non-null
+   * (`NEXT_PUBLIC_WORKSPACE_ID` or `localStorage.workspace_id`); otherwise rely on
+   * `requestHost` / `X-Forwarded-Host` for domain-based tenant resolution.
    */
   siteAdminScope?: boolean
 }
@@ -254,7 +243,6 @@ export type GetApiHeadersOptions = {
 export type ApiFetchOptions = RequestInit & {
   requestHost?: string
   withAuth?: boolean
-  storefrontScope?: boolean
   siteAdminScope?: boolean
 }
 
@@ -269,10 +257,9 @@ export function getApiHeaders(
   const headers: Record<string, string> = {
     ...getApiLanguageHeaders(),
   }
-  const useHostScopedRouting = options?.storefrontScope || options?.siteAdminScope
-  // Authenticated requests don't need X-Workspace-ID — backend resolves workspace from JWT claim.
-  const isAuthenticated = options?.withAuth && !!getWorkspaceToken()
-  const workspaceId = isAuthenticated ? null : (useHostScopedRouting ? getStorefrontWorkspaceId() : getWorkspaceId())
+  const pinnedWorkspaceId = getWorkspaceId()
+  const isAuthenticated = Boolean(options?.withAuth && getWorkspaceToken())
+  const workspaceId = isAuthenticated && !pinnedWorkspaceId ? null : pinnedWorkspaceId
   if (workspaceId) {
     headers['X-Workspace-ID'] = workspaceId
   }
@@ -340,9 +327,11 @@ export async function apiFetch<T>(
   retryOn401: boolean = true
 ): Promise<T> {
   const token = getAuthToken()
-  const { requestHost, withAuth, storefrontScope, siteAdminScope, ...fetchOptions } = options || {}
-  const useHostScopedRouting = storefrontScope || siteAdminScope
-  const workspaceId = useHostScopedRouting ? getStorefrontWorkspaceId() : getWorkspaceId()
+  const { requestHost, withAuth, siteAdminScope, ...fetchOptions } = options || {}
+  void siteAdminScope
+  const pinnedWorkspaceId = getWorkspaceId()
+  const sendsAuth = Boolean(token && withAuth !== false)
+  const workspaceId = sendsAuth && !pinnedWorkspaceId ? null : pinnedWorkspaceId
   const headers: Record<string, string> = {
     ...(fetchOptions?.headers as Record<string, string>)
   }
