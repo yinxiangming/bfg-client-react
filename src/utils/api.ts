@@ -257,8 +257,11 @@ export function getApiHeaders(
   if (workspaceId) {
     headers['X-Workspace-ID'] = workspaceId
   }
-  if (options?.requestHost) {
-    headers['X-Forwarded-Host'] = options.requestHost
+  const forwardedHost =
+    options?.requestHost ??
+    (typeof window !== 'undefined' && !workspaceId ? window.location.host : undefined)
+  if (forwardedHost) {
+    headers['X-Forwarded-Host'] = forwardedHost
   }
   if (options?.withAuth) {
     const token = getAuthToken()
@@ -299,6 +302,9 @@ export function getAgentChatRequestInit(body: Record<string, unknown>): RequestI
   if (token) headers['Authorization'] = `Bearer ${token}`
   const workspaceId = getWorkspaceId()
   if (workspaceId) headers['X-Workspace-ID'] = workspaceId
+  else if (typeof window !== 'undefined') {
+    headers['X-Forwarded-Host'] = window.location.host
+  }
   return { method: 'POST', headers, body: JSON.stringify(body) }
 }
 
@@ -336,8 +342,15 @@ export async function apiFetch<T>(
     headers['X-Workspace-ID'] = workspaceId
   }
 
-  if (requestHost) {
-    headers['X-Forwarded-Host'] = requestHost
+  // Split-host production: browser is on preloved.kiwi but API is api.preloved.kiwi.
+  // WorkspaceMiddleware resolves tenant from Host / X-Forwarded-Host via WorkspaceDomain.
+  // When there is no X-Workspace-ID (no localStorage / env pin), send the site hostname so
+  // the API can resolve workspace without trusting api.* as a tenant domain.
+  const forwardedHost =
+    requestHost ??
+    (typeof window !== 'undefined' && !workspaceId ? window.location.host : undefined)
+  if (forwardedHost) {
+    headers['X-Forwarded-Host'] = forwardedHost
   }
 
   const response = await fetch(url, {
