@@ -83,7 +83,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
       const mediaItems = mediaRes?.items ?? (data as any)?.media ?? []
       const merged = { ...data, media: mediaItems }
       setProductData(merged)
-      setFormData(prev => ({ ...prev, media: mediaItems }))
+      setFormData(prev => ({ ...prev, media: mediaItems, stock_quantity: data.stock_quantity }))
     } catch (e) {
       console.error('Failed to refetch product', e)
     }
@@ -239,7 +239,8 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
                 {renderSlot('ProductVariants', ProductVariants, {
                   productId: id,
                   productMedia: (productData as any)?.media,
-                  initialVariants: (productData as any)?.variants
+                  initialVariants: (productData as any)?.variants,
+                  onInventoryUpdate: refetchProduct
                 })}
               </Grid>
             )}

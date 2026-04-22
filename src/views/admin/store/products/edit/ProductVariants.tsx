@@ -41,6 +41,7 @@ type ProductVariantsProps = {
     productId: string
     productMedia?: ProductMedia[]
     initialVariants?: ProductVariant[]
+    onInventoryUpdate?: () => void
 }
 
 type NewVariantData = Partial<ProductVariant> & {
@@ -48,7 +49,7 @@ type NewVariantData = Partial<ProductVariant> & {
     selectedMedia?: ProductMedia
 }
 
-const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVariantsProps) => {
+const ProductVariants = ({ productId, productMedia, initialVariants, onInventoryUpdate }: ProductVariantsProps) => {
     const t = useTranslations('admin')
     const [variants, setVariants] = useState<ProductVariant[]>(initialVariants || [])
     const [variantImages, setVariantImages] = useState<Record<number, string>>({})
@@ -515,28 +516,24 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                                         )}
                                     </TableCell>
                                     <TableCell sx={{ minWidth: 180 }}>
-                                        {editingId === variant.id ? (
-                                            <Link
-                                                component='button'
-                                                variant='body2'
-                                                onClick={() => {
-                                                    if (productIdNumber) {
-                                                        setInventoryModalVariantId(variant.id)
-                                                        setInventoryModalOpen(true)
-                                                    }
-                                                }}
-                                                sx={{
-                                                    cursor: productIdNumber ? 'pointer' : 'default',
-                                                    textDecoration: 'underline',
-                                                    minWidth: 80,
-                                                    textAlign: 'left'
-                                                }}
-                                            >
-                                                {variant.stock_quantity}
-                                            </Link>
-                                        ) : (
-                                            variant.stock_quantity
-                                        )}
+                                        <Link
+                                            component='button'
+                                            variant='body2'
+                                            onClick={() => {
+                                                if (productIdNumber) {
+                                                    setInventoryModalVariantId(variant.id)
+                                                    setInventoryModalOpen(true)
+                                                }
+                                            }}
+                                            sx={{
+                                                cursor: productIdNumber ? 'pointer' : 'default',
+                                                textDecoration: 'underline',
+                                                minWidth: 80,
+                                                textAlign: 'left'
+                                            }}
+                                        >
+                                            {variant.stock_quantity}
+                                        </Link>
                                     </TableCell>
                                     <TableCell sx={{ width: 120, minWidth: 120 }}>
                                         <IconButton size='small' disabled={index === 0} onClick={() => handleMove(index, -1)}>
@@ -754,6 +751,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                 onUpdate={() => {
                     fetchVariants()
                     notifyProductsRefresh()
+                    onInventoryUpdate?.()
                 }}
             />
         )}

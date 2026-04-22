@@ -18,7 +18,6 @@ import InfoIcon from '@mui/icons-material/Info'
 import Link from '@mui/material/Link'
 
 // Component Imports
-import CustomTextField from '@/components/ui/TextField'
 import VariantInventoryModal from './VariantInventoryModal'
 
 // Type Imports
@@ -48,47 +47,28 @@ const ProductInventory = ({ productData, onChange }: ProductInventoryProps) => {
 
     return (
         <Card>
-            <CardHeader title={t('products.inventory.title')} sx={{ pb: 0 }} />
+            <CardHeader
+                title={t('products.inventory.title')}
+                sx={{ pb: 0 }}
+                action={
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, pr: 1, pt: 0.5 }}>
+                        {productData?.id && (
+                            <Link
+                                component='button'
+                                variant='body2'
+                                onClick={() => setInventoryModalOpen(true)}
+                                sx={{ textDecoration: 'none', cursor: 'pointer' }}
+                            >
+                                {t('products.inventory.actions.manageInventory')}
+                            </Link>
+                        )}
+                        <Typography variant='h5' fontWeight={600} lineHeight={1}>
+                            {totalStock}
+                        </Typography>
+                    </Box>
+                }
+            />
             <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 }, display: 'flex', flexDirection: 'column', gap: 0, '& > *': { mb: 3 } }}>
-                <Box>
-                    <CustomTextField
-                        fullWidth
-                        label={t('products.inventory.fields.totalStockQuantity')}
-                        placeholder='0'
-                        type='number'
-                        value={totalStock}
-                        InputProps={{
-                            readOnly: true,
-                        }}
-                        helperText={
-                            <>
-                                <Typography 
-                                    component='span' 
-                                    variant='caption' 
-                                    color='text.secondary'
-                                    sx={{ display: 'inline' }}
-                                >
-                                    {productData?.variants && Array.isArray(productData.variants) && productData.variants.length > 0 
-                                        ? t('products.inventory.helpers.autoCalculatedFromVariants')
-                                        : t('products.inventory.helpers.autoCalculatedFromProduct')}
-                                </Typography>
-                                {productData?.id && (
-                                    <>
-                                        {' '}
-                                        <Link
-                                            component='button'
-                                            variant='caption'
-                                            onClick={() => setInventoryModalOpen(true)}
-                                            sx={{ textDecoration: 'none', cursor: 'pointer', display: 'inline' }}
-                                        >
-                                            {t('products.inventory.actions.manageInventory')}
-                                        </Link>
-                                    </>
-                                )}
-                            </>
-                        }
-                    />
-                </Box>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
