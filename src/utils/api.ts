@@ -38,6 +38,14 @@ export const API_VERSIONS = {
   BFG2: 'v1'
 } as const
 
+/** Response shape for GET /api/v1/system/version/ */
+export type ServerVersionResponse = {
+  api_version: string
+  schema_version: string
+  bfg_version: string
+  build_id?: string
+}
+
 /**
  * Build API URL with version prefix
  */
@@ -58,6 +66,9 @@ export function buildApiUrl(
  * BFG API endpoints (v1)
  */
 export const bfgApi = {
+  // System (public)
+  serverVersion: () => buildApiUrl('/system/version/', API_VERSIONS.BFG2),
+
   // Common
   workspaces: () => buildApiUrl('/workspaces/', API_VERSIONS.BFG2),
   customers: () => buildApiUrl('/customers/', API_VERSIONS.BFG2),
@@ -160,6 +171,18 @@ export const bfgApi = {
     buildApiUrl('/agent/capabilities/', API_VERSIONS.BFG2) + (format ? `?format=${encodeURIComponent(format)}` : ''),
   agentExecute: () => buildApiUrl('/agent/execute/', API_VERSIONS.BFG2),
   agentChat: () => buildApiUrl('/agent/chat/', API_VERSIONS.BFG2),
+}
+
+/**
+ * Fetch running server version metadata (no auth).
+ */
+export async function fetchServerVersion(
+  options?: Pick<ApiFetchOptions, 'requestHost' | 'siteAdminScope' | 'storefrontScope'>
+): Promise<ServerVersionResponse> {
+  return apiFetch<ServerVersionResponse>(bfgApi.serverVersion(), {
+    ...options,
+    withAuth: false
+  })
 }
 
 /**
