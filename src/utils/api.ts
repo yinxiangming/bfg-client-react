@@ -189,6 +189,23 @@ export function getWorkspaceId(): string | null {
 }
 
 /**
+ * Read workspace_id from the JWT access token payload (for UI display).
+ * The backend embeds workspace_id as a signed claim so this is authoritative
+ * for the active tenant context without an extra API call.
+ */
+export function getWorkspaceIdFromJwt(): number | null {
+  if (typeof window === 'undefined') return null
+  const token = getWorkspaceToken()
+  if (!token) return null
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    return (payload as { workspace_id?: number }).workspace_id ?? null
+  } catch {
+    return null
+  }
+}
+
+/**
  * Workspace id for public storefront fetches only: never localStorage, never header by default.
  * Storefront tenant resolution should come from Host / X-Forwarded-Host.
  */
@@ -253,7 +270,9 @@ export function getApiHeaders(
     ...getApiLanguageHeaders(),
   }
   const useHostScopedRouting = options?.storefrontScope || options?.siteAdminScope
-  const workspaceId = useHostScopedRouting ? getStorefrontWorkspaceId() : getWorkspaceId()
+  // Authenticated requests don't need X-Workspace-ID — backend resolves workspace from JWT claim.
+  const isAuthenticated = options?.withAuth && !!getWorkspaceToken()
+  const workspaceId = isAuthenticated ? null : (useHostScopedRouting ? getStorefrontWorkspaceId() : getWorkspaceId())
   if (workspaceId) {
     headers['X-Workspace-ID'] = workspaceId
   }
@@ -299,11 +318,15 @@ export function getAgentChatRequestInit(body: Record<string, unknown>): RequestI
     ...getApiLanguageHeaders(),
     'Content-Type': 'application/json'
   }
-  if (token) headers['Authorization'] = `Bearer ${token}`
-  const workspaceId = getWorkspaceId()
-  if (workspaceId) headers['X-Workspace-ID'] = workspaceId
-  else if (typeof window !== 'undefined') {
-    headers['X-Forwarded-Host'] = window.location.host
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+    // Workspace resolved from JWT claim by backend; no X-Workspace-ID needed.
+  } else {
+    const workspaceId = getWorkspaceId()
+    if (workspaceId) headers['X-Workspace-ID'] = workspaceId
+    else if (typeof window !== 'undefined') {
+      headers['X-Forwarded-Host'] = window.location.host
+    }
   }
   return { method: 'POST', headers, body: JSON.stringify(body) }
 }
