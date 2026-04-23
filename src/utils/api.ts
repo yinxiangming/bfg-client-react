@@ -39,10 +39,20 @@ export const API_VERSIONS = {
 } as const
 
 /** Response shape for GET /api/v1/system/version/ */
+export type DjangoLocalAppVersion = {
+  id: string
+  version: string
+}
+
+/** Response shape for GET /api/v1/system/version/ */
 export type ServerVersionResponse = {
   api_version: string
   schema_version: string
   bfg_version: string
+  /** Present when API includes workspace API server app metadata. */
+  workspace_server_app_version?: string
+  /** Django apps under apps.* (workspace server extensions). */
+  django_local_apps?: DjangoLocalAppVersion[]
   build_id?: string
 }
 

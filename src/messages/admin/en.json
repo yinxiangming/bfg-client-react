@@ -3549,8 +3549,35 @@
           "users": "Users",
           "roles": "Roles",
           "email": "Email",
-          "apiKeys": "API Keys"
+          "apiKeys": "API Keys",
+          "versions": "Versions"
         }
+      },
+      "versions": {
+        "intro": "Runtime versions for the BFG API, this admin app, server-side Django extensions, and loaded Next.js plugins.",
+        "sections": {
+          "api": "API & server library",
+          "adminClient": "Admin client (Next.js)",
+          "djangoExtensions": "Server extension apps (Django)",
+          "nextExtensions": "Admin plugins (Next.js)"
+        },
+        "labels": {
+          "bfg": "BFG (library)",
+          "workspaceServerApp": "Workspace API server app",
+          "apiVersion": "API version",
+          "schemaVersion": "OpenAPI schema version",
+          "buildId": "Build / Git revision",
+          "packageName": "npm package",
+          "clientVersion": "Admin app version"
+        },
+        "table": {
+          "appId": "App",
+          "extensionId": "Plugin id",
+          "extensionName": "Name",
+          "version": "Version"
+        },
+        "emptyDjangoApps": "No Django extension apps are registered for this workspace API.",
+        "emptyPlugins": "No admin plugins are loaded for this build."
       },
       "email": {
         "title": "Email configuration",

@@ -3549,8 +3549,35 @@
           "users": "用户",
           "roles": "角色",
           "email": "邮件",
-          "apiKeys": "API 密钥"
+          "apiKeys": "API 密钥",
+          "versions": "版本信息"
         }
+      },
+      "versions": {
+        "intro": "展示 BFG 接口、本管理端、服务端 Django 扩展应用，以及当前已加载的 Next 管理插件的版本信息。",
+        "sections": {
+          "api": "接口与依赖",
+          "adminClient": "管理端（Next.js）",
+          "djangoExtensions": "服务端扩展（Django apps）",
+          "nextExtensions": "管理端插件（Next.js）"
+        },
+        "labels": {
+          "bfg": "BFG 库版本",
+          "workspaceServerApp": "工作区 API 服务应用",
+          "apiVersion": "API 版本",
+          "schemaVersion": "OpenAPI 文档版本",
+          "buildId": "构建 / Git 修订",
+          "packageName": "npm 包名",
+          "clientVersion": "管理端版本"
+        },
+        "table": {
+          "appId": "应用",
+          "extensionId": "插件 ID",
+          "extensionName": "名称",
+          "version": "版本"
+        },
+        "emptyDjangoApps": "当前工作区 API 未注册 Django 扩展应用。",
+        "emptyPlugins": "当前构建未加载管理端插件。"
       },
       "email": {
         "title": "邮件配置",

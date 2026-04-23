@@ -34,6 +34,7 @@ import UsersListTable from './UsersListTable'
 import RolesListTable from './RolesListTable'
 import EmailTab from './EmailTab'
 import APIKeysTab from './APIKeysTab'
+import VersionsTab from './VersionsTab'
 import {
   getWorkspaceSettings,
   updateGeneralSettings,
@@ -554,6 +555,7 @@ const GeneralSettingsPage = () => {
                 <Tab label={t('settings.general.page.tabs.roles')} icon={<i className='tabler-shield' />} iconPosition='start' value='roles' />
                 <Tab label={t('settings.general.page.tabs.email')} icon={<i className='tabler-mail' />} iconPosition='start' value='email' />
                 <Tab label={t('settings.general.page.tabs.apiKeys')} icon={<i className='tabler-key' />} iconPosition='start' value='api-keys' />
+                <Tab label={t('settings.general.page.tabs.versions')} icon={<i className='tabler-tag' />} iconPosition='start' value='versions' />
               </CustomTabList>
             </CardContent>
 
@@ -1199,6 +1201,10 @@ const GeneralSettingsPage = () => {
             {/* API Keys Tab */}
             <TabPanel value='api-keys' className='p-0'>
               <APIKeysTab />
+            </TabPanel>
+
+            <TabPanel value='versions' className='p-0'>
+              <VersionsTab />
             </TabPanel>
           </TabContext>
         </Card>

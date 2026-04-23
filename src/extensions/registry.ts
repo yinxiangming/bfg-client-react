@@ -58,6 +58,8 @@ export function getTargetSlot(ext: PageSlotExtension): string | undefined {
 export interface Extension {
   id: string
   name: string
+  /** Optional semver or build label for admin “About / versions”. */
+  version?: string
   priority?: number           // global priority, default 100
   enabled?: boolean | (() => boolean)  // when false, disables the whole extension
   nav?: NavExtension[]
