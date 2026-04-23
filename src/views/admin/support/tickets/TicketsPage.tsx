@@ -18,8 +18,9 @@ import SchemaTable from '@/components/schema/SchemaTable'
 import SchemaForm from '@/components/schema/SchemaForm'
 import type { ListSchema, FormSchema, SchemaAction } from '@/types/schema'
 import { useApiData } from '@/hooks/useApiData'
+import { usePagedData } from '@/hooks/usePagedData'
 import {
-  getTickets,
+  getTicketsPage,
   getTicket,
   getTicketMessages,
   createTicket,
@@ -55,18 +56,22 @@ export default function TicketsPage({ viewMode = 'unassigned' }: TicketsPageProp
     fetchFn: getSupportOptions
   })
 
-  const fetchTicketsFn = useCallback(() => {
-    const params = { ...apiFilters }
+  const extraParams = useMemo(() => {
+    const params: Record<string, string> = { ...apiFilters }
     if (viewMode === 'my') params.scope = 'my'
     else if (viewMode === 'unassigned') params.scope = 'unassigned'
     else if (viewMode === 'in_progress') params.status = 'in_progress'
     else if (viewMode === 'closed') params.status = 'closed'
-    return getTickets(params)
+    return params
   }, [apiFilters, viewMode])
-  const { data: tickets, loading, error, refetch } = useApiData<SupportTicket[]>({
-    fetchFn: fetchTicketsFn,
-    deps: [apiFilters, viewMode]
-  })
+  const {
+    items: tickets,
+    loading,
+    error,
+    serverPagination,
+    onSearchChange,
+    refetch,
+  } = usePagedData<SupportTicket, Record<string, string>>(getTicketsPage, { extraParams })
 
   const schema = useMemo(
     () => buildTicketsSchema(t, optionsData ?? null),
@@ -258,6 +263,8 @@ export default function TicketsPage({ viewMode = 'unassigned' }: TicketsPageProp
         fetchDetailFn={(id) => getTicket(typeof id === 'string' ? parseInt(id, 10) : id)}
         filters={apiFilters}
         onFiltersChange={setApiFilters}
+        serverPagination={serverPagination}
+        onSearchChange={onSearchChange}
       />
 
       {fetchingDetail && (

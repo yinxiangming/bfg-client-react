@@ -12,8 +12,8 @@ import Typography from '@mui/material/Typography'
 // Component Imports
 import SchemaTable from '@/components/schema/SchemaTable'
 import type { ListSchema, SchemaAction } from '@/types/schema'
-import { useApiData } from '@/hooks/useApiData'
-import { getCustomers, getCustomer, deleteCustomer, type Customer } from '@/services/store'
+import { usePagedData } from '@/hooks/usePagedData'
+import { getCustomersPage, getCustomer, deleteCustomer, type Customer } from '@/services/store'
 import { useAppDialog } from '@/contexts/AppDialogContext'
 
 const buildCustomersSchema = (t: any): ListSchema => ({
@@ -50,9 +50,14 @@ export default function CustomersPage() {
   const { confirm } = useAppDialog()
   const customersSchema = buildCustomersSchema(t)
   
-  const { data: customers, loading, error, refetch } = useApiData<Customer[]>({
-    fetchFn: getCustomers
-  })
+  const {
+    items: customers,
+    loading,
+    error,
+    serverPagination,
+    onSearchChange,
+    refetch,
+  } = usePagedData<Customer>(getCustomersPage)
 
   const handleActionClick = async (action: SchemaAction, item: Customer | {}) => {
     if (action.id === 'delete' && 'id' in item) {
@@ -72,7 +77,7 @@ export default function CustomersPage() {
     }
   }
 
-  if (loading) {
+  if (loading && !customers) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
         <CircularProgress />
@@ -98,9 +103,12 @@ export default function CustomersPage() {
       <SchemaTable
         schema={customersSchema}
         data={customers || []}
+        loading={loading}
         onActionClick={handleActionClick}
         fetchDetailFn={(id) => getCustomer(typeof id === 'string' ? parseInt(id) : id)}
         basePath='/admin/store/customers'
+        serverPagination={serverPagination}
+        onSearchChange={onSearchChange}
       />
     </Box>
   )

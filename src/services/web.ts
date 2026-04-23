@@ -2,6 +2,7 @@
 
 import { apiFetch, bfgApi } from '@/utils/api'
 import { getSiteAdminOptions } from '@/services/settings'
+import type { PagedResult } from '@/services/store'
 
 export type Site = {
   id: number
@@ -675,6 +676,17 @@ export async function getTags(): Promise<Tag[]> {
   const response = await apiFetch<Tag[] | { results: Tag[] }>(bfgApi.tags(), getSiteAdminOptions())
   if (Array.isArray(response)) return response
   return response.results || []
+}
+
+export async function getTagsPage(params?: { page?: number; page_size?: number; search?: string }): Promise<PagedResult<Tag>> {
+  const q = new URLSearchParams()
+  if (params?.page) q.set('page', String(params.page))
+  if (params?.page_size) q.set('page_size', String(params.page_size))
+  if (params?.search) q.set('search', params.search)
+  const url = `${bfgApi.tags()}${q.toString() ? `?${q.toString()}` : ''}`
+  const response = await apiFetch<{ count: number; results: Tag[] } | Tag[]>(url, getSiteAdminOptions())
+  if (Array.isArray(response)) return { results: response, count: response.length }
+  return { results: response.results || [], count: response.count || 0 }
 }
 
 export async function getTag(id: number): Promise<Tag> {

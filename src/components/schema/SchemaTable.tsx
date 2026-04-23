@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 
 // i18n Imports
 import { useTranslations } from 'next-intl'
@@ -104,6 +104,16 @@ type SchemaTableProps<T = any> = {
   /** Controlled filters for API-mode filtering: parent passes params and refetches when they change */
   filters?: Record<string, string>
   onFiltersChange?: (filters: Record<string, string>) => void
+  /** Server-side pagination: when provided, data is the current page and client-side filtering/pagination are skipped */
+  serverPagination?: {
+    total: number
+    page: number
+    rowsPerPage: number
+    onPageChange: (page: number) => void
+    onRowsPerPageChange: (rowsPerPage: number) => void
+  }
+  /** Called with debounced search string when server-side pagination is active */
+  onSearchChange?: (search: string) => void
 }
 
 // Default status colors - only common/generic statuses
@@ -171,7 +181,9 @@ export default function SchemaTable<T extends { id: number | string }>({
   statusColors = defaultStatusColors,
   customFilters,
   filters: controlledFilters,
-  onFiltersChange
+  onFiltersChange,
+  serverPagination,
+  onSearchChange
 }: SchemaTableProps<T>) {
   const t = useTranslations('admin')
   // State
@@ -213,6 +225,23 @@ export default function SchemaTable<T extends { id: number | string }>({
     }, 300)
     return () => clearTimeout(timer)
   }, [search])
+
+  // Notify parent when search changes in server-pagination mode.
+  // Only fire when debouncedSearch actually changes — do NOT include the
+  // unstable serverPagination / onSearchChange props in deps, otherwise the
+  // effect would fire on every render and repeatedly reset pagination.
+  const onSearchChangeRef = useRef(onSearchChange)
+  useEffect(() => {
+    onSearchChangeRef.current = onSearchChange
+  })
+  const didMountSearchRef = useRef(false)
+  useEffect(() => {
+    if (!didMountSearchRef.current) {
+      didMountSearchRef.current = true
+      return
+    }
+    onSearchChangeRef.current?.(debouncedSearch)
+  }, [debouncedSearch])
 
   // Load filter options dynamically
   useEffect(() => {
@@ -263,6 +292,8 @@ export default function SchemaTable<T extends { id: number | string }>({
 
   // Filter and search data
   const filteredData = useMemo(() => {
+    // When server pagination is active, data is already the current page — skip client-side processing
+    if (serverPagination) return Array.isArray(data) ? [...data] : []
     let result = Array.isArray(data) ? [...data] : []
 
     // Apply search
@@ -319,9 +350,10 @@ export default function SchemaTable<T extends { id: number | string }>({
 
   // Pagination
   const paginatedData = useMemo(() => {
+    if (serverPagination) return filteredData
     const start = page * rowsPerPage
     return filteredData.slice(start, start + rowsPerPage)
-  }, [filteredData, page, rowsPerPage])
+  }, [serverPagination, filteredData, page, rowsPerPage])
 
   // Reset to first page when filters change
   useEffect(() => {
@@ -505,9 +537,13 @@ export default function SchemaTable<T extends { id: number | string }>({
   const globalActions = schema.actions?.filter(a => a.scope === 'global') || []
   const rowActions = schema.actions?.filter(a => a.scope === 'row') || []
 
-  const totalPages = Math.ceil(filteredData.length / rowsPerPage)
-  const startIndex = filteredData.length === 0 ? 0 : page * rowsPerPage + 1
-  const endIndex = Math.min((page + 1) * rowsPerPage, filteredData.length)
+  const _sp = serverPagination
+  const displayTotal = _sp ? _sp.total : filteredData.length
+  const displayPage = _sp ? _sp.page : page
+  const displayRowsPerPage = _sp ? _sp.rowsPerPage : rowsPerPage
+  const totalPages = Math.ceil(displayTotal / displayRowsPerPage)
+  const startIndex = displayTotal === 0 ? 0 : displayPage * displayRowsPerPage + 1
+  const endIndex = Math.min((displayPage + 1) * displayRowsPerPage, displayTotal)
 
   // Row selection handlers
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -1008,7 +1044,7 @@ export default function SchemaTable<T extends { id: number | string }>({
           {/* Left: Showing info + Items per page */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
             <Typography color='text.secondary' variant='body2' sx={{ fontSize: '0.875rem', minWidth: 'fit-content' }}>
-              {t('common.schemaTable.showing')} <Box component="span" sx={{ fontWeight: 500, color: 'text.primary' }}>{startIndex}</Box> {t('common.schemaTable.to')} <Box component="span" sx={{ fontWeight: 500, color: 'text.primary' }}>{endIndex}</Box> {t('common.schemaTable.of')} <Box component="span" sx={{ fontWeight: 500, color: 'text.primary' }}>{filteredData.length}</Box> {t('common.schemaTable.entries')}
+              {t('common.schemaTable.showing')} <Box component="span" sx={{ fontWeight: 500, color: 'text.primary' }}>{startIndex}</Box> {t('common.schemaTable.to')} <Box component="span" sx={{ fontWeight: 500, color: 'text.primary' }}>{endIndex}</Box> {t('common.schemaTable.of')} <Box component="span" sx={{ fontWeight: 500, color: 'text.primary' }}>{displayTotal}</Box> {t('common.schemaTable.entries')}
             </Typography>
           </Box>
 
@@ -1020,10 +1056,11 @@ export default function SchemaTable<T extends { id: number | string }>({
               </Typography>
               <FormControl size="small" sx={{ minWidth: 70 }}>
                 <Select
-                  value={rowsPerPage}
+                  value={displayRowsPerPage}
                   onChange={e => {
-                    setRowsPerPage(Number(e.target.value))
-                    setPage(0)
+                    const n = Number(e.target.value)
+                    if (_sp) { _sp.onRowsPerPageChange(n); _sp.onPageChange(0) }
+                    else { setRowsPerPage(n); setPage(0) }
                   }}
                   displayEmpty
                   sx={{ fontSize: '0.875rem', height: '38px' }}
@@ -1040,8 +1077,8 @@ export default function SchemaTable<T extends { id: number | string }>({
               color='primary'
               variant='outlined'
               count={totalPages}
-              page={page + 1}
-              onChange={(_, newPage) => setPage(newPage - 1)}
+              page={displayPage + 1}
+              onChange={(_, newPage) => _sp ? _sp.onPageChange(newPage - 1) : setPage(newPage - 1)}
               showFirstButton
               showLastButton
               sx={{

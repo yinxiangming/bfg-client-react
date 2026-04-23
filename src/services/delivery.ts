@@ -3,6 +3,7 @@
 import { apiFetch, bfgApi } from '@/utils/api'
 import { getSiteAdminOptions } from '@/services/settings'
 import type { FormSchema } from '@/types/schema'
+import type { PagedResult } from '@/services/store'
 
 export type Warehouse = {
   id: number
@@ -150,6 +151,17 @@ export async function getWarehouses(): Promise<Warehouse[]> {
     return response
   }
   return response.results || response.data || []
+}
+
+export async function getWarehousesPage(params?: { page?: number; page_size?: number; search?: string }): Promise<PagedResult<Warehouse>> {
+  const q = new URLSearchParams()
+  if (params?.page) q.set('page', String(params.page))
+  if (params?.page_size) q.set('page_size', String(params.page_size))
+  if (params?.search) q.set('search', params.search)
+  const url = `${bfgApi.warehouses()}${q.toString() ? `?${q.toString()}` : ''}`
+  const response = await apiFetch<{ count: number; results: Warehouse[] } | Warehouse[]>(url, getSiteAdminOptions())
+  if (Array.isArray(response)) return { results: response, count: response.length }
+  return { results: response.results || [], count: response.count || 0 }
 }
 
 export async function getWarehouse(id: number): Promise<Warehouse> {
