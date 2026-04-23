@@ -27,10 +27,10 @@ import { productsSchema } from '@/data/storeSchemas'
 import type { SchemaResponse } from '@/types/schema'
 
 // Service Imports
-import { getProducts, deleteProduct, updateProduct, getCategoriesTree, type Product, type Category } from '@/services/store'
+import { getProductsPage, deleteProduct, updateProduct, getCategoriesTree, type Product, type Category } from '@/services/store'
 
 // Hook Imports
-import { useApiData } from '@/hooks/useApiData'
+import { usePagedData } from '@/hooks/usePagedData'
 
 // Type Imports
 import type { SchemaAction } from '@/types/schema'
@@ -88,10 +88,21 @@ const ProductListTable = () => {
     }
   }, [selectedCategoryId, categories])
 
-  const { data: products, loading, error, refetch } = useApiData<Product[]>({
-    fetchFn: () => getProducts(selectedCategoryId ? { category: selectedCategoryId } : undefined),
-    deps: [selectedCategoryId] // Refetch when category changes
-  })
+  const extraParams = useMemo(
+    () => (selectedCategoryId ? { category: selectedCategoryId } : {}),
+    [selectedCategoryId]
+  )
+  const {
+    items: products,
+    count: totalCount,
+    loading,
+    error,
+    setPage,
+    refetch,
+    serverPagination,
+    onSearchChange: handleSearchChange,
+  } = usePagedData<Product>(getProductsPage, { extraParams })
+
   const [inventoryModalOpen, setInventoryModalOpen] = useState(false)
   const [inventoryModalProductId, setInventoryModalProductId] = useState<number | undefined>(undefined)
 
@@ -108,7 +119,8 @@ const ProductListTable = () => {
   const handleCategoryChange = (selectedCategories: Category[]) => {
     const category = selectedCategories.length > 0 ? selectedCategories[0] : null
     setSelectedCategory(category)
-    
+    setPage(0)
+
     // Update URL with category parameter
     const params = new URLSearchParams(searchParams.toString())
     if (category) {
@@ -432,6 +444,8 @@ const ProductListTable = () => {
           Published: 'success',
           Inactive: 'error'
         }}
+        serverPagination={serverPagination}
+        onSearchChange={handleSearchChange}
       />
       {inventoryModalProductId && (
         <VariantInventoryModal

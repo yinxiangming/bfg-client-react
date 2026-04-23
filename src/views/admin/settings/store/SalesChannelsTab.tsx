@@ -11,10 +11,10 @@ import CircularProgress from '@mui/material/CircularProgress'
 
 import SchemaTable from '@/components/schema/SchemaTable'
 import type { ListSchema, SchemaAction } from '@/types/schema'
-import { useApiData } from '@/hooks/useApiData'
+import { usePagedData } from '@/hooks/usePagedData'
 import SalesChannelEditDialog from './SalesChannelEditDialog'
 import {
-  getSalesChannels,
+  getSalesChannelsPage,
   getSalesChannel,
   createSalesChannel,
   updateSalesChannel,
@@ -77,16 +77,14 @@ const SalesChannelsTab = () => {
   const t = useTranslations('admin')
   const salesChannelsSchema = useMemo(() => buildSalesChannelsSchema(t), [t])
 
-  const { data, loading, error, refetch } = useApiData<SalesChannel[]>({
-    fetchFn: async () => {
-      const result = await getSalesChannels()
-      if (Array.isArray(result)) return result
-      if (result && typeof result === 'object' && 'results' in result && Array.isArray((result as any).results)) {
-        return (result as any).results
-      }
-      return []
-    }
-  })
+  const {
+    items: data,
+    loading,
+    error,
+    serverPagination,
+    onSearchChange,
+    refetch,
+  } = usePagedData<SalesChannel>(getSalesChannelsPage)
   const [editOpen, setEditOpen] = useState(false)
   const [selected, setSelected] = useState<SalesChannel | null>(null)
 
@@ -125,7 +123,7 @@ const SalesChannelsTab = () => {
     }
   }
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
         <CircularProgress />
@@ -146,8 +144,11 @@ const SalesChannelsTab = () => {
       <SchemaTable
         schema={salesChannelsSchema}
         data={data || []}
+        loading={loading}
         onActionClick={handleActionClick}
         fetchDetailFn={(id) => getSalesChannel(typeof id === 'string' ? parseInt(id) : id)}
+        serverPagination={serverPagination}
+        onSearchChange={onSearchChange}
       />
       <SalesChannelEditDialog
         open={editOpen}

@@ -12,10 +12,10 @@ import Typography from '@mui/material/Typography'
 
 import SchemaTable from '@/components/schema/SchemaTable'
 import SchemaForm from '@/components/schema/SchemaForm'
-import type { ListSchema, SchemaAction } from '@/types/schema'
-import { useApiData } from '@/hooks/useApiData'
+import type { SchemaAction } from '@/types/schema'
+import { usePagedData } from '@/hooks/usePagedData'
 import {
-  getStores,
+  getStoresPage,
   getStore,
   createStore,
   updateStore,
@@ -54,9 +54,14 @@ export default function StoresPage() {
   const listSchema = schema.list!
   const formSchema = schema.form!
 
-  const { data: stores, loading, error, refetch } = useApiData<Store[]>({
-    fetchFn: getStores
-  })
+  const {
+    items: stores,
+    loading,
+    error,
+    serverPagination,
+    onSearchChange,
+    refetch,
+  } = usePagedData<Store>(getStoresPage)
 
   const [editItem, setEditItem] = useState<Store | Partial<Store> | null>(null)
   const [fetchingDetail, setFetchingDetail] = useState(false)
@@ -149,7 +154,7 @@ export default function StoresPage() {
 
   const handleCancel = () => setEditItem(null)
 
-  if (loading) {
+  if (loading && !stores) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
         <CircularProgress />
@@ -175,9 +180,12 @@ export default function StoresPage() {
       <SchemaTable
         schema={listSchema}
         data={stores ?? []}
+        loading={loading}
         onActionClick={handleActionClick}
         fetchDetailFn={(id) => getStore(typeof id === 'string' ? parseInt(id, 10) : id)}
         basePath='/admin/store/stores'
+        serverPagination={serverPagination}
+        onSearchChange={onSearchChange}
       />
 
       {fetchingDetail && (

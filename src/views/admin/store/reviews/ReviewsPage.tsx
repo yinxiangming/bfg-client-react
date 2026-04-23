@@ -13,14 +13,13 @@ import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import SchemaTable from '@/components/schema/SchemaTable'
 import type { ListSchema, SchemaAction, SchemaFilter } from '@/types/schema'
-import { useApiData } from '@/hooks/useApiData'
+import { usePagedData } from '@/hooks/usePagedData'
 import {
-  getReviews,
+  getReviewsPage,
   approveReview,
   rejectReview,
   deleteReview,
-  type ProductReview as AdminProductReview,
-  type GetReviewsParams
+  type ProductReview as AdminProductReview
 } from '@/services/store'
 import { formatDate } from '@/utils/format'
 import { bfgApi } from '@/utils/api'
@@ -59,31 +58,6 @@ function buildReviewsSchema(
         sortable: true
       },
       {
-        field: 'rating',
-        label: t('reviews.listPage.schema.columns.rating'),
-        type: 'number',
-        sortable: true,
-        render: (value: number) => (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
-            {renderStars(value ?? 0)}
-            <Typography component='span' variant='body2'>
-              {value ?? 0}/5
-            </Typography>
-          </Box>
-        )
-      },
-      {
-        field: 'title',
-        label: t('reviews.listPage.schema.columns.title'),
-        type: 'string',
-        link: 'view',
-        render: (value: string, row: AdminProductReview) => {
-          const text = value || row.comment || '-'
-          const truncated = typeof text === 'string' && text.length > 60 ? text.slice(0, 60) + '…' : text
-          return truncated
-        }
-      },
-      {
         field: 'is_approved',
         label: t('reviews.listPage.schema.columns.status'),
         type: 'select',
@@ -107,6 +81,31 @@ function buildReviewsSchema(
               style={approved ? undefined : { cursor: 'pointer' }}
             />
           )
+        }
+      },
+      {
+        field: 'rating',
+        label: t('reviews.listPage.schema.columns.rating'),
+        type: 'number',
+        sortable: true,
+        render: (value: number) => (
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25 }}>
+            {renderStars(value ?? 0)}
+            <Typography component='span' variant='body2'>
+              {value ?? 0}/5
+            </Typography>
+          </Box>
+        )
+      },
+      {
+        field: 'title',
+        label: t('reviews.listPage.schema.columns.title'),
+        type: 'string',
+        link: 'view',
+        render: (value: string, row: AdminProductReview) => {
+          const text = value || row.comment || '-'
+          const truncated = typeof text === 'string' && text.length > 60 ? text.slice(0, 60) + '…' : text
+          return truncated
         }
       },
       {
@@ -177,10 +176,15 @@ export default function ReviewsPage() {
   const [apiFilters, setApiFilters] = useState<Record<string, string>>({})
   const [selectedReview, setSelectedReview] = useState<AdminProductReview | null>(null)
 
-  const { data: reviews, loading, error, refetch } = useApiData<AdminProductReview[]>({
-    fetchFn: useCallback(() => getReviews(apiFilters as GetReviewsParams), [apiFilters]),
-    deps: [JSON.stringify(apiFilters)]
-  })
+  const extraParams = useMemo(() => ({ ...apiFilters }), [apiFilters])
+  const {
+    items: reviews,
+    loading,
+    error,
+    serverPagination,
+    onSearchChange,
+    refetch,
+  } = usePagedData<AdminProductReview, Record<string, string>>(getReviewsPage, { extraParams })
 
   const handleApprove = useCallback(
     async (row: AdminProductReview) => {
@@ -252,6 +256,8 @@ export default function ReviewsPage() {
         onActionClick={handleActionClick}
         filters={apiFilters}
         onFiltersChange={setApiFilters}
+        serverPagination={serverPagination}
+        onSearchChange={onSearchChange}
       />
 
       <Dialog open={!!selectedReview} onClose={() => setSelectedReview(null)} maxWidth='sm' fullWidth>

@@ -13,8 +13,8 @@ import IconButton from '@mui/material/IconButton'
 
 import SchemaTable from '@/components/schema/SchemaTable'
 import type { ListSchema, SchemaAction, SchemaFilter } from '@/types/schema'
-import { useApiData } from '@/hooks/useApiData'
-import { getOrders, getOrder, deleteOrder, updateOrder, type Order, type OrderItemSummary, type OrderListParams } from '@/services/store'
+import { usePagedData } from '@/hooks/usePagedData'
+import { getOrdersPage, getOrder, deleteOrder, updateOrder, type Order, type OrderItemSummary } from '@/services/store'
 import { getWorkspaceSettings } from '@/services/settings'
 import { formatCurrency, formatDate } from '@/utils/format'
 import { bfgApi } from '@/utils/api'
@@ -103,14 +103,6 @@ const buildOrdersSchema = (
       }
     },
     {
-      field: 'store',
-      label: t('orders.listPage.schema.columns.store'),
-      type: 'string',
-      render: (value: any, row: any) => {
-        return row.store_name || value || '-'
-      }
-    },
-    {
       field: 'total',
       label: t('orders.listPage.schema.columns.total'),
       type: 'currency',
@@ -195,6 +187,14 @@ const buildOrdersSchema = (
             }}
           />
         )
+      }
+    },
+    {
+      field: 'store',
+      label: t('orders.listPage.schema.columns.store'),
+      type: 'string',
+      render: (value: any, row: any) => {
+        return row.store_name || value || '-'
       }
     },
     {
@@ -337,10 +337,15 @@ export default function OrdersPage() {
   )
 
   const [apiFilters, setApiFilters] = useState<Record<string, string>>({})
-  const { data: orders, loading, error, refetch } = useApiData<Order[]>({
-    fetchFn: useCallback(() => getOrders(apiFilters as OrderListParams), [apiFilters]),
-    deps: [JSON.stringify(apiFilters)]
-  })
+  const extraParams = useMemo(() => ({ ...apiFilters }), [apiFilters])
+  const {
+    items: orders,
+    loading,
+    error,
+    serverPagination,
+    onSearchChange,
+    refetch,
+  } = usePagedData<Order, Record<string, string>>(getOrdersPage, { extraParams })
 
   const orderForStatus = statusPopover.orderId != null ? orders?.find(o => o.id === statusPopover.orderId) : null
   const orderForPayment = paymentPopover.orderId != null ? orders?.find(o => o.id === paymentPopover.orderId) : null
@@ -432,6 +437,8 @@ export default function OrdersPage() {
         basePath='/admin/store/orders'
         filters={apiFilters}
         onFiltersChange={setApiFilters}
+        serverPagination={serverPagination}
+        onSearchChange={onSearchChange}
       />
       <OrderPackagesModal
         open={logisticsModalOrderId != null}

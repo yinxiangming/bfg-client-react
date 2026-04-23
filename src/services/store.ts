@@ -196,6 +196,17 @@ export async function getStores(): Promise<Store[]> {
   return response.results || response.data || []
 }
 
+export async function getStoresPage(params?: { page?: number; page_size?: number; search?: string }): Promise<PagedResult<Store>> {
+  const searchParams = new URLSearchParams()
+  if (params?.page) searchParams.append('page', String(params.page))
+  if (params?.page_size) searchParams.append('page_size', String(params.page_size))
+  if (params?.search) searchParams.append('search', params.search)
+  const url = `${bfgApi.stores()}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
+  const response = await apiFetch<{ count: number; results: Store[] } | Store[]>(url, getSiteAdminOptions())
+  if (Array.isArray(response)) return { results: response, count: response.length }
+  return { results: response.results || [], count: response.count || 0 }
+}
+
 export async function getStore(id: number): Promise<Store> {
   return apiFetch<Store>(`${bfgApi.stores()}${id}/`, getSiteAdminOptions())
 }
@@ -240,6 +251,17 @@ export async function getSalesChannels(): Promise<SalesChannel[]> {
   return response.results || response.data || []
 }
 
+export async function getSalesChannelsPage(params?: { page?: number; page_size?: number; search?: string }): Promise<PagedResult<SalesChannel>> {
+  const searchParams = new URLSearchParams()
+  if (params?.page) searchParams.append('page', String(params.page))
+  if (params?.page_size) searchParams.append('page_size', String(params.page_size))
+  if (params?.search) searchParams.append('search', params.search)
+  const url = `${bfgApi.salesChannels()}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
+  const response = await apiFetch<{ count: number; results: SalesChannel[] } | SalesChannel[]>(url, getSiteAdminOptions())
+  if (Array.isArray(response)) return { results: response, count: response.length }
+  return { results: response.results || [], count: response.count || 0 }
+}
+
 export async function getSalesChannel(id: number): Promise<SalesChannel> {
   return apiFetch<SalesChannel>(`${bfgApi.salesChannels()}${id}/`, getSiteAdminOptions())
 }
@@ -274,6 +296,17 @@ export async function getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
     return response
   }
   return response.results || response.data || []
+}
+
+export async function getSubscriptionPlansPage(params?: { page?: number; page_size?: number; search?: string }): Promise<PagedResult<SubscriptionPlan>> {
+  const searchParams = new URLSearchParams()
+  if (params?.page) searchParams.append('page', String(params.page))
+  if (params?.page_size) searchParams.append('page_size', String(params.page_size))
+  if (params?.search) searchParams.append('search', params.search)
+  const url = `${bfgApi.subscriptionPlans()}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
+  const response = await apiFetch<{ count: number; results: SubscriptionPlan[] } | SubscriptionPlan[]>(url, getSiteAdminOptions())
+  if (Array.isArray(response)) return { results: response, count: response.length }
+  return { results: response.results || [], count: response.count || 0 }
 }
 
 export async function getSubscriptionPlan(id: number): Promise<SubscriptionPlan> {
@@ -360,6 +393,20 @@ export async function getOrders(params?: OrderListParams): Promise<Order[]> {
     return response
   }
   return response.results || response.data || []
+}
+
+export async function getOrdersPage(params?: OrderListParams & { page?: number; page_size?: number; search?: string }): Promise<PagedResult<Order>> {
+  let url = bfgApi.orders().replace(/\/+$/, '')
+  const qs = new URLSearchParams()
+  if (params) {
+    Object.entries(params).forEach(([k, v]) => {
+      if (v != null && v !== '') qs.set(k, String(v))
+    })
+  }
+  if (qs.toString()) url += `?${qs.toString()}`
+  const response = await apiFetch<{ count: number; results: Order[] } | Order[]>(url, getSiteAdminOptions())
+  if (Array.isArray(response)) return { results: response, count: response.length }
+  return { results: response.results || [], count: response.count || 0 }
 }
 
 export async function getOrder(id: number): Promise<Order> {
@@ -520,6 +567,19 @@ export async function getReviews(params?: GetReviewsParams): Promise<ProductRevi
   return response.results || response.data || []
 }
 
+export async function getReviewsPage(params?: GetReviewsParams & { page?: number; page_size?: number; search?: string }): Promise<PagedResult<ProductReview>> {
+  const q = new URLSearchParams()
+  if (params?.product != null) q.set('product', String(params.product))
+  if (params?.is_approved != null && params.is_approved !== '') q.set('is_approved', String(params.is_approved))
+  if (params?.page) q.set('page', String(params.page))
+  if (params?.page_size) q.set('page_size', String(params.page_size))
+  if (params?.search) q.set('search', params.search)
+  const url = q.toString() ? `${bfgApi.reviews().replace(/\/+$/, '')}?${q}` : bfgApi.reviews()
+  const response = await apiFetch<{ count: number; results: ProductReview[] } | ProductReview[]>(url, getSiteAdminOptions())
+  if (Array.isArray(response)) return { results: response, count: response.length }
+  return { results: response.results || [], count: response.count || 0 }
+}
+
 export async function approveReview(id: number): Promise<ProductReview> {
   return apiFetch<ProductReview>(`${bfgApi.reviews()}${id}/approve/`, { ...getSiteAdminOptions(), method: 'POST' })
 }
@@ -586,6 +646,17 @@ export async function getCustomers(params?: GetCustomersParams): Promise<Custome
     return response
   }
   return response.results || response.data || []
+}
+
+export async function getCustomersPage(params?: GetCustomersParams & { page?: number; page_size?: number }): Promise<PagedResult<Customer>> {
+  const q = new URLSearchParams()
+  if (params?.search?.trim()) q.set('search', params.search.trim())
+  if (params?.page) q.set('page', String(params.page))
+  if (params?.page_size) q.set('page_size', String(params.page_size))
+  const url = q.toString() ? `${bfgApi.customers().replace(/\/+$/, '')}?${q}` : bfgApi.customers()
+  const response = await apiFetch<{ count: number; results: Customer[] } | Customer[]>(url, getSiteAdminOptions())
+  if (Array.isArray(response)) return { results: response, count: response.length }
+  return { results: response.results || [], count: response.count || 0 }
 }
 
 export async function getCustomer(id: number): Promise<Customer> {
@@ -717,14 +788,21 @@ export interface Tag {
   created_at?: string
 }
 
-export async function getProducts(params?: {
+export interface PagedResult<T> {
+  results: T[]
+  count: number
+}
+
+type ProductsParams = {
   search?: string
   category?: number
   tag?: number
   featured?: boolean
   page?: number
   page_size?: number
-}): Promise<Product[]> {
+}
+
+function buildProductsUrl(params?: ProductsParams): string {
   const searchParams = new URLSearchParams()
   if (params?.search) searchParams.append('search', params.search)
   if (params?.category) searchParams.append('category', params.category.toString())
@@ -732,13 +810,19 @@ export async function getProducts(params?: {
   if (params?.featured !== undefined) searchParams.append('featured', params.featured.toString())
   if (params?.page) searchParams.append('page', params.page.toString())
   if (params?.page_size) searchParams.append('page_size', params.page_size.toString())
+  return `${bfgApi.products()}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
+}
 
-  const url = `${bfgApi.products()}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
-  const response = await apiFetch<Product[] | { results?: Product[]; data?: Product[] }>(url, getSiteAdminOptions())
-  if (Array.isArray(response)) {
-    return response
-  }
+export async function getProducts(params?: ProductsParams): Promise<Product[]> {
+  const response = await apiFetch<Product[] | { results?: Product[]; data?: Product[] }>(buildProductsUrl(params), getSiteAdminOptions())
+  if (Array.isArray(response)) return response
   return response.results || response.data || []
+}
+
+export async function getProductsPage(params?: ProductsParams): Promise<PagedResult<Product>> {
+  const response = await apiFetch<{ count: number; results: Product[] } | Product[]>(buildProductsUrl(params), getSiteAdminOptions())
+  if (Array.isArray(response)) return { results: response, count: response.length }
+  return { results: response.results || [], count: response.count || 0 }
 }
 
 export async function getProduct(id: number): Promise<Product> {
@@ -799,6 +883,19 @@ export async function getCategories(lang: string = 'en'): Promise<Category[]> {
     list = Array.isArray(enResponse) ? enResponse : (enResponse.results || enResponse.data || [])
   }
   return list
+}
+
+export async function getCategoriesPage(params?: { lang?: string; page?: number; page_size?: number; search?: string }): Promise<PagedResult<Category>> {
+  const lang = params?.lang ?? 'en'
+  const q = new URLSearchParams()
+  q.set('lang', lang)
+  if (params?.page) q.set('page', String(params.page))
+  if (params?.page_size) q.set('page_size', String(params.page_size))
+  if (params?.search) q.set('search', params.search)
+  const url = `${bfgApi.products()}categories/?${q.toString()}`
+  const response = await apiFetch<{ count: number; results: Category[] } | Category[]>(url, getSiteAdminOptions())
+  if (Array.isArray(response)) return { results: response, count: response.length }
+  return { results: response.results || [], count: response.count || 0 }
 }
 
 export async function getCategoriesTree(lang: string = 'en'): Promise<Category[]> {

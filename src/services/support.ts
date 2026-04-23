@@ -1,6 +1,7 @@
 // Support API service (BFG Support module)
 
 import { apiFetch, bfgApi } from '@/utils/api'
+import type { PagedResult } from '@/services/store'
 
 export interface SupportOptions {
   ticket_statuses: Array<{ value: string; label: string }>
@@ -88,6 +89,20 @@ export async function getTickets(params?: { status?: string; priority?: string; 
   const response = await apiFetch<SupportTicket[] | { results: SupportTicket[] }>(url)
   if (Array.isArray(response)) return response
   return response?.results ?? []
+}
+
+export async function getTicketsPage(params?: { status?: string; priority?: string; scope?: 'my' | 'unassigned'; page?: number; page_size?: number; search?: string }): Promise<PagedResult<SupportTicket>> {
+  const qs = new URLSearchParams()
+  if (params?.scope) qs.set('scope', params.scope)
+  if (params?.status) qs.set('status', params.status)
+  if (params?.priority) qs.set('priority', params.priority)
+  if (params?.page) qs.set('page', String(params.page))
+  if (params?.page_size) qs.set('page_size', String(params.page_size))
+  if (params?.search) qs.set('search', params.search)
+  const url = qs.toString() ? `${bfgApi.tickets()}?${qs}` : bfgApi.tickets()
+  const response = await apiFetch<{ count: number; results: SupportTicket[] } | SupportTicket[]>(url)
+  if (Array.isArray(response)) return { results: response, count: response.length }
+  return { results: response.results || [], count: response.count || 0 }
 }
 
 export async function getTicket(id: number): Promise<SupportTicket> {
