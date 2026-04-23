@@ -101,7 +101,7 @@ const ProductListTable = () => {
     refetch,
     serverPagination,
     onSearchChange: handleSearchChange,
-  } = usePagedData<Product>(getProductsPage, { extraParams })
+  } = usePagedData<Product, { category?: number }>(getProductsPage, { extraParams })
 
   const [inventoryModalOpen, setInventoryModalOpen] = useState(false)
   const [inventoryModalProductId, setInventoryModalProductId] = useState<number | undefined>(undefined)
