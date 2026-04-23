@@ -85,8 +85,13 @@ class StorefrontApiClient {
       ...getApiLanguageHeaders(),
       ...(fetchOptions.headers as Record<string, string> || {})
     }
-    const workspaceId = getWorkspaceId()
-    if (workspaceId) headers['X-Workspace-ID'] = workspaceId
+    // X-Workspace-ID is only trusted by the backend in non-prod / for anonymous requests
+    // (see WorkspaceMiddleware). In prod the storefront resolves tenant via JWT claim or
+    // domain (X-Forwarded-Host), so sending this header is redundant and misleading.
+    if (process.env.NODE_ENV !== 'production') {
+      const workspaceId = getWorkspaceId()
+      if (workspaceId) headers['X-Workspace-ID'] = workspaceId
+    }
     const forwardedHost =
       requestHost ||
       (typeof window !== 'undefined' && typeof window.location?.host === 'string' && window.location.host
