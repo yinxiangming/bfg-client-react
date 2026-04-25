@@ -139,7 +139,7 @@ export default function ReviewsPage() {
           type: 'select',
           filterMode: 'api',
           optionsSource: 'api',
-          optionsApi: bfgApi.products(),
+          optionsApi: bfgApi.adminProducts(),
           optionsValueField: 'id',
           optionsLabelField: 'name'
         }

@@ -12,6 +12,9 @@ interface StaffRole {
   code: string
   description: string
   permissions: Record<string, string[] | boolean>
+  default_permissions: Record<string, string[] | boolean>
+  permissions_match_default: boolean
+  owner_module: string
   is_system: boolean
   is_active: boolean
   created_at: string
@@ -124,8 +127,11 @@ export default function RolesPage() {
   >({})
   const [saving, setSaving] = useState<number | null>(null)
   const [deleting, setDeleting] = useState<number | null>(null)
+  const [restoring, setRestoring] = useState<number | null>(null)
+  const [syncing, setSyncing] = useState(false)
   const [showCreate, setShowCreate] = useState(false)
   const [error, setError] = useState('')
+  const [syncResult, setSyncResult] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -169,6 +175,45 @@ export default function RolesPage() {
     }
   }
 
+  async function handleRestoreDefaults(role: StaffRole) {
+    if (!confirm(t('confirmRestore', { name: role.name }))) return
+    setRestoring(role.id)
+    try {
+      const data = await apiFetch<{ role: StaffRole }>(
+        `${bfgApi.staffRoles()}${role.id}/restore_defaults/`,
+        { method: 'POST' }
+      )
+      setRoles((prev) => prev.map((r) => (r.id === role.id ? data.role : r)))
+      setEditingPermissions((prev) => {
+        const next = { ...prev }
+        delete next[role.id]
+        return next
+      })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('restoreFailed'))
+    } finally {
+      setRestoring(null)
+    }
+  }
+
+  async function handleSyncSystemRoles() {
+    setSyncing(true)
+    setSyncResult(null)
+    try {
+      const data = await apiFetch<{ created: string[]; updated: string[]; skipped: string[] }>(
+        `${bfgApi.staffRoles()}sync_system_roles/`,
+        { method: 'POST' }
+      )
+      const total = data.created.length + data.updated.length
+      setSyncResult(t('syncResult', { created: data.created.length, updated: data.updated.length }))
+      if (total > 0) await load()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('syncFailed'))
+    } finally {
+      setSyncing(false)
+    }
+  }
+
   async function handleDelete(role: StaffRole) {
     if (!confirm(t('confirmDelete', { name: role.name }))) return
     setDeleting(role.id)
@@ -191,14 +236,31 @@ export default function RolesPage() {
             <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">{t('title')}</h1>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">{t('subtitle')}</p>
           </div>
-          <button
-            onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
-          >
-            <span className="text-lg leading-none">+</span>
-            {t('create')}
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleSyncSystemRoles}
+              disabled={syncing}
+              className="px-4 py-2 text-sm text-gray-600 dark:text-gray-200 border border-gray-300 dark:border-white/15 rounded-lg hover:bg-gray-50 dark:hover:bg-white/5 disabled:opacity-50"
+              title={t('syncTooltip')}
+            >
+              {syncing ? t('syncing') : t('sync')}
+            </button>
+            <button
+              onClick={() => setShowCreate(true)}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
+            >
+              <span className="text-lg leading-none">+</span>
+              {t('create')}
+            </button>
+          </div>
         </div>
+
+        {syncResult && (
+          <div className="mb-4 p-3 bg-green-50 dark:bg-green-500/10 border border-green-200 dark:border-green-500/30 text-green-700 dark:text-green-300 text-sm rounded-lg flex justify-between">
+            {syncResult}
+            <button onClick={() => setSyncResult(null)} className="text-green-500 hover:text-green-700 dark:hover:text-green-200">✕</button>
+          </div>
+        )}
 
         {error && (
           <div className="mb-4 p-3 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 text-red-700 dark:text-red-300 text-sm rounded-lg flex justify-between">
@@ -254,15 +316,31 @@ export default function RolesPage() {
 
                   {isExpanded && (
                     <div className="border-t border-gray-200 dark:border-white/10 px-5 py-4">
+                      {role.is_system && !role.permissions_match_default && !isDirty && (
+                        <div className="mb-3 p-2 rounded border border-amber-200 dark:border-amber-500/30 bg-amber-50 dark:bg-amber-500/10 text-xs text-amber-700 dark:text-amber-300">
+                          {t('overriddenNotice')}
+                        </div>
+                      )}
                       <RolePermissionMatrix
                         permissions={pendingPermissions ?? role.permissions}
-                        readOnly={role.is_system}
+                        readOnly={role.code === 'admin'}
                         onChange={(newPerms) =>
                           setEditingPermissions((prev) => ({ ...prev, [role.id]: newPerms }))
                         }
                       />
-                      <div className="flex justify-between items-center mt-4">
-                        <div>
+                      <div className="flex justify-between items-center mt-4 gap-2">
+                        <div className="flex gap-3">
+                          {role.is_system && role.code !== 'admin' && (
+                            <button
+                              type="button"
+                              onClick={() => handleRestoreDefaults(role)}
+                              disabled={restoring === role.id || role.permissions_match_default}
+                              className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-30"
+                              title={role.permissions_match_default ? t('alreadyDefault') : ''}
+                            >
+                              {restoring === role.id ? t('restoring') : t('restoreDefaults')}
+                            </button>
+                          )}
                           {!role.is_system && (
                             <button
                               type="button"
@@ -274,7 +352,7 @@ export default function RolesPage() {
                             </button>
                           )}
                         </div>
-                        {!role.is_system && (
+                        {role.code !== 'admin' && (
                           <div className="flex gap-2">
                             <button
                               type="button"

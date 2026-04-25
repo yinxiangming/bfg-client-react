@@ -4088,7 +4088,18 @@
         "saving": "Saving…",
         "saveFailed": "Save failed. Please try again.",
         "deleteFailed": "Delete failed.",
-        "confirmDelete": "Delete role \"{name}\"? This cannot be undone."
+        "confirmDelete": "Delete role \"{name}\"? This cannot be undone.",
+        "sync": "Sync system roles",
+        "syncing": "Syncing…",
+        "syncTooltip": "Pull in any newly-released system roles from BFG modules.",
+        "syncResult": "Sync complete: {created} new, {updated} refreshed.",
+        "syncFailed": "Failed to sync system roles.",
+        "restoreDefaults": "Restore defaults",
+        "restoring": "Restoring…",
+        "restoreFailed": "Failed to restore defaults.",
+        "confirmRestore": "Restore \"{name}\" to its system default permissions?",
+        "overriddenNotice": "This role's permissions differ from the system default. You can save further changes or click \"Restore defaults\" to revert.",
+        "alreadyDefault": "Permissions already match system defaults."
       },
       "create": {
         "title": "New role",

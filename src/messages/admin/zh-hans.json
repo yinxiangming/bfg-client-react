@@ -4088,7 +4088,18 @@
         "saving": "保存中…",
         "saveFailed": "保存失败，请重试",
         "deleteFailed": "删除失败",
-        "confirmDelete": "确认删除角色「{name}」？此操作不可恢复。"
+        "confirmDelete": "确认删除角色「{name}」？此操作不可恢复。",
+        "sync": "同步系统角色",
+        "syncing": "同步中…",
+        "syncTooltip": "从各 BFG 模块拉取新发布的系统角色。",
+        "syncResult": "同步完成：新建 {created}，刷新 {updated}。",
+        "syncFailed": "同步系统角色失败。",
+        "restoreDefaults": "恢复默认权限",
+        "restoring": "恢复中…",
+        "restoreFailed": "恢复默认权限失败。",
+        "confirmRestore": "将「{name}」恢复到系统默认权限？",
+        "overriddenNotice": "此角色权限已偏离系统默认值。可继续保存修改，或点击「恢复默认权限」回到系统默认。",
+        "alreadyDefault": "已与系统默认权限一致。"
       },
       "create": {
         "title": "新建角色",
