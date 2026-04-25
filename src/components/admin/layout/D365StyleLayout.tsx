@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 // Next Imports
 import { usePathname } from 'next/navigation'
@@ -16,6 +16,10 @@ import { adminNavItems } from '@/data/adminNavItems'
 // Type Imports
 import type { MenuNode } from '@/types/menu'
 
+// RBAC Imports
+import { useStaffMemberContext } from '@/contexts/StaffMemberContext'
+import { filterNavByAccess } from '@/utils/filterNavByAccess'
+
 // Config Imports
 import { layoutVariants, layoutConfig } from '@configs/layoutConfig'
 
@@ -28,9 +32,19 @@ const SidebarComponent = layoutVariants.sidebar[layoutConfig.sidebarVariant] || 
 
 const D365StyleLayout = ({ children, navItems = adminNavItems }: D365StyleLayoutProps) => {
   const pathname = usePathname()
+  const { staffMember, loading: staffLoading } = useStaffMemberContext()
   const [collapsed, setCollapsed] = useState(false)
   const [mobileOpen, setMobileOpen] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
+
+  const visibleNavItems = useMemo(() => {
+    if (staffLoading) return [] as MenuNode[]
+    return filterNavByAccess(navItems, {
+      isAdmin:
+        staffMember?.is_active === true && staffMember.role.code === 'admin',
+      permissions: staffMember?.is_active ? staffMember.role.permissions : null,
+    })
+  }, [navItems, staffMember, staffLoading])
 
   useEffect(() => {
     const checkSize = () => {
@@ -62,7 +76,7 @@ const D365StyleLayout = ({ children, navItems = adminNavItems }: D365StyleLayout
         {/* Sidebar */}
         <aside className={`d365-sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`}>
           <SidebarComponent
-            navItems={navItems}
+            navItems={visibleNavItems}
             activePath={pathname}
             collapsed={collapsed}
             onToggleCollapse={handleToggleCollapse}
