@@ -4096,13 +4096,17 @@
         "support": "Support"
       },
       "modules": {
-        "shop.product": "Products",
-        "shop.order": "Orders",
-        "shop.customer": "Customers",
-        "shop.category": "Categories",
+        "shop": {
+          "product": "Products",
+          "order": "Orders",
+          "customer": "Customers",
+          "category": "Categories"
+        },
         "delivery": "Delivery",
-        "finance.invoice": "Invoices",
-        "finance.payment": "Payments",
+        "finance": {
+          "invoice": "Invoices",
+          "payment": "Payments"
+        },
         "marketing": "Marketing",
         "web": "CMS Content",
         "support": "Tickets"

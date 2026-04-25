@@ -4096,13 +4096,17 @@
         "support": "支持"
       },
       "modules": {
-        "shop.product": "商品",
-        "shop.order": "订单",
-        "shop.customer": "客户",
-        "shop.category": "分类",
+        "shop": {
+          "product": "商品",
+          "order": "订单",
+          "customer": "客户",
+          "category": "分类"
+        },
         "delivery": "配送",
-        "finance.invoice": "发票",
-        "finance.payment": "支付",
+        "finance": {
+          "invoice": "发票",
+          "payment": "支付"
+        },
         "marketing": "营销",
         "web": "CMS 内容",
         "support": "工单支持"
