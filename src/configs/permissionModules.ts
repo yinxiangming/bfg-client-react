@@ -1,38 +1,41 @@
 export interface PermissionAction {
   key: string
-  label: string
+  /** Translation key under `staff.permissions.actions.<key>` in the admin namespace. */
+  i18nKey: string
 }
 
 export interface PermissionModule {
   key: string
-  label: string
+  /** Translation key under `staff.permissions.modules.<dottedKey>` in the admin namespace. */
+  i18nKey: string
+  /** Group identifier; rendered via `staff.permissions.groups.<group>`. */
   group: string
 }
 
 export const PERMISSION_ACTIONS: PermissionAction[] = [
-  { key: 'view', label: '查看' },
-  { key: 'list', label: '列表' },
-  { key: 'create', label: '新建' },
-  { key: 'update', label: '编辑' },
-  { key: 'delete', label: '删除' },
+  { key: 'view', i18nKey: 'view' },
+  { key: 'list', i18nKey: 'list' },
+  { key: 'create', i18nKey: 'create' },
+  { key: 'update', i18nKey: 'update' },
+  { key: 'delete', i18nKey: 'delete' },
 ]
 
 export const PERMISSION_MODULES: PermissionModule[] = [
-  { key: 'shop.product', label: '商品', group: '商城' },
-  { key: 'shop.order', label: '订单', group: '商城' },
-  { key: 'shop.customer', label: '客户', group: '商城' },
-  { key: 'shop.category', label: '分类', group: '商城' },
+  { key: 'shop.product', i18nKey: 'shop.product', group: 'shop' },
+  { key: 'shop.order', i18nKey: 'shop.order', group: 'shop' },
+  { key: 'shop.customer', i18nKey: 'shop.customer', group: 'shop' },
+  { key: 'shop.category', i18nKey: 'shop.category', group: 'shop' },
 
-  { key: 'delivery', label: '配送', group: '配送' },
+  { key: 'delivery', i18nKey: 'delivery', group: 'delivery' },
 
-  { key: 'finance.invoice', label: '发票', group: '财务' },
-  { key: 'finance.payment', label: '支付', group: '财务' },
+  { key: 'finance.invoice', i18nKey: 'finance.invoice', group: 'finance' },
+  { key: 'finance.payment', i18nKey: 'finance.payment', group: 'finance' },
 
-  { key: 'marketing', label: '营销', group: '营销' },
+  { key: 'marketing', i18nKey: 'marketing', group: 'marketing' },
 
-  { key: 'web', label: 'CMS 内容', group: '内容' },
+  { key: 'web', i18nKey: 'web', group: 'content' },
 
-  { key: 'support', label: '工单支持', group: '支持' },
+  { key: 'support', i18nKey: 'support', group: 'support' },
 ]
 
 export function groupModules(): { group: string; modules: PermissionModule[] }[] {

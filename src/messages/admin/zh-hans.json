@@ -36,7 +36,10 @@
     "resaleTimeslots": "时段",
     "resaleBookings": "预约",
     "resaleProducts": "商品",
-    "resalePayouts": "结算"
+    "resalePayouts": "结算",
+    "team": "团队",
+    "teamStaff": "员工",
+    "teamRoles": "角色与权限"
   },
   "common": {
     "networkUnreachable": "无法连接服务器，请确认 API 已启动。",
@@ -3998,6 +4001,112 @@
       "successMessage": "已添加：{name}",
       "errorRequired": "请填写产品型号",
       "errorSubmit": "提交失败，请重试"
+    }
+  },
+  "staff": {
+    "page": {
+      "title": "员工管理",
+      "subtitle": "{active} 名活跃员工 · 共 {total} 名",
+      "rolesLink": "角色权限",
+      "invite": "邀请员工",
+      "empty": "还没有员工，点击「邀请员工」添加。",
+      "loading": "加载中…",
+      "loadFailed": "加载失败",
+      "table": {
+        "member": "员工",
+        "role": "角色",
+        "status": "状态",
+        "joined": "加入时间",
+        "actions": "操作"
+      },
+      "status": {
+        "active": "活跃",
+        "inactive": "已停用",
+        "clickDeactivate": "点击停用",
+        "clickActivate": "点击启用"
+      },
+      "remove": "移除",
+      "confirmRemove": "确认移除员工「{name}」？",
+      "removeFailed": "移除失败",
+      "updateFailed": "更新失败"
+    },
+    "invite": {
+      "title": "邀请员工",
+      "emailPlaceholder": "输入用户邮箱",
+      "search": "查询",
+      "searching": "查询中…",
+      "notFound": "未找到该邮箱对应的用户，请确认邮箱或让用户先注册。",
+      "searchFailed": "查询用户失败",
+      "assignRole": "分配角色",
+      "cancel": "取消",
+      "submit": "确认邀请",
+      "submitting": "邀请中…",
+      "failed": "邀请失败"
+    },
+    "roles": {
+      "page": {
+        "title": "角色权限",
+        "subtitle": "管理工作区角色及其对各功能模块的访问权限",
+        "create": "新建角色",
+        "loading": "加载中…",
+        "loadFailed": "加载角色列表失败",
+        "system": "系统",
+        "unsaved": "未保存",
+        "deleteRole": "删除角色",
+        "deleting": "删除中…",
+        "discard": "撤销修改",
+        "save": "保存权限",
+        "saving": "保存中…",
+        "saveFailed": "保存失败，请重试",
+        "deleteFailed": "删除失败",
+        "confirmDelete": "确认删除角色「{name}」？此操作不可恢复。"
+      },
+      "create": {
+        "title": "新建角色",
+        "name": "角色名称",
+        "namePlaceholder": "例：内容编辑",
+        "description": "描述",
+        "descriptionPlaceholder": "可选，说明该角色的职责范围",
+        "cancel": "取消",
+        "submit": "创建",
+        "submitting": "创建中…",
+        "failed": "创建失败"
+      }
+    },
+    "permissions": {
+      "moduleHeader": "权限模块",
+      "selectAll": "全选",
+      "rowToggleAll": "全选",
+      "rowToggleNone": "取消全选",
+      "columnToggle": "全选/取消 {action}",
+      "readOnlyNotice": "系统角色权限不可修改",
+      "actions": {
+        "view": "查看",
+        "list": "列表",
+        "create": "新建",
+        "update": "编辑",
+        "delete": "删除"
+      },
+      "groups": {
+        "shop": "商城",
+        "delivery": "配送",
+        "finance": "财务",
+        "marketing": "营销",
+        "content": "内容",
+        "support": "支持"
+      },
+      "modules": {
+        "shop.product": "商品",
+        "shop.order": "订单",
+        "shop.customer": "客户",
+        "shop.category": "分类",
+        "delivery": "配送",
+        "finance.invoice": "发票",
+        "finance.payment": "支付",
+        "marketing": "营销",
+        "web": "CMS 内容",
+        "support": "工单支持"
+      }
     }
   }
 }

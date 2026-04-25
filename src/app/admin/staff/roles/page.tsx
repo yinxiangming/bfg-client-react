@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import { ProtectedPage } from '@/components/auth/ProtectedPage'
 import { RolePermissionMatrix } from '@/components/admin/RolePermissionMatrix'
 import { apiFetch, bfgApi } from '@/utils/api'
@@ -39,6 +40,7 @@ function CreateRoleModal({
   onClose: () => void
   onCreated: (role: StaffRole) => void
 }) {
+  const t = useTranslations('admin.staff.roles.create')
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [saving, setSaving] = useState(false)
@@ -55,7 +57,7 @@ function CreateRoleModal({
       })
       onCreated(role)
     } catch (err) {
-      setError(err instanceof Error ? err.message : '创建失败')
+      setError(err instanceof Error ? err.message : t('failed'))
     } finally {
       setSaving(false)
     }
@@ -64,28 +66,28 @@ function CreateRoleModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">新建角色</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('title')}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
-              角色名称 <span className="text-red-500">*</span>
+              {t('name')} <span className="text-red-500">*</span>
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              placeholder="例：内容编辑"
+              placeholder={t('namePlaceholder')}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">描述</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">{t('description')}</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
-              placeholder="可选，说明该角色的职责范围"
+              placeholder={t('descriptionPlaceholder')}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
             />
           </div>
@@ -96,14 +98,14 @@ function CreateRoleModal({
               onClick={onClose}
               className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900"
             >
-              取消
+              {t('cancel')}
             </button>
             <button
               type="submit"
               disabled={saving || !name.trim()}
               className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50"
             >
-              {saving ? '创建中…' : '创建'}
+              {saving ? t('submitting') : t('submit')}
             </button>
           </div>
         </form>
@@ -113,6 +115,7 @@ function CreateRoleModal({
 }
 
 export default function RolesPage() {
+  const t = useTranslations('admin.staff.roles.page')
   const [roles, setRoles] = useState<StaffRole[]>([])
   const [loading, setLoading] = useState(true)
   const [expandedId, setExpandedId] = useState<number | null>(null)
@@ -130,11 +133,11 @@ export default function RolesPage() {
       const data = await apiFetch<{ results: StaffRole[] }>(bfgApi.staffRoles())
       setRoles(data.results ?? (data as unknown as StaffRole[]))
     } catch {
-      setError('加载角色列表失败')
+      setError(t('loadFailed'))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     load()
@@ -159,21 +162,21 @@ export default function RolesPage() {
         return next
       })
     } catch {
-      setError('保存失败，请重试')
+      setError(t('saveFailed'))
     } finally {
       setSaving(null)
     }
   }
 
   async function handleDelete(role: StaffRole) {
-    if (!confirm(`确认删除角色「${role.name}」？此操作不可恢复。`)) return
+    if (!confirm(t('confirmDelete', { name: role.name }))) return
     setDeleting(role.id)
     try {
       await apiFetch(`${bfgApi.staffRoles()}${role.id}/`, { method: 'DELETE' })
       setRoles((prev) => prev.filter((r) => r.id !== role.id))
       if (expandedId === role.id) setExpandedId(null)
     } catch {
-      setError('删除失败')
+      setError(t('deleteFailed'))
     } finally {
       setDeleting(null)
     }
@@ -184,15 +187,15 @@ export default function RolesPage() {
       <div className="max-w-5xl mx-auto py-8 px-4">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">角色权限</h1>
-            <p className="text-sm text-gray-500 mt-1">管理工作区角色及其对各功能模块的访问权限</p>
+            <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
+            <p className="text-sm text-gray-500 mt-1">{t('subtitle')}</p>
           </div>
           <button
             onClick={() => setShowCreate(true)}
             className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
           >
             <span className="text-lg leading-none">+</span>
-            新建角色
+            {t('create')}
           </button>
         </div>
 
@@ -206,7 +209,7 @@ export default function RolesPage() {
         )}
 
         {loading ? (
-          <div className="text-center py-16 text-gray-400">加载中…</div>
+          <div className="text-center py-16 text-gray-400">{t('loading')}</div>
         ) : (
           <div className="space-y-3">
             {roles.map((role) => {
@@ -229,12 +232,12 @@ export default function RolesPage() {
                       <RoleBadge role={role} />
                       {role.is_system && (
                         <span className="text-xs text-gray-400 border border-gray-200 rounded px-1.5 py-0.5">
-                          系统
+                          {t('system')}
                         </span>
                       )}
                       {isDirty && (
                         <span className="text-xs text-amber-600 border border-amber-200 bg-amber-50 rounded px-1.5 py-0.5">
-                          未保存
+                          {t('unsaved')}
                         </span>
                       )}
                     </div>
@@ -266,7 +269,7 @@ export default function RolesPage() {
                               disabled={deleting === role.id}
                               className="text-sm text-red-500 hover:text-red-700 disabled:opacity-50"
                             >
-                              {deleting === role.id ? '删除中…' : '删除角色'}
+                              {deleting === role.id ? t('deleting') : t('deleteRole')}
                             </button>
                           )}
                         </div>
@@ -284,7 +287,7 @@ export default function RolesPage() {
                               disabled={!isDirty}
                               className="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 disabled:opacity-30"
                             >
-                              撤销修改
+                              {t('discard')}
                             </button>
                             <button
                               type="button"
@@ -292,7 +295,7 @@ export default function RolesPage() {
                               disabled={!isDirty || saving === role.id}
                               className="px-4 py-1.5 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50"
                             >
-                              {saving === role.id ? '保存中…' : '保存权限'}
+                              {saving === role.id ? t('saving') : t('save')}
                             </button>
                           </div>
                         )}

@@ -36,7 +36,10 @@
     "resaleTimeslots": "Time Slots",
     "resaleBookings": "Bookings",
     "resaleProducts": "Products",
-    "resalePayouts": "Payouts"
+    "resalePayouts": "Payouts",
+    "team": "Team",
+    "teamStaff": "Staff",
+    "teamRoles": "Roles & Permissions"
   },
   "common": {
     "networkUnreachable": "Unable to reach the server. Check that the API is running and NEXT_PUBLIC_API_URL is set correctly.",
@@ -3998,6 +4001,112 @@
       "successMessage": "Added: {name}",
       "errorRequired": "Product model is required",
       "errorSubmit": "Submission failed, please try again"
+    }
+  },
+  "staff": {
+    "page": {
+      "title": "Staff",
+      "subtitle": "{active} active staff · {total} total",
+      "rolesLink": "Roles & Permissions",
+      "invite": "Invite staff",
+      "empty": "No staff yet. Click \"Invite staff\" to add someone.",
+      "loading": "Loading…",
+      "loadFailed": "Failed to load staff.",
+      "table": {
+        "member": "Member",
+        "role": "Role",
+        "status": "Status",
+        "joined": "Joined",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "clickDeactivate": "Click to deactivate",
+        "clickActivate": "Click to activate"
+      },
+      "remove": "Remove",
+      "confirmRemove": "Remove staff member \"{name}\"?",
+      "removeFailed": "Failed to remove staff member.",
+      "updateFailed": "Update failed."
+    },
+    "invite": {
+      "title": "Invite staff",
+      "emailPlaceholder": "Enter user email",
+      "search": "Search",
+      "searching": "Searching…",
+      "notFound": "No user with that email. Confirm the address or ask the user to register first.",
+      "searchFailed": "User lookup failed.",
+      "assignRole": "Assign role",
+      "cancel": "Cancel",
+      "submit": "Send invite",
+      "submitting": "Inviting…",
+      "failed": "Failed to invite."
+    },
+    "roles": {
+      "page": {
+        "title": "Roles & Permissions",
+        "subtitle": "Manage workspace roles and the modules each role can access",
+        "create": "New role",
+        "loading": "Loading…",
+        "loadFailed": "Failed to load roles.",
+        "system": "System",
+        "unsaved": "Unsaved",
+        "deleteRole": "Delete role",
+        "deleting": "Deleting…",
+        "discard": "Discard changes",
+        "save": "Save permissions",
+        "saving": "Saving…",
+        "saveFailed": "Save failed. Please try again.",
+        "deleteFailed": "Delete failed.",
+        "confirmDelete": "Delete role \"{name}\"? This cannot be undone."
+      },
+      "create": {
+        "title": "New role",
+        "name": "Role name",
+        "namePlaceholder": "e.g. Content editor",
+        "description": "Description",
+        "descriptionPlaceholder": "Optional. Describe the responsibilities of this role.",
+        "cancel": "Cancel",
+        "submit": "Create",
+        "submitting": "Creating…",
+        "failed": "Create failed."
+      }
+    },
+    "permissions": {
+      "moduleHeader": "Module",
+      "selectAll": "All",
+      "rowToggleAll": "Toggle all",
+      "rowToggleNone": "Clear all",
+      "columnToggle": "Toggle all / clear {action}",
+      "readOnlyNotice": "System role permissions cannot be modified.",
+      "actions": {
+        "view": "View",
+        "list": "List",
+        "create": "Create",
+        "update": "Update",
+        "delete": "Delete"
+      },
+      "groups": {
+        "shop": "Shop",
+        "delivery": "Delivery",
+        "finance": "Finance",
+        "marketing": "Marketing",
+        "content": "Content",
+        "support": "Support"
+      },
+      "modules": {
+        "shop.product": "Products",
+        "shop.order": "Orders",
+        "shop.customer": "Customers",
+        "shop.category": "Categories",
+        "delivery": "Delivery",
+        "finance.invoice": "Invoices",
+        "finance.payment": "Payments",
+        "marketing": "Marketing",
+        "web": "CMS Content",
+        "support": "Tickets"
+      }
     }
   }
 }
