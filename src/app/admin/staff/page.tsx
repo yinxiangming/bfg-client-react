@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useCallback } from 'react'
+import { useLocale, useTranslations } from 'next-intl'
 import { ProtectedPage } from '@/components/auth/ProtectedPage'
 import { apiFetch, bfgApi } from '@/utils/api'
 
@@ -68,6 +69,7 @@ function InviteModal({
   onClose: () => void
   onInvited: (member: StaffMember) => void
 }) {
+  const t = useTranslations('admin.staff.invite')
   const [email, setEmail] = useState('')
   const [selectedRole, setSelectedRole] = useState<number>(roles[0]?.id ?? 0)
   const [searching, setSearching] = useState(false)
@@ -95,7 +97,7 @@ function InviteModal({
         setNotFound(true)
       }
     } catch {
-      setError('查询用户失败')
+      setError(t('searchFailed'))
     } finally {
       setSearching(false)
     }
@@ -112,7 +114,7 @@ function InviteModal({
       })
       onInvited(member)
     } catch (err) {
-      setError(err instanceof Error ? err.message : '邀请失败')
+      setError(err instanceof Error ? err.message : t('failed'))
     } finally {
       setSaving(false)
     }
@@ -126,7 +128,7 @@ function InviteModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
       <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">邀请员工</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">{t('title')}</h2>
         <form onSubmit={handleSearch} className="flex gap-2 mb-4">
           <input
             type="email"
@@ -136,7 +138,7 @@ function InviteModal({
               setFoundUser(null)
               setNotFound(false)
             }}
-            placeholder="输入用户邮箱"
+            placeholder={t('emailPlaceholder')}
             required
             className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -145,13 +147,11 @@ function InviteModal({
             disabled={searching}
             className="px-3 py-2 bg-gray-100 text-gray-700 text-sm rounded-lg hover:bg-gray-200 disabled:opacity-50"
           >
-            {searching ? '查询中…' : '查询'}
+            {searching ? t('searching') : t('search')}
           </button>
         </form>
         {notFound && (
-          <p className="text-sm text-amber-600 mb-4">
-            未找到该邮箱对应的用户，请确认邮箱或让用户先注册。
-          </p>
+          <p className="text-sm text-amber-600 mb-4">{t('notFound')}</p>
         )}
         {foundUser && (
           <div className="space-y-4">
@@ -163,7 +163,7 @@ function InviteModal({
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">分配角色</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">{t('assignRole')}</label>
               <select
                 value={selectedRole}
                 onChange={(e) => setSelectedRole(Number(e.target.value))}
@@ -185,7 +185,7 @@ function InviteModal({
             onClick={onClose}
             className="px-4 py-2 text-sm text-gray-600 hover:text-gray-900"
           >
-            取消
+            {t('cancel')}
           </button>
           <button
             type="button"
@@ -193,7 +193,7 @@ function InviteModal({
             disabled={!foundUser || saving}
             className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 disabled:opacity-50"
           >
-            {saving ? '邀请中…' : '确认邀请'}
+            {saving ? t('submitting') : t('submit')}
           </button>
         </div>
       </div>
@@ -202,6 +202,9 @@ function InviteModal({
 }
 
 export default function StaffPage() {
+  const t = useTranslations('admin.staff.page')
+  const locale = useLocale()
+  const dateLocale = locale === 'zh-hans' ? 'zh-CN' : 'en-US'
   const [members, setMembers] = useState<StaffMember[]>([])
   const [roles, setRoles] = useState<StaffRole[]>([])
   const [loading, setLoading] = useState(true)
@@ -219,11 +222,11 @@ export default function StaffPage() {
       setMembers(membersData.results ?? (membersData as unknown as StaffMember[]))
       setRoles(rolesData.results ?? (rolesData as unknown as StaffRole[]))
     } catch {
-      setError('加载失败')
+      setError(t('loadFailed'))
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [t])
 
   useEffect(() => {
     load()
@@ -238,7 +241,7 @@ export default function StaffPage() {
       })
       setMembers((prev) => prev.map((m) => (m.id === member.id ? updated : m)))
     } catch (err) {
-      setError(err instanceof Error ? err.message : '更新失败')
+      setError(err instanceof Error ? err.message : t('updateFailed'))
     } finally {
       setUpdatingId(null)
     }
@@ -253,7 +256,7 @@ export default function StaffPage() {
       })
       setMembers((prev) => prev.map((m) => (m.id === member.id ? updated : m)))
     } catch (err) {
-      setError(err instanceof Error ? err.message : '更新失败')
+      setError(err instanceof Error ? err.message : t('updateFailed'))
     } finally {
       setUpdatingId(null)
     }
@@ -262,13 +265,13 @@ export default function StaffPage() {
   async function handleRemove(member: StaffMember) {
     const name =
       `${member.user.first_name} ${member.user.last_name}`.trim() || member.user.email
-    if (!confirm(`确认移除员工「${name}」？`)) return
+    if (!confirm(t('confirmRemove', { name }))) return
     setUpdatingId(member.id)
     try {
       await apiFetch(`${bfgApi.staffMembers()}${member.id}/`, { method: 'DELETE' })
       setMembers((prev) => prev.filter((m) => m.id !== member.id))
     } catch (err) {
-      setError(err instanceof Error ? err.message : '移除失败')
+      setError(err instanceof Error ? err.message : t('removeFailed'))
     } finally {
       setUpdatingId(null)
     }
@@ -281,9 +284,9 @@ export default function StaffPage() {
       <div className="max-w-5xl mx-auto py-8 px-4">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">员工管理</h1>
+            <h1 className="text-2xl font-bold text-gray-900">{t('title')}</h1>
             <p className="text-sm text-gray-500 mt-1">
-              {activeCount} 名活跃员工 · 共 {members.length} 名
+              {t('subtitle', { active: activeCount, total: members.length })}
             </p>
           </div>
           <div className="flex gap-2">
@@ -291,14 +294,14 @@ export default function StaffPage() {
               href="/admin/staff/roles"
               className="px-4 py-2 text-sm text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50"
             >
-              角色权限
+              {t('rolesLink')}
             </a>
             <button
               onClick={() => setShowInvite(true)}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700"
             >
               <span className="text-lg leading-none">+</span>
-              邀请员工
+              {t('invite')}
             </button>
           </div>
         </div>
@@ -313,21 +316,19 @@ export default function StaffPage() {
         )}
 
         {loading ? (
-          <div className="text-center py-16 text-gray-400">加载中…</div>
+          <div className="text-center py-16 text-gray-400">{t('loading')}</div>
         ) : members.length === 0 ? (
-          <div className="text-center py-16 text-gray-400">
-            还没有员工，点击「邀请员工」添加。
-          </div>
+          <div className="text-center py-16 text-gray-400">{t('empty')}</div>
         ) : (
           <div className="bg-white border border-gray-200 rounded-xl overflow-hidden shadow-sm">
             <table className="min-w-full text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="px-5 py-3 text-left font-medium text-gray-600">员工</th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">角色</th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">状态</th>
-                  <th className="px-4 py-3 text-left font-medium text-gray-600">加入时间</th>
-                  <th className="px-4 py-3 text-right font-medium text-gray-600">操作</th>
+                  <th className="px-5 py-3 text-left font-medium text-gray-600">{t('table.member')}</th>
+                  <th className="px-4 py-3 text-left font-medium text-gray-600">{t('table.role')}</th>
+                  <th className="px-4 py-3 text-left font-medium text-gray-600">{t('table.status')}</th>
+                  <th className="px-4 py-3 text-left font-medium text-gray-600">{t('table.joined')}</th>
+                  <th className="px-4 py-3 text-right font-medium text-gray-600">{t('table.actions')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -336,7 +337,7 @@ export default function StaffPage() {
                     `${member.user.first_name} ${member.user.last_name}`.trim() ||
                     member.user.username
                   const isUpdating = updatingId === member.id
-                  const joinedDate = new Date(member.created_at).toLocaleDateString('zh-CN')
+                  const joinedDate = new Date(member.created_at).toLocaleDateString(dateLocale)
                   return (
                     <tr
                       key={member.id}
@@ -373,10 +374,10 @@ export default function StaffPage() {
                           onClick={() => handleToggleActive(member)}
                           disabled={isUpdating}
                           className="flex items-center gap-1.5 text-sm text-gray-600 hover:text-gray-900 disabled:opacity-50"
-                          title={member.is_active ? '点击停用' : '点击启用'}
+                          title={member.is_active ? t('status.clickDeactivate') : t('status.clickActivate')}
                         >
                           <StatusDot active={member.is_active} />
-                          {member.is_active ? '活跃' : '已停用'}
+                          {member.is_active ? t('status.active') : t('status.inactive')}
                         </button>
                       </td>
                       <td className="px-4 py-3 text-gray-500">{joinedDate}</td>
@@ -387,7 +388,7 @@ export default function StaffPage() {
                           disabled={isUpdating}
                           className="text-sm text-red-400 hover:text-red-600 disabled:opacity-30"
                         >
-                          移除
+                          {t('remove')}
                         </button>
                       </td>
                     </tr>

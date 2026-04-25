@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import {
   PERMISSION_ACTIONS,
   groupModules,
@@ -22,6 +23,7 @@ export function RolePermissionMatrix({
   onChange,
   readOnly = false,
 }: RolePermissionMatrixProps) {
+  const t = useTranslations('admin.staff.permissions')
   const [matrix, setMatrix] = useState<Record<string, Set<string>>>(() =>
     permissionsToMatrix(permissions)
   )
@@ -83,21 +85,24 @@ export function RolePermissionMatrix({
       <table className="min-w-full text-sm">
         <thead>
           <tr className="bg-gray-50 border-b border-gray-200">
-            <th className="px-4 py-3 text-left font-medium text-gray-600 w-40">权限模块</th>
-            <th className="px-3 py-3 text-center font-medium text-gray-600 w-16">全选</th>
-            {PERMISSION_ACTIONS.map((action) => (
-              <th key={action.key} className="px-3 py-3 text-center font-medium text-gray-600 w-20">
-                <button
-                  type="button"
-                  onClick={() => toggleColumn(action.key)}
-                  disabled={readOnly}
-                  className="hover:text-blue-600 disabled:cursor-default"
-                  title={readOnly ? undefined : `全选/取消 ${action.label}`}
-                >
-                  {action.label}
-                </button>
-              </th>
-            ))}
+            <th className="px-4 py-3 text-left font-medium text-gray-600 w-40">{t('moduleHeader')}</th>
+            <th className="px-3 py-3 text-center font-medium text-gray-600 w-16">{t('selectAll')}</th>
+            {PERMISSION_ACTIONS.map((action) => {
+              const actionLabel = t(`actions.${action.i18nKey}`)
+              return (
+                <th key={action.key} className="px-3 py-3 text-center font-medium text-gray-600 w-20">
+                  <button
+                    type="button"
+                    onClick={() => toggleColumn(action.key)}
+                    disabled={readOnly}
+                    className="hover:text-blue-600 disabled:cursor-default"
+                    title={readOnly ? undefined : t('columnToggle', { action: actionLabel })}
+                  >
+                    {actionLabel}
+                  </button>
+                </th>
+              )
+            })}
           </tr>
         </thead>
         <tbody>
@@ -108,7 +113,7 @@ export function RolePermissionMatrix({
                   colSpan={2 + PERMISSION_ACTIONS.length}
                   className="px-4 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
                 >
-                  {group}
+                  {t(`groups.${group}`)}
                 </td>
               </tr>
               {modules.map((mod, idx) => {
@@ -125,7 +130,7 @@ export function RolePermissionMatrix({
                     } hover:bg-blue-50/30 transition-colors`}
                   >
                     <td className="px-4 py-2.5 text-gray-700 font-medium">
-                      <div>{mod.label}</div>
+                      <div>{t(`modules.${mod.i18nKey}`)}</div>
                       <div className="text-xs text-gray-400 font-mono">{mod.key}</div>
                     </td>
                     <td className="px-3 py-2.5 text-center">
@@ -142,7 +147,7 @@ export function RolePermissionMatrix({
                               ? 'bg-blue-200 border-blue-400'
                               : 'bg-white border-gray-300'
                           }`}
-                        title={allSelected ? '取消全选' : '全选'}
+                        title={allSelected ? t('rowToggleNone') : t('rowToggleAll')}
                       >
                         {allSelected && (
                           <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
@@ -186,7 +191,7 @@ export function RolePermissionMatrix({
       </table>
       {readOnly && (
         <div className="px-4 py-2 text-xs text-gray-400 border-t border-gray-200 bg-gray-50">
-          系统角色权限不可修改
+          {t('readOnlyNotice')}
         </div>
       )}
     </div>
