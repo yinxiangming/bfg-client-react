@@ -4032,16 +4032,45 @@
     },
     "invite": {
       "title": "Invite staff",
-      "emailPlaceholder": "Enter user email",
-      "search": "Search",
-      "searching": "Searching…",
-      "notFound": "No user with that email. Confirm the address or ask the user to register first.",
-      "searchFailed": "User lookup failed.",
+      "hint": "Enter the recipient's email and we'll send them a secure invitation link. They can accept it any time before it expires — no prior account required.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "person@example.com",
       "assignRole": "Assign role",
+      "expiryLabel": "Link expires after",
+      "expiryHours": "{hours} hours",
+      "messageLabel": "Personal message (optional)",
+      "messagePlaceholder": "Add a short note that will be included in the invitation email.",
       "cancel": "Cancel",
       "submit": "Send invite",
-      "submitting": "Inviting…",
-      "failed": "Failed to invite."
+      "submitting": "Sending…",
+      "failed": "Failed to send invitation."
+    },
+    "invitations": {
+      "title": "Invitations",
+      "empty": "No pending invitations.",
+      "loadFailed": "Failed to load invitations.",
+      "table": {
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "expires": "Expires",
+        "invitedBy": "Invited by",
+        "actions": "Actions"
+      },
+      "status": {
+        "pending": "Pending",
+        "accepted": "Accepted",
+        "expired": "Expired",
+        "revoked": "Revoked"
+      },
+      "resend": "Resend",
+      "revoke": "Revoke",
+      "confirmRevoke": "Revoke invitation for \"{email}\"?",
+      "revokeFailed": "Failed to revoke invitation.",
+      "resendFailed": "Failed to resend invitation.",
+      "expiresIn": "in {hours}h",
+      "expiresOn": "{date}",
+      "neverInvited": "—"
     },
     "roles": {
       "page": {

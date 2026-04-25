@@ -81,21 +81,21 @@ export function RolePermissionMatrix({
   const groups = groupModules()
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-gray-200">
+    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-white/10">
       <table className="min-w-full text-sm">
         <thead>
-          <tr className="bg-gray-50 border-b border-gray-200">
-            <th className="px-4 py-3 text-left font-medium text-gray-600 w-40">{t('moduleHeader')}</th>
-            <th className="px-3 py-3 text-center font-medium text-gray-600 w-16">{t('selectAll')}</th>
+          <tr className="bg-gray-50 dark:bg-white/5 border-b border-gray-200 dark:border-white/10">
+            <th className="px-4 py-3 text-left font-medium text-gray-600 dark:text-gray-300 w-40">{t('moduleHeader')}</th>
+            <th className="px-3 py-3 text-center font-medium text-gray-600 dark:text-gray-300 w-16">{t('selectAll')}</th>
             {PERMISSION_ACTIONS.map((action) => {
               const actionLabel = t(`actions.${action.i18nKey}`)
               return (
-                <th key={action.key} className="px-3 py-3 text-center font-medium text-gray-600 w-20">
+                <th key={action.key} className="px-3 py-3 text-center font-medium text-gray-600 dark:text-gray-300 w-20">
                   <button
                     type="button"
                     onClick={() => toggleColumn(action.key)}
                     disabled={readOnly}
-                    className="hover:text-blue-600 disabled:cursor-default"
+                    className="hover:text-blue-600 dark:hover:text-blue-400 disabled:cursor-default"
                     title={readOnly ? undefined : t('columnToggle', { action: actionLabel })}
                   >
                     {actionLabel}
@@ -108,10 +108,10 @@ export function RolePermissionMatrix({
         <tbody>
           {groups.map(({ group, modules }) => (
             <>
-              <tr key={`group-${group}`} className="bg-gray-100">
+              <tr key={`group-${group}`} className="bg-gray-100 dark:bg-white/[0.07]">
                 <td
                   colSpan={2 + PERMISSION_ACTIONS.length}
-                  className="px-4 py-1.5 text-xs font-semibold text-gray-500 uppercase tracking-wider"
+                  className="px-4 py-1.5 text-xs font-semibold text-gray-500 dark:text-gray-300 uppercase tracking-wider"
                 >
                   {t(`groups.${group}`)}
                 </td>
@@ -125,13 +125,15 @@ export function RolePermissionMatrix({
                 return (
                   <tr
                     key={mod.key}
-                    className={`border-t border-gray-100 ${
-                      idx % 2 === 0 ? 'bg-white' : 'bg-gray-50/50'
-                    } hover:bg-blue-50/30 transition-colors`}
+                    className={`border-t border-gray-100 dark:border-white/10 ${
+                      idx % 2 === 0
+                        ? 'bg-white dark:bg-transparent'
+                        : 'bg-gray-50/50 dark:bg-white/[0.03]'
+                    } hover:bg-blue-50/30 dark:hover:bg-blue-500/10 transition-colors`}
                   >
-                    <td className="px-4 py-2.5 text-gray-700 font-medium">
+                    <td className="px-4 py-2.5 text-gray-700 dark:text-gray-200 font-medium">
                       <div>{t(`modules.${mod.i18nKey}`)}</div>
-                      <div className="text-xs text-gray-400 font-mono">{mod.key}</div>
+                      <div className="text-xs text-gray-400 dark:text-gray-500 font-mono">{mod.key}</div>
                     </td>
                     <td className="px-3 py-2.5 text-center">
                       <button
@@ -144,8 +146,8 @@ export function RolePermissionMatrix({
                             allSelected
                               ? 'bg-blue-600 border-blue-600'
                               : someSelected
-                              ? 'bg-blue-200 border-blue-400'
-                              : 'bg-white border-gray-300'
+                              ? 'bg-blue-200 border-blue-400 dark:bg-blue-500/30 dark:border-blue-400'
+                              : 'bg-white dark:bg-white/5 border-gray-300 dark:border-white/25'
                           }`}
                         title={allSelected ? t('rowToggleNone') : t('rowToggleAll')}
                       >
@@ -169,7 +171,11 @@ export function RolePermissionMatrix({
                             disabled={readOnly}
                             className={`w-5 h-5 rounded border-2 inline-flex items-center justify-center transition-colors
                               ${readOnly ? 'cursor-default' : 'cursor-pointer hover:border-blue-500'}
-                              ${checked ? 'bg-blue-600 border-blue-600' : 'bg-white border-gray-300'}`}
+                              ${
+                                checked
+                                  ? 'bg-blue-600 border-blue-600'
+                                  : 'bg-white dark:bg-white/5 border-gray-300 dark:border-white/25'
+                              }`}
                             aria-checked={checked}
                             role="checkbox"
                           >
@@ -190,7 +196,7 @@ export function RolePermissionMatrix({
         </tbody>
       </table>
       {readOnly && (
-        <div className="px-4 py-2 text-xs text-gray-400 border-t border-gray-200 bg-gray-50">
+        <div className="px-4 py-2 text-xs text-gray-400 dark:text-gray-400 border-t border-gray-200 dark:border-white/10 bg-gray-50 dark:bg-white/5">
           {t('readOnlyNotice')}
         </div>
       )}

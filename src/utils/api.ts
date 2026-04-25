@@ -88,6 +88,9 @@ export const bfgApi = {
   users: () => buildApiUrl('/users/', API_VERSIONS.BFG2),
   staffRoles: () => buildApiUrl('/staff-roles/', API_VERSIONS.BFG2),
   staffMembers: () => buildApiUrl('/staff-members/', API_VERSIONS.BFG2),
+  staffInvitations: () => buildApiUrl('/staff-invitations/', API_VERSIONS.BFG2),
+  invitationPreview: () => buildApiUrl('/invitations/preview/', API_VERSIONS.BFG2),
+  invitationAccept: () => buildApiUrl('/invitations/accept/', API_VERSIONS.BFG2),
   apiKeys: () => buildApiUrl('/api-keys/', API_VERSIONS.BFG2),
 
   // Web/CMS

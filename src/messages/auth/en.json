@@ -73,5 +73,32 @@
     "passwordMinLength": "Password must be at least 8 characters long",
     "success": "Password has been reset successfully. Redirecting to login...",
     "failed": "Failed to reset password. Please try again."
+  },
+  "invite": {
+    "pageTitle": "Accept invitation",
+    "loading": "Loading invitation…",
+    "invalid": "This invitation link is invalid or has expired. Please ask an administrator to resend it.",
+    "expired": "This invitation has expired. Ask an administrator to send a new one.",
+    "revoked": "This invitation was revoked.",
+    "alreadyAccepted": "This invitation has already been accepted.",
+    "invitedTo": "You’ve been invited to join",
+    "asRole": "as {role}",
+    "invitedBy": "Invited by {name}",
+    "expiresOn": "This link expires on {date}.",
+    "mismatch": "You’re signed in as {current}, but this invitation is for {invitedEmail}. Sign out and try again with the right account.",
+    "accept": "Accept invitation",
+    "accepting": "Accepting…",
+    "acceptError": "Could not accept invitation.",
+    "success": "Welcome aboard! You’ve joined {workspace}.",
+    "goToAdmin": "Go to admin",
+    "signInPrompt": "Sign in or create an account using {email} to accept this invitation.",
+    "signIn": "Sign in",
+    "signUp": "Create account",
+    "switchAccount": "Sign out and use a different account",
+    "signInToAccept": "Sign in to accept",
+    "signUpToAccept": "Create account to accept",
+    "signUpHint": "No account yet — click below to set a password and join {workspace}.",
+    "signInHint": "You already have an account for {email}. Sign in to accept this invitation.",
+    "redirectingIn": "Redirecting to admin in {seconds}s…"
   }
 }

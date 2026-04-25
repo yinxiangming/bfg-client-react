@@ -152,21 +152,21 @@ class MeApiClient {
           }
         }
       } else if (response.status === 403) {
-        // Redirect to login on 403 for /api/v1/me/ endpoints
-        if (typeof window !== 'undefined') {
-          const { pathname, href } = window.location
-          const isAuthRoute = pathname.startsWith('/auth')
-          if (!isAuthRoute) {
-            const redirect = encodeURIComponent(href)
-            window.location.href = `/auth/login?redirect=${redirect}`
-          }
-        }
-        // Check if we have a token - if not, suggest login
+        // 403 used to auto-redirect to /auth/login, which hid the underlying
+        // reason (workspace mismatch, missing membership, etc). Now we surface
+        // the server's detail so the failure is visible in the UI/console.
         const hasToken = typeof window !== 'undefined' && getWorkspaceToken()
-        if (!hasToken) {
+        const serverDetail =
+          (errorData && typeof errorData === 'object'
+            ? (errorData as Record<string, unknown>).detail ??
+              (errorData as Record<string, unknown>).message
+            : null) ?? null
+        if (typeof serverDetail === 'string' && serverDetail) {
+          errorDetail = `Forbidden: ${serverDetail}`
+        } else if (!hasToken) {
           errorDetail = 'Please log in to access your account information.'
         } else {
-          errorDetail = 'Forbidden. You do not have permission to access this resource. Please check your login status.'
+          errorDetail = 'Forbidden. You do not have permission to access this resource.'
         }
       } else if (response.status === 404) {
         errorDetail = `Resource not found: ${endpoint}`
