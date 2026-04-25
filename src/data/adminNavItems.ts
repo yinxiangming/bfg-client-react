@@ -106,6 +106,7 @@ export const adminNavItems: MenuNode[] = [
     i18nKey: 'nav.team',
     icon: 'tabler-users-group',
     type: 'submenu',
+    requireAdmin: true,
     children: [
       {
         id: 'team-staff',
@@ -113,14 +114,16 @@ export const adminNavItems: MenuNode[] = [
         i18nKey: 'nav.teamStaff',
         href: '/admin/staff',
         icon: 'tabler-user-cog',
-        activeMatch: 'exact'
+        activeMatch: 'exact',
+        requireAdmin: true
       },
       {
         id: 'team-roles',
         label: 'Roles & Permissions',
         i18nKey: 'nav.teamRoles',
         href: '/admin/staff/roles',
-        icon: 'tabler-shield-lock'
+        icon: 'tabler-shield-lock',
+        requireAdmin: true
       }
     ]
   },
