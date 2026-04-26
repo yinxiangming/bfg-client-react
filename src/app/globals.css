@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Map Tailwind's dark: variant to the project's [data-mode='dark'] convention */
+@custom-variant dark (&:where([data-mode='dark'], [data-mode='dark'] *));
+
 /* Import all style modules */
 @import '../styles/variables.css';
 @import '../styles/base.css';

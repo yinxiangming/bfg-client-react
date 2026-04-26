@@ -89,7 +89,7 @@ export interface VariantInventory {
 
 export async function getVariantInventories(productId: number): Promise<VariantInventory[]> {
   const response = await apiFetch<VariantInventory[] | { results?: VariantInventory[] }>(
-    `${bfgApi.products()}${productId}/inventory/`,
+    `${bfgApi.adminProducts()}${productId}/inventory/`,
     getSiteAdminOptions()
   )
   if (Array.isArray(response)) {
@@ -99,7 +99,7 @@ export async function getVariantInventories(productId: number): Promise<VariantI
 }
 
 export async function updateVariantInventories(productId: number, inventories: VariantInventory[]): Promise<void> {
-  return apiFetch<void>(`${bfgApi.products()}${productId}/inventory/`, {
+  return apiFetch<void>(`${bfgApi.adminProducts()}${productId}/inventory/`, {
     ...getSiteAdminOptions(),
     method: 'PUT',
     body: JSON.stringify({ inventories })
@@ -810,7 +810,7 @@ function buildProductsUrl(params?: ProductsParams): string {
   if (params?.featured !== undefined) searchParams.append('featured', params.featured.toString())
   if (params?.page) searchParams.append('page', params.page.toString())
   if (params?.page_size) searchParams.append('page_size', params.page_size.toString())
-  return `${bfgApi.products()}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
+  return `${bfgApi.adminProducts()}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
 }
 
 export async function getProducts(params?: ProductsParams): Promise<Product[]> {
@@ -826,11 +826,11 @@ export async function getProductsPage(params?: ProductsParams): Promise<PagedRes
 }
 
 export async function getProduct(id: number): Promise<Product> {
-  return apiFetch<Product>(`${bfgApi.products()}${id}/`, getSiteAdminOptions())
+  return apiFetch<Product>(`${bfgApi.adminProducts()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createProduct(data: Partial<Product>): Promise<Product> {
-  return apiFetch<Product>(bfgApi.products(), {
+  return apiFetch<Product>(bfgApi.adminProducts(), {
     ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
@@ -838,7 +838,7 @@ export async function createProduct(data: Partial<Product>): Promise<Product> {
 }
 
 export async function updateProduct(id: number, data: Partial<Product>): Promise<Product> {
-  return apiFetch<Product>(`${bfgApi.products()}${id}/`, {
+  return apiFetch<Product>(`${bfgApi.adminProducts()}${id}/`, {
     ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
@@ -846,7 +846,7 @@ export async function updateProduct(id: number, data: Partial<Product>): Promise
 }
 
 export async function deleteProduct(id: number): Promise<void> {
-  return apiFetch<void>(`${bfgApi.products()}${id}/`, { ...getSiteAdminOptions(), method: 'DELETE' })
+  return apiFetch<void>(`${bfgApi.adminProducts()}${id}/`, { ...getSiteAdminOptions(), method: 'DELETE' })
 }
 
 // Wishlist (admin)

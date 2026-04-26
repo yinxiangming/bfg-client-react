@@ -98,7 +98,7 @@ const ProductInformation = ({
             if (onPrintLabel) {
                 await onPrintLabel(productNumericId, printTab)
             } else {
-                const labelUrl = `${bfgApi.products()}${productNumericId}/label/`
+                const labelUrl = `${bfgApi.adminProducts()}${productNumericId}/label/`
                 const raw = await apiFetch<unknown>(labelUrl, {
                     method: 'GET',
                     headers: { Accept: 'application/pdf' }
@@ -124,7 +124,7 @@ const ProductInformation = ({
         setter(true)
         try {
             const params = new URLSearchParams({ fields: field, name })
-            const url = `${bfgApi.products()}${productNumericId}/generate_identifiers/?${params}`
+            const url = `${bfgApi.adminProducts()}${productNumericId}/generate_identifiers/?${params}`
             const data = await apiFetch<Record<string, string>>(url)
             if (field === 'sku' && data.sku) {
                 setSku(data.sku)

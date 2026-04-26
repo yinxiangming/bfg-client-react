@@ -88,6 +88,9 @@ export const bfgApi = {
   users: () => buildApiUrl('/users/', API_VERSIONS.BFG2),
   staffRoles: () => buildApiUrl('/staff-roles/', API_VERSIONS.BFG2),
   staffMembers: () => buildApiUrl('/staff-members/', API_VERSIONS.BFG2),
+  staffInvitations: () => buildApiUrl('/staff-invitations/', API_VERSIONS.BFG2),
+  invitationPreview: () => buildApiUrl('/invitations/preview/', API_VERSIONS.BFG2),
+  invitationAccept: () => buildApiUrl('/invitations/accept/', API_VERSIONS.BFG2),
   apiKeys: () => buildApiUrl('/api-keys/', API_VERSIONS.BFG2),
 
   // Web/CMS
@@ -115,7 +118,12 @@ export const bfgApi = {
   stores: () => buildApiUrl('/stores/', API_VERSIONS.BFG2, 'shop'),
   salesChannels: () => buildApiUrl('/sales-channels/', API_VERSIONS.BFG2, 'shop'),
   subscriptionPlans: () => buildApiUrl('/subscription-plans/', API_VERSIONS.BFG2, 'shop'),
+  /** Storefront-facing read-only product endpoint. Returns only active
+   *  products with public-safe fields (no cost / barcode / inventory flags). */
   products: () => buildApiUrl('/products/', API_VERSIONS.BFG2, 'shop'),
+  /** Admin product management endpoint — staff only. Full data including
+   *  cost, barcode, track_inventory, finance_code, drafts. */
+  adminProducts: () => buildApiUrl('/admin/products/', API_VERSIONS.BFG2, 'shop'),
   productCategoryRulesSchema: () => buildApiUrl('/categories/rules_schema/', API_VERSIONS.BFG2, 'shop'),
   productMedia: () => buildApiUrl('/product-media/', API_VERSIONS.BFG2, 'shop'),
   variants: () => buildApiUrl('/variants/', API_VERSIONS.BFG2, 'shop'),
@@ -162,7 +170,12 @@ export const bfgApi = {
   paymentGatewayPlugins: () => buildApiUrl('/payment-gateways/plugins/', API_VERSIONS.BFG2, 'finance'),
   taxRates: () => buildApiUrl('/tax-rates/', API_VERSIONS.BFG2, 'finance'),
   invoiceSettings: () => buildApiUrl('/invoice-settings/', API_VERSIONS.BFG2, 'finance'),
+  /** Admin-only wallet endpoint — staff sees every customer's wallet. */
   wallets: () => buildApiUrl('/wallets/', API_VERSIONS.BFG2, 'finance'),
+  /** Customer-facing wallet endpoint — returns own wallets and exposes
+   *  the ``withdraw`` action. Use from /account pages. */
+  meWallets: () => buildApiUrl('/me/wallets/', API_VERSIONS.BFG2),
+  meWithdrawalRequests: () => buildApiUrl('/me/withdrawal-requests/', API_VERSIONS.BFG2),
 
   // Marketing
   campaigns: () => buildApiUrl('/campaigns/', API_VERSIONS.BFG2, 'marketing'),
@@ -299,7 +312,10 @@ export function getApiHeaders(
  */
 function redirectToLoginIfAdminUnauthorized(status: number): void {
   if (typeof window === 'undefined') return
-  if (status !== 401 && status !== 403) return
+  // 403 = the user is authenticated but lacks workspace/role permission for
+  // a specific endpoint. We surface that as an in-page error so the cause is
+  // visible — only 401 (token actually invalid/expired) forces re-login.
+  if (status !== 401) return
   const pathname = window.location.pathname
   if (!pathname.startsWith('/admin')) return
   const href = window.location.href

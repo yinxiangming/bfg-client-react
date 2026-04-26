@@ -73,5 +73,32 @@
     "passwordMinLength": "密码至少需要 8 个字符",
     "success": "密码已重置成功，正在跳转到登录页...",
     "failed": "重置失败，请重试。"
+  },
+  "invite": {
+    "pageTitle": "接受邀请",
+    "loading": "正在加载邀请…",
+    "invalid": "此邀请链接无效或已失效，请联系管理员重新发送。",
+    "expired": "此邀请已过期，请联系管理员重新发送。",
+    "revoked": "此邀请已被撤销。",
+    "alreadyAccepted": "此邀请已被接受。",
+    "invitedTo": "你被邀请加入",
+    "asRole": "担任 {role}",
+    "invitedBy": "邀请人：{name}",
+    "expiresOn": "此链接将于 {date} 过期。",
+    "mismatch": "当前登录账号为 {current}，但邀请发送给 {invitedEmail}，请退出后用正确的邮箱重新登录。",
+    "accept": "接受邀请",
+    "accepting": "接受中…",
+    "acceptError": "接受邀请失败。",
+    "success": "欢迎！你已加入 {workspace}。",
+    "goToAdmin": "进入管理后台",
+    "signInPrompt": "请使用 {email} 登录或注册账号以接受邀请。",
+    "signIn": "登录",
+    "signUp": "注册账号",
+    "switchAccount": "退出当前账号",
+    "signInToAccept": "登录以接受邀请",
+    "signUpToAccept": "创建账号以接受邀请",
+    "signUpHint": "还没有账号 — 点击下方设置密码并加入 {workspace}。",
+    "signInHint": "已有 {email} 的账号，请登录以接受邀请。",
+    "redirectingIn": "{seconds} 秒后自动跳转到管理后台…"
   }
 }

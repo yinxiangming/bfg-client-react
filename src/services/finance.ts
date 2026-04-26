@@ -403,7 +403,7 @@ export type Wallet = {
 }
 
 export async function getMyWallet(): Promise<Wallet | null> {
-  const response = await apiFetch<{ results?: Wallet[] } | Wallet[]>(bfgApi.wallets())
+  const response = await apiFetch<{ results?: Wallet[] } | Wallet[]>(bfgApi.meWallets())
   const list = Array.isArray(response) ? response : response.results || []
   const first = list[0]
   if (!first) return null
@@ -423,7 +423,7 @@ export async function createWithdrawalRequest(
   walletId: number,
   payload: { amount: number; payout_method?: string; payout_details?: Record<string, unknown>; notes?: string }
 ): Promise<{ id: number; amount: string; status: string }> {
-  return apiFetch(`${bfgApi.wallets()}${walletId}/withdraw/`, {
+  return apiFetch(`${bfgApi.meWallets()}${walletId}/withdraw/`, {
     method: 'POST',
     body: JSON.stringify(payload)
   })

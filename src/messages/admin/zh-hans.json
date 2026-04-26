@@ -4032,16 +4032,45 @@
     },
     "invite": {
       "title": "邀请员工",
-      "emailPlaceholder": "输入用户邮箱",
-      "search": "查询",
-      "searching": "查询中…",
-      "notFound": "未找到该邮箱对应的用户，请确认邮箱或让用户先注册。",
-      "searchFailed": "查询用户失败",
+      "hint": "输入对方邮箱，我们会发送一封带链接的邀请邮件。对方可在邀请有效期内随时点击接受，无需事先注册账号。",
+      "emailLabel": "邮箱",
+      "emailPlaceholder": "person@example.com",
       "assignRole": "分配角色",
+      "expiryLabel": "链接有效期",
+      "expiryHours": "{hours} 小时",
+      "messageLabel": "附言（可选）",
+      "messagePlaceholder": "可以写一段短消息，将随邀请邮件一起发送。",
       "cancel": "取消",
-      "submit": "确认邀请",
-      "submitting": "邀请中…",
-      "failed": "邀请失败"
+      "submit": "发送邀请",
+      "submitting": "发送中…",
+      "failed": "邀请发送失败"
+    },
+    "invitations": {
+      "title": "邀请记录",
+      "empty": "暂无待处理邀请。",
+      "loadFailed": "加载邀请失败。",
+      "table": {
+        "email": "邮箱",
+        "role": "角色",
+        "status": "状态",
+        "expires": "有效期",
+        "invitedBy": "邀请人",
+        "actions": "操作"
+      },
+      "status": {
+        "pending": "待接受",
+        "accepted": "已接受",
+        "expired": "已过期",
+        "revoked": "已撤销"
+      },
+      "resend": "重新发送",
+      "revoke": "撤销",
+      "confirmRevoke": "确定撤销发给「{email}」的邀请？",
+      "revokeFailed": "撤销失败。",
+      "resendFailed": "重新发送失败。",
+      "expiresIn": "{hours} 小时后过期",
+      "expiresOn": "{date}",
+      "neverInvited": "—"
     },
     "roles": {
       "page": {
@@ -4059,7 +4088,18 @@
         "saving": "保存中…",
         "saveFailed": "保存失败，请重试",
         "deleteFailed": "删除失败",
-        "confirmDelete": "确认删除角色「{name}」？此操作不可恢复。"
+        "confirmDelete": "确认删除角色「{name}」？此操作不可恢复。",
+        "sync": "同步系统角色",
+        "syncing": "同步中…",
+        "syncTooltip": "从各 BFG 模块拉取新发布的系统角色。",
+        "syncResult": "同步完成：新建 {created}，刷新 {updated}。",
+        "syncFailed": "同步系统角色失败。",
+        "restoreDefaults": "恢复默认权限",
+        "restoring": "恢复中…",
+        "restoreFailed": "恢复默认权限失败。",
+        "confirmRestore": "将「{name}」恢复到系统默认权限？",
+        "overriddenNotice": "此角色权限已偏离系统默认值。可继续保存修改，或点击「恢复默认权限」回到系统默认。",
+        "alreadyDefault": "已与系统默认权限一致。"
       },
       "create": {
         "title": "新建角色",
@@ -4096,13 +4136,17 @@
         "support": "支持"
       },
       "modules": {
-        "shop.product": "商品",
-        "shop.order": "订单",
-        "shop.customer": "客户",
-        "shop.category": "分类",
+        "shop": {
+          "product": "商品",
+          "order": "订单",
+          "customer": "客户",
+          "category": "分类"
+        },
         "delivery": "配送",
-        "finance.invoice": "发票",
-        "finance.payment": "支付",
+        "finance": {
+          "invoice": "发票",
+          "payment": "支付"
+        },
         "marketing": "营销",
         "web": "CMS 内容",
         "support": "工单支持"

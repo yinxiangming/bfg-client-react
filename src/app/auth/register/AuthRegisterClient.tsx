@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type { ChangeEvent, FormEvent, MouseEvent } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
@@ -28,8 +28,19 @@ export default function AuthRegisterClient() {
   const [success, setSuccess] = useState<string | null>(null)
 
   const router = useRouter()
+  const searchParams = useSearchParams()
   const storefrontConfig = useStorefrontConfigSafe()
   const siteName = storefrontConfig.site_name?.trim() || 'BFG'
+
+  const inviteToken = searchParams.get('invite_token') || ''
+  const inviteUuid = searchParams.get('invite_uuid') || ''
+  const prefilledEmail = searchParams.get('email') || ''
+  const isInviteFlow = Boolean(inviteToken)
+
+  useEffect(() => {
+    if (prefilledEmail && !email) setEmail(prefilledEmail)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [prefilledEmail])
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -48,9 +59,17 @@ export default function AuthRegisterClient() {
 
     setLoading(true)
     try {
-      await authApi.register({ email, password, password_confirm: passwordConfirm })
+      await authApi.register({
+        email,
+        password,
+        password_confirm: passwordConfirm,
+        ...(inviteToken ? { invite_token: inviteToken, invite_uuid: inviteUuid } : {}),
+      })
       setSuccess(t('accountCreated'))
-      setTimeout(() => router.push('/auth/login'), 1500)
+      const next = isInviteFlow
+        ? `/auth/invite/accept?token=${encodeURIComponent(inviteToken)}${inviteUuid ? `&uuid=${encodeURIComponent(inviteUuid)}` : ''}`
+        : '/auth/login'
+      setTimeout(() => router.push(next), 1500)
     } catch (err: any) {
       setError(err?.message || t('registrationFailed'))
     } finally {
@@ -83,6 +102,7 @@ export default function AuthRegisterClient() {
             value={email}
             onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
             required
+            disabled={isInviteFlow}
           />
 
           <label className='auth-label'>{t('password')}</label>

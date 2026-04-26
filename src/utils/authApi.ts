@@ -26,6 +26,8 @@ interface RegisterRequest {
   password_confirm: string
   first_name?: string
   last_name?: string
+  invite_token?: string
+  invite_uuid?: string
 }
 
 interface TokenResponse {
