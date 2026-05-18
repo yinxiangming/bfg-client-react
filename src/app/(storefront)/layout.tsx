@@ -1,8 +1,6 @@
 import React from 'react'
 // Server: load extensions; use plugin storefront layout if provided, else home __root__ override or theme-based layout
 import { headers } from 'next/headers'
-// Website theme block styles (hero, sections). Load for storefront so CMS home blocks are styled when theme=website.
-import '@/components/storefront/themes/website/website-theme-blocks.css'
 import { getLocale } from 'next-intl/server'
 import { StorefrontConfigProvider } from '@/contexts/StorefrontConfigContext'
 import ThemeShell from '@/components/storefront/ThemeShell'

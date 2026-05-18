@@ -18,5 +18,16 @@ src/app/admin/plugins/
 src/app/(storefront)/plugins/
 src/.plugin-routes-manifest.json
 src/components/storefront/themes/registry.generated.ts
+
+# Skins are synced into these trees by scripts/prepare.js. Sources live in:
+#   - src/skins/<id>/         (built-in skins shipped with bfg-client itself)
+#   - src/plugins/<plugin>/skins/<id>/  (extension-contributed via symlink to extensions/)
+src/.skin-sync-manifest.json
+src/components/storefront/themes/*/
+src/components/account/themes/*/
+src/components/auth/themes/*/
+public/skins/
+public/plugins/
+
 .env*.local
 .claude/settings.local.json
