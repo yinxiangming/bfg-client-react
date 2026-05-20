@@ -4,6 +4,7 @@ import { getSiteBaseUrl } from '@/utils/api'
 import { getSiteConfig } from '@/utils/siteMetadata'
 import { getMediaUrl } from '@/utils/media'
 import { storefrontApi } from '@/utils/storefrontApi'
+import { resolveStorefrontPage } from '@/components/storefront/themes/resolve'
 import ProductDetailPage from '@views/storefront/ProductDetailPage'
 import type { Metadata } from 'next'
 
@@ -129,6 +130,10 @@ export default async function Page(props: Props) {
   const headersList = await headers()
   const requestHost = headersList.get('host') ?? undefined
   const product = await getProductForServer(id, requestHost)
+  const Override = await resolveStorefrontPage('product/[id]')
+  const Body = Override
+    ? <Override productId={id} id={id} />
+    : <ProductDetailPage productId={id} />
 
   return (
     <>
@@ -140,7 +145,7 @@ export default async function Page(props: Props) {
           }}
         />
       )}
-      <ProductDetailPage productId={id} />
+      {Body}
     </>
   )
 }

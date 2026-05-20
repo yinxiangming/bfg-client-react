@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 import { getSiteConfig } from '@/utils/siteMetadata'
 import { fetchRenderedCmsPage } from '@/services/storefrontCmsApi'
+import { resolveStorefrontPage } from '@/components/storefront/themes/resolve'
 import DynamicPage from '@views/storefront/DynamicPage'
 import type { Metadata } from 'next'
 
@@ -58,5 +59,9 @@ export default async function StorefrontSlugPage({ params }: Props) {
     notFound()
   }
 
+  const Override = await resolveStorefrontPage('cms')
+  if (Override) {
+    return <Override pageData={pageData} locale={locale} slug={slug} />
+  }
   return <DynamicPage pageData={pageData} locale={locale} />
 }

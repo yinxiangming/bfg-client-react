@@ -9,6 +9,7 @@ import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 import { fetchRenderedCmsPage } from '@/services/storefrontCmsApi'
 import StorefrontDevBadge from '@components/storefront/StorefrontDevBadge'
 import { HOME_REGISTRY } from '@/components/storefront/themes/registry.generated'
+import { resolveStorefrontPage } from '@/components/storefront/themes/resolve'
 import DynamicPage from '@views/storefront/DynamicPage'
 import HomePage from '@views/storefront/HomePage'
 import type { Metadata } from 'next'
@@ -42,6 +43,20 @@ export default async function Page() {
   if (rootReplace?.component) {
     const RootComponent = rootReplace.component
     return <RootComponent locale={locale} />
+  }
+
+  // Skin-level page override (themes/<id>/pages/home.tsx) takes priority over
+  // the legacy HOME_REGISTRY (themes/<id>/Home.tsx).
+  const SkinHome = await resolveStorefrontPage('home')
+  if (SkinHome) {
+    return (
+      <SkinHome
+        pageData={pageData}
+        locale={locale}
+        workspace_id={config.workspace_id}
+        workspace_slug={config.workspace_slug}
+      />
+    )
   }
 
   const ThemeHome = theme ? HOME_REGISTRY[theme] : null
