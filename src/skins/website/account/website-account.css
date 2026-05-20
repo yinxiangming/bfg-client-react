@@ -1,0 +1,326 @@
+/* Account "website" skin — class-scoped under .website-account-root.
+ * Mirrors the storefront website theme's class-selector approach so the
+ * account UI shares its visual language without leaking outside this scope. */
+
+.website-account-root {
+  --wa-bg: #f8fafc;
+  --wa-bg-elevated: #ffffff;
+  --wa-border: #e2e8f0;
+  --wa-border-strong: #cbd5e1;
+  --wa-text: #0f172a;
+  --wa-text-muted: #475569;
+  --wa-text-subtle: #94a3b8;
+  --wa-primary: #2563eb;
+  --wa-primary-hover: #1d4ed8;
+  --wa-primary-soft: rgba(37, 99, 235, 0.08);
+  --wa-radius: 14px;
+  --wa-shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.04);
+  --wa-shadow-md: 0 8px 24px -10px rgba(15, 23, 42, 0.12);
+
+  background: var(--wa-bg);
+  color: var(--wa-text);
+  min-height: 100svh;
+}
+
+.website-account-root[data-mode='dark'] {
+  --wa-bg: #020617;
+  --wa-bg-elevated: #0f172a;
+  --wa-border: rgba(148, 163, 184, 0.16);
+  --wa-border-strong: rgba(148, 163, 184, 0.28);
+  --wa-text: #e2e8f0;
+  --wa-text-muted: #94a3b8;
+  --wa-text-subtle: #64748b;
+  --wa-primary: #60a5fa;
+  --wa-primary-hover: #93c5fd;
+  --wa-primary-soft: rgba(96, 165, 250, 0.12);
+  --wa-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --wa-shadow-md: 0 12px 32px -10px rgba(0, 0, 0, 0.5);
+}
+
+.website-account-root .wa-shell {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  min-height: 100svh;
+}
+
+@media (max-width: 1023px) {
+  .website-account-root .wa-shell {
+    grid-template-columns: 1fr;
+  }
+}
+
+.website-account-root .wa-sidebar {
+  background: var(--wa-bg-elevated);
+  border-right: 1px solid var(--wa-border);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  height: 100svh;
+  overflow-y: auto;
+}
+
+@media (max-width: 1023px) {
+  .website-account-root .wa-sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    width: 280px;
+    z-index: 60;
+    transform: translateX(-100%);
+    transition: transform 0.2s ease-out;
+    box-shadow: var(--wa-shadow-md);
+  }
+  .website-account-root .wa-sidebar[data-open='true'] {
+    transform: translateX(0);
+  }
+  .website-account-root .wa-sidebar-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.4);
+    z-index: 55;
+  }
+}
+
+.website-account-root .wa-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid var(--wa-border);
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--wa-text);
+}
+
+.website-account-root .wa-brand-logo {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 800;
+  font-size: 1.05rem;
+  box-shadow: 0 8px 16px -8px rgba(37, 99, 235, 0.6);
+}
+
+.website-account-root .wa-nav {
+  padding: 0.75rem 0.75rem 1rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+
+.website-account-root .wa-nav-section {
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.7rem;
+  color: var(--wa-text-subtle);
+  padding: 1rem 0.75rem 0.5rem;
+}
+
+.website-account-root .wa-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.6rem 0.75rem;
+  border-radius: 10px;
+  color: var(--wa-text-muted);
+  font-size: 0.92rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s;
+}
+
+.website-account-root .wa-nav-link:hover {
+  background: var(--wa-primary-soft);
+  color: var(--wa-primary);
+}
+
+.website-account-root .wa-nav-link[aria-current='page'] {
+  background: var(--wa-primary-soft);
+  color: var(--wa-primary);
+  font-weight: 600;
+}
+
+.website-account-root .wa-nav-link i {
+  font-size: 1.1rem;
+  width: 1.25rem;
+  display: inline-flex;
+  justify-content: center;
+}
+
+.website-account-root .wa-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.website-account-root .wa-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: saturate(180%) blur(12px);
+  border-bottom: 1px solid var(--wa-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.875rem 1.5rem;
+  gap: 1rem;
+}
+
+.website-account-root[data-mode='dark'] .wa-topbar {
+  background: rgba(15, 23, 42, 0.85);
+}
+
+.website-account-root .wa-topbar-title {
+  font-weight: 600;
+  font-size: 1rem;
+  color: var(--wa-text);
+}
+
+.website-account-root .wa-topbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.website-account-root .wa-icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  border: 1px solid var(--wa-border);
+  background: transparent;
+  color: var(--wa-text-muted);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+
+.website-account-root .wa-icon-btn:hover {
+  background: var(--wa-primary-soft);
+  color: var(--wa-primary);
+  border-color: transparent;
+}
+
+.website-account-root .wa-content {
+  padding: 1.5rem;
+  flex: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin-inline: auto;
+}
+
+@media (min-width: 768px) {
+  .website-account-root .wa-content {
+    padding: 2rem 2.25rem 3rem;
+  }
+}
+
+.website-account-root .wa-card {
+  background: var(--wa-bg-elevated);
+  border: 1px solid var(--wa-border);
+  border-radius: var(--wa-radius);
+  padding: 1.25rem 1.5rem;
+  box-shadow: var(--wa-shadow-sm);
+}
+
+.website-account-root .wa-card + .wa-card {
+  margin-top: 1rem;
+}
+
+.website-account-root .wa-page-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.website-account-root .wa-page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.website-account-root .wa-page-subtitle {
+  color: var(--wa-text-muted);
+  font-size: 0.95rem;
+}
+
+.website-account-root .wa-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.625rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s;
+}
+
+.website-account-root .wa-btn-primary {
+  background: var(--wa-primary);
+  color: #fff;
+}
+
+.website-account-root .wa-btn-primary:hover {
+  background: var(--wa-primary-hover);
+}
+
+.website-account-root .wa-btn-ghost {
+  background: transparent;
+  color: var(--wa-text-muted);
+  border-color: var(--wa-border-strong);
+}
+
+.website-account-root .wa-btn-ghost:hover {
+  color: var(--wa-primary);
+  border-color: var(--wa-primary);
+}
+
+.website-account-root .wa-stat-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.website-account-root .wa-stat-card {
+  background: var(--wa-bg-elevated);
+  border: 1px solid var(--wa-border);
+  border-radius: var(--wa-radius);
+  padding: 1.25rem 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  box-shadow: var(--wa-shadow-sm);
+}
+
+.website-account-root .wa-stat-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--wa-text-subtle);
+}
+
+.website-account-root .wa-stat-value {
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.website-account-root .wa-mobile-trigger {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  .website-account-root .wa-mobile-trigger {
+    display: inline-flex;
+  }
+}

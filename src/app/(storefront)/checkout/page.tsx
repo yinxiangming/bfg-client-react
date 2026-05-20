@@ -1,5 +1,6 @@
 import { headers } from 'next/headers'
 import { getSiteConfig } from '@/utils/siteMetadata'
+import { resolveStorefrontPage } from '@/components/storefront/themes/resolve'
 import CheckoutPage from '@views/storefront/CheckoutPage'
 import type { Metadata } from 'next'
 
@@ -10,6 +11,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: `Checkout | ${site_name}` }
 }
 
-export default function CheckoutPageRoute() {
-  return <CheckoutPage />
+export default async function CheckoutPageRoute() {
+  const Override = await resolveStorefrontPage('checkout')
+  const Component = Override ?? CheckoutPage
+  return <Component />
 }

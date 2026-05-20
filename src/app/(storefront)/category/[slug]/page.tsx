@@ -1,6 +1,7 @@
 import { headers } from 'next/headers'
 import { getSiteConfig } from '@/utils/siteMetadata'
 import { storefrontApi } from '@/utils/storefrontApi'
+import { resolveStorefrontPage } from '@/components/storefront/themes/resolve'
 import CategoryPage from '@views/storefront/CategoryPage'
 import type { Metadata } from 'next'
 
@@ -74,6 +75,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function Page(props: Props) {
   const params = await props.params
-  return <CategoryPage slug={params.slug} />
+  const Override = await resolveStorefrontPage('category/[slug]')
+  const Component = Override ?? CategoryPage
+  return <Component slug={params.slug} />
 }
 

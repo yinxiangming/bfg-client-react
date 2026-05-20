@@ -2,6 +2,7 @@ import { headers } from 'next/headers'
 import { getLocale, getTranslations } from 'next-intl/server'
 import type { Metadata } from 'next'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
+import { resolveAuthPage } from '@/components/auth/themes/resolve'
 import AuthLoginClient from './AuthLoginClient'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -16,6 +17,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: `${siteName} - ${t('pageTitle')}` }
 }
 
-export default function LoginPage() {
-  return <AuthLoginClient />
+export default async function LoginPage() {
+  const Override = await resolveAuthPage('login')
+  const Component = Override ?? AuthLoginClient
+  return <Component />
 }
