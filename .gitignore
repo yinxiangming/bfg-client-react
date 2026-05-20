@@ -25,7 +25,9 @@ src/components/storefront/themes/registry.generated.ts
 src/.skin-sync-manifest.json
 src/components/storefront/themes/*/
 src/components/account/themes/*/
+src/components/account/themes/registry.generated.ts
 src/components/auth/themes/*/
+src/components/auth/themes/registry.generated.ts
 public/skins/
 public/plugins/
 
