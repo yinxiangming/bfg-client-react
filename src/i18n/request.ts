@@ -2,6 +2,7 @@ import {cookies, headers} from 'next/headers'
 import {getRequestConfig} from 'next-intl/server'
 import {routing, type AppLocale} from './routing'
 import {loadPluginMessages} from './plugin-messages'
+import {DEFAULT_APP_LOCALE, normalizeAppLocale, uniqueAppLocales} from './locales'
 
 type Messages = Record<string, any>
 
@@ -10,6 +11,15 @@ type EnabledApp = (typeof enabledApps)[number]
 
 function isSupportedLocale(locale: string): locale is AppLocale {
   return (routing.locales as readonly string[]).includes(locale)
+}
+
+function getWorkspaceApiBaseUrl(): string | null {
+  const baseUrl =
+    process.env.API_URL ||
+    process.env.NEXT_PUBLIC_WORKSPACE_API_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    ''
+  return baseUrl ? baseUrl.replace(/\/+$/, '') : null
 }
 
 /** Deep merge source into target (mutates target). */
@@ -41,20 +51,49 @@ async function getLocaleFromCookie(): Promise<AppLocale | null> {
   return null
 }
 
-async function getLocaleFromAcceptLanguage(): Promise<AppLocale | null> {
-  const headerStore = await headers()
-  const al = headerStore.get('accept-language') || ''
+function getLocaleFromAcceptLanguageHeader(al: string): AppLocale | null {
   // Minimal matching for our supported locales
   if (al.toLowerCase().includes('zh')) return 'zh-hans'
   if (al.toLowerCase().includes('en')) return 'en'
   return null
 }
 
+async function getSingleSiteLocale(headerStore: Awaited<ReturnType<typeof headers>>): Promise<AppLocale | null> {
+  const apiBase = getWorkspaceApiBaseUrl()
+  if (!apiBase) return null
+
+  const requestHost = headerStore.get('x-forwarded-host') || headerStore.get('host') || ''
+  try {
+    const res = await fetch(`${apiBase}/api/v1/settings/storefront/?lang=${DEFAULT_APP_LOCALE}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(requestHost ? { 'X-Forwarded-Host': requestHost } : {}),
+      },
+      cache: 'no-store',
+    })
+    if (!res.ok) return null
+    const config = (await res.json()) as { default_language?: string; languages?: string[] }
+    const languages = uniqueAppLocales(config.languages ?? [])
+    if (languages.length === 1) return languages[0]
+
+    if (languages.length === 0) {
+      return normalizeAppLocale(config.default_language)
+    }
+  } catch {
+    return null
+  }
+
+  return null
+}
+
 export default getRequestConfig(async ({requestLocale}) => {
   const requested = await requestLocale
+  const headerStore = await headers()
   const fromCookie = await getLocaleFromCookie()
-  const fromAcceptLanguage = await getLocaleFromAcceptLanguage()
+  const fromSingleSiteLanguage = await getSingleSiteLocale(headerStore)
+  const fromAcceptLanguage = getLocaleFromAcceptLanguageHeader(headerStore.get('accept-language') || '')
   const locale: AppLocale =
+    fromSingleSiteLanguage ||
     (requested && isSupportedLocale(requested) ? requested : null) ||
     fromCookie ||
     fromAcceptLanguage ||
@@ -89,4 +128,3 @@ export default getRequestConfig(async ({requestLocale}) => {
     }
   }
 })
-

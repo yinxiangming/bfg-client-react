@@ -24,8 +24,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: site_name ? `${site_name}` : 'Home' }
 }
 
-async function getPageData(slug: string, locale: string, requestHost?: string) {
-  return fetchRenderedCmsPage(slug, locale, requestHost, { cache: 'no-store' })
+async function getPageData(slug: string, locale: string, requestHost?: string, languages?: string[]) {
+  return fetchRenderedCmsPage(slug, locale, requestHost, { cache: 'no-store', languages })
 }
 
 export default async function Page() {
@@ -35,7 +35,7 @@ export default async function Page() {
   const config = await getStorefrontConfigForServer(locale, requestHost)
   if (config === null) return null
   const theme = config.theme ?? 'store'
-  const pageData = await getPageData('home', locale, requestHost)
+  const pageData = await getPageData('home', locale, requestHost, config.languages)
 
   const extensions = await loadExtensions()
   const replacements = getPageSlotReplacements(extensions, 'storefront/home')

@@ -5,7 +5,13 @@
 
 import { cache } from 'react'
 import { getApiBaseUrl, getApiHeaders } from './api'
-import { getApiLanguageHeaders, getCurrentLocale } from '@/i18n/http'
+import { getCurrentLocale } from '@/i18n/http'
+import {
+  DEFAULT_APP_LOCALE,
+  normalizeAppLocale,
+  uniqueAppLocales,
+  type AppLocale,
+} from '@/i18n/locales'
 
 export type StorefrontMenuKind = 'link' | 'category' | 'page' | 'post'
 
@@ -61,6 +67,7 @@ export type StorefrontConfig = {
   footer_menus: StorefrontMenuItem[]
   footer_menu_groups?: StorefrontFooterMenuGroup[]
   default_language?: string
+  languages?: string[]
   theme?: string
   header?: string
   footer?: string
@@ -76,6 +83,39 @@ export type StorefrontConfig = {
 
 const STALE_MS = 5 * 60 * 1000 // 5 minutes
 let cached: { data: StorefrontConfig; at: number } | null = null
+
+export function getStorefrontLanguages(config?: Pick<StorefrontConfig, 'default_language' | 'languages'> | null): AppLocale[] {
+  const configured = uniqueAppLocales(config?.languages ?? [])
+  const defaultLanguage = normalizeAppLocale(config?.default_language)
+
+  if (configured.length > 0) {
+    return configured
+  }
+  if (defaultLanguage) {
+    return [defaultLanguage]
+  }
+  return [DEFAULT_APP_LOCALE]
+}
+
+export function hasMultipleStorefrontLanguages(
+  config?: Pick<StorefrontConfig, 'default_language' | 'languages'> | null
+): boolean {
+  return getStorefrontLanguages(config).length > 1
+}
+
+export function resolveStorefrontLocale(
+  config?: Pick<StorefrontConfig, 'default_language' | 'languages'> | null,
+  preferredLocale?: string | null
+): AppLocale {
+  const languages = getStorefrontLanguages(config)
+  const preferred = normalizeAppLocale(preferredLocale)
+  const defaultLanguage = normalizeAppLocale(config?.default_language)
+
+  if (languages.length === 1) return languages[0]
+  if (preferred && languages.includes(preferred)) return preferred
+  if (defaultLanguage && languages.includes(defaultLanguage)) return defaultLanguage
+  return languages[0] ?? DEFAULT_APP_LOCALE
+}
 
 /** Clear in-memory storefront config cache (e.g. after admin saves general settings). */
 export function clearStorefrontConfigCache(): void {
@@ -119,6 +159,8 @@ export async function getStorefrontConfig(locale?: string): Promise<StorefrontCo
   }
   const data = (await res.json()) as StorefrontConfig
   if (!data.theme) data.theme = 'store'
+  data.default_language = resolveStorefrontLocale(data, data.default_language)
+  data.languages = getStorefrontLanguages(data)
   if (!data.header_options) data.header_options = { ...DEFAULT_HEADER_OPTIONS }
   else data.header_options = { ...DEFAULT_HEADER_OPTIONS, ...data.header_options }
   cached = { data, at: Date.now() }
@@ -159,6 +201,8 @@ export const getStorefrontConfigForServer = cache(
       }
       const data = (await res.json()) as StorefrontConfig
       if (!data.theme) data.theme = 'store'
+      data.default_language = resolveStorefrontLocale(data, data.default_language)
+      data.languages = getStorefrontLanguages(data)
       if (!data.header_options) data.header_options = { ...DEFAULT_HEADER_OPTIONS }
       else data.header_options = { ...DEFAULT_HEADER_OPTIONS, ...data.header_options }
       return data

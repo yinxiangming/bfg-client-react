@@ -3,6 +3,8 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import {
   getStorefrontConfig,
+  hasMultipleStorefrontLanguages,
+  resolveStorefrontLocale,
   seedStorefrontConfigCache,
   type StorefrontConfig,
 } from '@/utils/storefrontConfig'
@@ -30,6 +32,8 @@ const defaultConfig: StorefrontConfig = {
   footer_contact: '',
   header_menus: [],
   footer_menus: [],
+  default_language: 'en',
+  languages: ['en'],
   theme: 'store',
   header_options: {
     show_search: true,
@@ -76,6 +80,13 @@ export function StorefrontConfigProvider({ children, initialConfig }: Storefront
     }
     fetchConfig()
   }, [initialConfig, fetchConfig])
+
+  useEffect(() => {
+    if (!config || hasMultipleStorefrontLanguages(config) || typeof document === 'undefined') return
+    const locale = resolveStorefrontLocale(config)
+    const maxAge = 60 * 60 * 24 * 365
+    document.cookie = `NEXT_LOCALE=${encodeURIComponent(locale)};path=/;max-age=${maxAge}`
+  }, [config])
 
   const value: StorefrontConfigContextType = {
     config,
