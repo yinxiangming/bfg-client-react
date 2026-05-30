@@ -499,14 +499,6 @@ export async function processReturnRefund(returnId: number): Promise<ReturnReque
   })
 }
 
-export async function relistResaleByOrder(orderId: number): Promise<{ count: number; results: any[] }> {
-  return apiFetch<{ count: number; results: any[] }>(buildApiUrl('/resale/products/relist-by-order/', API_VERSIONS.BFG2), {
-    ...getSiteAdminOptions(),
-    method: 'POST',
-    body: JSON.stringify({ order_id: orderId })
-  })
-}
-
 export async function updateOrder(id: number, data: Partial<Order>): Promise<Order> {
   return apiFetch<Order>(`${bfgApi.orders()}${id}/`, {
     ...getSiteAdminOptions(),

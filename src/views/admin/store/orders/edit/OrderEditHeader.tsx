@@ -21,6 +21,7 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 
 import type { Order } from '@/services/store'
+import type { OrderHeaderAction } from '@/extensions/registry'
 import { getIntlLocale } from '@/utils/format'
 
 type OrderEditHeaderProps = {
@@ -28,7 +29,7 @@ type OrderEditHeaderProps = {
   onBack?: () => void
   onShip?: () => void
   onRefund?: () => Promise<void>
-  onRelist?: () => Promise<void>
+  extraActions?: OrderHeaderAction[]
   onCreateReturn?: (payload: {
     reason_category?: string
     customer_note?: string
@@ -44,7 +45,7 @@ const OrderEditHeader = ({
   onBack,
   onShip,
   onRefund,
-  onRelist,
+  extraActions = [],
   onCreateReturn,
   onCancelOrder,
   onStatusChange,
@@ -169,8 +170,15 @@ const OrderEditHeader = ({
   const canShip = !!onShip && !['shipped', 'completed', 'cancelled'].includes(order.status)
   const canCancel = !!onCancelOrder && !['cancelled', 'completed', 'refunded'].includes(order.status)
   const canRefund = !!onRefund && !['refunded', 'cancelled'].includes(order.status)
-  const canRelist = !!onRelist
+  const enabledExtraActions = extraActions.filter(action => !action.disabled)
   const canReturn = !!onCreateReturn && !!order.items?.length && !['cancelled'].includes(order.status)
+  const hasExtraActions = enabledExtraActions.length > 0
+
+  const translateActionLabel = (key: string | undefined, fallback: string) => {
+    if (!key) return fallback
+    const has = (t as any).has ? (t as any).has(key) : true
+    return has ? t(key as any) : fallback
+  }
 
   const submitCancel = async () => {
     if (!onCancelOrder) return
@@ -251,7 +259,7 @@ const OrderEditHeader = ({
           <Button
             variant='outlined'
             onClick={(e) => setActionsAnchor(e.currentTarget)}
-            disabled={busyAction !== null || (!canCancel && !canRefund && !canReturn && !canRelist)}
+            disabled={busyAction !== null || (!canCancel && !canRefund && !canReturn && !hasExtraActions)}
           >
             {t('orders.editHeader.actions.more')}
           </Button>
@@ -317,7 +325,13 @@ const OrderEditHeader = ({
         {canCancel && <MenuItem onClick={() => { setActionsAnchor(null); setCancelDialogOpen(true) }}>{t('orders.editHeader.actions.cancelOrder')}</MenuItem>}
         {canRefund && <MenuItem onClick={() => onRefund && runAction('refund', onRefund)}>{busyAction === 'refund' ? t('orders.editHeader.actions.refunding') : t('orders.editHeader.actions.refund')}</MenuItem>}
         {canReturn && <MenuItem onClick={() => { setActionsAnchor(null); setReturnDialogOpen(true) }}>{t('orders.editHeader.actions.return')}</MenuItem>}
-        {canRelist && <MenuItem onClick={() => onRelist && runAction('relist', onRelist)}>{busyAction === 'relist' ? t('orders.editHeader.actions.relisting') : t('orders.editHeader.actions.relist')}</MenuItem>}
+        {enabledExtraActions.map(action => (
+          <MenuItem key={action.id} onClick={() => runAction(action.id, action.run)}>
+            {busyAction === action.id
+              ? translateActionLabel(action.loadingI18nKey, action.loadingLabel || action.label)
+              : translateActionLabel(action.i18nKey, action.label)}
+          </MenuItem>
+        ))}
       </Menu>
 
       <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)} maxWidth='sm' fullWidth>

@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { useExtensions } from '../context'
-import { getTargetSlot, type PageSlotExtension } from '../registry'
+import { getTargetSlot, type OrderActionContext, type OrderHeaderAction, type PageSlotExtension } from '../registry'
 
 // Default slot IDs per page (for hide/replace detection). Canonical name: DEFAULT_SLOTS.
 export const DEFAULT_SLOTS: Record<string, string[]> = {
@@ -44,7 +44,7 @@ export const DEFAULT_SLOTS: Record<string, string[]> = {
   'storefront/cart': ['AboveCart', 'CartContent', 'BelowCart'],
   'storefront/checkout': ['AboveSteps', 'Contact', 'Shipping', 'Payment', 'OrderSummary', 'BelowSteps'],
   'storefront/checkout/success': ['AboveMessage', 'Message', 'BelowActions'],
-  // Account (StatsRowTail = slot after New Messages for plugin replace, e.g. resale Listings/Sold)
+  // Account (StatsRowTail = slot after New Messages for plugin KPIs)
   'account/dashboard': ['Welcome', 'QuickLinks', 'RecentOrders', 'StatsRowTail'],
   'account/information': ['ProfileForm'],
   'account/orders': ['AboveList', 'OrderList', 'BelowList'],
@@ -111,4 +111,17 @@ export function usePageSections(page: string) {
     afterSections: afterSlots,
     replacements
   }
+}
+
+export function useOrderActions(page: string, context: OrderActionContext) {
+  const ctx = useExtensions()
+
+  return useMemo(() => {
+    if (!ctx || !context.order) return []
+
+    return ctx
+      .getOrderActions(page)
+      .map(ext => ext.createAction(context))
+      .filter((action): action is OrderHeaderAction => action != null)
+  }, [ctx, page, context])
 }

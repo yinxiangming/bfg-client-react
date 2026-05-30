@@ -139,7 +139,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
       setProductData(response)
       setFormData(response)
 
-      // Run extension afterSave hooks (e.g. ResaleProduct create/update)
+      // Run extension afterSave hooks for plugin-owned related data.
       await runAfterSave({ productId: parseInt(id), formData })
 
       setSnackbar({ open: true, message: t('products.edit.snackbar.saved'), severity: 'success' })
@@ -265,7 +265,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
                 })}
               </Grid>
             )}
-            {/* Extension slots after ProductPricing (e.g. Resale) */}
+            {/* Extension slots after ProductPricing */}
             {afterSlots
               .filter(ext => (ext.targetSlot ?? ext.targetSection) === 'ProductPricing')
               .map(ext => ext.component && (
@@ -320,4 +320,3 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
     </>
   )
 }
-

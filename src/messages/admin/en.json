@@ -30,13 +30,6 @@
     "settingsDelivery": "Delivery",
     "settingsMarketing": "Marketing",
     "settingsSupport": "Customer Support",
-    "resale": "Resale",
-    "resaleIntake": "Intake",
-    "resaleSettings": "Settings",
-    "resaleTimeslots": "Time Slots",
-    "resaleBookings": "Bookings",
-    "resaleProducts": "Products",
-    "resalePayouts": "Payouts",
     "team": "Team",
     "teamStaff": "Staff",
     "teamRoles": "Roles & Permissions"
@@ -286,8 +279,6 @@
         "refund": "Refund",
         "refunding": "Refunding...",
         "return": "Create Return",
-        "relist": "Relist",
-        "relisting": "Relisting...",
         "cancelOrder": "Cancel Order"
       },
       "dialogs": {

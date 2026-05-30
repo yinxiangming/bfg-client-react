@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useMemo, useEffect, useState, ReactNode } from 'react'
 import { loadPluginExtensions } from './loadExtensionsCore'
-import type { Extension, PageSlotExtension, DataHookExtension } from './registry'
+import type { Extension, PageSlotExtension, DataHookExtension, OrderActionExtension } from './registry'
 
 interface ExtensionContextValue {
   extensions: Extension[]
@@ -10,6 +10,7 @@ interface ExtensionContextValue {
   /** @deprecated Use getPageSlots */
   getPageSections: (page: string) => PageSlotExtension[]
   getDataHooks: (page: string) => DataHookExtension[]
+  getOrderActions: (page: string) => OrderActionExtension[]
 }
 
 const ExtensionContext = createContext<ExtensionContextValue | null>(null)
@@ -65,6 +66,12 @@ export function ExtensionProvider({
       return extensions
         .flatMap(e => e.dataHooks || [])
         .filter(h => h.page === page)
+        .sort((a, b) => (b.priority ?? 100) - (a.priority ?? 100))
+    },
+    getOrderActions: (page: string) => {
+      return extensions
+        .flatMap(e => e.orderActions || [])
+        .filter(a => a.page === page)
         .sort((a, b) => (b.priority ?? 100) - (a.priority ?? 100))
     }
   }), [extensions])
