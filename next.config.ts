@@ -89,10 +89,19 @@ const tracingRoot =
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  ...(process.env.API_PROXY_TARGET ? { skipTrailingSlashRedirect: true } : {}),
   ...(tracingRoot != null && tracingRoot !== '' ? { outputFileTracingRoot: tracingRoot } : {}),
   allowedDevOrigins: process.env.ALLOWED_DEV_ORIGINS?.split(',').map(s => s.trim()).filter(Boolean) ?? [],
   async rewrites() {
-    return { beforeFiles: [...buildPluginRewrites(), ...buildStorefrontPluginRewrites()] }
+    const t = process.env.API_PROXY_TARGET?.replace(/\/+$/, '')
+    const px = t ? [
+      { source: '/api/v1/:path*/', destination: `${t}/api/v1/:path*/` },
+      { source: '/api/v2/:path*/', destination: `${t}/api/v2/:path*/` },
+      { source: '/api/v1/:path*', destination: `${t}/api/v1/:path*` },
+      { source: '/api/v2/:path*', destination: `${t}/api/v2/:path*` },
+      { source: '/media/:path*', destination: `${t}/media/:path*` },
+    ] : []
+    return { beforeFiles: [...px, ...buildPluginRewrites(), ...buildStorefrontPluginRewrites()] }
   },
   webpack: (config) => {
     // Fallback for --no-turbopack: resolve node_modules from the client directory.

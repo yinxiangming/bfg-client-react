@@ -416,7 +416,7 @@ class StorefrontApiClient {
 
   // Freight Services
   async getFreightServicesForCountry(country: string): Promise<any[]> {
-    return this.request<any[]>(`/api/v1/freight-services/for_country/?country=${encodeURIComponent(country)}`)
+    return this.request<any[]>(`/api/v1/delivery/freight-services/for_country/?country=${encodeURIComponent(country)}`)
   }
 
   async addCartItem(data: { product: number; variant?: number; quantity: number }): Promise<any> {

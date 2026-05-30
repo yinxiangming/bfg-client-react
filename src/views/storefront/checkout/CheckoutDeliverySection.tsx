@@ -172,6 +172,8 @@ const CheckoutDeliverySection = ({
                 cursor: 'pointer'
               }}
             >
+              <option value='NZ'>New Zealand</option>
+              <option value='AU'>Australia</option>
               <option value='US'>{t('checkout.delivery.country.us')}</option>
               <option value='CA'>{t('checkout.delivery.country.ca')}</option>
               <option value='GB'>{t('checkout.delivery.country.gb')}</option>
