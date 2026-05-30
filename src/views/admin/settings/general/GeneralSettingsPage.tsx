@@ -88,14 +88,22 @@ const defaultHeaderOptions: StorefrontHeaderOptionsPayload = {
   show_login: true
 }
 
+type ColorMode = 'light' | 'dark'
+
 type StorefrontUiData = {
   theme: string
   header_options: StorefrontHeaderOptionsPayload
+  allowed_color_modes: ColorMode[]
+  default_color_mode: 'light' | 'dark' | 'system'
 }
+
+const ALL_COLOR_MODES: ColorMode[] = ['light', 'dark']
 
 const initialStorefrontUi: StorefrontUiData = {
   theme: THEME_IDS[0] ?? 'store',
-  header_options: { ...defaultHeaderOptions }
+  header_options: { ...defaultHeaderOptions },
+  allowed_color_modes: [...ALL_COLOR_MODES],
+  default_color_mode: 'system'
 }
 
 type ShopData = {
@@ -348,9 +356,24 @@ const GeneralSettingsPage = () => {
         const storefront_ui = (settings.custom_settings as any)?.storefront_ui || {}
         if (storefront_ui && Object.keys(storefront_ui).length > 0) {
           const themeId = storefront_ui.theme ?? 'store'
+          const rawModes = Array.isArray(storefront_ui.allowed_color_modes)
+            ? (storefront_ui.allowed_color_modes as unknown[]).filter(
+                (m): m is ColorMode => m === 'light' || m === 'dark'
+              )
+            : []
+          const allowedColorModes: ColorMode[] = rawModes.length > 0 ? Array.from(new Set(rawModes)) as ColorMode[] : [...ALL_COLOR_MODES]
+          const rawDefault = storefront_ui.default_color_mode
+          const defaultColorMode: 'light' | 'dark' | 'system' =
+            rawDefault === 'light' || rawDefault === 'dark' || rawDefault === 'system'
+              ? rawDefault
+              : allowedColorModes.length === 1
+              ? allowedColorModes[0]
+              : 'system'
           setStorefrontUi({
             theme: THEME_IDS.includes(themeId) ? themeId : THEME_IDS[0] ?? 'store',
-            header_options: { ...defaultHeaderOptions, ...(storefront_ui.header_options || {}) }
+            header_options: { ...defaultHeaderOptions, ...(storefront_ui.header_options || {}) },
+            allowed_color_modes: allowedColorModes,
+            default_color_mode: defaultColorMode
           })
         }
 
@@ -475,7 +498,9 @@ const GeneralSettingsPage = () => {
 
       const storefrontPayload: StorefrontUiSettingsPayload = {
         theme: storefrontUi.theme || undefined,
-        header_options: storefrontUi.header_options
+        header_options: storefrontUi.header_options,
+        allowed_color_modes: storefrontUi.allowed_color_modes,
+        default_color_mode: storefrontUi.default_color_mode
       }
       await updateStorefrontUiSettings(currentSettingsId, storefrontPayload)
 
@@ -1050,6 +1075,74 @@ const GeneralSettingsPage = () => {
                               </MenuItem>
                             ))}
                           </CustomTextField>
+                        </Grid>
+                        <Grid size={{ xs: 12 }}>
+                          <Typography variant='subtitle2' color='text.secondary' sx={{ mb: 2 }}>
+                            Allowed color modes
+                          </Typography>
+                          <Typography variant='caption' color='text.secondary' sx={{ display: 'block', mb: 2 }}>
+                            Tick the modes the storefront / account / auth UIs may render in.
+                            When only one is selected, the switcher is hidden and that mode is
+                            forced for all visitors.
+                          </Typography>
+                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                            {ALL_COLOR_MODES.map(mode => {
+                              const checked = storefrontUi.allowed_color_modes.includes(mode)
+                              const isOnlyOne = checked && storefrontUi.allowed_color_modes.length === 1
+                              return (
+                                <FormControlLabel
+                                  key={mode}
+                                  control={
+                                    <Checkbox
+                                      checked={checked}
+                                      disabled={isOnlyOne}
+                                      onChange={e => {
+                                        const next = e.target.checked
+                                          ? Array.from(new Set([...storefrontUi.allowed_color_modes, mode]))
+                                          : storefrontUi.allowed_color_modes.filter(m => m !== mode)
+                                        // Never let the admin save an empty allow-list — that
+                                        // would lock the site out of any color scheme.
+                                        if (next.length === 0) return
+                                        handleStorefrontUiChange('allowed_color_modes', next as ColorMode[])
+                                        // If the configured default falls outside the new set,
+                                        // snap it back to the first allowed mode.
+                                        const cur = storefrontUi.default_color_mode
+                                        if (next.length === 1) {
+                                          handleStorefrontUiChange('default_color_mode', next[0])
+                                        } else if ((cur === 'light' || cur === 'dark') && !next.includes(cur)) {
+                                          handleStorefrontUiChange('default_color_mode', next[0])
+                                        }
+                                      }}
+                                    />
+                                  }
+                                  label={mode === 'light' ? 'Light' : 'Dark'}
+                                />
+                              )
+                            })}
+                          </Box>
+                          {storefrontUi.allowed_color_modes.length > 1 && (
+                            <Box sx={{ mt: 2, maxWidth: 280 }}>
+                              <CustomTextField
+                                select
+                                fullWidth
+                                label='Default color mode'
+                                value={storefrontUi.default_color_mode}
+                                onChange={e =>
+                                  handleStorefrontUiChange(
+                                    'default_color_mode',
+                                    e.target.value as 'light' | 'dark' | 'system'
+                                  )
+                                }
+                              >
+                                <MenuItem value='system'>Follow OS preference</MenuItem>
+                                {storefrontUi.allowed_color_modes.map(m => (
+                                  <MenuItem key={m} value={m}>
+                                    {m === 'light' ? 'Light' : 'Dark'}
+                                  </MenuItem>
+                                ))}
+                              </CustomTextField>
+                            </Box>
+                          )}
                         </Grid>
                         <Grid size={{ xs: 12 }}>
                           <Typography variant='subtitle2' color='text.secondary' sx={{ mb: 2 }}>

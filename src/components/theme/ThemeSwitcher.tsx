@@ -8,14 +8,21 @@ import Icon from '@components/Icon'
 
 // Context Imports
 import { useTheme } from '@/contexts/ThemeContext'
+import { useStorefrontConfig } from '@/contexts/StorefrontConfigContext'
+import { getAllowedColorModes } from '@/utils/storefrontConfig'
 
 // Type Imports
 import type { Mode } from '@/types/core'
 
 const ThemeSwitcher = () => {
   const { mode, systemMode, setMode } = useTheme()
+  const { config } = useStorefrontConfig()
+  const allowed = getAllowedColorModes(config)
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+
+  // Single allowed mode → no choice to make; suppress the entire switcher.
+  if (allowed.length <= 1) return null
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -41,11 +48,12 @@ const ThemeSwitcher = () => {
     return effectiveMode === 'dark' ? 'tabler-moon' : 'tabler-sun'
   }
 
-  const options: { mode: Mode; label: string; icon: string }[] = [
+  const allOptions: { mode: Mode; label: string; icon: string }[] = [
     { mode: 'light', label: 'Light', icon: 'tabler-sun' },
     { mode: 'dark', label: 'Dark', icon: 'tabler-moon-stars' },
     { mode: 'system', label: 'System', icon: 'tabler-device-desktop' }
   ]
+  const options = allOptions.filter(o => o.mode === 'system' || allowed.includes(o.mode as 'light' | 'dark'))
 
   return (
     <div className='theme-switcher' ref={dropdownRef}>

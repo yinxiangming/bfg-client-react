@@ -33,6 +33,10 @@ export type StorefrontFooterMenuGroup = {
   items: StorefrontMenuItem[]
 }
 
+export type ColorMode = 'light' | 'dark'
+
+export const ALL_COLOR_MODES: ColorMode[] = ['light', 'dark']
+
 export type StorefrontHeaderOptions = {
   show_search?: boolean
   show_cart?: boolean
@@ -68,6 +72,18 @@ export type StorefrontConfig = {
   footer_menu_groups?: StorefrontFooterMenuGroup[]
   default_language?: string
   languages?: string[]
+  /**
+   * Allowed color modes (subset of ['light', 'dark']). When this contains
+   * a single entry, the storefront / account / auth UIs force that mode and
+   * hide any mode-switcher. Defaults to both when omitted.
+   */
+  allowed_color_modes?: ColorMode[]
+  /**
+   * Preferred default color mode. Accepts 'light' | 'dark' | 'system'.
+   * 'system' means "follow the OS preference"; only meaningful when more
+   * than one entry is in allowed_color_modes.
+   */
+  default_color_mode?: 'light' | 'dark' | 'system'
   theme?: string
   header?: string
   footer?: string
@@ -101,6 +117,51 @@ export function hasMultipleStorefrontLanguages(
   config?: Pick<StorefrontConfig, 'default_language' | 'languages'> | null
 ): boolean {
   return getStorefrontLanguages(config).length > 1
+}
+
+/**
+ * Allowed color modes for the current storefront. Defaults to both modes
+ * when the config doesn't specify a (non-empty) list — i.e. opt-out, not
+ * opt-in. When a single mode is returned, the UI should force it and hide
+ * any switcher (mirrors the language-list pattern).
+ */
+export function getAllowedColorModes(
+  config?: Pick<StorefrontConfig, 'allowed_color_modes'> | null
+): ColorMode[] {
+  const raw = config?.allowed_color_modes
+  if (Array.isArray(raw)) {
+    const filtered = raw.filter((m): m is ColorMode => m === 'light' || m === 'dark')
+    if (filtered.length > 0) return Array.from(new Set(filtered)) as ColorMode[]
+  }
+  return [...ALL_COLOR_MODES]
+}
+
+export function hasMultipleColorModes(
+  config?: Pick<StorefrontConfig, 'allowed_color_modes'> | null
+): boolean {
+  return getAllowedColorModes(config).length > 1
+}
+
+/**
+ * Resolve the effective color mode given the config + the user's stored
+ * preference. When only one mode is allowed, that mode wins regardless of
+ * what the user previously chose.
+ */
+export function resolveColorMode(
+  config: Pick<StorefrontConfig, 'allowed_color_modes' | 'default_color_mode'> | null | undefined,
+  preferred?: 'light' | 'dark' | 'system' | null
+): 'light' | 'dark' | 'system' {
+  const allowed = getAllowedColorModes(config)
+  if (allowed.length === 1) return allowed[0]
+  if (preferred === 'light' || preferred === 'dark') {
+    if (allowed.includes(preferred)) return preferred
+  }
+  if (preferred === 'system') return 'system'
+  const def = config?.default_color_mode
+  if (def === 'light' || def === 'dark') {
+    if (allowed.includes(def)) return def
+  }
+  return def === 'system' ? 'system' : 'system'
 }
 
 export function resolveStorefrontLocale(

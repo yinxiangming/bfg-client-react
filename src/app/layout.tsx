@@ -1,12 +1,15 @@
 // i18n Imports
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
+import { headers } from 'next/headers'
 
 // Component Imports
 import ThemeProvider from '@components/theme/ThemeProvider'
 import RootLayoutChrome from '@components/layout/RootLayoutChrome'
 import { CartProvider } from '@/contexts/CartContext'
 import { AppDialogProvider } from '@/contexts/AppDialogContext'
+import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
+import { getAllowedColorModes } from '@/utils/storefrontConfig'
 
 // Style Imports
 import './globals.css'
@@ -24,29 +27,41 @@ export const viewport = {
   maximumScale: 5
 }
 
-const getInitialMode = async (): Promise<'system' | 'light' | 'dark'> => {
-  // Try to get stored mode from cookies or default to 'system'
-  // This runs on server, so we can't access localStorage
-  return 'system'
-}
-
 const RootLayout = async ({ children }: { children: React.ReactNode }) => {
-  const initialMode = await getInitialMode()
   const locale = await getLocale()
   const messages = await getMessages()
   const direction = 'ltr'
-  const defaultSystemMode: 'light' | 'dark' = 'light'
+
+  // Resolve color-mode constraints from the storefront config so first paint
+  // already matches the workspace's allowed_color_modes — no flash from
+  // localStorage/system preference into a disallowed mode.
+  const headersList = await headers()
+  const requestHost = headersList.get('host') ?? undefined
+  const storefrontConfig = await getStorefrontConfigForServer(locale, requestHost)
+  const allowedModes = getAllowedColorModes(storefrontConfig)
+  const lockedMode = allowedModes.length === 1 ? allowedModes[0] : null
+  const initialMode: 'system' | 'light' | 'dark' = lockedMode ?? 'system'
+  const defaultSystemMode: 'light' | 'dark' = lockedMode ?? 'light'
 
   const content = (
     <RootLayoutChrome defaultSystemMode={defaultSystemMode}>{children}</RootLayoutChrome>
   )
 
+  const htmlModeAttrs = defaultSystemMode === 'dark' ? { 'data-dark': '' } : { 'data-light': '' }
+
   return (
-    <html id='__next' lang={locale} dir={direction} data-light='' suppressHydrationWarning>
+    <html
+      id='__next'
+      lang={locale}
+      dir={direction}
+      data-mode={defaultSystemMode}
+      {...htmlModeAttrs}
+      suppressHydrationWarning
+    >
       <head>
         <script src='https://code.iconify.design/3/3.1.1/iconify.min.js' async></script>
       </head>
-      <body className='flex is-full min-bs-full flex-auto flex-col' data-mode={defaultSystemMode} data-light=''>
+      <body className='flex is-full min-bs-full flex-auto flex-col' data-mode={defaultSystemMode} {...htmlModeAttrs}>
 
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider initialMode={initialMode}>

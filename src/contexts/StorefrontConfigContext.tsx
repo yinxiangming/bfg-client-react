@@ -2,12 +2,14 @@
 
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import {
+  getAllowedColorModes,
   getStorefrontConfig,
   hasMultipleStorefrontLanguages,
   resolveStorefrontLocale,
   seedStorefrontConfigCache,
   type StorefrontConfig,
 } from '@/utils/storefrontConfig'
+import { useTheme } from '@/contexts/ThemeContext'
 
 type StorefrontConfigContextType = {
   config: StorefrontConfig | null
@@ -34,6 +36,8 @@ const defaultConfig: StorefrontConfig = {
   footer_menus: [],
   default_language: 'en',
   languages: ['en'],
+  allowed_color_modes: ['light', 'dark'],
+  default_color_mode: 'system',
   theme: 'store',
   header_options: {
     show_search: true,
@@ -97,9 +101,32 @@ export function StorefrontConfigProvider({ children, initialConfig }: Storefront
 
   return (
     <StorefrontConfigContext.Provider value={value}>
+      <ColorModeEnforcer config={config} />
       {children}
     </StorefrontConfigContext.Provider>
   )
+}
+
+/**
+ * When the storefront config allows only one color mode (e.g. light), force
+ * that mode on the ThemeContext — overriding any stored localStorage choice
+ * or OS preference — for as long as this provider is mounted. When multiple
+ * modes are allowed, release the override so the user's choice wins again.
+ *
+ * Mirrors the language-locale lock-in at line 84 above.
+ */
+function ColorModeEnforcer({ config }: { config: StorefrontConfig | null }) {
+  const { forceMode } = useTheme()
+  useEffect(() => {
+    if (!config) return
+    const allowed = getAllowedColorModes(config)
+    if (allowed.length === 1) {
+      forceMode(allowed[0])
+    } else {
+      forceMode(null)
+    }
+  }, [config, forceMode])
+  return null
 }
 
 export function useStorefrontConfig(): StorefrontConfigContextType {
