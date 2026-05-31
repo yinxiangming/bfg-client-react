@@ -21,9 +21,6 @@ const ThemeSwitcher = () => {
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
-  // Single allowed mode → no choice to make; suppress the entire switcher.
-  if (allowed.length <= 1) return null
-
   // Close dropdown when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -54,6 +51,9 @@ const ThemeSwitcher = () => {
     { mode: 'system', label: 'System', icon: 'tabler-device-desktop' }
   ]
   const options = allOptions.filter(o => o.mode === 'system' || allowed.includes(o.mode as 'light' | 'dark'))
+
+  // Single allowed mode means there is no choice to make, but hooks must stay stable.
+  if (allowed.length <= 1) return null
 
   return (
     <div className='theme-switcher' ref={dropdownRef}>
@@ -90,4 +90,3 @@ const ThemeSwitcher = () => {
 }
 
 export default ThemeSwitcher
-
