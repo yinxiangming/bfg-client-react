@@ -14,7 +14,9 @@ import Logo from '@components/Logo'
 import Icon from '@components/Icon'
 import CustomTextField from '@components/ui/TextField'
 import { authApi } from '@/utils/authApi'
+import { getApiBaseUrl } from '@/utils/api'
 import { useStorefrontConfigSafe } from '@/contexts/StorefrontConfigContext'
+import { useSocialProviders } from '@/hooks/useSocialProviders'
 
 export default function AuthRegisterClient() {
   const t = useTranslations('auth.register')
@@ -36,6 +38,16 @@ export default function AuthRegisterClient() {
   const inviteUuid = searchParams.get('invite_uuid') || ''
   const prefilledEmail = searchParams.get('email') || ''
   const isInviteFlow = Boolean(inviteToken)
+
+  const redirect = searchParams.get('redirect') ? decodeURIComponent(searchParams.get('redirect')!) : '/account'
+  const host = typeof window !== 'undefined' ? window.location.host : ''
+  const enabledProviders = useSocialProviders()
+
+  const socialLogin = (provider: string) => {
+    const apiBase = getApiBaseUrl().replace(/\/+$/, '')
+    const params = new URLSearchParams({ redirect, host })
+    window.location.href = `${apiBase}/api/v1/auth/${provider}/login/?${params}`
+  }
 
   useEffect(() => {
     if (prefilledEmail && !email) setEmail(prefilledEmail)
@@ -177,24 +189,45 @@ export default function AuthRegisterClient() {
             </Link>
           </div>
 
-          <div className='auth-divider'>
-            <span>{t('or')}</span>
-          </div>
-
-          <div className='auth-social'>
-            <IconButton className='text-facebook' size='small'>
-              <Icon icon='tabler-brand-facebook-filled' />
-            </IconButton>
-            <IconButton className='text-twitter' size='small'>
-              <Icon icon='tabler-brand-twitter-filled' />
-            </IconButton>
-            <IconButton className='text-textPrimary' size='small'>
-              <Icon icon='tabler-brand-github-filled' />
-            </IconButton>
-            <IconButton className='text-error' size='small'>
-              <Icon icon='tabler-brand-google-filled' />
-            </IconButton>
-          </div>
+          {enabledProviders && enabledProviders.length > 0 && (
+            <>
+              <div className='auth-divider'>
+                <span>{t('or')}</span>
+              </div>
+              <div className='auth-social'>
+                {enabledProviders.includes('google') && (
+                  <IconButton
+                    className='text-error'
+                    size='small'
+                    onClick={() => socialLogin('google')}
+                    aria-label='Google'
+                  >
+                    <Icon icon='tabler-brand-google-filled' />
+                  </IconButton>
+                )}
+                {enabledProviders.includes('facebook') && (
+                  <IconButton
+                    className='text-facebook'
+                    size='small'
+                    onClick={() => socialLogin('facebook')}
+                    aria-label='Facebook'
+                  >
+                    <Icon icon='tabler-brand-facebook-filled' />
+                  </IconButton>
+                )}
+                {enabledProviders.includes('apple') && (
+                  <IconButton
+                    className='text-textPrimary'
+                    size='small'
+                    onClick={() => socialLogin('apple')}
+                    aria-label='Apple'
+                  >
+                    <Icon icon='tabler-brand-apple-filled' />
+                  </IconButton>
+                )}
+              </div>
+            </>
+          )}
         </form>
       </div>
     </div>
