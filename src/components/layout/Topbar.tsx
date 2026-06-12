@@ -6,6 +6,7 @@ import { useState, useRef, useEffect } from 'react'
 // Component Imports
 import Icon from '@components/Icon'
 import ThemeSwitcher from '@components/theme/ThemeSwitcher'
+import AdminSkinSwitcher from '@components/theme/AdminSkinSwitcher'
 import UserDropdown from '../ui/UserDropdown'
 import CurrentUserDisplay from '../ui/CurrentUserDisplay'
 import LanguageSwitcher from '@/components/i18n/LanguageSwitcher'
@@ -61,6 +62,7 @@ const Topbar = ({ avatarInitial = 'N', onMenuToggle, showMenuToggle }: Props) =>
           </button>
         )}
         <ThemeSwitcher />
+        <AdminSkinSwitcher />
         <LanguageSwitcher />
         <FeedbackButton variant='button' />
         <button

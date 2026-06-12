@@ -1033,7 +1033,7 @@ export default function SchemaForm<T extends Record<string, any>>({
     return (
       <Box key={blockIndex} sx={{ mb: 3 }} className={block.className}>
         {block.title && (
-          <Typography variant="h6" sx={{ mb: 3 }}>
+          <Typography component="div" className="at-block-title">
             {block.title}
           </Typography>
         )}
@@ -1075,10 +1075,20 @@ export default function SchemaForm<T extends Record<string, any>>({
   }
 
   return (
-    <Card>
+    <Card
+      elevation={0}
+      className="at-schema-form"
+      sx={{
+        backgroundColor: 'var(--at-card-bg)',
+        border: '1px solid',
+        borderColor: 'var(--at-card-border)',
+        borderRadius: 'var(--at-card-radius)',
+        boxShadow: 'var(--at-card-shadow)'
+      }}
+    >
       <CardContent>
         {!hideTitle && schema.title && (
-          <Typography variant="h5" sx={{ mb: 4 }}>
+          <Typography variant="h5" sx={{ mb: 4, fontFamily: 'var(--at-font-display)' }}>
             {schema.title}
           </Typography>
         )}
@@ -1089,11 +1099,28 @@ export default function SchemaForm<T extends Record<string, any>>({
           {!hideActions && (
             <Box sx={{ display: 'flex', gap: 2, mt: 4, justifyContent: 'flex-end' }}>
               {onCancel && (
-                <Button variant="outlined" onClick={onCancel} disabled={loading}>
+                <Button
+                  variant="outlined"
+                  onClick={onCancel}
+                  disabled={loading}
+                  sx={{ textTransform: 'none', borderRadius: 'var(--at-control-radius)' }}
+                >
                   {t('common.schemaForm.cancel')}
                 </Button>
               )}
-              <Button type="submit" variant="contained" disabled={loading}>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={loading}
+                sx={{
+                  textTransform: 'none',
+                  borderRadius: 'var(--at-control-radius)',
+                  boxShadow: 'none',
+                  backgroundColor: 'var(--at-accent)',
+                  color: 'var(--at-accent-fg)',
+                  '&:hover': { backgroundColor: 'var(--at-accent-strong)' }
+                }}
+              >
                 {loading ? t('common.schemaForm.saving') : t('common.schemaForm.save')}
               </Button>
             </Box>
