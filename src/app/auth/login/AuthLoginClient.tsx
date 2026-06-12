@@ -14,6 +14,7 @@ import Logo from '@components/Logo'
 import CustomTextField from '@components/ui/TextField'
 import Icon from '@components/Icon'
 import { authApi } from '@/utils/authApi'
+import { meApi } from '@/utils/meApi'
 import { getApiBaseUrl } from '@/utils/api'
 import { useStorefrontConfigSafe } from '@/contexts/StorefrontConfigContext'
 import { useSocialProviders } from '@/hooks/useSocialProviders'
@@ -32,7 +33,8 @@ export default function AuthLoginClient() {
   const storefrontConfig = useStorefrontConfigSafe()
   const siteName = storefrontConfig.site_name?.trim() || 'BFG'
 
-  const redirect = searchParams.get('redirect') ? decodeURIComponent(searchParams.get('redirect')!) : '/account'
+  const hasExplicitRedirect = Boolean(searchParams.get('redirect'))
+  const redirect = hasExplicitRedirect ? decodeURIComponent(searchParams.get('redirect')!) : '/account'
   const host = typeof window !== 'undefined' ? window.location.host : ''
   const enabledProviders = useSocialProviders()
 
@@ -64,7 +66,19 @@ export default function AuthLoginClient() {
           redirect,
         )
       } else {
-        router.push(redirect)
+        // Default landing: staff belong in the admin area. The customer /account
+        // area bounces non-customers to the storefront, so without this a staff
+        // login lands on the shop. Respect an explicit ?redirect when present.
+        let target = redirect
+        if (!hasExplicitRedirect) {
+          try {
+            const me = await meApi.getMe()
+            if (me?.staff_member?.is_active) target = '/admin'
+          } catch {
+            // Fall back to the default redirect on any /me error.
+          }
+        }
+        router.push(target)
       }
     } catch (err: any) {
       setError(err?.message === 'NETWORK_ERROR' ? t('networkError') : (err?.message || t('loginFailed')))

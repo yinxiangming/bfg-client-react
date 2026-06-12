@@ -167,3 +167,36 @@
   border-color: rgba(255, 62, 29, 0.3);
 }
 
+/* Responsive: on short or narrow screens the vertically-centered card can
+   overflow the viewport and clip the submit button. Top-align and let the
+   page scroll so the whole form (incl. the login button) is reachable. */
+@media (max-height: 780px) {
+  .auth-shell {
+    align-items: flex-start;
+    padding-top: 88px;
+    padding-bottom: 24px;
+  }
+}
+
+@media (max-width: 600px) {
+  .auth-shell {
+    align-items: flex-start;
+    padding: 72px 14px 24px;
+  }
+
+  .auth-logo {
+    top: 18px;
+    left: 18px;
+  }
+
+  .auth-card {
+    max-width: 100%;
+    padding: 24px 18px;
+    border-radius: 12px;
+  }
+
+  .auth-header h2 {
+    font-size: 20px;
+  }
+}
+
