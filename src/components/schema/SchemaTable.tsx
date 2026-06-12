@@ -13,7 +13,6 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
-import Chip from '@mui/material/Chip'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import Dialog from '@mui/material/Dialog'
@@ -37,6 +36,7 @@ import classnames from 'classnames'
 // Component Imports
 import CustomTextField from '@/components/ui/TextField'
 import FilterDateRangePicker, { toDateOnly } from '@/components/schema/FilterDateRangePicker'
+import StatusBadge from '@/components/schema/StatusBadge'
 
 // Type Imports
 import type { ListSchema, SchemaAction, SchemaFilter } from '@/types/schema'
@@ -392,17 +392,9 @@ export default function SchemaTable<T extends { id: number | string }>({
           // Note: These labels should ideally come from schema or data
           // For now, using generic status labels
           return (
-            <Chip
+            <StatusBadge
               label={value ? t('common.states.active', { defaultValue: 'Active' }) : t('common.states.inactive', { defaultValue: 'Inactive' })}
-              size="small"
               color={value ? 'success' : 'default'}
-              variant="filled"
-              sx={{ 
-                height: 24, 
-                fontSize: '0.8125rem', 
-                fontWeight: 500,
-                '& .MuiChip-label': { px: 1.5 }
-              }}
             />
           )
         }
@@ -411,36 +403,12 @@ export default function SchemaTable<T extends { id: number | string }>({
           return (
             <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
               {value.map((item, idx) => (
-                <Chip 
-                  key={idx} 
-                  label={item} 
-                  size="small" 
-                  variant="filled"
-                  sx={{ 
-                    height: 24, 
-                    fontSize: '0.8125rem', 
-                    fontWeight: 500,
-                    '& .MuiChip-label': { px: 1.5 }
-                  }}
-                />
+                <StatusBadge key={idx} label={item} color="default" noDot />
               ))}
             </Box>
           )
         }
-        return (
-          <Chip
-            label={value}
-            size="small"
-            color={statusColors[value] || 'default'}
-            variant="filled"
-            sx={{ 
-              height: 24, 
-              fontSize: '0.8125rem', 
-              fontWeight: 500,
-              '& .MuiChip-label': { px: 1.5 }
-            }}
-          />
-        )
+        return <StatusBadge label={value} color={statusColors[value] || 'default'} />
       default:
         // Format file size for media
         if (typeof value === 'number' && value > 1024) {
@@ -570,13 +538,15 @@ export default function SchemaTable<T extends { id: number | string }>({
 
   return (
     <>
-      <Card 
-        elevation={0} 
-        sx={{ 
-          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+      <Card
+        elevation={0}
+        className="at-schema-table"
+        sx={{
+          backgroundColor: 'var(--at-card-bg)',
+          boxShadow: 'var(--at-card-shadow)',
           border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: 2,
+          borderColor: 'var(--at-card-border)',
+          borderRadius: 'var(--at-card-radius)',
           width: '100%',
           display: 'flex',
           flexDirection: 'column',
@@ -585,7 +555,7 @@ export default function SchemaTable<T extends { id: number | string }>({
       >
 
         {/* Toolbar with Search, Filters, and Actions */}
-        <CardContent sx={{ py: 2, px: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
+        <CardContent sx={{ py: 2, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider)' }}>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
             {/* Search */}
             {schema.searchFields && (
@@ -850,13 +820,20 @@ export default function SchemaTable<T extends { id: number | string }>({
                   startIcon={action.icon ? <i className={action.icon} style={{ fontSize: '1rem' }} /> : undefined}
                   onClick={() => handleActionClick(action, {} as T)}
                   size="small"
-                  sx={{ 
-                    textTransform: 'none', 
+                  sx={{
+                    textTransform: 'none',
                     fontWeight: 500,
-                    borderRadius: 1.5,
-                    boxShadow: action.type === 'primary' ? '0 1px 2px 0 rgb(0 0 0 / 0.05)' : 'none',
+                    borderRadius: 'var(--at-control-radius)',
+                    boxShadow: 'none',
                     height: '38px',
-                    fontSize: '0.875rem'
+                    fontSize: '0.875rem',
+                    ...(action.type === 'primary'
+                      ? {
+                          backgroundColor: 'var(--at-accent)',
+                          color: 'var(--at-accent-fg)',
+                          '&:hover': { backgroundColor: 'var(--at-accent-strong)' }
+                        }
+                      : {})
                   }}
                 >
                   {action.label}
@@ -905,16 +882,20 @@ export default function SchemaTable<T extends { id: number | string }>({
                     size="small"
                   />
                 </th>
-                {schema.columns.map((column) => (
+                {schema.columns.map((column) => {
+                  const isNumeric = column.type === 'currency' || column.type === 'number'
+                  return (
                   <th
                     key={column.field}
                     className={classnames({
-                      'cursor-pointer select-none': column.sortable
+                      'cursor-pointer select-none': column.sortable,
+                      'at-num': isNumeric
                     })}
                     onClick={() => column.sortable && handleSort(column.field)}
                   >
                     <div className={classnames({
-                      'flex items-center': column.sortable
+                      'flex items-center': column.sortable,
+                      'justify-end': isNumeric && column.sortable
                     })}>
                       {column.label}
                       {column.sortable && (
@@ -931,7 +912,8 @@ export default function SchemaTable<T extends { id: number | string }>({
                       )}
                     </div>
                   </th>
-                ))}
+                  )
+                })}
                 {rowActions.length > 0 && <th align="right">{t('common.schemaTable.actionsColumn')}</th>}
               </tr>
             </thead>
@@ -944,8 +926,11 @@ export default function SchemaTable<T extends { id: number | string }>({
                 </tr>
               ) : paginatedData.length === 0 ? (
                 <tr>
-                  <td colSpan={schema.columns.length + 1 + (rowActions.length > 0 ? 1 : 0)} className='text-center'>
-                    {t('common.schemaTable.noData')}
+                  <td colSpan={schema.columns.length + 1 + (rowActions.length > 0 ? 1 : 0)}>
+                    <div className='at-empty'>
+                      <i className='tabler-inbox' aria-hidden='true' />
+                      {t('common.schemaTable.noData')}
+                    </div>
                   </td>
                 </tr>
               ) : (
@@ -981,6 +966,7 @@ export default function SchemaTable<T extends { id: number | string }>({
 
                         // Check if column has a link action
                         const hasLink = !!column.link
+                        const isNumeric = column.type === 'currency' || column.type === 'number'
                         const handleColumnClick = (e: React.MouseEvent) => {
                           if (hasLink && column.link) {
                             e.stopPropagation()
@@ -995,7 +981,7 @@ export default function SchemaTable<T extends { id: number | string }>({
                         return (
                           <td
                             key={column.field}
-                            className={hasLink ? 'hover:underline' : ''}
+                            className={classnames({ 'hover:underline': hasLink, 'at-num': isNumeric })}
                             onClick={hasLink ? handleColumnClick : undefined}
                             style={hasLink ? { 
                               color: 'var(--mui-palette-primary-main)', 
@@ -1035,11 +1021,11 @@ export default function SchemaTable<T extends { id: number | string }>({
           justifyContent: 'space-between', 
           alignItems: 'center', 
           flexWrap: 'wrap', 
-          gap: 2, 
-          py: 2, 
+          gap: 2,
+          py: 2,
           px: 3,
           borderTop: '1px solid',
-          borderColor: 'divider'
+          borderColor: 'var(--at-divider)'
         }}>
           {/* Left: Showing info + Items per page */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
@@ -1083,10 +1069,18 @@ export default function SchemaTable<T extends { id: number | string }>({
               showLastButton
               sx={{
                 '& .MuiPaginationItem-root': {
-                  minWidth: 40,
-                  height: 40,
+                  minWidth: 36,
+                  height: 36,
                   fontSize: '0.875rem',
-                  fontWeight: 500
+                  fontWeight: 500,
+                  borderRadius: 'var(--at-control-radius)',
+                  borderColor: 'var(--at-card-border)'
+                },
+                '& .MuiPaginationItem-root.Mui-selected': {
+                  backgroundColor: 'var(--at-accent)',
+                  color: 'var(--at-accent-fg)',
+                  borderColor: 'transparent',
+                  '&:hover': { backgroundColor: 'var(--at-accent-strong)' }
                 },
                 '& .MuiPaginationItem-icon': {
                   fontSize: '1.25rem'
