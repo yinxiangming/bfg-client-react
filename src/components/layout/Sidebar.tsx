@@ -142,7 +142,13 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
           const itemPath = [...parentIds, item.id]
           const itemId = itemPath.join('-')
 
-          if (hasActiveChild(item.children)) {
+          // Open when a child is active OR the active path matches the submenu's
+          // own overview href, so the menu stays expanded right after navigating
+          // to the overview page (not only on a second click).
+          if (
+            hasActiveChild(item.children) ||
+            (item.href && isActive(item.href, item.activeUrl, item.activeMatch))
+          ) {
             nextState[itemId] = true
           }
 
@@ -155,7 +161,7 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
 
     findAndOpenActiveParents(navItems)
     setOpenSubmenus(nextState)
-  }, [navItems, hasActiveChild, currentPath])
+  }, [navItems, hasActiveChild, isActive, currentPath])
 
   const toggleSubmenu = (id: string) => {
     setOpenSubmenus(prev => ({
@@ -192,28 +198,56 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
     if (isMenuSubMenu(item)) {
       const isOpen = openSubmenus[itemId] || false
       const hasActive = hasActiveChild(item.children)
+      const submenuHref = item.href
+      const headerActive = submenuHref ? isActive(submenuHref, item.activeUrl, item.activeMatch) : false
+
+      const headerBody = (
+        <>
+          {item.icon && (
+            <span className='menu-icon'>
+              <Icon icon={item.icon} />
+            </span>
+          )}
+          {!collapsed && <span className='menu-label'>{getLabel(item)}</span>}
+          {!collapsed && item.suffix && renderBadge(item.suffix)}
+          {!collapsed && (
+            <span
+              className={`menu-expand-icon ${isOpen ? 'open' : ''}`}
+              onClick={(e) => {
+                // Chevron toggles open/closed without following the parent link.
+                e.preventDefault()
+                e.stopPropagation()
+                toggleSubmenu(itemId)
+              }}
+            >
+              <Icon icon='tabler-chevron-right' />
+            </span>
+          )}
+        </>
+      )
 
       return (
         <li key={item.id} className={`menu-submenu ${isOpen ? 'open' : ''} ${hasActive ? 'has-active' : ''}`}>
-          <button
-            type='button'
-            className={`menu-submenu-button level-${level}`}
-            onClick={() => toggleSubmenu(itemId)}
-            disabled={item.disabled}
-          >
-            {item.icon && (
-              <span className='menu-icon'>
-                <Icon icon={item.icon} />
-              </span>
-            )}
-            {!collapsed && <span className='menu-label'>{getLabel(item)}</span>}
-            {!collapsed && item.suffix && renderBadge(item.suffix)}
-            {!collapsed && (
-              <span className={`menu-expand-icon ${isOpen ? 'open' : ''}`}>
-                <Icon icon='tabler-chevron-right' />
-              </span>
-            )}
-          </button>
+          {submenuHref ? (
+            // Submenu with an overview page: clicking the label navigates there
+            // AND expands the children; the chevron toggles independently.
+            <Link
+              href={submenuHref}
+              className={`menu-submenu-button level-${level} ${headerActive ? 'active' : ''}`}
+              onClick={() => setOpenSubmenus(prev => ({ ...prev, [itemId]: true }))}
+            >
+              {headerBody}
+            </Link>
+          ) : (
+            <button
+              type='button'
+              className={`menu-submenu-button level-${level}`}
+              onClick={() => toggleSubmenu(itemId)}
+              disabled={item.disabled}
+            >
+              {headerBody}
+            </button>
+          )}
           {!collapsed && (
             <ul className={`menu-submenu-children level-${level + 1} ${isOpen ? 'open' : ''}`}>
               {item.children.map(child => renderMenuItem(child, level + 1, itemId))}
