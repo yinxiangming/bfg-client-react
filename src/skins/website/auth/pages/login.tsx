@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl'
 import { authApi } from '@/utils/authApi'
 import { getApiBaseUrl } from '@/utils/api'
 import { useStorefrontConfigSafe } from '@/contexts/StorefrontConfigContext'
+import { useSocialProviders } from '@/hooks/useSocialProviders'
 import { isPlatformInstance, handlePlatformPostLogin } from '@/services/platform'
 
 /**
@@ -30,6 +31,7 @@ export default function WebsiteLoginPage() {
 
   const redirect = searchParams.get('redirect') ? decodeURIComponent(searchParams.get('redirect')!) : '/account'
   const host = typeof window !== 'undefined' ? window.location.host : ''
+  const enabledProviders = useSocialProviders()
 
   const platformLoginUrl = process.env.NEXT_PUBLIC_PLATFORM_LOGIN_URL
   useEffect(() => {
@@ -144,15 +146,25 @@ export default function WebsiteLoginPage() {
           <Link href='/auth/register'>{t('createAccount')}</Link>
         </div>
 
-        <div className='au-divider'>
-          <span>{t('or')}</span>
-        </div>
+        {enabledProviders && enabledProviders.length > 0 && (
+          <>
+            <div className='au-divider'>
+              <span>{t('or')}</span>
+            </div>
 
-        <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
-          <SocialButton provider='google' onClick={() => socialLogin('google')} icon='tabler-brand-google-filled' />
-          <SocialButton provider='facebook' onClick={() => socialLogin('facebook')} icon='tabler-brand-facebook-filled' />
-          <SocialButton provider='apple' onClick={() => socialLogin('apple')} icon='tabler-brand-apple-filled' />
-        </div>
+            <div style={{ display: 'flex', gap: '0.5rem', justifyContent: 'center' }}>
+              {enabledProviders.includes('google') && (
+                <SocialButton provider='google' onClick={() => socialLogin('google')} icon='tabler-brand-google-filled' />
+              )}
+              {enabledProviders.includes('facebook') && (
+                <SocialButton provider='facebook' onClick={() => socialLogin('facebook')} icon='tabler-brand-facebook-filled' />
+              )}
+              {enabledProviders.includes('apple') && (
+                <SocialButton provider='apple' onClick={() => socialLogin('apple')} icon='tabler-brand-apple-filled' />
+              )}
+            </div>
+          </>
+        )}
       </form>
     </div>
   )
