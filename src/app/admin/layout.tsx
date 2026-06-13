@@ -33,13 +33,6 @@ export default async function AdminLayout({
 
   return (
     <>
-      {/* Apply the persisted admin skin before paint to avoid a flash. */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html:
-            "(function(){try{var s=localStorage.getItem('admin-skin');document.documentElement.setAttribute('data-admin-skin',(s==='compact'||s==='carbon')?s:'slate');}catch(e){document.documentElement.setAttribute('data-admin-skin','slate');}})();"
-        }}
-      />
       {/* Skin display / mono fonts (graceful system fallbacks in admin-skins.css). */}
       <link rel='preconnect' href='https://fonts.googleapis.com' />
       <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='anonymous' />

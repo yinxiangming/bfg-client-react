@@ -59,6 +59,8 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
       suppressHydrationWarning
     >
       <head>
+        {/* Runs before any paint to avoid admin skin flash; safe on non-admin pages. */}
+        <script dangerouslySetInnerHTML={{ __html: "(function(){try{var s=localStorage.getItem('admin-skin');document.documentElement.setAttribute('data-admin-skin',(s==='compact'||s==='carbon')?s:'slate');}catch(e){document.documentElement.setAttribute('data-admin-skin','slate');}})();" }} />
         <script src='https://code.iconify.design/3/3.1.1/iconify.min.js' async></script>
       </head>
       <body className='flex is-full min-bs-full flex-auto flex-col' data-mode={defaultSystemMode} {...htmlModeAttrs}>
