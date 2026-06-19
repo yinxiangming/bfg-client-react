@@ -4143,5 +4143,14 @@
         "support": "工单支持"
       }
     }
+  },
+  "dashboard": {
+    "title": "仪表盘",
+    "editLayout": "编辑布局",
+    "editTitle": "编辑仪表盘布局",
+    "cancel": "取消",
+    "save": "保存布局",
+    "saving": "保存中…",
+    "emptyHint": "暂无区块。添加区块以定制您的仪表盘。"
   }
 }

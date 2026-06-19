@@ -110,7 +110,9 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 24px;
+  /* No padding here: each page provides its own (p-6 / page wrappers). Avoids
+     the doubled content margin (was 24px here + 24px page = 48px). */
+  padding: 0;
   width: 100%;
 }
 
@@ -281,7 +283,7 @@
   }
 
   .d365-content-body {
-    padding: 16px;
+    padding: 0;
   }
 }
 
