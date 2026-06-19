@@ -113,7 +113,8 @@
       "selectedCount": "Selected {count}",
       "selectedAllMatching": "All {count} matching selected",
       "selectAllMatching": "Select all {count} matching",
-      "clearSelection": "Clear selection"
+      "clearSelection": "Clear selection",
+      "selectionSummaryLabel": "Selected totals"
     },
     "schemaForm": {
       "save": "Save",

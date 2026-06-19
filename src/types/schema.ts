@@ -74,6 +74,11 @@ export interface SchemaSummaryField {
   format?: 'number' | 'currency' | 'decimal' | 'integer'
   /** Optional unit appended after the value, e.g. 'm³' / 'kg'. */
   unit?: string
+  /** Row field summed client-side for the selected-rows summary (WI-399). When set,
+   *  the summary bar aggregates over the selected rows (or the whole filtered set
+   *  when nothing is selected) in-browser, no stats endpoint needed. Use the
+   *  sentinel '__count__' to count rows instead of summing a field. */
+  sumField?: string
 }
 
 /** Declarative summary-bar config: a list aggregates its whole filtered result

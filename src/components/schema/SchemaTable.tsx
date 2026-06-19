@@ -595,6 +595,40 @@ export default function SchemaTable<T extends { id: number | string }>({
     })
   }, [selectedRows, allMatchingSelected, matchingTotal])
 
+  // Selected-row summary (WI-399): when summaryConfig fields declare a `sumField`,
+  // the bar aggregates client-side over the loaded rows — the selected rows when a
+  // selection is active, else the full filtered set. A server-provided `summary`
+  // still wins for the whole-set view (covers aggregates the client can't compute,
+  // e.g. declared value derived from related records).
+  const sumFields = useMemo(
+    () => schema.summaryConfig?.fields.filter(f => f.sumField) ?? [],
+    [schema.summaryConfig]
+  )
+  const hasSelection = selectedRows.size > 0 || allMatchingSelected
+  const selectionSummary = useMemo(() => {
+    if (sumFields.length === 0 || !hasSelection) return null
+    const rows = allMatchingSelected ? filteredData : data.filter(d => selectedRows.has(d.id))
+    const out: Record<string, number> = {}
+    for (const f of sumFields) {
+      out[f.key] = f.sumField === '__count__'
+        ? rows.length
+        : rows.reduce((acc, r) => acc + (Number((r as Record<string, unknown>)[f.sumField as string]) || 0), 0)
+    }
+    return out
+  }, [sumFields, hasSelection, allMatchingSelected, filteredData, data, selectedRows])
+  const computedAllSummary = useMemo(() => {
+    if (sumFields.length === 0 || summary) return null
+    const out: Record<string, number> = {}
+    for (const f of sumFields) {
+      out[f.key] = f.sumField === '__count__'
+        ? filteredData.length
+        : filteredData.reduce((acc, r) => acc + (Number((r as Record<string, unknown>)[f.sumField as string]) || 0), 0)
+    }
+    return out
+  }, [sumFields, summary, filteredData])
+  const summaryIsSelection = !!selectionSummary
+  const effectiveSummary = selectionSummary ?? summary ?? computedAllSummary ?? undefined
+
   return (
     <>
       <Card
@@ -615,30 +649,39 @@ export default function SchemaTable<T extends { id: number | string }>({
 
         {/* Summary bar — aggregates the whole filtered result set, not just the
             current page (WI-391). Driven by schema.summaryConfig + summary prop. */}
-        {schema.summaryConfig && (summary || summaryLoading) && (
+        {schema.summaryConfig && (effectiveSummary || summaryLoading) && (
           <CardContent
             sx={{
               py: 1.25, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider)',
               display: 'flex', gap: 3, flexWrap: 'wrap', alignItems: 'baseline',
-              backgroundColor: 'var(--at-subtle-bg, rgba(0,0,0,0.02))'
+              backgroundColor: summaryIsSelection
+                ? 'var(--at-selected-bg, rgba(105,108,255,0.08))'
+                : 'var(--at-subtle-bg, rgba(0,0,0,0.02))'
             }}
           >
-            {summaryLoading && !summary ? (
+            {summaryLoading && !effectiveSummary ? (
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <CircularProgress size={16} />
                 <Typography variant="body2" color="text.secondary">{t('common.schemaTable.loadingStats')}</Typography>
               </Box>
             ) : (
-              schema.summaryConfig.fields.map(field => (
-                <Box key={field.key} sx={{ display: 'flex', alignItems: 'baseline', gap: 0.75 }}>
-                  <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.3 }}>
-                    {field.label}
+              <>
+                {summaryIsSelection && (
+                  <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.3 }}>
+                    {t('common.schemaTable.selectionSummaryLabel')}
                   </Typography>
-                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                    {formatSummaryValue(summary?.[field.key], field)}{field.unit ? ` ${field.unit}` : ''}
-                  </Typography>
-                </Box>
-              ))
+                )}
+                {schema.summaryConfig.fields.map(field => (
+                  <Box key={field.key} sx={{ display: 'flex', alignItems: 'baseline', gap: 0.75 }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.3 }}>
+                      {field.label}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      {formatSummaryValue(effectiveSummary?.[field.key], field)}{field.unit ? ` ${field.unit}` : ''}
+                    </Typography>
+                  </Box>
+                ))}
+              </>
             )}
           </CardContent>
         )}
