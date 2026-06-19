@@ -65,6 +65,24 @@ export interface SchemaAction {
   icon?: string
 }
 
+/** A single aggregate shown in the SchemaTable summary bar (WI-391). */
+export interface SchemaSummaryField {
+  /** Key into the summary stats object passed to SchemaTable (e.g. 'total_volume'). */
+  key: string
+  label: string
+  /** Display formatting: plain number, currency, decimal string, or a unit suffix. */
+  format?: 'number' | 'currency' | 'decimal' | 'integer'
+  /** Optional unit appended after the value, e.g. 'm³' / 'kg'. */
+  unit?: string
+}
+
+/** Declarative summary-bar config: a list aggregates its whole filtered result
+ *  set (not just the current page) and renders the totals above the table. The
+ *  container is responsible for fetching the stats and passing them down. */
+export interface ListSchemaSummaryConfig {
+  fields: SchemaSummaryField[]
+}
+
 export interface ListSchema {
   title: string
   columns: SchemaColumn[]
@@ -72,6 +90,8 @@ export interface ListSchema {
   searchFields?: string[]
   searchPlaceholder?: string
   actions?: SchemaAction[]
+  /** When set, SchemaTable renders a summary bar from the `summary` prop (WI-391). */
+  summaryConfig?: ListSchemaSummaryConfig
 }
 
 export interface FormField {
