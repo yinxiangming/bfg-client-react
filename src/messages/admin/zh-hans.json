@@ -108,7 +108,12 @@
         "yesterday": "昨天",
         "lastWeek": "上周",
         "selectDate": "选择日期"
-      }
+      },
+      "loadingStats": "正在统计…",
+      "selectedCount": "已选 {count} 项",
+      "selectedAllMatching": "已选全部 {count} 条",
+      "selectAllMatching": "选择全部 {count} 条",
+      "clearSelection": "清空选择"
     },
     "schemaForm": {
       "save": "保存",

@@ -108,7 +108,12 @@
         "yesterday": "Yesterday",
         "lastWeek": "Last week",
         "selectDate": "Select date"
-      }
+      },
+      "loadingStats": "Loading statistics…",
+      "selectedCount": "Selected {count}",
+      "selectedAllMatching": "All {count} matching selected",
+      "selectAllMatching": "Select all {count} matching",
+      "clearSelection": "Clear selection"
     },
     "schemaForm": {
       "save": "Save",

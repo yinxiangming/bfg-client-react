@@ -39,7 +39,7 @@ import FilterDateRangePicker, { toDateOnly } from '@/components/schema/FilterDat
 import StatusBadge from '@/components/schema/StatusBadge'
 
 // Type Imports
-import type { ListSchema, SchemaAction, SchemaFilter } from '@/types/schema'
+import type { ListSchema, SchemaAction, SchemaFilter, SchemaSummaryField } from '@/types/schema'
 
 // Util Imports
 import { formatCurrency, formatDate, formatDateTime } from '@/utils/format'
@@ -91,6 +91,18 @@ function getDateRangePreset(start: string, end: string): '' | 'today' | 'yesterd
   return 'custom'
 }
 
+// Format a summary aggregate for display in the summary bar (WI-391).
+function formatSummaryValue(value: string | number | null | undefined, field: SchemaSummaryField): string {
+  if (value === null || value === undefined || value === '') return '—'
+  const num = typeof value === 'number' ? value : Number(value)
+  if (field.format === 'currency') return formatCurrency(Number.isFinite(num) ? num : 0)
+  if (field.format === 'integer' || field.format === 'number') {
+    return Number.isFinite(num) ? num.toLocaleString() : String(value)
+  }
+  // decimal (default): server pre-formats precision; add thousands grouping when numeric
+  return Number.isFinite(num) ? num.toLocaleString(undefined, { maximumFractionDigits: 3 }) : String(value)
+}
+
 type SchemaTableProps<T = any> = {
   schema: ListSchema
   data: T[]
@@ -114,6 +126,15 @@ type SchemaTableProps<T = any> = {
   }
   /** Called with debounced search string when server-side pagination is active */
   onSearchChange?: (search: string) => void
+  /** Aggregate stats for the summary bar, keyed by SchemaSummaryField.key (WI-391). */
+  summary?: Record<string, string | number | null>
+  summaryLoading?: boolean
+  /** Total rows matching the current filters; enables cross-page "select all N".
+   *  Falls back to serverPagination.total, then the local filtered count. */
+  totalCount?: number
+  /** Notifies the container of the current selection so it can run bulk actions
+   *  by id-set (page selection) or by filter (all-matching). */
+  onSelectionChange?: (selection: { ids: (number | string)[]; allMatching: boolean; total: number }) => void
 }
 
 // Default status colors - only common/generic statuses
@@ -183,7 +204,11 @@ export default function SchemaTable<T extends { id: number | string }>({
   filters: controlledFilters,
   onFiltersChange,
   serverPagination,
-  onSearchChange
+  onSearchChange,
+  summary,
+  summaryLoading,
+  totalCount,
+  onSelectionChange
 }: SchemaTableProps<T>) {
   const t = useTranslations('admin')
   // State
@@ -211,6 +236,9 @@ export default function SchemaTable<T extends { id: number | string }>({
   const [filterOptions, setFilterOptions] = useState<Record<string, OptionItemType[]>>({})
   const [filterOptionsLoading, setFilterOptionsLoading] = useState<Record<string, boolean>>({})
   const [selectedRows, setSelectedRows] = useState<Set<number | string>>(new Set())
+  // Cross-page "select all N matching" mode (WI-391): selection spans the whole
+  // filtered result set, not just the rows held client-side on the current page.
+  const [allMatchingSelected, setAllMatchingSelected] = useState(false)
   const [bulkActionMenuAnchor, setBulkActionMenuAnchor] = useState<HTMLElement | null>(null)
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState<boolean>(false)
   const [dateRangePickerOpen, setDateRangePickerOpen] = useState<string | null>(null)
@@ -513,8 +541,12 @@ export default function SchemaTable<T extends { id: number | string }>({
   const startIndex = displayTotal === 0 ? 0 : displayPage * displayRowsPerPage + 1
   const endIndex = Math.min((displayPage + 1) * displayRowsPerPage, displayTotal)
 
+  // Total rows matching the current filters — drives the "select all N" affordance.
+  const matchingTotal = totalCount ?? (_sp ? _sp.total : filteredData.length)
+
   // Row selection handlers
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setAllMatchingSelected(false)
     if (event.target.checked) {
       const newSelected = new Set(paginatedData.map(item => item.id))
       setSelectedRows(newSelected)
@@ -524,6 +556,8 @@ export default function SchemaTable<T extends { id: number | string }>({
   }
 
   const handleSelectRow = (id: number | string) => {
+    // Any manual toggle drops out of cross-page "all matching" mode.
+    setAllMatchingSelected(false)
     const newSelected = new Set(selectedRows)
     if (newSelected.has(id)) {
       newSelected.delete(id)
@@ -533,8 +567,33 @@ export default function SchemaTable<T extends { id: number | string }>({
     setSelectedRows(newSelected)
   }
 
-  const isAllSelected = paginatedData.length > 0 && paginatedData.every(item => selectedRows.has(item.id))
-  const isIndeterminate = selectedRows.size > 0 && selectedRows.size < paginatedData.length
+  // Cross-page select-all (WI-391): mark the entire filtered set as selected.
+  const handleSelectAllMatching = () => {
+    setAllMatchingSelected(true)
+    setSelectedRows(new Set(paginatedData.map(item => item.id)))
+  }
+
+  const handleClearSelection = () => {
+    setAllMatchingSelected(false)
+    setSelectedRows(new Set())
+  }
+
+  const isAllSelected =
+    allMatchingSelected || (paginatedData.length > 0 && paginatedData.every(item => selectedRows.has(item.id)))
+  const isIndeterminate = !allMatchingSelected && selectedRows.size > 0 && selectedRows.size < paginatedData.length
+
+  // Surface the live selection to the container so it can run bulk actions by
+  // id-set (page selection) or by filter (all-matching). Ref-guarded so an
+  // unstable callback prop does not re-fire the effect every render.
+  const onSelectionChangeRef = useRef(onSelectionChange)
+  useEffect(() => { onSelectionChangeRef.current = onSelectionChange })
+  useEffect(() => {
+    onSelectionChangeRef.current?.({
+      ids: Array.from(selectedRows),
+      allMatching: allMatchingSelected,
+      total: allMatchingSelected ? matchingTotal : selectedRows.size
+    })
+  }, [selectedRows, allMatchingSelected, matchingTotal])
 
   return (
     <>
@@ -553,6 +612,61 @@ export default function SchemaTable<T extends { id: number | string }>({
           overflow: 'hidden' // Prevent card from overflowing
         }}
       >
+
+        {/* Summary bar — aggregates the whole filtered result set, not just the
+            current page (WI-391). Driven by schema.summaryConfig + summary prop. */}
+        {schema.summaryConfig && (summary || summaryLoading) && (
+          <CardContent
+            sx={{
+              py: 1.25, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider)',
+              display: 'flex', gap: 3, flexWrap: 'wrap', alignItems: 'baseline',
+              backgroundColor: 'var(--at-subtle-bg, rgba(0,0,0,0.02))'
+            }}
+          >
+            {summaryLoading && !summary ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <CircularProgress size={16} />
+                <Typography variant="body2" color="text.secondary">{t('common.schemaTable.loadingStats')}</Typography>
+              </Box>
+            ) : (
+              schema.summaryConfig.fields.map(field => (
+                <Box key={field.key} sx={{ display: 'flex', alignItems: 'baseline', gap: 0.75 }}>
+                  <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.3 }}>
+                    {field.label}
+                  </Typography>
+                  <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                    {formatSummaryValue(summary?.[field.key], field)}{field.unit ? ` ${field.unit}` : ''}
+                  </Typography>
+                </Box>
+              ))
+            )}
+          </CardContent>
+        )}
+
+        {/* Selection banner — page selection count + cross-page "select all N" (WI-391) */}
+        {(selectedRows.size > 0 || allMatchingSelected) && (
+          <CardContent
+            sx={{
+              py: 1, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider)',
+              display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap',
+              backgroundColor: 'var(--at-selected-bg, rgba(105,108,255,0.08))'
+            }}
+          >
+            <Typography variant="body2">
+              {allMatchingSelected
+                ? t('common.schemaTable.selectedAllMatching', { count: matchingTotal })
+                : t('common.schemaTable.selectedCount', { count: selectedRows.size })}
+            </Typography>
+            {!allMatchingSelected && isAllSelected && matchingTotal > paginatedData.length && (
+              <Button size="small" variant="text" onClick={handleSelectAllMatching} sx={{ textTransform: 'none' }}>
+                {t('common.schemaTable.selectAllMatching', { count: matchingTotal })}
+              </Button>
+            )}
+            <Button size="small" variant="text" color="error" onClick={handleClearSelection} sx={{ textTransform: 'none' }}>
+              {t('common.schemaTable.clearSelection')}
+            </Button>
+          </CardContent>
+        )}
 
         {/* Toolbar with Search, Filters, and Actions */}
         <CardContent sx={{ py: 2, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider)' }}>
@@ -951,7 +1065,7 @@ export default function SchemaTable<T extends { id: number | string }>({
                     >
                       <td onClick={(e) => e.stopPropagation()}>
                         <Checkbox
-                          checked={selectedRows.has(item.id)}
+                          checked={allMatchingSelected || selectedRows.has(item.id)}
                           onChange={() => handleSelectRow(item.id)}
                           size="small"
                           onClick={(e) => e.stopPropagation()}
