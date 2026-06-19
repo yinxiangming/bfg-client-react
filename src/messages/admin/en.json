@@ -4143,5 +4143,14 @@
         "support": "Tickets"
       }
     }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "editLayout": "Edit Layout",
+    "editTitle": "Edit Dashboard Layout",
+    "cancel": "Cancel",
+    "save": "Save Layout",
+    "saving": "Saving…",
+    "emptyHint": "No blocks yet. Add blocks to customize your dashboard."
   }
 }
