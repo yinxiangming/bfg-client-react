@@ -110,9 +110,10 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  /* No padding here: each page provides its own (p-6 / page wrappers). Avoids
-     the doubled content margin (was 24px here + 24px page = 48px). */
-  padding: 0;
+  /* Content gutter so admin pages (incl. SchemaTable/SchemaForm lists) aren't
+     flush against the sidebar/topbar. Pages that add their own p-6 wrapper will
+     read slightly roomier, which is acceptable. */
+  padding: 1.5rem;
   width: 100%;
 }
 
