@@ -198,3 +198,50 @@ These symlinks are gitignored via `extensions/*/node_modules` in the root `.giti
 | `NEXT_PUBLIC_MEDIA_URL` | No | Defaults to `NEXT_PUBLIC_API_URL/media` |
 | `API_URL` | No | Server-side only (Docker internal); falls back to `NEXT_PUBLIC_API_URL` |
 | `NEXT_FILE_TRACING_ROOT` | No | Set to `/app` in Docker; auto-detected otherwise |
+
+## Operational notes / common "how do I lock this down" checks
+
+These are config-driven (no code changes) and surface via
+`GET /api/v1/settings/storefront/`. After changing any backing value, clear the
+server's storefront-config cache (restart, or call the workspace cache
+invalidator) so the next SSR fetch sees it.
+
+### Force a single color mode (light-only)
+
+Color mode is driven by `allowed_color_modes` on the storefront config
+(`Settings.custom_settings.storefront_ui.allowed_color_modes`, default
+`['light','dark']`). When exactly **one** mode is allowed:
+
+- `app/layout.tsx` computes `lockedMode` via `getAllowedColorModes()` and pins
+  `initialMode` + `defaultSystemMode` (no first-paint flash).
+- `StorefrontConfigContext` calls `forceMode(allowed[0])`, overriding any value
+  stored in `localStorage['theme-mode']` and the OS `prefers-color-scheme`.
+- `ThemeSwitcher` / storefront header hide the light/dark toggle
+  (`getAllowedColorModes(config).length > 1` gate).
+
+So: set `allowed_color_modes: ['light']` (and optionally `default_color_mode:
+'light'`) to lock light-only. Note `ThemeContext` alone does **not** enforce
+this — the lock comes from the storefront config flowing through the two points
+above, which wrap storefront/account/auth. Areas not wrapped by
+`StorefrontConfigProvider` (e.g. the MUI `/admin` shell) rely on the SSR
+`lockedMode`/`defaultMode` only.
+
+### Force a single language (English-only)
+
+Languages come from the storefront config `languages` / `default_language`,
+resolved server-side preferring the `bfg.web.Site` (`Site.languages`,
+`Site.default_language`), then `Settings.supported_languages` /
+`Settings.default_language`. Set `languages` to a single entry (e.g. `['en']`)
+to hide the language switcher (the client treats `len(languages) === 1` as
+locked) and pin `<html lang>`.
+
+### "Admin user can't open /admin" (bounced to /account)
+
+`/admin` is gated by `AdminAccessGuard`, which uses `useIsStaff()` →
+`StaffMemberContext` → `GET /api/v1/me/` `staff_member.is_active`. It checks the
+workspace **`StaffMember`**, NOT Django `is_staff`/`is_superuser`. A superuser
+with no active `StaffMember` in the current workspace is redirected to
+`/account`. Fix at the data layer (no client change): provision the workspace's
+roles (`manage.py init_system_roles`) and create an active `StaffMember` with the
+`admin` role for that user. Diagnose by inspecting `staff_member` in
+`GET /api/v1/me/` for the logged-in admin.
