@@ -14,12 +14,12 @@ import Grid from '@mui/material/Grid'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
-import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 
 // Component Imports
+import CustomTextField from '@/components/ui/TextField'
 import CustomerEditHeader from '@/views/admin/store/customers/edit/CustomerEditHeader'
 
 // API Imports
@@ -101,9 +101,9 @@ export default function NewCustomerPage() {
               <Typography variant='h6' sx={{ mb: 4 }}>
                 {t('customers.newPage.card.title')}
               </Typography>
-              <Grid container spacing={4}>
+              <Grid container spacing={2}>
                 <Grid size={{ xs: 12 }}>
-                  <TextField
+                  <CustomTextField
                     fullWidth
                     label={t('customers.newPage.fields.userId.label')}
                     type='number'
@@ -114,7 +114,7 @@ export default function NewCustomerPage() {
                   />
                 </Grid>
                 <Grid size={{ xs: 12 }}>
-                  <TextField
+                  <CustomTextField
                     fullWidth
                     label={t('customers.newPage.fields.companyName.label')}
                     value={formData.company_name}
@@ -122,7 +122,7 @@ export default function NewCustomerPage() {
                   />
                 </Grid>
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <TextField
+                  <CustomTextField
                     fullWidth
                     label={t('customers.newPage.fields.taxNumber.label')}
                     value={formData.tax_number}
@@ -130,7 +130,7 @@ export default function NewCustomerPage() {
                   />
                 </Grid>
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <TextField
+                  <CustomTextField
                     fullWidth
                     label={t('customers.newPage.fields.creditLimit.label')}
                     type='number'
@@ -139,7 +139,7 @@ export default function NewCustomerPage() {
                   />
                 </Grid>
                 <Grid size={{ xs: 12 }}>
-                  <TextField
+                  <CustomTextField
                     fullWidth
                     label={t('customers.newPage.fields.notes.label')}
                     multiline

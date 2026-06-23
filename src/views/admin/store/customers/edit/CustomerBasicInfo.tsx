@@ -12,7 +12,6 @@ import CardContent from '@mui/material/CardContent'
 import CardHeader from '@mui/material/CardHeader'
 import Typography from '@mui/material/Typography'
 import Grid from '@mui/material/Grid'
-import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
 import Divider from '@mui/material/Divider'
@@ -20,6 +19,9 @@ import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 import Switch from '@mui/material/Switch'
 import FormControlLabel from '@mui/material/FormControlLabel'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 // Type Imports
 import type { Customer } from '@/services/store'
@@ -96,7 +98,7 @@ const CustomerBasicInfo = ({ customer, onUpdate }: CustomerBasicInfoProps) => {
       <Grid size={{ xs: 12, md: 8 }}>
         <Card>
           <CardContent>
-            <Grid container spacing={4}>
+            <Grid container spacing={2}>
               <Grid size={{ xs: 12 }}>
                 <FormControlLabel
                   control={
@@ -116,7 +118,7 @@ const CustomerBasicInfo = ({ customer, onUpdate }: CustomerBasicInfoProps) => {
                 />
               </Grid>
               <Grid size={{ xs: 12 }}>
-                <TextField
+                <CustomTextField
                   fullWidth
                   label={t('customers.basicInfo.fields.email.label')}
                   type='email'
@@ -125,7 +127,7 @@ const CustomerBasicInfo = ({ customer, onUpdate }: CustomerBasicInfoProps) => {
                 />
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
+                <CustomTextField
                   fullWidth
                   label={t('customers.basicInfo.fields.firstName.label')}
                   value={userFormData.first_name}
@@ -133,7 +135,7 @@ const CustomerBasicInfo = ({ customer, onUpdate }: CustomerBasicInfoProps) => {
                 />
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
+                <CustomTextField
                   fullWidth
                   label={t('customers.basicInfo.fields.lastName.label')}
                   value={userFormData.last_name}
@@ -141,7 +143,7 @@ const CustomerBasicInfo = ({ customer, onUpdate }: CustomerBasicInfoProps) => {
                 />
               </Grid>
               <Grid size={{ xs: 12 }}>
-                <TextField
+                <CustomTextField
                   fullWidth
                   label={t('customers.basicInfo.fields.phone.label')}
                   value={userFormData.phone}
@@ -152,7 +154,7 @@ const CustomerBasicInfo = ({ customer, onUpdate }: CustomerBasicInfoProps) => {
                 <Divider sx={{ my: 2 }} />
               </Grid>
               <Grid size={{ xs: 12 }}>
-                <TextField
+                <CustomTextField
                   fullWidth
                   label={t('customers.basicInfo.fields.notes.label')}
                   multiline
@@ -169,9 +171,9 @@ const CustomerBasicInfo = ({ customer, onUpdate }: CustomerBasicInfoProps) => {
         <Card>
           <CardHeader title={t('customers.basicInfo.sidebar.title')} sx={{ pb: 0 }} />
           <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 } }}>
-            <Grid container spacing={4}>
+            <Grid container spacing={2}>
               <Grid size={{ xs: 12 }}>
-                <TextField
+                <CustomTextField
                   fullWidth
                   label={t('customers.basicInfo.fields.companyName.label')}
                   value={formData.company_name}
@@ -179,7 +181,7 @@ const CustomerBasicInfo = ({ customer, onUpdate }: CustomerBasicInfoProps) => {
                 />
               </Grid>
               <Grid size={{ xs: 12 }}>
-                <TextField
+                <CustomTextField
                   fullWidth
                   label={t('customers.basicInfo.fields.taxNumber.label')}
                   value={formData.tax_number}
@@ -187,7 +189,7 @@ const CustomerBasicInfo = ({ customer, onUpdate }: CustomerBasicInfoProps) => {
                 />
               </Grid>
               <Grid size={{ xs: 12 }}>
-                <TextField
+                <CustomTextField
                   fullWidth
                   label={t('customers.basicInfo.fields.creditLimit.label')}
                   type='number'

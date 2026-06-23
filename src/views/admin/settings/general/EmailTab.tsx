@@ -12,7 +12,6 @@ import DialogTitle from '@mui/material/DialogTitle'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import MenuItem from '@mui/material/MenuItem'
 import Switch from '@mui/material/Switch'
-import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import Alert from '@mui/material/Alert'
 import Snackbar from '@mui/material/Snackbar'
@@ -293,7 +292,7 @@ export default function EmailTab() {
       <Dialog open={testDialogOpen} onClose={() => setTestDialogOpen(false)}>
         <DialogTitle>{t('sendTest')}</DialogTitle>
         <DialogContent>
-          <TextField
+          <CustomTextField
             autoFocus
             margin="dense"
             label={t('testEmailTo')}

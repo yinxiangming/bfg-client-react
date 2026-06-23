@@ -11,14 +11,11 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import Divider from '@mui/material/Divider'
-import FormControl from '@mui/material/FormControl'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Grid from '@mui/material/Grid'
 import IconButton from '@mui/material/IconButton'
-import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
 import Paper from '@mui/material/Paper'
-import Select from '@mui/material/Select'
 import Switch from '@mui/material/Switch'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
@@ -305,23 +302,24 @@ export default function CategoryFieldsSchemaDialog({ open, category, onClose, on
 
         <Grid container spacing={2} sx={{ mb: 2 }} alignItems='center'>
           <Grid size={{ xs: 12, sm: 8 }}>
-            <FormControl fullWidth size='small' disabled={loadingTemplates}>
-              <InputLabel>{t('settings.web.categories.fieldsSchemaDialog.applyTemplate')}</InputLabel>
-              <Select
-                label={t('settings.web.categories.fieldsSchemaDialog.applyTemplate')}
-                value={templateKey}
-                onChange={e => setTemplateKey(e.target.value as string)}
-              >
-                <MenuItem value=''>
-                  <em>{t('settings.web.categories.fieldsSchemaDialog.templatePlaceholder')}</em>
+            <CustomTextField
+              select
+              fullWidth
+              size='small'
+              disabled={loadingTemplates}
+              label={t('settings.web.categories.fieldsSchemaDialog.applyTemplate')}
+              value={templateKey}
+              onChange={e => setTemplateKey(e.target.value as string)}
+            >
+              <MenuItem value=''>
+                <em>{t('settings.web.categories.fieldsSchemaDialog.templatePlaceholder')}</em>
+              </MenuItem>
+              {templates.map(tp => (
+                <MenuItem key={tp.key} value={tp.key}>
+                  {tp.name} ({tp.content_type_name})
                 </MenuItem>
-                {templates.map(tp => (
-                  <MenuItem key={tp.key} value={tp.key}>
-                    {tp.name} ({tp.content_type_name})
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+              ))}
+            </CustomTextField>
           </Grid>
           <Grid size={{ xs: 12, sm: 4 }}>
             <Button

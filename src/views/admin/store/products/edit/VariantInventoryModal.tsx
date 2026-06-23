@@ -14,7 +14,6 @@ import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import TextField from '@mui/material/TextField'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -24,6 +23,9 @@ import TableRow from '@mui/material/TableRow'
 import Paper from '@mui/material/Paper'
 import CircularProgress from '@mui/material/CircularProgress'
 import Alert from '@mui/material/Alert'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 // Type Imports
 import type { Product, ProductVariant, Warehouse } from '@/services/store'
@@ -242,7 +244,7 @@ const VariantInventoryModal = ({ open, onClose, productId, productData, variantI
                                             const inventory = inventories[key]
                                             return (
                                                 <TableCell key={warehouse.id} align='right'>
-                                                    <TextField
+                                                    <CustomTextField
                                                         type='number'
                                                         size='small'
                                                         value={inventory?.quantity || 0}

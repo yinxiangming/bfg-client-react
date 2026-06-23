@@ -7,8 +7,10 @@ import { useLocale, useTranslations } from 'next-intl'
 
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
-import TextField from '@mui/material/TextField'
 import Box from '@mui/material/Box'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 import SchemaForm from '@/components/schema/SchemaForm'
 import type { FormSchema } from '@/types/schema'
@@ -327,7 +329,7 @@ const WarehouseEditDialog = ({ open, warehouse, onClose, onSave }: WarehouseEdit
   const customFieldRenderer = useCallback((field: any, value: any, onChange: (value: any) => void, error?: string) => {
     if (field.field === 'address_line1') {
       return (
-        <TextField
+        <CustomTextField
           inputRef={addressInputRef}
           name="address_line1"
           label={field.label}

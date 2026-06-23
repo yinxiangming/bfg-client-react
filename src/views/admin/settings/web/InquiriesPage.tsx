@@ -12,20 +12,19 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
-  FormControl,
   Grid,
   IconButton,
-  InputLabel,
   MenuItem,
   Paper,
-  Select,
   Tab,
   Tabs,
-  TextField,
   Typography,
 } from '@mui/material'
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid'
 import { Icon } from '@iconify/react'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 import { bfgApi, apiFetch } from '@/utils/api'
 
@@ -234,36 +233,36 @@ export function InquiriesPage() {
       <Paper sx={{ p: 2, mb: 2 }}>
         <Grid container spacing={2} alignItems='center'>
           <Grid size={{ xs: 12, sm: 4, md: 3 }}>
-            <FormControl fullWidth size='small'>
-              <InputLabel>Status</InputLabel>
-              <Select
-                value={statusFilter}
-                label='Status'
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <MenuItem value=''>All</MenuItem>
-                <MenuItem value='pending'>Pending</MenuItem>
-                <MenuItem value='processing'>Processing</MenuItem>
-                <MenuItem value='completed'>Completed</MenuItem>
-                <MenuItem value='cancelled'>Cancelled</MenuItem>
-              </Select>
-            </FormControl>
+            <CustomTextField
+              select
+              fullWidth
+              size='small'
+              label='Status'
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <MenuItem value=''>All</MenuItem>
+              <MenuItem value='pending'>Pending</MenuItem>
+              <MenuItem value='processing'>Processing</MenuItem>
+              <MenuItem value='completed'>Completed</MenuItem>
+              <MenuItem value='cancelled'>Cancelled</MenuItem>
+            </CustomTextField>
           </Grid>
           <Grid size={{ xs: 12, sm: 4, md: 3 }}>
-            <FormControl fullWidth size='small'>
-              <InputLabel>Type</InputLabel>
-              <Select
-                value={typeFilter}
-                label='Type'
-                onChange={(e) => setTypeFilter(e.target.value)}
-              >
-                <MenuItem value=''>All</MenuItem>
-                <MenuItem value='booking'>Booking</MenuItem>
-                <MenuItem value='inquiry'>Inquiry</MenuItem>
-                <MenuItem value='feedback'>Feedback</MenuItem>
-                <MenuItem value='other'>Other</MenuItem>
-              </Select>
-            </FormControl>
+            <CustomTextField
+              select
+              fullWidth
+              size='small'
+              label='Type'
+              value={typeFilter}
+              onChange={(e) => setTypeFilter(e.target.value)}
+            >
+              <MenuItem value=''>All</MenuItem>
+              <MenuItem value='booking'>Booking</MenuItem>
+              <MenuItem value='inquiry'>Inquiry</MenuItem>
+              <MenuItem value='feedback'>Feedback</MenuItem>
+              <MenuItem value='other'>Other</MenuItem>
+            </CustomTextField>
           </Grid>
           <Grid size={{ xs: 12, sm: 4, md: 6 }}>
             <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>

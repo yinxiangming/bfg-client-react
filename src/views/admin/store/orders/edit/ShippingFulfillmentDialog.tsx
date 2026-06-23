@@ -16,8 +16,10 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import Radio from '@mui/material/Radio'
 import RadioGroup from '@mui/material/RadioGroup'
 import Stack from '@mui/material/Stack'
-import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 import { createAdminMessage, sendAdminMessage } from '@/services/inbox'
 import { getCustomer, updateOrder, type Customer, type Order } from '@/services/store'
@@ -214,7 +216,7 @@ const ShippingFulfillmentDialog = ({ open, order, onClose, onCompleted }: Shippi
 
                   {loadingCustomer && <Alert severity='info'>{t('orders.shippingWizard.pickup.loadingCustomerLanguage')}</Alert>}
 
-                  <TextField
+                  <CustomTextField
                     label={t('orders.shippingWizard.pickup.subject')}
                     value={pickupSubject}
                     onChange={(e) => setPickupSubject(e.target.value)}
@@ -222,7 +224,7 @@ const ShippingFulfillmentDialog = ({ open, order, onClose, onCompleted }: Shippi
                     fullWidth
                   />
 
-                  <TextField
+                  <CustomTextField
                     label={t('orders.shippingWizard.pickup.message')}
                     value={pickupMessage}
                     onChange={(e) => setPickupMessage(e.target.value)}

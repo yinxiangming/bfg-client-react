@@ -16,8 +16,10 @@ import FormHelperText from '@mui/material/FormHelperText'
 import IconButton from '@mui/material/IconButton'
 import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
-import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 import { Bold } from '@tiptap/extension-bold'
 import { Italic } from '@tiptap/extension-italic'
@@ -305,13 +307,13 @@ export default function PostContentEditor({
       <Dialog open={resizeOpen} onClose={() => setResizeOpen(false)} fullWidth maxWidth='xs'>
         <DialogTitle>{t('settings.web.posts.contentEditor.resizeDialog.title')}</DialogTitle>
         <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-          <TextField
+          <CustomTextField
             label={t('settings.web.posts.contentEditor.resizeDialog.width')}
             value={resizeWidth}
             onChange={e => handleWidthChange(e.target.value)}
             fullWidth
           />
-          <TextField
+          <CustomTextField
             label={t('settings.web.posts.contentEditor.resizeDialog.height')}
             value={resizeHeight}
             onChange={e => handleHeightChange(e.target.value)}

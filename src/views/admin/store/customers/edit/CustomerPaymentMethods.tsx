@@ -15,6 +15,8 @@ import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
 import Alert from '@mui/material/Alert'
 import Chip from '@mui/material/Chip'
+import Checkbox from '@mui/material/Checkbox'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import IconButton from '@mui/material/IconButton'
 import Grid from '@mui/material/Grid'
 import Dialog from '@mui/material/Dialog'
@@ -165,7 +167,7 @@ const StripeCardForm = ({
             {error}
           </Alert>
         )}
-        <Grid container spacing={4}>
+        <Grid container spacing={2}>
           <Grid size={{ xs: 12 }}>
             <Typography variant='body2' color='text.secondary' sx={{ mb: 1 }}>
               {t('customers.paymentMethods.addDialog.fields.cardDetails')}
@@ -197,18 +199,17 @@ const StripeCardForm = ({
           </Grid>
           
           <Grid size={{ xs: 12 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <input
-                type='checkbox'
-                id='is_default'
-                checked={isDefault}
-                onChange={e => setIsDefault(e.target.checked)}
-                style={{ marginRight: '8px' }}
-              />
-              <label htmlFor='is_default'>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={isDefault}
+                  onChange={e => setIsDefault(e.target.checked)}
+                />
+              }
+              label={
                 <Typography variant='body2'>{t('customers.paymentMethods.addDialog.fields.setAsDefault')}</Typography>
-              </label>
-            </Box>
+              }
+            />
           </Grid>
           
           {/* Security Notice */}

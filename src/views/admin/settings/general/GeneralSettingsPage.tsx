@@ -607,7 +607,7 @@ const GeneralSettingsPage = () => {
                       </Box>
 
                       {!adminIdentityEditing ? (
-                        <Grid container spacing={4}>
+                        <Grid container spacing={2}>
                           <Grid size={{ xs: 12, sm: 6 }}>
                             <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, mb: 0.5, flexWrap: 'wrap' }}>
                               <Typography variant='caption' color='text.secondary' component='span'>
@@ -656,7 +656,7 @@ const GeneralSettingsPage = () => {
                         </Grid>
                       ) : (
                         <>
-                          <Grid container spacing={4}>
+                          <Grid container spacing={2}>
                             <Grid size={{ xs: 12, sm: 6 }}>
                               <CustomTextField
                                 fullWidth
@@ -755,7 +755,7 @@ const GeneralSettingsPage = () => {
                       <Typography variant='h6' sx={{ mb: 4 }}>
                         {t('settings.general.basic.sections.localization')}
                       </Typography>
-                      <Grid container spacing={4}>
+                      <Grid container spacing={2}>
                         <Grid size={{ xs: 12, sm: 4 }}>
                           <CustomTextField
                             select
@@ -911,7 +911,7 @@ const GeneralSettingsPage = () => {
                         </Grid>
                       </Grid>
 
-                      <Grid container spacing={4}>
+                      <Grid container spacing={2}>
                         <Grid size={{ xs: 12, sm: 6 }}>
                           <CustomTextField
                             fullWidth
@@ -943,7 +943,7 @@ const GeneralSettingsPage = () => {
                       <Typography variant='h6' sx={{ mb: 4 }}>
                         {t('settings.general.basic.sections.contactInformation')}
                       </Typography>
-                      <Grid container spacing={4}>
+                      <Grid container spacing={2}>
                         <Grid size={{ xs: 12, sm: 6 }}>
                           <CustomTextField
                             fullWidth
@@ -1002,7 +1002,7 @@ const GeneralSettingsPage = () => {
                       <Typography variant='h6' sx={{ mb: 4 }}>
                         {t('settings.general.basic.sections.storefrontDisplay')}
                       </Typography>
-                      <Grid container spacing={4}>
+                      <Grid container spacing={2}>
                         <Grid size={{ xs: 12 }}>
                           <CustomTextField
                             fullWidth
@@ -1060,7 +1060,7 @@ const GeneralSettingsPage = () => {
                       <Typography variant='h6' sx={{ mb: 4 }}>
                         {t('settings.general.basic.sections.storefrontTheme')}
                       </Typography>
-                      <Grid container spacing={4}>
+                      <Grid container spacing={2}>
                         <Grid size={{ xs: 12, sm: 6 }}>
                           <CustomTextField
                             select
@@ -1205,7 +1205,7 @@ const GeneralSettingsPage = () => {
                       <Typography variant='h6' sx={{ mb: 4 }}>
                         {t('settings.general.basic.sections.socialMediaLinks')}
                       </Typography>
-                      <Grid container spacing={4}>
+                      <Grid container spacing={2}>
                         <Grid size={{ xs: 12, sm: 4 }}>
                           <CustomTextField
                             fullWidth
