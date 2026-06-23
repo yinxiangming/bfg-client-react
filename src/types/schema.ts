@@ -63,6 +63,8 @@ export interface SchemaAction {
   scope: 'global' | 'row'
   confirm?: string
   icon?: string
+  /** Optional per-row predicate; when it returns true this row action is hidden for that row. */
+  hidden?: (row: any) => boolean
 }
 
 /** A single aggregate shown in the SchemaTable summary bar (WI-391). */

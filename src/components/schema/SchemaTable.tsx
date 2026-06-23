@@ -1153,15 +1153,17 @@ export default function SchemaTable<T extends { id: number | string }>({
                       })}
                       {rowActions.length > 0 && (
                         <td align="right" onClick={(e) => e.stopPropagation()}>
-                          <IconButton
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setActionMenuAnchor({ el: e.currentTarget, item })
-                            }}
-                          >
-                            <i className="tabler-dots-vertical" />
-                          </IconButton>
+                          {rowActions.some(a => !a.hidden?.(item)) && (
+                            <IconButton
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setActionMenuAnchor({ el: e.currentTarget, item })
+                              }}
+                            >
+                              <i className="tabler-dots-vertical" />
+                            </IconButton>
+                          )}
                         </td>
                       )}
                     </tr>
@@ -1254,18 +1256,20 @@ export default function SchemaTable<T extends { id: number | string }>({
         open={!!actionMenuAnchor}
         onClose={() => setActionMenuAnchor(null)}
       >
-        {rowActions.map((action) => (
-          <MenuItem
-            key={action.id}
-            onClick={() => {
-              if (actionMenuAnchor) {
-                handleActionClick(action, actionMenuAnchor.item)
-              }
-            }}
-          >
-            {action.label}
-          </MenuItem>
-        ))}
+        {rowActions
+          .filter(action => !(actionMenuAnchor && action.hidden?.(actionMenuAnchor.item)))
+          .map((action) => (
+            <MenuItem
+              key={action.id}
+              onClick={() => {
+                if (actionMenuAnchor) {
+                  handleActionClick(action, actionMenuAnchor.item)
+                }
+              }}
+            >
+              {action.label}
+            </MenuItem>
+          ))}
       </Menu>
 
       {/* Bulk Actions Menu */}
