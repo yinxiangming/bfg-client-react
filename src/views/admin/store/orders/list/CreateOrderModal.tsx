@@ -8,7 +8,6 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
@@ -23,6 +22,10 @@ import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
+
 import {
   getProducts,
   getCustomers,
@@ -275,7 +278,7 @@ export default function CreateOrderModal({ open, onClose, onSuccess }: CreateOrd
           onInputChange={handleProductSearchChange}
           loading={productLoading}
           renderInput={params => (
-            <TextField
+            <CustomTextField
               {...params}
               size='small'
               placeholder={t('orders.createOrderModal.productSearchPlaceholder')}
@@ -304,7 +307,7 @@ export default function CreateOrderModal({ open, onClose, onSuccess }: CreateOrd
           }}
         />
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-          <TextField
+          <CustomTextField
             type='number'
             size='small'
             sx={{ width: 80 }}
@@ -397,7 +400,7 @@ export default function CreateOrderModal({ open, onClose, onSuccess }: CreateOrd
               value={selectedCustomer}
               onChange={(_, val) => setSelectedCustomer(val)}
               renderInput={params => (
-                <TextField
+                <CustomTextField
                   {...params}
                   size='small'
                   placeholder={t('orders.createOrderModal.customerSearchPlaceholder')}
@@ -423,20 +426,20 @@ export default function CreateOrderModal({ open, onClose, onSuccess }: CreateOrd
           </>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            <TextField
+            <CustomTextField
               size='small'
               label={t('orders.createOrderModal.newCustomerName')}
               value={newCustomerName}
               onChange={e => setNewCustomerName(e.target.value)}
             />
-            <TextField
+            <CustomTextField
               size='small'
               label={t('orders.createOrderModal.newCustomerEmail')}
               type='email'
               value={newCustomerEmail}
               onChange={e => setNewCustomerEmail(e.target.value)}
             />
-            <TextField
+            <CustomTextField
               size='small'
               label={t('orders.createOrderModal.newCustomerPhone')}
               value={newCustomerPhone}

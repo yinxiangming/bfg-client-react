@@ -11,17 +11,16 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Box from '@mui/material/Box'
-import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Switch from '@mui/material/Switch'
 import Divider from '@mui/material/Divider'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 import SchemaConfigEditor, { type ConfigSchema } from '@/components/config/SchemaConfigEditor'
 import type {
@@ -176,9 +175,9 @@ const PaymentGatewayEditDialog = ({
       </DialogTitle>
       <DialogContent>
         <Box sx={{ pt: 2 }}>
-          <Grid container spacing={3}>
+          <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 label={t('settings.finance.paymentGateways.editDialog.name')}
                 value={name}
@@ -187,23 +186,23 @@ const PaymentGatewayEditDialog = ({
               />
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
-              <FormControl fullWidth required>
-                <InputLabel>{t('settings.finance.paymentGateways.editDialog.gatewayType')}</InputLabel>
-                <Select
-                  value={gatewayType}
-                  label={t('settings.finance.paymentGateways.editDialog.gatewayType')}
-                  onChange={(e) => setGatewayType(e.target.value)}
-                >
-                  <MenuItem value="">
-                    <em>{t('settings.finance.paymentGateways.editDialog.gatewayTypePlaceholder')}</em>
+              <CustomTextField
+                select
+                fullWidth
+                required
+                label={t('settings.finance.paymentGateways.editDialog.gatewayType')}
+                value={gatewayType}
+                onChange={(e) => setGatewayType(e.target.value)}
+              >
+                <MenuItem value="">
+                  <em>{t('settings.finance.paymentGateways.editDialog.gatewayTypePlaceholder')}</em>
+                </MenuItem>
+                {pluginOptions.map((opt) => (
+                  <MenuItem key={opt.value} value={opt.value}>
+                    {opt.label}
                   </MenuItem>
-                  {pluginOptions.map((opt) => (
-                    <MenuItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                ))}
+              </CustomTextField>
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
               <FormControlLabel
@@ -241,9 +240,9 @@ const PaymentGatewayEditDialog = ({
           ) : (
             <>
               <Divider sx={{ my: 4 }} />
-              <Grid container spacing={3}>
+              <Grid container spacing={2}>
                 <Grid size={{ xs: 12 }}>
-                  <TextField
+                  <CustomTextField
                     fullWidth
                     multiline
                     rows={5}
@@ -254,7 +253,7 @@ const PaymentGatewayEditDialog = ({
                   />
                 </Grid>
                 <Grid size={{ xs: 12 }}>
-                  <TextField
+                  <CustomTextField
                     fullWidth
                     multiline
                     rows={5}

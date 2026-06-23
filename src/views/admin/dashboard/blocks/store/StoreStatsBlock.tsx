@@ -1,10 +1,13 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Card, CardContent, Typography, Box, CircularProgress, Alert, TextField } from '@mui/material'
+import { Card, CardContent, Typography, Box, CircularProgress, Alert } from '@mui/material'
 import { Icon } from '@iconify/react'
 import { getDashboardStats } from '@/services/store'
 import type { BlockDefinition, BlockProps, BlockSettingsProps } from '@/views/common/blocks'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 export const definition: BlockDefinition = {
   type: 'store_stats',
@@ -22,7 +25,7 @@ interface StoreStatsSettingsProps extends BlockSettingsProps<{ title?: string },
 
 export function StoreStatsBlockSettings({ settings, onSettingsChange }: StoreStatsSettingsProps) {
   return (
-    <TextField
+    <CustomTextField
       fullWidth
       size="small"
       label="Title"

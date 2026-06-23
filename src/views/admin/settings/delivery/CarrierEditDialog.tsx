@@ -12,16 +12,15 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Switch from '@mui/material/Switch'
 import Divider from '@mui/material/Divider'
 import Grid from '@mui/material/Grid'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 import SchemaConfigEditor, { type ConfigSchema } from '@/components/config/SchemaConfigEditor'
 import type { Carrier, CarrierPayload, CarrierPluginInfo } from '@/services/delivery'
@@ -133,9 +132,9 @@ const CarrierEditDialog = ({ open, carrier, carrierPlugins = [], onClose, onSave
       <DialogTitle>{carrier ? t('settings.delivery.carriers.editDialog.titleEdit') : t('settings.delivery.carriers.editDialog.titleNew')}</DialogTitle>
       <DialogContent>
         <Box sx={{ pt: 2 }}>
-          <Grid container spacing={3}>
+          <Grid container spacing={2}>
             <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 label={t('settings.delivery.carriers.editDialog.name')}
                 value={name}
@@ -144,7 +143,7 @@ const CarrierEditDialog = ({ open, carrier, carrierPlugins = [], onClose, onSave
               />
             </Grid>
             <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 label={t('settings.delivery.carriers.editDialog.code')}
                 value={code}
@@ -153,26 +152,25 @@ const CarrierEditDialog = ({ open, carrier, carrierPlugins = [], onClose, onSave
               />
             </Grid>
             <Grid size={{ xs: 12 }}>
-              <FormControl fullWidth>
-                <InputLabel>{t('settings.delivery.carriers.editDialog.carrierType')}</InputLabel>
-                <Select
-                  value={carrierType}
-                  label={t('settings.delivery.carriers.editDialog.carrierType')}
-                  onChange={(e) => setCarrierType(e.target.value)}
-                >
-                  <MenuItem value="">
-                    <em>{t('settings.delivery.carriers.editDialog.carrierTypePlaceholder')}</em>
+              <CustomTextField
+                select
+                fullWidth
+                label={t('settings.delivery.carriers.editDialog.carrierType')}
+                value={carrierType}
+                onChange={(e) => setCarrierType(e.target.value)}
+              >
+                <MenuItem value="">
+                  <em>{t('settings.delivery.carriers.editDialog.carrierTypePlaceholder')}</em>
+                </MenuItem>
+                {pluginOptions.map(option => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
                   </MenuItem>
-                  {pluginOptions.map(option => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+                ))}
+              </CustomTextField>
             </Grid>
             <Grid size={{ xs: 12 }}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 label={t('settings.delivery.carriers.editDialog.trackingUrlTemplate')}
                 value={trackingUrlTemplate}

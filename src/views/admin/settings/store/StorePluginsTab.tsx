@@ -146,7 +146,7 @@ const StorePluginsTab = () => {
           {t('settings.store.settings.description')}
         </Typography>
 
-        <Grid container spacing={4}>
+        <Grid container spacing={2}>
           <Grid size={{ xs: 12 }}>
             <Typography variant='subtitle2' color='text.secondary' sx={{ mb: 2 }}>
               {t('settings.store.settings.fields.productIdentifiers.title')}

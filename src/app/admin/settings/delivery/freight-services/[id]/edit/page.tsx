@@ -14,7 +14,6 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Alert from '@mui/material/Alert'
 import Snackbar from '@mui/material/Snackbar'
 import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
 import IconButton from '@mui/material/IconButton'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
@@ -24,6 +23,9 @@ import ListItemButton from '@mui/material/ListItemButton'
 import ListItemText from '@mui/material/ListItemText'
 import DeleteOutline from '@mui/icons-material/DeleteOutline'
 import Add from '@mui/icons-material/Add'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 import SchemaForm from '@/components/schema/SchemaForm'
 import type { FormField, FormSchema } from '@/types/schema'
@@ -367,7 +369,7 @@ export default function FreightServiceEditPage() {
               <Dialog open={configJsonModalOpen} onClose={() => setConfigJsonModalOpen(false)} maxWidth="md" fullWidth>
                 <DialogTitle>{t('settings.delivery.freightServices.tab.configTab.viewConfigJson')}</DialogTitle>
                 <DialogContent dividers>
-                  <TextField
+                  <CustomTextField
                     fullWidth
                     multiline
                     minRows={12}
@@ -442,7 +444,7 @@ export default function FreightServiceEditPage() {
                             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{field.helperText}</Typography>
                             {list.map((row, idx) => (
                               <Box key={idx} sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1 }}>
-                                <TextField
+                                <CustomTextField
                                   type="number"
                                   size="small"
                                   label="Max kg"
@@ -454,7 +456,7 @@ export default function FreightServiceEditPage() {
                                   }}
                                   sx={{ width: 120 }}
                                 />
-                                <TextField
+                                <CustomTextField
                                   type="number"
                                   size="small"
                                   label="Price"

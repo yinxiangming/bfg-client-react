@@ -23,9 +23,11 @@ import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import Autocomplete from '@mui/material/Autocomplete'
-import TextField from '@mui/material/TextField'
 import CircularProgress from '@mui/material/CircularProgress'
 import Alert from '@mui/material/Alert'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 // API
 import { getProducts, updateOrderItems, type Product, type OrderItemUpdatePayload } from '@/services/store'
@@ -232,7 +234,7 @@ const OrderDetailsCard = ({ order, onOrderUpdate }: OrderDetailsCardProps) => {
               }}
               loading={productLoading}
               renderInput={params => (
-                <TextField
+                <CustomTextField
                   {...params}
                   size='small'
                   placeholder={t('orders.createOrderModal.productSearchPlaceholder')}

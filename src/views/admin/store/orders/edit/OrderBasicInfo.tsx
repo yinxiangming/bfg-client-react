@@ -167,7 +167,7 @@ const OrderBasicInfo = ({ order, onNavigate }: OrderBasicInfoProps) => {
         </Box>
 
         {/* Statistics Grid */}
-        <Grid container spacing={4} sx={{ mb: 4 }}>
+        <Grid container spacing={2} sx={{ mb: 4 }}>
           <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
             <Box
               onClick={() => handleStatClick('packages')}
@@ -227,7 +227,7 @@ const OrderBasicInfo = ({ order, onNavigate }: OrderBasicInfoProps) => {
         </Grid>
 
         {/* Row 3: Store, Payment gateway name, Shipping method */}
-        <Grid container spacing={4}>
+        <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 4 }}>
             <Box sx={{ p: 1 }}>
               <Typography variant='body2' color='text.secondary' sx={{ mb: 1 }}>

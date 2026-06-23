@@ -14,8 +14,10 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Stack from '@mui/material/Stack'
-import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 import SchemaTable from '@/components/schema/SchemaTable'
 import SchemaForm from '@/components/schema/SchemaForm'
@@ -380,7 +382,7 @@ export default function TimeSlotsPage() {
   ) => {
     if (field.field === 'start_time' || field.field === 'end_time') {
       return (
-        <TextField
+        <CustomTextField
           fullWidth
           type='time'
           label={field.label}
@@ -389,7 +391,6 @@ export default function TimeSlotsPage() {
           required={field.required}
           error={!!error}
           helperText={error}
-          InputLabelProps={{ shrink: true }}
         />
       )
     }
@@ -468,42 +469,38 @@ export default function TimeSlotsPage() {
               {t('settings.web.timeSlots.batch.description')}
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 type='date'
                 label={t('settings.web.timeSlots.batch.fields.startDate')}
                 value={batchForm.start_date}
                 onChange={(e) => handleBatchFieldChange('start_date', e.target.value)}
-                InputLabelProps={{ shrink: true }}
               />
-              <TextField
+              <CustomTextField
                 fullWidth
                 type='date'
                 label={t('settings.web.timeSlots.batch.fields.endDate')}
                 value={batchForm.end_date}
                 onChange={(e) => handleBatchFieldChange('end_date', e.target.value)}
-                InputLabelProps={{ shrink: true }}
               />
             </Stack>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 type='time'
                 label={t('settings.web.timeSlots.batch.fields.startTime')}
                 value={batchForm.start_time}
                 onChange={(e) => handleBatchFieldChange('start_time', e.target.value)}
-                InputLabelProps={{ shrink: true }}
               />
-              <TextField
+              <CustomTextField
                 fullWidth
                 type='time'
                 label={t('settings.web.timeSlots.batch.fields.endTime')}
                 value={batchForm.end_time}
                 onChange={(e) => handleBatchFieldChange('end_time', e.target.value)}
-                InputLabelProps={{ shrink: true }}
               />
             </Stack>
-            <TextField
+            <CustomTextField
               fullWidth
               type='number'
               label={t('settings.web.timeSlots.batch.fields.maxBookings')}
@@ -511,13 +508,13 @@ export default function TimeSlotsPage() {
               onChange={(e) => handleBatchFieldChange('max_bookings', Math.max(1, Number(e.target.value) || 1))}
               inputProps={{ min: 1 }}
             />
-            <TextField
+            <CustomTextField
               fullWidth
               label={t('settings.web.timeSlots.fields.nameOptional')}
               value={batchForm.name}
               onChange={(e) => handleBatchFieldChange('name', e.target.value)}
             />
-            <TextField
+            <CustomTextField
               fullWidth
               multiline
               minRows={2}

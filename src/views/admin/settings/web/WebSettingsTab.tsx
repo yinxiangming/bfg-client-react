@@ -103,7 +103,7 @@ const WebSettingsTab = () => {
           {t('settings.web.settingsTab.title')}
         </Typography>
 
-        <Grid container spacing={4}>
+        <Grid container spacing={2}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <CustomTextField
               select

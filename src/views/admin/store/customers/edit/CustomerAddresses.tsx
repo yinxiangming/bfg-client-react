@@ -19,7 +19,6 @@ import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
-import TextField from '@mui/material/TextField'
 import IconButton from '@mui/material/IconButton'
 import Chip from '@mui/material/Chip'
 import DialogContentText from '@mui/material/DialogContentText'
@@ -27,6 +26,9 @@ import Snackbar from '@mui/material/Snackbar'
 
 // Icon Imports
 import Icon from '@/components/Icon'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 // Type Imports
 import { getCustomerAddresses, createAddress, updateAddress, deleteAddress, type Address } from '@/services/store'
@@ -244,25 +246,25 @@ const CustomerAddresses = ({ customerId, onUpdate }: CustomerAddressesProps) => 
         </DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               label={t('customers.addresses.fields.fullName.label')}
               value={formData.full_name || ''}
               onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
             />
-            <TextField
+            <CustomTextField
               fullWidth
               label={t('customers.addresses.fields.company.label')}
               value={formData.company || ''}
               onChange={(e) => setFormData({ ...formData, company: e.target.value })}
             />
-            <TextField
+            <CustomTextField
               fullWidth
               label={t('customers.addresses.fields.addressLine1.label')}
               value={formData.address_line1 || ''}
               onChange={(e) => setFormData({ ...formData, address_line1: e.target.value })}
             />
-            <TextField
+            <CustomTextField
               fullWidth
               label={t('customers.addresses.fields.addressLine2.label')}
               value={formData.address_line2 || ''}
@@ -270,7 +272,7 @@ const CustomerAddresses = ({ customerId, onUpdate }: CustomerAddressesProps) => 
             />
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
+                <CustomTextField
                   fullWidth
                   label={t('customers.addresses.fields.city.label')}
                   value={formData.city || ''}
@@ -278,7 +280,7 @@ const CustomerAddresses = ({ customerId, onUpdate }: CustomerAddressesProps) => 
                 />
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
+                <CustomTextField
                   fullWidth
                   label={t('customers.addresses.fields.state.label')}
                   value={formData.state || ''}
@@ -288,7 +290,7 @@ const CustomerAddresses = ({ customerId, onUpdate }: CustomerAddressesProps) => 
             </Grid>
             <Grid container spacing={2}>
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
+                <CustomTextField
                   fullWidth
                   label={t('customers.addresses.fields.postalCode.label')}
                   value={formData.postal_code || ''}
@@ -296,7 +298,7 @@ const CustomerAddresses = ({ customerId, onUpdate }: CustomerAddressesProps) => 
                 />
               </Grid>
               <Grid size={{ xs: 12, md: 6 }}>
-                <TextField
+                <CustomTextField
                   fullWidth
                   label={t('customers.addresses.fields.country.label')}
                   value={formData.country || ''}
@@ -304,13 +306,13 @@ const CustomerAddresses = ({ customerId, onUpdate }: CustomerAddressesProps) => 
                 />
               </Grid>
             </Grid>
-            <TextField
+            <CustomTextField
               fullWidth
               label={t('customers.addresses.fields.phone.label')}
               value={formData.phone || ''}
               onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             />
-            <TextField
+            <CustomTextField
               fullWidth
               label={t('customers.addresses.fields.email.label')}
               type='email'

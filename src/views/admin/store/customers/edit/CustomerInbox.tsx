@@ -12,7 +12,6 @@ import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
-import TextField from '@mui/material/TextField'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
@@ -23,6 +22,7 @@ import Pagination from '@mui/material/Pagination'
 import Snackbar from '@mui/material/Snackbar'
 
 // Component Imports
+import CustomTextField from '@/components/ui/TextField'
 import SchemaTable from '@/components/schema/SchemaTable'
 import SchemaForm from '@/components/schema/SchemaForm'
 
@@ -300,14 +300,14 @@ const CustomerInbox = ({ customerId }: CustomerInboxProps) => {
         <DialogTitle>{t('customers.inbox.sendDialog.title')}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-            <TextField
+            <CustomTextField
               fullWidth
               label={t('common.labels.subject')}
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               required
             />
-            <TextField
+            <CustomTextField
               fullWidth
               label={t('common.labels.message')}
               multiline

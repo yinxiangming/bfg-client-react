@@ -9,12 +9,12 @@ import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import CircularProgress from '@mui/material/CircularProgress'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
-import Select from '@mui/material/Select'
 import Snackbar from '@mui/material/Snackbar'
 import Typography from '@mui/material/Typography'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 import SchemaForm from '@/components/schema/SchemaForm'
 import type { FormField, FormSchema } from '@/types/schema'
@@ -480,29 +480,28 @@ export default function PostEditForm({ postId, listFallback, onCancel, onCreated
                     afterField: 'featured_image',
                     children: (
                       <>
-                        <FormControl fullWidth size='small' disabled={busy} sx={{ mb: 2 }}>
-                          <InputLabel id='post-edit-category-label'>
-                            {t('settings.web.posts.editDialog.fields.category')}
-                          </InputLabel>
-                          <Select<number | ''>
-                            labelId='post-edit-category-label'
-                            label={t('settings.web.posts.editDialog.fields.category')}
-                            value={categoryId}
-                            onChange={e => {
-                              const v = e.target.value
-                              handleCategoryChange(v === '' ? '' : Number(v))
-                            }}
-                          >
-                            <MenuItem value=''>
-                              <em>{t('settings.web.posts.editDialog.categoryNone')}</em>
+                        <CustomTextField
+                          select
+                          fullWidth
+                          size='small'
+                          disabled={busy}
+                          sx={{ mb: 2 }}
+                          label={t('settings.web.posts.editDialog.fields.category')}
+                          value={categoryId}
+                          onChange={e => {
+                            const v = e.target.value
+                            handleCategoryChange(v === '' ? '' : Number(v))
+                          }}
+                        >
+                          <MenuItem value=''>
+                            <em>{t('settings.web.posts.editDialog.categoryNone')}</em>
+                          </MenuItem>
+                          {categoryOptions.map(c => (
+                            <MenuItem key={c.id} value={c.id}>
+                              {c.name}
                             </MenuItem>
-                            {categoryOptions.map(c => (
-                              <MenuItem key={c.id} value={c.id}>
-                                {c.name}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl>
+                          ))}
+                        </CustomTextField>
 
                         {loadingCategory ? (
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>

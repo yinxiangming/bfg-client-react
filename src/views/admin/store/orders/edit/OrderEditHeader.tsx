@@ -17,8 +17,10 @@ import MenuItem from '@mui/material/MenuItem'
 import Popover from '@mui/material/Popover'
 import FormControl from '@mui/material/FormControl'
 import Select from '@mui/material/Select'
-import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 import type { Order } from '@/services/store'
 import type { OrderHeaderAction } from '@/extensions/registry'
@@ -337,7 +339,7 @@ const OrderEditHeader = ({
       <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)} maxWidth='sm' fullWidth>
         <DialogTitle>{t('orders.editHeader.dialogs.cancelTitle')}</DialogTitle>
         <DialogContent>
-          <TextField
+          <CustomTextField
             fullWidth
             multiline
             minRows={3}
@@ -358,7 +360,7 @@ const OrderEditHeader = ({
       <Dialog open={returnDialogOpen} onClose={() => setReturnDialogOpen(false)} maxWidth='sm' fullWidth>
         <DialogTitle>{t('orders.editHeader.dialogs.returnTitle')}</DialogTitle>
         <DialogContent>
-          <TextField
+          <CustomTextField
             fullWidth
             label={t('orders.editHeader.dialogs.returnCategory')}
             value={returnReasonCategory}
@@ -372,7 +374,7 @@ const OrderEditHeader = ({
               <MenuItem value='damage'>{t('orders.editHeader.restock.damage')}</MenuItem>
             </Select>
           </FormControl>
-          <TextField
+          <CustomTextField
             fullWidth
             multiline
             minRows={3}
