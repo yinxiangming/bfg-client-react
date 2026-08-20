@@ -1,6 +1,8 @@
 import { Suspense } from 'react'
+import { headers } from 'next/headers'
 import { getLocale } from 'next-intl/server'
 import { getSiteConfig } from '@/utils/siteMetadata'
+import { getRequestOrigin } from '@/utils/seo'
 import SearchPage from '@views/storefront/SearchPage'
 import type { Metadata } from 'next'
 
@@ -18,11 +20,28 @@ type Props = {
 
 export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
   const locale = await getLocale()
-  const { site_name } = await getSiteConfig(locale)
-  const params = await searchParams
+  const headersList = await headers()
+  const requestHost = headersList.get('host') ?? undefined
+  const [{ site_name }, origin, params] = await Promise.all([
+    getSiteConfig(locale, requestHost),
+    getRequestOrigin(),
+    searchParams,
+  ])
   const q = params?.q
-  const titlePart = typeof q === 'string' ? `Search: ${q}` : Array.isArray(q) ? `Search: ${q[0]}` : 'Search'
-  return { title: `${titlePart} | ${site_name}` }
+  const term = typeof q === 'string' ? q : Array.isArray(q) ? q[0] : ''
+  const titlePart = term ? `Search: ${term}` : 'Search'
+
+  // Result pages are thin and effectively unbounded, so keep them out of the index but let
+  // crawlers follow through to the product pages they link to. The canonical points at the
+  // bare /search entry point so any indexed variant consolidates there.
+  return {
+    title: titlePart,
+    description: term
+      ? `Search results for “${term}” at ${site_name}.`
+      : `Search the full ${site_name} catalogue of maker electronics.`,
+    robots: { index: false, follow: true },
+    alternates: { canonical: origin ? `${origin}/search` : '/search' },
+  }
 }
 
 export default function Page() {

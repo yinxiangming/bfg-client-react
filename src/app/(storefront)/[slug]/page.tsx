@@ -2,7 +2,9 @@ import { getLocale } from 'next-intl/server'
 import { headers } from 'next/headers'
 import { notFound, redirect } from 'next/navigation'
 import { getSiteConfig } from '@/utils/siteMetadata'
+import { getRequestOrigin, clampDescription } from '@/utils/seo'
 import { fetchRenderedCmsPage } from '@/services/storefrontCmsApi'
+import { resolveCmsBlocks } from '@/utils/resolveCmsBlocks'
 import DynamicPage from '@views/storefront/DynamicPage'
 import type { Metadata } from 'next'
 
@@ -13,6 +15,7 @@ const RESERVED_ASSET_SLUGS = new Set([
   'favicon.ico',
   'robots.txt',
   'sitemap.xml',
+  'llms.txt',
   'manifest.webmanifest',
   'site.webmanifest',
 ])
@@ -30,12 +33,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const locale = await getLocale()
   const requestHost = (await headers()).get('host') ?? undefined
-  const [pageData, { site_name }] = await Promise.all([
+  const [pageData, { site_name }, origin] = await Promise.all([
     getPageData(slug, locale, requestHost),
-    getSiteConfig(locale),
+    getSiteConfig(locale, requestHost),
+    getRequestOrigin(),
   ])
   const title = (pageData?.meta_title || pageData?.title || slug) as string
-  return { title: `${title} | ${site_name}` }
+  const description =
+    clampDescription((pageData?.meta_description || pageData?.excerpt) as string | undefined) ||
+    `${title} – ${site_name}`
+  const canonical = origin ? `${origin}/${slug}` : `/${slug}`
+
+  return {
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: { type: 'article', title, description, url: canonical, siteName: site_name },
+    twitter: { card: 'summary_large_image', title, description },
+  }
 }
 
 const RESERVED_SLUGS = ['admin', 'account', 'auth'] as const
@@ -53,10 +68,11 @@ export default async function StorefrontSlugPage({ params }: Props) {
 
   const locale = await getLocale()
   const requestHost = (await headers()).get('host') ?? undefined
-  const pageData = await getPageData(slug, locale, requestHost)
-  if (!pageData || !pageData.blocks?.length) {
+  const rawPageData = await getPageData(slug, locale, requestHost)
+  if (!rawPageData || !rawPageData.blocks?.length) {
     notFound()
   }
+  const pageData = await resolveCmsBlocks(rawPageData, requestHost, locale)
 
   return <DynamicPage pageData={pageData} locale={locale} />
 }

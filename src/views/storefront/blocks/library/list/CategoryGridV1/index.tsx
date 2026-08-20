@@ -52,11 +52,19 @@ export function CategoryGridV1({
   isEditing,
 }: BlockProps<CategoryGridSettings, CategoryGridData>) {
   const t = useTranslations('storefront')
-  const [categories, setCategories] = useState<CategoryDisplay[]>([])
-  const [loading, setLoading] = useState(true)
 
   const { columns = 4, limit = 8, showCount = true, imageHeight = '180px' } = settings
   const { source = 'auto' } = data
+
+  // Seeded during render so the categories appear in the SSR HTML (see ProductGridV1).
+  const seeded =
+    resolvedData && Array.isArray(resolvedData)
+      ? resolvedData.slice(0, limit).map(transformCategory)
+      : source === 'manual' && data.categories
+        ? data.categories.slice(0, limit).map(transformCategory)
+        : null
+  const [categories, setCategories] = useState<CategoryDisplay[]>(() => seeded ?? [])
+  const [loading, setLoading] = useState(seeded === null)
 
   // Use resolved data from server if available
   useEffect(() => {

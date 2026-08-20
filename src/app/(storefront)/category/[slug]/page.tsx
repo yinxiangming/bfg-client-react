@@ -1,6 +1,13 @@
+import { cache } from 'react'
 import { headers } from 'next/headers'
 import { getSiteConfig } from '@/utils/siteMetadata'
 import { storefrontApi } from '@/utils/storefrontApi'
+import {
+  getRequestOrigin,
+  clampDescription,
+  buildBreadcrumbJsonLd,
+  jsonLdScript,
+} from '@/utils/seo'
 import CategoryPage from '@views/storefront/CategoryPage'
 import type { Metadata } from 'next'
 
@@ -8,72 +15,159 @@ type Props = {
   params: Promise<{ slug: string }>
 }
 
-type CategoryMeta = { name: string; description: string }
+type CategoryNode = {
+  name: string
+  description: string
+  children: { slug: string; name: string }[]
+}
 
-async function findCategoryBySlug(
-  slug: string,
-  requestHost: string | undefined,
-  locale: string
-): Promise<CategoryMeta | null> {
-  try {
-    const data = await storefrontApi.getCategories({
-      tree: true,
-      requestHost,
-      lang: locale,
-      next: { revalidate: 60 },
-    })
-    const list = Array.isArray(data) ? data : data.results ?? data.data ?? []
-    const walk = (items: any[]): CategoryMeta | null => {
-      for (const c of items) {
-        if (c.slug === slug) {
-          return { name: c.name ?? slug, description: c.description ?? '' }
-        }
-        if (c.children?.length) {
-          const found = walk(c.children)
-          if (found) return found
-        }
+/** Must match `productsPerPage` in the view so the server seed fills exactly page 1. */
+const PRODUCTS_PER_PAGE = 12
+
+function walkTree(items: any[], slug: string): CategoryNode | null {
+  for (const c of items ?? []) {
+    if (c.slug === slug) {
+      return {
+        name: c.name ?? slug,
+        description: c.description ?? '',
+        children: (c.children ?? [])
+          .filter((ch: any) => ch?.slug && ch?.name)
+          .map((ch: any) => ({ slug: ch.slug as string, name: ch.name as string })),
       }
-      return null
     }
-    return walk(list)
-  } catch {
-    return null
+    if (c.children?.length) {
+      const found = walkTree(c.children, slug)
+      if (found) return found
+    }
+  }
+  return null
+}
+
+async function fetchCategoryData(slug: string, requestHost: string | undefined, locale: string) {
+  const [categoriesRes, productsRes] = await Promise.all([
+    storefrontApi
+      .getCategories({ tree: true, requestHost, lang: locale, next: { revalidate: 300 } })
+      .catch(() => null),
+    storefrontApi
+      .getProducts({
+        category: slug,
+        limit: PRODUCTS_PER_PAGE,
+        requestHost,
+        next: { revalidate: 300 },
+      })
+      .catch(() => null),
+  ])
+
+  const list = Array.isArray(categoriesRes)
+    ? categoriesRes
+    : (categoriesRes?.results ?? (categoriesRes as any)?.data ?? [])
+  const products = Array.isArray(productsRes)
+    ? productsRes
+    : (productsRes?.results ?? (productsRes as any)?.data ?? [])
+
+  return {
+    category: walkTree(list, slug),
+    products,
+    totalCount: (productsRes as any)?.count ?? products.length,
   }
 }
+
+/** Deduped per request: metadata, JSON-LD and the page body share one round trip. */
+const getCategoryForServer = cache(fetchCategoryData)
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params
   const headersList = await headers()
   const locale = headersList.get('x-locale') || 'en'
   const requestHost = headersList.get('host') ?? undefined
-  const [category, { site_name }] = await Promise.all([
-    findCategoryBySlug(slug, requestHost, locale),
-    getSiteConfig(locale),
+
+  const [data, { site_name }, origin] = await Promise.all([
+    getCategoryForServer(slug, requestHost, locale),
+    // requestHost is required: without it the workspace cannot be resolved and every title
+    // degrades to the 'Web App' placeholder.
+    getSiteConfig(locale, requestHost),
+    getRequestOrigin(),
   ])
-  const title = category?.name ?? slug
-  const fullTitle = `${title} | ${site_name}`
+
+  const name = data.category?.name ?? slug
+  const canonical = origin ? `${origin}/category/${slug}` : `/category/${slug}`
   const description =
-    category?.description?.replace(/\s+/g, ' ').trim().slice(0, 160) ||
-    `${title} – ${site_name}`
+    clampDescription(data.category?.description) ||
+    `Shop ${name} at ${site_name}. ${data.totalCount} products in stock with fast delivery across New Zealand.`
 
   return {
-    title: fullTitle,
+    title: name,
     description,
+    alternates: { canonical },
     openGraph: {
-      title: fullTitle,
+      title: `${name} | ${site_name}`,
       description,
       type: 'website',
+      url: canonical,
+      siteName: site_name,
     },
-    twitter: {
-      card: 'summary_large_image',
-      title: fullTitle,
-      description,
-    },
+    twitter: { card: 'summary_large_image', title: `${name} | ${site_name}`, description },
   }
 }
 
 export default async function Page(props: Props) {
-  const params = await props.params
-  return <CategoryPage slug={params.slug} />
-}
+  const { slug } = await props.params
+  const headersList = await headers()
+  const locale = headersList.get('x-locale') || 'en'
+  const requestHost = headersList.get('host') ?? undefined
 
+  const [data, origin] = await Promise.all([
+    getCategoryForServer(slug, requestHost, locale),
+    getRequestOrigin(),
+  ])
+
+  const name = data.category?.name ?? slug
+
+  const collectionJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'CollectionPage',
+    name,
+    description: clampDescription(data.category?.description, 5000) || undefined,
+    url: origin ? `${origin}/category/${slug}` : undefined,
+    // ItemList gives generative engines an extractable list of what this category contains.
+    mainEntity: {
+      '@type': 'ItemList',
+      numberOfItems: data.totalCount,
+      itemListElement: (data.products ?? []).slice(0, PRODUCTS_PER_PAGE).map((p: any, i: number) => ({
+        '@type': 'ListItem',
+        position: i + 1,
+        name: p.name,
+        url: origin ? `${origin}/product/${p.slug || p.id}` : undefined,
+      })),
+    },
+  }
+
+  const breadcrumb = buildBreadcrumbJsonLd(origin, [
+    { name: 'Home', path: '/' },
+    { name, path: `/category/${slug}` },
+  ])
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(collectionJsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumb) }}
+      />
+      <CategoryPage
+        slug={slug}
+        initialData={{
+          products: data.products ?? [],
+          totalCount: data.totalCount,
+          category: data.category
+            ? { name: data.category.name, description: data.category.description }
+            : null,
+          subcategories: data.category?.children ?? [],
+        }}
+      />
+    </>
+  )
+}

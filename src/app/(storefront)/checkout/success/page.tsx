@@ -6,8 +6,9 @@ import type { Metadata } from 'next'
 export async function generateMetadata(): Promise<Metadata> {
   const headersList = await headers()
   const locale = headersList.get('x-locale') || 'en'
-  const { site_name } = await getSiteConfig(locale)
-  return { title: `Order Success | ${site_name}` }
+  const requestHost = headersList.get('host') ?? undefined
+  await getSiteConfig(locale, requestHost)
+  return { title: 'Order Success', robots: { index: false, follow: false } }
 }
 
 export default function Page() {

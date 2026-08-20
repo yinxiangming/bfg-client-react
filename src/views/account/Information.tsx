@@ -2,6 +2,9 @@
 
 // React Imports
 import { useState, useEffect } from 'react'
+
+// i18n Imports
+import { routing } from '@/i18n/routing'
 import type { ChangeEvent } from 'react'
 
 // Next Imports
@@ -54,18 +57,15 @@ const Information = () => {
     timezone_name: ''
   })
 
-  // Language options
-  const languageOptions = [
-    { value: 'en', label: 'English' },
-    { value: 'zh-hans', label: '简体中文' },
-    { value: 'zh-hant', label: '繁體中文' },
-    { value: 'fr', label: 'Français' },
-    { value: 'es', label: 'Español' },
-    { value: 'de', label: 'Deutsch' },
-    { value: 'ja', label: '日本語' },
-    { value: 'ko', label: '한국어' },
-    { value: 'ar', label: 'العربية' }
-  ]
+  // Language options — only the locales this deployment actually renders, so a customer
+  // cannot save a preference the storefront will never honour.
+  const LANGUAGE_LABELS: Record<string, string> = { en: 'English', 'zh-hans': '简体中文' }
+  // The list previously offered zh-hant / fr / es / de / ja / ko / ar, none of which the
+  // app has message catalogues for — saving one left the UI in English anyway.
+  const languageOptions = routing.locales.map((value) => ({
+    value,
+    label: LANGUAGE_LABELS[value] ?? value
+  }))
 
   // Timezone options
   const timezoneOptions = [

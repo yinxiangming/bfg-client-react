@@ -5,6 +5,8 @@ import AdminLayoutClient from './AdminLayoutClient'
 
 export const metadata = {
   title: { template: 'Admin - %s', default: 'Admin' },
+  // Back-office: never index, and don't follow links out of it into private surfaces.
+  robots: { index: false, follow: false, nocache: true },
 }
 
 export default async function AdminLayout({

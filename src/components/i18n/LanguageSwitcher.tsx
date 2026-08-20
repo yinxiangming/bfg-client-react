@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 
 import Icon from '@components/Icon'
+import { routing } from '@/i18n/routing'
 
 type Props = {
   className?: string
@@ -17,10 +18,22 @@ type Props = {
 
 const LOCALE_COOKIE_NAME = 'NEXT_LOCALE'
 
-const LOCALE_OPTIONS = [
-  { value: 'en', labelKey: 'language.en', shortLabel: 'EN' },
-  { value: 'zh-hans', labelKey: 'language.zhHans', shortLabel: '中' }
-] as const
+/** Presentation for every locale the app knows how to render. */
+const LOCALE_META = {
+  en: { labelKey: 'language.en', shortLabel: 'EN' },
+  'zh-hans': { labelKey: 'language.zhHans', shortLabel: '中' }
+} as const
+
+/**
+ * Only the locales enabled in `routing` are offered. Driving this off the routing config
+ * (rather than a hardcoded list) means a single-language deployment shows no switcher at
+ * all, instead of a control that silently does nothing.
+ */
+const LOCALE_OPTIONS = routing.locales.map((value) => ({
+  value,
+  labelKey: LOCALE_META[value]?.labelKey ?? 'language.en',
+  shortLabel: LOCALE_META[value]?.shortLabel ?? value.toUpperCase()
+}))
 
 function setLocaleCookie(locale: string) {
   // Persist for 1 year
@@ -72,6 +85,9 @@ export default function LanguageSwitcher({
   }
 
   const isMinimal = triggerVariant === 'minimal'
+
+  // Nothing to switch between on a single-language deployment.
+  if (LOCALE_OPTIONS.length < 2) return null
 
   return (
     <div
