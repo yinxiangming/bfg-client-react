@@ -26,6 +26,11 @@ export const normalizeMediaUrl = (url: string | null | undefined): string => {
   if (!url) return ''
   const base = getMediaBaseUrl()
   if (url.startsWith('http://') || url.startsWith('https://')) {
+    // Already served from the configured media root (e.g. the S3/CloudFront CDN):
+    // leave it alone. Without this the rewrite below strips everything up to the
+    // first `/media/` and re-hosts the file on the API origin, which is exactly
+    // where a CDN-backed object does *not* live.
+    if (url.startsWith(`${base}/`)) return url
     const mediaMatch = url.match(/\/media\/(.+)$/)
     if (mediaMatch) {
       return `${base}/${mediaMatch[1]}`
