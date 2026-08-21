@@ -13,7 +13,6 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
-import Chip from '@mui/material/Chip'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import Dialog from '@mui/material/Dialog'
@@ -37,9 +36,10 @@ import classnames from 'classnames'
 // Component Imports
 import CustomTextField from '@/components/ui/TextField'
 import FilterDateRangePicker, { toDateOnly } from '@/components/schema/FilterDateRangePicker'
+import StatusBadge from '@/components/schema/StatusBadge'
 
 // Type Imports
-import type { ListSchema, SchemaAction, SchemaFilter } from '@/types/schema'
+import type { ListSchema, SchemaAction, SchemaFilter, SchemaSummaryField } from '@/types/schema'
 
 // Util Imports
 import { formatCurrency, formatDate, formatDateTime } from '@/utils/format'
@@ -91,6 +91,18 @@ function getDateRangePreset(start: string, end: string): '' | 'today' | 'yesterd
   return 'custom'
 }
 
+// Format a summary aggregate for display in the summary bar (WI-391).
+function formatSummaryValue(value: string | number | null | undefined, field: SchemaSummaryField): string {
+  if (value === null || value === undefined || value === '') return '—'
+  const num = typeof value === 'number' ? value : Number(value)
+  if (field.format === 'currency') return formatCurrency(Number.isFinite(num) ? num : 0)
+  if (field.format === 'integer' || field.format === 'number') {
+    return Number.isFinite(num) ? num.toLocaleString() : String(value)
+  }
+  // decimal (default): server pre-formats precision; add thousands grouping when numeric
+  return Number.isFinite(num) ? num.toLocaleString(undefined, { maximumFractionDigits: 3 }) : String(value)
+}
+
 type SchemaTableProps<T = any> = {
   schema: ListSchema
   data: T[]
@@ -114,6 +126,15 @@ type SchemaTableProps<T = any> = {
   }
   /** Called with debounced search string when server-side pagination is active */
   onSearchChange?: (search: string) => void
+  /** Aggregate stats for the summary bar, keyed by SchemaSummaryField.key (WI-391). */
+  summary?: Record<string, string | number | null>
+  summaryLoading?: boolean
+  /** Total rows matching the current filters; enables cross-page "select all N".
+   *  Falls back to serverPagination.total, then the local filtered count. */
+  totalCount?: number
+  /** Notifies the container of the current selection so it can run bulk actions
+   *  by id-set (page selection) or by filter (all-matching). */
+  onSelectionChange?: (selection: { ids: (number | string)[]; allMatching: boolean; total: number }) => void
 }
 
 // Default status colors - only common/generic statuses
@@ -183,7 +204,11 @@ export default function SchemaTable<T extends { id: number | string }>({
   filters: controlledFilters,
   onFiltersChange,
   serverPagination,
-  onSearchChange
+  onSearchChange,
+  summary,
+  summaryLoading,
+  totalCount,
+  onSelectionChange
 }: SchemaTableProps<T>) {
   const t = useTranslations('admin')
   // State
@@ -211,6 +236,9 @@ export default function SchemaTable<T extends { id: number | string }>({
   const [filterOptions, setFilterOptions] = useState<Record<string, OptionItemType[]>>({})
   const [filterOptionsLoading, setFilterOptionsLoading] = useState<Record<string, boolean>>({})
   const [selectedRows, setSelectedRows] = useState<Set<number | string>>(new Set())
+  // Cross-page "select all N matching" mode (WI-391): selection spans the whole
+  // filtered result set, not just the rows held client-side on the current page.
+  const [allMatchingSelected, setAllMatchingSelected] = useState(false)
   const [bulkActionMenuAnchor, setBulkActionMenuAnchor] = useState<HTMLElement | null>(null)
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState<boolean>(false)
   const [dateRangePickerOpen, setDateRangePickerOpen] = useState<string | null>(null)
@@ -392,17 +420,9 @@ export default function SchemaTable<T extends { id: number | string }>({
           // Note: These labels should ideally come from schema or data
           // For now, using generic status labels
           return (
-            <Chip
+            <StatusBadge
               label={value ? t('common.states.active', { defaultValue: 'Active' }) : t('common.states.inactive', { defaultValue: 'Inactive' })}
-              size="small"
               color={value ? 'success' : 'default'}
-              variant="filled"
-              sx={{ 
-                height: 24, 
-                fontSize: '0.8125rem', 
-                fontWeight: 500,
-                '& .MuiChip-label': { px: 1.5 }
-              }}
             />
           )
         }
@@ -411,36 +431,12 @@ export default function SchemaTable<T extends { id: number | string }>({
           return (
             <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
               {value.map((item, idx) => (
-                <Chip 
-                  key={idx} 
-                  label={item} 
-                  size="small" 
-                  variant="filled"
-                  sx={{ 
-                    height: 24, 
-                    fontSize: '0.8125rem', 
-                    fontWeight: 500,
-                    '& .MuiChip-label': { px: 1.5 }
-                  }}
-                />
+                <StatusBadge key={idx} label={item} color="default" noDot />
               ))}
             </Box>
           )
         }
-        return (
-          <Chip
-            label={value}
-            size="small"
-            color={statusColors[value] || 'default'}
-            variant="filled"
-            sx={{ 
-              height: 24, 
-              fontSize: '0.8125rem', 
-              fontWeight: 500,
-              '& .MuiChip-label': { px: 1.5 }
-            }}
-          />
-        )
+        return <StatusBadge label={value} color={statusColors[value] || 'default'} />
       default:
         // Format file size for media
         if (typeof value === 'number' && value > 1024) {
@@ -545,8 +541,12 @@ export default function SchemaTable<T extends { id: number | string }>({
   const startIndex = displayTotal === 0 ? 0 : displayPage * displayRowsPerPage + 1
   const endIndex = Math.min((displayPage + 1) * displayRowsPerPage, displayTotal)
 
+  // Total rows matching the current filters — drives the "select all N" affordance.
+  const matchingTotal = totalCount ?? (_sp ? _sp.total : filteredData.length)
+
   // Row selection handlers
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setAllMatchingSelected(false)
     if (event.target.checked) {
       const newSelected = new Set(paginatedData.map(item => item.id))
       setSelectedRows(newSelected)
@@ -556,6 +556,8 @@ export default function SchemaTable<T extends { id: number | string }>({
   }
 
   const handleSelectRow = (id: number | string) => {
+    // Any manual toggle drops out of cross-page "all matching" mode.
+    setAllMatchingSelected(false)
     const newSelected = new Set(selectedRows)
     if (newSelected.has(id)) {
       newSelected.delete(id)
@@ -565,18 +567,79 @@ export default function SchemaTable<T extends { id: number | string }>({
     setSelectedRows(newSelected)
   }
 
-  const isAllSelected = paginatedData.length > 0 && paginatedData.every(item => selectedRows.has(item.id))
-  const isIndeterminate = selectedRows.size > 0 && selectedRows.size < paginatedData.length
+  // Cross-page select-all (WI-391): mark the entire filtered set as selected.
+  const handleSelectAllMatching = () => {
+    setAllMatchingSelected(true)
+    setSelectedRows(new Set(paginatedData.map(item => item.id)))
+  }
+
+  const handleClearSelection = () => {
+    setAllMatchingSelected(false)
+    setSelectedRows(new Set())
+  }
+
+  const isAllSelected =
+    allMatchingSelected || (paginatedData.length > 0 && paginatedData.every(item => selectedRows.has(item.id)))
+  const isIndeterminate = !allMatchingSelected && selectedRows.size > 0 && selectedRows.size < paginatedData.length
+
+  // Surface the live selection to the container so it can run bulk actions by
+  // id-set (page selection) or by filter (all-matching). Ref-guarded so an
+  // unstable callback prop does not re-fire the effect every render.
+  const onSelectionChangeRef = useRef(onSelectionChange)
+  useEffect(() => { onSelectionChangeRef.current = onSelectionChange })
+  useEffect(() => {
+    onSelectionChangeRef.current?.({
+      ids: Array.from(selectedRows),
+      allMatching: allMatchingSelected,
+      total: allMatchingSelected ? matchingTotal : selectedRows.size
+    })
+  }, [selectedRows, allMatchingSelected, matchingTotal])
+
+  // Selected-row summary (WI-399): when summaryConfig fields declare a `sumField`,
+  // the bar aggregates client-side over the loaded rows — the selected rows when a
+  // selection is active, else the full filtered set. A server-provided `summary`
+  // still wins for the whole-set view (covers aggregates the client can't compute,
+  // e.g. declared value derived from related records).
+  const sumFields = useMemo(
+    () => schema.summaryConfig?.fields.filter(f => f.sumField) ?? [],
+    [schema.summaryConfig]
+  )
+  const hasSelection = selectedRows.size > 0 || allMatchingSelected
+  const selectionSummary = useMemo(() => {
+    if (sumFields.length === 0 || !hasSelection) return null
+    const rows = allMatchingSelected ? filteredData : data.filter(d => selectedRows.has(d.id))
+    const out: Record<string, number> = {}
+    for (const f of sumFields) {
+      out[f.key] = f.sumField === '__count__'
+        ? rows.length
+        : rows.reduce((acc, r) => acc + (Number((r as Record<string, unknown>)[f.sumField as string]) || 0), 0)
+    }
+    return out
+  }, [sumFields, hasSelection, allMatchingSelected, filteredData, data, selectedRows])
+  const computedAllSummary = useMemo(() => {
+    if (sumFields.length === 0 || summary) return null
+    const out: Record<string, number> = {}
+    for (const f of sumFields) {
+      out[f.key] = f.sumField === '__count__'
+        ? filteredData.length
+        : filteredData.reduce((acc, r) => acc + (Number((r as Record<string, unknown>)[f.sumField as string]) || 0), 0)
+    }
+    return out
+  }, [sumFields, summary, filteredData])
+  const summaryIsSelection = !!selectionSummary
+  const effectiveSummary = selectionSummary ?? summary ?? computedAllSummary ?? undefined
 
   return (
     <>
-      <Card 
-        elevation={0} 
-        sx={{ 
-          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+      <Card
+        elevation={0}
+        className="at-schema-table"
+        sx={{
+          backgroundColor: 'var(--at-card-bg)',
+          boxShadow: 'var(--at-card-shadow)',
           border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: 2,
+          borderColor: 'var(--at-card-border)',
+          borderRadius: 'var(--at-card-radius)',
           width: '100%',
           display: 'flex',
           flexDirection: 'column',
@@ -584,8 +647,72 @@ export default function SchemaTable<T extends { id: number | string }>({
         }}
       >
 
+        {/* Summary bar — aggregates the whole filtered result set, not just the
+            current page (WI-391). Driven by schema.summaryConfig + summary prop. */}
+        {schema.summaryConfig && (effectiveSummary || summaryLoading) && (
+          <CardContent
+            sx={{
+              py: 1.25, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider)',
+              display: 'flex', gap: 3, flexWrap: 'wrap', alignItems: 'baseline',
+              backgroundColor: summaryIsSelection
+                ? 'var(--at-selected-bg, rgba(105,108,255,0.08))'
+                : 'var(--at-subtle-bg, rgba(0,0,0,0.02))'
+            }}
+          >
+            {summaryLoading && !effectiveSummary ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <CircularProgress size={16} />
+                <Typography variant="body2" color="text.secondary">{t('common.schemaTable.loadingStats')}</Typography>
+              </Box>
+            ) : (
+              <>
+                {summaryIsSelection && (
+                  <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.3 }}>
+                    {t('common.schemaTable.selectionSummaryLabel')}
+                  </Typography>
+                )}
+                {schema.summaryConfig.fields.map(field => (
+                  <Box key={field.key} sx={{ display: 'flex', alignItems: 'baseline', gap: 0.75 }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.3 }}>
+                      {field.label}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      {formatSummaryValue(effectiveSummary?.[field.key], field)}{field.unit ? ` ${field.unit}` : ''}
+                    </Typography>
+                  </Box>
+                ))}
+              </>
+            )}
+          </CardContent>
+        )}
+
+        {/* Selection banner — page selection count + cross-page "select all N" (WI-391) */}
+        {(selectedRows.size > 0 || allMatchingSelected) && (
+          <CardContent
+            sx={{
+              py: 1, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider)',
+              display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap',
+              backgroundColor: 'var(--at-selected-bg, rgba(105,108,255,0.08))'
+            }}
+          >
+            <Typography variant="body2">
+              {allMatchingSelected
+                ? t('common.schemaTable.selectedAllMatching', { count: matchingTotal })
+                : t('common.schemaTable.selectedCount', { count: selectedRows.size })}
+            </Typography>
+            {!allMatchingSelected && isAllSelected && matchingTotal > paginatedData.length && (
+              <Button size="small" variant="text" onClick={handleSelectAllMatching} sx={{ textTransform: 'none' }}>
+                {t('common.schemaTable.selectAllMatching', { count: matchingTotal })}
+              </Button>
+            )}
+            <Button size="small" variant="text" color="error" onClick={handleClearSelection} sx={{ textTransform: 'none' }}>
+              {t('common.schemaTable.clearSelection')}
+            </Button>
+          </CardContent>
+        )}
+
         {/* Toolbar with Search, Filters, and Actions */}
-        <CardContent sx={{ py: 2, px: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
+        <CardContent sx={{ py: 2, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider)' }}>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
             {/* Search */}
             {schema.searchFields && (
@@ -850,13 +977,20 @@ export default function SchemaTable<T extends { id: number | string }>({
                   startIcon={action.icon ? <i className={action.icon} style={{ fontSize: '1rem' }} /> : undefined}
                   onClick={() => handleActionClick(action, {} as T)}
                   size="small"
-                  sx={{ 
-                    textTransform: 'none', 
+                  sx={{
+                    textTransform: 'none',
                     fontWeight: 500,
-                    borderRadius: 1.5,
-                    boxShadow: action.type === 'primary' ? '0 1px 2px 0 rgb(0 0 0 / 0.05)' : 'none',
+                    borderRadius: 'var(--at-control-radius)',
+                    boxShadow: 'none',
                     height: '38px',
-                    fontSize: '0.875rem'
+                    fontSize: '0.875rem',
+                    ...(action.type === 'primary'
+                      ? {
+                          backgroundColor: 'var(--at-accent)',
+                          color: 'var(--at-accent-fg)',
+                          '&:hover': { backgroundColor: 'var(--at-accent-strong)' }
+                        }
+                      : {})
                   }}
                 >
                   {action.label}
@@ -905,16 +1039,20 @@ export default function SchemaTable<T extends { id: number | string }>({
                     size="small"
                   />
                 </th>
-                {schema.columns.map((column) => (
+                {schema.columns.map((column) => {
+                  const isNumeric = column.type === 'currency' || column.type === 'number'
+                  return (
                   <th
                     key={column.field}
                     className={classnames({
-                      'cursor-pointer select-none': column.sortable
+                      'cursor-pointer select-none': column.sortable,
+                      'at-num': isNumeric
                     })}
                     onClick={() => column.sortable && handleSort(column.field)}
                   >
                     <div className={classnames({
-                      'flex items-center': column.sortable
+                      'flex items-center': column.sortable,
+                      'justify-end': isNumeric && column.sortable
                     })}>
                       {column.label}
                       {column.sortable && (
@@ -931,7 +1069,8 @@ export default function SchemaTable<T extends { id: number | string }>({
                       )}
                     </div>
                   </th>
-                ))}
+                  )
+                })}
                 {rowActions.length > 0 && <th align="right">{t('common.schemaTable.actionsColumn')}</th>}
               </tr>
             </thead>
@@ -944,8 +1083,11 @@ export default function SchemaTable<T extends { id: number | string }>({
                 </tr>
               ) : paginatedData.length === 0 ? (
                 <tr>
-                  <td colSpan={schema.columns.length + 1 + (rowActions.length > 0 ? 1 : 0)} className='text-center'>
-                    {t('common.schemaTable.noData')}
+                  <td colSpan={schema.columns.length + 1 + (rowActions.length > 0 ? 1 : 0)}>
+                    <div className='at-empty'>
+                      <i className='tabler-inbox' aria-hidden='true' />
+                      {t('common.schemaTable.noData')}
+                    </div>
                   </td>
                 </tr>
               ) : (
@@ -966,7 +1108,7 @@ export default function SchemaTable<T extends { id: number | string }>({
                     >
                       <td onClick={(e) => e.stopPropagation()}>
                         <Checkbox
-                          checked={selectedRows.has(item.id)}
+                          checked={allMatchingSelected || selectedRows.has(item.id)}
                           onChange={() => handleSelectRow(item.id)}
                           size="small"
                           onClick={(e) => e.stopPropagation()}
@@ -981,6 +1123,7 @@ export default function SchemaTable<T extends { id: number | string }>({
 
                         // Check if column has a link action
                         const hasLink = !!column.link
+                        const isNumeric = column.type === 'currency' || column.type === 'number'
                         const handleColumnClick = (e: React.MouseEvent) => {
                           if (hasLink && column.link) {
                             e.stopPropagation()
@@ -995,7 +1138,7 @@ export default function SchemaTable<T extends { id: number | string }>({
                         return (
                           <td
                             key={column.field}
-                            className={hasLink ? 'hover:underline' : ''}
+                            className={classnames({ 'hover:underline': hasLink, 'at-num': isNumeric })}
                             onClick={hasLink ? handleColumnClick : undefined}
                             style={hasLink ? { 
                               color: 'var(--mui-palette-primary-main)', 
@@ -1010,15 +1153,17 @@ export default function SchemaTable<T extends { id: number | string }>({
                       })}
                       {rowActions.length > 0 && (
                         <td align="right" onClick={(e) => e.stopPropagation()}>
-                          <IconButton
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setActionMenuAnchor({ el: e.currentTarget, item })
-                            }}
-                          >
-                            <i className="tabler-dots-vertical" />
-                          </IconButton>
+                          {rowActions.some(a => !a.hidden?.(item)) && (
+                            <IconButton
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setActionMenuAnchor({ el: e.currentTarget, item })
+                              }}
+                            >
+                              <i className="tabler-dots-vertical" />
+                            </IconButton>
+                          )}
                         </td>
                       )}
                     </tr>
@@ -1035,11 +1180,11 @@ export default function SchemaTable<T extends { id: number | string }>({
           justifyContent: 'space-between', 
           alignItems: 'center', 
           flexWrap: 'wrap', 
-          gap: 2, 
-          py: 2, 
+          gap: 2,
+          py: 2,
           px: 3,
           borderTop: '1px solid',
-          borderColor: 'divider'
+          borderColor: 'var(--at-divider)'
         }}>
           {/* Left: Showing info + Items per page */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
@@ -1083,10 +1228,18 @@ export default function SchemaTable<T extends { id: number | string }>({
               showLastButton
               sx={{
                 '& .MuiPaginationItem-root': {
-                  minWidth: 40,
-                  height: 40,
+                  minWidth: 36,
+                  height: 36,
                   fontSize: '0.875rem',
-                  fontWeight: 500
+                  fontWeight: 500,
+                  borderRadius: 'var(--at-control-radius)',
+                  borderColor: 'var(--at-card-border)'
+                },
+                '& .MuiPaginationItem-root.Mui-selected': {
+                  backgroundColor: 'var(--at-accent)',
+                  color: 'var(--at-accent-fg)',
+                  borderColor: 'transparent',
+                  '&:hover': { backgroundColor: 'var(--at-accent-strong)' }
                 },
                 '& .MuiPaginationItem-icon': {
                   fontSize: '1.25rem'
@@ -1103,18 +1256,20 @@ export default function SchemaTable<T extends { id: number | string }>({
         open={!!actionMenuAnchor}
         onClose={() => setActionMenuAnchor(null)}
       >
-        {rowActions.map((action) => (
-          <MenuItem
-            key={action.id}
-            onClick={() => {
-              if (actionMenuAnchor) {
-                handleActionClick(action, actionMenuAnchor.item)
-              }
-            }}
-          >
-            {action.label}
-          </MenuItem>
-        ))}
+        {rowActions
+          .filter(action => !(actionMenuAnchor && action.hidden?.(actionMenuAnchor.item)))
+          .map((action) => (
+            <MenuItem
+              key={action.id}
+              onClick={() => {
+                if (actionMenuAnchor) {
+                  handleActionClick(action, actionMenuAnchor.item)
+                }
+              }}
+            >
+              {action.label}
+            </MenuItem>
+          ))}
       </Menu>
 
       {/* Bulk Actions Menu */}

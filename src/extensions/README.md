@@ -136,11 +136,11 @@ Plugin side:
 
 ```typescript
 sections: [{
-  id: 'resale-customer-products-tab',
+  id: 'loyalty-customer-rewards-tab',
   page: 'admin/store/customers/detail',
   position: 'after',
   targetSlot: 'CustomerInbox',
-  component: CustomerResaleProductsTab,
+  component: CustomerRewardsTab,
 }]
 ```
 
@@ -152,7 +152,7 @@ MyTabComponent.tabLabel = 'My Tab'
 MyTabComponent.tabLabel = (t) => t('myPlugin.tabs.myTab')
 ```
 
-This keeps `src/client` unaware of plugin namespaces like `resale`, while still allowing each extension to own its own label/i18n.
+This keeps `src/client` unaware of plugin namespaces like `loyalty`, while still allowing each extension to own its own label/i18n.
 
 ### 5. Data Hooks
 

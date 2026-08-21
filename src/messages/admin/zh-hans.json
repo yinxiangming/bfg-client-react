@@ -30,13 +30,6 @@
     "settingsDelivery": "配送",
     "settingsMarketing": "营销",
     "settingsSupport": "客户支持",
-    "resale": "代售",
-    "resaleIntake": "代收",
-    "resaleSettings": "设置",
-    "resaleTimeslots": "时段",
-    "resaleBookings": "预约",
-    "resaleProducts": "商品",
-    "resalePayouts": "结算",
     "team": "团队",
     "teamStaff": "员工",
     "teamRoles": "角色与权限"
@@ -115,7 +108,13 @@
         "yesterday": "昨天",
         "lastWeek": "上周",
         "selectDate": "选择日期"
-      }
+      },
+      "loadingStats": "正在统计…",
+      "selectedCount": "已选 {count} 项",
+      "selectedAllMatching": "已选全部 {count} 条",
+      "selectAllMatching": "选择全部 {count} 条",
+      "clearSelection": "清空选择",
+      "selectionSummaryLabel": "选中合计"
     },
     "schemaForm": {
       "save": "保存",
@@ -286,8 +285,6 @@
         "refund": "退款",
         "refunding": "退款中...",
         "return": "创建退货",
-        "relist": "重新上架",
-        "relisting": "重新上架中...",
         "cancelOrder": "取消订单"
       },
       "dialogs": {
@@ -4152,5 +4149,14 @@
         "support": "工单支持"
       }
     }
+  },
+  "dashboard": {
+    "title": "仪表盘",
+    "editLayout": "编辑布局",
+    "editTitle": "编辑仪表盘布局",
+    "cancel": "取消",
+    "save": "保存布局",
+    "saving": "保存中…",
+    "emptyHint": "暂无区块。添加区块以定制您的仪表盘。"
   }
 }

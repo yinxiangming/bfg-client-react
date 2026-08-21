@@ -11,7 +11,6 @@ import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 import Grid from '@mui/material/Grid'
-import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
 import Alert from '@mui/material/Alert'
@@ -28,6 +27,7 @@ import type { Customer } from '@/services/store'
 import { apiFetch, bfgApi } from '@/utils/api'
 
 // Component Imports
+import CustomTextField from '@/components/ui/TextField'
 import TransactionHistoryModal from './TransactionHistoryModal'
 
 type CustomerWalletProps = {
@@ -202,7 +202,7 @@ const CustomerWallet = ({ customer, onUpdate }: CustomerWalletProps) => {
             </Typography>
             <Grid container spacing={2}>
               <Grid size={{ xs: 12 }}>
-                <TextField
+                <CustomTextField
                   fullWidth
                   label={t('customers.wallet.topUp.fields.amount.label')}
                   type='number'
@@ -214,7 +214,7 @@ const CustomerWallet = ({ customer, onUpdate }: CustomerWalletProps) => {
                 />
               </Grid>
               <Grid size={{ xs: 12 }}>
-                <TextField
+                <CustomTextField
                   fullWidth
                   label={t('customers.wallet.topUp.fields.note.label')}
                   multiline

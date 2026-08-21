@@ -63,6 +63,31 @@ export interface SchemaAction {
   scope: 'global' | 'row'
   confirm?: string
   icon?: string
+  /** Optional per-row predicate; when it returns true this row action is hidden for that row. */
+  hidden?: (row: any) => boolean
+}
+
+/** A single aggregate shown in the SchemaTable summary bar (WI-391). */
+export interface SchemaSummaryField {
+  /** Key into the summary stats object passed to SchemaTable (e.g. 'total_volume'). */
+  key: string
+  label: string
+  /** Display formatting: plain number, currency, decimal string, or a unit suffix. */
+  format?: 'number' | 'currency' | 'decimal' | 'integer'
+  /** Optional unit appended after the value, e.g. 'm³' / 'kg'. */
+  unit?: string
+  /** Row field summed client-side for the selected-rows summary (WI-399). When set,
+   *  the summary bar aggregates over the selected rows (or the whole filtered set
+   *  when nothing is selected) in-browser, no stats endpoint needed. Use the
+   *  sentinel '__count__' to count rows instead of summing a field. */
+  sumField?: string
+}
+
+/** Declarative summary-bar config: a list aggregates its whole filtered result
+ *  set (not just the current page) and renders the totals above the table. The
+ *  container is responsible for fetching the stats and passing them down. */
+export interface ListSchemaSummaryConfig {
+  fields: SchemaSummaryField[]
 }
 
 export interface ListSchema {
@@ -72,6 +97,8 @@ export interface ListSchema {
   searchFields?: string[]
   searchPlaceholder?: string
   actions?: SchemaAction[]
+  /** When set, SchemaTable renders a summary bar from the `summary` prop (WI-391). */
+  summaryConfig?: ListSchemaSummaryConfig
 }
 
 export interface FormField {

@@ -56,7 +56,7 @@ const CheckoutPage = () => {
     city: '',
     state: '',
     zip: '',
-    country: 'US'
+    country: 'NZ'
   })
   const [showNewBillingAddressForm, setShowNewBillingAddressForm] = useState(false)
 
@@ -69,7 +69,7 @@ const CheckoutPage = () => {
     city: '',
     state: '',
     zip: '',
-    country: 'US',
+    country: 'NZ',
     phone: '',
     shippingMethod: 'standard',
     cardNumber: '',
@@ -95,6 +95,9 @@ const CheckoutPage = () => {
   const selectedGateway = paymentGateways.find(g => g.id === selectedGatewayId)
   const requiresCreditCard = selectedGateway?.gateway_type === 'stripe'
   const placeOrderThenSuccess = isPlaceOrderGateway(selectedGateway)
+  const isStripeNewCardPending = requiresCreditCard && useNewCard && !paymentMethodId
+  const isStripeSavedCardPending = requiresCreditCard && !useNewCard && !selectedPaymentMethodId
+  const isSubmitDisabled = submitting || !selectedGatewayId || isStripeNewCardPending || isStripeSavedCardPending
   
   // Use preview prices if available, otherwise fallback to local calculation
   const subtotal = pricePreview?.subtotal ?? getSubtotal()
@@ -678,22 +681,22 @@ const CheckoutPage = () => {
             {/* Submit Button */}
             <button
               type='submit'
-              disabled={submitting || !selectedGatewayId}
+              disabled={isSubmitDisabled}
               style={{
                 width: '100%',
                 padding: '1.125rem',
-                backgroundColor: '#6366f1',
+                backgroundColor: 'var(--primary-color, #6366f1)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
                 fontSize: '1rem',
                 fontWeight: 600,
-                cursor: (submitting || !selectedGatewayId) ? 'not-allowed' : 'pointer',
-                opacity: (submitting || !selectedGatewayId) ? 0.7 : 1,
+                cursor: isSubmitDisabled ? 'not-allowed' : 'pointer',
+                opacity: isSubmitDisabled ? 0.7 : 1,
                 transition: 'all 0.2s'
               }}
-              onMouseEnter={(e) => !submitting && selectedGatewayId && (e.currentTarget.style.backgroundColor = '#4f46e5')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#6366f1')}
+              onMouseEnter={(e) => !isSubmitDisabled && (e.currentTarget.style.backgroundColor = 'var(--primary-hover, #4f46e5)')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary-color, #6366f1)')}
             >
               {submitting ? t('buttons.processing') : (
                 placeOrderThenSuccess ? t('buttons.placeOrder') :

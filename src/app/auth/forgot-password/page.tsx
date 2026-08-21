@@ -2,6 +2,7 @@ import { headers } from 'next/headers'
 import { getLocale, getTranslations } from 'next-intl/server'
 import type { Metadata } from 'next'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
+import { resolveAuthPage } from '@/components/auth/themes/resolve'
 import AuthForgotPasswordClient from './AuthForgotPasswordClient'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -16,6 +17,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: `${siteName} - ${t('pageTitle')}` }
 }
 
-export default function ForgotPasswordPage() {
-  return <AuthForgotPasswordClient />
+export default async function ForgotPasswordPage() {
+  const Override = await resolveAuthPage('forgot-password')
+  const Component = Override ?? AuthForgotPasswordClient
+  return <Component />
 }

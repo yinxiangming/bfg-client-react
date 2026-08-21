@@ -14,7 +14,7 @@ import { AppDialogProvider } from '@/contexts/AppDialogContext'
 
 // Util Imports
 import { getRequestOrigin, clampDescription, localeTag, openGraphLocale } from '@/utils/seo'
-import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
+import { getStorefrontConfigForServer, getAllowedColorModes } from '@/utils/storefrontConfig'
 
 // Style Imports
 import './globals.css'
@@ -74,34 +74,46 @@ export const viewport = {
   maximumScale: 5
 }
 
-const getInitialMode = async (): Promise<'system' | 'light' | 'dark'> => {
-  // Try to get stored mode from cookies or default to 'system'
-  // This runs on server, so we can't access localStorage
-  return 'system'
-}
-
 const RootLayout = async ({ children }: { children: React.ReactNode }) => {
-  const initialMode = await getInitialMode()
   const locale = await getLocale()
   const messages = await getMessages()
   const direction = 'ltr'
+
+  // Resolve color-mode constraints from the storefront config so first paint
+  // already matches the workspace's allowed_color_modes — no flash from
+  // localStorage/system preference into a disallowed mode.
   const headersList = await headers()
-  const config = await getStorefrontConfigForServer(locale, headersList.get('host') ?? undefined)
-    .catch(() => null)
-  // Region-qualified when the workspace declares a market (e.g. 'en-NZ'), bare locale otherwise.
-  const htmlLang = localeTag(locale, config?.country)
-  const defaultSystemMode: 'light' | 'dark' = 'light'
+  const requestHost = headersList.get('host') ?? undefined
+  const storefrontConfig = await getStorefrontConfigForServer(locale, requestHost)
+  const allowedModes = getAllowedColorModes(storefrontConfig)
+  const lockedMode = allowedModes.length === 1 ? allowedModes[0] : null
+  const initialMode: 'system' | 'light' | 'dark' = lockedMode ?? 'system'
+  const defaultSystemMode: 'light' | 'dark' = lockedMode ?? 'light'
+  // Region-qualified when the workspace declares a market (e.g. 'en-NZ'), bare locale
+  // otherwise. Reuses the config already fetched above.
+  const htmlLang = localeTag(locale, storefrontConfig?.country)
 
   const content = (
     <RootLayoutChrome defaultSystemMode={defaultSystemMode}>{children}</RootLayoutChrome>
   )
 
+  const htmlModeAttrs = defaultSystemMode === 'dark' ? { 'data-dark': '' } : { 'data-light': '' }
+
   return (
-    <html id='__next' lang={htmlLang} dir={direction} data-light='' suppressHydrationWarning>
+    <html
+      id='__next'
+      lang={htmlLang}
+      dir={direction}
+      data-mode={defaultSystemMode}
+      {...htmlModeAttrs}
+      suppressHydrationWarning
+    >
       <head>
+        {/* Runs before any paint to avoid admin skin flash; safe on non-admin pages. */}
+        <script dangerouslySetInnerHTML={{ __html: "(function(){try{var s=localStorage.getItem('admin-skin');document.documentElement.setAttribute('data-admin-skin',(s==='compact'||s==='carbon')?s:'slate');}catch(e){document.documentElement.setAttribute('data-admin-skin','slate');}})();" }} />
         <script src='https://code.iconify.design/3/3.1.1/iconify.min.js' async></script>
       </head>
-      <body className='flex is-full min-bs-full flex-auto flex-col' data-mode={defaultSystemMode} data-light=''>
+      <body className='flex is-full min-bs-full flex-auto flex-col' data-mode={defaultSystemMode} {...htmlModeAttrs}>
 
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider initialMode={initialMode}>

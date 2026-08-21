@@ -594,7 +594,7 @@ const ProductDetailPage = ({
               </span>
             </p>
           </div>
-          {/* Extension sections after ProductInfo (e.g. Resale owner info) */}
+          {/* Extension sections after ProductInfo */}
           {afterProductInfoSections.map(
             ext =>
               ext.component && (

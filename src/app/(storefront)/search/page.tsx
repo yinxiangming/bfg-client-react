@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import { getLocale } from 'next-intl/server'
 import { getSiteConfig } from '@/utils/siteMetadata'
 import { getRequestOrigin } from '@/utils/seo'
+import { resolveStorefrontPage } from '@/components/storefront/themes/resolve'
 import SearchPage from '@views/storefront/SearchPage'
 import type { Metadata } from 'next'
 
@@ -44,10 +45,12 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   }
 }
 
-export default function Page() {
+export default async function Page() {
+  const Override = await resolveStorefrontPage('search')
+  const Component = Override ?? SearchPage
   return (
     <Suspense fallback={<SearchFallback />}>
-      <SearchPage />
+      <Component />
     </Suspense>
   )
 }

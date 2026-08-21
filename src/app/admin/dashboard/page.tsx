@@ -3,6 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import { Box, Button, Typography, CircularProgress } from '@mui/material'
 import { Icon } from '@iconify/react'
+import { useTranslations } from 'next-intl'
 import { useExtensions } from '@/extensions/context'
 import {
   buildDashboardBlockRegistry,
@@ -23,6 +24,7 @@ import { meApi } from '@/utils/meApi'
 const DASHBOARD_LAYOUT_KEY = 'dashboard_layout'
 
 export default function AdminDashboardPage() {
+  const t = useTranslations('admin.dashboard')
   const extensions = useExtensions()
   const [layout, setLayout] = useState<DashboardLayout | null>(null)
   const [loading, setLoading] = useState(true)
@@ -90,7 +92,7 @@ export default function AdminDashboardPage() {
     return (
       <Box sx={{ p: 2 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h5">Edit Dashboard Layout</Typography>
+          <Typography variant="h5">{t('editTitle')}</Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Button
               variant="outlined"
@@ -100,10 +102,10 @@ export default function AdminDashboardPage() {
               }}
               disabled={saving}
             >
-              Cancel
+              {t('cancel')}
             </Button>
             <Button variant="contained" onClick={handleSaveLayout} disabled={saving}>
-              {saving ? 'Saving…' : 'Save Layout'}
+              {saving ? t('saving') : t('save')}
             </Button>
           </Box>
         </Box>
@@ -123,13 +125,13 @@ export default function AdminDashboardPage() {
   return (
     <Box sx={{ p: 2 }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h5">Dashboard</Typography>
+        <Typography variant="h5">{t('title')}</Typography>
         <Button
           variant="outlined"
           startIcon={<Icon icon="mdi:pencil" />}
           onClick={() => setIsEditing(true)}
         >
-          Edit Layout
+          {t('editLayout')}
         </Button>
       </Box>
 
@@ -144,14 +146,14 @@ export default function AdminDashboardPage() {
             borderRadius: 2,
           }}
         >
-          <Typography>No blocks yet. Add blocks to customize your dashboard.</Typography>
+          <Typography>{t('emptyHint')}</Typography>
           <Button
             variant="contained"
             sx={{ mt: 2 }}
             startIcon={<Icon icon="mdi:plus" />}
             onClick={() => setIsEditing(true)}
           >
-            Edit Layout
+            {t('editLayout')}
           </Button>
         </Box>
       ) : (

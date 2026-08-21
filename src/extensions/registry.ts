@@ -38,9 +38,31 @@ export interface DataHookExtension {
   priority?: number
   onLoad?: (data: any) => Promise<any>
   onSave?: (data: any) => Promise<any>
-  /** Called after main entity is saved (e.g. after product update). Use for related entities like ResaleProduct. */
+  /** Called after main entity is saved. Use for plugin-owned related entities. */
   afterSave?: (context: Record<string, any>) => Promise<void>
   transformData?: (data: any) => any
+}
+
+export interface OrderHeaderAction {
+  id: string
+  label: string
+  loadingLabel?: string
+  i18nKey?: string
+  loadingI18nKey?: string
+  disabled?: boolean
+  run: () => Promise<void>
+}
+
+export interface OrderActionContext<OrderType = any> {
+  order: OrderType | null
+  refreshOrder: () => Promise<void>
+}
+
+export interface OrderActionExtension<OrderType = any> {
+  id: string
+  page: string
+  priority?: number
+  createAction: (context: OrderActionContext<OrderType>) => OrderHeaderAction | null
 }
 
 /** Props for plugin-provided storefront layout (replaces default StorefrontLayout). */
@@ -68,6 +90,8 @@ export interface Extension {
   /** Page slot extensions (before/after/replace/hide). Prefer targetSlot; targetSection is legacy. */
   sections?: PageSlotExtension[]
   dataHooks?: DataHookExtension[]
+  /** Action menu entries contributed to entity screens such as admin order edit. */
+  orderActions?: OrderActionExtension[]
   /** Dashboard blocks for admin /admin/dashboard */
   dashboardBlocks?: BlockRegistryEntry[]
   /** Replaces default storefront layout (header + main + footer) for all storefront routes. children = page content (home, category, cart, etc.). */

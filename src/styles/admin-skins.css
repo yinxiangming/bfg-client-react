@@ -1,0 +1,341 @@
+/* ============================================================
+   Admin skin system — flat & compact, token-driven.
+
+   One set of `--at-*` design tokens drives SchemaTable,
+   SchemaForm, status badges and the admin data surfaces.
+
+   Surfaces / text / dividers / accent are DERIVED FROM THE
+   ACTIVE MUI THEME (`--mui-palette-*`) so the tables always
+   harmonise with the surrounding admin (and auto-adapt to
+   light/dark). Skins only restyle STRUCTURE — radius, density,
+   header treatment, badge shape, fonts — never the base hues.
+
+   The attribute lives on <html> so MUI portals (Menu/Dialog)
+   inherit the tokens too. Switching skins never touches the
+   100+ call sites — only these variables change.
+
+   Skins: slate (default, calm) · compact (dense) · carbon (ink)
+   ============================================================ */
+
+/* ---------- SLATE (default) — calm: surfaces over lines ---------- */
+:root,
+[data-admin-skin='slate'] {
+  --at-font-display: 'Inter Tight', system-ui, -apple-system, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --at-font-body: 'Inter Tight', system-ui, -apple-system, 'Segoe UI', Roboto, 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --at-font-num: 'Inter Tight', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --at-num-feat: 'tnum' 1, 'cv01' 1;
+
+  --at-card-bg: var(--mui-palette-background-paper);
+  --at-card-border: var(--mui-palette-divider);
+  --at-card-radius: 8px;
+  --at-card-shadow: none;
+
+  --at-head-bg: transparent;
+  --at-head-fg: var(--mui-palette-text-secondary);
+  --at-head-size: 11px;
+  --at-head-weight: 600;
+  --at-head-transform: none;
+  --at-head-tracking: 0.01em;
+  --at-head-rule: 1px solid var(--mui-palette-divider);
+
+  --at-row-fg: var(--mui-palette-text-primary);
+  --at-row-sub: var(--mui-palette-text-secondary);
+  --at-row-size: 13px;
+  --at-row-h: 46px;
+  --at-cell-px: 16px;
+  --at-row-hover: var(--mui-palette-action-hover);
+  /* Faint row separators — half the strength of a normal divider. */
+  --at-divider: color-mix(in srgb, var(--mui-palette-divider) 55%, transparent);
+  --at-row-rule: 1px solid var(--at-divider);
+
+  --at-accent: var(--mui-palette-primary-main);
+  --at-accent-strong: var(--mui-palette-primary-dark);
+  --at-accent-fg: var(--mui-palette-primary-contrastText);
+  --at-accent-soft: color-mix(in srgb, var(--mui-palette-primary-main) 12%, transparent);
+  --at-accent-soft-fg: var(--mui-palette-primary-main);
+
+  --at-control-radius: 8px;
+  --at-field-bg: var(--mui-palette-background-paper);
+  --at-field-border: var(--mui-palette-divider);
+  --at-field-radius: 8px;
+  --at-label-fg: var(--mui-palette-text-secondary);
+  --at-block-title-size: 13px;
+  --at-block-title-font: var(--at-font-display);
+  --at-block-title-fg: var(--mui-palette-text-primary);
+  --at-block-title-transform: none;
+  --at-block-title-tracking: 0;
+  --at-block-rule: 1px solid var(--mui-palette-divider);
+
+  --at-badge-radius: 6px;
+  --at-badge-pad: 2px 9px;
+  --at-badge-size: 11px;
+  --at-badge-weight: 600;
+  --at-badge-font: var(--at-font-body);
+  --at-badge-transform: none;
+  --at-badge-border: 0;
+  --at-badge-dot: 1;
+
+  --at-shell-radius: 8px;
+}
+
+/* ---------- COMPACT — maximum density ---------- */
+[data-admin-skin='compact'] {
+  --at-font-display: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --at-font-body: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --at-font-num: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --at-num-feat: 'tnum' 1;
+
+  /* Distinct accent so switching skins is visible (surfaces stay theme-derived). */
+  --at-accent: #0f766e;
+  --at-accent-strong: #0d5d57;
+  --at-accent-fg: #ffffff;
+  --at-accent-soft: color-mix(in srgb, #14b8a6 14%, transparent);
+  --at-accent-soft-fg: #0f766e;
+
+  --at-card-radius: 4px;
+  --at-head-bg: var(--mui-palette-action-hover);
+  --at-head-size: 10px;
+  --at-head-transform: uppercase;
+  --at-head-tracking: 0.07em;
+
+  --at-row-size: 12.5px;
+  --at-row-h: 36px;
+  --at-cell-px: 12px;
+
+  --at-control-radius: 4px;
+  --at-field-radius: 4px;
+  --at-block-title-size: 11px;
+  --at-block-title-font: var(--at-font-body);
+  --at-block-title-transform: uppercase;
+  --at-block-title-tracking: 0.07em;
+
+  --at-badge-radius: 3px;
+  --at-badge-pad: 1px 7px;
+  --at-badge-size: 10.5px;
+  --at-badge-font: var(--at-font-num);
+  --at-badge-transform: uppercase;
+  --at-badge-border: 1;
+  --at-badge-dot: 0;
+
+  --at-shell-radius: 4px;
+}
+
+/* ---------- CARBON — high-contrast ink rules ---------- */
+[data-admin-skin='carbon'] {
+  --at-font-display: 'Inter Tight', system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --at-font-body: 'Inter Tight', system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  --at-font-num: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --at-num-feat: 'tnum' 1;
+
+  /* Ink accent — black in light, near-white in dark (follows the theme). */
+  --at-accent: var(--mui-palette-text-primary);
+  --at-accent-strong: var(--mui-palette-text-primary);
+  --at-accent-fg: var(--mui-palette-background-paper);
+  --at-accent-soft: color-mix(in srgb, var(--mui-palette-text-primary) 8%, transparent);
+  --at-accent-soft-fg: var(--mui-palette-text-primary);
+
+  --at-card-radius: 2px;
+  --at-head-bg: transparent;
+  --at-head-fg: var(--mui-palette-text-primary);
+  --at-head-size: 10.5px;
+  --at-head-transform: uppercase;
+  --at-head-tracking: 0.1em;
+  --at-head-rule: 2px solid var(--mui-palette-text-primary);
+
+  --at-row-h: 44px;
+  --at-control-radius: 2px;
+  --at-field-radius: 2px;
+  --at-block-title-transform: uppercase;
+  --at-block-title-tracking: 0.08em;
+  --at-block-rule: 2px solid var(--mui-palette-text-primary);
+
+  --at-badge-radius: 2px;
+  --at-badge-border: 1;
+
+  --at-shell-radius: 2px;
+}
+
+/* ============================================================
+   Status badge semantic tones (explicit so contrast stays
+   readable independent of the theme). Soft tonal fills.
+   ============================================================ */
+:root,
+[data-admin-skin] {
+  --at-ok-bg: #ecfdf5;   --at-ok-fg: #047857;
+  --at-warn-bg: #fffbeb;  --at-warn-fg: #b45309;
+  --at-err-bg: #fef2f2;   --at-err-fg: #dc2626;
+  --at-info-bg: #eef2ff;  --at-info-fg: #4338ca;
+  --at-neu-bg: #f1f5f9;   --at-neu-fg: #475569;
+}
+[data-mode='dark'] {
+  --at-ok-bg: rgba(4, 120, 87, 0.22); --at-ok-fg: #5ee0a8;
+  --at-warn-bg: rgba(180, 83, 9, 0.24); --at-warn-fg: #f5c163;
+  --at-err-bg: rgba(220, 38, 38, 0.22); --at-err-fg: #f49a9a;
+  --at-info-bg: rgba(99, 102, 241, 0.26); --at-info-fg: #aeb8ff;
+  --at-neu-bg: rgba(148, 163, 184, 0.16); --at-neu-fg: #aab4c5;
+}
+
+/* Compact's teal accent reads brighter in dark mode. */
+[data-mode='dark'][data-admin-skin='compact'] {
+  --at-accent: #2dd4bf;
+  --at-accent-strong: #5eead4;
+  --at-accent-fg: #06120f;
+  --at-accent-soft: color-mix(in srgb, #2dd4bf 16%, transparent);
+  --at-accent-soft-fg: #7fe9da;
+}
+
+.at-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  border-radius: var(--at-badge-radius);
+  padding: var(--at-badge-pad);
+  font-family: var(--at-badge-font);
+  font-size: var(--at-badge-size);
+  font-weight: var(--at-badge-weight);
+  text-transform: var(--at-badge-transform);
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+  white-space: nowrap;
+  border: calc(var(--at-badge-border) * 1px) solid transparent;
+}
+.at-badge::before {
+  content: '';
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: currentColor;
+  opacity: calc(0.85 * var(--at-badge-dot));
+  flex-shrink: 0;
+  display: inline-block;
+  margin-inline-end: calc(var(--at-badge-dot) * 1px);
+}
+.at-badge.at-badge--no-dot::before { display: none; }
+.at-badge--ok { background: var(--at-ok-bg); color: var(--at-ok-fg); border-color: color-mix(in srgb, var(--at-ok-fg) 24%, transparent); }
+.at-badge--warn { background: var(--at-warn-bg); color: var(--at-warn-fg); border-color: color-mix(in srgb, var(--at-warn-fg) 24%, transparent); }
+.at-badge--err { background: var(--at-err-bg); color: var(--at-err-fg); border-color: color-mix(in srgb, var(--at-err-fg) 24%, transparent); }
+.at-badge--info { background: var(--at-info-bg); color: var(--at-info-fg); border-color: color-mix(in srgb, var(--at-info-fg) 24%, transparent); }
+.at-badge--neu { background: var(--at-neu-bg); color: var(--at-neu-fg); border-color: color-mix(in srgb, var(--at-neu-fg) 24%, transparent); }
+
+/* ============================================================
+   Schema component scopes — token-driven. Scoped to wrapper
+   classNames so the rest of admin is untouched, but still
+   reach MUI portals because the skin attribute is on <html>.
+   ============================================================ */
+.at-schema-table .at-num {
+  font-family: var(--at-font-num);
+  font-feature-settings: var(--at-num-feat);
+  text-align: right;
+}
+
+.at-schema-form .MuiOutlinedInput-root,
+.at-schema-table .MuiOutlinedInput-root {
+  border-radius: var(--at-field-radius);
+}
+.at-schema-form .MuiInputBase-root.MuiInputBase-multiline {
+  border-radius: var(--at-field-radius);
+}
+
+.at-block-title {
+  display: block;
+  font-family: var(--at-block-title-font);
+  font-size: var(--at-block-title-size);
+  font-weight: 600;
+  color: var(--at-block-title-fg);
+  text-transform: var(--at-block-title-transform);
+  letter-spacing: var(--at-block-title-tracking);
+  padding-bottom: 10px;
+  margin-bottom: 16px;
+  border-bottom: var(--at-block-rule);
+}
+
+/* Empty state inside SchemaTable */
+.at-schema-table .at-empty {
+  padding: 40px 16px;
+  text-align: center;
+  color: var(--at-row-sub);
+  font-size: 13px;
+}
+.at-schema-table .at-empty i {
+  display: block;
+  font-size: 26px;
+  opacity: 0.5;
+  margin-bottom: 8px;
+}
+
+/* ============================================================
+   Admin skin switcher (reuses theme-switcher dropdown styles)
+   ============================================================ */
+.skin-switcher { position: relative; }
+.skin-swatch {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+.skin-swatch--slate { background: var(--mui-palette-primary-main, #4f46e5); }
+.skin-swatch--compact { background: #0f766e; }
+.skin-swatch--carbon { background: #111111; }
+[data-mode='dark'] .skin-swatch--carbon { background: #f5f5f5; border-color: rgba(255, 255, 255, 0.2); }
+
+/* ============================================================
+   Token-driven tile/overview cards (workbench landings, config
+   grids, dashboards). Dark-correct + skin-responsive by reading
+   the same --at-* tokens. Use for non-table admin surfaces.
+   ============================================================ */
+.at-tile-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 12px;
+}
+.at-tile {
+  display: block;
+  height: 100%;
+  background: var(--at-card-bg);
+  border: 1px solid var(--at-card-border);
+  border-radius: var(--at-card-radius);
+  padding: 14px 16px;
+  color: inherit;
+  text-decoration: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+.at-tile--link { cursor: pointer; }
+.at-tile--link:hover {
+  border-color: var(--at-accent);
+  background: var(--at-row-hover);
+}
+.at-tile-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.at-tile-title {
+  font-family: var(--at-font-display);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--at-row-fg);
+  letter-spacing: -0.01em;
+}
+.at-tile-desc {
+  margin-top: 6px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--at-row-sub);
+}
+
+/* Workbench header (title + subtitle) */
+.at-page-title {
+  font-family: var(--at-font-display);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--at-row-fg);
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+.at-page-subtitle {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--at-row-sub);
+}

@@ -4,6 +4,7 @@ import { getSiteConfig } from '@/utils/siteMetadata'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 import { getMediaUrl } from '@/utils/media'
 import { storefrontApi } from '@/utils/storefrontApi'
+import { resolveStorefrontPage } from '@/components/storefront/themes/resolve'
 import {
   getRequestOrigin,
   toAbsolute,
@@ -238,6 +239,15 @@ export default async function Page(props: Props) {
   const currency = (config?.default_currency || '').toUpperCase()
   const path = canonicalPath(product, id)
 
+  // A skin may replace the page body; it still receives the server-fetched product, so an
+  // override does not fall back to the loading placeholder a crawler would index.
+  const Override = await resolveStorefrontPage('product/[id]')
+  const Body = Override ? (
+    <Override productId={id} id={id} initialProduct={product ?? undefined} />
+  ) : (
+    <ProductDetailPage productId={id} initialProduct={product ?? undefined} />
+  )
+
   const breadcrumb = product
     ? buildBreadcrumbJsonLd(origin, [
         { name: 'Home', path: '/' },
@@ -277,7 +287,7 @@ export default async function Page(props: Props) {
       )}
       {/* initialProduct renders the real product markup in the SSR HTML instead of a
           loading placeholder, which is all a crawler ever sees. */}
-      <ProductDetailPage productId={id} initialProduct={product ?? undefined} />
+      {Body}
     </>
   )
 }

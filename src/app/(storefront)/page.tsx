@@ -19,6 +19,7 @@ import { fetchRenderedCmsPage } from '@/services/storefrontCmsApi'
 import { resolveCmsBlocks } from '@/utils/resolveCmsBlocks'
 import StorefrontDevBadge from '@components/storefront/StorefrontDevBadge'
 import { HOME_REGISTRY } from '@/components/storefront/themes/registry.generated'
+import { resolveStorefrontPage } from '@/components/storefront/themes/resolve'
 import DynamicPage from '@views/storefront/DynamicPage'
 import HomePage from '@views/storefront/HomePage'
 import type { Metadata } from 'next'
@@ -66,10 +67,10 @@ export async function generateMetadata(): Promise<Metadata> {
   }
 }
 
-async function getPageData(slug: string, locale: string, requestHost?: string) {
+async function getPageData(slug: string, locale: string, requestHost?: string, languages?: string[]) {
   // `cache: 'no-store'` opted the route out of the 60s ISR declared above, so the homepage
   // re-rendered on every request. Match the route's revalidate window instead.
-  return fetchRenderedCmsPage(slug, locale, requestHost, { revalidate: 60 })
+  return fetchRenderedCmsPage(slug, locale, requestHost, { revalidate: 60, languages })
 }
 
 /**
@@ -117,7 +118,7 @@ export default async function Page() {
   if (config === null) return null
   const origin = await getRequestOrigin()
   const theme = config.theme ?? 'store'
-  const rawPageData = await getPageData('home', locale, requestHost)
+  const rawPageData = await getPageData('home', locale, requestHost, config.languages)
   // Fill in product/category grids before render so they appear in the SSR HTML.
   const pageData = await resolveCmsBlocks(rawPageData, requestHost, locale)
 
@@ -133,6 +134,20 @@ export default async function Page() {
         {siteJsonLd}
         <RootComponent locale={locale} />
       </>
+    )
+  }
+
+  // Skin-level page override (themes/<id>/pages/home.tsx) takes priority over
+  // the legacy HOME_REGISTRY (themes/<id>/Home.tsx).
+  const SkinHome = await resolveStorefrontPage('home')
+  if (SkinHome) {
+    return (
+      <SkinHome
+        pageData={pageData}
+        locale={locale}
+        workspace_id={config.workspace_id}
+        workspace_slug={config.workspace_slug}
+      />
     )
   }
 

@@ -6,6 +6,7 @@ import D365StyleLayout from '@/components/admin/layout/D365StyleLayout'
 import type { MenuNode } from '@/types/menu'
 import { StaffMemberProvider } from '@/contexts/StaffMemberContext'
 import AdminAccessGuard from '@/components/admin/AdminAccessGuard'
+import { AdminSkinProvider } from '@/contexts/AdminSkinContext'
 
 type Props = {
   navItems: MenuNode[]
@@ -19,9 +20,11 @@ export default function AdminLayoutClient({ navItems, extensionIds, children }: 
       <AdminAccessGuard>
         <ExtensionLoaderProvider extensionIds={extensionIds}>
           <AppLayoutProvider configCookie={null}>
-            <D365StyleLayout navItems={navItems}>
-              {children}
-            </D365StyleLayout>
+            <AdminSkinProvider>
+              <D365StyleLayout navItems={navItems}>
+                {children}
+              </D365StyleLayout>
+            </AdminSkinProvider>
           </AppLayoutProvider>
         </ExtensionLoaderProvider>
       </AdminAccessGuard>

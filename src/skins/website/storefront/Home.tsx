@@ -3,7 +3,7 @@
 import React from 'react'
 import DynamicPage from '@views/storefront/DynamicPage'
 import StorefrontDevBadge from '@components/storefront/StorefrontDevBadge'
-import type { ThemeHomeProps } from '../registry.generated'
+import type { ThemeHomeProps } from '@/components/storefront/themes/registry.generated'
 
 export default function WebsiteHome({
   pageData,

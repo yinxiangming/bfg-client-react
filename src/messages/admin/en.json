@@ -30,13 +30,6 @@
     "settingsDelivery": "Delivery",
     "settingsMarketing": "Marketing",
     "settingsSupport": "Customer Support",
-    "resale": "Resale",
-    "resaleIntake": "Intake",
-    "resaleSettings": "Settings",
-    "resaleTimeslots": "Time Slots",
-    "resaleBookings": "Bookings",
-    "resaleProducts": "Products",
-    "resalePayouts": "Payouts",
     "team": "Team",
     "teamStaff": "Staff",
     "teamRoles": "Roles & Permissions"
@@ -115,7 +108,13 @@
         "yesterday": "Yesterday",
         "lastWeek": "Last week",
         "selectDate": "Select date"
-      }
+      },
+      "loadingStats": "Loading statistics…",
+      "selectedCount": "Selected {count}",
+      "selectedAllMatching": "All {count} matching selected",
+      "selectAllMatching": "Select all {count} matching",
+      "clearSelection": "Clear selection",
+      "selectionSummaryLabel": "Selected totals"
     },
     "schemaForm": {
       "save": "Save",
@@ -286,8 +285,6 @@
         "refund": "Refund",
         "refunding": "Refunding...",
         "return": "Create Return",
-        "relist": "Relist",
-        "relisting": "Relisting...",
         "cancelOrder": "Cancel Order"
       },
       "dialogs": {
@@ -4152,5 +4149,14 @@
         "support": "Tickets"
       }
     }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "editLayout": "Edit Layout",
+    "editTitle": "Edit Dashboard Layout",
+    "cancel": "Cancel",
+    "save": "Save Layout",
+    "saving": "Saving…",
+    "emptyHint": "No blocks yet. Add blocks to customize your dashboard."
   }
 }

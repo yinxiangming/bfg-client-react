@@ -2,7 +2,7 @@
  * Platform API Client
  *
  * 后端路由通过 DefaultRouter 自动生成，挂载于 /api/v1/platform/
- * 自动装载机制见 resale-website/server/config/urls.py → get_local_apps()
+ * 自动装载机制见 backend config/urls.py → get_local_apps()
  *
  * 路由映射（Router 标准）:
  *   GET  /api/v1/platform/workspaces/              WorkspaceViewSet.list

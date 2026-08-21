@@ -2,6 +2,7 @@ import {cookies, headers} from 'next/headers'
 import {getRequestConfig} from 'next-intl/server'
 import {routing, type AppLocale} from './routing'
 import {loadPluginMessages} from './plugin-messages'
+import {DEFAULT_APP_LOCALE, normalizeAppLocale, uniqueAppLocales} from './locales'
 
 type Messages = Record<string, any>
 
@@ -10,6 +11,15 @@ type EnabledApp = (typeof enabledApps)[number]
 
 function isSupportedLocale(locale: string): locale is AppLocale {
   return (routing.locales as readonly string[]).includes(locale)
+}
+
+function getWorkspaceApiBaseUrl(): string | null {
+  const baseUrl =
+    process.env.API_URL ||
+    process.env.NEXT_PUBLIC_WORKSPACE_API_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    ''
+  return baseUrl ? baseUrl.replace(/\/+$/, '') : null
 }
 
 /** Deep merge source into target (mutates target). */
@@ -41,50 +51,58 @@ async function getLocaleFromCookie(): Promise<AppLocale | null> {
   return null
 }
 
-/**
- * Search-engine and AI crawlers. They send no `Accept-Language`, so without this check they
- * fall through to whatever the negotiation chain picks last — and would get a locale that is
- * not the site's own. The indexed copy of the site must be stable and in the default language,
- * so crawlers always get `routing.defaultLocale`.
- */
-const CRAWLER_UA = /(googlebot|bingbot|slurp|duckduckbot|baiduspider|yandex(bot)?|applebot|facebookexternalhit|twitterbot|linkedinbot|gptbot|oai-searchbot|chatgpt-user|claudebot|claude-user|claude-searchbot|anthropic-ai|perplexitybot|perplexity-user|ccbot|amazonbot|meta-externalagent|bytespider|ahrefsbot|semrushbot|screaming frog|lighthouse|pagespeed)/i
-
-async function isCrawlerRequest(): Promise<boolean> {
-  const headerStore = await headers()
-  return CRAWLER_UA.test(headerStore.get('user-agent') || '')
+function getLocaleFromAcceptLanguageHeader(al: string): AppLocale | null {
+  // Minimal matching for our supported locales. Order matters: a plain `includes('zh')`
+  // check ran first, so `en-NZ,zh;q=0.5` — English preferred, Chinese as a fallback —
+  // selected Chinese. Whichever tag appears first in the header wins instead.
+  const header = al.toLowerCase()
+  const en = header.search(/\ben\b/)
+  const zh = header.search(/\bzh\b/)
+  if (en !== -1 && (zh === -1 || en <= zh)) return 'en'
+  if (zh !== -1) return 'zh-hans'
+  return null
 }
 
-async function getLocaleFromAcceptLanguage(): Promise<AppLocale | null> {
-  const headerStore = await headers()
-  const al = (headerStore.get('accept-language') || '').toLowerCase()
-  if (!al) return null
-  // Minimal matching for our supported locales; English wins ties so an
-  // `en-NZ,zh;q=0.5` header does not flip the store into Chinese.
-  const enIndex = al.search(/\ben\b/)
-  const zhIndex = al.search(/\bzh\b/)
-  const matched: AppLocale | null =
-    enIndex !== -1 && (zhIndex === -1 || enIndex <= zhIndex)
-      ? 'en'
-      : zhIndex !== -1
-        ? ('zh-hans' as AppLocale)
-        : null
-  // A locale that is not enabled for this deployment must never win negotiation.
-  return matched && isSupportedLocale(matched) ? matched : null
+async function getSingleSiteLocale(headerStore: Awaited<ReturnType<typeof headers>>): Promise<AppLocale | null> {
+  const apiBase = getWorkspaceApiBaseUrl()
+  if (!apiBase) return null
+
+  const requestHost = headerStore.get('x-forwarded-host') || headerStore.get('host') || ''
+  try {
+    const res = await fetch(`${apiBase}/api/v1/settings/storefront/?lang=${DEFAULT_APP_LOCALE}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(requestHost ? { 'X-Forwarded-Host': requestHost } : {}),
+      },
+      cache: 'no-store',
+    })
+    if (!res.ok) return null
+    const config = (await res.json()) as { default_language?: string; languages?: string[] }
+    const languages = uniqueAppLocales(config.languages ?? [])
+    if (languages.length === 1) return languages[0]
+
+    if (languages.length === 0) {
+      return normalizeAppLocale(config.default_language)
+    }
+  } catch {
+    return null
+  }
+
+  return null
 }
 
 export default getRequestConfig(async ({requestLocale}) => {
   const requested = await requestLocale
-  const [isCrawler, fromCookie, fromAcceptLanguage] = await Promise.all([
-    isCrawlerRequest(),
-    getLocaleFromCookie(),
-    getLocaleFromAcceptLanguage()
-  ])
-  const locale: AppLocale = isCrawler
-    ? routing.defaultLocale
-    : (requested && isSupportedLocale(requested) ? requested : null) ||
-      fromCookie ||
-      fromAcceptLanguage ||
-      routing.defaultLocale
+  const headerStore = await headers()
+  const fromCookie = await getLocaleFromCookie()
+  const fromSingleSiteLanguage = await getSingleSiteLocale(headerStore)
+  const fromAcceptLanguage = getLocaleFromAcceptLanguageHeader(headerStore.get('accept-language') || '')
+  const locale: AppLocale =
+    fromSingleSiteLanguage ||
+    (requested && isSupportedLocale(requested) ? requested : null) ||
+    fromCookie ||
+    fromAcceptLanguage ||
+    routing.defaultLocale
 
   const [common, storefront, account, admin, auth, pluginMessages] = await Promise.all([
     loadCommonMessages(locale),
@@ -115,4 +133,3 @@ export default getRequestConfig(async ({requestLocale}) => {
     }
   }
 })
-

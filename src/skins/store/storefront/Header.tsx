@@ -12,7 +12,7 @@ import FeedbackButton from '@/components/feedback/FeedbackButton'
 import { storefrontApi } from '@/utils/storefrontApi'
 import { authApi } from '@/utils/authApi'
 import { useStorefrontConfigSafe } from '@/contexts/StorefrontConfigContext'
-import type { StorefrontMenuItem, StorefrontMenuKind } from '@/utils/storefrontConfig'
+import { getAllowedColorModes, hasMultipleStorefrontLanguages, type StorefrontMenuItem, type StorefrontMenuKind } from '@/utils/storefrontConfig'
 
 type CategoryItem = { name: string; slug: string }
 type CategorySubcategory = { name: string; slug: string; items: CategoryItem[] }
@@ -132,8 +132,9 @@ export default function StoreHeader(_props: StoreHeaderProps) {
   const opts = config.header_options ?? {}
   const showSearch = opts.show_search !== false
   const showCart = opts.show_cart !== false
-  const showLanguageSwitcher = opts.show_language_switcher !== false
-  const showStyleSelector = opts.show_style_selector !== false
+  const showLanguageSwitcher = opts.show_language_switcher !== false && hasMultipleStorefrontLanguages(config)
+  const allowedColorModes = getAllowedColorModes(config)
+  const showStyleSelector = opts.show_style_selector !== false && allowedColorModes.length > 1
   const showLogin = opts.show_login !== false
 
   useEffect(() => {

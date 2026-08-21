@@ -1294,13 +1294,30 @@ body {
   }
 
   .sf-checkout-layout {
-    grid-template-columns: 1fr;
+    /* minmax(0,1fr): plain 1fr is minmax(auto,1fr) whose min-content floor
+       blows the single column out to ~632px on narrow screens, cutting off
+       the form + order summary. minmax(0,...) lets it shrink to the viewport. */
+    grid-template-columns: minmax(0, 1fr);
     gap: 2rem;
+  }
+
+  .sf-checkout-layout > div {
+    min-width: 0;
   }
 
   .sf-checkout-layout > div:last-child {
     order: -1;
     position: static !important;
+  }
+
+  /* Keep form controls + Stripe card iframes within the viewport */
+  .sf-checkout-form input,
+  .sf-checkout-form select,
+  .sf-checkout-form textarea,
+  .sf-checkout-form .__PrivateStripeElement,
+  .sf-checkout-form iframe {
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   /* Checkout Success Page - Mobile */

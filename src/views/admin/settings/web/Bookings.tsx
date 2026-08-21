@@ -11,7 +11,9 @@ import Box from '@mui/material/Box'
 import Alert from '@mui/material/Alert'
 import CircularProgress from '@mui/material/CircularProgress'
 import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 import SchemaTable from '@/components/schema/SchemaTable'
 import type { ListSchema } from '@/types/schema'
@@ -173,12 +175,11 @@ export default function Bookings() {
                 rowGap: 1.5
               }}
             >
-              <TextField
+              <CustomTextField
                 label={t('bookings.date')}
                 type="date"
                 value={bookDate}
                 onChange={(e) => setBookDate(e.target.value)}
-                InputLabelProps={{ shrink: true }}
                 size="small"
                 sx={{ width: 152, '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
               />

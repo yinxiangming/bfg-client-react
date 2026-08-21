@@ -12,10 +12,8 @@ import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Grid from '@mui/material/Grid'
-import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import Autocomplete from '@mui/material/Autocomplete'
 import Chip from '@mui/material/Chip'
@@ -28,6 +26,9 @@ import Avatar from '@mui/material/Avatar'
 import Collapse from '@mui/material/Collapse'
 import IconButton from '@mui/material/IconButton'
 import CircularProgress from '@mui/material/CircularProgress'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 // Type Imports
 import type { FormSchema, FormField, FormFieldBlock } from '@/types/schema'
@@ -553,7 +554,7 @@ export default function SchemaForm<T extends Record<string, any>>({
     switch (field.type) {
       case 'email':
         return (
-          <TextField
+          <CustomTextField
             fullWidth
             type="email"
             label={labelNode}
@@ -569,7 +570,7 @@ export default function SchemaForm<T extends Record<string, any>>({
 
       case 'string':
         return (
-          <TextField
+          <CustomTextField
             fullWidth
             label={labelNode}
             value={value}
@@ -584,7 +585,7 @@ export default function SchemaForm<T extends Record<string, any>>({
 
       case 'textarea':
         return (
-          <TextField
+          <CustomTextField
             fullWidth
             multiline
             rows={field.rows || 4}
@@ -595,14 +596,13 @@ export default function SchemaForm<T extends Record<string, any>>({
             error={!!error}
             helperText={helperText}
             placeholder={field.placeholder}
-            InputLabelProps={{ shrink: true }}
             sx={{ ...requiredAsteriskSx, mt: 0.5 }}
           />
         )
 
       case 'number':
         return (
-          <TextField
+          <CustomTextField
             fullWidth
             type="number"
             label={field.label}
@@ -622,7 +622,7 @@ export default function SchemaForm<T extends Record<string, any>>({
 
       case 'currency':
         return (
-          <TextField
+          <CustomTextField
             fullWidth
             type="number"
             label={field.label}
@@ -665,7 +665,7 @@ export default function SchemaForm<T extends Record<string, any>>({
                 onChange={(_, newValue) => handleChange(field.field, newValue.map(opt => opt.value))}
                 loading={isLoading}
                 renderInput={(params) => (
-                  <TextField
+                  <CustomTextField
                     {...params}
                     label={field.label}
                     required={field.required}
@@ -726,7 +726,7 @@ export default function SchemaForm<T extends Record<string, any>>({
               isOptionEqualToValue={(opt, val) => opt.value === val.value}
               filterOptions={(options) => options} // Disable client-side filtering, use server-side only
               renderInput={(params) => (
-                <TextField
+                <CustomTextField
                   {...params}
                   label={field.label}
                   required={field.required}
@@ -750,22 +750,24 @@ export default function SchemaForm<T extends Record<string, any>>({
         }
 
         return (
-          <FormControl fullWidth required={field.required} error={!!error} sx={requiredAsteriskSx}>
-            <InputLabel>{field.label}</InputLabel>
-            <Select
-              value={value}
-              label={field.label}
-              onChange={(e) => handleChange(field.field, e.target.value)}
-              disabled={isLoading}
-            >
+          <CustomTextField
+            select
+            fullWidth
+            label={field.label}
+            value={value}
+            onChange={(e) => handleChange(field.field, e.target.value)}
+            required={field.required}
+            error={!!error}
+            helperText={helperText}
+            disabled={isLoading}
+            sx={requiredAsteriskSx}
+          >
             {selectOptions.map((option) => (
               <MenuItem key={option.value} value={option.value}>
                 {option.label}
               </MenuItem>
             ))}
-            </Select>
-            {(error || field.helperText) && <FormHelperText>{helperText}</FormHelperText>}
-          </FormControl>
+          </CustomTextField>
         )
 
       case 'multiselect':
@@ -789,7 +791,7 @@ export default function SchemaForm<T extends Record<string, any>>({
               onChange={(_, newValue) => handleChange(field.field, newValue.map(opt => opt.value))}
               loading={multiIsLoading}
               renderInput={(params) => (
-                <TextField
+                <CustomTextField
                   {...params}
                   label={field.label}
                   required={field.required}
@@ -838,7 +840,7 @@ export default function SchemaForm<T extends Record<string, any>>({
 
       case 'date':
         return (
-          <TextField
+          <CustomTextField
             fullWidth
             type="date"
             label={field.label}
@@ -847,14 +849,13 @@ export default function SchemaForm<T extends Record<string, any>>({
             required={field.required}
             error={!!error}
             helperText={error}
-            InputLabelProps={{ shrink: true }}
             sx={requiredAsteriskSx}
           />
         )
 
       case 'datetime':
         return (
-          <TextField
+          <CustomTextField
             fullWidth
             type="datetime-local"
             label={field.label}
@@ -863,7 +864,6 @@ export default function SchemaForm<T extends Record<string, any>>({
             required={field.required}
             error={!!error}
             helperText={error}
-            InputLabelProps={{ shrink: true }}
             sx={requiredAsteriskSx}
           />
         )
@@ -871,7 +871,7 @@ export default function SchemaForm<T extends Record<string, any>>({
       case 'color':
         return (
           <Box>
-            <TextField
+            <CustomTextField
               fullWidth
               type="color"
               label={field.label}
@@ -880,7 +880,6 @@ export default function SchemaForm<T extends Record<string, any>>({
               required={field.required}
               error={!!error}
               helperText={error}
-              InputLabelProps={{ shrink: true }}
               sx={requiredAsteriskSx}
             />
           </Box>
@@ -956,7 +955,7 @@ export default function SchemaForm<T extends Record<string, any>>({
 
       default:
         return (
-          <TextField
+          <CustomTextField
             fullWidth
             label={field.label}
             value={value}
@@ -987,7 +986,7 @@ export default function SchemaForm<T extends Record<string, any>>({
     const isCollapsible = block.className === 'collapse'
 
     const blockContent = (
-      <Grid container spacing={4}>
+      <Grid container spacing={2}>
         {block.fields.map((field) => (
           <Grid
             key={field.field}
@@ -1033,7 +1032,7 @@ export default function SchemaForm<T extends Record<string, any>>({
     return (
       <Box key={blockIndex} sx={{ mb: 3 }} className={block.className}>
         {block.title && (
-          <Typography variant="h6" sx={{ mb: 3 }}>
+          <Typography component="div" className="at-block-title">
             {block.title}
           </Typography>
         )}
@@ -1050,7 +1049,7 @@ export default function SchemaForm<T extends Record<string, any>>({
     
     // Legacy: render fields directly
     return (
-      <Grid container spacing={4}>
+      <Grid container spacing={2}>
         {fields.map(field => (
           <Fragment key={field.field}>
             <Grid
@@ -1075,10 +1074,20 @@ export default function SchemaForm<T extends Record<string, any>>({
   }
 
   return (
-    <Card>
+    <Card
+      elevation={0}
+      className="at-schema-form"
+      sx={{
+        backgroundColor: 'var(--at-card-bg)',
+        border: '1px solid',
+        borderColor: 'var(--at-card-border)',
+        borderRadius: 'var(--at-card-radius)',
+        boxShadow: 'var(--at-card-shadow)'
+      }}
+    >
       <CardContent>
         {!hideTitle && schema.title && (
-          <Typography variant="h5" sx={{ mb: 4 }}>
+          <Typography variant="h5" sx={{ mb: 4, fontFamily: 'var(--at-font-display)' }}>
             {schema.title}
           </Typography>
         )}
@@ -1089,11 +1098,28 @@ export default function SchemaForm<T extends Record<string, any>>({
           {!hideActions && (
             <Box sx={{ display: 'flex', gap: 2, mt: 4, justifyContent: 'flex-end' }}>
               {onCancel && (
-                <Button variant="outlined" onClick={onCancel} disabled={loading}>
+                <Button
+                  variant="outlined"
+                  onClick={onCancel}
+                  disabled={loading}
+                  sx={{ textTransform: 'none', borderRadius: 'var(--at-control-radius)' }}
+                >
                   {t('common.schemaForm.cancel')}
                 </Button>
               )}
-              <Button type="submit" variant="contained" disabled={loading}>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={loading}
+                sx={{
+                  textTransform: 'none',
+                  borderRadius: 'var(--at-control-radius)',
+                  boxShadow: 'none',
+                  backgroundColor: 'var(--at-accent)',
+                  color: 'var(--at-accent-fg)',
+                  '&:hover': { backgroundColor: 'var(--at-accent-strong)' }
+                }}
+              >
                 {loading ? t('common.schemaForm.saving') : t('common.schemaForm.save')}
               </Button>
             </Box>

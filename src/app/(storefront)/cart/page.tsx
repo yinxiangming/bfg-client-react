@@ -1,5 +1,6 @@
 import { headers } from 'next/headers'
 import { getSiteConfig } from '@/utils/siteMetadata'
+import { resolveStorefrontPage } from '@/components/storefront/themes/resolve'
 import CartPage from '@views/storefront/CartPage'
 import type { Metadata } from 'next'
 
@@ -12,6 +13,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: 'Cart', robots: { index: false, follow: true } }
 }
 
-export default function Page() {
-  return <CartPage />
+export default async function Page() {
+  const Override = await resolveStorefrontPage('cart')
+  const Component = Override ?? CartPage
+  return <Component />
 }

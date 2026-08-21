@@ -35,11 +35,11 @@ import { BaseDataProvider } from '@/contexts/BaseDataContext'
 import { orderSchema } from '@/data/storeSchemas'
 
 // Extension Hooks
-import { usePageSlots } from '@/extensions/hooks/usePageSections'
+import { useOrderActions, usePageSlots } from '@/extensions/hooks/usePageSections'
 import { renderSlot } from '@/extensions/hooks/renderSection'
 
 // API Imports
-import { getOrder, updateOrder, cancelOrder, refundOrder, createReturnRequest, createReturnLineItem, relistResaleByOrder, type Order } from '@/services/store'
+import { getOrder, updateOrder, cancelOrder, refundOrder, createReturnRequest, createReturnLineItem, type Order } from '@/services/store'
 
 // Extended Order type for detail view
 type OrderDetail = Order & {
@@ -124,6 +124,11 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
       }, 300)
     }
   }, [fetchOrder])
+
+  const orderActions = useOrderActions('admin/store/orders/edit', {
+    order,
+    refreshOrder: fetchOrder
+  })
 
   useEffect(() => {
     fetchOrder()
@@ -235,11 +240,6 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
     await fetchOrder()
   }
 
-  const handleRelist = async () => {
-    await relistResaleByOrder(parseInt(id))
-    await fetchOrder()
-  }
-
   const handleCreateReturn = async (payload: {
     reason_category?: string
     customer_note?: string
@@ -306,7 +306,7 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
             onBack={handleCancel}
             onShip={handleShip}
             onRefund={handleRefund}
-            onRelist={handleRelist}
+            extraActions={orderActions}
             onCreateReturn={handleCreateReturn}
             onCancelOrder={handleCancelOrder}
             onStatusChange={handleStatusChange}

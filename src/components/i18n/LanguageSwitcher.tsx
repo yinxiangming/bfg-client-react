@@ -6,7 +6,9 @@ import { useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 
 import Icon from '@components/Icon'
-import { routing } from '@/i18n/routing'
+import { LOCALE_OPTIONS, normalizeAppLocale } from '@/i18n/locales'
+import { useStorefrontConfig } from '@/contexts/StorefrontConfigContext'
+import { getStorefrontLanguages, hasMultipleStorefrontLanguages, resolveStorefrontLocale } from '@/utils/storefrontConfig'
 
 type Props = {
   className?: string
@@ -17,23 +19,6 @@ type Props = {
 }
 
 const LOCALE_COOKIE_NAME = 'NEXT_LOCALE'
-
-/** Presentation for every locale the app knows how to render. */
-const LOCALE_META = {
-  en: { labelKey: 'language.en', shortLabel: 'EN' },
-  'zh-hans': { labelKey: 'language.zhHans', shortLabel: '中' }
-} as const
-
-/**
- * Only the locales enabled in `routing` are offered. Driving this off the routing config
- * (rather than a hardcoded list) means a single-language deployment shows no switcher at
- * all, instead of a control that silently does nothing.
- */
-const LOCALE_OPTIONS = routing.locales.map((value) => ({
-  value,
-  labelKey: LOCALE_META[value]?.labelKey ?? 'language.en',
-  shortLabel: LOCALE_META[value]?.shortLabel ?? value.toUpperCase()
-}))
 
 function setLocaleCookie(locale: string) {
   // Persist for 1 year
@@ -50,17 +35,25 @@ export default function LanguageSwitcher({
   const router = useRouter()
   const locale = useLocale()
   const t = useTranslations('common')
+  const { config, loading } = useStorefrontConfig()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
+  const localeOptions = useMemo(() => {
+    if (!config) return LOCALE_OPTIONS
+    const available = new Set(getStorefrontLanguages(config))
+    return LOCALE_OPTIONS.filter(option => available.has(option.value))
+  }, [config])
 
   const current = useMemo(() => {
-    return LOCALE_OPTIONS.find(o => o.value === locale) ? locale : 'en'
-  }, [locale])
+    return resolveStorefrontLocale(config, normalizeAppLocale(locale))
+  }, [config, locale])
 
   const currentShortLabel = useMemo(() => {
-    const opt = LOCALE_OPTIONS.find(o => o.value === current)
+    const opt = localeOptions.find(o => o.value === current)
     return opt?.shortLabel || 'EN'
-  }, [current])
+  }, [current, localeOptions])
+
+  const shouldHideSwitcher = loading || (config && !hasMultipleStorefrontLanguages(config))
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -86,8 +79,9 @@ export default function LanguageSwitcher({
 
   const isMinimal = triggerVariant === 'minimal'
 
-  // Nothing to switch between on a single-language deployment.
-  if (LOCALE_OPTIONS.length < 2) return null
+  if (shouldHideSwitcher) {
+    return null
+  }
 
   return (
     <div
@@ -139,7 +133,7 @@ export default function LanguageSwitcher({
 
       {isOpen && (
         <div className='theme-switcher-dropdown'>
-          {LOCALE_OPTIONS.map(opt => {
+          {localeOptions.map(opt => {
             const isSelected = current === opt.value
             return (
               <button
@@ -159,4 +153,3 @@ export default function LanguageSwitcher({
     </div>
   )
 }
-

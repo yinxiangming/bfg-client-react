@@ -16,7 +16,6 @@ import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
-import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
@@ -36,6 +35,9 @@ import classnames from 'classnames'
 
 // Components Imports
 import IconButton from '@mui/material/IconButton'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 // Style Imports
 import '@/libs/styles/tiptapEditor.css'
@@ -277,14 +279,14 @@ const ProductDescription = ({ productData, onChange }: ProductDescriptionProps) 
                 <Dialog open={resizeOpen} onClose={() => setResizeOpen(false)} fullWidth maxWidth='xs'>
                     <DialogTitle>{t('products.description.resizeDialog.title')}</DialogTitle>
                     <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-                        <TextField
+                        <CustomTextField
                             label={t('products.description.resizeDialog.fields.width.label')}
                             placeholder={t('products.description.resizeDialog.fields.width.placeholder')}
                             value={resizeWidth}
                             onChange={e => handleWidthChange(e.target.value)}
                             fullWidth
                         />
-                        <TextField
+                        <CustomTextField
                             label={t('products.description.resizeDialog.fields.height.label')}
                             placeholder={t('products.description.resizeDialog.fields.height.placeholder')}
                             value={resizeHeight}

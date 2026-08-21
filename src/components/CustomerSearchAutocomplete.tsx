@@ -8,7 +8,7 @@ import Typography from '@mui/material/Typography'
 import type { Customer } from '@/services/store'
 import { getCustomers } from '@/services/store'
 
-/** Shared helper for customer display (name, email, phone). Reusable across ResaleCustomerSection, payouts filter, etc. */
+/** Shared helper for customer display (name, email, phone). */
 export function getCustomerDisplayName(customer: Customer) {
   const firstName = customer.user?.first_name || ''
   const lastName = customer.user?.last_name || ''

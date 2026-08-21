@@ -53,6 +53,13 @@ export type StorefrontUiSettingsPayload = {
   header?: string
   footer?: string
   header_options?: StorefrontHeaderOptionsPayload
+  /**
+   * Allowed color modes (subset of ['light', 'dark']). Single-entry → the
+   * frontend forces that mode and hides any switcher. Default both.
+   */
+  allowed_color_modes?: ('light' | 'dark')[]
+  /** Preferred default; meaningful only when both modes are allowed. */
+  default_color_mode?: 'light' | 'dark' | 'system'
 }
 
 export type ShopSettingsPayload = {

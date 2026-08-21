@@ -11,7 +11,6 @@ import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -32,6 +31,7 @@ import Link from '@mui/material/Link'
 import { getProductVariants, createProductVariant, deleteProductVariant, uploadProductMedia, updateProductVariant, type ProductVariant, type ProductMedia } from '@/services/store'
 
 // Component Imports
+import CustomTextField from '@/components/ui/TextField'
 import MediaLibraryDialog from '@/components/media/MediaLibraryDialog'
 import VariantInventoryModal from './VariantInventoryModal'
 
@@ -477,7 +477,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants, onInventory
                                     </TableCell>
                                     <TableCell sx={{ minWidth: 180 }}>
                                         {editingId === variant.id ? (
-                                            <TextField
+                                            <CustomTextField
                                                 variant='outlined'
                                                 size='small'
                                                 value={editDraft.name ?? ''}
@@ -490,7 +490,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants, onInventory
                                     </TableCell>
                                     <TableCell sx={{ minWidth: 180 }}>
                                         {editingId === variant.id ? (
-                                            <TextField
+                                            <CustomTextField
                                                 variant='outlined'
                                                 size='small'
                                                 value={editDraft.sku ?? ''}
@@ -503,7 +503,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants, onInventory
                                     </TableCell>
                                     <TableCell sx={{ minWidth: 180 }}>
                                         {editingId === variant.id ? (
-                                            <TextField
+                                            <CustomTextField
                                                 variant='outlined'
                                                 size='small'
                                                 type='number'
@@ -637,7 +637,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants, onInventory
                                         </Box>
                                     </TableCell>
                                     <TableCell sx={{ minWidth: 180 }}>
-                                        <TextField
+                                        <CustomTextField
                                             variant='outlined'
                                             size='small'
                                             placeholder={t('products.variants.new.placeholders.name')}
@@ -647,7 +647,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants, onInventory
                                         />
                                     </TableCell>
                                     <TableCell sx={{ minWidth: 140 }}>
-                                        <TextField
+                                        <CustomTextField
                                             variant='outlined'
                                             size='small'
                                             placeholder={t('products.variants.new.placeholders.sku')}
@@ -657,7 +657,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants, onInventory
                                         />
                                     </TableCell>
                                     <TableCell sx={{ minWidth: 140 }}>
-                                        <TextField
+                                        <CustomTextField
                                             variant='outlined'
                                             size='small'
                                             type='number'
@@ -668,7 +668,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants, onInventory
                                         />
                                     </TableCell>
                                     <TableCell sx={{ minWidth: 120 }}>
-                                        <TextField
+                                        <CustomTextField
                                             variant='outlined'
                                             size='small'
                                             type='number'

@@ -3,6 +3,7 @@ import { headers } from 'next/headers'
 import { getSiteConfig } from '@/utils/siteMetadata'
 import { storefrontApi } from '@/utils/storefrontApi'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
+import { resolveStorefrontPage } from '@/components/storefront/themes/resolve'
 import {
   getRequestOrigin,
   clampDescription,
@@ -151,6 +152,11 @@ export default async function Page(props: Props) {
     { name, path: `/category/${slug}` },
   ])
 
+  // A skin may replace the page body; it still receives the server-fetched first page,
+  // so an override does not silently fall back to a client-side fetch.
+  const Override = await resolveStorefrontPage('category/[slug]')
+  const Component = Override ?? CategoryPage
+
   return (
     <>
       <script
@@ -161,7 +167,7 @@ export default async function Page(props: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumb) }}
       />
-      <CategoryPage
+      <Component
         slug={slug}
         initialData={{
           products: data.products ?? [],

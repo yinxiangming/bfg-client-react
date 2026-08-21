@@ -10,17 +10,16 @@ import {
   DialogTitle,
   Tab,
   Tabs,
-  TextField,
   Typography,
   Button,
   Alert,
-  FormControl,
-  InputLabel,
-  Select,
   MenuItem,
   Box,
 } from '@mui/material'
 import { useTranslations } from 'next-intl'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 import SchemaTable from '@/components/schema/SchemaTable'
 import type { ListSchema, SchemaAction } from '@/types/schema'
@@ -424,7 +423,7 @@ export default function NewsletterTab() {
       <Dialog open={addSubOpen} onClose={() => setAddSubOpen(false)}>
         <DialogTitle>{t('newsletterTab.dialogs.addSubscriber.title')}</DialogTitle>
         <DialogContent>
-          <TextField
+          <CustomTextField
             autoFocus
             margin='dense'
             label={t('newsletterTab.dialogs.addSubscriber.fields.email')}
@@ -472,7 +471,7 @@ export default function NewsletterTab() {
         <DialogTitle>{t('newsletterTab.dialogs.addSend.title')}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-            <TextField
+            <CustomTextField
               autoFocus
               label={t('newsletterTab.dialogs.addSend.fields.subject')}
               required
@@ -480,7 +479,7 @@ export default function NewsletterTab() {
               value={addSendSubject}
               onChange={(e) => setAddSendSubject(e.target.value)}
             />
-            <TextField
+            <CustomTextField
               label={t('newsletterTab.dialogs.addSend.fields.content')}
               placeholder={t('newsletterTab.dialogs.addSend.placeholders.content')}
               fullWidth
@@ -489,31 +488,29 @@ export default function NewsletterTab() {
               value={addSendContent}
               onChange={(e) => setAddSendContent(e.target.value)}
             />
-            <FormControl fullWidth>
-              <InputLabel>{t('newsletterTab.dialogs.addSend.fields.template')}</InputLabel>
-              <Select
-                value={addSendTemplateId === '' ? '' : String(addSendTemplateId)}
-                label={t('newsletterTab.dialogs.addSend.fields.template')}
-                onChange={(e) => {
-                  const v = e.target.value
-                  setAddSendTemplateId(v === '' ? '' : Number(v))
-                }}
-              >
-                <MenuItem value=''>{t('newsletterTab.dialogs.addSend.options.none')}</MenuItem>
-                {templates.map((tmpl) => (
-                  <MenuItem key={tmpl.id} value={String(tmpl.id)}>
-                    {tmpl.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField
+            <CustomTextField
+              select
+              fullWidth
+              label={t('newsletterTab.dialogs.addSend.fields.template')}
+              value={addSendTemplateId === '' ? '' : String(addSendTemplateId)}
+              onChange={(e) => {
+                const v = e.target.value
+                setAddSendTemplateId(v === '' ? '' : Number(v))
+              }}
+            >
+              <MenuItem value=''>{t('newsletterTab.dialogs.addSend.options.none')}</MenuItem>
+              {templates.map((tmpl) => (
+                <MenuItem key={tmpl.id} value={String(tmpl.id)}>
+                  {tmpl.name}
+                </MenuItem>
+              ))}
+            </CustomTextField>
+            <CustomTextField
               label={t('newsletterTab.dialogs.addSend.fields.scheduledAt')}
               type='datetime-local'
               fullWidth
               value={addSendScheduledAt}
               onChange={(e) => setAddSendScheduledAt(e.target.value)}
-              InputLabelProps={{ shrink: true }}
             />
           </Box>
         </DialogContent>

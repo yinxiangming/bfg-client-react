@@ -1,10 +1,13 @@
 'use client'
 
 import React, { useEffect, useState, useMemo } from 'react'
-import { Card, CardContent, Typography, CircularProgress, Alert, Box, TextField, MenuItem } from '@mui/material'
+import { Card, CardContent, Typography, CircularProgress, Alert, Box, MenuItem } from '@mui/material'
 import dynamic from 'next/dynamic'
 import { getDashboardStats } from '@/services/store'
 import type { BlockDefinition, BlockProps, BlockSettingsProps } from '@/views/common/blocks'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
@@ -32,14 +35,14 @@ export function OrdersChartBlockSettings({ settings, onSettingsChange }: OrdersC
   const days = settings?.days ?? 7
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <TextField
+      <CustomTextField
         fullWidth
         size="small"
         label="Title"
         value={title}
         onChange={(e) => onSettingsChange({ ...settings, title: e.target.value })}
       />
-      <TextField
+      <CustomTextField
         select
         fullWidth
         size="small"
@@ -52,7 +55,7 @@ export function OrdersChartBlockSettings({ settings, onSettingsChange }: OrdersC
             Last {d} days
           </MenuItem>
         ))}
-      </TextField>
+      </CustomTextField>
     </Box>
   )
 }

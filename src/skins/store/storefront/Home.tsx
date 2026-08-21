@@ -4,7 +4,7 @@ import DynamicPage from '@views/storefront/DynamicPage'
 import HomePage from '@views/storefront/HomePage'
 import StorefrontDevBadge from '@components/storefront/StorefrontDevBadge'
 import { useStorefrontConfigSafe } from '@/contexts/StorefrontConfigContext'
-import type { ThemeHomeProps } from '../registry.generated'
+import type { ThemeHomeProps } from '@/components/storefront/themes/registry.generated'
 
 /**
  * Does any hero slide already supply the page's <h1>?
