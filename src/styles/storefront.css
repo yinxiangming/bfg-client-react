@@ -3032,3 +3032,25 @@ body {
     font-size: 0.9375rem;
   }
 }
+
+/* Home page heading — rendered only when the hero carousel supplies no <h1>.
+   Keeps the most-linked page on the site from shipping without a page heading. */
+.sf-home-heading {
+  padding-block: 2rem 0.5rem;
+  text-align: center;
+}
+
+.sf-home-heading-title {
+  font-size: clamp(1.5rem, 3vw, 2.125rem);
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0 0 0.5rem;
+}
+
+.sf-home-heading-subtitle {
+  color: var(--sf-text-muted, #6b7280);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 auto;
+  max-width: 60ch;
+}

@@ -52,9 +52,14 @@ async function getLocaleFromCookie(): Promise<AppLocale | null> {
 }
 
 function getLocaleFromAcceptLanguageHeader(al: string): AppLocale | null {
-  // Minimal matching for our supported locales
-  if (al.toLowerCase().includes('zh')) return 'zh-hans'
-  if (al.toLowerCase().includes('en')) return 'en'
+  // Minimal matching for our supported locales. Order matters: a plain `includes('zh')`
+  // check ran first, so `en-NZ,zh;q=0.5` — English preferred, Chinese as a fallback —
+  // selected Chinese. Whichever tag appears first in the header wins instead.
+  const header = al.toLowerCase()
+  const en = header.search(/\ben\b/)
+  const zh = header.search(/\bzh\b/)
+  if (en !== -1 && (zh === -1 || en <= zh)) return 'en'
+  if (zh !== -1) return 'zh-hans'
   return null
 }
 

@@ -42,12 +42,67 @@ type Product = {
   colors: { name: string; value: string }[]
 }
 
-const ProductDetailPage = ({ productId }: { productId: string }) => {
+/**
+ * Map an API product onto the view model.
+ *
+ * Lives at module scope so the server-rendered `initialProduct` and the client refetch
+ * produce identical markup — any divergence would show up as a hydration mismatch.
+ */
+const transformProduct = (productData: any, descriptionFallback: string): Product => {
+  const productVariants = productData.variants || []
+  return {
+    id: productData.id,
+    name: productData.name,
+    brand: productData.brand || '',
+    condition: productData.condition || '',
+    price: parseFloat(productData.price || '0'),
+    originalPrice: productData.compare_price ? parseFloat(productData.compare_price) : null,
+    discount: productData.discount_percentage || null,
+    rating: productData.rating || 0,
+    reviews: productData.reviews_count || 0,
+    images:
+      productData.images && productData.images.length > 0
+        ? productData.images.map((img: string) => getMediaUrl(img))
+        : productData.primary_image
+          ? [getMediaUrl(productData.primary_image)]
+          : [getStoreImageUrl('themes/PRS04099/assets/img/megnor/empty-cart.svg')],
+    description: productData.description || descriptionFallback,
+    reference: productData.sku || '',
+    stock: productVariants.length
+      ? productVariants.reduce((sum: number, v: any) => sum + (v.stock_available || 0), 0) || 0
+      : (productData.stock_quantity ?? 0),
+    sizes: productVariants.map((v: any) => v.options?.size).filter(Boolean) || [],
+    colors:
+      productVariants
+        ?.map((v: any) => ({
+          name: v.options?.color || v.name,
+          value: v.options?.color || '#000000'
+        }))
+        .filter((c: any) => c.name) || []
+  }
+}
+
+const ProductDetailPage = ({
+  productId,
+  initialProduct
+}: {
+  productId: string
+  /**
+   * Product fetched on the server. When present the first paint already contains the real
+   * product markup, so crawlers (and users on a cold cache) never see the loading state.
+   */
+  initialProduct?: any
+}) => {
   const t = useTranslations('storefront')
-  const [product, setProduct] = useState<Product | null>(null)
-  const [variants, setVariants] = useState<any[]>([])
+  const hasInitialProduct = Boolean(initialProduct)
+  // Same fallback string as the client refetch below, otherwise a product with an empty
+  // description would render one text on the server and another after hydration.
+  const [product, setProduct] = useState<Product | null>(() =>
+    initialProduct ? transformProduct(initialProduct, t('product.descriptionFallback')) : null
+  )
+  const [variants, setVariants] = useState<any[]>(() => initialProduct?.variants || [])
   const [relatedProducts, setRelatedProducts] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!initialProduct)
   const [error, setError] = useState<string | null>(null)
   const [selectedImage, setSelectedImage] = useState(0)
   const [imageViewerOpen, setImageViewerOpen] = useState(false)
@@ -86,7 +141,9 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        setLoading(true)
+        // Keep showing the server-rendered product while refreshing price/stock in the
+        // background; only a cold client load should surface the spinner.
+        if (!hasInitialProduct) setLoading(true)
         setError(null)
 
         const productData = await storefrontApi.getProduct(productId)
@@ -95,36 +152,10 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
         const productVariants = productData.variants || []
         setVariants(productVariants)
 
-        const transformedProduct: Product = {
-          id: productData.id,
-          name: productData.name,
-          brand: productData.brand || '',
-          condition: productData.condition || '',
-          price: parseFloat(productData.price || '0'),
-          originalPrice: productData.compare_price ? parseFloat(productData.compare_price) : null,
-          discount: productData.discount_percentage || null,
-          rating: productData.rating || 0,
-          reviews: productData.reviews_count || 0,
-          images:
-            productData.images && productData.images.length > 0
-              ? productData.images.map((img: string) => getMediaUrl(img))
-              : productData.primary_image
-                ? [getMediaUrl(productData.primary_image)]
-                : [getStoreImageUrl('themes/PRS04099/assets/img/megnor/empty-cart.svg')],
-          description: productData.description || t('product.descriptionFallback'),
-          reference: productData.sku || '',
-          stock: productVariants.length
-            ? productVariants.reduce((sum: number, v: any) => sum + (v.stock_available || 0), 0) || 0
-            : (productData.stock_quantity ?? 0),
-          sizes: productVariants.map((v: any) => v.options?.size).filter(Boolean) || [],
-          colors:
-            productVariants
-              ?.map((v: any) => ({
-                name: v.options?.color || v.name,
-                value: v.options?.color || '#000000'
-              }))
-              .filter((c: any) => c.name) || []
-        }
+        const transformedProduct: Product = transformProduct(
+          productData,
+          t('product.descriptionFallback')
+        )
         setProduct(transformedProduct)
 
         // Set default selections
@@ -169,7 +200,7 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
     }
 
     fetchProduct()
-  }, [productId])
+  }, [productId, hasInitialProduct])
 
   useEffect(() => {
     if (activeTab === 'reviews' && productId) fetchReviews(productId)

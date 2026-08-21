@@ -4,6 +4,8 @@ import { resolveAccountSkin } from '@/components/account/themes/resolve'
 import AccountLayoutClient from './AccountLayoutClient'
 
 export const metadata = {
+  // Customer account pages are per-session and must stay out of the index.
+  robots: { index: false, follow: false, nocache: true },
   title: { template: 'Account - %s', default: 'Account' },
 }
 

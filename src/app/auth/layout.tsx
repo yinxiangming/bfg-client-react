@@ -5,6 +5,11 @@ import { StorefrontConfigProvider } from '@/contexts/StorefrontConfigContext'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 import { resolveAuthSkin } from '@/components/auth/themes/resolve'
 
+/** Login/register/reset are transactional and carry no search value. */
+export const metadata = {
+  robots: { index: false, follow: false, nocache: true },
+}
+
 /**
  * Auth layout: resolve Site by X-Workspace-ID or request host (same as storefront),
  * so login/register show the correct site name and branding. When the active

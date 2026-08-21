@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 // Next Imports
 import Link from 'next/link'
@@ -55,41 +55,70 @@ function findCategoryInTree(
   return null
 }
 
-const CategoryPage = ({ slug }: { slug: string }) => {
+type CategoryInitialData = {
+  products: any[]
+  totalCount: number
+  category: { name: string; description: string } | null
+  subcategories: { slug: string; name: string }[]
+}
+
+/** Map an API product onto the card view model (module scope: shared by SSR seed + refetch). */
+const transformApiProduct = (apiProduct: any): Product => ({
+  id: apiProduct.id,
+  name: apiProduct.name,
+  brand: apiProduct.brand || '',
+  price: parseFloat(apiProduct.price || '0'),
+  originalPrice: apiProduct.compare_price ? parseFloat(apiProduct.compare_price) : null,
+  discount: apiProduct.discount_percentage || null,
+  rating: apiProduct.rating || 0,
+  reviews: apiProduct.reviews_count || 0,
+  image:
+    getMediaUrl(apiProduct.primary_image || (apiProduct.images && apiProduct.images[0]) || '') ||
+    getStoreImageUrl('themes/PRS04099/assets/img/megnor/empty-cart.svg'),
+  isNew: apiProduct.is_new || false
+})
+
+const CategoryPage = ({
+  slug,
+  initialData
+}: {
+  slug: string
+  /**
+   * First page of products fetched on the server. Without it the SSR HTML is just a loading
+   * placeholder, so a crawler indexing this category sees no products and no internal links
+   * through to the product pages.
+   */
+  initialData?: CategoryInitialData
+}) => {
   const t = useTranslations('storefront')
   const { beforeSlots, afterSlots } = usePageSlots('storefront/category')
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
+  const hasInitialData = Boolean(initialData)
+  const [products, setProducts] = useState<Product[]>(
+    () => initialData?.products?.map(transformApiProduct) ?? []
+  )
+  const [loading, setLoading] = useState(!initialData)
   const [sortBy, setSortBy] = useState<SortOption>('relevance')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [currentPage, setCurrentPage] = useState(1)
-  const [totalCount, setTotalCount] = useState(0)
-  const [categoryInfo, setCategoryInfo] = useState<{ name: string; description: string } | null>(null)
-  const [subcategories, setSubcategories] = useState<{ slug: string; name: string }[]>([])
+  const [totalCount, setTotalCount] = useState(initialData?.totalCount ?? 0)
+  const [categoryInfo, setCategoryInfo] = useState<{ name: string; description: string } | null>(
+    initialData?.category ?? null
+  )
+  const [subcategories, setSubcategories] = useState<{ slug: string; name: string }[]>(
+    initialData?.subcategories ?? []
+  )
   const [showFilters, setShowFilters] = useState(false)
+  // Distinguishes the hydration pass from later sort/page changes.
+  const isFirstLoad = useRef(true)
 
   const productsPerPage = 12
-
-  // Transform API product
-  const transformProduct = (apiProduct: any): Product => ({
-    id: apiProduct.id,
-    name: apiProduct.name,
-    brand: apiProduct.brand || '',
-    price: parseFloat(apiProduct.price || '0'),
-    originalPrice: apiProduct.compare_price ? parseFloat(apiProduct.compare_price) : null,
-    discount: apiProduct.discount_percentage || null,
-    rating: apiProduct.rating || 0,
-    reviews: apiProduct.reviews_count || 0,
-    image:
-      getMediaUrl(apiProduct.primary_image || (apiProduct.images && apiProduct.images[0]) || '') ||
-      getStoreImageUrl('themes/PRS04099/assets/img/megnor/empty-cart.svg'),
-    isNew: apiProduct.is_new || false
-  })
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        setLoading(true)
+        // Server-seeded first render already shows page 1; only later navigations spin.
+        if (!(hasInitialData && isFirstLoad.current)) setLoading(true)
+        isFirstLoad.current = false
 
         const sortMap: Record<SortOption, string | undefined> = {
           relevance: undefined,
@@ -113,7 +142,7 @@ const CategoryPage = ({ slug }: { slug: string }) => {
         const response = await storefrontApi.getProducts(params)
         const productsList = Array.isArray(response) ? response : response.results || response.data || []
 
-        setProducts(productsList.map(transformProduct))
+        setProducts(productsList.map(transformApiProduct))
         setTotalCount(response.count || productsList.length)
 
         // Fetch category info + subcategories (tree)

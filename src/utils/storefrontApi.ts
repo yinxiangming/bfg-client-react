@@ -281,6 +281,10 @@ class StorefrontApiClient {
     sort?: 'price_asc' | 'price_desc' | 'name' | 'sales'
     limit?: number
     page?: number
+    /** Next.js server: incoming Host for tenant resolution (pass `headers().get('host')`). */
+    requestHost?: string
+    /** Next.js fetch cache (server components / sitemap). */
+    next?: { revalidate?: number }
   }): Promise<ApiResponse<any>> {
     const queryParams = new URLSearchParams()
 
@@ -293,11 +297,19 @@ class StorefrontApiClient {
     if (params?.min_price) queryParams.append('min_price', params.min_price.toString())
     if (params?.max_price) queryParams.append('max_price', params.max_price.toString())
     if (params?.sort) queryParams.append('sort', params.sort)
-    if (params?.limit) queryParams.append('limit', params.limit.toString())
+    if (params?.limit) {
+      // The API paginates with `page_size` (config.pagination.StandardPagination, max 200);
+      // `limit` alone is ignored and every caller silently received the default page of 20.
+      queryParams.append('limit', params.limit.toString())
+      queryParams.append('page_size', Math.min(params.limit, 200).toString())
+    }
     if (params?.page) queryParams.append('page', params.page.toString())
 
     const query = queryParams.toString()
-    return this.request<ApiResponse<any>>(`/api/v1/store/products/${query ? `?${query}` : ''}`)
+    return this.request<ApiResponse<any>>(`/api/v1/store/products/${query ? `?${query}` : ''}`, {
+      next: params?.next,
+      requestHost: params?.requestHost,
+    })
   }
 
   async getProduct(

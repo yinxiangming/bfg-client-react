@@ -1,24 +1,71 @@
+// Next Imports
+import { headers } from 'next/headers'
+import type { Metadata } from 'next'
+
 // i18n Imports
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
-import { headers } from 'next/headers'
 
 // Component Imports
 import ThemeProvider from '@components/theme/ThemeProvider'
 import RootLayoutChrome from '@components/layout/RootLayoutChrome'
 import { CartProvider } from '@/contexts/CartContext'
 import { AppDialogProvider } from '@/contexts/AppDialogContext'
-import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
-import { getAllowedColorModes } from '@/utils/storefrontConfig'
+
+// Util Imports
+import { getRequestOrigin, clampDescription, localeTag, openGraphLocale } from '@/utils/seo'
+import { getStorefrontConfigForServer, getAllowedColorModes } from '@/utils/storefrontConfig'
 
 // Style Imports
 import './globals.css'
 import '@assets/iconify-icons/generated-icons.css'
 import '@/styles/storefront.css'
 
-export const metadata = {
-  title: { default: 'BFG', template: '%s' },
-  description: 'Generic Web Application',
+/**
+ * Root metadata is resolved per request because one deployment serves several workspace
+ * domains — a static title here would brand every storefront with the same placeholder.
+ * `metadataBase` must be the request origin so Next resolves relative OG/canonical URLs
+ * against the customer-facing host instead of the Vercel deployment URL.
+ */
+export async function generateMetadata(): Promise<Metadata> {
+  const headersList = await headers()
+  const requestHost = headersList.get('host') ?? undefined
+  const locale = await getLocale()
+  const [origin, config] = await Promise.all([
+    getRequestOrigin(),
+    getStorefrontConfigForServer(locale, requestHost).catch(() => null),
+  ])
+
+  const siteName = config?.site_name?.trim() || 'Web App'
+  const description = clampDescription(config?.site_description) || undefined
+
+  return {
+    metadataBase: origin ? new URL(origin) : undefined,
+    title: { default: siteName, template: `%s | ${siteName}` },
+    description,
+    applicationName: siteName,
+    openGraph: {
+      type: 'website',
+      siteName,
+      title: siteName,
+      description,
+      locale: openGraphLocale(locale, config?.country),
+      url: origin || undefined,
+    },
+    twitter: { card: 'summary_large_image', title: siteName, description },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        'max-snippet': -1,
+        'max-image-preview': 'large',
+        'max-video-preview': -1,
+      },
+    },
+    formatDetection: { telephone: false, address: false, email: false },
+  }
 }
 
 export const viewport = {
@@ -42,6 +89,9 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   const lockedMode = allowedModes.length === 1 ? allowedModes[0] : null
   const initialMode: 'system' | 'light' | 'dark' = lockedMode ?? 'system'
   const defaultSystemMode: 'light' | 'dark' = lockedMode ?? 'light'
+  // Region-qualified when the workspace declares a market (e.g. 'en-NZ'), bare locale
+  // otherwise. Reuses the config already fetched above.
+  const htmlLang = localeTag(locale, storefrontConfig?.country)
 
   const content = (
     <RootLayoutChrome defaultSystemMode={defaultSystemMode}>{children}</RootLayoutChrome>
@@ -52,7 +102,7 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   return (
     <html
       id='__next'
-      lang={locale}
+      lang={htmlLang}
       dir={direction}
       data-mode={defaultSystemMode}
       {...htmlModeAttrs}
