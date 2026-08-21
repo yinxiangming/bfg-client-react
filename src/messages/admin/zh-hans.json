@@ -3645,7 +3645,8 @@
           "storefrontDisplay": "前台展示",
           "storefrontTheme": "前台主题与页头",
           "shop": "店铺",
-          "socialMediaLinks": "社交媒体链接"
+          "socialMediaLinks": "社交媒体链接",
+          "analytics": "数据分析"
         },
         "subsections": {
           "adminIdentity": "后台与系统标识",
@@ -3768,6 +3769,13 @@
             "instagram": {
               "label": "Instagram",
               "placeholder": "https://instagram.com/yourprofile"
+            }
+          },
+          "analytics": {
+            "googleAnalyticsId": {
+              "label": "Google Analytics 4 衡量 ID",
+              "placeholder": "G-XXXXXXXXXX",
+              "helper": "在 GA4 的「管理 → 数据流 → 网页数据流」中查看。留空即关闭跟踪。填写后，店铺前台每个页面的访问都会自动上报。"
             }
           }
         },

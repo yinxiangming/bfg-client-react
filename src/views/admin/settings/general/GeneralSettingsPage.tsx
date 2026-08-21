@@ -40,6 +40,7 @@ import {
   updateGeneralSettings,
   updateStorefrontUiSettings,
   updateShopSettings,
+  updateAnalyticsSettings,
   fetchWorkspaceRecord,
   patchWorkspaceRecord,
   type GeneralSettingsPayload,
@@ -104,6 +105,14 @@ const initialStorefrontUi: StorefrontUiData = {
   header_options: { ...defaultHeaderOptions },
   allowed_color_modes: [...ALL_COLOR_MODES],
   default_color_mode: 'system'
+}
+
+type AnalyticsData = {
+  google_analytics_id: string
+}
+
+const initialAnalyticsData: AnalyticsData = {
+  google_analytics_id: ''
 }
 
 type ShopData = {
@@ -191,6 +200,7 @@ const GeneralSettingsPage = () => {
   const [settingsId, setSettingsId] = useState<number | null>(null)
   const [storefrontUi, setStorefrontUi] = useState<StorefrontUiData>(initialStorefrontUi)
   const [shopData, setShopData] = useState<ShopData>(initialShopData)
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData>(initialAnalyticsData)
   const [currencies, setCurrencies] = useState<Currency[]>([])
   const [workspaceId, setWorkspaceId] = useState<number | null>(null)
   const [workspaceOrgName, setWorkspaceOrgName] = useState('')
@@ -383,6 +393,11 @@ const GeneralSettingsPage = () => {
           sku_prefix: shop.product_identifiers?.sku_prefix ?? initialShopData.sku_prefix,
           barcode_prefix: shop.product_identifiers?.barcode_prefix ?? initialShopData.barcode_prefix
         })
+        const analytics = (settings.custom_settings as any)?.analytics || {}
+        setAnalyticsData({
+          google_analytics_id: analytics.google_analytics_id ?? initialAnalyticsData.google_analytics_id
+        })
+
         const general = (settings.custom_settings as any)?.general || {}
         if (general || (settings as any).site_name != null || (settings as any).site_description != null) {
           setBasicData({
@@ -512,6 +527,10 @@ const GeneralSettingsPage = () => {
         }
       }
       await updateShopSettings(currentSettingsId, shopPayload)
+
+      await updateAnalyticsSettings(currentSettingsId, {
+        google_analytics_id: analyticsData.google_analytics_id.trim()
+      })
 
       console.log('[GeneralSettings] Save successful')
       clearStorefrontConfigCache()
@@ -1195,6 +1214,41 @@ const GeneralSettingsPage = () => {
                               label={t('settings.general.basic.fields.headerOptions.showLogin')}
                             />
                           </Box>
+                        </Grid>
+                      </Grid>
+                    </CardContent>
+                  </Card>
+
+                  <Card variant='outlined' sx={{ mb: 6 }}>
+                    <CardContent>
+                      <Typography variant='h6' sx={{ mb: 4 }}>
+                        {t('settings.general.basic.sections.analytics')}
+                      </Typography>
+                      <Grid container spacing={2}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
+                          <CustomTextField
+                            fullWidth
+                            label={
+                              <Box
+                                component='span'
+                                sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, flexWrap: 'wrap' }}
+                              >
+                                <span>{t('settings.general.basic.fields.analytics.googleAnalyticsId.label')}</span>
+                                <FieldHelperTip
+                                  helperText={t('settings.general.basic.fields.analytics.googleAnalyticsId.helper')}
+                                  ariaLabel={t('settings.general.basic.helperTipAria')}
+                                />
+                              </Box>
+                            }
+                            value={analyticsData.google_analytics_id}
+                            placeholder={t('settings.general.basic.fields.analytics.googleAnalyticsId.placeholder')}
+                            onChange={e => setAnalyticsData({ google_analytics_id: e.target.value })}
+                            slotProps={{
+                              input: {
+                                startAdornment: <i className='tabler-chart-bar' />
+                              }
+                            }}
+                          />
                         </Grid>
                       </Grid>
                     </CardContent>

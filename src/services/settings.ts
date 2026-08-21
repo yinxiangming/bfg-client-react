@@ -62,6 +62,14 @@ export type StorefrontUiSettingsPayload = {
   default_color_mode?: 'light' | 'dark' | 'system'
 }
 
+export type AnalyticsSettingsPayload = {
+  /**
+   * GA4 measurement id (`G-XXXXXXXXXX`). Public client-side tag id, not a
+   * secret. Blank disables tracking for this workspace.
+   */
+  google_analytics_id?: string
+}
+
 export type ShopSettingsPayload = {
   review_moderation_required?: boolean
   product_identifiers?: {
@@ -86,6 +94,7 @@ export type WorkspaceSettings = {
     general?: GeneralSettingsPayload
     storefront_ui?: StorefrontUiSettingsPayload
     shop?: ShopSettingsPayload
+    analytics?: AnalyticsSettingsPayload
     support?: { notice?: string }
     plugins?: PluginsSettingsPayload
   }
@@ -338,6 +347,20 @@ export async function updateStorefrontUiSettings(settingsId: number, storefront_
     method: 'PATCH',
     body: JSON.stringify({ custom_settings: nextCustom })
   })
+}
+
+export async function updateAnalyticsSettings(settingsId: number, analytics: AnalyticsSettingsPayload) {
+  const url = `${bfgApi.settings()}${settingsId}/`
+  const current = await apiFetch<WorkspaceSettings>(url, getSiteAdminOptions())
+  const currentCustom = current.custom_settings || {}
+  const nextCustom = { ...currentCustom, analytics }
+  const result = await apiFetch<WorkspaceSettings>(url, {
+    ...getSiteAdminOptions(),
+    method: 'PATCH',
+    body: JSON.stringify({ custom_settings: nextCustom })
+  })
+  invalidateWorkspaceSettingsCache()
+  return result
 }
 
 export async function updateShopSettings(settingsId: number, shop: ShopSettingsPayload) {

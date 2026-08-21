@@ -93,6 +93,15 @@ export type StorefrontConfig = {
   header_options?: StorefrontHeaderOptions
   /** When true, new reviews require admin approval before showing. Default false. */
   review_moderation_required?: boolean
+  /**
+   * Public, client-side analytics tag ids for this workspace. One deployment
+   * serves many storefronts, so the GA4 property travels with the config rather
+   * than a build-time env var.
+   */
+  analytics?: {
+    /** GA4 measurement id, e.g. `G-XXXXXXXXXX`. Blank when not configured. */
+    google_analytics_id?: string
+  }
   /** Primary domain configured for this workspace (hostname only, no port). */
   workspace_domain?: string
   /** Resolved workspace (public storefront context). */

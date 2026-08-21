@@ -9,12 +9,15 @@ import { getLocale, getMessages } from 'next-intl/server'
 // Component Imports
 import ThemeProvider from '@components/theme/ThemeProvider'
 import RootLayoutChrome from '@components/layout/RootLayoutChrome'
+import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
+import GoogleOneTap from '@/components/auth/GoogleOneTap'
 import { CartProvider } from '@/contexts/CartContext'
 import { AppDialogProvider } from '@/contexts/AppDialogContext'
 
 // Util Imports
 import { getRequestOrigin, clampDescription, localeTag, openGraphLocale } from '@/utils/seo'
 import { getStorefrontConfigForServer, getAllowedColorModes } from '@/utils/storefrontConfig'
+import { getEnvMeasurementId } from '@/utils/analytics'
 
 // Style Imports
 import './globals.css'
@@ -93,6 +96,9 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   // otherwise. Reuses the config already fetched above.
   const htmlLang = localeTag(locale, storefrontConfig?.country)
 
+  // Per-workspace GA4 property wins; the env var is the single-tenant fallback.
+  const gaMeasurementId = storefrontConfig?.analytics?.google_analytics_id?.trim() || getEnvMeasurementId()
+
   const content = (
     <RootLayoutChrome defaultSystemMode={defaultSystemMode}>{children}</RootLayoutChrome>
   )
@@ -114,6 +120,9 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
         <script src='https://code.iconify.design/3/3.1.1/iconify.min.js' async></script>
       </head>
       <body className='flex is-full min-bs-full flex-auto flex-col' data-mode={defaultSystemMode} {...htmlModeAttrs}>
+
+        <GoogleAnalytics measurementId={gaMeasurementId} />
+        <GoogleOneTap />
 
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider initialMode={initialMode}>

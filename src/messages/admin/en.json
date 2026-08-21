@@ -3645,7 +3645,8 @@
           "storefrontDisplay": "Storefront Display",
           "storefrontTheme": "Storefront Theme & Header",
           "shop": "Shop",
-          "socialMediaLinks": "Social Media Links"
+          "socialMediaLinks": "Social Media Links",
+          "analytics": "Analytics"
         },
         "subsections": {
           "adminIdentity": "Admin & system identity",
@@ -3768,6 +3769,13 @@
             "instagram": {
               "label": "Instagram",
               "placeholder": "https://instagram.com/yourprofile"
+            }
+          },
+          "analytics": {
+            "googleAnalyticsId": {
+              "label": "Google Analytics 4 measurement ID",
+              "placeholder": "G-XXXXXXXXXX",
+              "helper": "Found in GA4 under Admin → Data streams → your web stream. Leave blank to turn tracking off. Page views are reported automatically on every storefront page."
             }
           }
         },
