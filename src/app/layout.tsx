@@ -13,7 +13,7 @@ import { CartProvider } from '@/contexts/CartContext'
 import { AppDialogProvider } from '@/contexts/AppDialogContext'
 
 // Util Imports
-import { getRequestOrigin, clampDescription } from '@/utils/seo'
+import { getRequestOrigin, clampDescription, localeTag, openGraphLocale } from '@/utils/seo'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 
 // Style Imports
@@ -49,7 +49,7 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName,
       title: siteName,
       description,
-      locale: locale === 'zh-hans' ? 'zh_CN' : 'en_NZ',
+      locale: openGraphLocale(locale, config?.country),
       url: origin || undefined,
     },
     twitter: { card: 'summary_large_image', title: siteName, description },
@@ -85,8 +85,11 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   const locale = await getLocale()
   const messages = await getMessages()
   const direction = 'ltr'
-  // Region-qualified language tag: 'en-NZ' tells search engines which market this store serves.
-  const htmlLang = locale === 'zh-hans' ? 'zh-Hans' : 'en-NZ'
+  const headersList = await headers()
+  const config = await getStorefrontConfigForServer(locale, headersList.get('host') ?? undefined)
+    .catch(() => null)
+  // Region-qualified when the workspace declares a market (e.g. 'en-NZ'), bare locale otherwise.
+  const htmlLang = localeTag(locale, config?.country)
   const defaultSystemMode: 'light' | 'dark' = 'light'
 
   const content = (

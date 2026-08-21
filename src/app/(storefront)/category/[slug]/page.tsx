@@ -2,11 +2,13 @@ import { cache } from 'react'
 import { headers } from 'next/headers'
 import { getSiteConfig } from '@/utils/siteMetadata'
 import { storefrontApi } from '@/utils/storefrontApi'
+import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 import {
   getRequestOrigin,
   clampDescription,
   buildBreadcrumbJsonLd,
   jsonLdScript,
+  openGraphLocale,
 } from '@/utils/seo'
 import CategoryPage from '@views/storefront/CategoryPage'
 import type { Metadata } from 'next'
@@ -81,19 +83,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = headersList.get('x-locale') || 'en'
   const requestHost = headersList.get('host') ?? undefined
 
-  const [data, { site_name }, origin] = await Promise.all([
+  const [data, { site_name }, origin, config] = await Promise.all([
     getCategoryForServer(slug, requestHost, locale),
     // requestHost is required: without it the workspace cannot be resolved and every title
     // degrades to the 'Web App' placeholder.
     getSiteConfig(locale, requestHost),
     getRequestOrigin(),
+    getStorefrontConfigForServer(locale, requestHost).catch(() => null),
   ])
 
   const name = data.category?.name ?? slug
   const canonical = origin ? `${origin}/category/${slug}` : `/category/${slug}`
   const description =
     clampDescription(data.category?.description) ||
-    `Shop ${name} at ${site_name}. ${data.totalCount} products in stock with fast delivery across New Zealand.`
+    `Shop ${name} at ${site_name} — ${data.totalCount} products in stock.`
 
   return {
     title: name,
@@ -105,6 +108,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'website',
       url: canonical,
       siteName: site_name,
+      locale: openGraphLocale(locale, config?.country),
     },
     twitter: { card: 'summary_large_image', title: `${name} | ${site_name}`, description },
   }

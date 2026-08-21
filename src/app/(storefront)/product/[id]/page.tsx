@@ -10,6 +10,7 @@ import {
   clampDescription,
   buildBreadcrumbJsonLd,
   jsonLdScript,
+  openGraphLocale,
 } from '@/utils/seo'
 import ProductDetailPage from '@views/storefront/ProductDetailPage'
 import type { Metadata } from 'next'
@@ -107,7 +108,8 @@ function buildProductJsonLd(
   origin: string,
   currency: string,
   siteName: string,
-  path: string
+  path: string,
+  country?: string
 ) {
   const url = origin ? `${origin}${path}` : undefined
   const images = (product.images?.length
@@ -156,10 +158,13 @@ function buildProductJsonLd(
           : 'https://schema.org/NewCondition',
       availability: stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       seller: { '@type': 'Organization', name: siteName },
-      shippingDetails: {
-        '@type': 'OfferShippingDetails',
-        shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'NZ' },
-      },
+      // Only claim a shipping destination the workspace has actually declared.
+      shippingDetails: country
+        ? {
+            '@type': 'OfferShippingDetails',
+            shippingDestination: { '@type': 'DefinedRegion', addressCountry: country },
+          }
+        : undefined,
     },
   }
 }
@@ -169,12 +174,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const headersList = await headers()
   const locale = headersList.get('x-locale') || 'en'
   const requestHost = headersList.get('host') ?? undefined
-  const [product, { site_name }, origin] = await Promise.all([
+  const [product, { site_name }, origin, config] = await Promise.all([
     getProductForServer(id, requestHost),
     // requestHost is required here — without it the backend cannot resolve the workspace and
     // site_name falls back to the placeholder 'Web App'.
     getSiteConfig(locale, requestHost),
     getRequestOrigin(),
+    getStorefrontConfigForServer(locale, requestHost).catch(() => null),
   ])
 
   if (!product) {
@@ -188,7 +194,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = product.meta_title?.trim() || product.name
   const description =
     clampDescription(product.meta_description || product.description || product.short_description) ||
-    `Buy ${product.name} from ${site_name}. Shipped across New Zealand.`
+    `Buy ${product.name} from ${site_name}.`
   const imageUrl =
     toAbsolute(origin, getMediaUrl(product.primary_image || product.images?.[0] || '')) || undefined
 
@@ -202,6 +208,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: 'website',
       url: canonical,
       siteName: site_name,
+      locale: openGraphLocale(locale, config?.country),
       ...(imageUrl && { images: [{ url: imageUrl, width: 1200, height: 630, alt: product.name }] }),
     },
     twitter: {
@@ -225,10 +232,10 @@ export default async function Page(props: Props) {
     getRequestOrigin(),
   ])
 
-  const siteName = config?.site_name?.trim() || 'GeekStudio'
+  const siteName = config?.site_name?.trim() || ''
   // Structured-data price must match the price on the page, so read the store's own currency
   // rather than asserting one here.
-  const currency = (config?.default_currency || 'NZD').toUpperCase()
+  const currency = (config?.default_currency || '').toUpperCase()
   const path = canonicalPath(product, id)
 
   const breadcrumb = product
@@ -250,14 +257,18 @@ export default async function Page(props: Props) {
     <>
       {product && (
         <>
-          <script
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{
-              __html: jsonLdScript(
-                buildProductJsonLd(product, origin, currency, siteName, path)
-              ),
-            }}
-          />
+          {/* An Offer without a currency is invalid structured data, so skip the whole
+              Product node rather than emit a price with no unit. */}
+          {currency && (
+            <script
+              type="application/ld+json"
+              dangerouslySetInnerHTML={{
+                __html: jsonLdScript(
+                  buildProductJsonLd(product, origin, currency, siteName, path, config?.country)
+                ),
+              }}
+            />
+          )}
           <script
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: jsonLdScript(breadcrumb) }}

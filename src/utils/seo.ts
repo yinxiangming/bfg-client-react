@@ -17,7 +17,7 @@ export function normalizeHost(host: string): string {
 }
 
 /**
- * Public origin for the current request, e.g. `https://geeker.co.nz`.
+ * Public origin for the current request, e.g. `https://shop.example.com`.
  * Order: explicit env override → forwarded/request host → Vercel URL → empty.
  */
 export async function getRequestOrigin(): Promise<string> {
@@ -69,6 +69,27 @@ export function clampDescription(input?: string | null, max = 158): string {
   return `${(lastSpace > max * 0.6 ? cut.slice(0, lastSpace) : cut).trim()}…`
 }
 
+/** ISO 3166-1 alpha-2 → display name. Unknown codes fall back to the code itself. */
+const COUNTRY_NAMES: Record<string, string> = {
+  AU: 'Australia',
+  CA: 'Canada',
+  CN: 'China',
+  DE: 'Germany',
+  FR: 'France',
+  GB: 'United Kingdom',
+  HK: 'Hong Kong',
+  JP: 'Japan',
+  NZ: 'New Zealand',
+  SG: 'Singapore',
+  US: 'United States',
+}
+
+export function countryName(code?: string): string | undefined {
+  const key = code?.trim().toUpperCase()
+  if (!key) return undefined
+  return COUNTRY_NAMES[key] ?? key
+}
+
 export type BreadcrumbEntry = { name: string; path: string }
 
 /** schema.org BreadcrumbList — drives the breadcrumb rich result in Google. */
@@ -92,15 +113,23 @@ type OrgInput = {
   phone?: string
   socials?: (string | undefined)[]
   logoUrl?: string
+  /** ISO 3166-1 alpha-2 from the workspace, or empty when the store has not declared one. */
+  country?: string
+  /** ISO 4217 from the workspace. */
+  currency?: string
 }
 
 /**
  * Organization + WebSite graph for the homepage.
- * `sameAs` and contact details are what generative engines quote when asked
- * "who sells X in New Zealand" — so emit them whenever the workspace has them.
+ *
+ * `sameAs`, contact details and the market served are what generative engines quote when
+ * asked who sells a thing in a given country — so emit them whenever the workspace has them,
+ * and omit them entirely when it does not. Guessing a market would put a false claim in the
+ * store's own structured data.
  */
 export function buildOrganizationJsonLd(origin: string, input: OrgInput) {
   const socials = (input.socials ?? []).filter((s): s is string => Boolean(s && s.trim()))
+  const country = input.country?.trim().toUpperCase()
   return {
     '@context': 'https://schema.org',
     '@type': 'OnlineStore',
@@ -113,13 +142,19 @@ export function buildOrganizationJsonLd(origin: string, input: OrgInput) {
     email: input.email || undefined,
     telephone: input.phone || undefined,
     sameAs: socials.length ? socials : undefined,
-    areaServed: { '@type': 'Country', name: 'New Zealand' },
-    currenciesAccepted: 'NZD',
+    // schema.org Country wants a name, not an ISO code.
+    areaServed: country ? { '@type': 'Country', name: countryName(country) } : undefined,
+    currenciesAccepted: input.currency?.trim().toUpperCase() || undefined,
   }
 }
 
 /** WebSite node with a SearchAction so Google can surface a sitelinks search box. */
-export function buildWebSiteJsonLd(origin: string, siteName: string, description?: string) {
+export function buildWebSiteJsonLd(
+  origin: string,
+  siteName: string,
+  description?: string,
+  inLanguage?: string
+) {
   return {
     '@context': 'https://schema.org',
     '@type': 'WebSite',
@@ -127,7 +162,7 @@ export function buildWebSiteJsonLd(origin: string, siteName: string, description
     name: siteName,
     url: origin || undefined,
     description: description || undefined,
-    inLanguage: 'en-NZ',
+    inLanguage: inLanguage || undefined,
     publisher: { '@id': `${origin}/#organization` },
     potentialAction: {
       '@type': 'SearchAction',
@@ -143,4 +178,23 @@ export function buildWebSiteJsonLd(origin: string, siteName: string, description
 /** Serialize JSON-LD safely for inline `<script>` injection. */
 export function jsonLdScript(data: unknown): string {
   return JSON.stringify(data).replace(/</g, '\\u003c')
+}
+
+
+/**
+ * BCP 47 tag for the current locale, qualified with the store's market when it has declared
+ * one — `en` + `NZ` gives `en-NZ`, which tells search engines which market the store serves.
+ * With no country the bare locale is returned rather than a guessed region.
+ */
+export function localeTag(locale: string, country?: string): string {
+  const base = locale === 'zh-hans' ? 'zh-Hans' : locale
+  const region = country?.trim().toUpperCase()
+  if (!region || base.includes('-')) return base
+  return `${base}-${region}`
+}
+
+/** Open Graph wants `xx_YY`, not a BCP 47 tag. */
+export function openGraphLocale(locale: string, country?: string): string | undefined {
+  const tag = localeTag(locale, country)
+  return tag.includes('-') ? tag.replace('-', '_') : undefined
 }

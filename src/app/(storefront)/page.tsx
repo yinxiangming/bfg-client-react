@@ -11,6 +11,8 @@ import {
   buildOrganizationJsonLd,
   buildWebSiteJsonLd,
   jsonLdScript,
+  localeTag,
+  openGraphLocale,
 } from '@/utils/seo'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 import { fetchRenderedCmsPage } from '@/services/storefrontCmsApi'
@@ -41,15 +43,13 @@ export async function generateMetadata(): Promise<Metadata> {
   // and were previously ignored in favour of the generic site description.
   const description =
     clampDescription(pageData?.meta_description) || clampDescription(config?.site_description)
-  // A bare site name ranks for nothing. Lead with what the store sells and where it ships,
-  // which is also the sentence generative engines quote when asked for NZ suppliers.
-  const title =
-    pageData?.meta_title?.trim() ||
-    (description ? `${siteName} – Arduino, Raspberry Pi & Electronics NZ` : siteName)
+  // A bare site name ranks for nothing, so a store should set the CMS page's meta_title to
+  // something that says what it sells. Only that field can know — this file cannot invent it.
+  const title = pageData?.meta_title?.trim() || siteName
 
   return {
     // `absolute` opts out of the root '%s | siteName' template so the homepage title
-    // is not 'GeekStudio | GeekStudio'.
+    // is not '<site name> | <site name>'.
     title: { absolute: title },
     description,
     alternates: { canonical: origin || '/' },
@@ -59,6 +59,8 @@ export async function generateMetadata(): Promise<Metadata> {
       type: 'website',
       url: origin || undefined,
       siteName,
+      // A page-level openGraph replaces the root's wholesale, so locale is repeated here.
+      locale: openGraphLocale(locale, config?.country),
     },
     twitter: { card: 'summary_large_image', title, description },
   }
@@ -72,12 +74,20 @@ async function getPageData(slug: string, locale: string, requestHost?: string) {
 
 /**
  * Organization + WebSite graph. This is the entity block search and generative engines read to
- * answer "who is GeekStudio" — it is emitted once, on the homepage, and referenced by @id
- * elsewhere.
+ * answer "who is this store" — emitted once, on the homepage, and referenced by @id elsewhere.
  */
-function SiteJsonLd({ origin, config }: { origin: string; config: any }) {
-  if (!origin) return null
-  const siteName = config?.site_name?.trim() || 'GeekStudio'
+function SiteJsonLd({
+  origin,
+  config,
+  locale,
+}: {
+  origin: string
+  config: any
+  locale: string
+}) {
+  const siteName = config?.site_name?.trim()
+  // No origin means no absolute @id, and no site name means no entity worth describing.
+  if (!origin || !siteName) return null
   const description = clampDescription(config?.site_description, 5000) || undefined
   const graph = [
     buildOrganizationJsonLd(origin, {
@@ -86,8 +96,10 @@ function SiteJsonLd({ origin, config }: { origin: string; config: any }) {
       email: config?.contact_email || undefined,
       phone: config?.contact_phone || undefined,
       socials: [config?.facebook_url, config?.twitter_url, config?.instagram_url],
+      country: config?.country,
+      currency: config?.default_currency,
     }),
-    buildWebSiteJsonLd(origin, siteName, description),
+    buildWebSiteJsonLd(origin, siteName, description, localeTag(locale, config?.country)),
   ]
   return (
     <script
@@ -112,7 +124,7 @@ export default async function Page() {
   const extensions = await loadExtensions()
   const replacements = getPageSlotReplacements(extensions, 'storefront/home')
   const rootReplace = replacements.get(ROOT_SLOT_ID)
-  const siteJsonLd = <SiteJsonLd origin={origin} config={config} />
+  const siteJsonLd = <SiteJsonLd origin={origin} config={config} locale={locale} />
 
   if (rootReplace?.component) {
     const RootComponent = rootReplace.component

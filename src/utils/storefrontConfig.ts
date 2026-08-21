@@ -53,6 +53,9 @@ export type StorefrontConfig = {
   twitter_url: string
   instagram_url: string
   default_currency: string
+  /** ISO 3166-1 alpha-2, or '' when the workspace has not declared a market. */
+  country?: string
+  supported_languages?: string[]
   top_bar_announcement: string
   footer_copyright: string
   site_announcement: string
