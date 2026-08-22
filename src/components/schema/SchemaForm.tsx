@@ -986,7 +986,7 @@ export default function SchemaForm<T extends Record<string, any>>({
     const isCollapsible = block.className === 'collapse'
 
     const blockContent = (
-      <Grid container spacing={2}>
+      <Grid container spacing={3}>
         {block.fields.map((field) => (
           <Grid
             key={field.field}
@@ -1017,7 +1017,17 @@ export default function SchemaForm<T extends Record<string, any>>({
             }}
             onClick={() => toggleBlock(blockIndex)}
           >
-            <Typography variant="h6">{block.title || t('common.schemaForm.details')}</Typography>
+            <Typography
+              component="h3"
+              sx={{
+                fontFamily: 'var(--at-block-title-font, inherit)',
+                fontSize: 'var(--at-block-title-size, 13px)',
+                fontWeight: 600,
+                color: 'var(--at-block-title-fg, var(--mui-palette-text-primary))'
+              }}
+            >
+              {block.title || t('common.schemaForm.details')}
+            </Typography>
             <IconButton size="small">
               <i className={isCollapsed ? 'tabler-chevron-down' : 'tabler-chevron-up'} />
             </IconButton>
@@ -1049,7 +1059,7 @@ export default function SchemaForm<T extends Record<string, any>>({
     
     // Legacy: render fields directly
     return (
-      <Grid container spacing={2}>
+      <Grid container spacing={3}>
         {fields.map(field => (
           <Fragment key={field.field}>
             <Grid
@@ -1078,16 +1088,35 @@ export default function SchemaForm<T extends Record<string, any>>({
       elevation={0}
       className="at-schema-form"
       sx={{
-        backgroundColor: 'var(--at-card-bg)',
+        backgroundColor: 'var(--at-card-bg, var(--mui-palette-background-paper))',
         border: '1px solid',
-        borderColor: 'var(--at-card-border)',
-        borderRadius: 'var(--at-card-radius)',
-        boxShadow: 'var(--at-card-shadow)'
+        // Fallbacks throughout: an undefined custom property makes the whole
+        // declaration invalid, and `border-color` then falls back to
+        // currentColor — a near-black box in light mode.
+        borderColor: 'var(--at-card-border, var(--mui-palette-divider))',
+        borderRadius: 'var(--at-card-radius, 8px)',
+        boxShadow: 'var(--at-card-shadow, none)',
+        // The action bar below sticks to the bottom of whatever scrolls — a
+        // Dialog's content area, or the page. `overflow: hidden` (MUI's Card
+        // default) would trap it inside the card and it would never stick.
+        overflow: 'visible'
       }}
     >
-      <CardContent>
+      <CardContent sx={{ p: 6, '&:last-child': { pb: 0 } }}>
         {!hideTitle && schema.title && (
-          <Typography variant="h5" sx={{ mb: 4, fontFamily: 'var(--at-font-display)' }}>
+          <Typography
+            component="h2"
+            sx={{
+              mb: 5,
+              fontFamily: 'var(--at-font-display, inherit)',
+              // Was h5 (1.5rem) — a display size for what is really a panel
+              // heading, and the loudest thing in any edit dialog.
+              fontSize: '0.9375rem',
+              fontWeight: 600,
+              lineHeight: 1.5,
+              color: 'var(--at-block-title-fg, var(--mui-palette-text-primary))'
+            }}
+          >
             {schema.title}
           </Typography>
         )}
@@ -1096,13 +1125,33 @@ export default function SchemaForm<T extends Record<string, any>>({
           {renderFields()}
 
           {!hideActions && (
-            <Box sx={{ display: 'flex', gap: 2, mt: 4, justifyContent: 'flex-end' }}>
+            <Box
+              sx={{
+                position: 'sticky',
+                bottom: 0,
+                zIndex: 2,
+                display: 'flex',
+                gap: 2,
+                justifyContent: 'flex-end',
+                mt: 6,
+                // Bleed to the card edges so the rule reads as a footer, not a
+                // floating strip. Matches CardContent's p: 6 above.
+                mx: -6,
+                px: 6,
+                py: 3,
+                borderTop: '1px solid',
+                borderColor: 'var(--at-card-border, var(--mui-palette-divider))',
+                backgroundColor: 'var(--at-card-bg, var(--mui-palette-background-paper))',
+                borderEndStartRadius: 'inherit',
+                borderEndEndRadius: 'inherit'
+              }}
+            >
               {onCancel && (
                 <Button
                   variant="outlined"
                   onClick={onCancel}
                   disabled={loading}
-                  sx={{ textTransform: 'none', borderRadius: 'var(--at-control-radius)' }}
+                  sx={{ textTransform: 'none', borderRadius: 'var(--at-control-radius, 8px)' }}
                 >
                   {t('common.schemaForm.cancel')}
                 </Button>
@@ -1113,11 +1162,11 @@ export default function SchemaForm<T extends Record<string, any>>({
                 disabled={loading}
                 sx={{
                   textTransform: 'none',
-                  borderRadius: 'var(--at-control-radius)',
+                  borderRadius: 'var(--at-control-radius, 8px)',
                   boxShadow: 'none',
-                  backgroundColor: 'var(--at-accent)',
-                  color: 'var(--at-accent-fg)',
-                  '&:hover': { backgroundColor: 'var(--at-accent-strong)' }
+                  backgroundColor: 'var(--at-accent, var(--mui-palette-primary-main))',
+                  color: 'var(--at-accent-fg, var(--mui-palette-primary-contrastText))',
+                  '&:hover': { backgroundColor: 'var(--at-accent-strong, var(--mui-palette-primary-dark))' }
                 }}
               >
                 {loading ? t('common.schemaForm.saving') : t('common.schemaForm.save')}

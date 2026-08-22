@@ -5,16 +5,16 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import TextField from '@mui/material/TextField'
-import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
-import FormControl from '@mui/material/FormControl'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 import CircularProgress from '@mui/material/CircularProgress'
 import Stack from '@mui/material/Stack'
+import { alpha } from '@mui/material/styles'
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
+import CustomTextField from '@/components/ui/TextField'
 import { apiFetch, buildApiUrl, API_VERSIONS } from '@/utils/api'
 import { getCategories, uploadProductMedia } from '@/services/store'
 import type { Category } from '@/services/store'
@@ -127,18 +127,16 @@ export default function ProductEntryForm() {
   return (
     <Box>
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
+      <Box sx={{ mb: 2 }}>
         <IconButton size='small' onClick={() => router.push('/admin/m')} title={t('back')}>
           <span className='iconify' data-icon='mdi:arrow-left' />
         </IconButton>
-        <Typography variant='h6' sx={{ fontWeight: 600 }}>
-          {t('title')}
-        </Typography>
       </Box>
+      <AdminPageHeader title={t('title')} />
 
       <Stack spacing={2.5}>
         {/* Product model */}
-        <TextField
+        <CustomTextField
           inputRef={nameRef}
           value={name}
           onChange={e => setName(e.target.value)}
@@ -152,7 +150,7 @@ export default function ProductEntryForm() {
         />
 
         {/* Quantity */}
-        <TextField
+        <CustomTextField
           type='number'
           value={quantity}
           onChange={e => setQuantity(e.target.value === '' ? '' : Math.max(1, parseInt(e.target.value, 10) || 1))}
@@ -164,7 +162,7 @@ export default function ProductEntryForm() {
         />
 
         {/* Storage location */}
-        <TextField
+        <CustomTextField
           value={locationCode}
           onChange={e => setLocationCode(e.target.value)}
           fullWidth
@@ -175,29 +173,34 @@ export default function ProductEntryForm() {
         />
 
         {/* Category */}
-        <FormControl fullWidth sx={mobileFieldSx}>
-          <Select
-            value={categoryId}
-            onChange={e => setCategoryId(e.target.value as number | '')}
-            displayEmpty
-            renderValue={value => {
-              if (categoryId === '') {
-                return <span style={{ color: 'rgba(0,0,0,0.6)' }}>{t('category')}</span>
-              }
-              const selected = categories.find(cat => String(cat.id) === String(value))
-              return selected?.name || ''
-            }}
-          >
-            <MenuItem value=''>
-              <em>{t('categoryNone')}</em>
+        <CustomTextField
+          select
+          fullWidth
+          value={categoryId}
+          onChange={e => setCategoryId(e.target.value === '' ? '' : Number(e.target.value))}
+          sx={mobileFieldSx}
+          slotProps={{
+            select: {
+              displayEmpty: true,
+              renderValue: (value: unknown) => {
+                if (categoryId === '') {
+                  return <span style={{ color: 'var(--mui-palette-text-secondary)' }}>{t('category')}</span>
+                }
+                const selected = categories.find(cat => String(cat.id) === String(value))
+                return selected?.name || ''
+              },
+            },
+          }}
+        >
+          <MenuItem value=''>
+            <em>{t('categoryNone')}</em>
+          </MenuItem>
+          {categories.map(cat => (
+            <MenuItem key={cat.id} value={cat.id}>
+              {cat.name}
             </MenuItem>
-            {categories.map(cat => (
-              <MenuItem key={cat.id} value={cat.id}>
-                {cat.name}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+          ))}
+        </CustomTextField>
 
         {/* Photos */}
         <Box>
@@ -234,7 +237,14 @@ export default function ProductEntryForm() {
                   <IconButton
                     size='small'
                     onClick={() => removePhoto(idx)}
-                    sx={{ position: 'absolute', top: 0, right: 0, bgcolor: 'rgba(0,0,0,0.5)', color: '#fff', p: 0.25 }}
+                    sx={{
+                      position: 'absolute',
+                      top: 0,
+                      right: 0,
+                      bgcolor: theme => alpha(theme.palette.common.black, 0.5),
+                      color: 'common.white',
+                      p: 0.25,
+                    }}
                   >
                     <span className='iconify text-sm' data-icon='mdi:close' />
                   </IconButton>
@@ -251,18 +261,30 @@ export default function ProductEntryForm() {
           </Alert>
         )}
 
-        {/* Submit */}
-        <Button
-          variant='contained'
-          size='large'
-          fullWidth
-          onClick={handleSubmit}
-          disabled={isSubmitting}
-          startIcon={isSubmitting ? <CircularProgress size={18} color='inherit' /> : undefined}
-          sx={{ py: 1.5, fontWeight: 600 }}
+        {/* Submit — docked: the form grows with every photo attached, so a
+            trailing button walks off the bottom of a phone screen. */}
+        <Box
+          sx={{
+            position: 'sticky',
+            bottom: 0,
+            py: 2,
+            bgcolor: 'background.paper',
+            borderTop: '1px solid',
+            borderColor: 'divider',
+          }}
         >
-          {isSubmitting ? t('submitting') : t('submit')}
-        </Button>
+          <Button
+            variant='contained'
+            size='large'
+            fullWidth
+            onClick={handleSubmit}
+            disabled={isSubmitting}
+            startIcon={isSubmitting ? <CircularProgress size={18} color='inherit' /> : undefined}
+            sx={{ py: 1.5, fontWeight: 600 }}
+          >
+            {isSubmitting ? t('submitting') : t('submit')}
+          </Button>
+        </Box>
       </Stack>
 
       <Snackbar

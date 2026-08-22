@@ -5,23 +5,25 @@
  * Overview of all workspaces the current user manages.
  */
 
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import WorkspaceGrid from '@/components/platform/WorkspaceGrid'
 import Link from 'next/link'
+import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 
 export default function PlatformDashboardPage() {
   return (
-    <div className="p-6">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Platform Dashboard</h1>
-        <Button variant="contained" component={Link} href="/admin/platform/workspaces/new">
-          Create Workspace
-        </Button>
-      </div>
-      <p className="text-muted-foreground mb-6">
-        Manage your workspaces, subscriptions, and platform settings.
-      </p>
+    <Box>
+      <AdminPageHeader
+        title='Platform Dashboard'
+        subtitle='Manage your workspaces, subscriptions, and platform settings.'
+        actions={
+          <Button variant='contained' component={Link} href='/admin/platform/workspaces/new'>
+            Create Workspace
+          </Button>
+        }
+      />
       <WorkspaceGrid />
-    </div>
+    </Box>
   )
 }

@@ -635,11 +635,11 @@ export default function SchemaTable<T extends { id: number | string }>({
         elevation={0}
         className="at-schema-table"
         sx={{
-          backgroundColor: 'var(--at-card-bg)',
-          boxShadow: 'var(--at-card-shadow)',
+          backgroundColor: 'var(--at-card-bg, var(--mui-palette-background-paper))',
+          boxShadow: 'var(--at-card-shadow, none)',
           border: '1px solid',
-          borderColor: 'var(--at-card-border)',
-          borderRadius: 'var(--at-card-radius)',
+          borderColor: 'var(--at-card-border, var(--mui-palette-divider))',
+          borderRadius: 'var(--at-card-radius, 8px)',
           width: '100%',
           display: 'flex',
           flexDirection: 'column',
@@ -652,7 +652,7 @@ export default function SchemaTable<T extends { id: number | string }>({
         {schema.summaryConfig && (effectiveSummary || summaryLoading) && (
           <CardContent
             sx={{
-              py: 1.25, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider)',
+              py: 1.25, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider, var(--mui-palette-divider))',
               display: 'flex', gap: 3, flexWrap: 'wrap', alignItems: 'baseline',
               backgroundColor: summaryIsSelection
                 ? 'var(--at-selected-bg, rgba(105,108,255,0.08))'
@@ -690,7 +690,7 @@ export default function SchemaTable<T extends { id: number | string }>({
         {(selectedRows.size > 0 || allMatchingSelected) && (
           <CardContent
             sx={{
-              py: 1, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider)',
+              py: 1, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider, var(--mui-palette-divider))',
               display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap',
               backgroundColor: 'var(--at-selected-bg, rgba(105,108,255,0.08))'
             }}
@@ -712,7 +712,7 @@ export default function SchemaTable<T extends { id: number | string }>({
         )}
 
         {/* Toolbar with Search, Filters, and Actions */}
-        <CardContent sx={{ py: 2, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider)' }}>
+        <CardContent sx={{ py: 2, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider, var(--mui-palette-divider))' }}>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
             {/* Search */}
             {schema.searchFields && (
@@ -980,15 +980,15 @@ export default function SchemaTable<T extends { id: number | string }>({
                   sx={{
                     textTransform: 'none',
                     fontWeight: 500,
-                    borderRadius: 'var(--at-control-radius)',
+                    borderRadius: 'var(--at-control-radius, 8px)',
                     boxShadow: 'none',
                     height: '38px',
                     fontSize: '0.875rem',
                     ...(action.type === 'primary'
                       ? {
-                          backgroundColor: 'var(--at-accent)',
-                          color: 'var(--at-accent-fg)',
-                          '&:hover': { backgroundColor: 'var(--at-accent-strong)' }
+                          backgroundColor: 'var(--at-accent, var(--mui-palette-primary-main))',
+                          color: 'var(--at-accent-fg, var(--mui-palette-primary-contrastText))',
+                          '&:hover': { backgroundColor: 'var(--at-accent-strong, var(--mui-palette-primary-dark))' }
                         }
                       : {})
                   }}
@@ -1184,7 +1184,7 @@ export default function SchemaTable<T extends { id: number | string }>({
           py: 2,
           px: 3,
           borderTop: '1px solid',
-          borderColor: 'var(--at-divider)'
+          borderColor: 'var(--at-divider, var(--mui-palette-divider))'
         }}>
           {/* Left: Showing info + Items per page */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
@@ -1232,14 +1232,14 @@ export default function SchemaTable<T extends { id: number | string }>({
                   height: 36,
                   fontSize: '0.875rem',
                   fontWeight: 500,
-                  borderRadius: 'var(--at-control-radius)',
-                  borderColor: 'var(--at-card-border)'
+                  borderRadius: 'var(--at-control-radius, 8px)',
+                  borderColor: 'var(--at-card-border, var(--mui-palette-divider))'
                 },
                 '& .MuiPaginationItem-root.Mui-selected': {
-                  backgroundColor: 'var(--at-accent)',
-                  color: 'var(--at-accent-fg)',
+                  backgroundColor: 'var(--at-accent, var(--mui-palette-primary-main))',
+                  color: 'var(--at-accent-fg, var(--mui-palette-primary-contrastText))',
                   borderColor: 'transparent',
-                  '&:hover': { backgroundColor: 'var(--at-accent-strong)' }
+                  '&:hover': { backgroundColor: 'var(--at-accent-strong, var(--mui-palette-primary-dark))' }
                 },
                 '& .MuiPaginationItem-icon': {
                   fontSize: '1.25rem'

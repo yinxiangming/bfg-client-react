@@ -267,7 +267,7 @@ export default function CreateOrderModal({ open, onClose, onSuccess }: CreateOrd
           </Alert>
         )}
 
-        <Typography variant='subtitle2' color='text.secondary' sx={{ mt: 1, mb: 1 }}>
+        <Typography sx={{ mt: 1, mb: 1, fontSize: 'var(--at-block-title-size, 13px)', fontWeight: 600, color: 'text.primary' }}>
           {t('orders.createOrderModal.products')}
         </Typography>
         <Autocomplete
@@ -369,7 +369,7 @@ export default function CreateOrderModal({ open, onClose, onSuccess }: CreateOrd
           </Table>
         )}
 
-        <Typography variant='subtitle2' color='text.secondary' sx={{ mt: 3, mb: 1 }}>
+        <Typography sx={{ mt: 3, mb: 1, fontSize: 'var(--at-block-title-size, 13px)', fontWeight: 600, color: 'text.primary' }}>
           {t('orders.createOrderModal.fulfillmentMethod')}
         </Typography>
         <RadioGroup
@@ -382,7 +382,7 @@ export default function CreateOrderModal({ open, onClose, onSuccess }: CreateOrd
           <FormControlLabel value='pickup' control={<Radio />} label={t('orders.createOrderModal.fulfillment.pickup')} />
         </RadioGroup>
 
-        <Typography variant='subtitle2' color='text.secondary' sx={{ mt: 3, mb: 1 }}>
+        <Typography sx={{ mt: 3, mb: 1, fontSize: 'var(--at-block-title-size, 13px)', fontWeight: 600, color: 'text.primary' }}>
           {t('orders.createOrderModal.customer')}
         </Typography>
         {!createNewCustomer ? (

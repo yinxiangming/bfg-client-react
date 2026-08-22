@@ -10,7 +10,6 @@ import { useTranslations } from 'next-intl'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
-import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
@@ -18,6 +17,7 @@ import MenuItem from '@mui/material/MenuItem'
 
 // Component Imports
 import CustomTextField from '@/components/ui/TextField'
+import { SETTINGS_GUTTER, SettingsActionBar } from '@/components/admin/settings/SettingsSection'
 
 // Hook Imports
 import { useApiData } from '@/hooks/useApiData'
@@ -82,7 +82,7 @@ const WebSettingsTab = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', px: SETTINGS_GUTTER, py: 6 }}>
         <CircularProgress />
       </Box>
     )
@@ -90,20 +90,20 @@ const WebSettingsTab = () => {
 
   if (error) {
     return (
-      <Box sx={{ p: 4 }}>
+      <Box sx={{ px: SETTINGS_GUTTER, py: 5 }}>
         <Alert severity='error'>{error}</Alert>
       </Box>
     )
   }
 
   return (
-    <CardContent>
-      <form onSubmit={handleSubmit}>
-        <Typography variant='h6' sx={{ mb: 4 }}>
+    <form onSubmit={handleSubmit}>
+      <Box sx={{ px: SETTINGS_GUTTER, py: 5 }}>
+        <Typography component='h3' sx={{ mb: 4, fontSize: '0.9375rem', fontWeight: 600, lineHeight: 1.5 }}>
           {t('settings.web.settingsTab.title')}
         </Typography>
 
-        <Grid container spacing={2}>
+        <Grid container spacing={3}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <CustomTextField
               select
@@ -140,17 +140,17 @@ const WebSettingsTab = () => {
             />
           </Grid>
         </Grid>
+      </Box>
 
-        <Box sx={{ display: 'flex', gap: 2, mt: 4 }}>
-          <Button type='submit' variant='contained'>
-            {t('settings.web.settingsTab.actions.saveChanges')}
-          </Button>
-          <Button type='button' variant='tonal' color='secondary' onClick={() => refetch()}>
-            {t('settings.web.settingsTab.actions.reset')}
-          </Button>
-        </Box>
-      </form>
-    </CardContent>
+      <SettingsActionBar>
+        <Button type='submit' variant='contained'>
+          {t('settings.web.settingsTab.actions.saveChanges')}
+        </Button>
+        <Button type='button' variant='tonal' color='secondary' onClick={() => refetch()}>
+          {t('settings.web.settingsTab.actions.reset')}
+        </Button>
+      </SettingsActionBar>
+    </form>
   )
 }
 

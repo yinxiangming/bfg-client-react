@@ -598,8 +598,10 @@ const Settings = () => {
                           size={{ xs: 12, md: 6 }}
                           sx={{
                             p: 6,
-                            borderTop: { xs: '1px solid', md: 'none' },
-                            borderLeft: { xs: 'none', md: '1px solid' },
+                            // Colour inside the shorthand: a responsive border
+                            // shorthand resets the colour to currentColor.
+                            borderTop: { xs: '1px solid var(--mui-palette-divider)', md: 'none' },
+                            borderLeft: { xs: 'none', md: '1px solid var(--mui-palette-divider)' },
                             borderColor: 'divider',
                             bgcolor: theme => alpha(theme.palette.error.main, 0.06)
                           }}

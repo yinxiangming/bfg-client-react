@@ -120,8 +120,12 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
       suppressHydrationWarning
     >
       <head>
-        {/* Runs before any paint to avoid admin skin flash; safe on non-admin pages. */}
-        <script dangerouslySetInnerHTML={{ __html: "(function(){try{var s=localStorage.getItem('admin-skin');document.documentElement.setAttribute('data-admin-skin',(s==='compact'||s==='carbon')?s:'slate');}catch(e){document.documentElement.setAttribute('data-admin-skin','slate');}})();" }} />
+        {/* Runs before any paint to avoid an admin skin flash. Admin paths only:
+            the attribute is what scopes the admin design system (see
+            components/theme/adminSurface.ts), so setting it everywhere pulled
+            back-office styling into the storefront. `AdminSkinProvider` takes
+            over for client-side navigation, including removal on the way out. */}
+        <script dangerouslySetInnerHTML={{ __html: "(function(){try{if(location.pathname.indexOf('/admin')!==0)return;var s=localStorage.getItem('admin-skin');document.documentElement.setAttribute('data-admin-skin',(s==='compact'||s==='carbon')?s:'slate');}catch(e){document.documentElement.setAttribute('data-admin-skin','slate');}})();" }} />
         <script src='https://code.iconify.design/3/3.1.1/iconify.min.js' async></script>
       </head>
       <body className='flex is-full min-bs-full flex-auto flex-col' data-mode={defaultSystemMode} {...htmlModeAttrs}>

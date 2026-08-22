@@ -299,7 +299,7 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
 
   return (
     <BaseDataProvider>
-      <Grid container spacing={4}>
+      <Grid container spacing={3}>
         <Grid size={{ xs: 12 }}>
           <OrderEditHeader 
             order={order} 
@@ -320,7 +320,7 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
           />
         </Grid>
         <Grid size={{ xs: 12, md: 8 }}>
-          <Grid container spacing={4}>
+          <Grid container spacing={3}>
             {beforeSlots.map(
               ext =>
                 ext.component && (
@@ -416,7 +416,7 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
           </Grid>
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
-          <Grid container spacing={4}>
+          <Grid container spacing={3}>
             {visibleSlots.includes('CustomerDetails') && (
               <Grid size={{ xs: 12 }} id='section-customer'>
                 {renderSlot(

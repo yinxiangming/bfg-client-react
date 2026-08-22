@@ -5,8 +5,6 @@ import { useEffect, useState } from 'react'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
 import Checkbox from '@mui/material/Checkbox'
 import CircularProgress from '@mui/material/CircularProgress'
 import FormControlLabel from '@mui/material/FormControlLabel'
@@ -15,6 +13,11 @@ import Snackbar from '@mui/material/Snackbar'
 import Typography from '@mui/material/Typography'
 import { useTranslations } from 'next-intl'
 
+import {
+  SETTINGS_GUTTER,
+  SettingsActionBar,
+  SettingsSection
+} from '@/components/admin/settings/SettingsSection'
 import CustomTextField from '@/components/ui/TextField'
 import {
   getWorkspaceSettings,
@@ -131,27 +134,24 @@ const StorePluginsTab = () => {
   }
 
   return (
-    <Card sx={{ boxShadow: 'none' }}>
-      <CardContent sx={{ p: 6 }}>
+    <>
+      <Box sx={{ px: SETTINGS_GUTTER, pt: 5, pb: 3 }}>
         {error && (
           <Alert severity='error' sx={{ mb: 4 }} onClose={() => setError(null)}>
             {error}
           </Alert>
         )}
 
-        <Typography variant='h6' sx={{ mb: 2 }}>
+        <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600 }}>
           {t('settings.store.settings.title')}
         </Typography>
-        <Typography variant='body2' color='text.secondary' sx={{ mb: 4 }}>
+        <Typography variant='body2' color='text.secondary' sx={{ mt: 1 }}>
           {t('settings.store.settings.description')}
         </Typography>
+      </Box>
 
-        <Grid container spacing={2}>
-          <Grid size={{ xs: 12 }}>
-            <Typography variant='subtitle2' color='text.secondary' sx={{ mb: 2 }}>
-              {t('settings.store.settings.fields.productIdentifiers.title')}
-            </Typography>
-          </Grid>
+      <SettingsSection title={t('settings.store.settings.fields.productIdentifiers.title')}>
+        <Grid container spacing={3}>
           <Grid size={{ xs: 12, sm: 6 }}>
             <CustomTextField
               fullWidth
@@ -170,11 +170,12 @@ const StorePluginsTab = () => {
               placeholder={t('settings.store.settings.fields.productIdentifiers.barcodePrefix.placeholder')}
             />
           </Grid>
+        </Grid>
+      </SettingsSection>
 
+      <SettingsSection title={t('settings.store.settings.fields.productScanner.title')}>
+        <Grid container spacing={3}>
           <Grid size={{ xs: 12 }}>
-            <Typography variant='subtitle2' color='text.secondary' sx={{ mb: 1 }}>
-              {t('settings.store.settings.fields.productScanner.title')}
-            </Typography>
             <FormControlLabel
               control={
                 <Checkbox
@@ -184,7 +185,7 @@ const StorePluginsTab = () => {
               }
               label={
                 <Box>
-                  <Typography variant='body1'>{t('settings.store.settings.fields.productScanner.enabled.label')}</Typography>
+                  <Typography variant='body2'>{t('settings.store.settings.fields.productScanner.enabled.label')}</Typography>
                   <Typography variant='caption' color='text.secondary'>
                     {t('settings.store.settings.fields.productScanner.enabled.help')}
                   </Typography>
@@ -226,30 +227,30 @@ const StorePluginsTab = () => {
             </>
           )}
         </Grid>
+      </SettingsSection>
 
-        <Box sx={{ mt: 6 }}>
-          <Button
-            variant='contained'
-            onClick={handleSave}
-            disabled={saving}
-            startIcon={saving ? <CircularProgress size={16} /> : <i className='tabler-check' />}
-          >
-            {saving ? t('settings.store.settings.actions.saving') : t('settings.store.settings.actions.save')}
-          </Button>
-        </Box>
-
-        <Snackbar
-          open={success}
-          autoHideDuration={3000}
-          onClose={() => setSuccess(false)}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      <SettingsActionBar>
+        <Button
+          variant='contained'
+          onClick={handleSave}
+          disabled={saving}
+          startIcon={saving ? <CircularProgress size={16} /> : <i className='tabler-check' />}
         >
-          <Alert onClose={() => setSuccess(false)} severity='success' sx={{ width: '100%' }}>
-            {t('settings.store.settings.snackbar.saved')}
-          </Alert>
-        </Snackbar>
-      </CardContent>
-    </Card>
+          {saving ? t('settings.store.settings.actions.saving') : t('settings.store.settings.actions.save')}
+        </Button>
+      </SettingsActionBar>
+
+      <Snackbar
+        open={success}
+        autoHideDuration={3000}
+        onClose={() => setSuccess(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert onClose={() => setSuccess(false)} severity='success' sx={{ width: '100%' }}>
+          {t('settings.store.settings.snackbar.saved')}
+        </Alert>
+      </Snackbar>
+    </>
   )
 }
 

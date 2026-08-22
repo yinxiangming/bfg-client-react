@@ -78,7 +78,7 @@ const DeliveryCard = ({ order }: DeliveryCardProps) => {
               <i className='tabler-truck-delivery' />
             </Avatar>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography variant='body1' sx={{ fontWeight: 500 }}>
+              <Typography variant='body2' sx={{ fontWeight: 500 }}>
                 {t('orders.delivery.deliveryStatusLabel')}
               </Typography>
               <Chip

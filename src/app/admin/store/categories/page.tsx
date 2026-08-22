@@ -8,12 +8,12 @@ import { useLocale, useTranslations } from 'next-intl'
 
 // MUI Imports
 import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
 import CircularProgress from '@mui/material/CircularProgress'
 import Alert from '@mui/material/Alert'
 import Button from '@mui/material/Button'
 
 // Component Imports
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import CategoryTreeTable from '@/components/category/CategoryTreeTable'
 
 // Service Imports
@@ -68,17 +68,18 @@ export default function CategoriesPage() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Typography variant='h4'>
-          {t('categories.page.title')}
-        </Typography>
-        <Button
-          variant="contained"
-          onClick={() => router.push('/admin/store/categories/new')}
-        >
-          {t('categories.page.actions.addCategory')}
-        </Button>
-      </Box>
+      <AdminPageHeader
+        title={t('categories.page.title')}
+        subtitle={t('categories.page.subtitle')}
+        actions={
+          <Button
+            variant="contained"
+            onClick={() => router.push('/admin/store/categories/new')}
+          >
+            {t('categories.page.actions.addCategory')}
+          </Button>
+        }
+      />
       <CategoryTreeTable
         categories={categories || []}
         onActionClick={handleActionClick}

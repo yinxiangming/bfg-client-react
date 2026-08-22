@@ -8,10 +8,11 @@ import { useTranslations } from 'next-intl'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import Chip from '@mui/material/Chip'
 import IconButton from '@mui/material/IconButton'
 
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import SchemaTable from '@/components/schema/SchemaTable'
+import StatusBadge from '@/components/schema/StatusBadge'
 import type { ListSchema, SchemaAction, SchemaFilter } from '@/types/schema'
 import { usePagedData } from '@/hooks/usePagedData'
 import { getOrdersPage, getOrder, deleteOrder, updateOrder, type Order, type OrderItemSummary } from '@/services/store'
@@ -20,9 +21,8 @@ import { formatCurrency, formatDate } from '@/utils/format'
 import { bfgApi } from '@/utils/api'
 import Button from '@mui/material/Button'
 import Popover from '@mui/material/Popover'
-import FormControl from '@mui/material/FormControl'
-import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
+import CustomTextField from '@/components/ui/TextField'
 import OrderPackagesModal from '@/views/admin/store/orders/list/OrderPackagesModal'
 import CreateOrderModal from '@/views/admin/store/orders/list/CreateOrderModal'
 
@@ -78,14 +78,14 @@ const buildOrdersSchema = (
             {items.length > 0 && (
               <Box component='span' display='block'>
                 {items.map((i, idx) => (
-                  <Typography key={idx} variant='body2' color='text.secondary' sx={{ fontSize: '0.9375rem', lineHeight: 1.5 }} component='span' display='block'>
+                  <Typography key={idx} variant='body2' color='text.secondary' sx={{ lineHeight: 1.5 }} component='span' display='block'>
                     {i.product_name} × {i.quantity}
                   </Typography>
                 ))}
               </Box>
             )}
             {note && (
-              <Typography variant='body2' color='text.secondary' sx={{ fontSize: '0.9375rem', fontStyle: 'italic' }} component='span' display='block'>
+              <Typography variant='body2' color='text.secondary' sx={{ fontStyle: 'italic' }} component='span' display='block'>
                 {t('orders.listPage.schema.columns.noteLabel')}: {note}
               </Typography>
             )}
@@ -133,21 +133,9 @@ const buildOrdersSchema = (
           if (row?.id != null) openStatusPopover(row.id, e.currentTarget as HTMLElement)
         }
         return (
-          <Chip
-            label={label}
-            size='small'
-            color={STATUS_COLORS[status] || 'default'}
-            variant='filled'
-            onClick={handleClick}
-            sx={{
-              cursor: 'pointer',
-              height: 24,
-              fontSize: '0.8125rem',
-              fontWeight: 500,
-              ...(status === 'paid' ? { backgroundColor: '#4caf50', color: '#ffffff' } : {}),
-              '& .MuiChip-label': { px: 1.5 }
-            }}
-          />
+          <Box component='span' onClick={handleClick} sx={{ cursor: 'pointer' }}>
+            <StatusBadge label={label} color={STATUS_COLORS[status] || 'default'} />
+          </Box>
         )
       }
     },
@@ -171,21 +159,9 @@ const buildOrdersSchema = (
           if (row?.id != null) openPaymentPopover(row.id, e.currentTarget as HTMLElement)
         }
         return (
-          <Chip
-            label={label}
-            size='small'
-            color={PAYMENT_COLORS[status] || 'default'}
-            variant='filled'
-            onClick={handleClick}
-            sx={{
-              cursor: 'pointer',
-              height: 24,
-              fontSize: '0.8125rem',
-              fontWeight: 500,
-              ...(status === 'paid' ? { backgroundColor: '#4caf50', color: '#ffffff' } : {}),
-              '& .MuiChip-label': { px: 1.5 }
-            }}
-          />
+          <Box component='span' onClick={handleClick} sx={{ cursor: 'pointer' }}>
+            <StatusBadge label={label} color={PAYMENT_COLORS[status] || 'default'} />
+          </Box>
         )
       }
     },
@@ -420,9 +396,7 @@ export default function OrdersPage() {
 
   return (
     <Box>
-      <Typography variant='h4' sx={{ mb: 4 }}>
-        {t('orders.listPage.title')}
-      </Typography>
+      <AdminPageHeader title={t('orders.listPage.title')} subtitle={t('orders.listPage.subtitle')} />
       {error && (
         <Alert severity='error' sx={{ mb: 2 }}>
           {error}
@@ -458,18 +432,19 @@ export default function OrdersPage() {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
         <Box sx={{ p: 2, minWidth: 150 }}>
-          <FormControl fullWidth size='small' disabled={statusChanging}>
-            <Select
-              value={orderForStatus?.status ?? ''}
-              onChange={(e) => handleStatusSelect(e.target.value)}
-            >
-              <MenuItem value='pending'>{t('orders.status.pending')}</MenuItem>
-              <MenuItem value='paid'>{t('orders.status.paid')}</MenuItem>
-              <MenuItem value='shipped'>{t('orders.status.shipped')}</MenuItem>
-              <MenuItem value='completed'>{t('orders.status.completed')}</MenuItem>
-              <MenuItem value='cancelled'>{t('orders.status.cancelled')}</MenuItem>
-            </Select>
-          </FormControl>
+          <CustomTextField
+            select
+            fullWidth
+            disabled={statusChanging}
+            value={orderForStatus?.status ?? ''}
+            onChange={(e) => handleStatusSelect(e.target.value)}
+          >
+            <MenuItem value='pending'>{t('orders.status.pending')}</MenuItem>
+            <MenuItem value='paid'>{t('orders.status.paid')}</MenuItem>
+            <MenuItem value='shipped'>{t('orders.status.shipped')}</MenuItem>
+            <MenuItem value='completed'>{t('orders.status.completed')}</MenuItem>
+            <MenuItem value='cancelled'>{t('orders.status.cancelled')}</MenuItem>
+          </CustomTextField>
         </Box>
       </Popover>
       <Popover
@@ -479,16 +454,17 @@ export default function OrdersPage() {
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
         <Box sx={{ p: 2, minWidth: 150 }}>
-          <FormControl fullWidth size='small' disabled={paymentChanging}>
-            <Select
-              value={orderForPayment?.payment_status ?? ''}
-              onChange={(e) => handlePaymentSelect(e.target.value)}
-            >
-              <MenuItem value='pending'>{t('orders.paymentStatus.pending')}</MenuItem>
-              <MenuItem value='paid'>{t('orders.paymentStatus.paid')}</MenuItem>
-              <MenuItem value='failed'>{t('orders.paymentStatus.failed')}</MenuItem>
-            </Select>
-          </FormControl>
+          <CustomTextField
+            select
+            fullWidth
+            disabled={paymentChanging}
+            value={orderForPayment?.payment_status ?? ''}
+            onChange={(e) => handlePaymentSelect(e.target.value)}
+          >
+            <MenuItem value='pending'>{t('orders.paymentStatus.pending')}</MenuItem>
+            <MenuItem value='paid'>{t('orders.paymentStatus.paid')}</MenuItem>
+            <MenuItem value='failed'>{t('orders.paymentStatus.failed')}</MenuItem>
+          </CustomTextField>
         </Box>
       </Popover>
     </Box>

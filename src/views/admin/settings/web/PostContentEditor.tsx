@@ -5,13 +5,10 @@ import { useTranslations } from 'next-intl'
 
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
-import Divider from '@mui/material/Divider'
 import FormHelperText from '@mui/material/FormHelperText'
 import IconButton from '@mui/material/IconButton'
 import Snackbar from '@mui/material/Snackbar'
@@ -263,7 +260,7 @@ export default function PostContentEditor({
 
   return (
     <Box>
-      <Typography variant='body2' sx={{ mb: 0.75, fontWeight: 600 }}>
+      <Typography sx={{ fontSize: '0.8125rem', fontWeight: 500, mb: 0.75 }}>
         {label}
         {required ? (
           <Typography component='span' color='error.main'>
@@ -275,38 +272,41 @@ export default function PostContentEditor({
       <Typography variant='body2' color='text.secondary' sx={{ mb: 1.5 }}>
         {t('settings.web.posts.contentEditor.hint')}
       </Typography>
-      <Card variant='outlined' sx={{ borderRadius: 1 }}>
-        <CardContent sx={{ p: 0, '&:last-child': { pb: 0 } }}>
-          <EditorToolbar
-            editor={editor}
-            disabled={disabled}
-            onOpenResize={openResizeDialog}
-            onWarn={message => setToast({ open: true, message, severity: 'warning' })}
-            onOpenMedia={() => setMediaOpen(true)}
-            insertFromLibraryTitle={t('settings.web.posts.contentEditor.toolbar.insertFromLibrary')}
-            resizeImageTitle={t('settings.web.posts.contentEditor.toolbar.resizeImage')}
-            selectImageFirstMessage={t('settings.web.posts.contentEditor.warnings.selectImageFirst')}
-          />
-          <Divider />
-          <Box
-            sx={{
-              minHeight: 320,
-              maxHeight: 560,
-              overflow: 'auto',
-              px: 2,
-              py: 1.5,
-              opacity: disabled ? 0.6 : 1
-            }}
-          >
-            <EditorContent editor={editor} className='post-content-editor-root' />
-          </Box>
-        </CardContent>
-      </Card>
+      <Box
+        sx={{
+          border: '1px solid var(--mui-palette-customColors-inputBorder)',
+          borderRadius: 'var(--at-field-radius, 8px)',
+          overflow: 'hidden'
+        }}
+      >
+        <EditorToolbar
+          editor={editor}
+          disabled={disabled}
+          onOpenResize={openResizeDialog}
+          onWarn={message => setToast({ open: true, message, severity: 'warning' })}
+          onOpenMedia={() => setMediaOpen(true)}
+          insertFromLibraryTitle={t('settings.web.posts.contentEditor.toolbar.insertFromLibrary')}
+          resizeImageTitle={t('settings.web.posts.contentEditor.toolbar.resizeImage')}
+          selectImageFirstMessage={t('settings.web.posts.contentEditor.warnings.selectImageFirst')}
+        />
+        <Box
+          sx={{
+            minHeight: 320,
+            maxHeight: 560,
+            overflow: 'auto',
+            px: 2,
+            py: 1.5,
+            opacity: disabled ? 0.6 : 1
+          }}
+        >
+          <EditorContent editor={editor} className='post-content-editor-root' />
+        </Box>
+      </Box>
       {error ? <FormHelperText error>{error}</FormHelperText> : null}
 
       <Dialog open={resizeOpen} onClose={() => setResizeOpen(false)} fullWidth maxWidth='xs'>
         <DialogTitle>{t('settings.web.posts.contentEditor.resizeDialog.title')}</DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <CustomTextField
             label={t('settings.web.posts.contentEditor.resizeDialog.width')}
             value={resizeWidth}

@@ -85,7 +85,7 @@ const CustomerDetailsCard = ({ order }: CustomerDetailsCardProps) => {
             {getInitials(customerName)}
           </Avatar>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography color='text.primary' sx={{ fontWeight: 500 }}>
+            <Typography variant='body2' color='text.primary' sx={{ fontWeight: 500 }}>
               {customerName}
             </Typography>
             {customer?.customer_number && (
@@ -104,7 +104,7 @@ const CustomerDetailsCard = ({ order }: CustomerDetailsCardProps) => {
               <i className='tabler-building' />
             </Avatar>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-              <Typography color='text.primary' sx={{ fontWeight: 500 }}>
+              <Typography variant='body2' color='text.primary' sx={{ fontWeight: 500 }}>
                 {customer.company_name}
               </Typography>
               {customer.tax_number && (
@@ -120,7 +120,7 @@ const CustomerDetailsCard = ({ order }: CustomerDetailsCardProps) => {
             <i className='tabler-shopping-cart' />
           </Avatar>
           <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <Typography color='text.primary' sx={{ fontWeight: 500 }}>
+            <Typography variant='body2' color='text.primary' sx={{ fontWeight: 500 }}>
               {t('orders.customerCard.itemsCount', { count: itemsPieceCount })}
             </Typography>
             <Typography variant='body2' color='text.secondary'>
@@ -130,7 +130,7 @@ const CustomerDetailsCard = ({ order }: CustomerDetailsCardProps) => {
         </Box>
         {(customer?.user?.email || customer?.user_email) && (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-            <Typography color='text.primary' sx={{ fontWeight: 500 }}>
+            <Typography variant='body2' color='text.primary' sx={{ fontWeight: 500 }}>
               {t('orders.customerCard.contact.title')}
             </Typography>
             <Typography variant='body2' color='text.secondary'>

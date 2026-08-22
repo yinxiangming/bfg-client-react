@@ -6,14 +6,13 @@ import { useLocale, useTranslations } from 'next-intl'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
 import CircularProgress from '@mui/material/CircularProgress'
 import MenuItem from '@mui/material/MenuItem'
 import Snackbar from '@mui/material/Snackbar'
 import Typography from '@mui/material/Typography'
 
 // Component Imports
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import CustomTextField from '@/components/ui/TextField'
 
 import SchemaForm from '@/components/schema/SchemaForm'
@@ -418,115 +417,85 @@ export default function PostEditForm({ postId, listFallback, onCancel, onCreated
         })
 
   return (
-    <Box sx={{ maxWidth: 1100, mx: 'auto', py: 2, px: { xs: 2, md: 3 } }}>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 2, mb: 3 }}>
-        <Button variant='outlined' color='inherit' startIcon={<i className='tabler-arrow-left' />} onClick={onCancel}>
-          {t('settings.web.posts.editPage.back')}
-        </Button>
-        <Typography
-          variant='h4'
-          component='h1'
-          sx={{ flex: '1 1 auto', minWidth: 0, overflowWrap: 'anywhere', wordBreak: 'break-word' }}
-        >
-          {pageTitle}
-        </Typography>
-      </Box>
+    <Box>
+      <AdminPageHeader
+        title={pageTitle}
+        actions={
+          <Button variant='outlined' color='inherit' startIcon={<i className='tabler-arrow-left' />} onClick={onCancel}>
+            {t('settings.web.posts.editPage.back')}
+          </Button>
+        }
+      />
 
-      <Card
-        variant='outlined'
-        sx={{
-          borderRadius: 2,
-          bgcolor: 'background.paper',
-          borderColor: 'divider'
-        }}
-      >
-        <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
-          {detailError ? (
-            <Alert severity='warning' sx={{ mb: 2 }}>
-              {detailError}
-            </Alert>
-          ) : null}
+      {detailError ? (
+        <Alert severity='warning' sx={{ mb: 2 }}>
+          {detailError}
+        </Alert>
+      ) : null}
 
-          {loadingDetail ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
-              <CircularProgress />
-            </Box>
-          ) : (
-            <Box
-              sx={{
-                mt: 2,
-                pt: 2,
-                borderTop: '1px solid',
-                borderColor: 'divider',
-                '& .MuiCard-root': {
-                  boxShadow: 'none',
-                  bgcolor: 'transparent',
-                  backgroundImage: 'none'
-                },
-                '& .MuiCardContent-root': { px: 0, pb: 0, pt: 0 }
-              }}
-            >
-              <SchemaForm
-                key={formKey}
-                schema={postFormSchema}
-                initialData={schemaFormInitialData}
-                onSubmit={handleSubmit}
-                onCancel={onCancel}
-                hideTitle
-                loading={saving}
-                customFieldRenderer={renderPostFormField}
-                formSlots={[
-                  {
-                    afterField: 'featured_image',
-                    children: (
-                      <>
-                        <CustomTextField
-                          select
-                          fullWidth
-                          size='small'
-                          disabled={busy}
-                          sx={{ mb: 2 }}
-                          label={t('settings.web.posts.editDialog.fields.category')}
-                          value={categoryId}
-                          onChange={e => {
-                            const v = e.target.value
-                            handleCategoryChange(v === '' ? '' : Number(v))
-                          }}
-                        >
-                          <MenuItem value=''>
-                            <em>{t('settings.web.posts.editDialog.categoryNone')}</em>
-                          </MenuItem>
-                          {categoryOptions.map(c => (
-                            <MenuItem key={c.id} value={c.id}>
-                              {c.name}
-                            </MenuItem>
-                          ))}
-                        </CustomTextField>
+      {loadingDetail ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}>
+          <CircularProgress />
+        </Box>
+      ) : (
+        <SchemaForm
+          key={formKey}
+          schema={postFormSchema}
+          initialData={schemaFormInitialData}
+          onSubmit={handleSubmit}
+          onCancel={onCancel}
+          hideTitle
+          loading={saving}
+          customFieldRenderer={renderPostFormField}
+          formSlots={[
+            {
+              afterField: 'featured_image',
+              children: (
+                <>
+                  <CustomTextField
+                    select
+                    fullWidth
+                    size='small'
+                    disabled={busy}
+                    sx={{ mb: 2 }}
+                    label={t('settings.web.posts.editDialog.fields.category')}
+                    value={categoryId}
+                    onChange={e => {
+                      const v = e.target.value
+                      handleCategoryChange(v === '' ? '' : Number(v))
+                    }}
+                  >
+                    <MenuItem value=''>
+                      <em>{t('settings.web.posts.editDialog.categoryNone')}</em>
+                    </MenuItem>
+                    {categoryOptions.map(c => (
+                      <MenuItem key={c.id} value={c.id}>
+                        {c.name}
+                      </MenuItem>
+                    ))}
+                  </CustomTextField>
 
-                        {loadingCategory ? (
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
-                            <CircularProgress size={18} />
-                            <Typography variant='caption' color='text.secondary'>
-                              {t('settings.web.posts.editDialog.loadingCategorySchema')}
-                            </Typography>
-                          </Box>
-                        ) : null}
+                  {loadingCategory ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                      <CircularProgress size={18} />
+                      <Typography variant='caption' color='text.secondary'>
+                        {t('settings.web.posts.editDialog.loadingCategorySchema')}
+                      </Typography>
+                    </Box>
+                  ) : null}
 
-                        <PostCustomFieldsBlock
-                          schema={fieldsSchema}
-                          value={customFields}
-                          onChange={setCustomFields}
-                          disabled={busy}
-                        />
-                      </>
-                    )
-                  }
-                ]}
-              />
-            </Box>
-          )}
-        </CardContent>
-      </Card>
+                  <PostCustomFieldsBlock
+                    schema={fieldsSchema}
+                    value={customFields}
+                    onChange={setCustomFields}
+                    disabled={busy}
+                  />
+                </>
+              )
+            }
+          ]}
+        />
+      )}
 
       <Snackbar
         open={snackbar.open}

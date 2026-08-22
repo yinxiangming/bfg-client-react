@@ -5,7 +5,10 @@ import { useMemo } from 'react'
 
 // MUI Imports
 import Autocomplete from '@mui/material/Autocomplete'
-import TextField from '@mui/material/TextField'
+// Label-above field, matching every other control in the admin toolbars. The
+// stock MUI TextField's notched label made this filter ~6px taller than the
+// selects beside it.
+import TextField from '@/components/ui/TextField'
 import Chip from '@mui/material/Chip'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
@@ -61,7 +64,7 @@ export default function CategoryTreeSelect({
   value,
   onChange,
   onOpen,
-  label = 'Categories',
+  label,
   placeholder = 'Select categories',
   loading = false,
   multiple = true
@@ -101,6 +104,10 @@ export default function CategoryTreeSelect({
 
   return (
     <Autocomplete
+      // Autocomplete defaults to medium and passes that down through
+      // renderInput's params, which overrode CustomTextField's small default —
+      // this control rendered 47px tall next to the 38px selects beside it.
+      size='small'
       multiple={multiple}
       options={flatCategories}
       getOptionLabel={(option) => option.displayLabel || option.name || ''}
@@ -137,7 +144,7 @@ export default function CategoryTreeSelect({
         return (
           <TextField
             {...params}
-            label={label}
+            label={label || undefined}
             placeholder={placeholder}
             InputLabelProps={{
               ...params.InputLabelProps,

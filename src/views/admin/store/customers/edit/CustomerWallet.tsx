@@ -20,6 +20,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContentText from '@mui/material/DialogContentText'
+import InputAdornment from '@mui/material/InputAdornment'
 import Snackbar from '@mui/material/Snackbar'
 
 // Type Imports
@@ -170,12 +171,14 @@ const CustomerWallet = ({ customer, onUpdate }: CustomerWalletProps) => {
   const creditLimit = Number(walletData.credit_limit) || 0
 
   return (
-    <Grid container spacing={4}>
+    <Grid container spacing={3}>
       <Grid size={{ xs: 12, md: 8 }}>
         <Card>
           <CardContent>
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-              <Typography variant='h6'>{t('customers.wallet.title')}</Typography>
+              <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600, lineHeight: 1.5 }}>
+                {t('customers.wallet.title')}
+              </Typography>
               <Button
                 variant='outlined'
                 size='small'
@@ -186,7 +189,7 @@ const CustomerWallet = ({ customer, onUpdate }: CustomerWalletProps) => {
               </Button>
             </Box>
             <Box sx={{ mb: 4 }}>
-              <Typography variant='h4' color='primary'>
+              <Typography color='primary' sx={{ fontSize: '1.75rem', fontWeight: 600, lineHeight: 1.3 }}>
                 {balance.toFixed(2)} {walletData.currency}
               </Typography>
               <Typography variant='body2' color='text.secondary' sx={{ mt: 1 }}>
@@ -196,11 +199,11 @@ const CustomerWallet = ({ customer, onUpdate }: CustomerWalletProps) => {
                 {t('customers.wallet.labels.totalAvailable')}: {(balance + creditLimit).toFixed(2)} {walletData.currency}
               </Typography>
             </Box>
-            <Divider sx={{ my: 4 }} />
-            <Typography variant='h6' sx={{ mb: 2 }}>
+            <Divider sx={{ my: 3 }} />
+            <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600, lineHeight: 1.5, mb: 2 }}>
               {t('customers.wallet.topUp.title')}
             </Typography>
-            <Grid container spacing={2}>
+            <Grid container spacing={3}>
               <Grid size={{ xs: 12 }}>
                 <CustomTextField
                   fullWidth
@@ -208,8 +211,10 @@ const CustomerWallet = ({ customer, onUpdate }: CustomerWalletProps) => {
                   type='number'
                   value={topUpAmount}
                   onChange={(e) => setTopUpAmount(e.target.value)}
-                  InputProps={{
-                    startAdornment: <Typography sx={{ mr: 1 }}>{walletData.currency}</Typography>
+                  slotProps={{
+                    input: {
+                      startAdornment: <InputAdornment position='start'>{walletData.currency}</InputAdornment>
+                    }
                   }}
                 />
               </Grid>
@@ -240,7 +245,7 @@ const CustomerWallet = ({ customer, onUpdate }: CustomerWalletProps) => {
       <Grid size={{ xs: 12, md: 4 }}>
         <Card>
           <CardContent>
-            <Typography variant='h6' sx={{ mb: 4 }}>
+            <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600, lineHeight: 1.5, mb: 3 }}>
               {t('customers.wallet.sidebar.title')}
             </Typography>
             <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -248,7 +253,7 @@ const CustomerWallet = ({ customer, onUpdate }: CustomerWalletProps) => {
                 <Typography variant='body2' color='text.secondary'>
                   {t('customers.wallet.sidebar.currentBalance')}
                 </Typography>
-                <Typography variant='h6'>
+                <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600 }}>
                   {balance.toFixed(2)} {walletData.currency}
                 </Typography>
               </Box>
@@ -257,7 +262,7 @@ const CustomerWallet = ({ customer, onUpdate }: CustomerWalletProps) => {
                 <Typography variant='body2' color='text.secondary'>
                   {t('customers.wallet.sidebar.creditLimit')}
                 </Typography>
-                <Typography variant='h6'>
+                <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600 }}>
                   {creditLimit.toFixed(2)} {walletData.currency}
                 </Typography>
               </Box>
@@ -266,7 +271,7 @@ const CustomerWallet = ({ customer, onUpdate }: CustomerWalletProps) => {
                 <Typography variant='body2' color='text.secondary'>
                   {t('customers.wallet.sidebar.totalAvailable')}
                 </Typography>
-                <Typography variant='h6' color='success.main'>
+                <Typography color='success.main' sx={{ fontSize: '0.9375rem', fontWeight: 600 }}>
                   {(balance + creditLimit).toFixed(2)} {walletData.currency}
                 </Typography>
               </Box>

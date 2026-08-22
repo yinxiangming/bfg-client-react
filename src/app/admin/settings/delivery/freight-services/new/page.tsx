@@ -5,12 +5,10 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
 import Box from '@mui/material/Box'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
 import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import SchemaForm from '@/components/schema/SchemaForm'
 import type { FormSchema } from '@/types/schema'
 import { bfgApi } from '@/utils/api'
@@ -82,27 +80,23 @@ export default function FreightServiceNewPage() {
 
   return (
     <Box>
-      <Typography variant="h4" sx={{ mb: 4 }}>
-        {t('settings.delivery.freightServices.editDialog.title')} — New
-      </Typography>
-      <Card>
-        <CardContent>
-          <SchemaForm
-            schema={schema}
-            initialData={{
-              base_price: 0,
-              price_per_kg: 0,
-              estimated_days_min: 1,
-              estimated_days_max: 7,
-              order: 100,
-              is_active: true
-            }}
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-            loading={loading}
-          />
-        </CardContent>
-      </Card>
+      <AdminPageHeader title={`${t('settings.delivery.freightServices.editDialog.title')} — New`} />
+      {/* SchemaForm renders its own card — wrapping it in another one doubled
+          the border and broke its docked action bar's negative margins. */}
+      <SchemaForm
+        schema={schema}
+        initialData={{
+          base_price: 0,
+          price_per_kg: 0,
+          estimated_days_min: 1,
+          estimated_days_max: 7,
+          order: 100,
+          is_active: true
+        }}
+        onSubmit={handleSubmit}
+        onCancel={handleCancel}
+        loading={loading}
+      />
       <Snackbar open={snackbar.open} autoHideDuration={4000} onClose={() => setSnackbar((p) => ({ ...p, open: false }))} anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}>
         <Alert severity={snackbar.severity} sx={{ width: '100%' }}>{snackbar.message}</Alert>
       </Snackbar>

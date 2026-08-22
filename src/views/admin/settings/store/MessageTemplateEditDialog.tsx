@@ -111,13 +111,7 @@ const MessageTemplateEditDialog = ({ open, template, onClose, onSave }: MessageT
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth='lg' fullWidth>
-      <DialogContent
-        sx={{
-          p: 0,
-          '& .MuiCard-root': { boxShadow: 'none' },
-          '& .MuiCardContent-root': { p: 4 }
-        }}
-      >
+      <DialogContent sx={{ p: 0 }}>
         <SchemaForm schema={messageTemplateFormSchema} initialData={initialData} onSubmit={handleSubmit} onCancel={onClose} />
       </DialogContent>
     </Dialog>
