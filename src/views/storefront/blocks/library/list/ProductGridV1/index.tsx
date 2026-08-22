@@ -21,6 +21,7 @@ interface Product {
   primary_image?: string
   images?: string[]
   is_new?: boolean
+  slug?: string | null
 }
 
 interface ProductGridSettings {
@@ -52,6 +53,7 @@ const transformProduct = (apiProduct: Product) => ({
     getMediaUrl(apiProduct.primary_image || (apiProduct.images && apiProduct.images[0]) || '') ||
     getStoreImageUrl('themes/PRS04099/assets/img/megnor/empty-cart.svg'),
   isNew: apiProduct.is_new || false,
+  slug: apiProduct.slug ?? null,
 })
 
 export function ProductGridV1({

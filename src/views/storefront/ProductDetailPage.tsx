@@ -184,7 +184,8 @@ const ProductDetailPage = ({
                   image:
                     getMediaUrl(p.primary_image || (p.images && p.images[0]) || '') ||
                     getStoreImageUrl('themes/PRS04099/assets/img/megnor/empty-cart.svg'),
-                  isNew: p.is_new || false
+                  isNew: p.is_new || false,
+                  slug: p.slug ?? null
                 }))
             )
           }
