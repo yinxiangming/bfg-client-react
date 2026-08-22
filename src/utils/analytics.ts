@@ -35,10 +35,16 @@ export function isAnalyticsReady(): boolean {
  * Record a page view. Called on every client-side route change — gtag only
  * fires one automatically on the initial document load, so an App Router SPA
  * would otherwise report a single view per session.
+ *
+ * Must be an explicit `event`, not a repeat `config`: gtag treats a second
+ * `config` for an already-configured measurement id as a settings update and
+ * sends nothing. Verified against the GA4 realtime report — the `config` form
+ * produced no rows at all, while this one shows up within a minute.
  */
 export function trackPageView(measurementId: string, url: string, title?: string): void {
   if (!isAnalyticsReady() || !measurementId) return
-  window.gtag!('config', measurementId, {
+  window.gtag!('event', 'page_view', {
+    send_to: measurementId,
     page_path: url,
     page_location: window.location.href,
     ...(title ? { page_title: title } : {}),
