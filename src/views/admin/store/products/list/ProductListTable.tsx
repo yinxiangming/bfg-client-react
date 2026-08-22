@@ -18,6 +18,7 @@ import Switch from '@mui/material/Switch'
 import Avatar from '@mui/material/Avatar'
 
 // Component Imports
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import SchemaTable from '@/components/schema/SchemaTable'
 import VariantInventoryModal from '../edit/VariantInventoryModal'
 import CategoryTreeSelect from '@/components/category/CategoryTreeSelect'
@@ -160,7 +161,7 @@ const ProductListTable = () => {
                           height: 38,
                           borderRadius: 1,
                           objectFit: 'cover',
-                          backgroundColor: '#f3f4f6',
+                          backgroundColor: 'action.hover',
                           flexShrink: 0
                         }}
                       />
@@ -171,7 +172,7 @@ const ProductListTable = () => {
                           width: 38,
                           height: 38,
                           borderRadius: 1,
-                          bgcolor: 'grey.100',
+                          bgcolor: 'action.hover',
                           color: 'text.secondary',
                           fontSize: 16,
                           flexShrink: 0
@@ -181,7 +182,7 @@ const ProductListTable = () => {
                       </Avatar>
                     )}
                     <Box sx={{ minWidth: 0 }}>
-                      <Typography sx={{ fontWeight: 500 }} noWrap>
+                      <Typography sx={{ fontWeight: 500, fontSize: '0.8125rem' }} noWrap>
                         {value}
                       </Typography>
                       <Typography variant="body2" sx={{ fontSize: '0.75rem', color: 'text.secondary', mt: 0.25 }} noWrap>
@@ -411,7 +412,8 @@ const ProductListTable = () => {
           categories={categories}
           value={selectedCategory ? [selectedCategory] : []}
           onChange={handleCategoryChange}
-          label={t('products.list.filters.category.label')}
+          // No label: the toolbar's other filters are label-less, and a label
+          // here pushed this control half a row below the ones beside it.
           placeholder={t('products.list.filters.category.placeholder')}
           loading={categoriesLoading}
           multiple={false}
@@ -432,6 +434,7 @@ const ProductListTable = () => {
 
   return (
     <>
+      <AdminPageHeader title={t('products.list.title')} subtitle={t('products.list.subtitle')} />
       <SchemaTable
         schema={customSchema.list}
         data={products || []}

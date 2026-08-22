@@ -192,10 +192,10 @@ const InviteStaffDialog = ({ open, roles, onClose, onInvited }: InviteDialogProp
           )}
         </DialogContent>
         <DialogActions>
-          <Button color='secondary' onClick={onClose} sx={{ textTransform: 'none' }}>
+          <Button color='secondary' onClick={onClose}>
             {t('cancel')}
           </Button>
-          <Button type='submit' variant='contained' disabled={saving || !email.trim() || !roleId} sx={{ textTransform: 'none' }}>
+          <Button type='submit' variant='contained' disabled={saving || !email.trim() || !roleId}>
             {saving ? t('submitting') : t('submit')}
           </Button>
         </DialogActions>

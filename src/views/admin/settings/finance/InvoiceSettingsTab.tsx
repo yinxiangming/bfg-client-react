@@ -7,8 +7,6 @@ import { useState, useEffect, useMemo } from 'react'
 import { useTranslations } from 'next-intl'
 
 // MUI Imports
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
 import Button from '@mui/material/Button'
 import Checkbox from '@mui/material/Checkbox'
 import Chip from '@mui/material/Chip'
@@ -32,6 +30,7 @@ import {
 } from '@/services/finance'
 
 // Component Imports
+import { ReadOnlyField, SettingsSection } from '@/components/admin/settings/SettingsSection'
 import InvoiceSettingEditDialog from './InvoiceSettingEditDialog'
 
 const InvoiceSettingsTab = () => {
@@ -106,10 +105,12 @@ const InvoiceSettingsTab = () => {
   const firstSetting = data && data[0]
 
   return (
-    <Card>
-      <CardContent>
-        <div className='flex justify-end mb-4'>
-          {firstSetting ? (
+    <>
+      <SettingsSection
+        flush
+        title={t('settings.finance.invoiceSettings.tab.current.title')}
+        action={
+          firstSetting ? (
             <Button variant='contained' onClick={() => handleActionClick(firstSetting, 'edit')} className='whitespace-nowrap'>
               {t('settings.finance.invoiceSettings.tab.actions.edit')}
             </Button>
@@ -117,44 +118,56 @@ const InvoiceSettingsTab = () => {
             <Button variant='contained' onClick={handleAddClick} className='whitespace-nowrap'>
               {t('settings.finance.invoiceSettings.tab.actions.add')}
             </Button>
-          )}
-        </div>
-
-        {firstSetting && (
-          <Box sx={{ p: 2, border: '1px solid', borderColor: 'divider', borderRadius: 1 }}>
-            <Typography variant='h6' sx={{ mb: 2 }}>
-              {t('settings.finance.invoiceSettings.tab.current.title')}
-            </Typography>
-            <Typography>
-              <strong>{t('settings.finance.invoiceSettings.tab.current.prefix')}:</strong> {firstSetting.invoice_prefix}
-            </Typography>
-            <Typography>
-              <strong>{t('settings.finance.invoiceSettings.tab.current.defaultDueDays')}:</strong> {firstSetting.default_due_days}
-            </Typography>
-            <Typography>
-              <strong>{t('settings.finance.invoiceSettings.tab.current.autoNumber')}:</strong>{' '}
-              {firstSetting.enable_auto_number ? t('settings.finance.invoiceSettings.tab.current.enabled') : t('settings.finance.invoiceSettings.tab.current.disabled')}
-            </Typography>
-            <Typography>
-              <strong>{t('settings.finance.invoiceSettings.tab.current.status')}:</strong>{' '}
-              {firstSetting.is_active ? t('settings.finance.invoiceSettings.tab.current.active') : t('settings.finance.invoiceSettings.tab.current.inactive')}
-            </Typography>
+          )
+        }
+      >
+        {firstSetting ? (
+          <Box
+            sx={{
+              display: 'grid',
+              gap: 3,
+              gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))' }
+            }}
+          >
+            <ReadOnlyField
+              label={t('settings.finance.invoiceSettings.tab.current.prefix')}
+              value={firstSetting.invoice_prefix}
+            />
+            <ReadOnlyField
+              label={t('settings.finance.invoiceSettings.tab.current.defaultDueDays')}
+              value={String(firstSetting.default_due_days)}
+            />
+            <ReadOnlyField
+              label={t('settings.finance.invoiceSettings.tab.current.autoNumber')}
+              value={
+                firstSetting.enable_auto_number
+                  ? t('settings.finance.invoiceSettings.tab.current.enabled')
+                  : t('settings.finance.invoiceSettings.tab.current.disabled')
+              }
+            />
+            <ReadOnlyField
+              label={t('settings.finance.invoiceSettings.tab.current.status')}
+              value={
+                firstSetting.is_active
+                  ? t('settings.finance.invoiceSettings.tab.current.active')
+                  : t('settings.finance.invoiceSettings.tab.current.inactive')
+              }
+            />
           </Box>
-        )}
-
-        {!firstSetting && (
-          <Typography color='text.secondary' sx={{ textAlign: 'center', py: 4 }}>
+        ) : (
+          <Typography variant='body2' color='text.secondary'>
             {t('settings.finance.invoiceSettings.tab.empty')}
           </Typography>
         )}
-      </CardContent>
+      </SettingsSection>
+
       <InvoiceSettingEditDialog
         open={editOpen}
         setting={selected || firstSetting || null}
         onClose={() => setEditOpen(false)}
         onSave={handleSave}
       />
-    </Card>
+    </>
   )
 }
 

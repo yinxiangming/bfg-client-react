@@ -156,9 +156,9 @@ export default function Bookings() {
   return (
     <Grid container spacing={3}>
       <Grid size={{ xs: 12 }}>
-        <Card variant="outlined" sx={{ boxShadow: 'none', borderRadius: 2 }}>
+        <Card>
           <CardContent sx={{ px: { xs: 2, md: 3 }, py: { xs: 2, md: 3 } }}>
-            <Typography variant="h6" sx={{ mb: 2 }}>
+            <Typography component="h3" sx={{ mb: 2, fontSize: '0.9375rem', fontWeight: 600, lineHeight: 1.5 }}>
               {t('bookings.bookDropOff')}
             </Typography>
             {error && (
@@ -181,7 +181,7 @@ export default function Bookings() {
                 value={bookDate}
                 onChange={(e) => setBookDate(e.target.value)}
                 size="small"
-                sx={{ width: 152, '& .MuiInputBase-root': { fontSize: '0.875rem' } }}
+                sx={{ width: 152 }}
               />
               {slotsLoading ? (
                 <CircularProgress size={24} />
@@ -216,9 +216,9 @@ export default function Bookings() {
             <CircularProgress />
           </Box>
         ) : bookings.length === 0 ? (
-          <Card variant="outlined" sx={{ boxShadow: 'none', borderRadius: 2 }}>
+          <Card>
             <CardContent sx={{ textAlign: 'center', py: 4 }}>
-              <Typography variant="body1" color="text.secondary">
+              <Typography sx={{ fontSize: '0.8125rem' }} color="text.secondary">
                 {t('bookings.empty')}
               </Typography>
             </CardContent>

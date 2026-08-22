@@ -15,7 +15,6 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import Grid from '@mui/material/Grid'
 import IconButton from '@mui/material/IconButton'
 import MenuItem from '@mui/material/MenuItem'
-import Paper from '@mui/material/Paper'
 import Switch from '@mui/material/Switch'
 import Tooltip from '@mui/material/Tooltip'
 import Typography from '@mui/material/Typography'
@@ -289,7 +288,7 @@ export default function CategoryFieldsSchemaDialog({ open, category, onClose, on
       <DialogTitle>
         {t('settings.web.categories.fieldsSchemaDialog.title', { name: category.name })}
       </DialogTitle>
-      <DialogContent dividers>
+      <DialogContent>
         <Typography variant='body2' color='text.secondary' sx={{ mb: 2 }}>
           {t('settings.web.categories.fieldsSchemaDialog.intro')}
         </Typography>
@@ -300,7 +299,7 @@ export default function CategoryFieldsSchemaDialog({ open, category, onClose, on
           </Alert>
         )}
 
-        <Grid container spacing={2} sx={{ mb: 2 }} alignItems='center'>
+        <Grid container spacing={3} sx={{ mb: 2 }} alignItems='center'>
           <Grid size={{ xs: 12, sm: 8 }}>
             <CustomTextField
               select
@@ -336,7 +335,7 @@ export default function CategoryFieldsSchemaDialog({ open, category, onClose, on
         <Divider sx={{ my: 2 }} />
 
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant='subtitle2' fontWeight={600}>
+          <Typography component='div' className='at-block-title' sx={{ mb: 0, pb: 0, border: 0 }}>
             {t('settings.web.categories.fieldsSchemaDialog.fieldsHeading')}
           </Typography>
           <Button size='small' variant='contained' startIcon={<i className='tabler-plus' />} onClick={addField}>
@@ -349,9 +348,12 @@ export default function CategoryFieldsSchemaDialog({ open, category, onClose, on
             {t('settings.web.categories.fieldsSchemaDialog.noFields')}
           </Typography>
         ) : (
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {rows.map((r, idx) => (
-              <Paper key={r.rid} variant='outlined' sx={{ p: 2 }}>
+              <Box
+                key={r.rid}
+                sx={{ py: 3, '&:not(:first-of-type)': { borderTop: '1px solid', borderColor: 'divider' } }}
+              >
                 <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                   <Typography variant='subtitle2' color='text.secondary'>
                     {t('settings.web.categories.fieldsSchemaDialog.fieldNumber', { n: idx + 1 })}
@@ -378,7 +380,7 @@ export default function CategoryFieldsSchemaDialog({ open, category, onClose, on
                     </Tooltip>
                   </Box>
                 </Box>
-                <Grid container spacing={2}>
+                <Grid container spacing={3}>
                   <Grid size={{ xs: 12, sm: 6 }}>
                     <CustomTextField
                       fullWidth
@@ -501,7 +503,7 @@ export default function CategoryFieldsSchemaDialog({ open, category, onClose, on
                     </Grid>
                   )}
                 </Grid>
-              </Paper>
+              </Box>
             ))}
           </Box>
         )}

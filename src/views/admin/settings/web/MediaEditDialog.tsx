@@ -69,13 +69,7 @@ const MediaEditDialog = ({ open, media, onClose, onSave }: MediaEditDialogProps)
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
-      <DialogContent
-        sx={{
-          p: 0,
-          '& .MuiCard-root': { boxShadow: 'none' },
-          '& .MuiCardContent-root': { p: 4 }
-        }}
-      >
+      <DialogContent sx={{ p: 0 }}>
         <SchemaForm schema={mediaFormSchema} initialData={initialData} onSubmit={handleSubmit} onCancel={onClose} />
       </DialogContent>
     </Dialog>

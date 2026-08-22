@@ -4,7 +4,6 @@ import { useMemo } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import Box from '@mui/material/Box'
-import Divider from '@mui/material/Divider'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Grid from '@mui/material/Grid'
 import MenuItem from '@mui/material/MenuItem'
@@ -71,11 +70,10 @@ export default function PostCustomFieldsBlock({
         mb: 1
       }}
     >
-      <Divider sx={{ my: 2 }} />
-      <Typography variant='subtitle1' fontWeight={600} sx={{ mb: 1 }}>
+      <Typography component='div' className='at-block-title'>
         {t('settings.web.posts.editDialog.customFieldsSection')}
       </Typography>
-      <Grid container spacing={2}>
+      <Grid container spacing={3}>
         <Grid size={{ xs: 12 }}>
           <Typography variant='body2' color='text.secondary' sx={{ mb: 0 }}>
             {t('settings.web.posts.editDialog.customFieldsHint')}

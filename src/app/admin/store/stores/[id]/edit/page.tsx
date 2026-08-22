@@ -8,6 +8,7 @@ import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
 import Alert from '@mui/material/Alert'
 
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import SchemaForm from '@/components/schema/SchemaForm'
 import { buildStoresSchema } from '@/data/storeSchemas'
 
@@ -134,13 +135,16 @@ export default function StoreEditPage({ params }: { params: Promise<{ id: string
   }
 
   return (
-    <SchemaForm
-      schema={formSchema}
-      initialData={formData}
-      onSubmit={handleSubmit}
-      onCancel={handleCancel}
-      loading={loading}
-    />
+    <Box>
+      <AdminPageHeader title={t('stores.editPage.title')} subtitle={t('stores.editPage.subtitle')} />
+      <SchemaForm
+        schema={formSchema}
+        initialData={formData}
+        onSubmit={handleSubmit}
+        onCancel={handleCancel}
+        loading={loading}
+      />
+    </Box>
   )
 }
 

@@ -160,7 +160,7 @@ const ProductOrganize = ({ productData, onChange }: ProductOrganizeProps) => {
 
                 {categoriesLoaded && categories.length === 0 ? (
                     <Box sx={{ p: 2, textAlign: 'center' }}>
-                        <Typography color='text.secondary'>{t('products.organize.states.noCategories')}</Typography>
+                        <Typography color='text.secondary' sx={{ fontSize: '0.8125rem' }}>{t('products.organize.states.noCategories')}</Typography>
                     </Box>
                 ) : (
                     <CategoryTreeSelect
@@ -211,14 +211,14 @@ const ProductOrganize = ({ productData, onChange }: ProductOrganizeProps) => {
 
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Typography>{t('products.organize.fields.published')}</Typography>
+                        <Typography sx={{ fontSize: '0.8125rem' }}>{t('products.organize.fields.published')}</Typography>
                         <Switch
                             checked={isActive}
                             onChange={handleActiveChange}
                         />
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Typography>{t('products.organize.fields.featured')}</Typography>
+                        <Typography sx={{ fontSize: '0.8125rem' }}>{t('products.organize.fields.featured')}</Typography>
                         <Switch
                             checked={isFeatured}
                             onChange={handleFeaturedChange}

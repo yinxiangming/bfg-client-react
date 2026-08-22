@@ -173,7 +173,7 @@ const CustomerAddresses = ({ customerId, onUpdate }: CustomerAddressesProps) => 
       <Card>
         <CardContent>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-            <Typography variant='h6'>
+            <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600 }}>
               {t('customers.addresses.title', { count: addresses.length })}
             </Typography>
             <Button variant='contained' onClick={() => handleOpenDialog()}>
@@ -184,14 +184,16 @@ const CustomerAddresses = ({ customerId, onUpdate }: CustomerAddressesProps) => 
             <Grid container spacing={3}>
               {addresses.map((address) => (
                 <Grid size={{ xs: 12, md: 6 }} key={address.id}>
-                  <Card variant='outlined'>
+                  <Card>
                     <CardContent>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                         <Box>
                           {address.is_default && (
                             <Chip label={t('customers.addresses.values.default')} color='primary' size='small' sx={{ mb: 1 }} />
                           )}
-                          <Typography variant='subtitle1'>{address.full_name || t('customers.addresses.values.na')}</Typography>
+                          <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600 }}>
+                            {address.full_name || t('customers.addresses.values.na')}
+                          </Typography>
                           {address.company && (
                             <Typography variant='body2' color='text.secondary'>
                               {address.company}
@@ -245,7 +247,7 @@ const CustomerAddresses = ({ customerId, onUpdate }: CustomerAddressesProps) => 
           {editingAddress ? t('customers.addresses.dialog.editTitle') : t('customers.addresses.dialog.addTitle')}
         </DialogTitle>
         <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
             <CustomTextField
               fullWidth
               label={t('customers.addresses.fields.fullName.label')}

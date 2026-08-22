@@ -7,10 +7,10 @@ import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 
 // MUI Imports
+import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import CardHeader from '@mui/material/CardHeader'
-import Divider from '@mui/material/Divider'
 import Typography from '@mui/material/Typography'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
@@ -110,7 +110,20 @@ const EditorToolbar = ({
     }
 
     return (
-        <div className='flex flex-wrap items-center gap-1 p-4 border-b border-solid border-border'>
+        // The colour lives in the same declaration as the border: a bare
+        // `1px solid` (or the undefined `border-border` utility this used to
+        // carry) falls back to currentColor — near-black in light mode.
+        <Box
+            sx={{
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                gap: 1,
+                p: 2,
+                borderBottom: '1px solid',
+                borderColor: 'divider'
+            }}
+        >
             <IconButton
                 {...(editorState.isBold && { color: 'primary' })}
                 size='small'
@@ -146,7 +159,7 @@ const EditorToolbar = ({
             >
                 <i className='tabler-arrows-diagonal-2 text-textSecondary' />
             </IconButton>
-        </div>
+        </Box>
     )
 }
 
@@ -258,27 +271,28 @@ const ProductDescription = ({ productData, onChange }: ProductDescriptionProps) 
             <Card>
                 <CardHeader title={t('products.description.cardTitle')} sx={{ pb: 0 }} />
                 <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 } }}>
-                    <Typography className='mbe-1'>{t('products.description.descriptionHint')}</Typography>
-                    <Card className='p-0 border shadow-none'>
-                        <CardContent className='p-0'>
-                            <EditorToolbar
-                                editor={editor}
-                                onOpenResize={openResizeDialog}
-                                onWarn={message => setToast({ open: true, message, severity: 'warning' })}
-                                onOpenMedia={() => setMediaOpen(true)}
-                                insertFromLibraryTitle={t('products.description.toolbar.insertFromLibrary')}
-                                resizeImageTitle={t('products.description.toolbar.resizeImage')}
-                                selectImageFirstMessage={t('products.description.warnings.selectImageFirst')}
-                                productId={productData?.id}
-                            />
-                            <Divider className='mli-6' />
-                            <EditorContent editor={editor} className='bs-[500px] overflow-y-auto flex ' />
-                        </CardContent>
-                    </Card>
+                    <Typography className='mbe-1' sx={{ fontSize: '0.8125rem', color: 'text.secondary' }}>
+                        {t('products.description.descriptionHint')}
+                    </Typography>
+                    {/* One surface: the editor frame is a plain bordered Box, not a second Card
+                        inside the panel card. The toolbar draws its own bottom hairline. */}
+                    <Box sx={{ border: '1px solid', borderColor: 'divider', borderRadius: 1, overflow: 'hidden' }}>
+                        <EditorToolbar
+                            editor={editor}
+                            onOpenResize={openResizeDialog}
+                            onWarn={message => setToast({ open: true, message, severity: 'warning' })}
+                            onOpenMedia={() => setMediaOpen(true)}
+                            insertFromLibraryTitle={t('products.description.toolbar.insertFromLibrary')}
+                            resizeImageTitle={t('products.description.toolbar.resizeImage')}
+                            selectImageFirstMessage={t('products.description.warnings.selectImageFirst')}
+                            productId={productData?.id}
+                        />
+                        <EditorContent editor={editor} className='bs-[500px] overflow-y-auto flex ' />
+                    </Box>
                 </CardContent>
                 <Dialog open={resizeOpen} onClose={() => setResizeOpen(false)} fullWidth maxWidth='xs'>
                     <DialogTitle>{t('products.description.resizeDialog.title')}</DialogTitle>
-                    <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+                    <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                         <CustomTextField
                             label={t('products.description.resizeDialog.fields.width.label')}
                             placeholder={t('products.description.resizeDialog.fields.width.placeholder')}

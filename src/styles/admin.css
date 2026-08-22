@@ -632,13 +632,19 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-[data-mode='dark'] .admin-topbar-btn {
+[data-mode='dark'] .admin-topbar-btn,
+[data-mode='dark'] .topbar-menu-toggle {
   background: rgba(231, 227, 252, 0.08);
   color: rgba(231, 227, 252, 0.87);
+  /* The light-mode rule sets a #e5e7eb border. Without this the topbar
+     buttons keep it in dark mode and ring themselves in near-white. */
+  border-color: rgba(231, 227, 252, 0.12);
 }
 
-[data-mode='dark'] .admin-topbar-btn:hover {
+[data-mode='dark'] .admin-topbar-btn:hover,
+[data-mode='dark'] .topbar-menu-toggle:hover {
   background: rgba(231, 227, 252, 0.12);
+  border-color: rgba(231, 227, 252, 0.2);
 }
 
 [data-mode='dark'] .admin-topbar-btn svg {

@@ -16,6 +16,7 @@ import Typography from '@mui/material/Typography'
 import Alert from '@mui/material/Alert'
 import Snackbar from '@mui/material/Snackbar'
 
+import { SETTINGS_GUTTER } from '@/components/admin/settings/SettingsSection'
 import CustomTextField from '@/components/ui/TextField'
 import SchemaTable from '@/components/schema/SchemaTable'
 import type { ListSchema, SchemaAction } from '@/types/schema'
@@ -223,14 +224,18 @@ export default function EmailTab() {
 
   return (
     <Box>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        {t('subtitle')}
-      </Typography>
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => {}}>
-          {t('errors.loadFailed')}: {error}
-        </Alert>
-      )}
+      {/* The panel is flush (p: 0) so the table can run edge to edge; this copy
+          needs the settings gutter to line up with the rows beneath it. */}
+      <Box sx={{ px: SETTINGS_GUTTER, pt: 5, pb: 3 }}>
+        <Typography variant="body2" color="text.secondary">
+          {t('subtitle')}
+        </Typography>
+        {error && (
+          <Alert severity="error" sx={{ mt: 2 }} onClose={() => {}}>
+            {t('errors.loadFailed')}: {error}
+          </Alert>
+        )}
+      </Box>
       <SchemaTable
         schema={schema}
         data={data ?? []}

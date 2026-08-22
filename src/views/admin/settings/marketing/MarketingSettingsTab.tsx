@@ -91,11 +91,7 @@ const MarketingSettingsTab = () => {
 
   const initial = data && data[0] ? data[0] : undefined
 
-  return (
-    <Box sx={{ p: 4 }}>
-      <SchemaForm schema={marketingFormSchema} initialData={initial} onSubmit={handleSubmit} onCancel={() => {}} />
-    </Box>
-  )
+  return <SchemaForm schema={marketingFormSchema} initialData={initial} onSubmit={handleSubmit} onCancel={() => {}} />
 }
 
 export default MarketingSettingsTab

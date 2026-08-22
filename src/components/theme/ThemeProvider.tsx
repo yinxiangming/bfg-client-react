@@ -12,6 +12,9 @@ import type {} from '@mui/material/themeCssVarsAugmentation'
 // Context Imports
 import { ThemeContextProvider, useTheme } from '@/contexts/ThemeContext'
 
+// Admin design-system overrides (scoped to admin routes)
+import { adminSurfaceOverrides } from './adminSurface'
+
 // Type Imports
 import type { SystemMode } from '@/types/core'
 
@@ -62,7 +65,8 @@ const InnerThemeProvider = ({ children }: InnerThemeProviderProps) => {
               color: 'var(--mui-palette-text-secondary)'
             }
           }
-        }
+        },
+        ...adminSurfaceOverrides
       }
     })
   }, [])
