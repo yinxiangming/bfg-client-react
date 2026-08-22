@@ -15,8 +15,10 @@ const DISALLOWED = [
   '/cart',
   '/checkout',
   '/unknown',
+  // Sort variants are the same products in a different order — pure duplicates.
+  // `page=` is deliberately NOT blocked: paginated category pages are how a crawler
+  // reaches products past the first 12, and blocking them strands the rest.
   '/*?*sort=',
-  '/*?*page=',
 ]
 
 /**

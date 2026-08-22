@@ -16,6 +16,14 @@ import type { Metadata } from 'next'
 
 type Props = {
   params: Promise<{ slug: string }>
+  searchParams: Promise<{ page?: string | string[] }>
+}
+
+/** `?page=` is 1-based and user-supplied; anything not a positive integer is page 1. */
+function parsePage(raw: string | string[] | undefined): number {
+  const value = Array.isArray(raw) ? raw[0] : raw
+  const n = Number.parseInt(value ?? '', 10)
+  return Number.isFinite(n) && n > 1 ? n : 1
 }
 
 type CategoryNode = {
@@ -46,7 +54,12 @@ function walkTree(items: any[], slug: string): CategoryNode | null {
   return null
 }
 
-async function fetchCategoryData(slug: string, requestHost: string | undefined, locale: string) {
+async function fetchCategoryData(
+  slug: string,
+  requestHost: string | undefined,
+  locale: string,
+  page: number
+) {
   const [categoriesRes, productsRes] = await Promise.all([
     storefrontApi
       .getCategories({ tree: true, requestHost, lang: locale, next: { revalidate: 300 } })
@@ -55,6 +68,7 @@ async function fetchCategoryData(slug: string, requestHost: string | undefined, 
       .getProducts({
         category: slug,
         limit: PRODUCTS_PER_PAGE,
+        page,
         requestHost,
         next: { revalidate: 300 },
       })
@@ -78,14 +92,15 @@ async function fetchCategoryData(slug: string, requestHost: string | undefined, 
 /** Deduped per request: metadata, JSON-LD and the page body share one round trip. */
 const getCategoryForServer = cache(fetchCategoryData)
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { slug } = await params
+  const page = parsePage((await searchParams)?.page)
   const headersList = await headers()
   const locale = headersList.get('x-locale') || 'en'
   const requestHost = headersList.get('host') ?? undefined
 
   const [data, { site_name }, origin, config] = await Promise.all([
-    getCategoryForServer(slug, requestHost, locale),
+    getCategoryForServer(slug, requestHost, locale, page),
     // requestHost is required: without it the workspace cannot be resolved and every title
     // degrades to the 'Web App' placeholder.
     getSiteConfig(locale, requestHost),
@@ -94,7 +109,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   ])
 
   const name = data.category?.name ?? slug
-  const canonical = origin ? `${origin}/category/${slug}` : `/category/${slug}`
+  const base = origin ? `${origin}/category/${slug}` : `/category/${slug}`
+  // Each paginated page is self-canonical. Pointing page 2 back at page 1 would tell
+  // Google to ignore page 2 — including the product links that only exist there.
+  const canonical = page > 1 ? `${base}?page=${page}` : base
   const description =
     clampDescription(data.category?.description) ||
     `Shop ${name} at ${site_name} — ${data.totalCount} products in stock.`
@@ -117,12 +135,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function Page(props: Props) {
   const { slug } = await props.params
+  const page = parsePage((await props.searchParams)?.page)
   const headersList = await headers()
   const locale = headersList.get('x-locale') || 'en'
   const requestHost = headersList.get('host') ?? undefined
 
   const [data, origin] = await Promise.all([
-    getCategoryForServer(slug, requestHost, locale),
+    getCategoryForServer(slug, requestHost, locale, page),
     getRequestOrigin(),
   ])
 
@@ -169,6 +188,7 @@ export default async function Page(props: Props) {
       />
       <Component
         slug={slug}
+        initialPage={page}
         initialData={{
           products: data.products ?? [],
           totalCount: data.totalCount,
