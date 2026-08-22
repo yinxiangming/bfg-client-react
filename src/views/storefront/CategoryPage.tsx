@@ -78,9 +78,28 @@ const transformApiProduct = (apiProduct: any): Product => ({
   isNew: apiProduct.is_new || false
 })
 
+/**
+ * One pagination control. Disabled ends render as a span rather than a link so a crawler is
+ * never offered `?page=0` or a page past the last one.
+ */
+const PaginationLink = ({ href, disabled, label }: { href: string; disabled: boolean; label: string }) => {
+  const style = {
+    padding: '0.5rem 1rem',
+    border: '1px solid #e0e0e0',
+    borderRadius: '4px',
+    textDecoration: 'none',
+    color: 'inherit',
+    opacity: disabled ? 0.5 : 1,
+    cursor: disabled ? 'not-allowed' : 'pointer',
+  } as const
+  if (disabled) return <span className='sf-pagination-btn' style={style}>{label}</span>
+  return <Link className='sf-pagination-btn' href={href} style={style}>{label}</Link>
+}
+
 const CategoryPage = ({
   slug,
-  initialData
+  initialData,
+  initialPage
 }: {
   slug: string
   /**
@@ -89,6 +108,12 @@ const CategoryPage = ({
    * through to the product pages.
    */
   initialData?: CategoryInitialData
+  /**
+   * Page number from `?page=`. Pagination is URL state rather than component state so the
+   * links are real hrefs a crawler can follow, and so a page-2 URL can be shared or
+   * bookmarked. Sort stays component state and resets when you move between pages.
+   */
+  initialPage?: number
 }) => {
   const t = useTranslations('storefront')
   const { beforeSlots, afterSlots } = usePageSlots('storefront/category')
@@ -99,7 +124,6 @@ const CategoryPage = ({
   const [loading, setLoading] = useState(!initialData)
   const [sortBy, setSortBy] = useState<SortOption>('relevance')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [currentPage, setCurrentPage] = useState(1)
   const [totalCount, setTotalCount] = useState(initialData?.totalCount ?? 0)
   const [categoryInfo, setCategoryInfo] = useState<{ name: string; description: string } | null>(
     initialData?.category ?? null
@@ -112,6 +136,10 @@ const CategoryPage = ({
   const isFirstLoad = useRef(true)
 
   const productsPerPage = 12
+  const currentPage = Math.max(1, initialPage ?? 1)
+
+  /** Pagination hrefs: page 1 drops the parameter so the canonical URL stays clean. */
+  const pageHref = (page: number) => (page <= 1 ? `/category/${slug}` : `/category/${slug}?page=${page}`)
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -330,65 +358,23 @@ const CategoryPage = ({
               {/* Pagination */}
               {totalPages > 1 && (
                 <div className='sf-pagination' style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
-                  <button
-                    className='sf-pagination-btn'
-                    onClick={() => setCurrentPage(1)}
-                    disabled={currentPage === 1}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      border: '1px solid #e0e0e0',
-                      borderRadius: '4px',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      opacity: currentPage === 1 ? 0.5 : 1
-                    }}
-                  >
-                    {t('category.pagination.first')}
-                  </button>
-                  <button
-                    className='sf-pagination-btn'
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      border: '1px solid #e0e0e0',
-                      borderRadius: '4px',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      opacity: currentPage === 1 ? 0.5 : 1
-                    }}
-                  >
-                    {t('category.pagination.previous')}
-                  </button>
+                  {/* Real links, not buttons: this is the only path a crawler has to products past
+                      the first page of a category, and it makes a page-2 URL shareable. */}
+                  {([
+                    { page: 1, label: t('category.pagination.first'), disabled: currentPage === 1 },
+                    { page: currentPage - 1, label: t('category.pagination.previous'), disabled: currentPage === 1 },
+                  ] as const).map(item => (
+                    <PaginationLink key={item.label} href={pageHref(item.page)} disabled={item.disabled} label={item.label} />
+                  ))}
                   <span className='sf-pagination-info' style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center' }}>
                     {t('category.pagination.pageOf', { page: currentPage, total: totalPages })}
                   </span>
-                  <button
-                    className='sf-pagination-btn'
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      border: '1px solid #e0e0e0',
-                      borderRadius: '4px',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      opacity: currentPage === totalPages ? 0.5 : 1
-                    }}
-                  >
-                    {t('category.pagination.next')}
-                  </button>
-                  <button
-                    className='sf-pagination-btn'
-                    onClick={() => setCurrentPage(totalPages)}
-                    disabled={currentPage === totalPages}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      border: '1px solid #e0e0e0',
-                      borderRadius: '4px',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      opacity: currentPage === totalPages ? 0.5 : 1
-                    }}
-                  >
-                    {t('category.pagination.last')}
-                  </button>
+                  {([
+                    { page: currentPage + 1, label: t('category.pagination.next'), disabled: currentPage === totalPages },
+                    { page: totalPages, label: t('category.pagination.last'), disabled: currentPage === totalPages },
+                  ] as const).map(item => (
+                    <PaginationLink key={item.label} href={pageHref(item.page)} disabled={item.disabled} label={item.label} />
+                  ))}
                 </div>
               )}
             </>

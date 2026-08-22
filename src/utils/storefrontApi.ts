@@ -298,9 +298,13 @@ class StorefrontApiClient {
     if (params?.max_price) queryParams.append('max_price', params.max_price.toString())
     if (params?.sort) queryParams.append('sort', params.sort)
     if (params?.limit) {
-      // The API paginates with `page_size` (config.pagination.StandardPagination, max 200);
-      // `limit` alone is ignored and every caller silently received the default page of 20.
-      queryParams.append('limit', params.limit.toString())
+      // Page size only. The API paginates with `page_size` (config.pagination.
+      // StandardPagination, max 200) and treats `limit` as a hard slice of the whole
+      // queryset — so sending both, at the same value, truncated every result set to a
+      // single page: `count` came back equal to the page size and `next` was always null.
+      // That capped category pages at 12 products forever and made totalPages always 1,
+      // so the pagination control could never render and the rest of a category was
+      // unreachable (arduino reported 12 products; it has 22).
       queryParams.append('page_size', Math.min(params.limit, 200).toString())
     }
     if (params?.page) queryParams.append('page', params.page.toString())
