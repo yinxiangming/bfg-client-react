@@ -94,6 +94,19 @@ export type StorefrontConfig = {
   /** When true, new reviews require admin approval before showing. Default false. */
   review_moderation_required?: boolean
   /**
+   * Workspace logo. A data URL when uploaded through admin, otherwise a media
+   * URL. Blank when unset — callers fall back to the built-in mark.
+   */
+  logo?: string
+  /** Workspace favicon, same shape as `logo`. Blank when unset. */
+  favicon?: string
+  /**
+   * Whether to print the site name next to the logo. Defaults to false — a
+   * logo usually contains the wordmark already. Ignored when no logo is set,
+   * in which case the name is the only branding there is.
+   */
+  show_site_name_with_logo?: boolean
+  /**
    * Public, client-side analytics tag ids for this workspace. One deployment
    * serves many storefronts, so the GA4 property travels with the config rather
    * than a build-time env var.

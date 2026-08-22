@@ -3654,7 +3654,8 @@
         },
         "logo": {
           "alt": "工作区 Logo",
-          "help": "支持 JPG、GIF 或 PNG，最大 800KB"
+          "help": "支持 JPG、GIF 或 PNG，最大 800KB",
+          "showSiteName": "在 Logo 旁同时显示站点名称"
         },
         "fields": {
           "workspaceOrgName": {
@@ -3794,6 +3795,11 @@
           "loadFailedWithRefresh": "加载设置失败：{error}。请刷新页面。",
           "settingsIdMissing": "未找到设置 ID，请刷新页面。",
           "saveFailed": "保存设置失败：{error}"
+        },
+        "favicon": {
+          "alt": "网站图标",
+          "upload": "上传网站图标",
+          "help": "显示在浏览器标签页上。方形 PNG、ICO 或 SVG，建议 32×32 以上。留空则使用默认图标。"
         }
       },
       "users": {

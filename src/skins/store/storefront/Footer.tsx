@@ -69,7 +69,12 @@ export default function StoreFooter(_props: StoreFooterProps) {
         <div className='sf-footer-grid'>
           <div className='sf-footer-section'>
             <div style={{ marginBottom: '1rem' }}>
-              <Logo color='#ffffff' name={config.site_name || undefined} />
+              <Logo
+                color='#ffffff'
+                name={config.site_name || undefined}
+                logoSrc={config.logo}
+                showNameWithLogo={config.show_site_name_with_logo}
+              />
             </div>
             <h3>{t('footer.contactUs')}</h3>
             <div style={{ marginBottom: '1rem' }}>

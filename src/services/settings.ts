@@ -156,6 +156,14 @@ export type GeneralSettingsPayload = {
   site_announcement?: string
   footer_contact?: string
   logo?: string
+  /** Browser tab icon. Same shape as `logo` — a data URL when uploaded here. */
+  favicon?: string
+  /**
+   * Print the site name next to the logo. Default false: a logo usually
+   * contains the wordmark, so showing both duplicates the brand. Has no effect
+   * when no logo is set.
+   */
+  show_site_name_with_logo?: boolean
   /** Optional internal note (e.g. from site-config workspace_bootstrap) */
   workspace_note?: string
 }

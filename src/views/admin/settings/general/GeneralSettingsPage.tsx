@@ -201,6 +201,10 @@ const GeneralSettingsPage = () => {
   const [storefrontUi, setStorefrontUi] = useState<StorefrontUiData>(initialStorefrontUi)
   const [shopData, setShopData] = useState<ShopData>(initialShopData)
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData>(initialAnalyticsData)
+  /** Favicon upload: `faviconInput` is the pending data URL, `faviconSrc` the preview. */
+  const [faviconInput, setFaviconInput] = useState<string>('')
+  const [faviconSrc, setFaviconSrc] = useState<string>('')
+  const [showNameWithLogo, setShowNameWithLogo] = useState(false)
   const [currencies, setCurrencies] = useState<Currency[]>([])
   const [workspaceId, setWorkspaceId] = useState<number | null>(null)
   const [workspaceOrgName, setWorkspaceOrgName] = useState('')
@@ -232,7 +236,11 @@ const GeneralSettingsPage = () => {
     site_announcement: basicData.siteAnnouncement,
     footer_contact: basicData.footerContact,
     workspace_note: workspaceNote,
-    logo: fileInput || undefined
+    logo: fileInput || undefined,
+    // Only send a favicon when one was just picked; omitting the key leaves any
+    // previously saved value untouched, same as `logo`.
+    favicon: faviconInput || undefined,
+    show_site_name_with_logo: showNameWithLogo
   })
 
   const startAdminIdentityEdit = () => {
@@ -339,6 +347,26 @@ const GeneralSettingsPage = () => {
     clearLogoFileInputs()
   }
 
+  const handleFaviconInputChange = (event: ChangeEvent) => {
+    const reader = new FileReader()
+    const { files } = event.target as HTMLInputElement
+
+    if (files && files.length !== 0) {
+      reader.onload = () => {
+        setFaviconSrc(reader.result as string)
+        setFaviconInput(reader.result as string)
+      }
+      reader.readAsDataURL(files[0])
+    }
+  }
+
+  const handleFaviconReset = () => {
+    setFaviconInput('')
+    setFaviconSrc('')
+    const el = document.getElementById('general-settings-upload-favicon') as HTMLInputElement | null
+    if (el) el.value = ''
+  }
+
   // Load initial data
   useEffect(() => {
     const loadSettings = async () => {
@@ -426,6 +454,11 @@ const GeneralSettingsPage = () => {
           if (logoUrl) {
             setImgSrc(logoUrl)
           }
+          const faviconUrl = general.favicon || (settings as any).favicon
+          if (faviconUrl) {
+            setFaviconSrc(faviconUrl)
+          }
+          setShowNameWithLogo(Boolean(general.show_site_name_with_logo))
         } else {
           console.log('[GeneralSettings] No general settings found, using defaults')
         }
@@ -925,6 +958,79 @@ const GeneralSettingsPage = () => {
                             </Box>
                             <Typography variant='body2' color='text.secondary'>
                               {t('settings.general.basic.logo.help')}
+                            </Typography>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={showNameWithLogo}
+                                  onChange={e => setShowNameWithLogo(e.target.checked)}
+                                />
+                              }
+                              label={t('settings.general.basic.logo.showSiteName')}
+                            />
+                          </Box>
+                        </Grid>
+                      </Grid>
+
+                      <Grid container spacing={4} sx={{ mb: 4 }}>
+                        <Grid size={{ xs: 12, sm: 'auto' }}>
+                          <div className='flex items-center justify-center'>
+                            {faviconSrc ? (
+                              <img
+                                height={64}
+                                width={64}
+                                className='rounded'
+                                src={faviconSrc}
+                                alt={t('settings.general.basic.favicon.alt')}
+                                style={{ objectFit: 'contain', border: '1px solid rgba(0,0,0,0.12)' }}
+                              />
+                            ) : (
+                              <Box
+                                sx={{
+                                  height: 64,
+                                  width: 64,
+                                  borderRadius: 1,
+                                  border: '1px dashed rgba(0,0,0,0.24)',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  color: 'text.disabled'
+                                }}
+                              >
+                                <i className='tabler-world' style={{ fontSize: '1.75rem' }} />
+                              </Box>
+                            )}
+                          </div>
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 'auto' }}>
+                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+                            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+                              <Button
+                                component='label'
+                                variant='contained'
+                                htmlFor='general-settings-upload-favicon'
+                                startIcon={<i className='tabler-upload' />}
+                              >
+                                {t('settings.general.basic.favicon.upload')}
+                                <input
+                                  hidden
+                                  type='file'
+                                  accept='image/png, image/x-icon, image/vnd.microsoft.icon, image/svg+xml'
+                                  onChange={handleFaviconInputChange}
+                                  id='general-settings-upload-favicon'
+                                />
+                              </Button>
+                              <Button
+                                variant='outlined'
+                                color='secondary'
+                                onClick={handleFaviconReset}
+                                startIcon={<i className='tabler-refresh' />}
+                              >
+                                {t('settings.general.basic.actions.resetPhoto')}
+                              </Button>
+                            </Box>
+                            <Typography variant='body2' color='text.secondary'>
+                              {t('settings.general.basic.favicon.help')}
                             </Typography>
                           </Box>
                         </Grid>

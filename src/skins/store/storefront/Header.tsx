@@ -255,7 +255,12 @@ export default function StoreHeader(_props: StoreHeaderProps) {
               <i className='tabler-menu-2 sf-nav-icon' style={{ fontSize: '1.5rem' }} />
             </button>
             <div className='sf-header-logo-wrap'>
-              <Logo color='#ffffff' name={config.site_name || undefined} />
+              <Logo
+                color='#ffffff'
+                name={config.site_name || undefined}
+                logoSrc={config.logo}
+                showNameWithLogo={config.show_site_name_with_logo}
+              />
             </div>
             <Link href='/' className='sf-header-mobile-site-name' aria-hidden='true'>
               {config.site_name || 'Store'}
@@ -372,7 +377,12 @@ export default function StoreHeader(_props: StoreHeaderProps) {
           <div onClick={() => setMobileMenuOpen(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 999 }} />
           <div style={{ position: 'fixed', top: 0, left: 0, width: '80%', maxWidth: '320px', height: '100vh', background: 'white', boxShadow: '2px 0 8px rgba(0,0,0,0.1)', zIndex: 1000, padding: '1rem', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <Logo color='#6366f1' name={config.site_name || undefined} />
+              <Logo
+                color='#6366f1'
+                name={config.site_name || undefined}
+                logoSrc={config.logo}
+                showNameWithLogo={config.show_site_name_with_logo}
+              />
               <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.75rem', cursor: 'pointer', color: '#757575', padding: '0.25rem' }} aria-label='Close menu'>×</button>
             </div>
             {showSearch && (

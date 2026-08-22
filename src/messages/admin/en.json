@@ -3654,7 +3654,8 @@
         },
         "logo": {
           "alt": "Workspace Logo",
-          "help": "Allowed JPG, GIF or PNG. Max size of 800K"
+          "help": "Allowed JPG, GIF or PNG. Max size of 800K",
+          "showSiteName": "Also show the site name next to the logo"
         },
         "fields": {
           "workspaceOrgName": {
@@ -3794,6 +3795,11 @@
           "loadFailedWithRefresh": "Failed to load settings: {error}. Please refresh the page.",
           "settingsIdMissing": "Settings ID not found. Please refresh the page.",
           "saveFailed": "Failed to save settings: {error}"
+        },
+        "favicon": {
+          "alt": "Favicon",
+          "upload": "Upload favicon",
+          "help": "Shown in the browser tab. A square PNG, ICO or SVG — 32×32 or larger. Leave empty to keep the default icon."
         }
       },
       "users": {
