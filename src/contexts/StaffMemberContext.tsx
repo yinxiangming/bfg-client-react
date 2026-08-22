@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import { meApi } from '@/utils/meApi'
+import { authApi } from '@/utils/authApi'
 import type { PermissionMap } from '@/utils/permissions'
 
 export interface StaffRole {
@@ -34,6 +35,14 @@ export function StaffMemberProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
 
   function load() {
+    // This provider wraps <AdminAccessGuard>, so it mounts before the guard can
+    // bounce a logged-out visitor to /auth/login. Without this check every
+    // logged-out hit on /admin fires a guaranteed 403 on /api/v1/me/.
+    if (!authApi.isAuthenticated()) {
+      setStaffMember(null)
+      setLoading(false)
+      return
+    }
     setLoading(true)
     meApi
       .getMe()
