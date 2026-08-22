@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -119,7 +119,6 @@ export default function StoreHeader(_props: StoreHeaderProps) {
   const [categories, setCategories] = useState<CategoryType[]>([])
   /** Raw API tree for merging CMS header menus with category subtrees. */
   const [categoryTreeRaw, setCategoryTreeRaw] = useState<any[]>([])
-  const [navRows, setNavRows] = useState<NavRow[] | null>(null)
   const [loadingCategories, setLoadingCategories] = useState(true)
   const [mounted, setMounted] = useState(false)
   const [searchKeyword, setSearchKeyword] = useState('')
@@ -170,13 +169,16 @@ export default function StoreHeader(_props: StoreHeaderProps) {
     fetchCategories()
   }, [])
 
-  useEffect(() => {
+  // Derived during render, not in an effect. header_menus arrives from the server via
+  // StorefrontConfigProvider, so computing it here puts real category links in the
+  // server-rendered HTML; an effect would leave the first paint — the one a crawler
+  // reads — with an empty nav. buildNavRows degrades to plain links when the category
+  // tree has not loaded yet, and upgrades to mega menus once it has, so hydration
+  // matches and subcategories still appear.
+  const navRows = useMemo<NavRow[] | null>(() => {
     const menus = config?.header_menus
-    if (menus?.length) {
-      setNavRows(buildNavRows(menus, categoryTreeRaw, transformCategoryTree))
-    } else {
-      setNavRows(null)
-    }
+    if (!menus?.length) return null
+    return buildNavRows(menus, categoryTreeRaw, transformCategoryTree)
   }, [config?.header_menus, categoryTreeRaw])
 
   const useMergedNav = Boolean(navRows?.length)
