@@ -29,9 +29,12 @@ import classnames from 'classnames'
 
 // Util Imports
 import { useCart } from '@/contexts/CartContext'
+import { productPath } from '@/utils/productUrl'
 
 type Product = {
   id: number
+  /** Canonical handle; see utils/productUrl. */
+  slug?: string | null
   name: string
   brand: string
   price: number
@@ -142,7 +145,7 @@ const ProductListView = ({ product }: { product: Product }) => {
           <CardContent>
             <Box className='flex justify-between items-start mbe-2'>
               <Box className='flex-1'>
-                <Link href={`/product/${product.id}`} className='no-underline'>
+                <Link href={productPath(product)} className='no-underline'>
                   <Typography variant='h5' className='font-semibold mbe-2 hover:text-primary'>
                     {product.brand} {product.name}
                   </Typography>

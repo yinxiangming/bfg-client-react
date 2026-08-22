@@ -11,6 +11,8 @@ import '@/styles/storefront.css'
 
 type Product = {
   id: number
+  /** Canonical handle; see utils/productUrl. */
+  slug?: string | null
   name: string
   brand: string
   price: number
@@ -47,7 +49,8 @@ function transformProduct(apiProduct: any): Product {
     image:
       getMediaUrl(apiProduct.primary_image || (apiProduct.images && apiProduct.images[0]) || '') ||
       getStoreImageUrl('themes/PRS04099/assets/img/megnor/empty-cart.svg'),
-    isNew: apiProduct.is_new || false
+    isNew: apiProduct.is_new || false,
+    slug: apiProduct.slug ?? null
   }
 }
 

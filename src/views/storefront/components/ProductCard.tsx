@@ -12,9 +12,12 @@ import { useTranslations } from 'next-intl'
 // Util Imports
 import { getStoreImageUrl } from '@/utils/media'
 import { useCart } from '@/contexts/CartContext'
+import { productPath } from '@/utils/productUrl'
 
 type Product = {
   id: number
+  /** Canonical handle; see utils/productUrl. */
+  slug?: string | null
   name: string
   brand: string
   price: number
@@ -103,7 +106,7 @@ const ProductCard = ({ product }: { product: Product }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className='sf-product-img-wrapper'>
-        <Link href={`/product/${product.id}`} style={{ display: 'block', lineHeight: 0 }} aria-label={product.name}>
+        <Link href={productPath(product)} style={{ display: 'block', lineHeight: 0 }} aria-label={product.name}>
           <img
             src={product.image || getStoreImageUrl('themes/PRS04099/assets/img/megnor/empty-cart.svg')}
             alt={product.name}
@@ -123,7 +126,7 @@ const ProductCard = ({ product }: { product: Product }) => {
       </div>
 
       <div className='sf-card-body'>
-        <Link href={`/product/${product.id}`} style={{ textDecoration: 'none' }}>
+        <Link href={productPath(product)} style={{ textDecoration: 'none' }}>
           <h3 className='sf-card-title' title={product.name}>
             {product.brand} {product.name}
           </h3>
