@@ -201,8 +201,14 @@ const GeneralSettingsPage = () => {
   const [storefrontUi, setStorefrontUi] = useState<StorefrontUiData>(initialStorefrontUi)
   const [shopData, setShopData] = useState<ShopData>(initialShopData)
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData>(initialAnalyticsData)
-  /** Favicon upload: `faviconInput` is the pending data URL, `faviconSrc` the preview. */
-  const [faviconInput, setFaviconInput] = useState<string>('')
+  /**
+   * The logo value as it should be persisted: a data URL, or '' for "no logo".
+   * Kept apart from `imgSrc`, which falls back to a placeholder image that must
+   * never be saved, and from `fileInput`, which only holds a *freshly picked*
+   * file and is cleared after every save.
+   */
+  const [logoValue, setLogoValue] = useState<string>('')
+  /** Favicon, same value semantics as `logoValue` — doubles as the preview src. */
   const [faviconSrc, setFaviconSrc] = useState<string>('')
   const [showNameWithLogo, setShowNameWithLogo] = useState(false)
   const [currencies, setCurrencies] = useState<Currency[]>([])
@@ -236,10 +242,12 @@ const GeneralSettingsPage = () => {
     site_announcement: basicData.siteAnnouncement,
     footer_contact: basicData.footerContact,
     workspace_note: workspaceNote,
-    logo: fileInput || undefined,
-    // Only send a favicon when one was just picked; omitting the key leaves any
-    // previously saved value untouched, same as `logo`.
-    favicon: faviconInput || undefined,
+    // Always an explicit string. `undefined` would be dropped by JSON.stringify,
+    // and since the PATCH replaces custom_settings.general wholesale, a missing
+    // key erases the stored logo — which is how saving this form for any other
+    // reason (a GA4 id, a footer tweak) used to wipe the workspace's logo.
+    logo: logoValue,
+    favicon: faviconSrc,
     show_site_name_with_logo: showNameWithLogo
   })
 
@@ -329,6 +337,7 @@ const GeneralSettingsPage = () => {
       reader.onload = () => {
         setImgSrc(reader.result as string)
         setFileInput(reader.result as string)
+        setLogoValue(reader.result as string)
       }
       reader.readAsDataURL(files[0])
     }
@@ -343,6 +352,7 @@ const GeneralSettingsPage = () => {
 
   const handleFileInputReset = () => {
     setFileInput('')
+    setLogoValue('')
     setImgSrc(DEFAULT_AVATAR)
     clearLogoFileInputs()
   }
@@ -354,14 +364,12 @@ const GeneralSettingsPage = () => {
     if (files && files.length !== 0) {
       reader.onload = () => {
         setFaviconSrc(reader.result as string)
-        setFaviconInput(reader.result as string)
       }
       reader.readAsDataURL(files[0])
     }
   }
 
   const handleFaviconReset = () => {
-    setFaviconInput('')
     setFaviconSrc('')
     const el = document.getElementById('general-settings-upload-favicon') as HTMLInputElement | null
     if (el) el.value = ''
@@ -453,6 +461,7 @@ const GeneralSettingsPage = () => {
           const logoUrl = general.logo || (settings as any).logo
           if (logoUrl) {
             setImgSrc(logoUrl)
+            setLogoValue(logoUrl)
           }
           const faviconUrl = general.favicon || (settings as any).favicon
           if (faviconUrl) {
