@@ -81,6 +81,34 @@ function buildStorefrontPluginRewrites() {
   return rules
 }
 
+/**
+ * `next/image` refuses any remote host that is not allow-listed. Media lives on
+ * whatever `NEXT_PUBLIC_MEDIA_URL` points at (an S3/CloudFront CDN in prod and
+ * UAT) and falls back to the API origin, so derive the allow-list from those two
+ * rather than hard-coding a CDN hostname that changes per environment.
+ */
+function buildImageRemotePatterns() {
+  const seen = new Set<string>()
+  const patterns: Array<{ protocol: 'http' | 'https'; hostname: string; pathname: string }> = []
+
+  for (const raw of [process.env.NEXT_PUBLIC_MEDIA_URL, process.env.NEXT_PUBLIC_API_URL]) {
+    if (!raw) continue
+    let url: URL
+    try {
+      url = new URL(raw)
+    } catch {
+      continue // not absolute (e.g. a bare "/media") — nothing remote to allow
+    }
+    const protocol = url.protocol.replace(':', '')
+    if (protocol !== 'http' && protocol !== 'https') continue
+    const key = `${protocol}//${url.hostname}`
+    if (seen.has(key)) continue
+    seen.add(key)
+    patterns.push({ protocol, hostname: url.hostname, pathname: '/**' })
+  }
+  return patterns
+}
+
 // Local: parent repo root for symlink tracing. Docker: set NEXT_FILE_TRACING_ROOT=/app.
 // On Vercel, omit outputFileTracingRoot (Next 16.2 + monorepo Root Directory can break finalize if this is set).
 const tracingRoot =
@@ -89,6 +117,7 @@ const tracingRoot =
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  images: { remotePatterns: buildImageRemotePatterns() },
   ...(process.env.API_PROXY_TARGET ? { skipTrailingSlashRedirect: true } : {}),
   ...(tracingRoot != null && tracingRoot !== '' ? { outputFileTracingRoot: tracingRoot } : {}),
   allowedDevOrigins: process.env.ALLOWED_DEV_ORIGINS?.split(',').map(s => s.trim()).filter(Boolean) ?? [],
