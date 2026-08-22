@@ -1,4 +1,5 @@
 import { headers } from 'next/headers'
+import { isIndexableHost } from '@/utils/indexable'
 import { getRequestOrigin } from '@/utils/seo'
 import { storefrontApi } from '@/utils/storefrontApi'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
@@ -59,6 +60,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const headersList = await headers()
   const requestHost = headersList.get('host') ?? undefined
+
+  // A preview host must not publish a catalogue of itself; robots.txt already
+  // refuses it, and an empty sitemap keeps the two from contradicting each other.
+  if (!isIndexableHost(headersList.get('x-forwarded-host') || requestHost)) return []
   const locale = headersList.get('x-locale') || 'en'
 
   const [config, categoriesRes, productList] = await Promise.all([

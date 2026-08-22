@@ -1,3 +1,5 @@
+import { headers } from 'next/headers'
+import { isIndexableHost } from '@/utils/indexable'
 import { getRequestOrigin } from '@/utils/seo'
 import type { MetadataRoute } from 'next'
 
@@ -48,6 +50,15 @@ const AI_CRAWLERS = [
 
 export default async function robots(): Promise<MetadataRoute.Robots> {
   const origin = await getRequestOrigin()
+  const headersList = await headers()
+  const host = headersList.get('x-forwarded-host') || headersList.get('host') || ''
+
+  // A deployment that is not the one meant to rank gets a blanket refusal, and no
+  // sitemap line — advertising a catalogue is an invitation to the crawl we are
+  // declining. See isIndexableHost().
+  if (!isIndexableHost(host)) {
+    return { rules: [{ userAgent: '*', disallow: '/' }] }
+  }
 
   return {
     rules: [
