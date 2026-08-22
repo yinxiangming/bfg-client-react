@@ -13,6 +13,7 @@ import {
   setWorkspaceRefreshToken,
   setWorkspaceToken,
 } from './authTokens'
+import { clearGuestCartKey } from './guestCart'
 
 interface LoginRequest {
   username?: string
@@ -277,6 +278,10 @@ class AuthApiClient {
   logout(): void {
     if (typeof window !== 'undefined') {
       clearWorkspaceAuthTokens()
+      // Signing in merged this key's guest cart into the customer cart and the API
+      // deleted it, so the key now points at nothing. Drop it so the next guest on
+      // this browser starts clean instead of inheriting a stranger's identifier.
+      clearGuestCartKey()
       console.log('Logged out: Tokens cleared')
     }
   }

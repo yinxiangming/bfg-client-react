@@ -7,6 +7,7 @@
 import { refreshTokenIfNeeded } from './tokenRefresh'
 import { getApiBaseUrl, getWorkspaceId } from './api'
 import { getWorkspaceToken } from './authTokens'
+import { getOrCreateGuestCartKey } from './guestCart'
 import { getApiLanguageHeaders, getCurrentLocale } from '@/i18n/http'
 
 interface ApiResponse<T> {
@@ -105,6 +106,15 @@ class StorefrontApiClient {
       const token = getWorkspaceToken()
       if (token) {
         headers['Authorization'] = `Bearer ${token}`
+      }
+      // Cart identity. `credentials: 'include'` below is not enough: the storefront and
+      // the API are on different registrable domains, so `sessionid` is a cross-site
+      // cookie and SameSite=Lax stops the browser sending it — every request would get
+      // a fresh empty cart. Sent on all storefront calls rather than an endpoint
+      // allowlist, so a new cart route can never be forgotten. See utils/guestCart.ts.
+      const guestCartKey = getOrCreateGuestCartKey()
+      if (guestCartKey) {
+        headers['X-Bfg-Cart-Session'] = guestCartKey
       }
     }
 
