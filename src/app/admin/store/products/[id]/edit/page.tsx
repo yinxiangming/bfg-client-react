@@ -186,7 +186,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
 
   return (
     <>
-      <Grid container spacing={4}>
+      <Grid container spacing={3}>
         <Grid size={{ xs: 12 }}>
           <ProductEditHeader
             productId={id}
@@ -196,7 +196,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
           />
         </Grid>
         <Grid size={{ xs: 12, md: 8 }}>
-          <Grid container spacing={4}>
+          <Grid container spacing={3}>
             {/* Extension slots before default slots */}
             {beforeSlots.map(ext => (
               ext.component && (
@@ -256,7 +256,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
           </Grid>
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
-          <Grid container spacing={4}>
+          <Grid container spacing={3}>
             {visibleSlots.includes('ProductPricing') && (
               <Grid key="ProductPricing" size={{ xs: 12 }}>
                 {renderSlot('ProductPricing', ProductPricing, {

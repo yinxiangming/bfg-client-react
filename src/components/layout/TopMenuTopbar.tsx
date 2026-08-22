@@ -36,6 +36,7 @@ const TopMenuTopbar = ({ avatarInitial = 'N' }: Props) => {
   /** Workspace organization name (API) preferred; falls back to settings `site_name`. */
   const [brandingName, setBrandingName] = useState<string | undefined>(undefined)
   const [workspaceLogoSrc, setWorkspaceLogoSrc] = useState<string | undefined>(undefined)
+  const [showNameWithLogo, setShowNameWithLogo] = useState(false)
   const [agentDialogOpen, setAgentDialogOpen] = useState(false)
 
   useEffect(() => {
@@ -46,6 +47,7 @@ const TopMenuTopbar = ({ avatarInitial = 'N' }: Props) => {
         setBrandingName(orgName || siteName)
         const logo = s.custom_settings?.general?.logo ?? s.logo
         setWorkspaceLogoSrc(logo ?? undefined)
+        setShowNameWithLogo(Boolean(s.custom_settings?.general?.show_site_name_with_logo))
       })
       .catch(() => {})
   }, [])
@@ -62,7 +64,7 @@ const TopMenuTopbar = ({ avatarInitial = 'N' }: Props) => {
   return (
     <div className='topmenu-topbar'>
       <div className='topmenu-topbar-left'>
-        <Logo name={displayName} logoSrc={workspaceLogoSrc} />
+        <Logo name={displayName} logoSrc={workspaceLogoSrc} showNameWithLogo={showNameWithLogo} />
       </div>
       <div className='topmenu-topbar-right'>
         <CurrentUserDisplay />

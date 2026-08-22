@@ -20,7 +20,6 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
-import Paper from '@mui/material/Paper'
 import CircularProgress from '@mui/material/CircularProgress'
 import Alert from '@mui/material/Alert'
 
@@ -206,15 +205,15 @@ const VariantInventoryModal = ({ open, onClose, productId, productData, variantI
                 ) : error ? (
                     <Alert severity='error' sx={{ mb: 2 }}>{error}</Alert>
                 ) : variants.length === 0 ? (
-                    <Typography color='text.secondary' sx={{ p: 2 }}>
+                    <Typography color='text.secondary' sx={{ p: 2, fontSize: '0.8125rem' }}>
                         {variantId ? t('products.variantInventory.empty.variantNotFound') : t('products.variantInventory.empty.noVariants')}
                     </Typography>
                 ) : warehouses.length === 0 ? (
-                    <Typography color='text.secondary' sx={{ p: 2 }}>
+                    <Typography color='text.secondary' sx={{ p: 2, fontSize: '0.8125rem' }}>
                         {t('products.variantInventory.empty.noWarehouses')}
                     </Typography>
                 ) : (
-                    <TableContainer component={Paper} sx={{ mt: 2 }}>
+                    <TableContainer sx={{ mt: 2 }}>
                         <Table size='small'>
                             <TableHead>
                                 <TableRow>
@@ -224,7 +223,7 @@ const VariantInventoryModal = ({ open, onClose, productId, productData, variantI
                                             {warehouse.name}
                                         </TableCell>
                                     ))}
-                                    <TableCell align='right' sx={{ fontWeight: 'bold' }}>
+                                    <TableCell align='right' sx={{ fontWeight: 600 }}>
                                         {t('products.variantInventory.table.headers.total')}
                                     </TableCell>
                                 </TableRow>
@@ -257,20 +256,20 @@ const VariantInventoryModal = ({ open, onClose, productId, productData, variantI
                                                 </TableCell>
                                             )
                                         })}
-                                        <TableCell align='right' sx={{ fontWeight: 'bold' }}>
+                                        <TableCell align='right' sx={{ fontWeight: 600 }}>
                                             {getTotalForVariant(variant.id)}
                                         </TableCell>
                                     </TableRow>
                                 ))}
                                 {!variantId && (
                                     <TableRow sx={{ backgroundColor: 'action.hover' }}>
-                                        <TableCell sx={{ fontWeight: 'bold' }}>{t('products.variantInventory.table.headers.total')}</TableCell>
+                                        <TableCell sx={{ fontWeight: 600 }}>{t('products.variantInventory.table.headers.total')}</TableCell>
                                         {warehouses.map(warehouse => (
-                                            <TableCell key={warehouse.id} align='right' sx={{ fontWeight: 'bold' }}>
+                                            <TableCell key={warehouse.id} align='right' sx={{ fontWeight: 600 }}>
                                                 {getTotalForWarehouse(warehouse.id)}
                                             </TableCell>
                                         ))}
-                                        <TableCell align='right' sx={{ fontWeight: 'bold' }}>
+                                        <TableCell align='right' sx={{ fontWeight: 600 }}>
                                             {Object.values(inventories).reduce((sum, inv) => sum + (inv.quantity || 0), 0)}
                                         </TableCell>
                                     </TableRow>

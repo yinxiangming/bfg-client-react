@@ -2,14 +2,14 @@
 
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
-import Typography from '@mui/material/Typography'
 import List from '@mui/material/List'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
-import Paper from '@mui/material/Paper'
+import Card from '@mui/material/Card'
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 
 export default function QuickEntryHub() {
   const router = useRouter()
@@ -27,15 +27,13 @@ export default function QuickEntryHub() {
 
   return (
     <Box>
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, gap: 1 }}>
+      <Box sx={{ mb: 2 }}>
         <IconButton size='small' onClick={() => router.push('/admin/m')} title={t('quickEntry.back')}>
           <span className='iconify' data-icon='mdi:arrow-left' />
         </IconButton>
-        <Typography variant='h6' sx={{ fontWeight: 600 }}>
-          {t('quickEntry.title')}
-        </Typography>
       </Box>
-      <Paper variant='outlined'>
+      <AdminPageHeader title={t('quickEntry.title')} />
+      <Card>
         <List disablePadding>
           {entryTypes.map((item, idx) => (
             <ListItemButton
@@ -52,11 +50,11 @@ export default function QuickEntryHub() {
                 secondary={item.desc}
                 primaryTypographyProps={{ fontWeight: 600 }}
               />
-              <span className='iconify text-gray-400' data-icon='mdi:chevron-right' />
+              <Box component='span' className='iconify' data-icon='mdi:chevron-right' sx={{ color: 'text.disabled' }} />
             </ListItemButton>
           ))}
         </List>
-      </Paper>
+      </Card>
     </Box>
   )
 }

@@ -18,7 +18,6 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
-import Paper from '@mui/material/Paper'
 import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
@@ -257,18 +256,18 @@ const OrderDetailsCard = ({ order, onOrderUpdate }: OrderDetailsCardProps) => {
           </Typography>
         ) : (
           <>
-            <TableContainer component={Paper} variant='outlined' sx={{ mb: 3 }}>
+            <TableContainer sx={{ mb: 3 }}>
               <Table sx={{ minWidth: 650 }}>
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>{t('orders.detailsCard.table.headers.product')}</TableCell>
-                    <TableCell align='right' sx={{ fontWeight: 600, minWidth: 100 }}>
+                    <TableCell>{t('orders.detailsCard.table.headers.product')}</TableCell>
+                    <TableCell align='right' sx={{ minWidth: 100 }}>
                       {t('orders.detailsCard.table.headers.price')}
                     </TableCell>
-                    <TableCell align='right' sx={{ fontWeight: 600, minWidth: 100 }}>
+                    <TableCell align='right' sx={{ minWidth: 100 }}>
                       {t('orders.detailsCard.table.headers.quantity')}
                     </TableCell>
-                    <TableCell align='right' sx={{ fontWeight: 600, minWidth: 100 }}>
+                    <TableCell align='right' sx={{ minWidth: 100 }}>
                       {t('orders.detailsCard.table.headers.total')}
                     </TableCell>
                     {editing && <TableCell sx={{ width: 56 }} />}
@@ -294,7 +293,7 @@ const OrderDetailsCard = ({ order, onOrderUpdate }: OrderDetailsCardProps) => {
                           )}
                         </Box>
                       </TableCell>
-                      <TableCell align='right' sx={{ fontFamily: 'monospace' }}>
+                      <TableCell align='right' sx={{ fontFamily: 'var(--at-font-num, monospace)', fontFeatureSettings: 'var(--at-num-feat, "tnum" 1)' }}>
                         {formatCurrency('price' in item ? item.price : (item as OrderItem).price)}
                       </TableCell>
                       <TableCell align='right'>
@@ -312,7 +311,7 @@ const OrderDetailsCard = ({ order, onOrderUpdate }: OrderDetailsCardProps) => {
                           (item as OrderItem).quantity
                         )}
                       </TableCell>
-                      <TableCell align='right' sx={{ fontWeight: 500, fontFamily: 'monospace' }}>
+                      <TableCell align='right' sx={{ fontWeight: 500, fontFamily: 'var(--at-font-num, monospace)', fontFeatureSettings: 'var(--at-num-feat, "tnum" 1)' }}>
                         {editing
                           ? formatCurrency((item as EditableLine).price * (item as EditableLine).quantity)
                           : formatCurrency((item as OrderItem).subtotal)}
@@ -373,10 +372,10 @@ const OrderDetailsCard = ({ order, onOrderUpdate }: OrderDetailsCardProps) => {
                         </Box>
                       )}
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', pt: 1.5, borderTop: 1, borderColor: 'divider' }}>
-                        <Typography variant='body1' sx={{ fontWeight: 600 }}>
+                        <Typography variant='body2' sx={{ fontWeight: 600 }}>
                           {t('orders.detailsCard.summary.total')}:
                         </Typography>
-                        <Typography variant='body1' sx={{ fontWeight: 600 }}>
+                        <Typography variant='body2' sx={{ fontWeight: 600 }}>
                           {formatCurrency(total)}
                         </Typography>
                       </Box>

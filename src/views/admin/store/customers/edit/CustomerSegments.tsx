@@ -103,11 +103,11 @@ const CustomerSegments = ({ customer }: CustomerSegmentsProps) => {
 
   return (
     <Box>
-      <Grid container spacing={4}>
+      <Grid container spacing={3}>
         <Grid size={{ xs: 12, md: 8 }}>
           <Card>
             <CardContent>
-              <Typography variant='h6' sx={{ mb: 4 }}>
+              <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600, mb: 3 }}>
                 {t('customers.segments.title')}
               </Typography>
               {segments.length > 0 ? (
@@ -130,11 +130,11 @@ const CustomerSegments = ({ customer }: CustomerSegmentsProps) => {
         <Grid size={{ xs: 12, md: 4 }}>
           <Card>
             <CardContent>
-              <Typography variant='h6' sx={{ mb: 4 }}>
+              <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600, mb: 3 }}>
                 {t('customers.segments.experiencePoints.title')}
               </Typography>
               {experiencePoints !== null ? (
-                <Typography variant='h4' color='primary'>
+                <Typography color='primary' sx={{ fontSize: '1.75rem', fontWeight: 600, lineHeight: 1.3 }}>
                   {experiencePoints.toLocaleString()}
                 </Typography>
               ) : (

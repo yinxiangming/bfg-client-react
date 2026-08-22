@@ -10,6 +10,7 @@ import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
 
 import SchemaTable from '@/components/schema/SchemaTable'
+import { SETTINGS_GUTTER } from '@/components/admin/settings/SettingsSection'
 import type { ListSchema, SchemaAction } from '@/types/schema'
 import { useApiData } from '@/hooks/useApiData'
 import ThemeEditDialog from './ThemeEditDialog'
@@ -99,7 +100,7 @@ const ThemesTab = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', px: SETTINGS_GUTTER, py: 6 }}>
         <CircularProgress />
       </Box>
     )
@@ -107,7 +108,7 @@ const ThemesTab = () => {
 
   if (error) {
     return (
-      <Box sx={{ p: 4 }}>
+      <Box sx={{ px: SETTINGS_GUTTER, py: 5 }}>
         <Alert severity='error'>{error}</Alert>
       </Box>
     )

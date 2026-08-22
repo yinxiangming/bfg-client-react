@@ -4,10 +4,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useTranslations } from 'next-intl'
 
 import Alert from '@mui/material/Alert'
-import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
 import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
@@ -188,7 +185,18 @@ const ShippingFulfillmentDialog = ({ open, order, onClose, onCompleted }: Shippi
   return (
     <Dialog open={open} onClose={busy ? undefined : onClose} maxWidth='lg' fullWidth>
       <DialogTitle>{t('orders.shippingWizard.title')}</DialogTitle>
-      <DialogContent>
+      {/* The shipping branch renders PackagesCard, which brings its own Card
+          surface; flatten it so the dialog paper is the only border. */}
+      <DialogContent
+        sx={{
+          '&& .MuiCard-root': {
+            border: 0,
+            borderRadius: 0,
+            boxShadow: 'none',
+            backgroundColor: 'transparent'
+          }
+        }}
+      >
         <Stack spacing={3} sx={{ pt: 1 }}>
           {error && <Alert severity='error'>{error}</Alert>}
 
@@ -206,49 +214,44 @@ const ShippingFulfillmentDialog = ({ open, order, onClose, onCompleted }: Shippi
               onShipmentCreated={handleShipmentCreated}
             />
           ) : (
-            <Card variant='outlined'>
-              <CardContent>
-                <Stack spacing={2.5}>
-                  <Typography variant='subtitle1'>{t('orders.shippingWizard.pickup.title')}</Typography>
-                  <Typography variant='body2' color='text.secondary'>
-                    {t('orders.shippingWizard.pickup.description')}
-                  </Typography>
+            <Stack spacing={2.5}>
+              <Typography variant='subtitle1'>{t('orders.shippingWizard.pickup.title')}</Typography>
+              <Typography variant='body2' color='text.secondary'>
+                {t('orders.shippingWizard.pickup.description')}
+              </Typography>
 
-                  {loadingCustomer && <Alert severity='info'>{t('orders.shippingWizard.pickup.loadingCustomerLanguage')}</Alert>}
+              {loadingCustomer && <Alert severity='info'>{t('orders.shippingWizard.pickup.loadingCustomerLanguage')}</Alert>}
 
-                  <CustomTextField
-                    label={t('orders.shippingWizard.pickup.subject')}
-                    value={pickupSubject}
-                    onChange={(e) => setPickupSubject(e.target.value)}
-                    disabled={busy}
-                    fullWidth
-                  />
+              <CustomTextField
+                label={t('orders.shippingWizard.pickup.subject')}
+                value={pickupSubject}
+                onChange={(e) => setPickupSubject(e.target.value)}
+                disabled={busy}
+                fullWidth
+              />
 
-                  <CustomTextField
-                    label={t('orders.shippingWizard.pickup.message')}
-                    value={pickupMessage}
-                    onChange={(e) => setPickupMessage(e.target.value)}
-                    disabled={busy}
-                    multiline
-                    minRows={5}
-                    fullWidth
-                  />
+              <CustomTextField
+                label={t('orders.shippingWizard.pickup.message')}
+                value={pickupMessage}
+                onChange={(e) => setPickupMessage(e.target.value)}
+                disabled={busy}
+                multiline
+                minRows={5}
+                fullWidth
+              />
 
-                  <Alert severity='warning'>{t('orders.shippingWizard.pickup.statusHint')}</Alert>
-
-                  <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-                    <Button variant='contained' onClick={handlePickupReady} disabled={busy || loadingCustomer}>
-                      {t('orders.shippingWizard.pickup.sendAndMarkReady')}
-                    </Button>
-                  </Box>
-                </Stack>
-              </CardContent>
-            </Card>
+              <Alert severity='warning'>{t('orders.shippingWizard.pickup.statusHint')}</Alert>
+            </Stack>
           )}
         </Stack>
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={busy}>{t('common.actions.close')}</Button>
+        {mode === 'pickup' && (
+          <Button variant='contained' onClick={handlePickupReady} disabled={busy || loadingCustomer}>
+            {t('orders.shippingWizard.pickup.sendAndMarkReady')}
+          </Button>
+        )}
       </DialogActions>
     </Dialog>
   )

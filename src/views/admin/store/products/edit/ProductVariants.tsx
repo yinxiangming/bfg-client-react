@@ -478,8 +478,6 @@ const ProductVariants = ({ productId, productMedia, initialVariants, onInventory
                                     <TableCell sx={{ minWidth: 180 }}>
                                         {editingId === variant.id ? (
                                             <CustomTextField
-                                                variant='outlined'
-                                                size='small'
                                                 value={editDraft.name ?? ''}
                                                 onChange={e => setEditDraft(prev => ({ ...prev, name: e.target.value }))}
                                                 sx={{ minWidth: 180 }}
@@ -491,8 +489,6 @@ const ProductVariants = ({ productId, productMedia, initialVariants, onInventory
                                     <TableCell sx={{ minWidth: 180 }}>
                                         {editingId === variant.id ? (
                                             <CustomTextField
-                                                variant='outlined'
-                                                size='small'
                                                 value={editDraft.sku ?? ''}
                                                 onChange={e => setEditDraft(prev => ({ ...prev, sku: e.target.value }))}
                                                 sx={{ minWidth: 140 }}
@@ -504,8 +500,6 @@ const ProductVariants = ({ productId, productMedia, initialVariants, onInventory
                                     <TableCell sx={{ minWidth: 180 }}>
                                         {editingId === variant.id ? (
                                             <CustomTextField
-                                                variant='outlined'
-                                                size='small'
                                                 type='number'
                                                 value={editDraft.price ?? ''}
                                                 onChange={e => setEditDraft(prev => ({ ...prev, price: Number(e.target.value) }))}
@@ -638,8 +632,6 @@ const ProductVariants = ({ productId, productMedia, initialVariants, onInventory
                                     </TableCell>
                                     <TableCell sx={{ minWidth: 180 }}>
                                         <CustomTextField
-                                            variant='outlined'
-                                            size='small'
                                             placeholder={t('products.variants.new.placeholders.name')}
                                             value={newVariant.name || ''}
                                             onChange={e => setNewVariant(prev => prev ? { ...prev, name: e.target.value } : { name: e.target.value })}
@@ -648,8 +640,6 @@ const ProductVariants = ({ productId, productMedia, initialVariants, onInventory
                                     </TableCell>
                                     <TableCell sx={{ minWidth: 140 }}>
                                         <CustomTextField
-                                            variant='outlined'
-                                            size='small'
                                             placeholder={t('products.variants.new.placeholders.sku')}
                                             value={newVariant.sku || ''}
                                             onChange={e => setNewVariant(prev => prev ? { ...prev, sku: e.target.value } : { sku: e.target.value })}
@@ -658,8 +648,6 @@ const ProductVariants = ({ productId, productMedia, initialVariants, onInventory
                                     </TableCell>
                                     <TableCell sx={{ minWidth: 140 }}>
                                         <CustomTextField
-                                            variant='outlined'
-                                            size='small'
                                             type='number'
                                             placeholder={t('products.variants.new.placeholders.price')}
                                             value={newVariant.price || ''}
@@ -669,8 +657,6 @@ const ProductVariants = ({ productId, productMedia, initialVariants, onInventory
                                     </TableCell>
                                     <TableCell sx={{ minWidth: 120 }}>
                                         <CustomTextField
-                                            variant='outlined'
-                                            size='small'
                                             type='number'
                                             placeholder={t('products.variants.new.placeholders.stock')}
                                             value={newVariant.stock_quantity || ''}

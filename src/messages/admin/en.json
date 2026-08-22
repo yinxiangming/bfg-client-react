@@ -242,7 +242,8 @@
         "cancelTodo": "Cancel order functionality to be implemented",
         "shipTodo": "Ship order functionality to be implemented",
         "exportTodo": "Export Excel functionality to be implemented"
-      }
+      },
+      "subtitle": "Track, fulfil, refund and export customer orders."
     },
     "addressCards": {
       "labels": {
@@ -607,7 +608,8 @@
       },
       "messages": {
         "actionFailed": "Action failed: {error}"
-      }
+      },
+      "subtitle": "Moderate product reviews before they appear on the storefront."
     }
   },
   "customers": {
@@ -632,7 +634,8 @@
         "confirmDelete": "Are you sure you want to delete this customer?",
         "confirmDeleteCustomer": "Are you sure you want to delete {name}?",
         "deleteFailed": "Failed to delete customer: {error}"
-      }
+      },
+      "subtitle": "Accounts, addresses, wallets and order history for everyone who has bought from you."
     },
     "editHeader": {
       "addCustomer": "Add Customer",
@@ -1014,7 +1017,8 @@
       },
       "errors": {
         "deleteFailed": "Failed to delete category: {error}"
-      }
+      },
+      "subtitle": "The category tree customers browse on the storefront."
     },
     "form": {
       "title": "Category Details",
@@ -1154,7 +1158,8 @@
   },
   "stores": {
     "page": {
-      "title": "Stores"
+      "title": "Stores",
+      "subtitle": "Sales locations and the warehouses that fulfil them."
     },
     "schema": {
       "title": "Stores",
@@ -1202,7 +1207,9 @@
       "snackbar": {
         "saved": "Store saved successfully!",
         "saveFailed": "Failed to update store"
-      }
+      },
+      "title": "Edit Store",
+      "subtitle": "Contact details, fulfilment and storefront settings for this location."
     }
   },
   "support": {
@@ -1212,7 +1219,8 @@
         "titleUnprocessed": "Unprocessed",
         "titleMy": "My Tickets",
         "titleInProgress": "In Progress",
-        "titleClosed": "Closed"
+        "titleClosed": "Closed",
+        "subtitle": "Customer conversations waiting on your team."
       },
       "tabs": {
         "basic": "Basic Info",
@@ -1467,7 +1475,8 @@
         "updateStatusFailed": "Failed to update status: {error}",
         "deleteFailed": "Failed to delete product: {error}",
         "schemaNotFound": "Schema not found"
-      }
+      },
+      "subtitle": "Catalogue, pricing, stock and storefront visibility for every product."
     },
     "description": {
       "cardTitle": "Product Description",
@@ -3645,7 +3654,19 @@
           "storefrontDisplay": "Storefront Display",
           "storefrontTheme": "Storefront Theme & Header",
           "shop": "Shop",
-          "socialMediaLinks": "Social Media Links"
+          "socialMediaLinks": "Social Media Links",
+          "analytics": "Analytics"
+        },
+        "sectionHints": {
+          "adminIdentity": "Names this tenant inside the back office. Not shown to storefront visitors.",
+          "localization": "Defaults applied to new content, prices, and timestamps across the workspace.",
+          "shop": "Catalogue and review behaviour for this workspace.",
+          "storefrontBranding": "Logo, favicon, and the name visitors see in the header and browser tab.",
+          "contactInformation": "Published in the storefront footer and on transactional pages.",
+          "storefrontDisplay": "Announcements and copy that sit above and below every storefront page.",
+          "storefrontTheme": "Skin, colour modes, and the header layout used by the storefront.",
+          "analytics": "Measurement tags injected into every storefront page.",
+          "socialMediaLinks": "Linked from the storefront footer. Leave blank to hide an icon."
         },
         "subsections": {
           "adminIdentity": "Admin & system identity",
@@ -3653,7 +3674,8 @@
         },
         "logo": {
           "alt": "Workspace Logo",
-          "help": "Allowed JPG, GIF or PNG. Max size of 800K"
+          "help": "Allowed JPG, GIF or PNG. Max size of 800K",
+          "showSiteName": "Also show the site name next to the logo"
         },
         "fields": {
           "workspaceOrgName": {
@@ -3769,6 +3791,13 @@
               "label": "Instagram",
               "placeholder": "https://instagram.com/yourprofile"
             }
+          },
+          "analytics": {
+            "googleAnalyticsId": {
+              "label": "Google Analytics 4 measurement ID",
+              "placeholder": "G-XXXXXXXXXX",
+              "helper": "Found in GA4 under Admin → Data streams → your web stream. Leave blank to turn tracking off. Page views are reported automatically on every storefront page."
+            }
           }
         },
         "actions": {
@@ -3786,6 +3815,11 @@
           "loadFailedWithRefresh": "Failed to load settings: {error}. Please refresh the page.",
           "settingsIdMissing": "Settings ID not found. Please refresh the page.",
           "saveFailed": "Failed to save settings: {error}"
+        },
+        "favicon": {
+          "alt": "Favicon",
+          "upload": "Upload favicon",
+          "help": "Shown in the browser tab. A square PNG, ICO or SVG — 32×32 or larger. Leave empty to keep the default icon."
         }
       },
       "users": {
@@ -3972,7 +4006,8 @@
     "hub": {
       "title": "Tools",
       "productEntry": "Log Product",
-      "productEntryDesc": "Log product model, quantity, location and photos"
+      "productEntryDesc": "Log product model, quantity, location and photos",
+      "subtitle": "Quick actions sized for a phone."
     },
     "quickEntry": {
       "title": "Quick Entry",
@@ -4157,6 +4192,7 @@
     "cancel": "Cancel",
     "save": "Save Layout",
     "saving": "Saving…",
-    "emptyHint": "No blocks yet. Add blocks to customize your dashboard."
+    "emptyHint": "No blocks yet. Add blocks to customize your dashboard.",
+    "subtitle": "Today's orders, revenue and customers at a glance."
   }
 }

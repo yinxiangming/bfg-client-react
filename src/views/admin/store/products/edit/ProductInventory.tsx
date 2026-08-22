@@ -62,7 +62,7 @@ const ProductInventory = ({ productData, onChange }: ProductInventoryProps) => {
                                 {t('products.inventory.actions.manageInventory')}
                             </Link>
                         )}
-                        <Typography variant='h5' fontWeight={600} lineHeight={1}>
+                        <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600, lineHeight: 1 }}>
                             {totalStock}
                         </Typography>
                     </Box>
@@ -72,7 +72,7 @@ const ProductInventory = ({ productData, onChange }: ProductInventoryProps) => {
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                            <Typography>{t('products.inventory.fields.trackInventory')}</Typography>
+                            <Typography sx={{ fontSize: '0.8125rem' }}>{t('products.inventory.fields.trackInventory')}</Typography>
                             <Tooltip 
                                 title={t('products.inventory.fields.trackInventoryHelp')}
                                 arrow
@@ -86,7 +86,7 @@ const ProductInventory = ({ productData, onChange }: ProductInventoryProps) => {
                         />
                     </Box>
                     <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                        <Typography>{t('products.inventory.fields.requiresShipping')}</Typography>
+                        <Typography sx={{ fontSize: '0.8125rem' }}>{t('products.inventory.fields.requiresShipping')}</Typography>
                         <Switch defaultChecked />
                     </Box>
                 </Box>

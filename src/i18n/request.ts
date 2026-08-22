@@ -67,12 +67,20 @@ async function getSingleSiteLocale(headerStore: Awaited<ReturnType<typeof header
   const apiBase = getWorkspaceApiBaseUrl()
   if (!apiBase) return null
 
+  // Same precedence as getApiHeaders(): a pinned workspace id wins, and the request
+  // host is only a fallback. Without the pin a dev host (localhost:3010) matches no
+  // WorkspaceDomain row and the backend answers 400 workspace_required.
+  const workspaceId = process.env.NEXT_PUBLIC_WORKSPACE_ID || ''
   const requestHost = headerStore.get('x-forwarded-host') || headerStore.get('host') || ''
   try {
     const res = await fetch(`${apiBase}/api/v1/settings/storefront/?lang=${DEFAULT_APP_LOCALE}`, {
       headers: {
         'Content-Type': 'application/json',
-        ...(requestHost ? { 'X-Forwarded-Host': requestHost } : {}),
+        ...(workspaceId
+          ? { 'X-Workspace-ID': workspaceId }
+          : requestHost
+            ? { 'X-Forwarded-Host': requestHost }
+            : {}),
       },
       // Same endpoint, same tenant-in-headers scheme and same window as
       // getStorefrontConfigForServer(). `no-store` here was uncached, and because

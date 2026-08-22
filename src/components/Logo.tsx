@@ -20,9 +20,15 @@ type LogoProps = {
   name?: string
   /** When provided (e.g. workspace logo URL), displayed instead of default LogoIcon */
   logoSrc?: string | null
+  /**
+   * Whether to print the name alongside a logo. Defaults to false because a
+   * logo usually contains the wordmark, and showing both duplicates the brand.
+   * With no logo the name always renders — it is the only branding left.
+   */
+  showNameWithLogo?: boolean
 }
 
-const Logo = ({ color, href = '/', skipLink = false, name, logoSrc }: LogoProps) => {
+const Logo = ({ color, href = '/', skipLink = false, name, logoSrc, showNameWithLogo = false }: LogoProps) => {
   const textStyle = color ? { color } : undefined
   const displayName = name ?? themeConfig.templateName
   // Use data URLs and absolute http(s) URLs as-is; only normalize relative media paths
@@ -43,12 +49,16 @@ const Logo = ({ color, href = '/', skipLink = false, name, logoSrc }: LogoProps)
     <LogoIcon className='text-[2.6rem] sidebar-logo-icon' />
   )
 
+  const showName = !resolvedLogoSrc || showNameWithLogo
+
   const content = (
     <>
       {iconContent}
-      <span style={textStyle} className='sidebar-logo-text'>
-        {displayName}
-      </span>
+      {showName && (
+        <span style={textStyle} className='sidebar-logo-text'>
+          {displayName}
+        </span>
+      )}
     </>
   )
 

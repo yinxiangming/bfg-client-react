@@ -19,13 +19,13 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import MenuItem from '@mui/material/MenuItem'
+import Radio from '@mui/material/Radio'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
-import Paper from '@mui/material/Paper'
 import Chip from '@mui/material/Chip'
 import Alert from '@mui/material/Alert'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -584,7 +584,7 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
         ) : (
           <>
             {/* Package Table */}
-            <TableContainer component={Paper} variant='outlined'>
+            <TableContainer>
               <Table size='small'>
                 <TableHead>
                   <TableRow>
@@ -657,11 +657,11 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
             <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
               <Box sx={{ flex: 1, minWidth: 150 }}>
                 <Typography variant='body2' color='text.secondary'>{t('orders.packages.totals.totalPackages')}</Typography>
-                <Typography variant='h6'>{totalPackages}</Typography>
+                <Typography sx={{ fontSize: '1.125rem', fontWeight: 600 }}>{totalPackages}</Typography>
               </Box>
               <Box sx={{ flex: 1, minWidth: 150 }}>
                 <Typography variant='body2' color='text.secondary'>{t('orders.packages.totals.actualWeight')}</Typography>
-                <Typography variant='h6'>
+                <Typography sx={{ fontSize: '1.125rem', fontWeight: 600 }}>
                   {typeof totalActualWeight === 'number' && !isNaN(totalActualWeight) 
                     ? totalActualWeight.toFixed(2) 
                     : '0.00'} kg
@@ -669,7 +669,7 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
               </Box>
               <Box sx={{ flex: 1, minWidth: 150 }}>
                 <Typography variant='body2' color='text.secondary'>{t('orders.packages.totals.billingWeight')}</Typography>
-                <Typography variant='h6' color='primary'>
+                <Typography sx={{ fontSize: '1.125rem', fontWeight: 600 }} color='primary'>
                   {typeof totalBillingWeight === 'number' && !isNaN(totalBillingWeight) 
                     ? totalBillingWeight.toFixed(2) 
                     : '0.00'} kg
@@ -683,7 +683,7 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
             {consignments.length > 0 && (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Typography variant='subtitle2'>{t('orders.packages.consignments.title')}</Typography>
-                <TableContainer component={Paper} variant='outlined'>
+                <TableContainer>
                   <Table size='small'>
                     <TableHead>
                       <TableRow>
@@ -869,7 +869,7 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
                   <Typography variant='body2' color='text.secondary'>
                     {t('orders.packages.shipping.optionsPrompt')}
                   </Typography>
-                  <TableContainer component={Paper} variant='outlined'>
+                  <TableContainer>
                     <Table size='small'>
                       <TableHead>
                         <TableRow>
@@ -890,8 +890,8 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
                             sx={{ cursor: 'pointer' }}
                           >
                             <TableCell padding='checkbox'>
-                              <input
-                                type='radio'
+                              <Radio
+                                size='small'
                                 checked={selectedOption?.service_code === opt.service_code}
                                 onChange={() => setSelectedOption(opt)}
                               />
@@ -944,7 +944,7 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
                         <Typography variant='body2' color='text.secondary'>
                           {t('orders.packages.shipping.selected', { serviceName: selectedOption.service_name })}
                         </Typography>
-                        <Typography variant='h6' color='primary'>
+                        <Typography sx={{ fontSize: '1.125rem', fontWeight: 600 }} color='primary'>
                           {selectedOption.currency} {selectedOption.price}
                         </Typography>
                       </Box>
@@ -971,7 +971,7 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
         <DialogTitle>
           {editingPackage ? t('orders.packages.dialogs.editTitle') : t('orders.packages.dialogs.addTitle')}
         </DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           <CustomTextField
             select
             fullWidth

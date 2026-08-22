@@ -5,8 +5,9 @@ import { useTranslations } from 'next-intl'
 
 // MUI Imports
 import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
-import Box from '@mui/material/Box'
+
+// Component Imports
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 
 type ProductEditHeaderProps = {
     productId: string
@@ -20,24 +21,22 @@ const ProductEditHeader = ({ productId, onSave, onDiscard, saving }: ProductEdit
     const isNew = productId === 'new'
     
     return (
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-                <Typography variant='h4'>{isNew ? t('products.edit.header.title.add') : t('products.edit.header.title.edit')}</Typography>
-                <Typography variant='body2' color='text.secondary'>
-                    {isNew ? t('products.edit.header.subtitle.add') : t('products.edit.header.subtitle.edit')}
-                </Typography>
-            </Box>
-            <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-                <Button variant='tonal' color='secondary' onClick={onDiscard} disabled={saving}>
-                    {t('products.edit.actions.discard')}
-                </Button>
-                <Button variant='contained' onClick={onSave} disabled={saving}>
-                    {saving
-                        ? (isNew ? t('products.edit.actions.creating') : t('products.edit.actions.saving'))
-                        : (isNew ? t('products.edit.actions.createProduct') : t('products.edit.actions.updateProduct'))}
-                </Button>
-            </Box>
-        </Box>
+        <AdminPageHeader
+            title={isNew ? t('products.edit.header.title.add') : t('products.edit.header.title.edit')}
+            subtitle={isNew ? t('products.edit.header.subtitle.add') : t('products.edit.header.subtitle.edit')}
+            actions={
+                <>
+                    <Button variant='tonal' color='secondary' onClick={onDiscard} disabled={saving}>
+                        {t('products.edit.actions.discard')}
+                    </Button>
+                    <Button variant='contained' onClick={onSave} disabled={saving}>
+                        {saving
+                            ? (isNew ? t('products.edit.actions.creating') : t('products.edit.actions.saving'))
+                            : (isNew ? t('products.edit.actions.createProduct') : t('products.edit.actions.updateProduct'))}
+                    </Button>
+                </>
+            }
+        />
     )
 }
 

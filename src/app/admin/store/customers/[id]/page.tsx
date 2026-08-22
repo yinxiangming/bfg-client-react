@@ -305,13 +305,13 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
       {beforeSlots.map(
         ext =>
           ext.component && (
-            <Box key={ext.id} sx={{ mt: 4 }}>
+            <Box key={ext.id} sx={{ mt: 3 }}>
               <ext.component customer={customer} onUpdate={handleCustomerUpdate} />
             </Box>
           )
       )}
       
-      <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 4, mb: 4 }}>
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', mt: 3, mb: 3 }}>
         <Tabs value={activeTab} onChange={handleTabChange}>
           {allTabs.map(tab => (
             <Tab key={tab.key} label={tab.label} />
@@ -319,12 +319,12 @@ export default function CustomerDetailPage({ params }: { params: Promise<{ id: s
         </Tabs>
       </Box>
 
-      <Box sx={{ mt: 4 }}>{allTabs[activeTab]?.render?.() ?? null}</Box>
+      <Box sx={{ mt: 3 }}>{allTabs[activeTab]?.render?.() ?? null}</Box>
 
       {panelExtensions.map(
         ext =>
           ext.component && (
-            <Box key={ext.id} sx={{ mt: 4 }}>
+            <Box key={ext.id} sx={{ mt: 3 }}>
               <ext.component customer={customer} onUpdate={handleCustomerUpdate} />
             </Box>
           )

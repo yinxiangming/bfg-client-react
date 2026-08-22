@@ -5,8 +5,8 @@ import { useMemo, useState, useCallback } from 'react'
 import { useTranslations } from 'next-intl'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import SchemaTable from '@/components/schema/SchemaTable'
 import type { ListSchema, SchemaAction, SchemaFilter } from '@/types/schema'
 import { useApiData } from '@/hooks/useApiData'
@@ -28,7 +28,7 @@ const renderStars = (rating: number) => {
       <i
         key={i}
         className={i < Math.floor(rating) ? 'tabler-star-filled' : 'tabler-star'}
-        style={{ color: '#fbbf24', fontSize: '0.875rem' }}
+        style={{ color: 'var(--mui-palette-warning-main)', fontSize: '0.875rem' }}
       />
     )
   }
@@ -195,9 +195,7 @@ export default function ReviewsPage() {
 
   return (
     <Box>
-      <Typography variant='h4' sx={{ mb: 4 }}>
-        {t('reviews.listPage.title')}
-      </Typography>
+      <AdminPageHeader title={t('reviews.listPage.title')} subtitle={t('reviews.listPage.subtitle')} />
       {error && (
         <Alert severity='error' sx={{ mb: 2 }}>
           {error}

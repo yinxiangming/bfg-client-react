@@ -73,7 +73,18 @@ export default function OrderPackagesModal({ open, onClose, orderId, onSuccess }
           <i className="tabler-x" />
         </IconButton>
       </DialogTitle>
-      <DialogContent dividers>
+      {/* PackagesCard brings its own Card surface; flatten it so the dialog
+          paper is the only border, the way flushPanelSx does for tab panels. */}
+      <DialogContent
+        sx={{
+          '&& .MuiCard-root': {
+            border: 0,
+            borderRadius: 0,
+            boxShadow: 'none',
+            backgroundColor: 'transparent'
+          }
+        }}
+      >
         {loading && (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
             <CircularProgress />

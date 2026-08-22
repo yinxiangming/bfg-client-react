@@ -150,13 +150,7 @@ const CampaignDisplayEditDialog = ({ open, display, onClose, onSave }: CampaignD
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth='lg' fullWidth>
-      <DialogContent
-        sx={{
-          p: 0,
-          '& .MuiCard-root': { boxShadow: 'none' },
-          '& .MuiCardContent-root': { p: 4 }
-        }}
-      >
+      <DialogContent sx={{ p: 0 }}>
         <SchemaForm
           schema={formSchema}
           initialData={initialData}

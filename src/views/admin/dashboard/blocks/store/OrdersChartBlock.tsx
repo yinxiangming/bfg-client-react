@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react'
 import { Card, CardContent, Typography, CircularProgress, Alert, Box, MenuItem } from '@mui/material'
+import { useTheme } from '@mui/material/styles'
 import dynamic from 'next/dynamic'
 import { getDashboardStats } from '@/services/store'
 import type { BlockDefinition, BlockProps, BlockSettingsProps } from '@/views/common/blocks'
@@ -61,6 +62,7 @@ export function OrdersChartBlockSettings({ settings, onSettingsChange }: OrdersC
 }
 
 export function OrdersChartBlock({ block, settings }: OrdersChartBlockProps) {
+  const theme = useTheme()
   const chartTitle = (settings?.title as string) ?? definition.defaultSettings?.title ?? 'Orders (Last 7 Days)'
   const [data, setData] = useState<{ orders_last_7_days: number[]; categories: string[] } | null>(null)
   const [loading, setLoading] = useState(true)
@@ -101,7 +103,8 @@ export function OrdersChartBlock({ block, settings }: OrdersChartBlockProps) {
       stroke: { curve: 'smooth' as const, width: 2 },
       xaxis: { categories },
       fill: { type: 'gradient' as const, gradient: { opacityFrom: 0.4, opacityTo: 0.1 } },
-      colors: ['#6366f1'],
+      // Series colour follows the active skin's accent, not a fixed hex.
+      colors: [theme.palette.primary.main],
       tooltip: {
         theme: 'light',
         cssClass: 'dashboard-chart-tooltip',
@@ -110,14 +113,14 @@ export function OrdersChartBlock({ block, settings }: OrdersChartBlockProps) {
         y: { formatter: (val: number) => (val != null ? String(val) : '') },
       },
     }),
-    [categories]
+    [categories, theme.palette.primary.main]
   )
 
   if (loading) {
     return (
-      <Card variant="outlined">
+      <Card>
         <CardContent>
-          <Typography variant="h6" sx={{ mb: 2 }}>{chartTitle}</Typography>
+          <Typography sx={{ mb: 4, fontSize: '0.9375rem', fontWeight: 600 }}>{chartTitle}</Typography>
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
             <CircularProgress size={32} />
           </Box>
@@ -127,7 +130,7 @@ export function OrdersChartBlock({ block, settings }: OrdersChartBlockProps) {
   }
   if (error) {
     return (
-      <Card variant="outlined">
+      <Card>
         <CardContent>
           <Alert severity="error">{error}</Alert>
         </CardContent>
@@ -136,9 +139,9 @@ export function OrdersChartBlock({ block, settings }: OrdersChartBlockProps) {
   }
 
   return (
-    <Card variant="outlined">
+    <Card>
       <CardContent>
-        <Typography variant="h6" sx={{ mb: 2 }}>
+        <Typography sx={{ mb: 4, fontSize: '0.9375rem', fontWeight: 600 }}>
           {chartTitle}
         </Typography>
         {typeof window !== 'undefined' && ReactApexChart && (

@@ -162,7 +162,7 @@ const SortableImageItem = ({
                 top: 4,
                 left: 4,
                 bgcolor: 'primary.main',
-                color: 'white',
+                color: 'primary.contrastText',
                 borderRadius: '50%',
                 width: 24,
                 height: 24,
@@ -406,7 +406,7 @@ const ProductImage = ({ productId, initialMedia }: ProductImageProps) => {
                         </SortableContext>
                     </DndContext>
                 ) : (
-                    <Typography color='text.secondary' align='center' sx={{ py: 4 }}>
+                    <Typography color='text.secondary' align='center' sx={{ py: 4, fontSize: '0.8125rem' }}>
                         {t('products.media.empty')}
                     </Typography>
                 )}

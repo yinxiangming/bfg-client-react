@@ -9,13 +9,11 @@ import { useLocale, useTranslations } from 'next-intl'
 
 // MUI Imports
 import Box from '@mui/material/Box'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
 import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 
 // Component Imports
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import SchemaForm from '@/components/schema/SchemaForm'
 import CategoryTreeSelect from '@/components/category/CategoryTreeSelect'
 
@@ -232,29 +230,29 @@ export default function CategoryNewPage() {
     return null
   }
 
+  // SchemaForm renders its own card and docks its own action bar; wrapping it in
+  // another Card doubles the border and clips the sticky Save/Cancel bar.
   const CategoryInfoContent = () => (
-    <Card>
-      <CardContent>
-        <SchemaForm
-          schema={categoryFormSchema}
-          initialData={initialData}
-          onSubmit={handleSubmit}
-          onCancel={handleCancel}
-          loading={loading}
-          customFieldRenderer={customFieldRenderer}
-        />
-      </CardContent>
-    </Card>
+    <SchemaForm
+      schema={categoryFormSchema}
+      initialData={initialData}
+      onSubmit={handleSubmit}
+      onCancel={handleCancel}
+      loading={loading}
+      customFieldRenderer={customFieldRenderer}
+    />
   )
 
   return (
     <>
       <Box>
-        <Typography variant='h4' sx={{ mb: 4 }}>
-          {parentCategory
-            ? t('categories.newPage.titleWithParent', { name: parentCategory.name })
-            : t('categories.newPage.title')}
-        </Typography>
+        <AdminPageHeader
+          title={
+            parentCategory
+              ? t('categories.newPage.titleWithParent', { name: parentCategory.name })
+              : t('categories.newPage.title')
+          }
+        />
         {beforeSlots.map(
           ext =>
             ext.component && (

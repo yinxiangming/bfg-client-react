@@ -3,14 +3,16 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import {
+  Alert,
   Card,
   CardContent,
-  TextField,
   Button,
   Box,
-  Typography,
   CircularProgress
 } from '@mui/material'
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
+import CustomTextField from '@/components/ui/TextField'
+import { SettingsActionBar } from '@/components/admin/settings/SettingsSection'
 import { createWorkspace } from '@/services/platform-api'
 import { getPlatformToken } from '@/utils/authTokens'
 
@@ -52,21 +54,23 @@ export default function NewWorkspacePage() {
   }
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">Create New Workspace</h1>
-      
+    <Box>
+      <AdminPageHeader title='Create New Workspace' />
+
       <Box sx={{ maxWidth: 600 }}>
         <Card>
-          <CardContent>
-            {error && (
-              <Box sx={{ mb: 2, p: 2, bgcolor: 'error.light', color: 'error.contrastText', borderRadius: 1 }}>
-                <Typography>{error}</Typography>
-              </Box>
-            )}
-            
-            <form onSubmit={handleSubmit}>
+          {/* The form wraps the action bar too, so the docked submit button
+              still belongs to it. */}
+          <form onSubmit={handleSubmit}>
+            <CardContent>
+              {error && (
+                <Alert severity='error' sx={{ mb: 2 }}>
+                  {error}
+                </Alert>
+              )}
+
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, pt: 2 }}>
-                <TextField
+                <CustomTextField
                   required
                   label="Workspace Name"
                   name="name"
@@ -75,8 +79,8 @@ export default function NewWorkspacePage() {
                   fullWidth
                   disabled={loading}
                 />
-                
-                <TextField
+
+                <CustomTextField
                   required
                   label="URL Slug"
                   name="slug"
@@ -86,8 +90,8 @@ export default function NewWorkspacePage() {
                   disabled={loading}
                   helperText="This will be used for your workspace URL"
                 />
-                
-                <TextField
+
+                <CustomTextField
                   label="Custom Domain (Optional)"
                   name="domain"
                   value={formData.domain}
@@ -96,29 +100,30 @@ export default function NewWorkspacePage() {
                   disabled={loading}
                   placeholder="e.g. store.yourcompany.com"
                 />
-                
-                <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
-                  <Button 
-                    type="submit" 
-                    variant="contained" 
-                    color="primary" 
-                    disabled={loading || !formData.name || !formData.slug}
-                  >
-                    {loading ? <CircularProgress size={24} color="inherit" /> : 'Create Workspace'}
-                  </Button>
-                  <Button 
-                    variant="outlined" 
-                    onClick={() => router.back()}
-                    disabled={loading}
-                  >
-                    Cancel
-                  </Button>
-                </Box>
               </Box>
-            </form>
-          </CardContent>
+            </CardContent>
+
+            <SettingsActionBar>
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                disabled={loading || !formData.name || !formData.slug}
+              >
+                {loading ? <CircularProgress size={24} color="inherit" /> : 'Create Workspace'}
+              </Button>
+              <Button
+                variant="outlined"
+                color="secondary"
+                onClick={() => router.back()}
+                disabled={loading}
+              >
+                Cancel
+              </Button>
+            </SettingsActionBar>
+          </form>
         </Card>
       </Box>
-    </div>
+    </Box>
   )
 }

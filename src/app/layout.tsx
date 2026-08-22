@@ -9,12 +9,15 @@ import { getLocale, getMessages } from 'next-intl/server'
 // Component Imports
 import ThemeProvider from '@components/theme/ThemeProvider'
 import RootLayoutChrome from '@components/layout/RootLayoutChrome'
+import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
+import GoogleOneTap from '@/components/auth/GoogleOneTap'
 import { CartProvider } from '@/contexts/CartContext'
 import { AppDialogProvider } from '@/contexts/AppDialogContext'
 
 // Util Imports
 import { getRequestOrigin, clampDescription, localeTag, openGraphLocale } from '@/utils/seo'
 import { getStorefrontConfigForServer, getAllowedColorModes } from '@/utils/storefrontConfig'
+import { getEnvMeasurementId } from '@/utils/analytics'
 
 // Style Imports
 import './globals.css'
@@ -38,9 +41,14 @@ export async function generateMetadata(): Promise<Metadata> {
 
   const siteName = config?.site_name?.trim() || 'Web App'
   const description = clampDescription(config?.site_description) || undefined
+  // Workspace favicon, when one is configured. Omitting `icons` entirely lets
+  // Next fall back to the app-router icon convention, so an unset favicon keeps
+  // the built-in mark rather than rendering a broken link.
+  const favicon = config?.favicon?.trim()
 
   return {
     metadataBase: origin ? new URL(origin) : undefined,
+    ...(favicon ? { icons: { icon: favicon, shortcut: favicon, apple: favicon } } : {}),
     title: { default: siteName, template: `%s | ${siteName}` },
     description,
     applicationName: siteName,
@@ -93,6 +101,9 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   // otherwise. Reuses the config already fetched above.
   const htmlLang = localeTag(locale, storefrontConfig?.country)
 
+  // Per-workspace GA4 property wins; the env var is the single-tenant fallback.
+  const gaMeasurementId = storefrontConfig?.analytics?.google_analytics_id?.trim() || getEnvMeasurementId()
+
   const content = (
     <RootLayoutChrome defaultSystemMode={defaultSystemMode}>{children}</RootLayoutChrome>
   )
@@ -109,11 +120,18 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
       suppressHydrationWarning
     >
       <head>
-        {/* Runs before any paint to avoid admin skin flash; safe on non-admin pages. */}
-        <script dangerouslySetInnerHTML={{ __html: "(function(){try{var s=localStorage.getItem('admin-skin');document.documentElement.setAttribute('data-admin-skin',(s==='compact'||s==='carbon')?s:'slate');}catch(e){document.documentElement.setAttribute('data-admin-skin','slate');}})();" }} />
+        {/* Runs before any paint to avoid an admin skin flash. Admin paths only:
+            the attribute is what scopes the admin design system (see
+            components/theme/adminSurface.ts), so setting it everywhere pulled
+            back-office styling into the storefront. `AdminSkinProvider` takes
+            over for client-side navigation, including removal on the way out. */}
+        <script dangerouslySetInnerHTML={{ __html: "(function(){try{if(location.pathname.indexOf('/admin')!==0)return;var s=localStorage.getItem('admin-skin');document.documentElement.setAttribute('data-admin-skin',(s==='compact'||s==='carbon')?s:'slate');}catch(e){document.documentElement.setAttribute('data-admin-skin','slate');}})();" }} />
         <script src='https://code.iconify.design/3/3.1.1/iconify.min.js' async></script>
       </head>
       <body className='flex is-full min-bs-full flex-auto flex-col' data-mode={defaultSystemMode} {...htmlModeAttrs}>
+
+        <GoogleAnalytics measurementId={gaMeasurementId} />
+        <GoogleOneTap />
 
         <NextIntlClientProvider messages={messages}>
           <ThemeProvider initialMode={initialMode}>

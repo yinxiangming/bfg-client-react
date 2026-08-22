@@ -167,7 +167,7 @@ const OrderBasicInfo = ({ order, onNavigate }: OrderBasicInfoProps) => {
         </Box>
 
         {/* Statistics Grid */}
-        <Grid container spacing={2} sx={{ mb: 4 }}>
+        <Grid container spacing={3} sx={{ mb: 4 }}>
           <Grid size={{ xs: 12, sm: 6, md: 2.4 }}>
             <Box
               onClick={() => handleStatClick('packages')}
@@ -176,7 +176,7 @@ const OrderBasicInfo = ({ order, onNavigate }: OrderBasicInfoProps) => {
               <Typography variant='body2' color='text.secondary' sx={{ mb: 1 }}>
                 {t('orders.basicInfo.stats.packages')}
               </Typography>
-              <Typography variant='h6' color='text.primary'>
+              <Typography color='text.primary' sx={{ fontSize: '1.125rem', fontWeight: 600, fontFamily: 'var(--at-font-num, inherit)' }}>
                 {packageCount}
               </Typography>
             </Box>
@@ -190,7 +190,7 @@ const OrderBasicInfo = ({ order, onNavigate }: OrderBasicInfoProps) => {
               <Typography variant='body2' color='text.secondary' sx={{ mb: 1 }}>
                 {t('orders.basicInfo.stats.totalWeight')}
               </Typography>
-              <Typography variant='h6' color='text.primary'>
+              <Typography color='text.primary' sx={{ fontSize: '1.125rem', fontWeight: 600, fontFamily: 'var(--at-font-num, inherit)' }}>
                 {totalWeight.toFixed(2)} kg
               </Typography>
             </Box>
@@ -204,7 +204,7 @@ const OrderBasicInfo = ({ order, onNavigate }: OrderBasicInfoProps) => {
               <Typography variant='body2' color='text.secondary' sx={{ mb: 1 }}>
                 {t('orders.basicInfo.stats.totalVolume')}
               </Typography>
-              <Typography variant='h6' color='text.primary'>
+              <Typography color='text.primary' sx={{ fontSize: '1.125rem', fontWeight: 600, fontFamily: 'var(--at-font-num, inherit)' }}>
                 {totalVolume.toFixed(2)} L
               </Typography>
             </Box>
@@ -218,7 +218,7 @@ const OrderBasicInfo = ({ order, onNavigate }: OrderBasicInfoProps) => {
               <Typography variant='body2' color='text.secondary' sx={{ mb: 1 }}>
                 {t('orders.basicInfo.stats.consignments')}
               </Typography>
-              <Typography variant='h6' color='text.primary'>
+              <Typography color='text.primary' sx={{ fontSize: '1.125rem', fontWeight: 600, fontFamily: 'var(--at-font-num, inherit)' }}>
                 {loadingConsignments ? '…' : consignmentCount}
               </Typography>
             </Box>
@@ -227,7 +227,7 @@ const OrderBasicInfo = ({ order, onNavigate }: OrderBasicInfoProps) => {
         </Grid>
 
         {/* Row 3: Store, Payment gateway name, Shipping method */}
-        <Grid container spacing={2}>
+        <Grid container spacing={3}>
           <Grid size={{ xs: 12, sm: 4 }}>
             <Box sx={{ p: 1 }}>
               <Typography variant='body2' color='text.secondary' sx={{ mb: 1 }}>
