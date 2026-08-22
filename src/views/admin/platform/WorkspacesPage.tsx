@@ -1,22 +1,31 @@
+'use client'
+
 /**
  * Workspace List — /admin/platform/workspaces
  */
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import WorkspaceTable from '@/components/platform/WorkspaceTable'
 import Link from 'next/link'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
 
 export default function WorkspacesPage() {
   return (
-    <div className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Workspaces</h1>
-        <Link
-          href="/admin/platform/workspaces/new"
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition"
-        >
-          + New Workspace
-        </Link>
-      </div>
+    <Box>
+      <AdminPageHeader
+        title='Workspaces'
+        actions={
+          <Button
+            variant='contained'
+            component={Link}
+            href='/admin/platform/workspaces/new'
+            startIcon={<i className='tabler-plus' />}
+          >
+            New Workspace
+          </Button>
+        }
+      />
       <WorkspaceTable />
-    </div>
+    </Box>
   )
 }

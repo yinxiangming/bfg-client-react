@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { getWorkspace, getWorkspaceBaseUrl, tokenExchange } from '@/services/platform-api'
-import { Box, Button, Card, CardContent, CircularProgress, Typography, Divider } from '@mui/material'
+import { Box, Button, Card, CardContent, CircularProgress, Typography } from '@mui/material'
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
+import { SettingsSection } from '@/components/admin/settings/SettingsSection'
 import { getPlatformToken, setAccessTokenCookie, setWorkspaceToken } from '@/utils/authTokens'
 
 const EMBEDDED = process.env.NEXT_PUBLIC_PLATFORM_EMBEDDED === 'true'
@@ -88,87 +90,79 @@ export default function WorkspaceDetailPage() {
   }
 
   return (
-    <Box sx={{ p: 4 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-        <Typography variant="h4" component="h1">
-          {workspace.name}
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 2 }}>
-          <Button component={Link} href="/admin/platform" variant="outlined" disabled={exchanging}>
-            Back to Platform
-          </Button>
-          <Button variant="contained" color="primary" onClick={handleEnterWorkspace} disabled={exchanging}>
-            {exchanging ? 'Entering...' : 'Enter Admin Panel'}
-          </Button>
-        </Box>
-      </Box>
+    <Box>
+      <AdminPageHeader
+        title={workspace.name}
+        actions={
+          <>
+            <Button component={Link} href="/admin/platform" variant="outlined" disabled={exchanging}>
+              Back to Platform
+            </Button>
+            <Button variant="contained" color="primary" onClick={handleEnterWorkspace} disabled={exchanging}>
+              {exchanging ? 'Entering...' : 'Enter Admin Panel'}
+            </Button>
+          </>
+        }
+      />
 
       <Box
         sx={{
           display: 'grid',
           gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' },
-          gap: 4,
+          gap: 3,
         }}
       >
-        <Box>
-          <Card sx={{ mb: 4 }}>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Workspace Details</Typography>
-              <Divider sx={{ mb: 2 }} />
-
-              <Box
-                sx={{
-                  display: 'grid',
-                  gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
-                  gap: 2,
-                }}
-              >
-                <Box>
-                  <Typography color="text.secondary" variant="body2">ID</Typography>
-                  <Typography variant="body1">{workspace.id}</Typography>
-                </Box>
-                <Box>
-                  <Typography color="text.secondary" variant="body2">Slug</Typography>
-                  <Typography variant="body1">{workspace.slug}</Typography>
-                </Box>
-                <Box>
-                  <Typography color="text.secondary" variant="body2">Status</Typography>
-                  <Typography variant="body1">{workspace.status || 'Active'}</Typography>
-                </Box>
-                <Box>
-                  <Typography color="text.secondary" variant="body2">Created At</Typography>
-                  <Typography variant="body1">
-                    {workspace.created_at ? new Date(workspace.created_at).toLocaleDateString() : 'N/A'}
-                  </Typography>
-                </Box>
+        {/* One surface: the two sections are separated by the hairline
+            SettingsSection draws, not by a gap between two cards. */}
+        <Card>
+          <SettingsSection title="Workspace Details" flush>
+            <Box
+              sx={{
+                display: 'grid',
+                gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, 1fr)' },
+                gap: 2,
+              }}
+            >
+              <Box>
+                <Typography color="text.secondary" variant="body2">ID</Typography>
+                <Typography variant="body1">{workspace.id}</Typography>
               </Box>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>Backend Connection</Typography>
-              <Divider sx={{ mb: 2 }} />
-              <Typography variant="body2" color="text.secondary" paragraph>
-                {EMBEDDED
-                  ? 'This workspace runs on the same server (embedded mode). API requests use the X-Workspace-ID header to select the workspace context.'
-                  : 'This workspace is provisioned on the platform. API requests will include the X-Workspace-ID header and route to the connected BFG workspace API.'
-                }
-              </Typography>
-              <Box sx={{ bgcolor: 'grey.100', p: 2, borderRadius: 1 }}>
-                <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
-                  API Endpoint: {getWorkspaceBaseUrl()}/api/v1/
+              <Box>
+                <Typography color="text.secondary" variant="body2">Slug</Typography>
+                <Typography variant="body1">{workspace.slug}</Typography>
+              </Box>
+              <Box>
+                <Typography color="text.secondary" variant="body2">Status</Typography>
+                <Typography variant="body1">{workspace.status || 'Active'}</Typography>
+              </Box>
+              <Box>
+                <Typography color="text.secondary" variant="body2">Created At</Typography>
+                <Typography variant="body1">
+                  {workspace.created_at ? new Date(workspace.created_at).toLocaleDateString() : 'N/A'}
                 </Typography>
               </Box>
-            </CardContent>
-          </Card>
-        </Box>
+            </Box>
+          </SettingsSection>
+
+          <SettingsSection title="Backend Connection">
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              {EMBEDDED
+                ? 'This workspace runs on the same server (embedded mode). API requests use the X-Workspace-ID header to select the workspace context.'
+                : 'This workspace is provisioned on the platform. API requests will include the X-Workspace-ID header and route to the connected BFG workspace API.'
+              }
+            </Typography>
+            <Box sx={{ bgcolor: 'action.hover', p: 2, borderRadius: 1 }}>
+              <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                API Endpoint: {getWorkspaceBaseUrl()}/api/v1/
+              </Typography>
+            </Box>
+          </SettingsSection>
+        </Card>
 
         <Box>
           <Card>
             <CardContent>
-              <Typography variant="h6" gutterBottom>Subscription</Typography>
-              <Divider sx={{ mb: 2 }} />
+              <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600, mb: 2 }}>Subscription</Typography>
               <Typography variant="body2" color="text.secondary">Current Plan</Typography>
               <Typography variant="body1" sx={{ mb: 2 }}>{workspace.plan?.name || 'Free Tier'}</Typography>
 

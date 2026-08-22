@@ -242,7 +242,8 @@
         "cancelTodo": "取消订单功能待实现",
         "shipTodo": "发货功能待实现",
         "exportTodo": "导出 Excel 功能待实现"
-      }
+      },
+      "subtitle": "跟踪、发货、退款与导出顾客订单。"
     },
     "addressCards": {
       "labels": {
@@ -607,7 +608,8 @@
       },
       "messages": {
         "actionFailed": "操作失败：{error}"
-      }
+      },
+      "subtitle": "在评价展示到前台之前进行审核。"
     }
   },
   "customers": {
@@ -632,7 +634,8 @@
         "confirmDelete": "确认删除该客户？",
         "confirmDeleteCustomer": "确认删除 {name}？",
         "deleteFailed": "删除失败：{error}"
-      }
+      },
+      "subtitle": "所有下过单的顾客的账号、地址、钱包与订单记录。"
     },
     "editHeader": {
       "addCustomer": "新增客户",
@@ -1014,7 +1017,8 @@
       },
       "errors": {
         "deleteFailed": "删除分类失败：{error}"
-      }
+      },
+      "subtitle": "顾客在前台浏览的分类树。"
     },
     "form": {
       "title": "分类详情",
@@ -1154,7 +1158,8 @@
   },
   "stores": {
     "page": {
-      "title": "门店"
+      "title": "门店",
+      "subtitle": "销售门店及为其发货的仓库。"
     },
     "schema": {
       "title": "门店",
@@ -1202,7 +1207,9 @@
       "snackbar": {
         "saved": "门店保存成功！",
         "saveFailed": "保存门店失败"
-      }
+      },
+      "title": "编辑门店",
+      "subtitle": "该门店的联系方式、发货与前台设置。"
     }
   },
   "support": {
@@ -1212,7 +1219,8 @@
         "titleUnprocessed": "未处理",
         "titleMy": "我的工单",
         "titleInProgress": "进行中",
-        "titleClosed": "已结束"
+        "titleClosed": "已结束",
+        "subtitle": "等待团队处理的顾客会话。"
       },
       "tabs": {
         "basic": "基本信息",
@@ -1467,7 +1475,8 @@
         "updateStatusFailed": "更新状态失败：{error}",
         "deleteFailed": "删除商品失败：{error}",
         "schemaNotFound": "未找到 Schema"
-      }
+      },
+      "subtitle": "商品的目录、价格、库存与前台展示状态。"
     },
     "description": {
       "cardTitle": "商品描述",
@@ -3648,6 +3657,17 @@
           "socialMediaLinks": "社交媒体链接",
           "analytics": "数据分析"
         },
+        "sectionHints": {
+          "adminIdentity": "用于在后台标识该租户，不会展示给网店访客。",
+          "localization": "工作区内新内容、价格与时间的默认设置。",
+          "shop": "该工作区的商品与评价行为设置。",
+          "storefrontBranding": "访客在页头与浏览器标签页看到的 Logo、图标与名称。",
+          "contactInformation": "展示在网店页脚与交易类页面上。",
+          "storefrontDisplay": "出现在每个网店页面顶部与底部的公告与文案。",
+          "storefrontTheme": "网店使用的皮肤、配色模式与页头布局。",
+          "analytics": "注入到每个网店页面的统计代码。",
+          "socialMediaLinks": "从网店页脚链接出去，留空则隐藏该图标。"
+        },
         "subsections": {
           "adminIdentity": "后台与系统标识",
           "storefrontBranding": "前台站点名称与品牌"
@@ -3986,7 +4006,8 @@
     "hub": {
       "title": "管理工具",
       "productEntry": "录入产品",
-      "productEntryDesc": "录入产品型号、数量、存放位置和照片"
+      "productEntryDesc": "录入产品型号、数量、存放位置和照片",
+      "subtitle": "为手机准备的快捷操作。"
     },
     "quickEntry": {
       "title": "快捷录入",
@@ -4171,6 +4192,7 @@
     "cancel": "取消",
     "save": "保存布局",
     "saving": "保存中…",
-    "emptyHint": "暂无区块。添加区块以定制您的仪表盘。"
+    "emptyHint": "暂无区块。添加区块以定制您的仪表盘。",
+    "subtitle": "今日订单、收入与顾客概览。"
   }
 }

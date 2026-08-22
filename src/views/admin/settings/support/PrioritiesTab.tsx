@@ -111,16 +111,14 @@ const PrioritiesTab = () => {
 
   return (
     <>
-      <Box sx={{ p: 4 }}>
-        <SchemaTable
-          schema={listSchema}
-          data={items ?? []}
-          onActionClick={handleActionClick}
-        />
-      </Box>
+      <SchemaTable
+        schema={listSchema}
+        data={items ?? []}
+        onActionClick={handleActionClick}
+      />
       {editItem !== null && formSchema && (
         <Dialog open onClose={() => setEditItem(null)} maxWidth='sm' fullWidth>
-          <DialogContent sx={{ p: 0, '& .MuiCard-root': { boxShadow: 'none' }, '& .MuiCardContent-root': { p: 4 } }}>
+          <DialogContent sx={{ p: 0 }}>
             <SchemaForm
               schema={formSchema}
               initialData={formInitialData}

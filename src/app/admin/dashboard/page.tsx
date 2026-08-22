@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Box, Button, Typography, CircularProgress } from '@mui/material'
 import { Icon } from '@iconify/react'
 import { useTranslations } from 'next-intl'
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import { useExtensions } from '@/extensions/context'
 import {
   buildDashboardBlockRegistry,
@@ -19,6 +20,7 @@ import {
   type DashboardLayout,
 } from '@/views/admin/dashboard/defaultLayout'
 import { DashboardLayoutEditor } from '@/views/admin/dashboard/DashboardLayoutEditor'
+import { SettingsActionBar } from '@/components/admin/settings/SettingsSection'
 import { meApi } from '@/utils/meApi'
 
 const DASHBOARD_LAYOUT_KEY = 'dashboard_layout'
@@ -90,25 +92,8 @@ export default function AdminDashboardPage() {
 
   if (isEditing) {
     return (
-      <Box sx={{ p: 2 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h5">{t('editTitle')}</Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
-            <Button
-              variant="outlined"
-              onClick={() => {
-                setIsEditing(false)
-                setPendingLayout(layout ?? DEFAULT_DASHBOARD_LAYOUT)
-              }}
-              disabled={saving}
-            >
-              {t('cancel')}
-            </Button>
-            <Button variant="contained" onClick={handleSaveLayout} disabled={saving}>
-              {saving ? t('saving') : t('save')}
-            </Button>
-          </Box>
-        </Box>
+      <Box>
+        <AdminPageHeader title={t('editTitle')} />
         <DashboardLayoutEditor
           initialLayout={pendingLayout}
           onLayoutChange={setPendingLayout}
@@ -118,22 +103,43 @@ export default function AdminDashboardPage() {
           getBlockComponent={getDashboardBlockComponent}
           getBlockSettingsEditor={getDashboardBlockSettingsEditor}
         />
+        {/* Docked: the editor is a full-height column, so a trailing button row
+            would scroll out of reach as soon as a column fills up. */}
+        <SettingsActionBar>
+          <Button variant="contained" onClick={handleSaveLayout} disabled={saving}>
+            {saving ? t('saving') : t('save')}
+          </Button>
+          <Button
+            variant="outlined"
+            color="secondary"
+            onClick={() => {
+              setIsEditing(false)
+              setPendingLayout(layout ?? DEFAULT_DASHBOARD_LAYOUT)
+            }}
+            disabled={saving}
+          >
+            {t('cancel')}
+          </Button>
+        </SettingsActionBar>
       </Box>
     )
   }
 
   return (
-    <Box sx={{ p: 2 }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-        <Typography variant="h5">{t('title')}</Typography>
-        <Button
-          variant="outlined"
-          startIcon={<Icon icon="mdi:pencil" />}
-          onClick={() => setIsEditing(true)}
-        >
-          {t('editLayout')}
-        </Button>
-      </Box>
+    <Box>
+      <AdminPageHeader
+        title={t('title')}
+        subtitle={t('subtitle')}
+        actions={
+          <Button
+            variant="outlined"
+            startIcon={<Icon icon="mdi:pencil" />}
+            onClick={() => setIsEditing(true)}
+          >
+            {t('editLayout')}
+          </Button>
+        }
+      />
 
       {!hasAnyBlocks ? (
         <Box
@@ -161,11 +167,11 @@ export default function AdminDashboardPage() {
           sx={{
             display: 'grid',
             gridTemplateColumns: { xs: '1fr', md: '2fr 1fr' },
-            gap: 2,
+            gap: 3,
             alignItems: 'start',
           }}
         >
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <PageRenderer
               blocks={layoutToRender.left}
               locale="en"
@@ -173,7 +179,7 @@ export default function AdminDashboardPage() {
               getBlockComponent={getDashboardBlockComponent}
             />
           </Box>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
             <PageRenderer
               blocks={layoutToRender.right}
               locale="en"

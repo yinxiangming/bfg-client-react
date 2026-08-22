@@ -14,6 +14,7 @@ import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
 
 // Component Imports
+import { SETTINGS_GUTTER } from '@/components/admin/settings/SettingsSection'
 import SchemaTable from '@/components/schema/SchemaTable'
 import SchemaForm from '@/components/schema/SchemaForm'
 import StatusBadge from '@/components/schema/StatusBadge'
@@ -340,9 +341,12 @@ const UsersListTable = () => {
   return (
     <>
       {inviteError && (
-        <Alert severity='error' sx={{ mb: 2 }} onClose={() => setInviteError('')}>
-          {inviteError}
-        </Alert>
+        // Gutter matches the table below, which insets its own rows.
+        <Box sx={{ px: SETTINGS_GUTTER, pt: 4 }}>
+          <Alert severity='error' onClose={() => setInviteError('')}>
+            {inviteError}
+          </Alert>
+        </Box>
       )}
 
       <SchemaTable

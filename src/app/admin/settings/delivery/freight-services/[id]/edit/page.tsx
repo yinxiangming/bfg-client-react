@@ -5,11 +5,9 @@ import { useRouter, useParams } from 'next/navigation'
 import { useTranslations, useLocale } from 'next-intl'
 
 import Box from '@mui/material/Box'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
-import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
+import TabContext from '@mui/lab/TabContext'
 import CircularProgress from '@mui/material/CircularProgress'
 import Alert from '@mui/material/Alert'
 import Snackbar from '@mui/material/Snackbar'
@@ -25,8 +23,10 @@ import DeleteOutline from '@mui/icons-material/DeleteOutline'
 import Add from '@mui/icons-material/Add'
 
 // Component Imports
+import CustomTabList from '@/components/ui/TabList'
 import CustomTextField from '@/components/ui/TextField'
 
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import SchemaForm from '@/components/schema/SchemaForm'
 import type { FormField, FormSchema } from '@/types/schema'
 
@@ -306,25 +306,25 @@ export default function FreightServiceEditPage() {
 
   return (
     <Box>
-      <Typography variant="h4" sx={{ mb: 4 }}>
-        {t('settings.delivery.freightServices.editDialog.title')} — {service.name}
-      </Typography>
-      <Tabs value={tabIndex} onChange={(_, v) => setTabIndex(v)} sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-        <Tab label={t('settings.delivery.freightServices.tab.tabs.info')} />
-        <Tab label={t('settings.delivery.freightServices.tab.tabs.config')} />
-      </Tabs>
+      <AdminPageHeader title={`${t('settings.delivery.freightServices.editDialog.title')} — ${service.name}`} />
+      {/* TabContext keys on strings; the panels are still driven by the numeric
+          `tabIndex` the config fetch below depends on. */}
+      <TabContext value={String(tabIndex)}>
+        <CustomTabList onChange={(_, v) => setTabIndex(Number(v))} pill='true' sx={{ mb: 3 }}>
+          <Tab value='0' label={t('settings.delivery.freightServices.tab.tabs.info')} />
+          <Tab value='1' label={t('settings.delivery.freightServices.tab.tabs.config')} />
+        </CustomTabList>
+      </TabContext>
       {tabIndex === 0 && (
-        <Card>
-          <CardContent>
-            <SchemaForm
-              schema={infoSchema}
-              initialData={initialInfoData}
-              onSubmit={handleSubmit}
-              onCancel={handleCancel}
-              loading={saving}
-            />
-          </CardContent>
-        </Card>
+        // SchemaForm brings its own card; wrapping it in another one doubled the
+        // border and left its docked action bar bleeding past the padding.
+        <SchemaForm
+          schema={infoSchema}
+          initialData={initialInfoData}
+          onSubmit={handleSubmit}
+          onCancel={handleCancel}
+          loading={saving}
+        />
       )}
       {tabIndex === 1 && (
         <>
@@ -337,11 +337,9 @@ export default function FreightServiceEditPage() {
             </Typography>
           </Alert>
           {templatesLoading && !templates?.length ? (
-            <Card>
-              <CardContent sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-                <CircularProgress size={24} />
-              </CardContent>
-            </Card>
+            <Box sx={{ display: 'flex', justifyContent: 'center', py: 8 }}>
+              <CircularProgress size={24} />
+            </Box>
           ) : (
             <>
               {!inferredTemplateId && (
@@ -410,89 +408,87 @@ export default function FreightServiceEditPage() {
                   </DialogContent>
                 </Dialog>
               {templateFormSchema && selectedTemplate && (
-                <Card>
-                  <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                      <Button
-                        type="button"
-                        variant="contained"
-                        disabled={savingConfig}
-                        onClick={() => (document.getElementById('freight-config-form') as HTMLFormElement)?.requestSubmit()}
-                      >
-                        {savingConfig ? t('common.schemaForm.saving') : t('common.schemaForm.save')}
-                      </Button>
-                    </Box>
-                    <SchemaForm
-                      formId="freight-config-form"
-                      schema={{ ...templateFormSchema, title: t('settings.delivery.freightServices.tab.tabs.config') }}
-                      initialData={templateFormInitialData}
-                      onSubmit={handleConfigSubmit}
-                      onCancel={() => {}}
-                      loading={savingConfig}
-                      customFieldRenderer={(field, value, onChange, fieldError) => {
-                        if (field.field !== 'tiers') return null
-                        const rows = Array.isArray(value) ? value : (value && typeof value === 'object') ? [value] : []
-                        const list: { max_kg: number; price: number }[] = rows.length
-                          ? rows.map((r: unknown) => ({
-                              max_kg: Number((r as { max_kg?: number })?.max_kg) || 0,
-                              price: Number((r as { price?: number })?.price) || 0
-                            }))
-                          : [{ max_kg: 0, price: 0 }]
-                        const update = (next: { max_kg: number; price: number }[]) => onChange(next)
-                        return (
-                          <Box>
-                            <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{field.helperText}</Typography>
-                            {list.map((row, idx) => (
-                              <Box key={idx} sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1 }}>
-                                <CustomTextField
-                                  type="number"
-                                  size="small"
-                                  label="Max kg"
-                                  value={row.max_kg}
-                                  onChange={(e) => {
-                                    const v = Number(e.target.value) || 0
-                                    const next = list.map((r, i) => (i === idx ? { ...r, max_kg: v } : r))
-                                    update(next)
-                                  }}
-                                  sx={{ width: 120 }}
-                                />
-                                <CustomTextField
-                                  type="number"
-                                  size="small"
-                                  label="Price"
-                                  value={row.price}
-                                  onChange={(e) => {
-                                    const v = Number(e.target.value) || 0
-                                    const next = list.map((r, i) => (i === idx ? { ...r, price: v } : r))
-                                    update(next)
-                                  }}
-                                  sx={{ width: 120 }}
-                                />
-                                <IconButton
-                                  size="small"
-                                  onClick={() => update(list.filter((_, i) => i !== idx))}
-                                  disabled={list.length <= 1}
-                                  aria-label="Remove row"
-                                >
-                                  <DeleteOutline fontSize="small" />
-                                </IconButton>
-                              </Box>
-                            ))}
-                            <Button
-                              type="button"
-                              size="small"
-                              startIcon={<Add />}
-                              onClick={() => update([...list, { max_kg: 0, price: 0 }])}
-                            >
-                              {t('settings.delivery.freightServices.tab.configTab.addTier')}
-                            </Button>
-                            {fieldError && <Typography variant="caption" color="error" sx={{ display: 'block', mt: 0.5 }}>{fieldError}</Typography>}
-                          </Box>
-                        )
-                      }}
-                    />
-                  </CardContent>
-                </Card>
+                <>
+                  <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+                    <Button
+                      type="button"
+                      variant="contained"
+                      disabled={savingConfig}
+                      onClick={() => (document.getElementById('freight-config-form') as HTMLFormElement)?.requestSubmit()}
+                    >
+                      {savingConfig ? t('common.schemaForm.saving') : t('common.schemaForm.save')}
+                    </Button>
+                  </Box>
+                  <SchemaForm
+                    formId="freight-config-form"
+                    schema={{ ...templateFormSchema, title: t('settings.delivery.freightServices.tab.tabs.config') }}
+                    initialData={templateFormInitialData}
+                    onSubmit={handleConfigSubmit}
+                    onCancel={() => {}}
+                    loading={savingConfig}
+                    customFieldRenderer={(field, value, onChange, fieldError) => {
+                      if (field.field !== 'tiers') return null
+                      const rows = Array.isArray(value) ? value : (value && typeof value === 'object') ? [value] : []
+                      const list: { max_kg: number; price: number }[] = rows.length
+                        ? rows.map((r: unknown) => ({
+                            max_kg: Number((r as { max_kg?: number })?.max_kg) || 0,
+                            price: Number((r as { price?: number })?.price) || 0
+                          }))
+                        : [{ max_kg: 0, price: 0 }]
+                      const update = (next: { max_kg: number; price: number }[]) => onChange(next)
+                      return (
+                        <Box>
+                          <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>{field.helperText}</Typography>
+                          {list.map((row, idx) => (
+                            <Box key={idx} sx={{ display: 'flex', gap: 2, alignItems: 'center', mb: 1 }}>
+                              <CustomTextField
+                                type="number"
+                                size="small"
+                                label="Max kg"
+                                value={row.max_kg}
+                                onChange={(e) => {
+                                  const v = Number(e.target.value) || 0
+                                  const next = list.map((r, i) => (i === idx ? { ...r, max_kg: v } : r))
+                                  update(next)
+                                }}
+                                sx={{ width: 120 }}
+                              />
+                              <CustomTextField
+                                type="number"
+                                size="small"
+                                label="Price"
+                                value={row.price}
+                                onChange={(e) => {
+                                  const v = Number(e.target.value) || 0
+                                  const next = list.map((r, i) => (i === idx ? { ...r, price: v } : r))
+                                  update(next)
+                                }}
+                                sx={{ width: 120 }}
+                              />
+                              <IconButton
+                                size="small"
+                                onClick={() => update(list.filter((_, i) => i !== idx))}
+                                disabled={list.length <= 1}
+                                aria-label="Remove row"
+                              >
+                                <DeleteOutline fontSize="small" />
+                              </IconButton>
+                            </Box>
+                          ))}
+                          <Button
+                            type="button"
+                            size="small"
+                            startIcon={<Add />}
+                            onClick={() => update([...list, { max_kg: 0, price: 0 }])}
+                          >
+                            {t('settings.delivery.freightServices.tab.configTab.addTier')}
+                          </Button>
+                          {fieldError && <Typography variant="caption" color="error" sx={{ display: 'block', mt: 0.5 }}>{fieldError}</Typography>}
+                        </Box>
+                      )
+                    }}
+                  />
+                </>
               )}
             </>
           )}

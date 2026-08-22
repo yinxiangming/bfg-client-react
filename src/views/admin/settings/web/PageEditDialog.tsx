@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl'
 
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
+import DialogActions from '@mui/material/DialogActions'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 import Box from '@mui/material/Box'
@@ -143,13 +144,7 @@ const PageEditDialog = ({ open, page, onClose, onSave, onBlocksSaved }: PageEdit
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth='lg' fullWidth>
-      <DialogContent
-        sx={{
-          p: 0,
-          '& .MuiCard-root': { boxShadow: 'none' },
-          '& .MuiCardContent-root': { p: 4 }
-        }}
-      >
+      <DialogContent sx={{ p: 0 }}>
         <Tabs value={activeTab} onChange={(_, v) => setActiveTab(v)} sx={{ borderBottom: 1, borderColor: 'divider', px: 2 }}>
           <Tab label={t('settings.web.pages.editDialog.tabs.basic')} id='page-edit-basic' />
           <Tab label={t('settings.web.pages.editDialog.tabs.blocks')} id='page-edit-blocks' disabled={!page} />
@@ -159,7 +154,7 @@ const PageEditDialog = ({ open, page, onClose, onSave, onBlocksSaved }: PageEdit
             <SchemaForm schema={pageFormSchema} initialData={initialData} onSubmit={handleSubmit} onCancel={onClose} />
           )}
           {activeTab === 1 && page && (
-            <Box sx={{ p: 2, minHeight: 480 }}>
+            <Box sx={{ p: 3, minHeight: 480 }}>
               <BlockRenderContext.Provider value={getBlockComponent}>
                 <PageBuilder
                   initialBlocks={blocks}
@@ -169,32 +164,38 @@ const PageEditDialog = ({ open, page, onClose, onSave, onBlocksSaved }: PageEdit
                   getBlockComponent={getBlockComponent}
                 />
               </BlockRenderContext.Provider>
-              <Box sx={{ mt: 2, display: 'flex', gap: 1 }}>
-                <Button
-                  variant='contained'
-                  disabled={blocksSaving}
-                  onClick={async () => {
-                    if (!page) return
-                    setBlocksSaving(true)
-                    try {
-                      await updatePageBlocks(page.id, toPageBlocks(blocks))
-                      onBlocksSaved?.()
-                    } catch (err: unknown) {
-                      const msg = err && typeof err === 'object' && 'message' in err ? String((err as Error).message) : ''
-                      alert(t('settings.web.pages.tab.errors.saveFailed', { error: msg || 'Unknown error' }))
-                    } finally {
-                      setBlocksSaving(false)
-                    }
-                  }}
-                >
-                  {blocksSaving ? '...' : t('settings.web.pages.editDialog.saveBlocks')}
-                </Button>
-                <Button onClick={onClose} disabled={blocksSaving}>{t('common.actions.cancel')}</Button>
-              </Box>
             </Box>
           )}
         </Box>
       </DialogContent>
+      {/* The page builder is 480px tall at minimum, so its actions have to dock
+          in the dialog footer the way SchemaForm docks its own on the Basic tab. */}
+      {activeTab === 1 && page && (
+        <DialogActions>
+          <Button variant='outlined' onClick={onClose} disabled={blocksSaving}>
+            {t('common.actions.cancel')}
+          </Button>
+          <Button
+            variant='contained'
+            disabled={blocksSaving}
+            onClick={async () => {
+              if (!page) return
+              setBlocksSaving(true)
+              try {
+                await updatePageBlocks(page.id, toPageBlocks(blocks))
+                onBlocksSaved?.()
+              } catch (err: unknown) {
+                const msg = err && typeof err === 'object' && 'message' in err ? String((err as Error).message) : ''
+                alert(t('settings.web.pages.tab.errors.saveFailed', { error: msg || 'Unknown error' }))
+              } finally {
+                setBlocksSaving(false)
+              }
+            }}
+          >
+            {blocksSaving ? '...' : t('settings.web.pages.editDialog.saveBlocks')}
+          </Button>
+        </DialogActions>
+      )}
     </Dialog>
   )
 }

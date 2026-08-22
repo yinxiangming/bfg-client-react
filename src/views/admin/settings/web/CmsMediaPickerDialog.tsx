@@ -76,7 +76,7 @@ export default function CmsMediaPickerDialog({ open, onClose, onSelect }: CmsMed
   return (
     <Dialog open={open} onClose={onClose} fullWidth maxWidth='md'>
       <DialogTitle>{t('settings.web.posts.contentEditor.mediaDialogTitle')}</DialogTitle>
-      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
+      <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
           <CustomTextField
             size='small'
@@ -109,7 +109,7 @@ export default function CmsMediaPickerDialog({ open, onClose, onSelect }: CmsMed
             {t('settings.web.posts.contentEditor.mediaEmpty')}
           </Typography>
         ) : (
-          <Grid container spacing={1.5}>
+          <Grid container spacing={2}>
             {filtered.map(m => {
               const src = getMediaUrl(m.file)
               return (

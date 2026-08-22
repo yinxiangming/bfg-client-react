@@ -7,9 +7,9 @@ import { useTranslations } from 'next-intl'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
-import Typography from '@mui/material/Typography'
 
 // Component Imports
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import SchemaTable from '@/components/schema/SchemaTable'
 import type { ListSchema, SchemaAction } from '@/types/schema'
 import { usePagedData } from '@/hooks/usePagedData'
@@ -97,9 +97,7 @@ export default function CustomersPage() {
 
   return (
     <Box>
-      <Typography variant='h4' sx={{ mb: 4 }}>
-        {t('customers.page.title')}
-      </Typography>
+      <AdminPageHeader title={t('customers.page.title')} subtitle={t('customers.page.subtitle')} />
       <SchemaTable
         schema={customersSchema}
         data={customers || []}

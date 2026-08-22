@@ -6,8 +6,6 @@ import { useTranslations } from 'next-intl'
 
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
 import CircularProgress from '@mui/material/CircularProgress'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
@@ -17,6 +15,7 @@ import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import Typography from '@mui/material/Typography'
 
+import { SETTINGS_GUTTER, SettingsSection } from '@/components/admin/settings/SettingsSection'
 import type { Extension } from '@/extensions/registry'
 import { loadPluginExtensions } from '@/extensions/loadExtensionsCore'
 import type { ServerVersionResponse } from '@/utils/api'
@@ -29,6 +28,14 @@ function clientAppVersion(): string {
   if (fromEnv && String(fromEnv).trim()) return String(fromEnv).trim()
   return (clientPackage as { version?: string }).version ?? '—'
 }
+
+/** Label/value rows. Two columns once there is room, stacked on narrow panels. */
+const detailGridSx = {
+  display: 'grid',
+  rowGap: 1,
+  columnGap: 3,
+  gridTemplateColumns: { xs: '1fr', sm: '160px 1fr' }
+} as const
 
 export default function VersionsTab() {
   const t = useTranslations('admin')
@@ -71,132 +78,114 @@ export default function VersionsTab() {
   }
 
   return (
-    <CardContent>
-      {error && (
-        <Alert severity='error' sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
+    <>
+      <Box sx={{ px: SETTINGS_GUTTER, pt: 5, pb: 3 }}>
+        {error && (
+          <Alert severity='error' sx={{ mb: 3 }}>
+            {error}
+          </Alert>
+        )}
 
-      <Typography variant='body2' color='text.secondary' sx={{ mb: 3 }}>
-        {t('settings.general.versions.intro')}
-      </Typography>
+        <Typography variant='body2' color='text.secondary'>
+          {t('settings.general.versions.intro')}
+        </Typography>
+      </Box>
 
-      <Card variant='outlined' sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant='subtitle1' sx={{ mb: 2 }}>
-            {t('settings.general.versions.sections.api')}
+      <SettingsSection title={t('settings.general.versions.sections.api')}>
+        <Box sx={detailGridSx}>
+          <Typography variant='body2' color='text.secondary'>
+            {t('settings.general.versions.labels.bfg')}
           </Typography>
-          <Box sx={{ display: 'grid', rowGap: 1, columnGap: 3, gridTemplateColumns: { xs: '1fr', sm: '160px 1fr' } }}>
-            <Typography variant='body2' color='text.secondary'>
-              {t('settings.general.versions.labels.bfg')}
-            </Typography>
-            <Typography variant='body2'>{server?.bfg_version ?? '—'}</Typography>
-            <Typography variant='body2' color='text.secondary'>
-              {t('settings.general.versions.labels.workspaceServerApp')}
-            </Typography>
-            <Typography variant='body2'>{server?.workspace_server_app_version ?? '—'}</Typography>
-            <Typography variant='body2' color='text.secondary'>
-              {t('settings.general.versions.labels.apiVersion')}
-            </Typography>
-            <Typography variant='body2'>{server?.api_version ?? '—'}</Typography>
-            <Typography variant='body2' color='text.secondary'>
-              {t('settings.general.versions.labels.schemaVersion')}
-            </Typography>
-            <Typography variant='body2'>{server?.schema_version || '—'}</Typography>
-            <Typography variant='body2' color='text.secondary'>
-              {t('settings.general.versions.labels.buildId')}
-            </Typography>
-            <Typography variant='body2' sx={{ wordBreak: 'break-all' }}>
-              {server?.build_id || '—'}
-            </Typography>
-          </Box>
-        </CardContent>
-      </Card>
-
-      <Card variant='outlined' sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant='subtitle1' sx={{ mb: 2 }}>
-            {t('settings.general.versions.sections.adminClient')}
+          <Typography variant='body2'>{server?.bfg_version ?? '—'}</Typography>
+          <Typography variant='body2' color='text.secondary'>
+            {t('settings.general.versions.labels.workspaceServerApp')}
           </Typography>
-          <Box sx={{ display: 'grid', rowGap: 1, columnGap: 3, gridTemplateColumns: { xs: '1fr', sm: '160px 1fr' } }}>
-            <Typography variant='body2' color='text.secondary'>
-              {t('settings.general.versions.labels.packageName')}
-            </Typography>
-            <Typography variant='body2'>{(clientPackage as { name?: string }).name ?? '—'}</Typography>
-            <Typography variant='body2' color='text.secondary'>
-              {t('settings.general.versions.labels.clientVersion')}
-            </Typography>
-            <Typography variant='body2'>{clientAppVersion()}</Typography>
-          </Box>
-        </CardContent>
-      </Card>
-
-      <Card variant='outlined' sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant='subtitle1' sx={{ mb: 2 }}>
-            {t('settings.general.versions.sections.djangoExtensions')}
+          <Typography variant='body2'>{server?.workspace_server_app_version ?? '—'}</Typography>
+          <Typography variant='body2' color='text.secondary'>
+            {t('settings.general.versions.labels.apiVersion')}
           </Typography>
-          {(server?.django_local_apps?.length ?? 0) === 0 ? (
-            <Typography variant='body2' color='text.secondary'>
-              {t('settings.general.versions.emptyDjangoApps')}
-            </Typography>
-          ) : (
-            <TableContainer>
-              <Table size='small'>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t('settings.general.versions.table.appId')}</TableCell>
-                    <TableCell align='right'>{t('settings.general.versions.table.version')}</TableCell>
+          <Typography variant='body2'>{server?.api_version ?? '—'}</Typography>
+          <Typography variant='body2' color='text.secondary'>
+            {t('settings.general.versions.labels.schemaVersion')}
+          </Typography>
+          <Typography variant='body2'>{server?.schema_version || '—'}</Typography>
+          <Typography variant='body2' color='text.secondary'>
+            {t('settings.general.versions.labels.buildId')}
+          </Typography>
+          <Typography variant='body2' sx={{ wordBreak: 'break-all' }}>
+            {server?.build_id || '—'}
+          </Typography>
+        </Box>
+      </SettingsSection>
+
+      <SettingsSection title={t('settings.general.versions.sections.adminClient')}>
+        <Box sx={detailGridSx}>
+          <Typography variant='body2' color='text.secondary'>
+            {t('settings.general.versions.labels.packageName')}
+          </Typography>
+          <Typography variant='body2'>{(clientPackage as { name?: string }).name ?? '—'}</Typography>
+          <Typography variant='body2' color='text.secondary'>
+            {t('settings.general.versions.labels.clientVersion')}
+          </Typography>
+          <Typography variant='body2'>{clientAppVersion()}</Typography>
+        </Box>
+      </SettingsSection>
+
+      <SettingsSection title={t('settings.general.versions.sections.djangoExtensions')}>
+        {(server?.django_local_apps?.length ?? 0) === 0 ? (
+          <Typography variant='body2' color='text.secondary'>
+            {t('settings.general.versions.emptyDjangoApps')}
+          </Typography>
+        ) : (
+          <TableContainer>
+            <Table size='small'>
+              <TableHead>
+                <TableRow>
+                  <TableCell>{t('settings.general.versions.table.appId')}</TableCell>
+                  <TableCell align='right'>{t('settings.general.versions.table.version')}</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {(server?.django_local_apps ?? []).map(row => (
+                  <TableRow key={row.id}>
+                    <TableCell>{row.id}</TableCell>
+                    <TableCell align='right'>{row.version?.trim() ? row.version : '—'}</TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {(server?.django_local_apps ?? []).map(row => (
-                    <TableRow key={row.id}>
-                      <TableCell>{row.id}</TableCell>
-                      <TableCell align='right'>{row.version?.trim() ? row.version : '—'}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </CardContent>
-      </Card>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </SettingsSection>
 
-      <Card variant='outlined'>
-        <CardContent>
-          <Typography variant='subtitle1' sx={{ mb: 2 }}>
-            {t('settings.general.versions.sections.nextExtensions')}
+      <SettingsSection title={t('settings.general.versions.sections.nextExtensions')}>
+        {extensions.length === 0 ? (
+          <Typography variant='body2' color='text.secondary'>
+            {t('settings.general.versions.emptyPlugins')}
           </Typography>
-          {extensions.length === 0 ? (
-            <Typography variant='body2' color='text.secondary'>
-              {t('settings.general.versions.emptyPlugins')}
-            </Typography>
-          ) : (
-            <TableContainer>
-              <Table size='small'>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>{t('settings.general.versions.table.extensionId')}</TableCell>
-                    <TableCell>{t('settings.general.versions.table.extensionName')}</TableCell>
-                    <TableCell align='right'>{t('settings.general.versions.table.version')}</TableCell>
+        ) : (
+          <TableContainer>
+            <Table size='small'>
+              <TableHead>
+                <TableRow>
+                  <TableCell>{t('settings.general.versions.table.extensionId')}</TableCell>
+                  <TableCell>{t('settings.general.versions.table.extensionName')}</TableCell>
+                  <TableCell align='right'>{t('settings.general.versions.table.version')}</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {extensions.map(ext => (
+                  <TableRow key={ext.id}>
+                    <TableCell>{ext.id}</TableCell>
+                    <TableCell>{ext.name}</TableCell>
+                    <TableCell align='right'>{ext.version?.trim() ? ext.version : '—'}</TableCell>
                   </TableRow>
-                </TableHead>
-                <TableBody>
-                  {extensions.map(ext => (
-                    <TableRow key={ext.id}>
-                      <TableCell>{ext.id}</TableCell>
-                      <TableCell>{ext.name}</TableCell>
-                      <TableCell align='right'>{ext.version?.trim() ? ext.version : '—'}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </TableContainer>
-          )}
-        </CardContent>
-      </Card>
-    </CardContent>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        )}
+      </SettingsSection>
+    </>
   )
 }

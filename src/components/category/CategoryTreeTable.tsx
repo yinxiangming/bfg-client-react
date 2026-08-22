@@ -18,13 +18,12 @@ import TableRow from '@mui/material/TableRow'
 import IconButton from '@mui/material/IconButton'
 import Chip from '@mui/material/Chip'
 import Typography from '@mui/material/Typography'
-import Paper from '@mui/material/Paper'
 import Tooltip from '@mui/material/Tooltip'
-import TextField from '@mui/material/TextField'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
+
+// The shared label-above field. Raw MUI TextField/Select render outlined at
+// medium size — 56px against the 38px every other admin toolbar uses.
+import CustomTextField from '@/components/ui/TextField'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Grid from '@mui/material/Grid'
@@ -261,42 +260,63 @@ export default function CategoryTreeTable({
   }
 
   return (
-    <Box>
-      {/* Filters */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-              <TextField
-                fullWidth
-                label={t('categories.treeTable.filters.search.label')}
-                placeholder={t('categories.treeTable.filters.search.placeholder')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                InputProps={{
-                  startAdornment: <i className="tabler-search" style={{ marginRight: 8, color: 'rgba(0,0,0,0.54)' }} />
-                }}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6, md: 4 }}>
-              <FormControl fullWidth>
-                <InputLabel>{t('categories.treeTable.filters.activeStatus.label')}</InputLabel>
-                <Select
-                  value={activeFilter}
-                  label={t('categories.treeTable.filters.activeStatus.label')}
-                  onChange={(e) => setActiveFilter(e.target.value)}
-                >
-                  <MenuItem value="">{t('categories.treeTable.filters.activeStatus.all')}</MenuItem>
-                  <MenuItem value="true">{t('categories.treeTable.filters.activeStatus.active')}</MenuItem>
-                  <MenuItem value="false">{t('categories.treeTable.filters.activeStatus.inactive')}</MenuItem>
-                </Select>
-              </FormControl>
-            </Grid>
+    <Card>
+      {/* Filter row — inside the table's card, so the list reads as one
+          surface the way every other admin list does. */}
+      <CardContent sx={{ borderBottom: '1px solid', borderColor: 'divider' }}>
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <CustomTextField
+              fullWidth
+              placeholder={t('categories.treeTable.filters.search.placeholder')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              slotProps={{
+                input: {
+                  startAdornment: (
+                    <i className='tabler-search' style={{ marginRight: 8, opacity: 0.6 }} />
+                  )
+                }
+              }}
+            />
           </Grid>
-        </CardContent>
-      </Card>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }}>
+            <CustomTextField
+              select
+              fullWidth
+              value={activeFilter}
+              onChange={(e) => setActiveFilter(e.target.value)}
+              slotProps={{
+                select: {
+                  // Unset, a filled select renders blank — no label sits above it
+                  // here because the search box beside it has none either. Show
+                  // the filter's name as the resting state instead, the way the
+                  // SchemaTable toolbars do.
+                  displayEmpty: true,
+                  renderValue: (value: unknown) =>
+                    value === ''
+                      ? (
+                        <Box component='span' sx={{ color: 'text.disabled' }}>
+                          {t('categories.treeTable.filters.activeStatus.label')}
+                        </Box>
+                      )
+                      : t(
+                        value === 'true'
+                          ? 'categories.treeTable.filters.activeStatus.active'
+                          : 'categories.treeTable.filters.activeStatus.inactive'
+                      )
+                }
+              }}
+            >
+              <MenuItem value=''>{t('categories.treeTable.filters.activeStatus.all')}</MenuItem>
+              <MenuItem value='true'>{t('categories.treeTable.filters.activeStatus.active')}</MenuItem>
+              <MenuItem value='false'>{t('categories.treeTable.filters.activeStatus.inactive')}</MenuItem>
+            </CustomTextField>
+          </Grid>
+        </Grid>
+      </CardContent>
 
-      <TableContainer component={Paper}>
+      <TableContainer>
         <Table>
           <TableHead>
             <TableRow>
@@ -431,7 +451,7 @@ export default function CategoryTreeTable({
         </TableBody>
       </Table>
     </TableContainer>
-    </Box>
+    </Card>
   )
 }
 

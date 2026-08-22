@@ -14,7 +14,6 @@ import Typography from '@mui/material/Typography'
 import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
-import Divider from '@mui/material/Divider'
 import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 import Switch from '@mui/material/Switch'
@@ -22,6 +21,7 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 
 // Component Imports
 import CustomTextField from '@/components/ui/TextField'
+import { SettingsActionBar } from '@/components/admin/settings/SettingsSection'
 
 // Type Imports
 import type { Customer } from '@/services/store'
@@ -94,133 +94,128 @@ const CustomerBasicInfo = ({ customer, onUpdate }: CustomerBasicInfoProps) => {
   }
 
   return (
-    <Grid container spacing={4}>
-      <Grid size={{ xs: 12, md: 8 }}>
-        <Card>
-          <CardContent>
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12 }}>
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={formData.is_active}
-                      onChange={(e) => handleChange('is_active', e.target.checked)}
-                    />
-                  }
-                  label={
-                    <Typography variant='body2' color='text.secondary'>
-                      {t('customers.basicInfo.fields.status.label')}:{' '}
-                      <Typography component='span' sx={{ fontWeight: 500, color: 'text.primary' }}>
-                        {formData.is_active ? t('customers.values.active') : t('customers.values.inactive')}
+    <>
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, md: 8 }}>
+          <Card>
+            <CardContent>
+              <Grid container spacing={3}>
+                <Grid size={{ xs: 12 }}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={formData.is_active}
+                        onChange={(e) => handleChange('is_active', e.target.checked)}
+                      />
+                    }
+                    label={
+                      <Typography variant='body2' color='text.secondary'>
+                        {t('customers.basicInfo.fields.status.label')}:{' '}
+                        <Typography component='span' sx={{ fontWeight: 500, color: 'text.primary' }}>
+                          {formData.is_active ? t('customers.values.active') : t('customers.values.inactive')}
+                        </Typography>
                       </Typography>
+                    }
+                  />
+                </Grid>
+                <Grid size={{ xs: 12 }}>
+                  <CustomTextField
+                    fullWidth
+                    label={t('customers.basicInfo.fields.email.label')}
+                    type='email'
+                    value={userFormData.email}
+                    onChange={(e) => handleUserChange('email', e.target.value)}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <CustomTextField
+                    fullWidth
+                    label={t('customers.basicInfo.fields.firstName.label')}
+                    value={userFormData.first_name}
+                    onChange={(e) => handleUserChange('first_name', e.target.value)}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12, md: 6 }}>
+                  <CustomTextField
+                    fullWidth
+                    label={t('customers.basicInfo.fields.lastName.label')}
+                    value={userFormData.last_name}
+                    onChange={(e) => handleUserChange('last_name', e.target.value)}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12 }}>
+                  <CustomTextField
+                    fullWidth
+                    label={t('customers.basicInfo.fields.phone.label')}
+                    value={userFormData.phone}
+                    onChange={(e) => handleUserChange('phone', e.target.value)}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12 }} sx={{ borderTop: '1px solid', borderColor: 'divider', pt: 3 }}>
+                  <CustomTextField
+                    fullWidth
+                    label={t('customers.basicInfo.fields.notes.label')}
+                    multiline
+                    rows={4}
+                    value={formData.notes}
+                    onChange={(e) => handleChange('notes', e.target.value)}
+                  />
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        </Grid>
+        <Grid size={{ xs: 12, md: 4 }}>
+          <Card>
+            <CardHeader title={t('customers.basicInfo.sidebar.title')} />
+            <CardContent>
+              <Grid container spacing={3}>
+                <Grid size={{ xs: 12 }}>
+                  <CustomTextField
+                    fullWidth
+                    label={t('customers.basicInfo.fields.companyName.label')}
+                    value={formData.company_name}
+                    onChange={(e) => handleChange('company_name', e.target.value)}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12 }}>
+                  <CustomTextField
+                    fullWidth
+                    label={t('customers.basicInfo.fields.taxNumber.label')}
+                    value={formData.tax_number}
+                    onChange={(e) => handleChange('tax_number', e.target.value)}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12 }}>
+                  <CustomTextField
+                    fullWidth
+                    label={t('customers.basicInfo.fields.creditLimit.label')}
+                    type='number'
+                    value={formData.credit_limit}
+                    onChange={(e) => handleChange('credit_limit', parseFloat(e.target.value) || 0)}
+                  />
+                </Grid>
+                <Grid size={{ xs: 12 }} sx={{ borderTop: '1px solid', borderColor: 'divider', pt: 3 }}>
+                  <Box>
+                    <Typography variant='body2' color='text.secondary'>
+                      {t('customers.basicInfo.fields.verified.label')}
                     </Typography>
-                  }
-                />
+                    <Typography variant='body1'>
+                      {customer.is_verified ? t('customers.values.yes') : t('customers.values.no')}
+                    </Typography>
+                  </Box>
+                </Grid>
               </Grid>
-              <Grid size={{ xs: 12 }}>
-                <CustomTextField
-                  fullWidth
-                  label={t('customers.basicInfo.fields.email.label')}
-                  type='email'
-                  value={userFormData.email}
-                  onChange={(e) => handleUserChange('email', e.target.value)}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <CustomTextField
-                  fullWidth
-                  label={t('customers.basicInfo.fields.firstName.label')}
-                  value={userFormData.first_name}
-                  onChange={(e) => handleUserChange('first_name', e.target.value)}
-                />
-              </Grid>
-              <Grid size={{ xs: 12, md: 6 }}>
-                <CustomTextField
-                  fullWidth
-                  label={t('customers.basicInfo.fields.lastName.label')}
-                  value={userFormData.last_name}
-                  onChange={(e) => handleUserChange('last_name', e.target.value)}
-                />
-              </Grid>
-              <Grid size={{ xs: 12 }}>
-                <CustomTextField
-                  fullWidth
-                  label={t('customers.basicInfo.fields.phone.label')}
-                  value={userFormData.phone}
-                  onChange={(e) => handleUserChange('phone', e.target.value)}
-                />
-              </Grid>
-              <Grid size={{ xs: 12 }}>
-                <Divider sx={{ my: 2 }} />
-              </Grid>
-              <Grid size={{ xs: 12 }}>
-                <CustomTextField
-                  fullWidth
-                  label={t('customers.basicInfo.fields.notes.label')}
-                  multiline
-                  rows={4}
-                  value={formData.notes}
-                  onChange={(e) => handleChange('notes', e.target.value)}
-                />
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
+            </CardContent>
+          </Card>
+        </Grid>
       </Grid>
-      <Grid size={{ xs: 12, md: 4 }}>
-        <Card>
-          <CardHeader title={t('customers.basicInfo.sidebar.title')} sx={{ pb: 0 }} />
-          <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 } }}>
-            <Grid container spacing={2}>
-              <Grid size={{ xs: 12 }}>
-                <CustomTextField
-                  fullWidth
-                  label={t('customers.basicInfo.fields.companyName.label')}
-                  value={formData.company_name}
-                  onChange={(e) => handleChange('company_name', e.target.value)}
-                />
-              </Grid>
-              <Grid size={{ xs: 12 }}>
-                <CustomTextField
-                  fullWidth
-                  label={t('customers.basicInfo.fields.taxNumber.label')}
-                  value={formData.tax_number}
-                  onChange={(e) => handleChange('tax_number', e.target.value)}
-                />
-              </Grid>
-              <Grid size={{ xs: 12 }}>
-                <CustomTextField
-                  fullWidth
-                  label={t('customers.basicInfo.fields.creditLimit.label')}
-                  type='number'
-                  value={formData.credit_limit}
-                  onChange={(e) => handleChange('credit_limit', parseFloat(e.target.value) || 0)}
-                />
-              </Grid>
-              <Grid size={{ xs: 12 }}>
-                <Divider sx={{ my: 2 }} />
-              </Grid>
-              <Grid size={{ xs: 12 }}>
-                <Box>
-                  <Typography variant='body2' color='text.secondary'>
-                    {t('customers.basicInfo.fields.verified.label')}
-                  </Typography>
-                  <Typography variant='body1'>
-                    {customer.is_verified ? t('customers.values.yes') : t('customers.values.no')}
-                  </Typography>
-                </Box>
-              </Grid>
-            </Grid>
-          </CardContent>
-        </Card>
-      </Grid>
-      <Grid size={{ xs: 12 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2 }}>
-          <Button variant='contained' onClick={handleSave} disabled={saving}>
-            {saving ? t('common.states.saving') : t('customers.basicInfo.actions.saveChanges')}
-          </Button>
-        </Box>
-      </Grid>
+
+      <SettingsActionBar>
+        <Button variant='contained' onClick={handleSave} disabled={saving}>
+          {saving ? t('common.states.saving') : t('customers.basicInfo.actions.saveChanges')}
+        </Button>
+      </SettingsActionBar>
 
       <Snackbar
         open={snackbar.open}
@@ -232,7 +227,7 @@ const CustomerBasicInfo = ({ customer, onUpdate }: CustomerBasicInfoProps) => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Grid>
+    </>
   )
 }
 
