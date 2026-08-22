@@ -74,7 +74,11 @@ async function getSingleSiteLocale(headerStore: Awaited<ReturnType<typeof header
         'Content-Type': 'application/json',
         ...(requestHost ? { 'X-Forwarded-Host': requestHost } : {}),
       },
-      cache: 'no-store',
+      // Same endpoint, same tenant-in-headers scheme and same window as
+      // getStorefrontConfigForServer(). `no-store` here was uncached, and because
+      // getRequestConfig runs for every route it cost one uncached API round trip
+      // on every single request — across regions that is the bulk of the page's TTFB.
+      next: { revalidate: 300 },
     })
     if (!res.ok) return null
     const config = (await res.json()) as { default_language?: string; languages?: string[] }
