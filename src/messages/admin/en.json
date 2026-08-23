@@ -3193,6 +3193,53 @@
               "label": "Product Scanner API Key",
               "placeholder": "ps-xxxxxx"
             }
+          },
+          "storefrontDisplay": {
+            "title": "Storefront Display",
+            "description": "What shoppers see on a product page, and what happens once a product runs out. Applies to the whole storefront.",
+            "skuDisplay": {
+              "label": "Product code",
+              "options": {
+                "plain": "Show without the prefix",
+                "full": "Show the full code",
+                "hidden": "Do not show"
+              },
+              "help": {
+                "plain": "Drops the prefix above, so SKU-KAS-301 reads as KAS-301.",
+                "full": "Shows the code exactly as stored, prefix included.",
+                "hidden": "No product code on the page."
+              }
+            },
+            "stockDisplay": {
+              "label": "Stock level",
+              "options": {
+                "status": "In stock / Sold out only",
+                "low_only": "Show a count only when running low",
+                "exact": "Show the exact count",
+                "hidden": "Do not show"
+              },
+              "help": {
+                "status": "Shoppers see whether it is available, never how many you hold.",
+                "low_only": "A count appears once it reaches the product's low-stock threshold.",
+                "exact": "Publishes your stock levels — competitors can read them too.",
+                "hidden": "No availability shown at all."
+              }
+            },
+            "outOfStock": {
+              "label": "When a product is sold out",
+              "options": {
+                "show": "Show it, marked sold out",
+                "notify": "Show it and collect back-in-stock requests",
+                "backorder": "Keep selling it (backorder)",
+                "hide": "Hide it from the storefront"
+              },
+              "help": {
+                "show": "Stays browsable and indexed; the buy button is disabled.",
+                "notify": "Shoppers can leave an email. Requests are listed in the back office — sending the email is still manual.",
+                "backorder": "Orders are accepted for stock you do not hold yet. Say so in your delivery terms.",
+                "hide": "Drops out of listings and its page returns 404 — any inbound links and search rankings go with it."
+              }
+            }
           }
         },
         "actions": {

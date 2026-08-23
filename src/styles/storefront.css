@@ -371,6 +371,71 @@ body {
   background-color: #ef4444;
 }
 
+/* Sold out sits top-right, opposite New/Sale. Those two share the top-left corner and
+   already stack on each other; a status stamp that can coincide with either needs its
+   own corner. Slate rather than red — red on a product card reads as a discount. */
+.sf-badge-sold-out {
+  left: auto;
+  right: 0.75rem;
+  background-color: #475569;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* Availability line on the product page. The value is muted like every other info row,
+   so out-of-stock needs colour of its own to register at a glance. */
+.sf-product-info-value[data-in-stock='false'] {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.sf-product-backorder-note {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  background-color: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #92400e;
+  font-size: 0.875rem;
+}
+
+/* No general text input existed in this sheet — the only one was `.sf-search-input`,
+   sized for the header. This is that treatment without the fixed width and icon inset. */
+.sf-product-notify-input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.sf-product-notify-input:focus {
+  border-color: #bdbdbd;
+}
+
+.sf-product-notify-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.sf-product-notify-done {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  background-color: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #065f46;
+  font-size: 0.875rem;
+}
+
+.sf-product-notify-error {
+  margin: 0.5rem 0 0;
+  color: #dc2626;
+  font-size: 0.8125rem;
+}
+
 .sf-rating {
   display: flex;
   align-items: center;
@@ -1895,6 +1960,34 @@ body {
 
 [data-mode='dark'] .sf-product-info-value {
   color: #b0b0b0;
+}
+
+/* The tinted panels above are readable on white; on a dark ground the text colour is the
+   part that fails, so only that is restated. */
+[data-mode='dark'] .sf-product-info-value[data-in-stock='false'] {
+  color: #f87171;
+}
+
+[data-mode='dark'] .sf-product-notify-input {
+  background-color: #2d2d2d;
+  border-color: #3d3d3d;
+  color: #e0e0e0;
+}
+
+[data-mode='dark'] .sf-product-notify-input::placeholder {
+  color: #9e9e9e;
+}
+
+[data-mode='dark'] .sf-product-backorder-note {
+  color: #fcd34d;
+}
+
+[data-mode='dark'] .sf-product-notify-done {
+  color: #6ee7b7;
+}
+
+[data-mode='dark'] .sf-product-notify-error {
+  color: #f87171;
 }
 
 [data-mode='dark'] .sf-tab-btn {

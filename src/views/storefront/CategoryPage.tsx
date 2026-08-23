@@ -33,6 +33,8 @@ type Product = {
   reviews: number
   image: string
   isNew: boolean
+  inStock?: boolean
+  purchasable?: boolean
 }
 
 type SortOption = 'relevance' | 'sales' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc'
@@ -78,6 +80,8 @@ const transformApiProduct = (apiProduct: any): Product => ({
     getMediaUrl(apiProduct.primary_image || (apiProduct.images && apiProduct.images[0]) || '') ||
     getStoreImageUrl('themes/PRS04099/assets/img/megnor/empty-cart.svg'),
   isNew: apiProduct.is_new || false,
+    inStock: apiProduct.in_stock ?? true,
+    purchasable: apiProduct.purchasable ?? true,
   slug: apiProduct.slug ?? null
 })
 

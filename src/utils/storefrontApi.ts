@@ -372,6 +372,26 @@ class StorefrontApiClient {
     )
   }
 
+  /**
+   * Ask to be emailed when a sold-out product returns.
+   *
+   * Only accepted while the workspace's out-of-stock policy is `notify`; under any other
+   * setting the server 404s rather than bank an address it will never write to.
+   */
+  async notifyWhenInStock(
+    productIdOrSlug: string | number,
+    email: string,
+    variantId?: number
+  ): Promise<{ registered: boolean }> {
+    return this.request<{ registered: boolean }>(
+      `/api/v1/store/products/${productIdOrSlug}/notify-me/`,
+      {
+        method: 'POST',
+        body: JSON.stringify(variantId ? { email, variant_id: variantId } : { email })
+      }
+    )
+  }
+
   async markReviewHelpful(productIdOrSlug: string | number, reviewId: number): Promise<any> {
     return this.request<any>(`/api/v1/store/products/${productIdOrSlug}/reviews/${reviewId}/helpful/`, {
       method: 'POST'

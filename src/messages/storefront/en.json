@@ -28,7 +28,9 @@
     "processing": "Processing...",
     "placeOrder": "Place order",
     "payNow": "Pay now",
-    "completeOrder": "Complete order"
+    "completeOrder": "Complete order",
+    "backorder": "Order now — ships later",
+    "notifyMe": "Notify me"
   },
   "nav": {
     "home": "Home"
@@ -37,9 +39,21 @@
     "welcomeTitle": "Welcome to BFG Store",
     "welcomeSubtitle": "Browse categories and products from the menu, or configure the home page in admin.",
     "hero": {
-      "slide1": { "title": "Limited Stock, Hurry Up!", "subtitle": "Trendy Looks", "description": "Timeless Style" },
-      "slide2": { "title": "New Collection", "subtitle": "Fashion Forward", "description": "Discover the Latest Trends" },
-      "slide3": { "title": "Super Sale", "subtitle": "Up to 50% Off", "description": "Limited Time Offer" }
+      "slide1": {
+        "title": "Limited Stock, Hurry Up!",
+        "subtitle": "Trendy Looks",
+        "description": "Timeless Style"
+      },
+      "slide2": {
+        "title": "New Collection",
+        "subtitle": "Fashion Forward",
+        "description": "Discover the Latest Trends"
+      },
+      "slide3": {
+        "title": "Super Sale",
+        "subtitle": "Up to 50% Off",
+        "description": "Limited Time Offer"
+      }
     },
     "categories": {
       "empty": "No categories available"
@@ -114,7 +128,8 @@
       "items": "Items",
       "brand": "Brand:",
       "reviews": "reviews",
-      "condition": "Condition:"
+      "condition": "Condition:",
+      "availability": "Availability:"
     },
     "condition": {
       "new": "New",
@@ -150,7 +165,17 @@
       "share": "Share"
     },
     "relatedTitle": "You might also like",
-    "descriptionFallback": "No description available."
+    "descriptionFallback": "No description available.",
+    "stock": {
+      "inStock": "In stock",
+      "soldOut": "Sold out",
+      "onlyLeft": "Only {count} left",
+      "backorderNote": "Out of stock right now. Order it and we will ship as soon as it arrives.",
+      "notifyPrompt": "Email me when this is back in stock",
+      "notifyPlaceholder": "you@example.com",
+      "notifyDone": "Thanks — we'll email you when it's back.",
+      "notifyFailed": "That didn't go through. Please try again."
+    }
   },
   "cart": {
     "title": "Shopping Cart",
@@ -365,4 +390,3 @@
     "sending": "Sending..."
   }
 }
-

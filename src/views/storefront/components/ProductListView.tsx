@@ -44,6 +44,8 @@ type Product = {
   reviews: number
   image: string
   isNew: boolean
+  inStock?: boolean
+  purchasable?: boolean
   description?: string
 }
 

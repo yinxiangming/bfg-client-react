@@ -3193,6 +3193,53 @@
               "label": "商品扫描器 API Key",
               "placeholder": "ps-xxxxxx"
             }
+          },
+          "storefrontDisplay": {
+            "title": "店铺展示",
+            "description": "顾客在商品页看到什么,以及商品售罄后如何处理。对整个店铺生效。",
+            "skuDisplay": {
+              "label": "商品编号",
+              "options": {
+                "plain": "显示(去掉前缀)",
+                "full": "显示完整编号",
+                "hidden": "不显示"
+              },
+              "help": {
+                "plain": "去掉上面设置的前缀,SKU-KAS-301 显示为 KAS-301。",
+                "full": "原样显示,包含前缀。",
+                "hidden": "商品页不显示编号。"
+              }
+            },
+            "stockDisplay": {
+              "label": "库存",
+              "options": {
+                "status": "只显示有货/售罄",
+                "low_only": "仅在库存偏低时显示数量",
+                "exact": "显示具体数量",
+                "hidden": "不显示"
+              },
+              "help": {
+                "status": "顾客只知道能不能买,不知道你有多少。",
+                "low_only": "低于该商品的低库存阈值时才显示数量。",
+                "exact": "会公开你的库存水平,竞争对手同样能看到。",
+                "hidden": "完全不显示库存状态。"
+              }
+            },
+            "outOfStock": {
+              "label": "售罄时",
+              "options": {
+                "show": "显示,并标记售罄",
+                "notify": "显示,并接受到货通知登记",
+                "backorder": "继续销售(预订)",
+                "hide": "从店铺中隐藏"
+              },
+              "help": {
+                "show": "商品页仍可访问和被收录,购买按钮置灰。",
+                "notify": "顾客可留下邮箱,登记记录在后台可查 —— 发信目前仍需手动。",
+                "backorder": "会接受尚无现货的订单,请在配送条款中说明。",
+                "hide": "从列表消失,商品页返回 404 —— 已有的外链和搜索排名会一并失去。"
+              }
+            }
           }
         },
         "actions": {

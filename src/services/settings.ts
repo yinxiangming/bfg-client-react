@@ -76,6 +76,15 @@ export type ShopSettingsPayload = {
     sku_prefix?: string
     barcode_prefix?: string
   }
+  /**
+   * SKU / stock visibility and out-of-stock behaviour for the storefront. Read back out
+   * of the public config endpoint as `storefront_display`; see StorefrontDisplaySettings.
+   */
+  storefront_display?: {
+    sku_display?: 'hidden' | 'plain' | 'full'
+    stock_display?: 'hidden' | 'status' | 'low_only' | 'exact'
+    out_of_stock_policy?: 'hide' | 'show' | 'notify' | 'backorder'
+  }
 }
 
 export type WorkspaceSettings = {
@@ -371,11 +380,22 @@ export async function updateAnalyticsSettings(settingsId: number, analytics: Ana
   return result
 }
 
+/**
+ * Merge a partial shop settings payload into `custom_settings.shop`.
+ *
+ * Merges rather than replaces because two admin screens write this node and neither sends
+ * all of it: General owns `review_moderation_required`, Store owns `storefront_display`,
+ * and both send `product_identifiers`. Replacing meant whichever page saved last erased
+ * the other's field — set an out-of-stock policy in Store, save General, and it was gone.
+ *
+ * The merge is one level deep, so a nested node passed in is replaced whole. Both callers
+ * send those complete.
+ */
 export async function updateShopSettings(settingsId: number, shop: ShopSettingsPayload) {
   const url = `${bfgApi.settings()}${settingsId}/`
   const current = await apiFetch<WorkspaceSettings>(url, getSiteAdminOptions())
   const currentCustom = current.custom_settings || {}
-  const nextCustom = { ...currentCustom, shop }
+  const nextCustom = { ...currentCustom, shop: { ...(currentCustom.shop || {}), ...shop } }
   const result = await apiFetch<WorkspaceSettings>(url, {
     ...getSiteAdminOptions(),
     method: 'PATCH',

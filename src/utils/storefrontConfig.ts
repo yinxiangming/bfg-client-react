@@ -53,6 +53,25 @@ const DEFAULT_HEADER_OPTIONS: StorefrontHeaderOptions = {
   show_login: true,
 }
 
+/**
+ * How much of a product's internals the storefront is allowed to show, and what a
+ * sold-out product does. Set once per workspace in Admin → Settings → Store; the server
+ * resolves it so every theme answers these the same way.
+ */
+export type StorefrontDisplaySettings = {
+  /** 'plain' drops the workspace's SKU prefix ("SKU-KAS-301" → "KAS-301"). */
+  sku_display: 'hidden' | 'plain' | 'full'
+  /** Anything but 'exact' also withholds the figure from the API payload. */
+  stock_display: 'hidden' | 'status' | 'low_only' | 'exact'
+  out_of_stock_policy: 'hide' | 'show' | 'notify' | 'backorder'
+}
+
+export const DEFAULT_STOREFRONT_DISPLAY: StorefrontDisplaySettings = {
+  sku_display: 'plain',
+  stock_display: 'status',
+  out_of_stock_policy: 'show',
+}
+
 export type StorefrontConfig = {
   site_name: string
   site_description: string
@@ -93,6 +112,8 @@ export type StorefrontConfig = {
   header_options?: StorefrontHeaderOptions
   /** When true, new reviews require admin approval before showing. Default false. */
   review_moderation_required?: boolean
+  /** SKU / stock visibility and out-of-stock behaviour. See StorefrontDisplaySettings. */
+  storefront_display?: StorefrontDisplaySettings
   /**
    * Workspace logo. A data URL when uploaded through admin, otherwise a media
    * URL. Blank when unset — callers fall back to the built-in mark.
@@ -249,12 +270,26 @@ export async function getStorefrontConfig(locale?: string): Promise<StorefrontCo
   data.languages = getStorefrontLanguages(data)
   if (!data.header_options) data.header_options = { ...DEFAULT_HEADER_OPTIONS }
   else data.header_options = { ...DEFAULT_HEADER_OPTIONS, ...data.header_options }
+  data.storefront_display = { ...DEFAULT_STOREFRONT_DISPLAY, ...(data.storefront_display ?? {}) }
   cached = { data, at: Date.now() }
   return data
 }
 
 /** Default theme id when not configured (standard store). */
 export const DEFAULT_THEME_ID = 'store'
+
+/**
+ * Display policy for a config that may not have loaded yet.
+ *
+ * Falls back to the same defaults the server resolves, so the first paint and the
+ * hydrated paint agree — a stock figure that appears and then vanishes is worse than
+ * one that was never shown.
+ */
+export function getStorefrontDisplay(
+  config?: Pick<StorefrontConfig, 'storefront_display'> | null
+): StorefrontDisplaySettings {
+  return { ...DEFAULT_STOREFRONT_DISPLAY, ...(config?.storefront_display ?? {}) }
+}
 
 /** Default header options (all true). Used when config is not yet loaded. */
 export function getDefaultHeaderOptions(): StorefrontHeaderOptions {
@@ -291,6 +326,7 @@ export const getStorefrontConfigForServer = cache(
       data.languages = getStorefrontLanguages(data)
       if (!data.header_options) data.header_options = { ...DEFAULT_HEADER_OPTIONS }
       else data.header_options = { ...DEFAULT_HEADER_OPTIONS, ...data.header_options }
+      data.storefront_display = { ...DEFAULT_STOREFRONT_DISPLAY, ...(data.storefront_display ?? {}) }
       return data
     } catch {
       clearTimeout(timeoutId)
