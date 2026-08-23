@@ -39,9 +39,10 @@ type ProductMeta = {
   condition: string | null
   rating: number | null
   reviews_count: number
-  stock_quantity: number | null
+  in_stock: boolean
+  purchasable: boolean
   categories: ProductCategory[]
-  variants: { stock_available?: number; sku?: string }[]
+  variants: { sku?: string }[]
 }
 
 async function fetchProductRaw(id: string, requestHost?: string): Promise<ProductMeta | null> {
@@ -68,7 +69,8 @@ async function fetchProductRaw(id: string, requestHost?: string): Promise<Produc
       condition: data.condition ?? null,
       rating: data.rating ?? null,
       reviews_count: data.reviews_count ?? 0,
-      stock_quantity: data.stock_quantity ?? null,
+      in_stock: data.in_stock ?? true,
+      purchasable: data.purchasable ?? true,
       categories: Array.isArray(data.categories) ? data.categories : [],
       variants: data.variants || [],
     }
@@ -90,11 +92,19 @@ function canonicalPath(product: ProductMeta | null, requested: string): string {
   return `/product/${product?.slug || requested}`
 }
 
-function totalStock(product: ProductMeta): number {
-  if (product.variants?.length) {
-    return product.variants.reduce((sum, v) => sum + (v.stock_available ?? 0), 0)
-  }
-  return product.stock_quantity ?? 0
+/**
+ * schema.org availability, taken from the server's verdict rather than counted here.
+ *
+ * This used to sum `stock_available` across variants and fall back to `stock_quantity`.
+ * Both of those are null whenever the workspace withholds stock figures, which a sum
+ * reads as zero — every product in the catalogue would have gone out to Google tagged
+ * OutOfStock the moment a shop chose not to publish its numbers.
+ */
+function availabilityUrl(product: ProductMeta): string {
+  if (product.in_stock) return 'https://schema.org/InStock'
+  // Sold out but still buyable: the shop takes the order and ships on restock.
+  if (product.purchasable) return 'https://schema.org/BackOrder'
+  return 'https://schema.org/OutOfStock'
 }
 
 /** One year out — Google treats a missing `priceValidUntil` as a soft warning on Offers. */
@@ -122,7 +132,6 @@ function buildProductJsonLd(
     .map((img) => toAbsolute(origin, getMediaUrl(img)))
     .filter((u): u is string => Boolean(u))
 
-  const stock = totalStock(product)
   const description =
     clampDescription(product.description || product.short_description, 5000) || product.name
 
@@ -157,7 +166,7 @@ function buildProductJsonLd(
         product.condition?.toLowerCase() === 'used'
           ? 'https://schema.org/UsedCondition'
           : 'https://schema.org/NewCondition',
-      availability: stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      availability: availabilityUrl(product),
       seller: { '@type': 'Organization', name: siteName },
       // Only claim a shipping destination the workspace has actually declared.
       shippingDetails: country

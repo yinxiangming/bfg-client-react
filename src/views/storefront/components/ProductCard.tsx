@@ -27,10 +27,17 @@ type Product = {
   reviews: number
   image: string
   isNew: boolean
+  /** From the API; absent on callers that build a card from partial data. */
+  inStock?: boolean
+  purchasable?: boolean
 }
 
 const ProductCard = ({ product }: { product: Product }) => {
   const t = useTranslations('storefront')
+  // Default to available: a card built from partial data should not accuse a product of
+  // being sold out on no evidence.
+  const inStock = product.inStock ?? true
+  const purchasable = product.purchasable ?? true
   const [isHovered, setIsHovered] = useState(false)
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState('')
@@ -123,6 +130,9 @@ const ProductCard = ({ product }: { product: Product }) => {
         </div>
         {product.isNew && <span className='sf-product-badge sf-badge-new'>{t('product.badges.new')}</span>}
         {product.discount && <span className='sf-product-badge sf-badge-sale'>-{product.discount}%</span>}
+        {!inStock && (
+          <span className='sf-product-badge sf-badge-sold-out'>{t('product.stock.soldOut')}</span>
+        )}
       </div>
 
       <div className='sf-card-body'>
@@ -145,11 +155,15 @@ const ProductCard = ({ product }: { product: Product }) => {
         <button
           className='sf-btn sf-btn-primary sf-btn-full'
           onClick={handleAddToCart}
-          disabled={loading}
+          disabled={loading || !purchasable}
           style={{ opacity: isHovered ? 1 : 0, transition: 'opacity 0.3s' }}
         >
-          <i className='tabler-shopping-cart' />
-          {t('buttons.addToCart')}
+          {purchasable && <i className='tabler-shopping-cart' />}
+          {!purchasable
+            ? t('product.stock.soldOut')
+            : inStock
+              ? t('buttons.addToCart')
+              : t('buttons.backorder')}
         </button>
       </div>
 

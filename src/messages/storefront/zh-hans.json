@@ -28,7 +28,9 @@
     "processing": "处理中...",
     "placeOrder": "提交订单",
     "payNow": "立即支付",
-    "completeOrder": "完成订单"
+    "completeOrder": "完成订单",
+    "backorder": "预订(到货后发出)",
+    "notifyMe": "到货通知我"
   },
   "nav": {
     "home": "首页"
@@ -37,9 +39,21 @@
     "welcomeTitle": "欢迎来到 BFG Store",
     "welcomeSubtitle": "从菜单浏览分类与商品，或在后台配置首页内容。",
     "hero": {
-      "slide1": { "title": "限量库存，抢购从速！", "subtitle": "潮流穿搭", "description": "经典风格" },
-      "slide2": { "title": "新品上新", "subtitle": "引领潮流", "description": "发现最新趋势" },
-      "slide3": { "title": "超级促销", "subtitle": "最高立减 50%", "description": "限时优惠" }
+      "slide1": {
+        "title": "限量库存，抢购从速！",
+        "subtitle": "潮流穿搭",
+        "description": "经典风格"
+      },
+      "slide2": {
+        "title": "新品上新",
+        "subtitle": "引领潮流",
+        "description": "发现最新趋势"
+      },
+      "slide3": {
+        "title": "超级促销",
+        "subtitle": "最高立减 50%",
+        "description": "限时优惠"
+      }
     },
     "categories": {
       "empty": "暂无分类"
@@ -114,7 +128,8 @@
       "items": "件",
       "brand": "品牌：",
       "reviews": "条评价",
-      "condition": "成色："
+      "condition": "成色：",
+      "availability": "库存状态:"
     },
     "condition": {
       "new": "全新",
@@ -150,7 +165,17 @@
       "share": "分享"
     },
     "relatedTitle": "你可能还喜欢",
-    "descriptionFallback": "暂无商品描述。"
+    "descriptionFallback": "暂无商品描述。",
+    "stock": {
+      "inStock": "有货",
+      "soldOut": "已售罄",
+      "onlyLeft": "仅剩 {count} 件",
+      "backorderNote": "当前缺货。您可以先下单,到货后我们会立即发出。",
+      "notifyPrompt": "到货后邮件通知我",
+      "notifyPlaceholder": "you@example.com",
+      "notifyDone": "已登记,到货后我们会发邮件通知您。",
+      "notifyFailed": "提交失败,请重试。"
+    }
   },
   "cart": {
     "title": "购物车",
@@ -365,4 +390,3 @@
     "sending": "发送中..."
   }
 }
-
