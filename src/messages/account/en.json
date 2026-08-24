@@ -521,7 +521,8 @@
     "financialCode": "Financial Code",
     "quantity": "Quantity",
     "unitPrice": "Unit Price",
-    "close": "Close"
+    "close": "Close",
+    "customerNote": "Order note"
   }
 }
 

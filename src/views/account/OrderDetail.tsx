@@ -16,6 +16,7 @@ import OrderDetailsCard from './orders/OrderDetailsCard'
 import ShippingActivity from './orders/ShippingActivity'
 import CustomerDetails from './orders/CustomerDetails'
 import ShippingAddress from './orders/ShippingAddress'
+import OrderNote from './orders/OrderNote'
 import BillingAddress from './orders/BillingAddress'
 import InvoicesCard from './orders/InvoicesCard'
 import PaymentsCard from './orders/PaymentsCard'
@@ -133,6 +134,11 @@ const OrderDetail = ({ orderId }: OrderDetailProps) => {
             <Grid size={{ xs: 12 }}>
               <BillingAddress order={order} />
             </Grid>
+            {(order.customer_note || '').trim() && (
+              <Grid size={{ xs: 12 }}>
+                <OrderNote order={order} />
+              </Grid>
+            )}
           </Grid>
         </Grid>
       </Grid>

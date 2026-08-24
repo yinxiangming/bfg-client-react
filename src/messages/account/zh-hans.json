@@ -521,7 +521,8 @@
     "financialCode": "财务代码",
     "quantity": "数量",
     "unitPrice": "单价",
-    "close": "关闭"
+    "close": "关闭",
+    "customerNote": "订单备注"
   }
 }
 
