@@ -24,11 +24,13 @@ import Switch from '@mui/material/Switch'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Avatar from '@mui/material/Avatar'
 import Collapse from '@mui/material/Collapse'
-import IconButton from '@mui/material/IconButton'
 import CircularProgress from '@mui/material/CircularProgress'
 
 // Component Imports
 import CustomTextField from '@/components/ui/TextField'
+
+// Theme Imports
+import { ADMIN_GUTTER } from '@/components/theme/adminSurface'
 
 // Type Imports
 import type { FormSchema, FormField, FormFieldBlock } from '@/types/schema'
@@ -46,6 +48,69 @@ import {
   filterOptionsFromCache,
   type OptionItem as OptionItemType
 } from '@/services/options'
+
+/**
+ * Fields that claim a whole row; everything else pairs up two-per-row at md+.
+ * Shared by the grid sizing and by the boolean renderer, which has to know
+ * whether it is standing next to a labelled field.
+ */
+function isFullRowField(field: FormField): boolean {
+  if (field.fullWidth || field.newline) return true
+  return field.type === 'textarea' || field.type === 'image' || field.type === 'file'
+}
+
+/**
+ * Height of the label block CustomTextField stacks above every control in the
+ * admin: 13px type at a 1.153 line-height, plus its 6px bottom margin. A
+ * control with no label of its own has to drop by exactly this much to sit on
+ * the same line as its neighbour.
+ */
+const FIELD_LABEL_BLOCK = 'calc(0.8125rem * 1.153 + 6px)'
+
+/**
+ * A switch carries its label inline, so unlike every other control it has
+ * nothing stacked above it and starts a label-block higher than a text field
+ * sharing its row. Replaying the grid's own wrapping tells us which switches
+ * actually have such a neighbour — two switches side by side line up with each
+ * other already, and one sitting alone on its row has nothing to line up with,
+ * so neither should be nudged.
+ *
+ * `rowBreakAfter` carries the fields that a caller's `formSlots` follow: those
+ * slots are full-width rows of their own, so they close the row early.
+ */
+function collectSwitchesNeedingOffset(fields: FormField[], rowBreakAfter?: Set<string>): Set<string> {
+  const rows: FormField[][] = []
+  let row: FormField[] = []
+  let filled = 0
+
+  for (const field of fields) {
+    const span = isFullRowField(field) ? 12 : 6
+    if (filled + span > 12) {
+      rows.push(row)
+      row = []
+      filled = 0
+    }
+    row.push(field)
+    filled += span
+    if (filled >= 12 || rowBreakAfter?.has(field.field)) {
+      rows.push(row)
+      row = []
+      filled = 0
+    }
+  }
+  if (row.length) rows.push(row)
+
+  const needsOffset = new Set<string>()
+  for (const r of rows) {
+    for (const field of r) {
+      if (field.type !== 'boolean') continue
+      if (r.some(other => other !== field && other.type !== 'boolean')) {
+        needsOffset.add(field.field)
+      }
+    }
+  }
+  return needsOffset
+}
 
 function resolveFileImagePreviewSrc(value: unknown): string | null {
   if (typeof value !== 'string' || !value) return null
@@ -129,6 +194,18 @@ export default function SchemaForm<T extends Record<string, any>>({
     }
     return schema.fields || []
   }, [schema])
+
+  const switchesNeedingOffset = useMemo(() => {
+    if (schema.blocks) {
+      // Each block lays out its own grid, so rows never straddle two blocks.
+      return schema.blocks.reduce<Set<string>>((acc, block) => {
+        collectSwitchesNeedingOffset(block.fields).forEach(name => acc.add(name))
+        return acc
+      }, new Set())
+    }
+    const rowBreakAfter = new Set(formSlots?.map(slot => slot.afterField) ?? [])
+    return collectSwitchesNeedingOffset(schema.fields || [], rowBreakAfter)
+  }, [schema, formSlots])
 
   // Initialize options cache on mount
   useEffect(() => {
@@ -530,12 +607,14 @@ export default function SchemaForm<T extends Record<string, any>>({
       }
       
       return (
-        <Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+        // Same label metrics as an editable field (13px, 6px gap) so a form
+        // that mixes readonly and editable rows keeps one baseline grid.
+        <Box sx={{ minHeight: 38 }}>
+          <Typography sx={{ mb: 0.75, fontSize: '0.8125rem', lineHeight: 1.153, color: 'text.secondary' }}>
             {field.label}
             {field.required && <Typography component="span" color="error.main"> *</Typography>}
           </Typography>
-          <Typography variant="body1" sx={{ mt: 0.5, fontWeight: 500 }}>
+          <Typography sx={{ fontSize: '0.8125rem', lineHeight: 1.5, fontWeight: 500 }}>
             {displayValue}
           </Typography>
         </Box>
@@ -596,7 +675,7 @@ export default function SchemaForm<T extends Record<string, any>>({
             error={!!error}
             helperText={helperText}
             placeholder={field.placeholder}
-            sx={{ ...requiredAsteriskSx, mt: 0.5 }}
+            sx={requiredAsteriskSx}
           />
         )
 
@@ -827,15 +906,37 @@ export default function SchemaForm<T extends Record<string, any>>({
 
       case 'boolean':
         return (
-          <FormControlLabel
-            control={
-              <Switch
-                checked={!!value}
-                onChange={(e) => handleChange(field.field, e.target.checked)}
-              />
-            }
-            label={field.label}
-          />
+          // A switch carries its label inline, so it has nothing stacked above
+          // it and starts a label-block higher than the field beside it. When
+          // it shares a row, drop it by exactly that block: switch and input
+          // are both 38px tall, so aligning their tops aligns their centres.
+          // On a row of its own there is nothing to line up with, so it sits
+          // flush and adds no height.
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              height: '100%',
+              minHeight: 38,
+              // Below md every field is a full row of its own, so nothing
+              // is ever beside the switch there.
+              pt: switchesNeedingOffset.has(field.field) ? { xs: 0, md: FIELD_LABEL_BLOCK } : 0
+            }}
+          >
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={!!value}
+                  onChange={(e) => handleChange(field.field, e.target.checked)}
+                />
+              }
+              label={field.label}
+              // Field labels are 13px in the admin; the switch label was
+              // inheriting body1 and coming out the largest text on the form.
+              slotProps={{ typography: { fontSize: '0.8125rem' } }}
+              sx={{ mr: 0 }}
+            />
+          </Box>
         )
 
       case 'date':
@@ -986,14 +1087,11 @@ export default function SchemaForm<T extends Record<string, any>>({
     const isCollapsible = block.className === 'collapse'
 
     const blockContent = (
-      <Grid container spacing={3}>
+      <Grid container rowSpacing={2.5} columnSpacing={3}>
         {block.fields.map((field) => (
           <Grid
             key={field.field}
-            size={{
-              xs: 12,
-              md: field.fullWidth || field.newline ? 12 : (field.type === 'textarea' || field.type === 'image' || field.type === 'file' ? 12 : 6)
-            }}
+            size={{ xs: 12, md: isFullRowField(field) ? 12 : 6 }}
           >
             {renderField(field)}
           </Grid>
@@ -1001,36 +1099,54 @@ export default function SchemaForm<T extends Record<string, any>>({
       </Grid>
     )
 
+    // Separate sections from each other, but leave the last one flush: the
+    // action bar supplies the gap below it.
+    const isLast = blockIndex === (schema.blocks?.length ?? 1) - 1
+    const blockSx = { mb: isLast ? 0 : 4 }
+
     if (isCollapsible) {
       return (
-        <Box key={blockIndex} sx={{ mb: 3 }}>
-          <Box 
-            sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'space-between',
-              cursor: 'pointer',
-              mb: 4,
-              p: 2,
-              bgcolor: 'action.hover',
-              borderRadius: 1
-            }}
+        <Box key={blockIndex} sx={blockSx}>
+          {/* A collapsible section is still a section — same title + rule as a
+              plain one, with the chevron sitting on the rule. The old filled
+              grey panel was the only tinted block in the admin. */}
+          <Box
+            component="button"
+            type="button"
             onClick={() => toggleBlock(blockIndex)}
+            aria-expanded={!isCollapsed}
+            className="at-block-title"
+            sx={{
+              // `.at-block-title` is a global class, and emotion is prepended
+              // (AppRouterCacheProvider `prepend: true`), so a plain sx rule
+              // loses the tie on `display`. Qualifying with the class itself
+              // wins on specificity while leaving the skin tokens in charge of
+              // type, colour and rule.
+              '&.at-block-title': {
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 1,
+                width: '100%',
+                // Undo the UA button box only. Type, colour and the rule stay
+                // with `.at-block-title` so skins keep driving them.
+                appearance: 'none',
+                background: 'none',
+                borderInline: 0,
+                borderBlockStart: 0,
+                paddingInline: 0,
+                paddingBlockStart: 0,
+                textAlign: 'start',
+                cursor: 'pointer'
+              }
+            }}
           >
-            <Typography
-              component="h3"
-              sx={{
-                fontFamily: 'var(--at-block-title-font, inherit)',
-                fontSize: 'var(--at-block-title-size, 13px)',
-                fontWeight: 600,
-                color: 'var(--at-block-title-fg, var(--mui-palette-text-primary))'
-              }}
-            >
-              {block.title || t('common.schemaForm.details')}
-            </Typography>
-            <IconButton size="small">
-              <i className={isCollapsed ? 'tabler-chevron-down' : 'tabler-chevron-up'} />
-            </IconButton>
+            {block.title || t('common.schemaForm.details')}
+            <Box
+              component="i"
+              className={isCollapsed ? 'tabler-chevron-down' : 'tabler-chevron-up'}
+              sx={{ fontSize: '1rem', color: 'text.secondary' }}
+            />
           </Box>
           <Collapse in={!isCollapsed}>
             {blockContent}
@@ -1040,7 +1156,7 @@ export default function SchemaForm<T extends Record<string, any>>({
     }
 
     return (
-      <Box key={blockIndex} sx={{ mb: 3 }} className={block.className}>
+      <Box key={blockIndex} sx={blockSx} className={block.className}>
         {block.title && (
           <Typography component="div" className="at-block-title">
             {block.title}
@@ -1059,14 +1175,14 @@ export default function SchemaForm<T extends Record<string, any>>({
     
     // Legacy: render fields directly
     return (
-      <Grid container spacing={3}>
+      // Rows sit tighter than columns on purpose: every field already carries
+      // its label stacked above the control, so a symmetric 24px gutter reads
+      // as ~30px of vertical air between one control and the next label.
+      <Grid container rowSpacing={2.5} columnSpacing={3}>
         {fields.map(field => (
           <Fragment key={field.field}>
             <Grid
-              size={{
-                xs: 12,
-                md: field.fullWidth || field.newline ? 12 : (field.type === 'textarea' || field.type === 'image' || field.type === 'file' ? 12 : 6)
-              }}
+              size={{ xs: 12, md: isFullRowField(field) ? 12 : 6 }}
             >
               {renderField(field)}
             </Grid>
@@ -1102,25 +1218,40 @@ export default function SchemaForm<T extends Record<string, any>>({
         overflow: 'visible'
       }}
     >
-      <CardContent sx={{ p: 6, '&:last-child': { pb: 0 } }}>
-        {!hideTitle && schema.title && (
-          <Typography
-            component="h2"
-            sx={{
-              mb: 5,
-              fontFamily: 'var(--at-font-display, inherit)',
-              // Was h5 (1.5rem) — a display size for what is really a panel
-              // heading, and the loudest thing in any edit dialog.
-              fontSize: '0.9375rem',
-              fontWeight: 600,
-              lineHeight: 1.5,
-              color: 'var(--at-block-title-fg, var(--mui-palette-text-primary))'
-            }}
-          >
-            {schema.title}
-          </Typography>
-        )}
+      {/* Its own row, not the first line of the body: same metrics as
+          MuiDialogTitle (see adminSurface), so a form that supplies its own
+          title and one hosted under a real <DialogTitle> get the same header. */}
+      {!hideTitle && schema.title && (
+        <Typography
+          component="h2"
+          sx={{
+            px: `${ADMIN_GUTTER}px`,
+            py: 2,
+            fontFamily: 'var(--at-font-display, inherit)',
+            // Was h5 (1.5rem) — a display size for what is really a panel
+            // heading, and the loudest thing in any edit dialog.
+            fontSize: '0.9375rem',
+            fontWeight: 600,
+            lineHeight: 1.5,
+            color: 'var(--at-block-title-fg, var(--mui-palette-text-primary))',
+            borderBottom: '1px solid',
+            borderColor: 'var(--at-card-border, var(--mui-palette-divider))'
+          }}
+        >
+          {schema.title}
+        </Typography>
+      )}
 
+      <CardContent
+        sx={{
+          p: `${ADMIN_GUTTER}px`,
+          // The action bar carries the gutter below the last field, so the body
+          // must not add its own — the bar's border would sit 24px adrift. With
+          // `hideActions` there is no bar, and MUI's own last-child rule would
+          // otherwise leave the final field flush against the dialog footer.
+          '&:last-child': { pb: hideActions ? `${ADMIN_GUTTER}px` : 0 }
+        }}
+      >
         <form id={formId} onSubmit={handleSubmit} noValidate>
           {renderFields()}
 
@@ -1131,14 +1262,15 @@ export default function SchemaForm<T extends Record<string, any>>({
                 bottom: 0,
                 zIndex: 2,
                 display: 'flex',
-                gap: 2,
+                gap: 1,
                 justifyContent: 'flex-end',
-                mt: 6,
+                mt: 3,
                 // Bleed to the card edges so the rule reads as a footer, not a
-                // floating strip. Matches CardContent's p: 6 above.
-                mx: -6,
-                px: 6,
-                py: 3,
+                // floating strip, and land on the same metrics as
+                // MuiDialogActions: 12px block, ADMIN_GUTTER inline, 8px gap.
+                mx: `${-ADMIN_GUTTER}px`,
+                px: `${ADMIN_GUTTER}px`,
+                py: 1.5,
                 borderTop: '1px solid',
                 borderColor: 'var(--at-card-border, var(--mui-palette-divider))',
                 backgroundColor: 'var(--at-card-bg, var(--mui-palette-background-paper))',

@@ -4,6 +4,7 @@ import { headers } from 'next/headers'
 import { getLocale } from 'next-intl/server'
 import { StorefrontConfigProvider } from '@/contexts/StorefrontConfigContext'
 import ThemeShell from '@/components/storefront/ThemeShell'
+import StorefrontSurface from '@/components/storefront/StorefrontSurface'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 import { loadExtensions } from '@/extensions'
 import { ExtensionLoaderProvider } from '@/extensions/context'
@@ -21,6 +22,7 @@ export default async function StorefrontLayoutWrapper({ children }: { children: 
     const locale = await getLocale()
     return (
       <ExtensionLoaderProvider extensionIds={extensionIds}>
+        <StorefrontSurface />
         {React.createElement(CustomStorefrontLayout, { locale, children })}
       </ExtensionLoaderProvider>
     )
@@ -37,6 +39,7 @@ export default async function StorefrontLayoutWrapper({ children }: { children: 
     const locale = await getLocale()
     return (
       <ExtensionLoaderProvider extensionIds={extensionIds}>
+        <StorefrontSurface />
         <div className='flex min-bs-screen flex-col'>
           <main className='flex-1'>{React.createElement(HomeOverride, { locale, children })}</main>
         </div>
@@ -63,6 +66,7 @@ export default async function StorefrontLayoutWrapper({ children }: { children: 
 
   return (
     <ExtensionLoaderProvider extensionIds={extensionIds}>
+      <StorefrontSurface />
       <StorefrontConfigProvider initialConfig={config}>
         <ThemeShell theme={theme}>{children}</ThemeShell>
       </StorefrontConfigProvider>

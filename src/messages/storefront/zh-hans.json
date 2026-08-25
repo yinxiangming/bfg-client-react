@@ -17,6 +17,12 @@
     "loading": "加载中...",
     "na": "暂无"
   },
+  "notFound": {
+    "title": "页面不存在",
+    "description": "你访问的页面不存在或已被移除。",
+    "backToHome": "返回首页",
+    "browseProducts": "浏览商品"
+  },
   "buttons": {
     "shopNow": "立即购买",
     "addToCart": "加入购物车",

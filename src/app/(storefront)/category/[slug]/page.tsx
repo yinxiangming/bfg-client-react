@@ -1,5 +1,6 @@
 import { cache } from 'react'
 import { headers } from 'next/headers'
+import { notFound } from 'next/navigation'
 import { getSiteConfig } from '@/utils/siteMetadata'
 import { storefrontApi } from '@/utils/storefrontApi'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
@@ -86,6 +87,10 @@ async function fetchCategoryData(
     category: walkTree(list, slug),
     products,
     totalCount: (productsRes as any)?.count ?? products.length,
+    // Whether the tree actually arrived. A failed request yields an empty list, in which
+    // *every* slug looks absent — 404ing on that would take the whole catalogue offline
+    // during an API blip, so only a tree we really received can prove a slug is unknown.
+    treeLoaded: list.length > 0,
   }
 }
 
@@ -107,6 +112,10 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     getRequestOrigin(),
     getStorefrontConfigForServer(locale, requestHost).catch(() => null),
   ])
+
+  if (data.treeLoaded && !data.category) {
+    return { title: 'Category not found', robots: { index: false, follow: true } }
+  }
 
   const name = data.category?.name ?? slug
   const base = origin ? `${origin}/category/${slug}` : `/category/${slug}`
@@ -144,6 +153,10 @@ export default async function Page(props: Props) {
     getCategoryForServer(slug, requestHost, locale, page),
     getRequestOrigin(),
   ])
+
+  // An unknown slug used to render an empty listing under HTTP 200 titled with the slug
+  // itself — a soft 404 that Google is free to index and keeps re-crawling.
+  if (data.treeLoaded && !data.category) notFound()
 
   const name = data.category?.name ?? slug
 

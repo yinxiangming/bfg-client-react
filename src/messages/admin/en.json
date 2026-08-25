@@ -3724,6 +3724,11 @@
           "help": "Allowed JPG, GIF or PNG. Max size of 800K",
           "showSiteName": "Also show the site name next to the logo"
         },
+        "logoDark": {
+          "alt": "Workspace logo for dark backgrounds",
+          "upload": "Upload dark logo",
+          "help": "Used where the storefront background is dark: the header in dark mode, and the footer always. Leave empty to use the same logo everywhere."
+        },
         "fields": {
           "workspaceOrgName": {
             "label": "Workspace name (admin)",

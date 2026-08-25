@@ -1,5 +1,6 @@
 import { cache } from 'react'
 import { headers } from 'next/headers'
+import { notFound } from 'next/navigation'
 import { getSiteConfig } from '@/utils/siteMetadata'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 import { getMediaUrl } from '@/utils/media'
@@ -45,14 +46,33 @@ type ProductMeta = {
   variants: { sku?: string }[]
 }
 
-async function fetchProductRaw(id: string, requestHost?: string): Promise<ProductMeta | null> {
+/**
+ * A missing product and an unreachable API must not share one answer. Collapsing both to
+ * `null` meant either serving a soft 404 (HTTP 200 on a URL that does not exist, which
+ * Google reports and keeps re-crawling) or hard-404ing a live product the moment the API
+ * hiccups. `outcome` keeps them apart: only `missing` is safe to turn into a real 404.
+ */
+type ProductLookup =
+  | { outcome: 'ok'; product: ProductMeta }
+  | { outcome: 'missing' }
+  | { outcome: 'error' }
+
+async function fetchProductRaw(id: string, requestHost?: string): Promise<ProductLookup> {
+  let data: any
   try {
-    const data = await storefrontApi.getProduct(id, {
+    data = await storefrontApi.getProduct(id, {
       requestHost,
       next: { revalidate: 300 },
     })
-    if (!data?.name) return null
-    return {
+  } catch (err) {
+    return (err as { status?: number })?.status === 404
+      ? { outcome: 'missing' }
+      : { outcome: 'error' }
+  }
+  if (!data?.name) return { outcome: 'missing' }
+  return {
+    outcome: 'ok',
+    product: {
       id: data.id ?? id,
       slug: data.slug ?? null,
       name: data.name ?? '',
@@ -73,14 +93,17 @@ async function fetchProductRaw(id: string, requestHost?: string): Promise<Produc
       purchasable: data.purchasable ?? true,
       categories: Array.isArray(data.categories) ? data.categories : [],
       variants: data.variants || [],
-    }
-  } catch {
-    return null
+    },
   }
 }
 
 /** Deduped per request so metadata, JSON-LD and the page body share one fetch. */
-const getProductForServer = cache(fetchProductRaw)
+const getProductLookup = cache(fetchProductRaw)
+
+async function getProductForServer(id: string, requestHost?: string): Promise<ProductMeta | null> {
+  const lookup = await getProductLookup(id, requestHost)
+  return lookup.outcome === 'ok' ? lookup.product : null
+}
 
 /**
  * Products resolve by both numeric id and slug, so `/product/75` and
@@ -236,11 +259,16 @@ export default async function Page(props: Props) {
   const locale = headersList.get('x-locale') || 'en'
   const requestHost = headersList.get('host') ?? undefined
 
-  const [product, config, origin] = await Promise.all([
-    getProductForServer(id, requestHost),
+  const [lookup, config, origin] = await Promise.all([
+    getProductLookup(id, requestHost),
     getStorefrontConfigForServer(locale, requestHost).catch(() => null),
     getRequestOrigin(),
   ])
+
+  // Genuinely absent → a real 404. An API failure still renders the shell, which retries
+  // client-side, so a blip never buries a live product.
+  if (lookup.outcome === 'missing') notFound()
+  const product = lookup.outcome === 'ok' ? lookup.product : null
 
   const siteName = config?.site_name?.trim() || ''
   // Structured-data price must match the price on the page, so read the store's own currency

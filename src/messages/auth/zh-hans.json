@@ -1,8 +1,8 @@
 {
   "login": {
     "pageTitle": "登录",
-    "welcome": "欢迎来到 {siteName}！👋🏻",
-    "subtitle": "请登录您的账户，开始使用",
+    "welcome": "欢迎回来",
+    "subtitle": "登录后继续未完成的操作。",
     "emailOrUsername": "邮箱或用户名 *",
     "emailPlaceholder": "请输入邮箱或用户名",
     "password": "密码 *",
@@ -14,12 +14,13 @@
     "createAccount": "注册账户",
     "or": "或",
     "loginFailed": "登录失败，请检查您的凭据。",
-    "networkError": "无法连接服务器，请确认后端服务已启动（如 8000 端口）且 NEXT_PUBLIC_API_URL 配置正确。"
+    "networkError": "无法连接服务器，请确认后端服务已启动（如 8000 端口）且 NEXT_PUBLIC_API_URL 配置正确。",
+    "eyebrow": "{siteName} · 登录"
   },
   "register": {
     "pageTitle": "注册",
-    "heading": "从这里开始 🚀",
-    "subtitle": "轻松管理您的账户",
+    "heading": "创建账户",
+    "subtitle": "只需一分钟，之后结账更快。",
     "email": "邮箱 *",
     "emailPlaceholder": "请输入邮箱",
     "password": "密码 *",
@@ -33,7 +34,8 @@
     "passwordsDoNotMatch": "两次输入的密码不一致",
     "passwordMinLength": "密码至少需要 8 个字符",
     "accountCreated": "注册成功，正在跳转到登录页...",
-    "registrationFailed": "注册失败，请重试。"
+    "registrationFailed": "注册失败，请重试。",
+    "eyebrow": "{siteName} · 注册"
   },
   "forgotPassword": {
     "pageTitle": "忘记密码",

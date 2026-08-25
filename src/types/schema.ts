@@ -99,6 +99,19 @@ export interface ListSchema {
   actions?: SchemaAction[]
   /** When set, SchemaTable renders a summary bar from the `summary` prop (WI-391). */
   summaryConfig?: ListSchemaSummaryConfig
+  /**
+   * Whether the first column links into the record.
+   *
+   * Defaults to true: clicking a record's name is how people expect to open it,
+   * and a table whose only way in is the ⋯ menu at the far right makes every row
+   * a trip across the width of the screen. SchemaTable resolves the target from
+   * the row actions ('edit', then 'view', 'detail', 'open'). A schema that sets
+   * `link` on a column of its own has already made the choice and is left alone.
+   *
+   * Set false where the first column is not an identity — a thumbnail, a
+   * checkbox-like flag, a colour swatch — and a link on it would mean nothing.
+   */
+  firstColumnLink?: boolean
 }
 
 export interface FormField {

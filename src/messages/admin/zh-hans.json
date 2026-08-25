@@ -3724,6 +3724,11 @@
           "help": "支持 JPG、GIF 或 PNG，最大 800KB",
           "showSiteName": "在 Logo 旁同时显示站点名称"
         },
+        "logoDark": {
+          "alt": "深色背景使用的工作区 Logo",
+          "upload": "上传深色版 Logo",
+          "help": "用于店面深色背景处：深色模式下的页头，以及始终为深色的页脚。留空则各处都使用同一个 Logo。"
+        },
         "fields": {
           "workspaceOrgName": {
             "label": "后台工作区名称",

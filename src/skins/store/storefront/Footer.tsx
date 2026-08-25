@@ -73,6 +73,11 @@ export default function StoreFooter(_props: StoreFooterProps) {
                 color='#ffffff'
                 name={config.site_name || undefined}
                 logoSrc={config.logo}
+                logoDarkSrc={config.logo_dark}
+                // .sf-footer is #1a1a1a in both colour modes, so this panel is dark
+                // even for a shopper in light mode — pin the variant rather than
+                // following the mode.
+                surface='dark'
                 showNameWithLogo={config.show_site_name_with_logo}
               />
             </div>

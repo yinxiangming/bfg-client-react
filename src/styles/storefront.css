@@ -3147,3 +3147,21 @@ body {
   margin: 0 auto;
   max-width: 60ch;
 }
+
+/* ============================================================
+   Dark page colour
+   ============================================================
+   `styles/admin.css` sets `[data-mode='dark'] body` to #28243d, the back
+   office's purple-tinted neutral, and that rule is unscoped — so it was also
+   the colour behind the shop. Every storefront surface is a plain neutral
+   (#1f1f1f header, #1a1a1a sections and footer, #2d2d2d cards), so the purple
+   only ever showed as a mismatched frame: down both margins of the content
+   column and in the gap between the hero and the first section.
+
+   #121212 is one step below the sections rather than level with them, so the
+   hero and each band still read as surfaces lifted off the page instead of
+   dissolving into it. `StorefrontSurface` puts the attribute on <html>.
+   ============================================================ */
+[data-mode='dark'][data-storefront] body {
+  background: #121212;
+}
