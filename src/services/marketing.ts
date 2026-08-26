@@ -206,6 +206,8 @@ export type CampaignDisplay = {
   campaign: number | null
   campaign_name?: string | null
   display_type: 'slide' | 'category_entry' | 'featured'
+  /** Storefront page this display belongs to; '' shows it on every page that asks. */
+  context?: '' | 'home' | 'category'
   order: number
   title?: string
   subtitle?: string
@@ -256,6 +258,7 @@ function buildCampaignDisplayFormData(data: CampaignDisplayPayload | Partial<Cam
   if (data.campaign != null) form.append('campaign', str(data.campaign))
   if (data.workspace != null) form.append('workspace', str(data.workspace))
   form.append('display_type', str(data.display_type))
+  form.append('context', str(data.context ?? ''))
   form.append('order', str(data.order))
   form.append('title', str(data.title ?? ''))
   form.append('subtitle', str(data.subtitle ?? ''))

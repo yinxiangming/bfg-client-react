@@ -26,6 +26,12 @@ const DISPLAY_TYPE_KEYS: Record<string, string> = {
   featured: 'featured'
 }
 
+const CONTEXT_KEYS: Record<string, string> = {
+  '': 'all',
+  home: 'home',
+  category: 'category'
+}
+
 const buildSchema = (t: any): ListSchema => ({
   title: t('settings.marketing.campaignDisplays.tab.title'),
   columns: [
@@ -37,6 +43,14 @@ const buildSchema = (t: any): ListSchema => ({
       type: 'string',
       sortable: true,
       render: (value) => t(`settings.marketing.campaignDisplays.editDialog.displayTypeOptions.${DISPLAY_TYPE_KEYS[String(value)] || value}`)
+    },
+    {
+      field: 'context',
+      label: t('settings.marketing.campaignDisplays.tab.columns.context'),
+      type: 'string',
+      sortable: true,
+      render: (value) =>
+        t(`settings.marketing.campaignDisplays.editDialog.contextOptions.${CONTEXT_KEYS[String(value ?? '')] || 'all'}`)
     },
     { field: 'order', label: t('settings.marketing.campaignDisplays.tab.columns.order'), type: 'number', sortable: true },
     { field: 'link_url', label: t('settings.marketing.campaignDisplays.tab.columns.linkUrl'), type: 'string' },
