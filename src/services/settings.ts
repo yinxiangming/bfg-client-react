@@ -165,6 +165,13 @@ export type GeneralSettingsPayload = {
   site_announcement?: string
   footer_contact?: string
   logo?: string
+  /**
+   * The logo drawn on dark surfaces — a dark-ink wordmark vanishes on the
+   * storefront's dark header and its always-dark footer. Same shape as `logo`.
+   * Blank means "use `logo` everywhere", which is what every existing workspace
+   * gets until someone uploads one.
+   */
+  logo_dark?: string
   /** Browser tab icon. Same shape as `logo` — a data URL when uploaded here. */
   favicon?: string
   /**

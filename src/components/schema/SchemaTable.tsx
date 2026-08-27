@@ -533,6 +533,27 @@ export default function SchemaTable<T extends { id: number | string }>({
   const globalActions = schema.actions?.filter(a => a.scope === 'global') || []
   const rowActions = schema.actions?.filter(a => a.scope === 'row') || []
 
+  /**
+   * The action the first column opens when the schema has not named one itself.
+   *
+   * `column.link` has existed all along, but only a handful of the schemas set
+   * it, so most tables could be entered only through the ⋯ menu at the far right
+   * — the identity of the row sits on the left and the only way to open it on
+   * the opposite edge. Preferring 'edit' over 'view' matches where these tables
+   * are used: this is the back office, and opening a record here means editing
+   * it. A schema that marks its own link column has decided already; one that
+   * sets `firstColumnLink: false` has opted out.
+   */
+  const implicitFirstColumnAction = useMemo(() => {
+    if (schema.firstColumnLink === false) return null
+    if (schema.columns.some(column => column.link)) return null
+    for (const id of ['edit', 'view', 'detail', 'open']) {
+      const action = rowActions.find(a => a.id === id)
+      if (action) return action
+    }
+    return null
+  }, [schema.firstColumnLink, schema.columns, rowActions])
+
   const _sp = serverPagination
   const displayTotal = _sp ? _sp.total : filteredData.length
   const displayPage = _sp ? _sp.page : page
@@ -1084,10 +1105,7 @@ export default function SchemaTable<T extends { id: number | string }>({
               ) : paginatedData.length === 0 ? (
                 <tr>
                   <td colSpan={schema.columns.length + 1 + (rowActions.length > 0 ? 1 : 0)}>
-                    <div className='at-empty'>
-                      <i className='tabler-inbox' aria-hidden='true' />
-                      {t('common.schemaTable.noData')}
-                    </div>
+                    <div className='at-empty'>{t('common.schemaTable.noData')}</div>
                   </td>
                 </tr>
               ) : (
@@ -1121,18 +1139,22 @@ export default function SchemaTable<T extends { id: number | string }>({
                             : '-'
                           : getNestedValue(item, column.field)
 
-                        // Check if column has a link action
-                        const hasLink = !!column.link
+                        // The action this cell opens: the one the column names, or —
+                        // for the first column — the implicit one resolved above.
+                        // Resolving to the action rather than to "a link id is set"
+                        // also stops a cell styling itself as a link when the id
+                        // matches no action, which looked clickable and did nothing.
+                        const linkAction = column.link
+                          ? schema.actions?.find(a => a.id === column.link)
+                          : columnIndex === 0
+                            ? implicitFirstColumnAction
+                            : null
+                        const hasLink = !!linkAction && !linkAction.hidden?.(item)
                         const isNumeric = column.type === 'currency' || column.type === 'number'
                         const handleColumnClick = (e: React.MouseEvent) => {
-                          if (hasLink && column.link) {
-                            e.stopPropagation()
-                            // Find the action by ID and trigger it through executeAction
-                            const action = schema.actions?.find(a => a.id === column.link)
-                            if (action) {
-                              executeAction(action, item)
-                            }
-                          }
+                          if (!hasLink || !linkAction) return
+                          e.stopPropagation()
+                          executeAction(linkAction, item)
                         }
 
                         return (
@@ -1140,9 +1162,23 @@ export default function SchemaTable<T extends { id: number | string }>({
                             key={column.field}
                             className={classnames({ 'hover:underline': hasLink, 'at-num': isNumeric })}
                             onClick={hasLink ? handleColumnClick : undefined}
-                            style={hasLink ? { 
-                              color: 'var(--mui-palette-primary-main)', 
-                              cursor: 'pointer' 
+                            // A cell that behaves like a link has to be reachable
+                            // without a mouse, and announce itself as actionable.
+                            role={hasLink ? 'link' : undefined}
+                            tabIndex={hasLink ? 0 : undefined}
+                            onKeyDown={
+                              hasLink
+                                ? e => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                      e.preventDefault()
+                                      handleColumnClick(e as unknown as React.MouseEvent)
+                                    }
+                                  }
+                                : undefined
+                            }
+                            style={hasLink ? {
+                              color: 'var(--mui-palette-primary-main)',
+                              cursor: 'pointer'
                             } : undefined}
                           >
                             {column.render

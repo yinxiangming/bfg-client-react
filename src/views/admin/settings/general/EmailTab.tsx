@@ -16,7 +16,7 @@ import Typography from '@mui/material/Typography'
 import Alert from '@mui/material/Alert'
 import Snackbar from '@mui/material/Snackbar'
 
-import { SETTINGS_GUTTER } from '@/components/admin/settings/SettingsSection'
+import { ADMIN_GUTTER } from '@/components/theme/adminSurface'
 import CustomTextField from '@/components/ui/TextField'
 import SchemaTable from '@/components/schema/SchemaTable'
 import type { ListSchema, SchemaAction } from '@/types/schema'
@@ -224,9 +224,10 @@ export default function EmailTab() {
 
   return (
     <Box>
-      {/* The panel is flush (p: 0) so the table can run edge to edge; this copy
-          needs the settings gutter to line up with the rows beneath it. */}
-      <Box sx={{ px: SETTINGS_GUTTER, pt: 5, pb: 3 }}>
+      {/* The panel is flush (p: 0) so the table can run edge to edge. This copy
+          takes the gutter the table insets its own toolbar and rows by, so the
+          sentence, the search box and the first column all start on one line. */}
+      <Box sx={{ px: `${ADMIN_GUTTER}px`, pt: 3, pb: 2 }}>
         <Typography variant="body2" color="text.secondary">
           {t('subtitle')}
         </Typography>

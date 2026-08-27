@@ -114,11 +114,18 @@ export const adminSurfaceOverrides: Components<Theme> = {
           backgroundColor: 'transparent'
         },
 
-        // That form docks its own action bar to the bottom of this scrollport.
-        // A sticky element stops at the padding box, so any bottom padding here
-        // leaves a strip of content scrolling past underneath the bar.
+        // The form lays out its own header, body and action bar on this same
+        // gutter, so the padding here would only double it — most call sites
+        // already pass `sx={{ p: 0 }}` by hand, and the handful that forgot
+        // were the ones sitting 48px off the dialog's own title. Zeroing it
+        // here makes both spellings render identically.
+        //
+        // It also has to be zero at the bottom regardless: the form docks its
+        // action bar to the bottom of this scrollport, and a sticky element
+        // stops at the padding box, so bottom padding would leave a strip of
+        // content scrolling past underneath the bar.
         '&:has(.at-schema-form)': {
-          paddingBottom: 0
+          padding: 0
         }
       })
     }

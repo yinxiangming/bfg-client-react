@@ -25,9 +25,15 @@ type AdminPageHeaderProps = {
   subtitle?: string
   /** Page-level controls, right-aligned on the title row. */
   actions?: ReactNode
+  /**
+   * Drop the bottom margin. For a header that sits in a spaced `<Grid container>`
+   * row, where the container already separates it from what follows and the
+   * margin would only stack on top of that.
+   */
+  flush?: boolean
 }
 
-export const AdminPageHeader = ({ title, subtitle, actions }: AdminPageHeaderProps) => (
+export const AdminPageHeader = ({ title, subtitle, actions, flush }: AdminPageHeaderProps) => (
   <Box
     sx={{
       display: 'flex',
@@ -35,7 +41,7 @@ export const AdminPageHeader = ({ title, subtitle, actions }: AdminPageHeaderPro
       justifyContent: 'space-between',
       flexWrap: 'wrap',
       gap: 2,
-      mb: 4
+      mb: flush ? 0 : 4
     }}
   >
     <div>

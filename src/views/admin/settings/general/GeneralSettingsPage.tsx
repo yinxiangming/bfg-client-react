@@ -2,7 +2,7 @@
 
 // React Imports
 import { useState, useEffect } from 'react'
-import type { ChangeEvent, SyntheticEvent, FormEvent } from 'react'
+import type { ChangeEvent, SyntheticEvent, FormEvent, ReactNode } from 'react'
 
 // i18n Imports
 import { useTranslations } from 'next-intl'
@@ -29,8 +29,7 @@ import CustomTextField from '@/components/ui/TextField'
 import {
   SettingsSection,
   ReadOnlyField,
-  SettingsActionBar,
-  SETTINGS_GUTTER
+  SettingsActionBar
 } from '@/components/admin/settings/SettingsSection'
 import { SettingsCard, flushPanelSx } from '@/components/admin/settings/SettingsTabsPage'
 import UsersListTable from './UsersListTable'
@@ -199,6 +198,47 @@ const TAB_RAIL_ITEMS = [
   { value: 'versions', icon: 'tabler-tag', labelKey: 'settings.general.page.tabs.versions' }
 ]
 
+/** Every branding preview occupies the same square, whatever its art measures. */
+const ASSET_PREVIEW_SIZE = 120
+
+/**
+ * One branding asset: a fixed-width preview, then its controls and help text.
+ *
+ * The gutter is the same width for every row — the favicon's art is half the size
+ * of the logo's, but its tile is not. Sizing each preview to its own content is
+ * what left three sets of buttons starting at three different x positions, which
+ * reads as three unrelated widgets rather than one branding block. Declared at
+ * module scope rather than inside the page so a re-render does not remount the
+ * rows and wipe the file inputs they contain.
+ */
+const AssetRow = ({ preview, children }: { preview: ReactNode; children: ReactNode }) => (
+  <Box
+    sx={{
+      display: 'flex',
+      flexDirection: { xs: 'column', sm: 'row' },
+      alignItems: 'flex-start',
+      gap: 4,
+      mb: 5
+    }}
+  >
+    <Box sx={{ width: ASSET_PREVIEW_SIZE, flexShrink: 0 }}>{preview}</Box>
+    <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>{children}</Box>
+  </Box>
+)
+
+/** The square a preview sits in: same size everywhere, art centred and never cropped. */
+const assetTileSx = (background?: string) => ({
+  height: ASSET_PREVIEW_SIZE,
+  width: ASSET_PREVIEW_SIZE,
+  borderRadius: 1,
+  border: '1px solid var(--mui-palette-divider)',
+  backgroundColor: background,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  overflow: 'hidden'
+})
+
 const GeneralSettingsPage = () => {
   const t = useTranslations('admin')
   const { beforeSlots, afterSlots } = usePageSlots('admin/settings/general')
@@ -227,6 +267,12 @@ const GeneralSettingsPage = () => {
    * file and is cleared after every save.
    */
   const [logoValue, setLogoValue] = useState<string>('')
+  /**
+   * The dark-surface logo, same value semantics as `logoValue` — doubles as the
+   * preview src. Empty means "no separate dark logo", and the storefront falls
+   * back to the light one, which is what every workspace had before this field.
+   */
+  const [logoDarkValue, setLogoDarkValue] = useState<string>('')
   /** Favicon, same value semantics as `logoValue` — doubles as the preview src. */
   const [faviconSrc, setFaviconSrc] = useState<string>('')
   const [showNameWithLogo, setShowNameWithLogo] = useState(false)
@@ -266,6 +312,7 @@ const GeneralSettingsPage = () => {
     // key erases the stored logo — which is how saving this form for any other
     // reason (a GA4 id, a footer tweak) used to wipe the workspace's logo.
     logo: logoValue,
+    logo_dark: logoDarkValue,
     favicon: faviconSrc,
     show_site_name_with_logo: showNameWithLogo
   })
@@ -376,6 +423,24 @@ const GeneralSettingsPage = () => {
     clearLogoFileInputs()
   }
 
+  const handleLogoDarkInputChange = (event: ChangeEvent) => {
+    const reader = new FileReader()
+    const { files } = event.target as HTMLInputElement
+
+    if (files && files.length !== 0) {
+      reader.onload = () => {
+        setLogoDarkValue(reader.result as string)
+      }
+      reader.readAsDataURL(files[0])
+    }
+  }
+
+  const handleLogoDarkReset = () => {
+    setLogoDarkValue('')
+    const el = document.getElementById('general-settings-upload-logo-dark') as HTMLInputElement | null
+    if (el) el.value = ''
+  }
+
   const handleFaviconInputChange = (event: ChangeEvent) => {
     const reader = new FileReader()
     const { files } = event.target as HTMLInputElement
@@ -481,6 +546,10 @@ const GeneralSettingsPage = () => {
           if (logoUrl) {
             setImgSrc(logoUrl)
             setLogoValue(logoUrl)
+          }
+          // No model field to fall back to — the dark variant lives only here.
+          if (general.logo_dark) {
+            setLogoDarkValue(general.logo_dark)
           }
           const faviconUrl = general.favicon || (settings as any).favicon
           if (faviconUrl) {
@@ -623,6 +692,7 @@ const GeneralSettingsPage = () => {
       {/* Page Header */}
       <Grid size={{ xs: 12 }}>
         <AdminPageHeader
+          flush
           title={t('settings.general.page.title')}
           subtitle={t('settings.general.page.subtitle')}
         />
@@ -915,125 +985,162 @@ const GeneralSettingsPage = () => {
                   title={t('settings.general.basic.subsections.storefrontBranding')}
                   description={t('settings.general.basic.sectionHints.storefrontBranding')}
                 >
-                    <Grid container spacing={4} sx={{ mb: 4 }}>
-                      <Grid size={{ xs: 12, sm: 'auto' }}>
-                        <div className='flex items-center justify-center'>
-                          <img 
-                            height={120} 
-                            width={120} 
-                            className='rounded' 
-                            src={imgSrc} 
+                    <AssetRow
+                      preview={
+                        <Box sx={assetTileSx()}>
+                          <img
+                            src={imgSrc}
                             alt={t('settings.general.basic.logo.alt')}
-                            style={{ objectFit: 'cover', border: '1px solid var(--mui-palette-divider)' }}
-                          />
-                        </div>
-                      </Grid>
-                      <Grid size={{ xs: 12, sm: 'auto' }}>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
-                            <Button 
-                              component='label' 
-                              variant='contained' 
-                              htmlFor='general-settings-upload-image-storefront'
-                              startIcon={<i className='tabler-upload' />}
-                            >
-                              {t('settings.general.basic.actions.uploadNewPhoto')}
-                              <input
-                                hidden
-                                type='file'
-                                accept='image/png, image/jpeg, image/jpg, image/gif'
-                                onChange={handleFileInputChange}
-                                id='general-settings-upload-image-storefront'
-                              />
-                            </Button>
-                            <Button 
-                              variant='outlined' 
-                              color='secondary' 
-                              onClick={handleFileInputReset}
-                              startIcon={<i className='tabler-refresh' />}
-                            >
-                              {t('settings.general.basic.actions.resetPhoto')}
-                            </Button>
-                          </Box>
-                          <Typography variant='body2' color='text.secondary'>
-                            {t('settings.general.basic.logo.help')}
-                          </Typography>
-                          <FormControlLabel
-                            control={
-                              <Checkbox
-                                checked={showNameWithLogo}
-                                onChange={e => setShowNameWithLogo(e.target.checked)}
-                              />
-                            }
-                            label={t('settings.general.basic.logo.showSiteName')}
+                            style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
                           />
                         </Box>
-                      </Grid>
-                    </Grid>
+                      }
+                    >
+                      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+                        <Button
+                          component='label'
+                          variant='contained'
+                          htmlFor='general-settings-upload-image-storefront'
+                          startIcon={<i className='tabler-upload' />}
+                        >
+                          {t('settings.general.basic.actions.uploadNewPhoto')}
+                          <input
+                            hidden
+                            type='file'
+                            accept='image/png, image/jpeg, image/jpg, image/gif'
+                            onChange={handleFileInputChange}
+                            id='general-settings-upload-image-storefront'
+                          />
+                        </Button>
+                        <Button
+                          variant='outlined'
+                          color='secondary'
+                          onClick={handleFileInputReset}
+                          startIcon={<i className='tabler-refresh' />}
+                        >
+                          {t('settings.general.basic.actions.resetPhoto')}
+                        </Button>
+                      </Box>
+                      <Typography variant='body2' color='text.secondary'>
+                        {t('settings.general.basic.logo.help')}
+                      </Typography>
+                    </AssetRow>
 
-                    <Grid container spacing={4} sx={{ mb: 4 }}>
-                      <Grid size={{ xs: 12, sm: 'auto' }}>
-                        <div className='flex items-center justify-center'>
+                    {/* The dark-surface variant, previewed on a dark tile because that is the
+                        only background it will ever be seen against — a light-ink mark on the
+                        page's own card looks broken until you put it where it belongs. */}
+                    <AssetRow
+                      preview={
+                        <Box sx={{ ...assetTileSx('#1a1a1a'), color: 'rgba(255,255,255,0.4)' }}>
+                          {logoDarkValue ? (
+                            <img
+                              src={logoDarkValue}
+                              alt={t('settings.general.basic.logoDark.alt')}
+                              style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
+                            />
+                          ) : (
+                            <i className='tabler-moon' style={{ fontSize: '1.75rem' }} />
+                          )}
+                        </Box>
+                      }
+                    >
+                      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+                        <Button
+                          component='label'
+                          variant='contained'
+                          htmlFor='general-settings-upload-logo-dark'
+                          startIcon={<i className='tabler-upload' />}
+                        >
+                          {t('settings.general.basic.logoDark.upload')}
+                          <input
+                            hidden
+                            type='file'
+                            accept='image/png, image/jpeg, image/jpg, image/gif, image/svg+xml'
+                            onChange={handleLogoDarkInputChange}
+                            id='general-settings-upload-logo-dark'
+                          />
+                        </Button>
+                        <Button
+                          variant='outlined'
+                          color='secondary'
+                          onClick={handleLogoDarkReset}
+                          startIcon={<i className='tabler-refresh' />}
+                        >
+                          {t('settings.general.basic.actions.resetPhoto')}
+                        </Button>
+                      </Box>
+                      <Typography variant='body2' color='text.secondary'>
+                        {t('settings.general.basic.logoDark.help')}
+                      </Typography>
+                    </AssetRow>
+
+                    {/* Below both logos, not beside one of them: the setting governs the pair.
+                        Indented into the same column as the buttons above so the controls of
+                        this block share one left edge. */}
+                    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 4, mb: 5 }}>
+                      <Box sx={{ width: ASSET_PREVIEW_SIZE, flexShrink: 0, display: { xs: 'none', sm: 'block' } }} />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={showNameWithLogo}
+                            onChange={e => setShowNameWithLogo(e.target.checked)}
+                          />
+                        }
+                        label={t('settings.general.basic.logo.showSiteName')}
+                      />
+                    </Box>
+
+                    <AssetRow
+                      preview={
+                        <Box
+                          sx={{
+                            ...assetTileSx(),
+                            ...(faviconSrc ? {} : { borderStyle: 'dashed', color: 'text.disabled' })
+                          }}
+                        >
                           {faviconSrc ? (
                             <img
                               height={64}
                               width={64}
-                              className='rounded'
                               src={faviconSrc}
                               alt={t('settings.general.basic.favicon.alt')}
-                              style={{ objectFit: 'contain', border: '1px solid var(--mui-palette-divider)' }}
+                              style={{ objectFit: 'contain' }}
                             />
                           ) : (
-                            <Box
-                              sx={{
-                                height: 64,
-                                width: 64,
-                                borderRadius: 1,
-                                border: '1px dashed var(--mui-palette-divider)',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: 'text.disabled'
-                              }}
-                            >
-                              <i className='tabler-world' style={{ fontSize: '1.75rem' }} />
-                            </Box>
+                            <i className='tabler-world' style={{ fontSize: '1.75rem' }} />
                           )}
-                        </div>
-                      </Grid>
-                      <Grid size={{ xs: 12, sm: 'auto' }}>
-                        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                          <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
-                            <Button
-                              component='label'
-                              variant='contained'
-                              htmlFor='general-settings-upload-favicon'
-                              startIcon={<i className='tabler-upload' />}
-                            >
-                              {t('settings.general.basic.favicon.upload')}
-                              <input
-                                hidden
-                                type='file'
-                                accept='image/png, image/x-icon, image/vnd.microsoft.icon, image/svg+xml'
-                                onChange={handleFaviconInputChange}
-                                id='general-settings-upload-favicon'
-                              />
-                            </Button>
-                            <Button
-                              variant='outlined'
-                              color='secondary'
-                              onClick={handleFaviconReset}
-                              startIcon={<i className='tabler-refresh' />}
-                            >
-                              {t('settings.general.basic.actions.resetPhoto')}
-                            </Button>
-                          </Box>
-                          <Typography variant='body2' color='text.secondary'>
-                            {t('settings.general.basic.favicon.help')}
-                          </Typography>
                         </Box>
-                      </Grid>
-                    </Grid>
+                      }
+                    >
+                      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+                        <Button
+                          component='label'
+                          variant='contained'
+                          htmlFor='general-settings-upload-favicon'
+                          startIcon={<i className='tabler-upload' />}
+                        >
+                          {t('settings.general.basic.favicon.upload')}
+                          <input
+                            hidden
+                            type='file'
+                            accept='image/png, image/x-icon, image/vnd.microsoft.icon, image/svg+xml'
+                            onChange={handleFaviconInputChange}
+                            id='general-settings-upload-favicon'
+                          />
+                        </Button>
+                        <Button
+                          variant='outlined'
+                          color='secondary'
+                          onClick={handleFaviconReset}
+                          startIcon={<i className='tabler-refresh' />}
+                        >
+                          {t('settings.general.basic.actions.resetPhoto')}
+                        </Button>
+                      </Box>
+                      <Typography variant='body2' color='text.secondary'>
+                        {t('settings.general.basic.favicon.help')}
+                      </Typography>
+                    </AssetRow>
 
                     <Grid container spacing={2}>
                       <Grid size={{ xs: 12, sm: 6 }}>
@@ -1433,11 +1540,10 @@ const GeneralSettingsPage = () => {
 
             {/* Email Tab */}
             <TabPanel value='email' sx={flushPanelSx}>
-              {/* Same gutter as the section rows above so the tabs don't shift
-                  their content left/right as you move between them. */}
-              <Box sx={{ px: SETTINGS_GUTTER, py: 5 }}>
-                <EmailTab />
-              </Box>
+              {/* No gutter wrapper: like the API Keys, Users and Roles panels,
+                  EmailTab is a table that runs edge to edge and insets its own
+                  copy to match. Wrapping it pushed the table in twice over. */}
+              <EmailTab />
             </TabPanel>
 
             {/* API Keys Tab */}

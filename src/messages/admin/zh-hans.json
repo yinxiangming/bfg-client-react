@@ -3278,7 +3278,8 @@
             "displayType": "展示类型",
             "order": "排序",
             "linkUrl": "链接",
-            "status": "状态"
+            "status": "状态",
+            "context": "展示页面"
           },
           "actions": {
             "newDisplay": "新增展示",
@@ -3309,12 +3310,19 @@
             "rules": "规则",
             "rulesHelp": "JSON 数组，与商品分类规则一致。例：[{\"column\":\"category_id\",\"relation\":\"equals\",\"condition\":\"5\"}]",
             "post": "文章",
-            "active": "启用"
+            "active": "启用",
+            "context": "展示页面",
+            "contextHelp": "这条内容出现在哪个店铺页面。选择“全部页面”则任何请求促销位的页面都会展示。"
           },
           "displayTypeOptions": {
             "slide": "轮播图",
             "categoryEntry": "分类入口",
             "featured": "精选推荐"
+          },
+          "contextOptions": {
+            "all": "全部页面",
+            "home": "首页",
+            "category": "分类页"
           }
         }
       },
@@ -3723,6 +3731,11 @@
           "alt": "工作区 Logo",
           "help": "支持 JPG、GIF 或 PNG，最大 800KB",
           "showSiteName": "在 Logo 旁同时显示站点名称"
+        },
+        "logoDark": {
+          "alt": "深色背景使用的工作区 Logo",
+          "upload": "上传深色版 Logo",
+          "help": "用于店面深色背景处：深色模式下的页头，以及始终为深色的页脚。留空则各处都使用同一个 Logo。"
         },
         "fields": {
           "workspaceOrgName": {

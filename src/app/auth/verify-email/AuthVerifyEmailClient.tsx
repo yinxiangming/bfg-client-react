@@ -52,7 +52,12 @@ export default function AuthVerifyEmailClient() {
   return (
     <div className='auth-shell'>
       <Link className='auth-logo' href='/'>
-        <Logo skipLink={true} name={siteName} />
+        <Logo
+          skipLink={true}
+          name={siteName}
+          logoSrc={storefrontConfig.logo}
+          logoDarkSrc={storefrontConfig.logo_dark}
+        />
       </Link>
 
       <div className='auth-card'>

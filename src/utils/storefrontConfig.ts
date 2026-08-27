@@ -119,6 +119,11 @@ export type StorefrontConfig = {
    * URL. Blank when unset — callers fall back to the built-in mark.
    */
   logo?: string
+  /**
+   * The logo for dark surfaces. Blank when the workspace has not uploaded one,
+   * in which case callers fall back to `logo`.
+   */
+  logo_dark?: string
   /** Workspace favicon, same shape as `logo`. Blank when unset. */
   favicon?: string
   /**

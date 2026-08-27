@@ -261,6 +261,7 @@ export default function StoreHeader(_props: StoreHeaderProps) {
                 color='#ffffff'
                 name={config.site_name || undefined}
                 logoSrc={config.logo}
+                logoDarkSrc={config.logo_dark}
                 showNameWithLogo={config.show_site_name_with_logo}
               />
             </div>
@@ -383,6 +384,7 @@ export default function StoreHeader(_props: StoreHeaderProps) {
                 color='#6366f1'
                 name={config.site_name || undefined}
                 logoSrc={config.logo}
+                logoDarkSrc={config.logo_dark}
                 showNameWithLogo={config.show_site_name_with_logo}
               />
               <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.75rem', cursor: 'pointer', color: '#757575', padding: '0.25rem' }} aria-label='Close menu'>×</button>

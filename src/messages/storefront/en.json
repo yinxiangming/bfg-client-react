@@ -17,6 +17,12 @@
     "loading": "Loading...",
     "na": "N/A"
   },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The page you are looking for doesn't exist or has been removed.",
+    "backToHome": "Back to Home",
+    "browseProducts": "Browse products"
+  },
   "buttons": {
     "shopNow": "Shop Now",
     "addToCart": "Add to cart",
