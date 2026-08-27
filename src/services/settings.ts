@@ -234,6 +234,17 @@ export type PluginsSettingsPayload = {
     api_key?: string
     api_url?: string
   }
+  /**
+   * Google-backed address suggestions and reverse geocoding, served by the
+   * server's `apps.geo` (`/api/v1/geo/`). No API key here on purpose — it is a
+   * billed server credential and `custom_settings` is returned whole to anyone
+   * who can read this endpoint, so it lives in the server's environment instead.
+   */
+  address_lookup?: {
+    enabled?: boolean
+    /** ISO 3166-1 alpha-2. Blank falls back to the workspace's own market. */
+    country_code?: string
+  }
 }
 
 let workspaceSettingsCache: Promise<WorkspaceSettings> | null = null
@@ -416,7 +427,10 @@ export async function updatePluginsSettings(settingsId: number, plugins: Plugins
   const url = `${bfgApi.settings()}${settingsId}/`
   const current = await apiFetch<WorkspaceSettings>(url, getSiteAdminOptions())
   const currentCustom = current.custom_settings || {}
-  const nextCustom = { ...currentCustom, plugins }
+  // Merge one plugin at a time. Each plugin's tab only knows about its own keys,
+  // so replacing the whole `plugins` node would have the General tab's save wipe
+  // whatever the Store tab had configured, and the other way round.
+  const nextCustom = { ...currentCustom, plugins: { ...(currentCustom.plugins || {}), ...plugins } }
   const result = await apiFetch<WorkspaceSettings>(url, {
     ...getSiteAdminOptions(),
     method: 'PATCH',

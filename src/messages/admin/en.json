@@ -3614,6 +3614,7 @@
           "roles": "Roles",
           "email": "Email",
           "apiKeys": "API Keys",
+          "plugins": "Plugins",
           "versions": "Versions"
         }
       },
@@ -4052,6 +4053,38 @@
           "deleteFailed": "Failed to delete API key: {error}",
           "regenerateFailed": "Failed to regenerate secret: {error}",
           "schemaNotFound": "API Keys schema not found"
+        }
+      },
+      "plugins": {
+        "title": "Plugins",
+        "description": "Optional features, switched on per workspace. A feature that costs money per use stays off until you turn it on here.",
+        "save": "Save Changes",
+        "saving": "Saving...",
+        "saved": "Plugin settings saved",
+        "errors": {
+          "loadFailed": "Failed to load plugin settings: {error}",
+          "saveFailed": "Failed to save plugin settings: {error}",
+          "settingsIdMissing": "Settings ID is missing. Reload the page and try again."
+        },
+        "addressLookup": {
+          "title": "Address Lookup",
+          "description": "Google-backed address suggestions and GPS place names, served by this server rather than by the client.",
+          "enabled": {
+            "label": "Enable Address Lookup",
+            "help": "Suggest addresses as a shopper types, and name the place a GPS fix landed on. Used by the WeChat mini-program, which cannot load Google's browser SDK."
+          },
+          "countryCode": {
+            "label": "Country",
+            "placeholder": "NZ",
+            "help": "Two-letter country code (ISO 3166-1). Suggestions and GPS results outside it are refused. Leave blank to use the workspace's own market.",
+            "invalid": "Enter a two-letter country code, such as NZ or CN."
+          },
+          "status": {
+            "live": "Live — {country}",
+            "notLive": "Not live",
+            "liveHelp": "The server is answering lookups and restricting them to this country.",
+            "notLiveHelp": "Save the switch above, then check that a country is set here and that GOOGLE_MAPS_API_KEY is set on the server."
+          }
         }
       }
     }
