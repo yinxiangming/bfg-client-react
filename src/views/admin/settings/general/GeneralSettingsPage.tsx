@@ -37,6 +37,7 @@ import RolesListTable from './RolesListTable'
 import EmailTab from './EmailTab'
 import APIKeysTab from './APIKeysTab'
 import VersionsTab from './VersionsTab'
+import PluginsTab from './PluginsTab'
 import {
   getWorkspaceSettings,
   updateGeneralSettings,
@@ -195,6 +196,7 @@ const TAB_RAIL_ITEMS = [
   { value: 'roles', icon: 'tabler-shield', labelKey: 'settings.general.page.tabs.roles' },
   { value: 'email', icon: 'tabler-mail', labelKey: 'settings.general.page.tabs.email' },
   { value: 'api-keys', icon: 'tabler-key', labelKey: 'settings.general.page.tabs.apiKeys' },
+  { value: 'plugins', icon: 'tabler-plug', labelKey: 'settings.general.page.tabs.plugins' },
   { value: 'versions', icon: 'tabler-tag', labelKey: 'settings.general.page.tabs.versions' }
 ]
 
@@ -1549,6 +1551,10 @@ const GeneralSettingsPage = () => {
             {/* API Keys Tab */}
             <TabPanel value='api-keys' sx={flushPanelSx}>
               <APIKeysTab />
+            </TabPanel>
+
+            <TabPanel value='plugins' sx={flushPanelSx}>
+              <PluginsTab />
             </TabPanel>
 
             <TabPanel value='versions' sx={flushPanelSx}>

@@ -3614,6 +3614,7 @@
           "roles": "角色",
           "email": "邮件",
           "apiKeys": "API 密钥",
+          "plugins": "插件",
           "versions": "版本信息"
         }
       },
@@ -4052,6 +4053,38 @@
           "deleteFailed": "删除 API 密钥失败：{error}",
           "regenerateFailed": "重新生成密钥失败：{error}",
           "schemaNotFound": "未找到 API 密钥配置"
+        }
+      },
+      "plugins": {
+        "title": "插件",
+        "description": "可选功能,按工作区分别开启。按次计费的功能在此处开启之前始终关闭。",
+        "save": "保存修改",
+        "saving": "保存中...",
+        "saved": "插件设置已保存",
+        "errors": {
+          "loadFailed": "加载插件设置失败:{error}",
+          "saveFailed": "保存插件设置失败:{error}",
+          "settingsIdMissing": "缺少设置 ID,请刷新页面后重试。"
+        },
+        "addressLookup": {
+          "title": "地址查询",
+          "description": "由本服务器(而非客户端)调用 Google 提供地址联想和 GPS 定位地址名称。",
+          "enabled": {
+            "label": "启用地址查询",
+            "help": "顾客输入时联想真实地址,并把 GPS 定位转成能看懂的地址名称。供微信小程序使用——小程序无法加载 Google 的浏览器 SDK。"
+          },
+          "countryCode": {
+            "label": "国家",
+            "placeholder": "NZ",
+            "help": "两位国家代码(ISO 3166-1)。该国以外的联想结果和 GPS 结果一律不返回。留空则使用工作区自身的市场设置。",
+            "invalid": "请填写两位国家代码,例如 NZ 或 CN。"
+          },
+          "status": {
+            "live": "已生效 — {country}",
+            "notLive": "未生效",
+            "liveHelp": "服务器正在响应地址查询,并已限定在该国家。",
+            "notLiveHelp": "请先保存上面的开关,然后确认这里已填写国家、且服务器已配置 GOOGLE_MAPS_API_KEY。"
+          }
         }
       }
     }
