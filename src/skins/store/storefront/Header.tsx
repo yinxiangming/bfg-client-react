@@ -17,7 +17,12 @@ import { getAllowedColorModes, hasMultipleStorefrontLanguages, type StorefrontMe
 type CategoryItem = { name: string; slug: string }
 type CategorySubcategory = { name: string; slug: string; items: CategoryItem[] }
 type CategoryWithSubs = { name: string; slug: string; subcategories: CategorySubcategory[] }
-type CategoryType = string | CategoryWithSubs
+// Every entry keeps its slug, including leaves. An earlier version collapsed a
+// childless category to its bare name and the nav then linked to
+// `/category/${name.toLowerCase()}` — which is only ever the slug for
+// single-word English names. A Chinese catalogue got `/category/本地团购`,
+// percent-encoded in the address bar and matching no category on the server.
+type CategoryType = CategoryWithSubs
 
 type NavRow =
   | { kind: 'mega'; key: string; title: string; slug: string; subcategories: CategorySubcategory[] }
@@ -44,7 +49,11 @@ function transformCategoryTree(apiCategories: any[]): CategoryType[] {
         subcategories: subcategories.length > 0 ? subcategories : []
       }
     }
-    return category.name
+    return {
+      name: category.name,
+      slug: category.slug || category.name.toLowerCase().replace(/\s+/g, '-'),
+      subcategories: []
+    }
   })
 }
 
@@ -84,7 +93,7 @@ function buildNavRows(menuItems: StorefrontMenuItem[], categoryTree: any[], tran
         if (node?.children?.length) {
           const transformed = transformCategoryTree([node])
           const top = transformed[0]
-          if (typeof top !== 'string' && top.subcategories?.length) {
+          if (top?.subcategories?.length) {
             rows.push({
               kind: 'mega',
               key,
@@ -313,11 +322,11 @@ export default function StoreHeader(_props: StoreHeaderProps) {
                 })
               ) : (
                 categories.map((category, index) => {
-                  const categoryKey = typeof category === 'string' ? category : category.slug || category.name
+                  const categoryKey = category.slug || category.name
                   return (
                     <li key={categoryKey || index} className='sf-nav-item'>
-                      {typeof category === 'string' ? (
-                        <Link href={`/category/${category.toLowerCase()}`} className='sf-nav-link'>{category}</Link>
+                      {category.subcategories.length === 0 ? (
+                        <Link href={`/category/${category.slug}`} className='sf-nav-link'>{category.name}</Link>
                       ) : (
                         <>
                           <a href='#' className='sf-nav-link' onClick={e => { e.preventDefault(); setCategoryOpen(categoryOpen === category.name ? null : category.name) }}>
@@ -457,11 +466,11 @@ export default function StoreHeader(_props: StoreHeaderProps) {
                   })
                 ) : (
                   categories.map((category, index) => {
-                    const categoryKey = typeof category === 'string' ? category : category.slug || category.name
+                    const categoryKey = category.slug || category.name
                     return (
                       <li key={categoryKey || index} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                        {typeof category === 'string' ? (
-                          <Link href={`/category/${category.toLowerCase()}`} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: '#2c3e50', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}>{category}</Link>
+                        {category.subcategories.length === 0 ? (
+                          <Link href={`/category/${category.slug}`} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: '#2c3e50', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}>{category.name}</Link>
                         ) : (
                           <div>
                             <button type='button' onClick={() => setCategoryOpen(categoryOpen === category.name ? null : category.name)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 0', background: 'none', border: 'none', color: '#2c3e50', fontSize: '0.9375rem', fontWeight: 500, cursor: 'pointer', textAlign: 'left' }}>
