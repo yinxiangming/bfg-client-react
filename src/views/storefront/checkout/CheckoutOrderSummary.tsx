@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+import { useStorefrontCurrency } from '@/hooks/useStorefrontCurrency'
 import type { CartItem } from './types'
 
 type Props = {
@@ -15,6 +16,7 @@ type Props = {
 
 const CheckoutOrderSummary = ({ items, subtotal, discount = 0, shippingFee, tax, total }: Props) => {
   const t = useTranslations('storefront')
+  const { currency, formatPrice } = useStorefrontCurrency()
 
   return (
     <div style={{ position: 'sticky', top: '2rem' }}>
@@ -54,7 +56,7 @@ const CheckoutOrderSummary = ({ items, subtotal, discount = 0, shippingFee, tax,
                 </p>
               </div>
               <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#2c3e50' }}>
-                ${(item.price * item.quantity).toFixed(2)}
+                {formatPrice(item.price * item.quantity)}
               </div>
             </div>
           ))}
@@ -95,30 +97,30 @@ const CheckoutOrderSummary = ({ items, subtotal, discount = 0, shippingFee, tax,
         <div style={{ borderTop: '2px solid #e0e0e0', paddingTop: '1rem' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontSize: '0.875rem' }}>
             <span style={{ color: '#757575' }}>{t('checkout.orderSummary.labels.subtotal')}</span>
-            <span style={{ fontWeight: 500, color: '#2c3e50' }}>${subtotal.toFixed(2)}</span>
+            <span style={{ fontWeight: 500, color: '#2c3e50' }}>{formatPrice(subtotal)}</span>
           </div>
           {discount > 0 && (
             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontSize: '0.875rem' }}>
               <span style={{ color: '#757575' }}>{t('checkout.orderSummary.labels.discount')}</span>
-              <span style={{ fontWeight: 500, color: '#10b981' }}>-${discount.toFixed(2)}</span>
+              <span style={{ fontWeight: 500, color: '#10b981' }}>-{formatPrice(discount)}</span>
             </div>
           )}
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.75rem', fontSize: '0.875rem' }}>
             <span style={{ color: '#757575' }}>{t('checkout.orderSummary.labels.shipping')}</span>
-            <span style={{ fontWeight: 500, color: '#2c3e50' }}>${shippingFee.toFixed(2)}</span>
+            <span style={{ fontWeight: 500, color: '#2c3e50' }}>{formatPrice(shippingFee)}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem', fontSize: '0.875rem', paddingBottom: '1rem', borderBottom: '1px solid #e0e0e0' }}>
             <span style={{ color: '#757575' }}>{t('checkout.orderSummary.labels.tax')}</span>
-            <span style={{ fontWeight: 500, color: '#2c3e50' }}>${tax.toFixed(2)}</span>
+            <span style={{ fontWeight: 500, color: '#2c3e50' }}>{formatPrice(tax)}</span>
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <span style={{ fontSize: '1rem', fontWeight: 600, color: '#2c3e50' }}>{t('checkout.orderSummary.labels.total')}</span>
             <div style={{ textAlign: 'right' }}>
               <div style={{ fontSize: '0.75rem', color: '#757575', marginBottom: '0.25rem' }}>
-                {t('checkout.orderSummary.labels.currency')}
+                {currency}
               </div>
               <div style={{ fontSize: '1.5rem', fontWeight: 700, color: '#6366f1' }}>
-                ${total.toFixed(2)}
+                {formatPrice(total)}
               </div>
             </div>
           </div>

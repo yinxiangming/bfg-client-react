@@ -13,8 +13,11 @@ import Button from '@mui/material/Button'
 
 // Util Imports
 import { getStoreImageUrl } from '@/utils/media'
+import { useStorefrontCurrency } from '@/hooks/useStorefrontCurrency'
 
 const CategorySidebar = () => {
+  const { formatPrice } = useStorefrontCurrency()
+
   // Sample data
   const leftBanner = {
     title: 'New trending',
@@ -159,11 +162,11 @@ const CategorySidebar = () => {
                   </Link>
                   <Box className='flex items-center gap-2'>
                     <Typography variant='body2' className='font-bold text-primary'>
-                      ${product.price.toFixed(2)}
+                      {formatPrice(product.price)}
                     </Typography>
                     {product.originalPrice && (
                       <Typography variant='caption' className='text-textSecondary line-through'>
-                        ${product.originalPrice.toFixed(2)}
+                        {formatPrice(product.originalPrice)}
                       </Typography>
                     )}
                   </Box>
@@ -202,11 +205,11 @@ const CategorySidebar = () => {
                   </Link>
                   <Box className='flex items-center gap-2'>
                     <Typography variant='body2' className='font-bold text-primary'>
-                      ${product.price.toFixed(2)}
+                      {formatPrice(product.price)}
                     </Typography>
                     {product.originalPrice && (
                       <Typography variant='caption' className='text-textSecondary line-through'>
-                        ${product.originalPrice.toFixed(2)}
+                        {formatPrice(product.originalPrice)}
                       </Typography>
                     )}
                   </Box>

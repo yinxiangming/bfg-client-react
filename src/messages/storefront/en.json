@@ -321,7 +321,6 @@
         "shipping": "Shipping",
         "tax": "Tax",
         "total": "Total",
-        "currency": "USD",
         "size": "Size",
         "color": "Color"
       }

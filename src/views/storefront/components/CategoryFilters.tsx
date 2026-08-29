@@ -6,6 +6,9 @@ import { useState } from 'react'
 // i18n Imports
 import { useTranslations } from 'next-intl'
 
+// Hook Imports
+import { useStorefrontCurrency } from '@/hooks/useStorefrontCurrency'
+
 // MUI Imports
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
@@ -36,6 +39,7 @@ const CategoryFilters = ({
   setPriceRange
 }: CategoryFiltersProps) => {
   const t = useTranslations('storefront')
+  const { formatPrice } = useStorefrontCurrency()
   const sizes = ['S', 'M', 'L', 'XL']
   const sizeCounts: Record<string, number> = { S: 14, M: 15, L: 15, XL: 5 }
 
@@ -163,12 +167,12 @@ const CategoryFilters = ({
                 min={15}
                 max={89}
                 valueLabelDisplay='auto'
-                valueLabelFormat={value => `$${value}`}
+                valueLabelFormat={value => formatPrice(value)}
                 sx={{ mbe: 2 }}
               />
               <Box className='flex justify-between items-center'>
-                <Typography variant='body2'>${priceRange[0]}</Typography>
-                <Typography variant='body2'>${priceRange[1]}</Typography>
+                <Typography variant='body2'>{formatPrice(priceRange[0])}</Typography>
+                <Typography variant='body2'>{formatPrice(priceRange[1])}</Typography>
               </Box>
             </Box>
           </AccordionDetails>

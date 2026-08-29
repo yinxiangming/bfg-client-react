@@ -29,6 +29,7 @@ import classnames from 'classnames'
 
 // Util Imports
 import { useCart } from '@/contexts/CartContext'
+import { useStorefrontCurrency } from '@/hooks/useStorefrontCurrency'
 import { productPath } from '@/utils/productUrl'
 
 type Product = {
@@ -51,6 +52,7 @@ type Product = {
 
 const ProductListView = ({ product }: { product: Product }) => {
   const t = useTranslations('storefront')
+  const { formatPrice } = useStorefrontCurrency()
   const [isHovered, setIsHovered] = useState(false)
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState('')
@@ -185,11 +187,11 @@ const ProductListView = ({ product }: { product: Product }) => {
             <Box className='flex justify-between items-center'>
               <Box className='flex items-center gap-2'>
                 <Typography variant='h5' className='font-bold text-primary'>
-                  ${product.price.toFixed(2)}
+                  {formatPrice(product.price)}
                 </Typography>
                 {product.originalPrice && (
                   <Typography variant='body2' className='text-textSecondary line-through'>
-                    ${product.originalPrice.toFixed(2)}
+                    {formatPrice(product.originalPrice)}
                   </Typography>
                 )}
               </Box>
