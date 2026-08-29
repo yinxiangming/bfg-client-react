@@ -57,6 +57,9 @@ const buildOrdersSchema = (
       type: 'string',
       sortable: true,
       link: 'edit',
+      // Holds the order number plus one line per item. Product names run to 40+
+      // CJK characters, so this column has to be capped or it eats the table.
+      width: 300,
       render: (value: any, row: Order) => {
         const num = value || row?.order_number || '-'
         const items = (row?.items || []) as OrderItemSummary[]
@@ -98,6 +101,7 @@ const buildOrdersSchema = (
       label: t('orders.listPage.schema.columns.customer'),
       type: 'string',
       sortable: true,
+      width: 150,
       render: (value: any, row: any) => {
         return row.customer_name || value || '-'
       }
@@ -166,17 +170,31 @@ const buildOrdersSchema = (
       }
     },
     {
-      field: 'store',
-      label: t('orders.listPage.schema.columns.store'),
-      type: 'string',
-      render: (value: any, row: any) => {
-        return row.store_name || value || '-'
+      field: 'fulfillment_method',
+      label: t('orders.listPage.schema.columns.fulfillment'),
+      type: 'select',
+      sortable: true,
+      width: 110,
+      render: (value: any, row: Order) => {
+        const method = (typeof value === 'string' ? value : row?.fulfillment_method) || ''
+        if (!method) return '-'
+        return (
+          <StatusBadge
+            label={
+              method === 'pickup'
+                ? t('orders.listPage.schema.columns.fulfillmentPickup')
+                : t('orders.listPage.schema.columns.fulfillmentShipping')
+            }
+            color={method === 'pickup' ? 'warning' : 'info'}
+          />
+        )
       }
     },
     {
       field: 'packages_count',
       label: t('orders.listPage.schema.columns.logistics'),
       type: 'string',
+      width: 190,
       render: (value: any, row: Order) => {
         const count = row?.packages_count ?? value ?? 0
         const orderId = row?.id
@@ -208,6 +226,7 @@ const buildOrdersSchema = (
       label: t('orders.listPage.schema.columns.createdAt'),
       type: 'datetime',
       sortable: true,
+      width: 110,
       render: (value: any) => (value ? formatDate(value, 'yyyy-MM-dd') : '-')
     }
   ],

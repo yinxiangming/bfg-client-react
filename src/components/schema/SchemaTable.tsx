@@ -1069,6 +1069,9 @@ export default function SchemaTable<T extends { id: number | string }>({
                       'cursor-pointer select-none': column.sortable,
                       'at-num': isNumeric
                     })}
+                    // `width` caps the column instead of letting `max-content`
+                    // size it to the longest cell. See the matching <td> below.
+                    style={column.width ? { maxWidth: column.width, width: column.width } : undefined}
                     onClick={() => column.sortable && handleSort(column.field)}
                   >
                     <div className={classnames({
@@ -1176,10 +1179,23 @@ export default function SchemaTable<T extends { id: number | string }>({
                                   }
                                 : undefined
                             }
-                            style={hasLink ? {
-                              color: 'var(--mui-palette-primary-main)',
-                              cursor: 'pointer'
-                            } : undefined}
+                            style={{
+                              ...(hasLink
+                                ? { color: 'var(--mui-palette-primary-main)', cursor: 'pointer' }
+                                : {}),
+                              // The table is `min-width: max-content`, so without
+                              // a cap one long value (a 40-character product name,
+                              // say) stretches its column and pushes the rest off
+                              // screen. Wrapping rather than truncating keeps the
+                              // whole value readable inside the cap.
+                              ...(column.width
+                                ? {
+                                    maxWidth: column.width,
+                                    whiteSpace: 'normal' as const,
+                                    overflowWrap: 'anywhere' as const
+                                  }
+                                : {})
+                            }}
                           >
                             {column.render
                               ? column.render(value, item)

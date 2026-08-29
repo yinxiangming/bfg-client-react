@@ -183,13 +183,16 @@ export const productsSchema: SchemaResponse = {
         label: 'Product',
         type: 'string',
         sortable: true,
-        link: 'edit'
+        link: 'edit',
+        // Product names reach 40+ CJK characters; cap so price/stock stay visible.
+        width: 300
       },
       {
         field: 'category_names',
         label: 'Category',
         type: 'string',
         sortable: true,
+        width: 150,
         render: (value: any) => {
           const category = Array.isArray(value) && value.length > 0 ? value[0] : 'Uncategorized'
           return category
@@ -199,7 +202,8 @@ export const productsSchema: SchemaResponse = {
         field: 'sku',
         label: 'SKU',
         type: 'string',
-        sortable: true
+        sortable: true,
+        width: 130
       },
       {
         field: 'price',
