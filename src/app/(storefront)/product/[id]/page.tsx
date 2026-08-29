@@ -1,6 +1,6 @@
 import { cache } from 'react'
 import { headers } from 'next/headers'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { getSiteConfig } from '@/utils/siteMetadata'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 import { getMediaUrl } from '@/utils/media'
@@ -116,6 +116,19 @@ function canonicalPath(product: ProductMeta | null, requested: string): string {
 }
 
 /**
+ * The route param arrives percent-encoded, the slug does not. Comparing them raw would
+ * redirect an already-canonical URL to itself and loop. A malformed escape is not worth
+ * throwing over — it simply will not match a slug.
+ */
+function decodeRequested(raw: string): string {
+  try {
+    return decodeURIComponent(raw)
+  } catch {
+    return raw
+  }
+}
+
+/**
  * schema.org availability, taken from the server's verdict rather than counted here.
  *
  * This used to sum `stock_available` across variants and fall back to `stock_quantity`.
@@ -175,7 +188,10 @@ function buildProductJsonLd(
     description,
     image: images.length ? images : undefined,
     sku: product.sku || product.variants?.[0]?.sku || String(product.id),
-    mpn: product.sku || undefined,
+    // No `mpn`: it is the *manufacturer's* part number, and the only code we hold is our
+    // own SKU. Publishing an internal SKU as an MPN makes Google match the product against
+    // the wrong catalogue entry, so omitting the field is better than filling it wrongly.
+
     brand: { '@type': 'Brand', name: product.brand || siteName },
     category: product.categories?.[0]?.name || undefined,
     aggregateRating: rating,
@@ -269,6 +285,16 @@ export default async function Page(props: Props) {
   // client-side, so a blip never buries a live product.
   if (lookup.outcome === 'missing') notFound()
   const product = lookup.outcome === 'ok' ? lookup.product : null
+
+  // `rel=canonical` is a hint, and Google declined it: it indexed /product/69, kept that
+  // as its own canonical, and left /product/keyes-infrared-sensor at "Discovered -
+  // currently not indexed". Both URLs answered 200, so the id form stayed alive and kept
+  // the ranking. A redirect is a directive rather than a hint, so the duplicate cannot
+  // survive. Only redirect on a resolved product: an API blip leaves `product` null, and
+  // redirecting then would bounce a live URL on a transient failure.
+  if (product?.slug && product.slug !== decodeRequested(id)) {
+    permanentRedirect(`/product/${product.slug}`)
+  }
 
   const siteName = config?.site_name?.trim() || ''
   // Structured-data price must match the price on the page, so read the store's own currency
