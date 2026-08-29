@@ -23,8 +23,7 @@ export default function NewWorkspacePage() {
   const [formData, setFormData] = useState({
     name: '',
     slug: '',
-    domain: '',
-    region: 'us-east'
+    domain: ''
   })
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -45,7 +44,12 @@ export default function NewWorkspacePage() {
       const token = getPlatformToken()
       if (!token) throw new Error('Not authenticated')
 
-      await createWorkspace(formData, token)
+      // `domain` is optional but the API rejects it as blank when it is sent
+      // empty, so leave the key out entirely rather than sending ''. `region`
+      // is not asked for here at all — the API defaults it.
+      const domain = formData.domain.trim()
+
+      await createWorkspace({ name: formData.name, slug: formData.slug, ...(domain ? { domain } : {}) }, token)
       router.push('/admin/platform/workspaces')
     } catch (err: any) {
       setError(err.message || 'Failed to create workspace')
