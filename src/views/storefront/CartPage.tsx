@@ -12,6 +12,7 @@ import { useTranslations } from 'next-intl'
 
 // Component Imports
 import { useCart } from '@/contexts/CartContext'
+import { useStorefrontCurrency } from '@/hooks/useStorefrontCurrency'
 
 // Util Imports
 import { getStoreImageUrl } from '@/utils/media'
@@ -23,6 +24,7 @@ import '@/styles/storefront.css'
 
 const CartPage = () => {
   const t = useTranslations('storefront')
+  const { formatPrice } = useStorefrontCurrency()
   const router = useRouter()
   const { items, loading, removeItem, updateQuantity, getSubtotal } = useCart()
   const { beforeSlots, afterSlots } = usePageSlots('storefront/cart')
@@ -187,7 +189,7 @@ const CartPage = () => {
                           {t('cart.labels.color')} {item.color}
                         </p>
                         <p className='sf-cart-item-price'>
-                          ${item.price.toFixed(2)}
+                          {formatPrice(item.price)}
                         </p>
                       </div>
                       <button
@@ -226,7 +228,7 @@ const CartPage = () => {
                         </button>
                       </div>
                       <p className='sf-cart-item-total'>
-                        ${(item.price * item.quantity).toFixed(2)}
+                        {formatPrice(item.price * item.quantity)}
                       </p>
                     </div>
                   </div>
@@ -250,13 +252,13 @@ const CartPage = () => {
                   <span style={{ fontSize: '0.875rem', color: '#757575' }}>
                     {t('cart.orderSummary.itemsCount', { count: items.length })}
                   </span>
-                  <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>${subtotal.toFixed(2)}</span>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>{formatPrice(subtotal)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: '0.875rem', color: '#757575' }}>
                     {t('cart.orderSummary.tax', { percent: taxRate.toFixed(0) })}
                   </span>
-                  <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>${tax.toFixed(2)}</span>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>{formatPrice(tax)}</span>
                 </div>
                 <div
                   style={{
@@ -267,7 +269,7 @@ const CartPage = () => {
                 />
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: '0.875rem', color: '#757575' }}>{t('cart.orderSummary.subtotalTaxIncl')}</span>
-                  <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>${subtotalWithTax.toFixed(2)}</span>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>{formatPrice(subtotalWithTax)}</span>
                 </div>
                 <div
                   style={{

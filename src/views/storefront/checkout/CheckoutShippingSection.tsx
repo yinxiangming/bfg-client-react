@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
 import { storefrontApi } from '@/utils/storefrontApi'
+import { useStorefrontCurrency } from '@/hooks/useStorefrontCurrency'
 import type { CheckoutFormData, FreightService } from './types'
 
 type Props = {
@@ -14,6 +15,7 @@ type Props = {
 
 const CheckoutShippingSection = ({ formData, onChange, country, onFreightServiceChange }: Props) => {
   const t = useTranslations('storefront')
+  const { formatPrice } = useStorefrontCurrency()
   const [freightServices, setFreightServices] = useState<FreightService[]>([])
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState(false)
@@ -104,10 +106,6 @@ const CheckoutShippingSection = ({ formData, onChange, country, onFreightService
     if (onFreightServiceChange) {
       onFreightServiceChange(serviceId)
     }
-  }
-
-  const formatPrice = (price: number): string => {
-    return `$${price.toFixed(2)}`
   }
 
   const formatDeliveryDays = (min: number, max: number): string => {

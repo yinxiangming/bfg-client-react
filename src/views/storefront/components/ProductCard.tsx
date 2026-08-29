@@ -12,6 +12,7 @@ import { useTranslations } from 'next-intl'
 // Util Imports
 import { getStoreImageUrl } from '@/utils/media'
 import { useCart } from '@/contexts/CartContext'
+import { useStorefrontCurrency } from '@/hooks/useStorefrontCurrency'
 import { productPath } from '@/utils/productUrl'
 
 type Product = {
@@ -38,6 +39,7 @@ const ProductCard = ({ product }: { product: Product }) => {
   // being sold out on no evidence.
   const inStock = product.inStock ?? true
   const purchasable = product.purchasable ?? true
+  const { formatPrice } = useStorefrontCurrency()
   const [isHovered, setIsHovered] = useState(false)
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState('')
@@ -148,8 +150,8 @@ const ProductCard = ({ product }: { product: Product }) => {
         </div>
 
         <div className='sf-price'>
-          <span className='sf-price-current'>${product.price.toFixed(2)}</span>
-          {product.originalPrice && <span className='sf-price-original'>${product.originalPrice.toFixed(2)}</span>}
+          <span className='sf-price-current'>{formatPrice(product.price)}</span>
+          {product.originalPrice && <span className='sf-price-original'>{formatPrice(product.originalPrice)}</span>}
         </div>
 
         <button

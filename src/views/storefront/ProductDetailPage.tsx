@@ -21,6 +21,7 @@ import { usePageSections } from '@/extensions/hooks/usePageSections'
 import { authApi } from '@/utils/authApi'
 import { useStorefrontConfigSafe } from '@/contexts/StorefrontConfigContext'
 import { getStorefrontDisplay } from '@/utils/storefrontConfig'
+import { useStorefrontCurrency } from '@/hooks/useStorefrontCurrency'
 
 // Import CSS
 import '@/styles/storefront.css'
@@ -105,6 +106,7 @@ const ProductDetailPage = ({
   initialProduct?: any
 }) => {
   const t = useTranslations('storefront')
+  const { formatPrice } = useStorefrontCurrency()
   const hasInitialProduct = Boolean(initialProduct)
   // Same fallback string as the client refetch below, otherwise a product with an empty
   // description would render one text on the server and another after hydration.
@@ -454,11 +456,11 @@ const ProductDetailPage = ({
           </div>
           <div className='sf-product-detail-price-row'>
             <span style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--primary-color, #6366f1)' }}>
-              ${product.price.toFixed(2)}
+              {formatPrice(product.price)}
             </span>
             {product.originalPrice && (
               <span className='sf-price-original' style={{ fontSize: '1.25rem', textDecoration: 'line-through' }}>
-                ${product.originalPrice.toFixed(2)}
+                {formatPrice(product.originalPrice)}
               </span>
             )}
             {product.discount && (
