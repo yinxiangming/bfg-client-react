@@ -48,12 +48,14 @@ function buildReviewsSchema(
     columns: [
       {
         field: 'product_name',
+        width: 220,
         label: t('reviews.listPage.schema.columns.product'),
         type: 'string',
         sortable: true
       },
       {
         field: 'customer_name',
+        width: 150,
         label: t('reviews.listPage.schema.columns.customer'),
         type: 'string',
         sortable: true
@@ -98,6 +100,7 @@ function buildReviewsSchema(
       },
       {
         field: 'title',
+        width: 260,
         label: t('reviews.listPage.schema.columns.title'),
         type: 'string',
         link: 'view',

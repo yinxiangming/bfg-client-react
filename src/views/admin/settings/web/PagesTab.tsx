@@ -27,8 +27,8 @@ import {
 const buildPagesSchema = (t: any): ListSchema => ({
   title: t('settings.web.pages.tab.title'),
   columns: [
-    { field: 'title', label: t('settings.web.pages.tab.columns.title'), type: 'string', sortable: true, link: 'edit' },
-    { field: 'slug', label: t('settings.web.pages.tab.columns.slug'), type: 'string', sortable: true },
+    { field: 'title', label: t('settings.web.pages.tab.columns.title'), type: 'string', sortable: true, link: 'edit', width: 260 },
+    { field: 'slug', label: t('settings.web.pages.tab.columns.slug'), type: 'string', sortable: true, width: 180 },
     { field: 'status', label: t('settings.web.pages.tab.columns.status'), type: 'select', sortable: true },
     { field: 'language', label: t('settings.web.pages.tab.columns.language'), type: 'string' },
     { field: 'order', label: t('settings.web.pages.tab.columns.order'), type: 'number', sortable: true },

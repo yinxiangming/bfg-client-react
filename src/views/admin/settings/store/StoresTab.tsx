@@ -28,7 +28,7 @@ const buildStoresSchema = (t: any): ListSchema => ({
   columns: [
     { field: 'name', label: t('settings.store.stores.tab.columns.name'), type: 'string', sortable: true, link: 'edit' },
     { field: 'code', label: t('settings.store.stores.tab.columns.code'), type: 'string', sortable: true },
-    { field: 'description', label: t('settings.store.stores.tab.columns.description'), type: 'string' },
+    { field: 'description', label: t('settings.store.stores.tab.columns.description'), type: 'string', width: 280 },
     { field: 'is_active', label: t('settings.store.stores.tab.columns.status'), type: 'select', sortable: true }
   ],
   searchFields: ['name', 'code'],
