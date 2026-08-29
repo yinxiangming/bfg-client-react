@@ -47,6 +47,8 @@ type Product = {
   purchasable: boolean
   sizes: string[]
   colors: { name: string; value: string }[]
+  /** First category the product belongs to, for the breadcrumb. Null when it has none. */
+  category: { name: string; slug: string } | null
 }
 
 /**
@@ -90,7 +92,10 @@ const transformProduct = (productData: any, descriptionFallback: string): Produc
           name: v.options?.color || v.name,
           value: v.options?.color || '#000000'
         }))
-        .filter((c: any) => c.name) || []
+        .filter((c: any) => c.name) || [],
+    category: productData.categories?.[0]?.slug
+      ? { name: productData.categories[0].name, slug: productData.categories[0].slug }
+      : null
   }
 }
 
@@ -388,10 +393,18 @@ const ProductDetailPage = ({
           {t('nav.home')}
         </Link>
         <span className='sf-breadcrumb-separator' style={{ margin: '0 0.5rem' }}>/</span>
-        <Link href='/category/clothes' className='sf-breadcrumb-link' style={{ textDecoration: 'none' }}>
-          {t('category.sidebar.sampleClothes')}
-        </Link>
-        <span className='sf-breadcrumb-separator' style={{ margin: '0 0.5rem' }}>/</span>
+        {product.category && (
+          <>
+            <Link
+              href={`/category/${product.category.slug}`}
+              className='sf-breadcrumb-link'
+              style={{ textDecoration: 'none' }}
+            >
+              {product.category.name}
+            </Link>
+            <span className='sf-breadcrumb-separator' style={{ margin: '0 0.5rem' }}>/</span>
+          </>
+        )}
         <span className='sf-breadcrumb-current'>{product.name}</span>
       </nav>
 
