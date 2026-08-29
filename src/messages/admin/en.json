@@ -618,6 +618,7 @@
       "schema": {
         "title": "Customers",
         "customerNumber": "Customer Number",
+        "name": "Name",
         "companyName": "Company Name",
         "email": "Email",
         "taxNumber": "Tax Number",

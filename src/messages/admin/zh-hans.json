@@ -618,6 +618,7 @@
       "schema": {
         "title": "客户",
         "customerNumber": "客户编号",
+        "name": "姓名",
         "companyName": "公司名称",
         "email": "邮箱",
         "taxNumber": "税号",

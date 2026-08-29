@@ -20,6 +20,18 @@ const buildCustomersSchema = (t: any): ListSchema => ({
   title: t('customers.page.schema.title'),
   columns: [
     { field: 'customer_number', label: t('customers.page.schema.customerNumber'), type: 'string', link: 'view' },
+    {
+      // Customer has no name of its own — it comes from the linked user. Without this
+      // a consumer account with no company and no email renders as a blank row.
+      field: 'user',
+      label: t('customers.page.schema.name'),
+      type: 'string',
+      render: (_value: any, row: any) => {
+        const user = row.user || {}
+        const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ').trim()
+        return fullName || user.username || '-'
+      }
+    },
     { field: 'company_name', label: t('customers.page.schema.companyName'), type: 'string', sortable: true },
     {
       field: 'user_email',
@@ -37,7 +49,7 @@ const buildCustomersSchema = (t: any): ListSchema => ({
     { field: 'is_verified', label: t('customers.page.schema.verified'), type: 'select', sortable: true },
     { field: 'created_at', label: t('customers.page.schema.createdAt'), type: 'datetime', sortable: true }
   ],
-  searchFields: ['company_name', 'tax_number', 'user_email', 'customer_number'],
+  searchFields: ['user', 'company_name', 'tax_number', 'user_email', 'customer_number'],
   actions: [
     { id: 'add', label: t('customers.page.actions.addCustomer'), type: 'primary', scope: 'global', icon: 'tabler-plus' },
     { id: 'view', label: t('customers.page.actions.view'), type: 'secondary', scope: 'row' },
