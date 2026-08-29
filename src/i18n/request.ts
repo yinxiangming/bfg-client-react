@@ -109,10 +109,19 @@ export default getRequestConfig(async ({requestLocale}) => {
   const fromCookie = await getLocaleFromCookie()
   const fromSingleSiteLanguage = await getSingleSiteLocale(headerStore)
   const fromAcceptLanguage = getLocaleFromAcceptLanguageHeader(headerStore.get('accept-language') || '')
+  // An explicit choice comes first. `fromSingleSiteLanguage` used to sit at the
+  // top, which meant a workspace selling in one language pinned the *whole app*
+  // to it — including /admin, where the operator's own language has nothing to
+  // do with what the shop sells. The switcher writes NEXT_LOCALE and then
+  // nothing happened, because this line overrode it on the next request.
+  //
+  // The single-site pin still does its real job: it beats Accept-Language and
+  // the default, so a one-language shop renders in its language for a visitor
+  // who never asked for anything.
   const locale: AppLocale =
+    fromCookie ||
     fromSingleSiteLanguage ||
     (requested && isSupportedLocale(requested) ? requested : null) ||
-    fromCookie ||
     fromAcceptLanguage ||
     routing.defaultLocale
 
