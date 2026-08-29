@@ -587,9 +587,7 @@
           "customer": "Customer",
           "rating": "Rating",
           "title": "Title",
-          "comment": "Comment",
           "status": "Status",
-          "helpfulCount": "Helpful",
           "createdAt": "Created At"
         }
       },

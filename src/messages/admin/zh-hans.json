@@ -587,9 +587,7 @@
           "customer": "客户",
           "rating": "评分",
           "title": "标题",
-          "comment": "内容",
           "status": "状态",
-          "helpfulCount": "有用",
           "createdAt": "创建时间"
         }
       },
