@@ -60,9 +60,6 @@ const DeliveryCard = ({ order }: DeliveryCardProps) => {
     if (order.status === 'shipped') {
       return { label: t('orders.status.shipped'), color: 'primary' as const }
     }
-    if (order.status === 'completed') {
-      return { label: t('orders.status.completed'), color: 'success' as const }
-    }
     return { label: t('orders.status.pending'), color: 'warning' as const }
   }
 

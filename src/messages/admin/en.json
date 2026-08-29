@@ -140,12 +140,14 @@
       "readyToPickup": "Ready for Pickup",
       "completed": "Completed",
       "cancelled": "Cancelled",
-      "delivered": "Delivered"
+      "delivered": "Delivered",
+      "refunded": "Refunded"
     },
     "paymentStatus": {
       "pending": "Pending",
       "paid": "Paid",
-      "failed": "Failed"
+      "failed": "Failed",
+      "refunded": "Refunded"
     },
     "basicInfo": {
       "storeFallback": "Store #{store}",

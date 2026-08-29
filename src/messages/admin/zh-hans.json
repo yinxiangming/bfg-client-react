@@ -140,12 +140,14 @@
       "readyToPickup": "待自提",
       "completed": "已完成",
       "cancelled": "已取消",
-      "delivered": "已送达"
+      "delivered": "已送达",
+      "refunded": "已退款"
     },
     "paymentStatus": {
       "pending": "待支付",
       "paid": "已支付",
-      "failed": "失败"
+      "failed": "失败",
+      "refunded": "已退款"
     },
     "basicInfo": {
       "storeFallback": "门店 #{store}",

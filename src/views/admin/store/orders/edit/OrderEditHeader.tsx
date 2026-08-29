@@ -21,7 +21,10 @@ import Typography from '@mui/material/Typography'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import CustomTextField from '@/components/ui/TextField'
 
-import type { Order } from '@/services/store'
+import {
+  ORDER_STATUSES, PAYMENT_STATUSES,
+  type Order, type OrderStatus, type PaymentStatus
+} from '@/services/store'
 import type { OrderHeaderAction } from '@/extensions/registry'
 import { getIntlLocale } from '@/utils/format'
 
@@ -37,8 +40,8 @@ type OrderEditHeaderProps = {
     restock_action: 'no_restock' | 'restock' | 'damage'
   }) => Promise<void>
   onCancelOrder?: (reason?: string) => Promise<void>
-  onStatusChange?: (status: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled') => Promise<void>
-  onPaymentStatusChange?: (status: 'pending' | 'paid' | 'failed') => Promise<void>
+  onStatusChange?: (status: OrderStatus) => Promise<void>
+  onPaymentStatusChange?: (status: PaymentStatus) => Promise<void>
 }
 
 const OrderEditHeader = ({
@@ -140,7 +143,7 @@ const OrderEditHeader = ({
     }
   }
 
-  const handleStatusChange = async (newStatus: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled') => {
+  const handleStatusChange = async (newStatus: OrderStatus) => {
     if (newStatus === order.status || !onStatusChange) {
       setStatusEditAnchor(null)
       return
@@ -154,7 +157,7 @@ const OrderEditHeader = ({
     }
   }
 
-  const handlePaymentStatusChange = async (newStatus: 'pending' | 'paid' | 'failed') => {
+  const handlePaymentStatusChange = async (newStatus: PaymentStatus) => {
     if (newStatus === order.payment_status || !onPaymentStatusChange) {
       setPaymentStatusEditAnchor(null)
       return
@@ -168,8 +171,8 @@ const OrderEditHeader = ({
     }
   }
 
-  const canShip = !!onShip && !['shipped', 'completed', 'cancelled'].includes(order.status)
-  const canCancel = !!onCancelOrder && !['cancelled', 'completed', 'refunded'].includes(order.status)
+  const canShip = !!onShip && !['shipped', 'delivered', 'cancelled'].includes(order.status)
+  const canCancel = !!onCancelOrder && !['cancelled', 'delivered', 'refunded'].includes(order.status)
   const canRefund = !!onRefund && !['refunded', 'cancelled'].includes(order.status)
   const enabledExtraActions = extraActions.filter(action => !action.disabled)
   const canReturn = !!onCreateReturn && !!order.items?.length && !['cancelled'].includes(order.status)
@@ -286,13 +289,11 @@ const OrderEditHeader = ({
             fullWidth
             disabled={statusChanging}
             value={order.status}
-            onChange={(e) => handleStatusChange(e.target.value as 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled')}
+            onChange={(e) => handleStatusChange(e.target.value as OrderStatus)}
           >
-            <MenuItem value='pending'>{t('orders.status.pending')}</MenuItem>
-            <MenuItem value='paid'>{t('orders.status.paid')}</MenuItem>
-            <MenuItem value='shipped'>{t('orders.status.shipped')}</MenuItem>
-            <MenuItem value='completed'>{t('orders.status.completed')}</MenuItem>
-            <MenuItem value='cancelled'>{t('orders.status.cancelled')}</MenuItem>
+            {ORDER_STATUSES.map(value => (
+              <MenuItem key={value} value={value}>{t(`orders.status.${value}`)}</MenuItem>
+            ))}
           </CustomTextField>
         </Box>
       </Popover>
@@ -309,11 +310,11 @@ const OrderEditHeader = ({
             fullWidth
             disabled={paymentStatusChanging}
             value={order.payment_status}
-            onChange={(e) => handlePaymentStatusChange(e.target.value as 'pending' | 'paid' | 'failed')}
+            onChange={(e) => handlePaymentStatusChange(e.target.value as PaymentStatus)}
           >
-            <MenuItem value='pending'>{t('orders.paymentStatus.pending')}</MenuItem>
-            <MenuItem value='paid'>{t('orders.paymentStatus.paid')}</MenuItem>
-            <MenuItem value='failed'>{t('orders.paymentStatus.failed')}</MenuItem>
+            {PAYMENT_STATUSES.map(value => (
+              <MenuItem key={value} value={value}>{t(`orders.paymentStatus.${value}`)}</MenuItem>
+            ))}
           </CustomTextField>
         </Box>
       </Popover>
