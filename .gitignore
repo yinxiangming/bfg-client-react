@@ -4,6 +4,9 @@ node_modules/
 .env
 .env.local
 .env.*.local
+# A hand-made copy escapes every pattern above, and a real .env.local.bak has
+# sat untracked in this checkout for weeks.
+.env*.bak
 !.env.example
 .cursor/commands/
 .shared/
