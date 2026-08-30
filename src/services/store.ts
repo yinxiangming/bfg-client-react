@@ -498,8 +498,8 @@ export interface ReturnLineItemPayload {
   restock_action?: 'no_restock' | 'restock' | 'damage'
 }
 
-const returnsApi = () => buildApiUrl('/returns/', API_VERSIONS.BFG2)
-const returnItemsApi = () => buildApiUrl('/return-items/', API_VERSIONS.BFG2)
+const returnsApi = () => buildApiUrl('/returns/', API_VERSIONS.BFG2, 'shop')
+const returnItemsApi = () => buildApiUrl('/return-items/', API_VERSIONS.BFG2, 'shop')
 
 export async function createReturnRequest(data: {
   order: number

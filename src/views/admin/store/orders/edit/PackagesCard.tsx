@@ -1000,6 +1000,7 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
               size='small'
               value={formData.length}
               onChange={(e) => setFormData(prev => ({ ...prev, length: parseFloat(e.target.value) || 0 }))}
+              required
               fullWidth
             />
             <CustomTextField
@@ -1008,6 +1009,7 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
               size='small'
               value={formData.width}
               onChange={(e) => setFormData(prev => ({ ...prev, width: parseFloat(e.target.value) || 0 }))}
+              required
               fullWidth
             />
             <CustomTextField
@@ -1016,6 +1018,7 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
               size='small'
               value={formData.height}
               onChange={(e) => setFormData(prev => ({ ...prev, height: parseFloat(e.target.value) || 0 }))}
+              required
               fullWidth
             />
           </Box>

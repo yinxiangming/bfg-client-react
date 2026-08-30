@@ -24,10 +24,12 @@ import {
 import { getWorkspaceSettings } from '@/services/settings'
 import { formatCurrency, formatDate } from '@/utils/format'
 import { bfgApi } from '@/utils/api'
-import Popover from '@mui/material/Popover'
+import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import CustomTextField from '@/components/ui/TextField'
 import OrderPackagesModal from '@/views/admin/store/orders/list/OrderPackagesModal'
+import CustomerQuickViewDialog from '@/views/admin/store/orders/list/CustomerQuickViewDialog'
+import PaymentProofDialog from '@/views/admin/store/orders/list/PaymentProofDialog'
 import CreateOrderModal from '@/views/admin/store/orders/list/CreateOrderModal'
 
 const STATUS_COLORS: Record<string, 'warning' | 'info' | 'primary' | 'success' | 'error' | 'default'> = {
@@ -54,7 +56,9 @@ const buildOrdersSchema = (
   currency: string,
   openLogisticsModal: (orderId: number) => void,
   openStatusPopover: (orderId: number, anchorEl: HTMLElement) => void,
-  openPaymentPopover: (orderId: number, anchorEl: HTMLElement) => void
+  openPaymentPopover: (orderId: number, anchorEl: HTMLElement) => void,
+  openCustomer: (customerId: number) => void,
+  openProof: (orderId: number) => void
 ): ListSchema => ({
   title: t('orders.listPage.schema.title'),
   columns: [
@@ -139,7 +143,20 @@ const buildOrdersSchema = (
       sortable: true,
       width: 150,
       render: (value: any, row: any) => {
-        return row.customer_name || value || '-'
+        const label = row.customer_name || value || '-'
+        const customerId = typeof row.customer === 'object' ? row.customer?.id : row.customer
+        if (!customerId || label === '-') return label
+        // Who is this, and how do I reach them — the question staff ask most
+        // often about a row, and it used to mean leaving the list to answer.
+        return (
+          <Box
+            component='span'
+            onClick={(e: React.MouseEvent) => { e.stopPropagation(); openCustomer(Number(customerId)) }}
+            sx={{ cursor: 'pointer', color: 'primary.main', '&:hover': { textDecoration: 'underline' } }}
+          >
+            {label}
+          </Box>
+        )
       }
     },
     {
@@ -198,7 +215,13 @@ const buildOrdersSchema = (
                 the order is paid — that is still a human's call. */}
             {row?.has_payment_proof && (
               <Tooltip title={t('orders.listPage.schema.columns.paymentProof')}>
-                <i className='tabler-photo-check' style={{ fontSize: 18, opacity: 0.75 }} />
+                <IconButton
+                  size='small'
+                  onClick={(e: React.MouseEvent) => { e.stopPropagation(); if (row?.id != null) openProof(row.id) }}
+                  aria-label={t('orders.listPage.schema.columns.paymentProof')}
+                >
+                  <i className='tabler-photo-check' style={{ fontSize: 18 }} />
+                </IconButton>
               </Tooltip>
             )}
           </Box>
@@ -214,6 +237,24 @@ const buildOrdersSchema = (
       render: (value: any, row: Order) => {
         const method = (typeof value === 'string' ? value : row?.fulfillment_method) || ''
         if (!method) return '-'
+        // The Logistics column was one icon opening one dialog, and it cost a
+        // whole column to say so. The badge that names the method is the
+        // obvious thing to click to change how it is fulfilled.
+        const count = row?.packages_count ?? 0
+        const withLogistics = (node: React.ReactNode) => (
+          <Box
+            component='span'
+            onClick={(e: React.MouseEvent) => { e.stopPropagation(); if (row?.id != null) openLogisticsModal(row.id) }}
+            sx={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 0.5 }}
+          >
+            {node}
+            {count > 0 && (
+              <Typography variant='caption' color='text.secondary'>
+                {t('orders.listPage.schema.columns.packagesCount', { count })}
+              </Typography>
+            )}
+          </Box>
+        )
         const badge = (
           <StatusBadge
             label={
@@ -227,40 +268,9 @@ const buildOrdersSchema = (
         // Which point to stage the order at is what a picker needs, but naming
         // it inline would widen the column for every shipping row too.
         if (method === 'pickup' && row?.pickup_point_name) {
-          return <Tooltip title={row.pickup_point_name}><span>{badge}</span></Tooltip>
+          return withLogistics(<Tooltip title={row.pickup_point_name}><span>{badge}</span></Tooltip>)
         }
-        return badge
-      }
-    },
-    {
-      field: 'packages_count',
-      label: t('orders.listPage.schema.columns.logistics'),
-      type: 'string',
-      width: 90,
-      render: (value: any, row: Order) => {
-        const count = row?.packages_count ?? value ?? 0
-        const orderId = row?.id
-        const handleClick = (e: React.MouseEvent) => {
-          e.stopPropagation()
-          if (orderId != null) openLogisticsModal(orderId)
-        }
-        // Icon only — the label repeated on every row cost more width than it
-        // earned. The tooltip still carries the package count and the action.
-        const title = count > 0
-          ? `${t('orders.listPage.schema.columns.packagesCount', { count })} · ${t('orders.listPage.schema.columns.manageLogistics')}`
-          : t('orders.listPage.schema.columns.addPackages')
-        return (
-          <Tooltip title={title}>
-            <IconButton
-              size='small'
-              color={count > 0 ? 'default' : 'primary'}
-              onClick={handleClick}
-              aria-label={title}
-            >
-              <i className={count > 0 ? 'tabler-package' : 'tabler-truck'} />
-            </IconButton>
-          </Tooltip>
-        )
+        return withLogistics(badge)
       }
     },
     {
@@ -350,6 +360,8 @@ export default function OrdersPage() {
   const [currency, setCurrency] = useState<string>('USD')
   const [logisticsModalOrderId, setLogisticsModalOrderId] = useState<number | null>(null)
   const [createOrderModalOpen, setCreateOrderModalOpen] = useState(false)
+  const [customerDialogId, setCustomerDialogId] = useState<number | null>(null)
+  const [proofDialogOrderId, setProofDialogOrderId] = useState<number | null>(null)
   const [statusPopover, setStatusPopover] = useState<PopoverState>({ orderId: null, anchorEl: null })
   const [paymentPopover, setPaymentPopover] = useState<PopoverState>({ orderId: null, anchorEl: null })
   const [statusChanging, setStatusChanging] = useState(false)
@@ -365,12 +377,14 @@ export default function OrdersPage() {
   const openStatusPopover = useCallback((orderId: number, anchorEl: HTMLElement) => {
     setStatusPopover({ orderId, anchorEl })
   }, [])
+  const openCustomer = useCallback((customerId: number) => setCustomerDialogId(customerId), [])
+  const openProof = useCallback((orderId: number) => setProofDialogOrderId(orderId), [])
   const openPaymentPopover = useCallback((orderId: number, anchorEl: HTMLElement) => {
     setPaymentPopover({ orderId, anchorEl })
   }, [])
   const ordersSchema = useMemo(
-    () => buildOrdersSchema(t, currency, openLogisticsModal, openStatusPopover, openPaymentPopover),
-    [t, currency, openLogisticsModal, openStatusPopover, openPaymentPopover]
+    () => buildOrdersSchema(t, currency, openLogisticsModal, openStatusPopover, openPaymentPopover, openCustomer, openProof),
+    [t, currency, openLogisticsModal, openStatusPopover, openPaymentPopover, openCustomer, openProof]
   )
 
   const [apiFilters, setApiFilters] = useState<Record<string, string>>({})
@@ -486,46 +500,54 @@ export default function OrdersPage() {
         onClose={() => setCreateOrderModalOpen(false)}
         onSuccess={refetch}
       />
-      <Popover
+      {/* A menu, not a popover wrapping a second dropdown: the old shape made
+          changing a status three clicks, two of which were opening things. */}
+      <Menu
         open={Boolean(statusPopover.anchorEl)}
         anchorEl={statusPopover.anchorEl}
         onClose={() => setStatusPopover({ orderId: null, anchorEl: null })}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
       >
-        <Box sx={{ p: 2, minWidth: 150 }}>
-          <CustomTextField
-            select
-            fullWidth
+        {ORDER_STATUSES.map(value => (
+          <MenuItem
+            key={value}
+            selected={orderForStatus?.status === value}
             disabled={statusChanging}
-            value={orderForStatus?.status ?? ''}
-            onChange={(e) => handleStatusSelect(e.target.value)}
+            onClick={() => handleStatusSelect(value)}
           >
-            {ORDER_STATUSES.map(value => (
-              <MenuItem key={value} value={value}>{t(`orders.status.${value}`)}</MenuItem>
-            ))}
-          </CustomTextField>
-        </Box>
-      </Popover>
-      <Popover
+            {t(`orders.status.${value}`)}
+          </MenuItem>
+        ))}
+      </Menu>
+      <Menu
         open={Boolean(paymentPopover.anchorEl)}
         anchorEl={paymentPopover.anchorEl}
         onClose={() => setPaymentPopover({ orderId: null, anchorEl: null })}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
       >
-        <Box sx={{ p: 2, minWidth: 150 }}>
-          <CustomTextField
-            select
-            fullWidth
+        {PAYMENT_STATUSES.map(value => (
+          <MenuItem
+            key={value}
+            selected={orderForPayment?.payment_status === value}
             disabled={paymentChanging}
-            value={orderForPayment?.payment_status ?? ''}
-            onChange={(e) => handlePaymentSelect(e.target.value)}
+            onClick={() => handlePaymentSelect(value)}
           >
-            {PAYMENT_STATUSES.map(value => (
-              <MenuItem key={value} value={value}>{t(`orders.paymentStatus.${value}`)}</MenuItem>
-            ))}
-          </CustomTextField>
-        </Box>
-      </Popover>
+            {t(`orders.paymentStatus.${value}`)}
+          </MenuItem>
+        ))}
+      </Menu>
+      <CustomerQuickViewDialog
+        open={customerDialogId != null}
+        customerId={customerDialogId}
+        onClose={() => setCustomerDialogId(null)}
+      />
+      <PaymentProofDialog
+        open={proofDialogOrderId != null}
+        orderId={proofDialogOrderId}
+        onClose={() => setProofDialogOrderId(null)}
+      />
     </Box>
   )
 }
