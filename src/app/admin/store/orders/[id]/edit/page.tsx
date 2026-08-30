@@ -21,6 +21,7 @@ import OrderDetailsCard from '@/views/admin/store/orders/edit/OrderDetailsCard'
 import CustomerDetailsCard from '@/views/admin/store/orders/edit/CustomerDetailsCard'
 import AddressCards from '@/views/admin/store/orders/edit/AddressCards'
 import PaymentCard from '@/views/admin/store/orders/edit/PaymentCard'
+import PaymentProofCard from '@/views/admin/store/orders/edit/PaymentProofCard'
 import DeliveryCard from '@/views/admin/store/orders/edit/DeliveryCard'
 import OrderTimeline from '@/views/admin/store/orders/edit/OrderTimeline'
 import InvoiceCard from '@/views/admin/store/orders/edit/InvoiceCard'
@@ -379,6 +380,11 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
                     onInvoiceUpdate: () => fetchOrder()
                   }
                 )}
+              </Grid>
+            )}
+            {visibleSlots.includes('Payment') && (
+              <Grid size={{ xs: 12 }} id='section-payment-proof'>
+                <PaymentProofCard attachments={(order as any).attachments} />
               </Grid>
             )}
             {visibleSlots.includes('Payment') && (

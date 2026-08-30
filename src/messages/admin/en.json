@@ -207,7 +207,8 @@
           "packagesCount": "{count} package(s)",
           "manageLogistics": "Manage",
           "addPackages": "Add packages",
-          "createdAt": "Created At"
+          "createdAt": "Created At",
+          "paymentProof": "Payment proof attached"
         }
       },
       "logisticsModal": {
@@ -232,6 +233,11 @@
         },
         "createdTime": {
           "label": "Created time"
+        },
+        "paymentProof": {
+          "label": "Payment proof",
+          "yes": "Attached",
+          "no": "None"
         }
       },
       "actions": {
@@ -585,6 +591,10 @@
         "title": "Delete Invoice",
         "message": "Are you sure you want to delete invoice {invoiceNumber}? This action cannot be undone."
       }
+    },
+    "paymentProof": {
+      "title": "Payment proof ({count})",
+      "hint": "Uploaded by the customer. Check it, then set the payment status yourself — an upload is a claim, not a payment."
     }
   },
   "reviews": {
