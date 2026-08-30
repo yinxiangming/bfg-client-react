@@ -38,6 +38,8 @@ type Product = {
   reviews: number
   images: string[]
   description: string
+  /** The blurb beside the price. Empty is fine — most catalogues never set it. */
+  shortDescription: string
   reference: string
   /** Units left, or null when the workspace withholds the figure. */
   stock: number | null
@@ -57,6 +59,27 @@ type Product = {
  * Lives at module scope so the server-rendered `initialProduct` and the client refetch
  * produce identical markup — any divergence would show up as a hydration mismatch.
  */
+/**
+ * The blurb that belongs beside the price: words, and not many of them.
+ *
+ * That slot used to render the whole description. On an imported catalogue the
+ * description is four full-width marketing images and no text at all, so the
+ * size, quantity and add-to-cart controls were pushed off the screen — the one
+ * thing the top of a product page exists to show. The pictures are not lost:
+ * the Description tab below still renders the HTML in full.
+ *
+ * Stripped with a regex rather than DOMParser because this runs during SSR too,
+ * and both passes have to produce the same string or hydration breaks.
+ */
+const priceAdjacentSummary = (shortDescription: string, description: string): string => {
+  if (shortDescription.trim()) return shortDescription
+  const withoutMedia = description
+    .replace(/<(img|video|iframe|picture|source)\b[^>]*>/gi, '')
+    .replace(/<\/(video|iframe|picture)>/gi, '')
+  // What is left is often just the empty tags that wrapped the images.
+  return withoutMedia.replace(/<[^>]+>/g, '').trim() ? withoutMedia : ''
+}
+
 const transformProduct = (productData: any, descriptionFallback: string): Product => {
   const productVariants = productData.variants || []
   return {
@@ -76,6 +99,7 @@ const transformProduct = (productData: any, descriptionFallback: string): Produc
           ? [getMediaUrl(productData.primary_image)]
           : [getStoreImageUrl('themes/PRS04099/assets/img/megnor/empty-cart.svg')],
     description: productData.description || descriptionFallback,
+    shortDescription: productData.short_description || '',
     reference: productData.sku || '',
     // Availability is decided by the server, which applies the workspace's display
     // policy and reads the same numbers the cart enforces. Summing variant counts here
@@ -491,11 +515,26 @@ const ProductDetailPage = ({
               </span>
             )}
           </div>
-          <div
-            className='sf-product-description'
-            style={{ fontSize: '0.875rem', lineHeight: 1.6, marginBottom: '1.5rem' }}
-            dangerouslySetInnerHTML={{ __html: product.description || '' }}
-          />
+          {(() => {
+            const summary = priceAdjacentSummary(product.shortDescription, product.description || '')
+            if (!summary) return null
+            return (
+              <div
+                className='sf-product-description'
+                style={{
+                  fontSize: '0.875rem',
+                  lineHeight: 1.6,
+                  marginBottom: '1.5rem',
+                  // A wordy description should not push the buy controls away either.
+                  display: '-webkit-box',
+                  WebkitLineClamp: 4,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden'
+                }}
+                dangerouslySetInnerHTML={{ __html: summary }}
+              />
+            )
+          })()}
 
           {/* Size Selection */}
           {product.sizes.length > 0 && (
