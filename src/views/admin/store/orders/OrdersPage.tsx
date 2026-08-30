@@ -188,8 +188,19 @@ const buildOrdersSchema = (
           if (row?.id != null) openPaymentPopover(row.id, e.currentTarget as HTMLElement)
         }
         return (
-          <Box component='span' onClick={handleClick} sx={{ cursor: 'pointer' }}>
-            <StatusBadge label={label} color={PAYMENT_COLORS[status] || 'default'} />
+          <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
+            <Box component='span' onClick={handleClick} sx={{ cursor: 'pointer' }}>
+              <StatusBadge label={label} color={PAYMENT_COLORS[status] || 'default'} />
+            </Box>
+            {/* A bank-transfer shopper uploads a screenshot and then waits for
+                someone to look at it. Without a mark here the only way to find
+                those orders was to open them one at a time. It does not claim
+                the order is paid — that is still a human's call. */}
+            {row?.has_payment_proof && (
+              <Tooltip title={t('orders.listPage.schema.columns.paymentProof')}>
+                <i className='tabler-photo-check' style={{ fontSize: 18, opacity: 0.75 }} />
+              </Tooltip>
+            )}
           </Box>
         )
       }
@@ -275,6 +286,16 @@ const buildOrdersSchema = (
       type: 'select',
       filterMode: 'api',
       options: PAYMENT_STATUSES.map(value => ({ value, label: t(`orders.paymentStatus.${value}`) }))
+    },
+    {
+      field: 'has_payment_proof',
+      label: t('orders.listPage.filters.paymentProof.label'),
+      type: 'select',
+      filterMode: 'api',
+      options: [
+        { value: '1', label: t('orders.listPage.filters.paymentProof.yes') },
+        { value: '0', label: t('orders.listPage.filters.paymentProof.no') }
+      ]
     },
     {
       field: 'store',

@@ -207,7 +207,8 @@
           "packagesCount": "{count} 个包裹",
           "manageLogistics": "管理",
           "addPackages": "发货",
-          "createdAt": "创建时间"
+          "createdAt": "创建时间",
+          "paymentProof": "已上传付款凭证"
         }
       },
       "logisticsModal": {
@@ -232,6 +233,11 @@
         },
         "createdTime": {
           "label": "创建时间"
+        },
+        "paymentProof": {
+          "label": "付款凭证",
+          "yes": "已上传",
+          "no": "无"
         }
       },
       "actions": {
@@ -585,6 +591,10 @@
         "title": "删除发票",
         "message": "确认删除发票 {invoiceNumber}？此操作无法撤销。"
       }
+    },
+    "paymentProof": {
+      "title": "付款凭证（{count}）",
+      "hint": "顾客上传的截图。核对后请自行修改支付状态 —— 上传只是声明，不等于已付款。"
     }
   },
   "reviews": {

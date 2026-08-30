@@ -26,6 +26,8 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Alert from '@mui/material/Alert'
 
 // Component Imports
+import Link from 'next/link'
+
 import CustomTextField from '@/components/ui/TextField'
 
 // API
@@ -38,6 +40,8 @@ type OrderItem = {
   product_name: string
   variant_name?: string
   sku?: string
+  /** First product image, for the row thumbnail. */
+  image?: string | null
   quantity: number
   price: number | string
   subtotal: number | string
@@ -277,10 +281,50 @@ const OrderDetailsCard = ({ order, onOrderUpdate }: OrderDetailsCardProps) => {
                   {(editing ? editLines : items).map((item, index) => (
                     <TableRow key={editing ? index : (item as OrderItem).id} hover>
                       <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          {/* Fixed box so a missing or slow image never shifts
+                              the row; the placeholder keeps the column aligned. */}
+                          <Box
+                            sx={{
+                              width: 40,
+                              height: 40,
+                              flexShrink: 0,
+                              borderRadius: 1,
+                              overflow: 'hidden',
+                              bgcolor: 'action.hover',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                          >
+                            {(item as OrderItem).image ? (
+                              <Box
+                                component='img'
+                                src={(item as OrderItem).image as string}
+                                alt=''
+                                sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              />
+                            ) : (
+                              <i className='tabler-photo' style={{ fontSize: 18, opacity: 0.4 }} />
+                            )}
+                          </Box>
                         <Box>
-                          <Typography variant='body2' sx={{ fontWeight: 500 }}>
-                            {'product_name' in item ? item.product_name : (item as OrderItem).product_name}
-                          </Typography>
+                          {/* The name is the way into the product; it was plain
+                              text, so there was no way through from an order. */}
+                          {item.product ? (
+                            <Typography
+                              component={Link}
+                              href={`/admin/store/products/${item.product}/edit`}
+                              variant='body2'
+                              sx={{ fontWeight: 500, color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+                            >
+                              {'product_name' in item ? item.product_name : (item as OrderItem).product_name}
+                            </Typography>
+                          ) : (
+                            <Typography variant='body2' sx={{ fontWeight: 500 }}>
+                              {'product_name' in item ? item.product_name : (item as OrderItem).product_name}
+                            </Typography>
+                          )}
                           {('variant_name' in item && item.variant_name) && (
                             <Typography variant='caption' color='text.secondary' display='block'>
                               {item.variant_name}
@@ -291,6 +335,7 @@ const OrderDetailsCard = ({ order, onOrderUpdate }: OrderDetailsCardProps) => {
                               {t('orders.detailsCard.table.values.sku')}: {item.sku}
                             </Typography>
                           )}
+                        </Box>
                         </Box>
                       </TableCell>
                       <TableCell align='right' sx={{ fontFamily: 'var(--at-font-num, monospace)', fontFeatureSettings: 'var(--at-num-feat, "tnum" 1)' }}>

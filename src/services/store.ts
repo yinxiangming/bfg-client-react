@@ -383,6 +383,9 @@ export interface Order {
   pickup_point_name?: string | null
   /** Locker PIN or counter code — whatever the customer quotes on collection. */
   pickup_code?: string
+  /** The shopper has attached something — a bank-transfer screenshot, all but
+   *  always. Not a payment: a human still has to look at it. */
+  has_payment_proof?: boolean
   total: number
   item_count?: number
   /** Brief item list for list view (product_name, quantity) */
