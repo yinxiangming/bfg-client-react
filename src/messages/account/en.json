@@ -458,7 +458,7 @@
     "pickupDetails": "Pickup Details",
     "billingAddress": "Billing Address",
     "noShippingAddress": "No shipping address available",
-    "pickupNoAddress": "This order is marked for pickup. Shipping address is not required.",
+    "pickupNoAddress": "This order has no pickup point on record — please contact us.",
     "noBillingAddress": "No billing address available",
     "payments": "Payments",
     "noPayments": "No payments found",
@@ -510,7 +510,6 @@
     "statusOutForDelivery": "Out for Delivery",
     "statusReadyToPickup": "Ready for Pickup",
     "statusDispatched": "Dispatched",
-    "statusCancelled": "Cancelled",
     "invoiceDetails": "Invoice Details",
     "brand": "Brand",
     "currency": "Currency",
@@ -522,7 +521,7 @@
     "quantity": "Quantity",
     "unitPrice": "Unit Price",
     "close": "Close",
-    "customerNote": "Order note"
+    "customerNote": "Order note",
+    "pickupCode": "Pickup code"
   }
 }
-

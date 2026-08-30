@@ -137,7 +137,7 @@
       "paid": "已支付",
       "processing": "处理中",
       "shipped": "已发货",
-      "readyToPickup": "待自提",
+      "ready_for_pickup": "待自提",
       "completed": "已完成",
       "cancelled": "已取消",
       "delivered": "已送达",
@@ -425,7 +425,6 @@
         "codeLabel": "自提码",
         "codeHelp": "自提柜取件码或到店核销码 —— 顾客取货时报的那个。",
         "saveCodeFailed": "保存自提码失败。",
-        "collected": "已取货",
         "notReadyYet": "订单还未到可自提状态。",
         "feeLabel": "自提费"
       }

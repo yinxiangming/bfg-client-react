@@ -105,13 +105,8 @@ const DeliveryCard = ({ order, onUpdate }: DeliveryCardProps) => {
     if (order.status === 'delivered') {
       return { label: t('orders.status.delivered'), color: 'success' as const }
     }
-    if (order.status === 'shipped') {
-      // `shipped` is what a collection order is set to when it is ready to be
-      // picked up; the vocabulary is shared, the wording is not.
-      return {
-        label: isPickup ? t('orders.status.readyToPickup') : t('orders.status.shipped'),
-        color: 'primary' as const
-      }
+    if (order.status === 'shipped' || order.status === 'ready_for_pickup') {
+      return { label: t(`orders.status.${order.status}`), color: 'primary' as const }
     }
     return { label: t('orders.status.pending'), color: 'warning' as const }
   }
@@ -244,7 +239,7 @@ const DeliveryCard = ({ order, onUpdate }: DeliveryCardProps) => {
                   <i className='tabler-package' />
                 </Avatar>
                 <Typography variant='body2' color='text.secondary'>
-                  {isPickup ? t('orders.status.readyToPickup') : t('orders.status.shipped')}
+                  {t(`orders.status.${isPickup ? 'ready_for_pickup' : 'shipped'}`)}
                 </Typography>
               </Box>
               <Typography variant='body2' sx={{ fontWeight: 500 }}>
@@ -260,7 +255,7 @@ const DeliveryCard = ({ order, onUpdate }: DeliveryCardProps) => {
                   <i className='tabler-check' />
                 </Avatar>
                 <Typography variant='body2' color='text.secondary'>
-                  {isPickup ? t('orders.delivery.pickup.collected') : t('orders.status.delivered')}
+                  {t('orders.status.delivered')}
                 </Typography>
               </Box>
               <Typography variant='body2' sx={{ fontWeight: 500 }} color='success.main'>

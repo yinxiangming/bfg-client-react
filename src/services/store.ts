@@ -363,7 +363,7 @@ export interface OrderItemSummary {
  * `status: "paid" is not a valid choice`, while `processing`, `delivered` and
  * `refunded` could not be set at all.
  */
-export const ORDER_STATUSES = ['pending', 'processing', 'shipped', 'delivered', 'cancelled', 'refunded'] as const
+export const ORDER_STATUSES = ['pending', 'processing', 'shipped', 'ready_for_pickup', 'delivered', 'cancelled', 'refunded'] as const
 export type OrderStatus = (typeof ORDER_STATUSES)[number]
 
 /** Mirrors `Order.PAYMENT_STATUS_CHOICES`. */

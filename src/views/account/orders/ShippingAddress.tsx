@@ -33,9 +33,40 @@ const ShippingAddress = ({ order }: ShippingAddressProps) => {
           {isPickup ? t('pickupDetails') : t('shippingAddress')}
         </Typography>
         {isPickup ? (
-          <Typography variant='body2' color='text.secondary'>
-            {t('pickupNoAddress')}
-          </Typography>
+          // Where to go and when — the collection equivalent of a delivery
+          // address. Orders imported from before pickup points existed have
+          // none, which is the only case left for the old "no address" line.
+          order.pickup_point ? (
+            <div className='flex flex-col gap-0.5'>
+              <Typography color='text.primary' sx={{ fontWeight: 500, mb: 0.5 }}>
+                {order.pickup_point.name}
+              </Typography>
+              {order.pickup_point.address && (
+                <Typography variant='body2' color='text.secondary'>
+                  {order.pickup_point.address}
+                </Typography>
+              )}
+              {order.pickup_point.phone && (
+                <Typography variant='body2' color='text.secondary' sx={{ mt: 1 }}>
+                  {t('phone')}: {order.pickup_point.phone}
+                </Typography>
+              )}
+              {order.pickup_point.instructions && (
+                <Typography variant='body2' color='text.secondary' sx={{ mt: 1, whiteSpace: 'pre-line' }}>
+                  {order.pickup_point.instructions}
+                </Typography>
+              )}
+              {order.pickup_code && (
+                <Typography variant='body2' color='text.primary' sx={{ mt: 1.5, fontWeight: 500 }}>
+                  {t('pickupCode')}: {order.pickup_code}
+                </Typography>
+              )}
+            </div>
+          ) : (
+            <Typography variant='body2' color='text.secondary'>
+              {t('pickupNoAddress')}
+            </Typography>
+          )
         ) : (
         <div className='flex flex-col gap-0.5'>
           {fullName && (

@@ -137,7 +137,7 @@
       "paid": "Paid",
       "processing": "Processing",
       "shipped": "Shipped",
-      "readyToPickup": "Ready for Pickup",
+      "ready_for_pickup": "Ready for Pickup",
       "completed": "Completed",
       "cancelled": "Cancelled",
       "delivered": "Delivered",
@@ -425,7 +425,6 @@
         "codeLabel": "Pickup Code",
         "codeHelp": "Locker PIN or counter code — whatever the customer quotes on collection.",
         "saveCodeFailed": "Failed to save the pickup code.",
-        "collected": "Collected",
         "notReadyYet": "Order is not ready for pickup yet.",
         "feeLabel": "Pickup Fee"
       }

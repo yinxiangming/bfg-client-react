@@ -94,6 +94,7 @@ const OrderEditHeader = ({
       pending: 'warning',
       processing: 'info',
       shipped: 'primary',
+      ready_for_pickup: 'primary',
       paid: 'success',
       completed: 'success',
       cancelled: 'error',
@@ -115,9 +116,6 @@ const OrderEditHeader = ({
   const formatStatusLabel = (status: string) => status.charAt(0).toUpperCase() + status.slice(1)
 
   const getOrderStatusLabel = (status: string) => {
-    if (status === 'shipped' && order.fulfillment_method === 'pickup') {
-      return t('orders.status.readyToPickup')
-    }
     const key = `orders.status.${status}`
     const has = (t as any).has ? (t as any).has(key) : true
     return has ? t(key as any) : formatStatusLabel(status)
@@ -171,7 +169,7 @@ const OrderEditHeader = ({
     }
   }
 
-  const canShip = !!onShip && !['shipped', 'delivered', 'cancelled'].includes(order.status)
+  const canShip = !!onShip && !['shipped', 'ready_for_pickup', 'delivered', 'cancelled'].includes(order.status)
   const canCancel = !!onCancelOrder && !['cancelled', 'delivered', 'refunded'].includes(order.status)
   const canRefund = !!onRefund && !['refunded', 'cancelled'].includes(order.status)
   const enabledExtraActions = extraActions.filter(action => !action.disabled)

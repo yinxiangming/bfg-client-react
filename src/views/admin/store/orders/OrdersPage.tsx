@@ -34,6 +34,7 @@ const STATUS_COLORS: Record<string, 'warning' | 'info' | 'primary' | 'success' |
   pending: 'warning',
   processing: 'info',
   shipped: 'primary',
+  ready_for_pickup: 'primary',
   delivered: 'success',
   cancelled: 'error',
   refunded: 'default'
@@ -155,13 +156,7 @@ const buildOrdersSchema = (
       sortable: true,
       render: (value: any, row: Order) => {
         const status = (typeof value === 'string' ? value : row?.status) || ''
-        // `shipped` reads differently depending on how the order is fulfilled:
-        // a pickup order is not on its way anywhere, it is waiting at the counter.
-        const label = !status
-          ? '-'
-          : status === 'shipped' && row?.fulfillment_method === 'pickup'
-            ? t('orders.status.readyToPickup')
-            : t(`orders.status.${status}`)
+        const label = status ? t(`orders.status.${status}`) : '-'
         const handleClick = (e: React.MouseEvent) => {
           e.stopPropagation()
           if (row?.id != null) openStatusPopover(row.id, e.currentTarget as HTMLElement)

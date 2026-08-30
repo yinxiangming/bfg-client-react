@@ -25,6 +25,7 @@ import PackagesCard from '@/views/admin/store/orders/edit/PackagesCard'
 type OrderDetail = Order & {
   customer?: number | string | { id: number }
   customer_name?: string
+  pickup_point?: PickupPointSummary | null
   items?: Array<{
     id: number
     quantity: number
@@ -66,19 +67,44 @@ type ShippingFulfillmentDialogProps = {
   onCompleted: () => Promise<void>
 }
 
-const buildPickupCopy = (language: string | undefined, customerName: string, orderNumber: string) => {
-  const lang = (language || '').toLowerCase()
+type PickupPointSummary = {
+  name?: string
+  address?: string
+  phone?: string
+  instructions?: string
+}
 
-  if (lang.startsWith('zh')) {
+/** "Ready for pickup" is not actionable without where and when, so the message
+ *  carries the point's address and its opening hours rather than leaving the
+ *  customer to go looking for them. */
+const buildPickupCopy = (
+  language: string | undefined,
+  customerName: string,
+  orderNumber: string,
+  point?: PickupPointSummary | null,
+  pickupCode?: string
+) => {
+  const lang = (language || '').toLowerCase()
+  const zh = lang.startsWith('zh')
+
+  const details = [
+    point?.name && (zh ? `自提点：${point.name}` : `Pickup point: ${point.name}`),
+    point?.address && (zh ? `地址：${point.address}` : `Address: ${point.address}`),
+    point?.phone && (zh ? `电话：${point.phone}` : `Phone: ${point.phone}`),
+    point?.instructions,
+    pickupCode && (zh ? `自提码：${pickupCode}` : `Pickup code: ${pickupCode}`)
+  ].filter(Boolean).join('\n')
+
+  if (zh) {
     return {
       subject: `订单 #${orderNumber} 可自提了`,
-      message: `您好 ${customerName}，您的订单 #${orderNumber} 已可到店自提。方便时请前来领取。`
+      message: [`您好 ${customerName}，您的订单 #${orderNumber} 已可自提。`, details].filter(Boolean).join('\n\n')
     }
   }
 
   return {
     subject: `Order #${orderNumber} is ready for pickup`,
-    message: `Hi ${customerName}, your order #${orderNumber} is ready for pickup. Please come to the store when convenient.`
+    message: [`Hi ${customerName}, your order #${orderNumber} is ready for pickup.`, details].filter(Boolean).join('\n\n')
   }
 }
 
@@ -110,7 +136,7 @@ const ShippingFulfillmentDialog = ({ open, order, onClose, onCompleted }: Shippi
     const loadCustomerLanguage = async () => {
       if (!customerId || Number.isNaN(customerId)) {
         setCustomerLanguage(undefined)
-        const copy = buildPickupCopy(undefined, customerLabel, order.order_number)
+        const copy = buildPickupCopy(undefined, customerLabel, order.order_number, order.pickup_point, order.pickup_code)
         setPickupSubject(copy.subject)
         setPickupMessage(copy.message)
         return
@@ -121,12 +147,12 @@ const ShippingFulfillmentDialog = ({ open, order, onClose, onCompleted }: Shippi
         const customer = await getCustomer(customerId) as Customer
         const lang = customer.user?.language
         setCustomerLanguage(lang)
-        const copy = buildPickupCopy(lang, customerLabel, order.order_number)
+        const copy = buildPickupCopy(lang, customerLabel, order.order_number, order.pickup_point, order.pickup_code)
         setPickupSubject(copy.subject)
         setPickupMessage(copy.message)
       } catch {
         setCustomerLanguage(undefined)
-        const copy = buildPickupCopy(undefined, customerLabel, order.order_number)
+        const copy = buildPickupCopy(undefined, customerLabel, order.order_number, order.pickup_point, order.pickup_code)
         setPickupSubject(copy.subject)
         setPickupMessage(copy.message)
       } finally {
@@ -135,7 +161,7 @@ const ShippingFulfillmentDialog = ({ open, order, onClose, onCompleted }: Shippi
     }
 
     void loadCustomerLanguage()
-  }, [open, customerId, order.fulfillment_method, order.order_number, customerLabel])
+  }, [open, customerId, order.fulfillment_method, order.order_number, customerLabel, order.pickup_point, order.pickup_code])
 
   const handleShipmentCreated = async () => {
     setBusy(true)
@@ -162,7 +188,7 @@ const ShippingFulfillmentDialog = ({ open, order, onClose, onCompleted }: Shippi
     setError(null)
 
     try {
-      const fallbackCopy = buildPickupCopy(customerLanguage, customerLabel, order.order_number)
+      const fallbackCopy = buildPickupCopy(customerLanguage, customerLabel, order.order_number, order.pickup_point, order.pickup_code)
       const message = await createAdminMessage({
         subject: pickupSubject.trim() || fallbackCopy.subject,
         message: pickupMessage.trim() || fallbackCopy.message,
@@ -172,7 +198,7 @@ const ShippingFulfillmentDialog = ({ open, order, onClose, onCompleted }: Shippi
       })
 
       await sendAdminMessage(message.id, [customerId])
-      await updateOrder(order.id, { status: 'shipped' })
+      await updateOrder(order.id, { status: 'ready_for_pickup' })
       await onCompleted()
       onClose()
     } catch (err: any) {
