@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import { storefrontApi } from '@/utils/storefrontApi'
+import { storefrontApi, type StorefrontPickupPoint } from '@/utils/storefrontApi'
 import { useStorefrontCurrency } from '@/hooks/useStorefrontCurrency'
 import type { CheckoutFormData, FreightService } from './types'
 
@@ -11,101 +11,107 @@ type Props = {
   onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void
   country: string
   onFreightServiceChange?: (serviceId: number | null) => void
+  /** Called whenever the shopper switches between collecting and being posted to. */
+  onFulfillmentChange?: (method: 'shipping' | 'pickup', pickupPointId?: number) => void
 }
 
-const CheckoutShippingSection = ({ formData, onChange, country, onFreightServiceChange }: Props) => {
+const rowStyle = (isSelected: boolean, isLast: boolean): React.CSSProperties => ({
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'space-between',
+  padding: '1rem',
+  cursor: 'pointer',
+  backgroundColor: isSelected ? '#f9fafb' : 'white',
+  borderBottom: isLast ? 'none' : '1px solid #d0d0d0',
+  transition: 'background-color 0.2s'
+})
+
+const CheckoutShippingSection = ({ formData, onChange, country, onFreightServiceChange, onFulfillmentChange }: Props) => {
   const t = useTranslations('storefront')
   const { formatPrice } = useStorefrontCurrency()
   const [freightServices, setFreightServices] = useState<FreightService[]>([])
+  const [pickupPoints, setPickupPoints] = useState<StorefrontPickupPoint[]>([])
   const [loading, setLoading] = useState(true)
   const [expanded, setExpanded] = useState(false)
   const [calculatedPrices, setCalculatedPrices] = useState<Record<number, number>>({})
 
-  // Fetch freight services for country
-  useEffect(() => {
-    const fetchServices = async () => {
-      if (!country) {
-        setLoading(false)
-        return
-      }
+  const isPickup = formData.fulfillmentMethod === 'pickup'
 
-      try {
-        setLoading(true)
-        const services = await storefrontApi.getFreightServicesForCountry(country)
-        setFreightServices(services || [])
-        
-        // Auto-select first service if none selected
-        if (services && services.length > 0 && !formData.freightServiceId) {
-          const firstService = services[0]
-          handleServiceSelect(firstService.id)
-        }
-      } catch (error) {
-        console.error('Failed to fetch freight services:', error)
-      } finally {
-        setLoading(false)
+  // Collection points do not depend on a delivery country — a shop with no
+  // courier at all still has options to show, which is the wxstore case.
+  useEffect(() => {
+    let cancelled = false
+
+    const load = async () => {
+      setLoading(true)
+      const [points, services] = await Promise.all([
+        storefrontApi.getPickupPoints().catch(() => [] as StorefrontPickupPoint[]),
+        country
+          ? storefrontApi.getFreightServicesForCountry(country).catch(() => [] as FreightService[])
+          : Promise.resolve([] as FreightService[])
+      ])
+      if (cancelled) return
+
+      setPickupPoints(points || [])
+      setFreightServices(services || [])
+      setLoading(false)
+
+      // Auto-select, but never over an explicit choice the shopper already made.
+      if (formData.freightServiceId || formData.pickupPointId) return
+      if (services && services.length > 0) {
+        selectService(services[0], services)
+      } else if (points && points.length > 0) {
+        selectPoint(points[0])
       }
     }
 
-    fetchServices()
+    load()
+    return () => {
+      cancelled = true
+    }
   }, [country])
 
-  // Calculate shipping cost for each service
+  // Freight prices depend on the cart, so they have to be quoted per service.
+  // A pickup point charges a flat fee it already told us.
   useEffect(() => {
     const calculatePrices = async () => {
       if (freightServices.length === 0) return
 
       const prices: Record<number, number> = {}
-      
-      // Calculate price for each service
       for (const service of freightServices) {
         try {
           const preview = await storefrontApi.getCartPreview(undefined, service.id)
           prices[service.id] = parseFloat(preview.shipping_cost)
         } catch (error) {
           console.error(`Failed to calculate price for service ${service.id}:`, error)
-          // Fallback to base_price if calculation fails
           prices[service.id] = parseFloat(service.base_price)
         }
       }
-
       setCalculatedPrices(prices)
     }
 
     calculatePrices()
   }, [freightServices])
 
-  const handleServiceSelect = (serviceId: number) => {
-    // Update form data via onChange
-    const event = {
-      target: {
-        name: 'freightServiceId',
-        value: serviceId.toString()
-      }
-    } as React.ChangeEvent<HTMLInputElement>
-    
-    // Use a custom handler that updates both freightServiceId and shippingMethod
-    const customOnChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-      onChange(e)
-      
-      // Also update shippingMethod for backward compatibility
-      const service = freightServices.find(s => s.id === serviceId)
-      if (service) {
-        const methodEvent = {
-          target: {
-            name: 'shippingMethod',
-            value: service.code || 'standard'
-          }
-        } as React.ChangeEvent<HTMLInputElement>
-        onChange(methodEvent)
-      }
-    }
-    
-    customOnChange(event)
+  const emit = (name: string, value: string) => {
+    onChange({ target: { name, value } } as React.ChangeEvent<HTMLInputElement>)
+  }
 
-    // Notify parent
-    if (onFreightServiceChange) {
-      onFreightServiceChange(serviceId)
-    }
+  const selectService = (service: FreightService, pool: FreightService[] = freightServices) => {
+    emit('freightServiceId', service.id.toString())
+    emit('shippingMethod', service.code || 'standard')
+    emit('fulfillmentMethod', 'shipping')
+    onFreightServiceChange?.(service.id)
+    onFulfillmentChange?.('shipping')
+    void pool
+  }
+
+  const selectPoint = (point: StorefrontPickupPoint) => {
+    emit('fulfillmentMethod', 'pickup')
+    emit('pickupPointId', point.id.toString())
+    // Drop any courier the shopper had selected: nothing is being carried.
+    onFreightServiceChange?.(null)
+    onFulfillmentChange?.('pickup', point.id)
   }
 
   const formatDeliveryDays = (min: number, max: number): string => {
@@ -117,6 +123,7 @@ const CheckoutShippingSection = ({ formData, onChange, country, onFreightService
 
   const visibleServices = expanded ? freightServices : freightServices.slice(0, 3)
   const hasMoreServices = freightServices.length > 3
+  const totalOptions = pickupPoints.length + freightServices.length
 
   if (loading) {
     return (
@@ -127,7 +134,7 @@ const CheckoutShippingSection = ({ formData, onChange, country, onFreightService
     )
   }
 
-  if (freightServices.length === 0) {
+  if (totalOptions === 0) {
     return (
       <div style={{ marginBottom: '2rem' }}>
         <h2 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1rem', color: '#2c3e50' }}>{t('checkout.shipping.title')}</h2>
@@ -141,44 +148,57 @@ const CheckoutShippingSection = ({ formData, onChange, country, onFreightService
   return (
     <div style={{ marginBottom: '2rem' }}>
       <h2 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: '1rem', color: '#2c3e50' }}>{t('checkout.shipping.title')}</h2>
-      
+
       <div style={{ border: '1px solid #d0d0d0', borderRadius: '8px', overflow: 'hidden' }}>
+        {/* Collection first: it is free of a delivery address, and for a shop
+            that mostly collects it is the answer most shoppers want. */}
+        {pickupPoints.map((point, index) => {
+          const isSelected = isPickup && formData.pickupPointId === point.id
+          const fee = parseFloat(point.fee || '0')
+          const isLast = index === pickupPoints.length - 1 && visibleServices.length === 0 && !hasMoreServices
+
+          return (
+            <label key={`pickup-${point.id}`} style={rowStyle(isSelected, isLast)}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
+                <input
+                  type='radio'
+                  name='fulfillmentOption'
+                  checked={isSelected}
+                  onChange={() => selectPoint(point)}
+                  style={{ width: '18px', height: '18px', cursor: 'pointer' }}
+                />
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '0.875rem', fontWeight: 500, color: '#2c3e50' }}>
+                    {t('checkout.shipping.pickupAt', { point: point.name })}
+                  </div>
+                  <div style={{ fontSize: '0.75rem', color: '#757575' }}>{point.address}</div>
+                  {point.instructions && (
+                    <div style={{ fontSize: '0.75rem', color: '#757575', whiteSpace: 'pre-line' }}>
+                      {point.instructions}
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div style={{ fontSize: '0.875rem', fontWeight: 600, color: '#2c3e50', marginLeft: '1rem' }}>
+                {fee > 0 ? formatPrice(fee) : t('checkout.shipping.free')}
+              </div>
+            </label>
+          )
+        })}
+
         {visibleServices.map((service, index) => {
-          const isSelected = formData.freightServiceId === service.id
+          const isSelected = !isPickup && formData.freightServiceId === service.id
           const price = calculatedPrices[service.id] ?? parseFloat(service.base_price)
           const isLast = index === visibleServices.length - 1 && !expanded && !hasMoreServices
 
           return (
-            <label
-              key={service.id}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '1rem',
-                cursor: 'pointer',
-                backgroundColor: isSelected ? '#f9fafb' : 'white',
-                borderBottom: isLast ? 'none' : '1px solid #d0d0d0',
-                transition: 'background-color 0.2s'
-              }}
-              onMouseEnter={(e) => {
-                if (!isSelected) {
-                  e.currentTarget.style.backgroundColor = '#f5f5f5'
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isSelected) {
-                  e.currentTarget.style.backgroundColor = 'white'
-                }
-              }}
-            >
+            <label key={`ship-${service.id}`} style={rowStyle(isSelected, isLast)}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1 }}>
                 <input
                   type='radio'
-                  name='freightServiceId'
-                  value={service.id.toString()}
+                  name='fulfillmentOption'
                   checked={isSelected}
-                  onChange={() => handleServiceSelect(service.id)}
+                  onChange={() => selectService(service)}
                   style={{ width: '18px', height: '18px', cursor: 'pointer' }}
                 />
                 <div style={{ flex: 1 }}>
@@ -203,10 +223,10 @@ const CheckoutShippingSection = ({ formData, onChange, country, onFreightService
           )
         })}
 
-        {hasMoreServices && !expanded && (
+        {hasMoreServices && (
           <button
             type='button'
-            onClick={() => setExpanded(true)}
+            onClick={() => setExpanded(!expanded)}
             style={{
               width: '100%',
               padding: '0.75rem',
@@ -216,44 +236,12 @@ const CheckoutShippingSection = ({ formData, onChange, country, onFreightService
               color: '#6366f1',
               fontSize: '0.875rem',
               fontWeight: 500,
-              cursor: 'pointer',
-              transition: 'background-color 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#f9fafb'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'white'
+              cursor: 'pointer'
             }}
           >
-            {t('checkout.shipping.showMore', { count: freightServices.length - 3 })}
-          </button>
-        )}
-
-        {expanded && hasMoreServices && (
-          <button
-            type='button'
-            onClick={() => setExpanded(false)}
-            style={{
-              width: '100%',
-              padding: '0.75rem',
-              border: 'none',
-              borderTop: '1px solid #d0d0d0',
-              backgroundColor: 'white',
-              color: '#6366f1',
-              fontSize: '0.875rem',
-              fontWeight: 500,
-              cursor: 'pointer',
-              transition: 'background-color 0.2s'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#f9fafb'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = 'white'
-            }}
-          >
-            {t('checkout.shipping.showFewer')}
+            {expanded
+              ? t('checkout.shipping.showFewer')
+              : t('checkout.shipping.showMore', { count: freightServices.length - 3 })}
           </button>
         )}
       </div>

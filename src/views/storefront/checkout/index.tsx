@@ -72,6 +72,7 @@ const CheckoutPage = () => {
     country: 'NZ',
     phone: '',
     shippingMethod: 'standard',
+    fulfillmentMethod: 'shipping',
     cardNumber: '',
     cardExpiry: '',
     cardCvv: '',
@@ -115,7 +116,8 @@ const CheckoutPage = () => {
       try {
         const preview = await storefrontApi.getCartPreview(
           formData.freightServiceId ? undefined : formData.shippingMethod,
-          formData.freightServiceId || undefined
+          formData.freightServiceId || undefined,
+          { method: formData.fulfillmentMethod, pickupPointId: formData.pickupPointId }
         )
         setPricePreview({
           subtotal: parseFloat(preview.subtotal),
@@ -134,7 +136,7 @@ const CheckoutPage = () => {
     if (items.length > 0) {
       fetchPricePreview()
     }
-  }, [items, formData.shippingMethod, formData.freightServiceId])
+  }, [items, formData.shippingMethod, formData.freightServiceId, formData.fulfillmentMethod, formData.pickupPointId])
 
   // Initialize checkout data
   useEffect(() => {
@@ -266,6 +268,9 @@ const CheckoutPage = () => {
       if (name === 'freightServiceId') {
         updates.freightServiceId = value ? parseInt(value, 10) : undefined
       }
+      if (name === 'pickupPointId') {
+        updates.pickupPointId = value ? parseInt(value, 10) : undefined
+      }
       
       return {
         ...prev,
@@ -321,8 +326,20 @@ const CheckoutPage = () => {
         }
       }
       
-      // Validate address fields
-      if (!selectedAddressId) {
+      const isPickup = formData.fulfillmentMethod === 'pickup'
+
+      // Validate address fields. A collection order has no address to check —
+      // only the name and phone the shop needs to hand the order over.
+      if (isPickup) {
+        const missingFields: string[] = []
+        if (!formData.lastName?.trim()) missingFields.push(t('checkout.delivery.lastName'))
+        if (!formData.phone?.trim()) missingFields.push(t('checkout.delivery.phone'))
+        if (missingFields.length > 0) {
+          alert(t('checkout.errors.missingRequiredFields', { fields: missingFields.join(', ') }))
+          setSubmitting(false)
+          return
+        }
+      } else if (!selectedAddressId) {
         const missingFields: string[] = []
         if (!formData.lastName?.trim()) missingFields.push(t('checkout.delivery.lastName'))
         if (!formData.address?.trim()) missingFields.push(t('checkout.delivery.address'))
@@ -345,7 +362,7 @@ const CheckoutPage = () => {
       if (isAuthenticated) {
         let shippingAddressId = selectedAddressId
         
-        if (!shippingAddressId) {
+        if (!shippingAddressId && !isPickup) {
           const newAddress = await meApi.createAddress({
             full_name: `${formData.firstName} ${formData.lastName}`.trim(),
             phone: formData.phone.trim(),
@@ -364,7 +381,9 @@ const CheckoutPage = () => {
         // Determine billing address
         let finalBillingAddressId: number | null = null
         
-        if (formData.sameAsBilling) {
+        if (isPickup) {
+          // Nothing is posted anywhere, so there is no address to bill to either.
+        } else if (formData.sameAsBilling) {
           // Use shipping address as billing address
           finalBillingAddressId = shippingAddressId
         } else if (billingAddressId) {
@@ -393,14 +412,19 @@ const CheckoutPage = () => {
           }
         }
         
-        if (!shippingAddressId || !finalBillingAddressId) {
+        if (!isPickup && (!shippingAddressId || !finalBillingAddressId)) {
           throw new Error('Failed to get valid address IDs')
         }
         
-        orderResponse = await storefrontApi.checkout({
+        orderResponse = await storefrontApi.checkout(isPickup ? {
           store: storeId,
-          shipping_address: shippingAddressId,
-          billing_address: finalBillingAddressId,
+          fulfillment_method: 'pickup',
+          pickup_point: formData.pickupPointId,
+          customer_note: ''
+        } : {
+          store: storeId,
+          shipping_address: shippingAddressId!,
+          billing_address: finalBillingAddressId!,
           customer_note: '',
           freight_service_id: formData.freightServiceId,
           shipping_method: formData.freightServiceId ? undefined : formData.shippingMethod
@@ -409,7 +433,9 @@ const CheckoutPage = () => {
         // Guest checkout - prepare billing address if different from shipping
         const guestCheckoutData: any = {
           store: storeId,
-          shipping_address: {
+          fulfillment_method: formData.fulfillmentMethod,
+          pickup_point: isPickup ? formData.pickupPointId : undefined,
+          shipping_address: isPickup ? undefined : {
             full_name: `${formData.firstName} ${formData.lastName}`,
             phone: formData.phone,
             email: formData.email,
@@ -442,7 +468,9 @@ const CheckoutPage = () => {
           }
         }
         
-        if (formData.freightServiceId) {
+        if (isPickup) {
+          // Freight would only confuse the total for an order nobody carries.
+        } else if (formData.freightServiceId) {
           guestCheckoutData.freight_service_id = formData.freightServiceId
         } else {
           guestCheckoutData.shipping_method = formData.shippingMethod
@@ -600,6 +628,7 @@ const CheckoutPage = () => {
               addresses={addresses}
               selectedAddressId={selectedAddressId}
               onSelectAddress={setSelectedAddressId}
+              isPickup={formData.fulfillmentMethod === 'pickup'}
             />
 
             {/* Shipping Method */}
@@ -612,6 +641,17 @@ const CheckoutPage = () => {
                   ...prev,
                   freightServiceId: serviceId || undefined
                 }))
+              }}
+              onFulfillmentChange={(method, pickupPointId) => {
+                setFormData(prev => ({
+                  ...prev,
+                  fulfillmentMethod: method,
+                  pickupPointId: method === 'pickup' ? pickupPointId : undefined,
+                  freightServiceId: method === 'pickup' ? undefined : prev.freightServiceId
+                }))
+                // A saved delivery address is meaningless once the order is
+                // being collected, and would otherwise be sent anyway.
+                if (method === 'pickup') setSelectedAddressId(null)
               }}
             />
 

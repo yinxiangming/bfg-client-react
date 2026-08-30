@@ -23,6 +23,20 @@ interface ApiResponse<T> {
  * Extends RequestInit for storefront fetches.
  * `requestHost` is set on the Next.js server so WorkspaceMiddleware can resolve the tenant from the incoming Host (no `window`).
  */
+/** A collection point as the checkout picker sees it. */
+export type StorefrontPickupPoint = {
+  id: number
+  name: string
+  code: string
+  address: string
+  phone: string
+  /** Opening hours, which door, where to park. Free text, may be empty. */
+  instructions: string
+  latitude: string | null
+  longitude: string | null
+  fee: string
+}
+
 export type StorefrontRequestInit = RequestInit & {
   requestHost?: string
 }
@@ -435,7 +449,11 @@ class StorefrontApiClient {
     return this.request<any>('/api/v1/store/cart/current/')
   }
 
-  async getCartPreview(shippingMethod?: string, freightServiceId?: number): Promise<{
+  async getCartPreview(
+    shippingMethod?: string,
+    freightServiceId?: number,
+    fulfillment?: { method: 'shipping' | 'pickup'; pickupPointId?: number | null }
+  ): Promise<{
     subtotal: string
     discount: string
     shipping_cost: string
@@ -444,7 +462,14 @@ class StorefrontApiClient {
     shipping_discount?: string | null
   }> {
     const queryParams = new URLSearchParams()
-    if (freightServiceId) {
+    if (fulfillment?.method === 'pickup') {
+      // Nothing is being carried, so a freight service would only mislead the
+      // summary; the point's own fee is the whole charge.
+      queryParams.append('fulfillment_method', 'pickup')
+      if (fulfillment.pickupPointId) {
+        queryParams.append('pickup_point', String(fulfillment.pickupPointId))
+      }
+    } else if (freightServiceId) {
       queryParams.append('freight_service_id', freightServiceId.toString())
     } else if (shippingMethod) {
       queryParams.append('shipping_method', shippingMethod)
@@ -458,6 +483,11 @@ class StorefrontApiClient {
       total: string
       shipping_discount?: string | null
     }>(`/api/v1/store/cart/preview/${query ? `?${query}` : ''}`)
+  }
+
+  /** Active collection points for this workspace. Public, like freight services. */
+  async getPickupPoints(): Promise<StorefrontPickupPoint[]> {
+    return this.request<StorefrontPickupPoint[]>('/api/v1/delivery/pickup-points/for_storefront/')
   }
 
   // Freight Services
@@ -507,8 +537,11 @@ class StorefrontApiClient {
 
   async checkout(data: {
     store: number
-    shipping_address: number
-    billing_address: number
+    /** Omitted for a collection order — there is nothing to deliver to. */
+    shipping_address?: number
+    billing_address?: number
+    fulfillment_method?: 'shipping' | 'pickup'
+    pickup_point?: number | null
     customer_note?: string
     freight_service_id?: number  // Preferred
     shipping_method?: string  // Backward compatibility
@@ -524,7 +557,9 @@ class StorefrontApiClient {
   // Guest checkout (no authentication required)
   async guestCheckout(data: {
     store: number
-    shipping_address: {
+    fulfillment_method?: 'shipping' | 'pickup'
+    pickup_point?: number | null
+    shipping_address?: {
       full_name: string
       phone?: string
       email?: string

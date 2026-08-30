@@ -15,6 +15,9 @@ export type CheckoutFormData = {
   phone: string
   shippingMethod: string
   freightServiceId?: number  // Preferred over shippingMethod
+  /** 'pickup' takes the address out of the equation entirely. */
+  fulfillmentMethod: 'shipping' | 'pickup'
+  pickupPointId?: number
   cardNumber: string
   cardExpiry: string
   cardCvv: string

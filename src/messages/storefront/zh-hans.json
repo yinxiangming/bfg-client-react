@@ -250,16 +250,19 @@
       "state": "州/省",
       "zipCode": "邮编",
       "phone": "电话",
-      "saveInfoNextTime": "保存信息，便于下次使用"
+      "saveInfoNextTime": "保存信息，便于下次使用",
+      "pickupContactTitle": "取货人信息"
     },
     "shipping": {
       "title": "配送方式",
       "loadingOptions": "正在加载配送选项...",
-      "noOptions": "该国家/地区暂无可用配送方式。",
+      "noOptions": "暂时没有可用的配送或自提方式。",
       "showMore": "展开更多（{count}）",
       "showFewer": "收起",
       "businessDay": "个工作日",
-      "businessDays": "个工作日"
+      "businessDays": "个工作日",
+      "pickupAt": "到 {point} 自提",
+      "free": "免费"
     },
     "payment": {
       "title": "支付",
