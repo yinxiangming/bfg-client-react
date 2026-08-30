@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 // Component Imports
 import SettingsTabsPage from '@/components/admin/settings/SettingsTabsPage'
 import WarehousesTab from './WarehousesTab'
+import PickupPointsTab from './PickupPointsTab'
 import FreightServicesTab from './FreightServicesTab'
 import CarriersTab from './CarriersTab'
 import FreightStatusesTab from './FreightStatusesTab'
@@ -28,6 +29,12 @@ const DeliverySettingsPage = () => {
           label: t('settings.delivery.page.tabs.warehouses'),
           icon: 'tabler-building-warehouse',
           content: <WarehousesTab />
+        },
+        {
+          value: 'pickup-points',
+          label: t('settings.delivery.page.tabs.pickupPoints'),
+          icon: 'tabler-map-pin-check',
+          content: <PickupPointsTab />
         },
         {
           value: 'freight-services',

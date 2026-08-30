@@ -39,7 +39,11 @@ import { useOrderActions, usePageSlots } from '@/extensions/hooks/usePageSection
 import { renderSlot } from '@/extensions/hooks/renderSection'
 
 // API Imports
-import { getOrder, updateOrder, cancelOrder, refundOrder, createReturnRequest, createReturnLineItem, type Order } from '@/services/store'
+import {
+  getOrder, updateOrder, cancelOrder, refundOrder, createReturnRequest, createReturnLineItem,
+  ORDER_STATUSES, PAYMENT_STATUSES,
+  type Order, type OrderStatus, type PaymentStatus
+} from '@/services/store'
 
 // Extended Order type for detail view
 type OrderDetail = Order & {
@@ -177,11 +181,7 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
         return {
           ...field,
           options: [
-            { value: 'pending', label: t('orders.status.pending') },
-            { value: 'paid', label: t('orders.status.paid') },
-            { value: 'shipped', label: t('orders.status.shipped') },
-            { value: 'completed', label: t('orders.status.completed') },
-            { value: 'cancelled', label: t('orders.status.cancelled') }
+            ...ORDER_STATUSES.map(value => ({ value, label: t(`orders.status.${value}`) }))
           ]
         }
       }
@@ -189,9 +189,7 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
         return {
           ...field,
           options: [
-            { value: 'pending', label: t('orders.paymentStatus.pending') },
-            { value: 'paid', label: t('orders.paymentStatus.paid') },
-            { value: 'failed', label: t('orders.paymentStatus.failed') }
+            ...PAYMENT_STATUSES.map(value => ({ value, label: t(`orders.paymentStatus.${value}`) }))
           ]
         }
       }
@@ -269,7 +267,7 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
     fetchOrder()
   }
 
-  const handleStatusChange = async (status: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled') => {
+  const handleStatusChange = async (status: OrderStatus) => {
     try {
       await updateOrder(parseInt(id), { status })
       await fetchOrder()
@@ -279,7 +277,7 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
     }
   }
 
-  const handlePaymentStatusChange = async (status: 'pending' | 'paid' | 'failed') => {
+  const handlePaymentStatusChange = async (status: PaymentStatus) => {
     try {
       await updateOrder(parseInt(id), { payment_status: status })
       await fetchOrder()
@@ -452,7 +450,7 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
                   visibleSlots,
                   replacements,
                   DeliveryCard,
-                  { order }
+                  { order, onUpdate: () => fetchOrder() }
                 )}
               </Grid>
             )}

@@ -138,6 +138,7 @@ export const bfgApi = {
 
   // Delivery
   warehouses: () => buildApiUrl('/warehouses/', API_VERSIONS.BFG2, 'delivery'),
+  pickupPoints: () => buildApiUrl('/pickup-points/', API_VERSIONS.BFG2, 'delivery'),
   consignments: () => buildApiUrl('/consignments/', API_VERSIONS.BFG2, 'delivery'),
   carriers: () => buildApiUrl('/carriers/', API_VERSIONS.BFG2, 'delivery'),
   packagingTypes: () => buildApiUrl('/packaging-types/', API_VERSIONS.BFG2, 'delivery'),

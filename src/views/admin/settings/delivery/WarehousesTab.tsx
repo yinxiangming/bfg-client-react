@@ -35,6 +35,7 @@ const buildWarehousesSchema = (t: any): ListSchema => ({
     { field: 'is_default', label: t('settings.delivery.warehouses.tab.columns.default'), type: 'select', sortable: true },
     {
       field: 'address_line1',
+      width: 240,
       label: t('settings.delivery.warehouses.tab.columns.address'),
       type: 'string',
       render: (value: any, row: any) => {

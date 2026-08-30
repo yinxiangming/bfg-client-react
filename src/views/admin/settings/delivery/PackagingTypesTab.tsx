@@ -28,7 +28,7 @@ const buildPackagingTypesSchema = (t: any): ListSchema => ({
   columns: [
     { field: 'name', label: t('settings.delivery.packagingTypes.tab.columns.name'), type: 'string', sortable: true, link: 'edit' },
     { field: 'code', label: t('settings.delivery.packagingTypes.tab.columns.code'), type: 'string', sortable: true },
-    { field: 'description', label: t('settings.delivery.packagingTypes.tab.columns.description'), type: 'string' },
+    { field: 'description', label: t('settings.delivery.packagingTypes.tab.columns.description'), type: 'string', width: 280 },
     { field: 'order', label: t('settings.delivery.packagingTypes.tab.columns.order'), type: 'number' },
     { field: 'is_active', label: t('settings.delivery.packagingTypes.tab.columns.status'), type: 'select', sortable: true }
   ],

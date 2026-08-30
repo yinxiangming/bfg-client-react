@@ -9,17 +9,21 @@ import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
+import Tooltip from '@mui/material/Tooltip'
 
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import SchemaTable from '@/components/schema/SchemaTable'
 import StatusBadge from '@/components/schema/StatusBadge'
 import type { ListSchema, SchemaAction, SchemaFilter } from '@/types/schema'
 import { usePagedData } from '@/hooks/usePagedData'
-import { getOrdersPage, getOrder, deleteOrder, updateOrder, type Order, type OrderItemSummary } from '@/services/store'
+import {
+  getOrdersPage, getOrder, deleteOrder, updateOrder,
+  ORDER_STATUSES, PAYMENT_STATUSES,
+  type Order, type OrderItemSummary
+} from '@/services/store'
 import { getWorkspaceSettings } from '@/services/settings'
 import { formatCurrency, formatDate } from '@/utils/format'
 import { bfgApi } from '@/utils/api'
-import Button from '@mui/material/Button'
 import Popover from '@mui/material/Popover'
 import MenuItem from '@mui/material/MenuItem'
 import CustomTextField from '@/components/ui/TextField'
@@ -28,16 +32,19 @@ import CreateOrderModal from '@/views/admin/store/orders/list/CreateOrderModal'
 
 const STATUS_COLORS: Record<string, 'warning' | 'info' | 'primary' | 'success' | 'error' | 'default'> = {
   pending: 'warning',
-  paid: 'success',
+  processing: 'info',
   shipped: 'primary',
-  completed: 'success',
-  cancelled: 'error'
+  ready_for_pickup: 'primary',
+  delivered: 'success',
+  cancelled: 'error',
+  refunded: 'default'
 }
 
 const PAYMENT_COLORS: Record<string, 'warning' | 'success' | 'error' | 'default'> = {
   pending: 'warning',
   paid: 'success',
-  failed: 'error'
+  failed: 'error',
+  refunded: 'default'
 }
 
 type PopoverState = { orderId: number | null; anchorEl: HTMLElement | null }
@@ -57,6 +64,9 @@ const buildOrdersSchema = (
       type: 'string',
       sortable: true,
       link: 'edit',
+      // Holds the order number plus one line per item. Product names run to 40+
+      // CJK characters, so this column has to be capped or it eats the table.
+      width: 300,
       render: (value: any, row: Order) => {
         const num = value || row?.order_number || '-'
         const items = (row?.items || []) as OrderItemSummary[]
@@ -78,9 +88,38 @@ const buildOrdersSchema = (
             {items.length > 0 && (
               <Box component='span' display='block'>
                 {items.map((i, idx) => (
-                  <Typography key={idx} variant='body2' color='text.secondary' sx={{ lineHeight: 1.5 }} component='span' display='block'>
-                    {i.product_name} × {i.quantity}
-                  </Typography>
+                  <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                    {/* Fixed box either way, so the product names stay aligned
+                        whether or not a line has an image. */}
+                    <Box
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        flexShrink: 0,
+                        borderRadius: 1,
+                        overflow: 'hidden',
+                        bgcolor: 'action.hover',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      {i.image ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={i.image}
+                          alt=''
+                          loading='lazy'
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <i className='tabler-photo' style={{ fontSize: '1rem', opacity: 0.4 }} />
+                      )}
+                    </Box>
+                    <Typography variant='body2' color='text.secondary' sx={{ lineHeight: 1.4 }}>
+                      {i.product_name} × {i.quantity}
+                    </Typography>
+                  </Box>
                 ))}
               </Box>
             )}
@@ -98,6 +137,7 @@ const buildOrdersSchema = (
       label: t('orders.listPage.schema.columns.customer'),
       type: 'string',
       sortable: true,
+      width: 150,
       render: (value: any, row: any) => {
         return row.customer_name || value || '-'
       }
@@ -116,18 +156,7 @@ const buildOrdersSchema = (
       sortable: true,
       render: (value: any, row: Order) => {
         const status = (typeof value === 'string' ? value : row?.status) || ''
-        const label =
-          status === 'pending'
-            ? t('orders.status.pending')
-            : status === 'paid'
-              ? t('orders.status.paid')
-              : status === 'shipped'
-                ? (row?.fulfillment_method === 'pickup' ? t('orders.status.readyToPickup') : t('orders.status.shipped'))
-                : status === 'completed'
-                  ? t('orders.status.completed')
-                  : status === 'cancelled'
-                    ? t('orders.status.cancelled')
-                    : status || '-'
+        const label = status ? t(`orders.status.${status}`) : '-'
         const handleClick = (e: React.MouseEvent) => {
           e.stopPropagation()
           if (row?.id != null) openStatusPopover(row.id, e.currentTarget as HTMLElement)
@@ -166,17 +195,37 @@ const buildOrdersSchema = (
       }
     },
     {
-      field: 'store',
-      label: t('orders.listPage.schema.columns.store'),
-      type: 'string',
-      render: (value: any, row: any) => {
-        return row.store_name || value || '-'
+      field: 'fulfillment_method',
+      label: t('orders.listPage.schema.columns.fulfillment'),
+      type: 'select',
+      sortable: true,
+      width: 110,
+      render: (value: any, row: Order) => {
+        const method = (typeof value === 'string' ? value : row?.fulfillment_method) || ''
+        if (!method) return '-'
+        const badge = (
+          <StatusBadge
+            label={
+              method === 'pickup'
+                ? t('orders.listPage.schema.columns.fulfillmentPickup')
+                : t('orders.listPage.schema.columns.fulfillmentShipping')
+            }
+            color={method === 'pickup' ? 'warning' : 'info'}
+          />
+        )
+        // Which point to stage the order at is what a picker needs, but naming
+        // it inline would widen the column for every shipping row too.
+        if (method === 'pickup' && row?.pickup_point_name) {
+          return <Tooltip title={row.pickup_point_name}><span>{badge}</span></Tooltip>
+        }
+        return badge
       }
     },
     {
       field: 'packages_count',
       label: t('orders.listPage.schema.columns.logistics'),
       type: 'string',
+      width: 90,
       render: (value: any, row: Order) => {
         const count = row?.packages_count ?? value ?? 0
         const orderId = row?.id
@@ -184,22 +233,22 @@ const buildOrdersSchema = (
           e.stopPropagation()
           if (orderId != null) openLogisticsModal(orderId)
         }
-        if (count > 0) {
-          return (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant='body2' color='text.secondary'>
-                {t('orders.listPage.schema.columns.packagesCount', { count })}
-              </Typography>
-              <Button size='small' variant='outlined' onClick={handleClick} startIcon={<i className='tabler-package' />}>
-                {t('orders.listPage.schema.columns.manageLogistics')}
-              </Button>
-            </Box>
-          )
-        }
+        // Icon only — the label repeated on every row cost more width than it
+        // earned. The tooltip still carries the package count and the action.
+        const title = count > 0
+          ? `${t('orders.listPage.schema.columns.packagesCount', { count })} · ${t('orders.listPage.schema.columns.manageLogistics')}`
+          : t('orders.listPage.schema.columns.addPackages')
         return (
-          <Button size='small' variant='outlined' color='primary' onClick={handleClick} startIcon={<i className='tabler-truck' />}>
-            {t('orders.listPage.schema.columns.addPackages')}
-          </Button>
+          <Tooltip title={title}>
+            <IconButton
+              size='small'
+              color={count > 0 ? 'default' : 'primary'}
+              onClick={handleClick}
+              aria-label={title}
+            >
+              <i className={count > 0 ? 'tabler-package' : 'tabler-truck'} />
+            </IconButton>
+          </Tooltip>
         )
       }
     },
@@ -208,7 +257,8 @@ const buildOrdersSchema = (
       label: t('orders.listPage.schema.columns.createdAt'),
       type: 'datetime',
       sortable: true,
-      render: (value: any) => (value ? formatDate(value, 'yyyy-MM-dd') : '-')
+      width: 150,
+      render: (value: any) => (value ? formatDate(value, 'yyyy-MM-dd HH:mm') : '-')
     }
   ],
   filters: [
@@ -217,24 +267,14 @@ const buildOrdersSchema = (
       label: t('orders.listPage.filters.status.label'),
       type: 'select',
       filterMode: 'api',
-      options: [
-        { value: 'pending', label: t('orders.status.pending') },
-        { value: 'paid', label: t('orders.status.paid') },
-        { value: 'shipped', label: t('orders.status.shipped') },
-        { value: 'completed', label: t('orders.status.completed') },
-        { value: 'cancelled', label: t('orders.status.cancelled') }
-      ]
+      options: ORDER_STATUSES.map(value => ({ value, label: t(`orders.status.${value}`) }))
     },
     {
       field: 'payment_status',
       label: t('orders.listPage.filters.paymentStatus.label'),
       type: 'select',
       filterMode: 'api',
-      options: [
-        { value: 'pending', label: t('orders.paymentStatus.pending') },
-        { value: 'paid', label: t('orders.paymentStatus.paid') },
-        { value: 'failed', label: t('orders.paymentStatus.failed') }
-      ]
+      options: PAYMENT_STATUSES.map(value => ({ value, label: t(`orders.paymentStatus.${value}`) }))
     },
     {
       field: 'store',
@@ -439,11 +479,9 @@ export default function OrdersPage() {
             value={orderForStatus?.status ?? ''}
             onChange={(e) => handleStatusSelect(e.target.value)}
           >
-            <MenuItem value='pending'>{t('orders.status.pending')}</MenuItem>
-            <MenuItem value='paid'>{t('orders.status.paid')}</MenuItem>
-            <MenuItem value='shipped'>{t('orders.status.shipped')}</MenuItem>
-            <MenuItem value='completed'>{t('orders.status.completed')}</MenuItem>
-            <MenuItem value='cancelled'>{t('orders.status.cancelled')}</MenuItem>
+            {ORDER_STATUSES.map(value => (
+              <MenuItem key={value} value={value}>{t(`orders.status.${value}`)}</MenuItem>
+            ))}
           </CustomTextField>
         </Box>
       </Popover>
@@ -461,9 +499,9 @@ export default function OrdersPage() {
             value={orderForPayment?.payment_status ?? ''}
             onChange={(e) => handlePaymentSelect(e.target.value)}
           >
-            <MenuItem value='pending'>{t('orders.paymentStatus.pending')}</MenuItem>
-            <MenuItem value='paid'>{t('orders.paymentStatus.paid')}</MenuItem>
-            <MenuItem value='failed'>{t('orders.paymentStatus.failed')}</MenuItem>
+            {PAYMENT_STATUSES.map(value => (
+              <MenuItem key={value} value={value}>{t(`orders.paymentStatus.${value}`)}</MenuItem>
+            ))}
           </CustomTextField>
         </Box>
       </Popover>

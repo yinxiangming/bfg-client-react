@@ -15,6 +15,7 @@ import CustomTextField from '@/components/ui/TextField'
 import SchemaForm from '@/components/schema/SchemaForm'
 import type { FormSchema } from '@/types/schema'
 import type { Warehouse, WarehousePayload } from '@/services/delivery'
+import { buildCountryOptions } from './countryOptions'
 
 // Google Places API types
 declare global {
@@ -26,47 +27,6 @@ declare global {
 
 let hasWarnedNoGoogleMapsKey = false
 
-// Common country codes (ISO 3166-1 alpha-2)
-const COUNTRY_CODES = [
-  'US',
-  'CA',
-  'GB',
-  'AU',
-  'NZ',
-  'CN',
-  'JP',
-  'KR',
-  'SG',
-  'MY',
-  'TH',
-  'PH',
-  'ID',
-  'VN',
-  'IN',
-  'DE',
-  'FR',
-  'IT',
-  'ES',
-  'NL',
-  'BE',
-  'CH',
-  'AT',
-  'SE',
-  'NO',
-  'DK',
-  'FI',
-  'PL',
-  'BR',
-  'MX',
-  'AR',
-  'CL',
-  'ZA',
-  'AE',
-  'SA',
-  'IL',
-  'TR',
-  'RU'
-] as const
 
 type WarehouseEditDialogProps = {
   open: boolean
@@ -260,16 +220,7 @@ const WarehouseEditDialog = ({ open, warehouse, onClose, onSave }: WarehouseEdit
     autocompleteRef.current = autocomplete
   }, [isGoogleMapsLoaded, open])
 
-  const countryOptions = useMemo(() => {
-    try {
-      const displayNames = new Intl.DisplayNames([locale], { type: 'region' })
-      return [...COUNTRY_CODES]
-        .map(code => ({ value: code, label: displayNames.of(code) || code }))
-        .sort((a, b) => a.label.localeCompare(b.label))
-    } catch {
-      return [...COUNTRY_CODES].map(code => ({ value: code, label: code }))
-    }
-  }, [locale])
+  const countryOptions = useMemo(() => buildCountryOptions(locale), [locale])
 
   const warehouseFormSchema = useMemo(() => buildWarehouseFormSchema(t, countryOptions), [t, countryOptions])
 

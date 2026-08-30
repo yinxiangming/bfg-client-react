@@ -137,15 +137,17 @@
       "paid": "Paid",
       "processing": "Processing",
       "shipped": "Shipped",
-      "readyToPickup": "Ready for Pickup",
+      "ready_for_pickup": "Ready for Pickup",
       "completed": "Completed",
       "cancelled": "Cancelled",
-      "delivered": "Delivered"
+      "delivered": "Delivered",
+      "refunded": "Refunded"
     },
     "paymentStatus": {
       "pending": "Pending",
       "paid": "Paid",
-      "failed": "Failed"
+      "failed": "Failed",
+      "refunded": "Refunded"
     },
     "basicInfo": {
       "storeFallback": "Store #{store}",
@@ -182,7 +184,9 @@
         "createCustomerFailed": "Failed to create customer",
         "addAtLeastOneProduct": "Add at least one product",
         "createOrderFailed": "Failed to create order"
-      }
+      },
+      "pickupPoint": "Pickup Point",
+      "noPickupPoints": "No pickup points configured. Add one under Settings › Delivery."
     },
     "listPage": {
       "title": "Orders",
@@ -193,7 +197,9 @@
           "copyOrderNo": "Copy order number",
           "noteLabel": "Note",
           "customer": "Customer",
-          "store": "Store",
+          "fulfillment": "Fulfillment",
+          "fulfillmentShipping": "Shipping",
+          "fulfillmentPickup": "Pickup",
           "total": "Total",
           "status": "Status",
           "payment": "Payment",
@@ -411,7 +417,17 @@
       "phoneLabel": "Phone",
       "deliveryTimelineLabel": "Delivery Timeline",
       "notShippedYet": "Order has not been shipped yet.",
-      "shippingCostLabel": "Shipping Cost"
+      "shippingCostLabel": "Shipping Cost",
+      "pickup": {
+        "title": "Pickup Information",
+        "pointLabel": "Pickup Point",
+        "noPoint": "No pickup point recorded for this order.",
+        "codeLabel": "Pickup Code",
+        "codeHelp": "Locker PIN or counter code — whatever the customer quotes on collection.",
+        "saveCodeFailed": "Failed to save the pickup code.",
+        "notReadyYet": "Order is not ready for pickup yet.",
+        "feeLabel": "Pickup Fee"
+      }
     },
     "packages": {
       "title": "Packages",
@@ -585,9 +601,7 @@
           "customer": "Customer",
           "rating": "Rating",
           "title": "Title",
-          "comment": "Comment",
           "status": "Status",
-          "helpfulCount": "Helpful",
           "createdAt": "Created At"
         }
       },
@@ -619,6 +633,9 @@
         "title": "Customers",
         "customerNumber": "Customer Number",
         "name": "Name",
+        "phone": "Phone",
+        "totalSpent": "Total Spent",
+        "lastLogin": "Last Active",
         "companyName": "Company Name",
         "email": "Email",
         "taxNumber": "Tax Number",
@@ -2018,6 +2035,7 @@
         "subtitle": "Manage warehouses, carriers, packaging types, and delivery defaults",
         "tabs": {
           "warehouses": "Warehouses",
+          "pickupPoints": "Pickup Points",
           "freightServices": "Freight Services",
           "carriers": "Carriers",
           "freightStatus": "Freight Status",
@@ -2025,6 +2043,57 @@
           "packagingTypes": "Packaging Types",
           "deliveryZones": "Delivery Zones",
           "deliverySettings": "Delivery Settings"
+        }
+      },
+      "pickupPoints": {
+        "tab": {
+          "title": "Pickup Points",
+          "columns": {
+            "name": "Name",
+            "code": "Code",
+            "address": "Address",
+            "phone": "Phone",
+            "fee": "Fee",
+            "status": "Status",
+            "default": "Default"
+          },
+          "actions": {
+            "newPoint": "New Pickup Point",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this pickup point?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete pickup point: {error}. A point with orders against it cannot be deleted — deactivate it instead.",
+            "saveFailed": "Failed to save pickup point: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Pickup Point",
+          "fields": {
+            "name": "Name",
+            "code": "Code",
+            "active": "Active",
+            "defaultPoint": "Default Pickup Point",
+            "defaultPointHelp": "Used when a pickup order names no point.",
+            "addressLine1": "Address Line 1",
+            "addressLine2": "Address Line 2",
+            "city": "City",
+            "state": "State/Province",
+            "postalCode": "Postal Code",
+            "country": "Country",
+            "latitude": "Latitude",
+            "longitude": "Longitude",
+            "phone": "Phone",
+            "email": "Email",
+            "instructions": "Pickup Instructions",
+            "instructionsHelp": "Opening hours, which door, where to park — shown to the shopper.",
+            "fee": "Pickup Fee",
+            "feeHelp": "Charged on the order's delivery charge line.",
+            "sortOrder": "Sort Order",
+            "warehouse": "Stock From",
+            "warehouseHelp": "The warehouse this point draws stock from, if it is one of yours."
+          }
         }
       }
     },

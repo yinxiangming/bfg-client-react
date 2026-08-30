@@ -349,7 +349,26 @@ export async function getWarehouses(): Promise<Warehouse[]> {
 export interface OrderItemSummary {
   product_name: string
   quantity: number
+  /** First product image, absolute URL. Null when the product has no image. */
+  image?: string | null
 }
+
+/**
+ * The only order statuses the API accepts, in workflow order.
+ *
+ * Mirrors `Order.STATUS_CHOICES` in bfg/shop/models/order.py. Every screen must
+ * build its dropdowns from this list: the admin used to offer `paid` and
+ * `completed`, neither of which is an order status — `paid` belongs to
+ * payment_status — so saving either returned
+ * `status: "paid" is not a valid choice`, while `processing`, `delivered` and
+ * `refunded` could not be set at all.
+ */
+export const ORDER_STATUSES = ['pending', 'processing', 'shipped', 'ready_for_pickup', 'delivered', 'cancelled', 'refunded'] as const
+export type OrderStatus = (typeof ORDER_STATUSES)[number]
+
+/** Mirrors `Order.PAYMENT_STATUS_CHOICES`. */
+export const PAYMENT_STATUSES = ['pending', 'paid', 'failed', 'refunded'] as const
+export type PaymentStatus = (typeof PAYMENT_STATUSES)[number]
 
 export interface Order {
   id: number
@@ -359,6 +378,11 @@ export interface Order {
   store?: number | string
   store_name?: string
   fulfillment_method?: 'shipping' | 'pickup'
+  /** Set only on pickup orders. The list serialises the id and the name. */
+  pickup_point?: number | null
+  pickup_point_name?: string | null
+  /** Locker PIN or counter code — whatever the customer quotes on collection. */
+  pickup_code?: string
   total: number
   item_count?: number
   /** Brief item list for list view (product_name, quantity) */
@@ -366,8 +390,8 @@ export interface Order {
   customer_note?: string
   /** Number of packages for logistics column */
   packages_count?: number
-  status: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled'
-  payment_status: 'pending' | 'paid' | 'failed'
+  status: OrderStatus
+  payment_status: PaymentStatus
   created_at: string
 }
 
@@ -418,6 +442,9 @@ export interface CreateOrderPayload {
   customer_id: number
   store_id: number
   fulfillment_method?: 'shipping' | 'pickup'
+  /** Required for pickup orders unless the workspace has a default point. */
+  pickup_point_id?: number | null
+  pickup_code?: string
   shipping_address_id?: number | null
   billing_address_id?: number | null
   status?: Order['status']

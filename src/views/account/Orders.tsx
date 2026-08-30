@@ -162,15 +162,14 @@ const Orders = () => {
 
   const getStatusLabel = (status: string, fulfillmentMethod?: string) => {
     const key = status?.toLowerCase()
-    if (key === 'shipped' && fulfillmentMethod === 'pickup') {
-      return t('statusReadyToPickup')
-    }
+    void fulfillmentMethod
     const map: Record<string, string> = {
       pending: 'statusPending',
       processing: 'statusProcessing',
       completed: 'statusCompleted',
       cancelled: 'statusCancelled',
-      shipped: 'statusDispatched'
+      shipped: 'statusDispatched',
+      ready_for_pickup: 'statusReadyToPickup'
     }
     return key && map[key] ? t(map[key]) : (status || t('unknown'))
   }

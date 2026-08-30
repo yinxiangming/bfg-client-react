@@ -16,38 +16,61 @@ import { usePagedData } from '@/hooks/usePagedData'
 import { getCustomersPage, getCustomer, deleteCustomer, type Customer } from '@/services/store'
 import { useAppDialog } from '@/contexts/AppDialogContext'
 
+const CJK_RE = /[\u4e00-\u9fff]/
+
+/**
+ * Name to show in the list.
+ *
+ * Chinese names read surname-first and unspaced (王小明), Western ones given-name
+ * first. Falls back to the customer number rather than the username, because
+ * legacy wxstore usernames carry a `__wxstore_<id>` suffix that is noise to a
+ * human reader.
+ *
+ * Mirrors `User.get_full_name()` server-side (bfg/common/models/core.py); this
+ * endpoint serialises `user.first_name`/`last_name` rather than a joined name,
+ * so the ordering rule has to exist on both sides. Keep them in step.
+ */
+const customerDisplayName = (row: any): string => {
+  const first = (row.user?.first_name || '').trim()
+  const last = (row.user?.last_name || '').trim()
+
+  if (first || last) {
+    return CJK_RE.test(`${first}${last}`) ? `${last}${first}` : [first, last].filter(Boolean).join(' ')
+  }
+
+  return row.customer_number || '-'
+}
+
 const buildCustomersSchema = (t: any): ListSchema => ({
   title: t('customers.page.schema.title'),
   columns: [
-    { field: 'customer_number', label: t('customers.page.schema.customerNumber'), type: 'string', link: 'view' },
     {
-      // Customer has no name of its own — it comes from the linked user. Without this
-      // a consumer account with no company and no email renders as a blank row.
-      field: 'user',
+      field: 'name',
       label: t('customers.page.schema.name'),
       type: 'string',
-      render: (_value: any, row: any) => {
-        const user = row.user || {}
-        const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ').trim()
-        return fullName || user.username || '-'
-      }
+      link: 'view',
+      width: 180,
+      render: (_value: any, row: any) => customerDisplayName(row)
     },
-    { field: 'company_name', label: t('customers.page.schema.companyName'), type: 'string', sortable: true },
     {
       field: 'user_email',
       label: t('customers.page.schema.email'),
       type: 'string',
       sortable: true,
+      width: 220,
       render: (value: any, row: any) => {
         return value || row.user?.email || '-'
       }
     },
-    { field: 'tax_number', label: t('customers.page.schema.taxNumber'), type: 'string' },
-    { field: 'credit_limit', label: t('customers.page.schema.creditLimit'), type: 'currency', sortable: true },
-    { field: 'balance', label: t('customers.page.schema.balance'), type: 'currency', sortable: true },
-    { field: 'is_active', label: t('customers.page.schema.active'), type: 'select', sortable: true },
-    { field: 'is_verified', label: t('customers.page.schema.verified'), type: 'select', sortable: true },
-    { field: 'created_at', label: t('customers.page.schema.createdAt'), type: 'datetime', sortable: true }
+    {
+      field: 'user_phone',
+      label: t('customers.page.schema.phone'),
+      type: 'string',
+      width: 140,
+      render: (_value: any, row: any) => row.user?.phone || '-'
+    },
+    { field: 'total_spent', label: t('customers.page.schema.totalSpent'), type: 'currency' },
+    { field: 'last_login', label: t('customers.page.schema.lastLogin'), type: 'datetime', width: 150 }
   ],
   searchFields: ['user', 'company_name', 'tax_number', 'user_email', 'customer_number'],
   actions: [

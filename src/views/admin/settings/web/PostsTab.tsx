@@ -22,8 +22,8 @@ const buildPostsSchema = (
 ): ListSchema => ({
   title: t('settings.web.posts.tab.title'),
   columns: [
-    { field: 'title', label: t('settings.web.posts.tab.columns.title'), type: 'string', sortable: true, link: 'edit' },
-    { field: 'slug', label: t('settings.web.posts.tab.columns.slug'), type: 'string', sortable: true },
+    { field: 'title', label: t('settings.web.posts.tab.columns.title'), type: 'string', sortable: true, link: 'edit', width: 260 },
+    { field: 'slug', label: t('settings.web.posts.tab.columns.slug'), type: 'string', sortable: true, width: 180 },
     { field: 'category_name', label: t('settings.web.posts.tab.columns.category'), type: 'string' },
     { field: 'status', label: t('settings.web.posts.tab.columns.status'), type: 'select', sortable: true },
     { field: 'language', label: t('settings.web.posts.tab.columns.language'), type: 'string' },

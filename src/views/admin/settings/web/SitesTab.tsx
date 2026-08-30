@@ -28,7 +28,7 @@ const buildSitesSchema = (t: any): ListSchema => ({
   title: t('settings.web.sites.tab.title'),
   columns: [
     { field: 'name', label: t('settings.web.sites.tab.columns.name'), type: 'string', sortable: true, link: 'edit' },
-    { field: 'domain', label: t('settings.web.sites.tab.columns.domain'), type: 'string', sortable: true },
+    { field: 'domain', label: t('settings.web.sites.tab.columns.domain'), type: 'string', sortable: true, width: 200 },
     { field: 'theme_name', label: t('settings.web.sites.tab.columns.theme'), type: 'string' },
     { field: 'default_language', label: t('settings.web.sites.tab.columns.defaultLanguage'), type: 'string' },
     { field: 'is_default', label: t('settings.web.sites.tab.columns.isDefault'), type: 'select', sortable: true },

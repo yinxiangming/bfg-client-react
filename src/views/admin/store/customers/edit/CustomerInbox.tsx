@@ -60,14 +60,16 @@ const buildInboxSchema = (t: any): ListSchema => ({
   title: t('customers.inbox.schemas.messagesTitle'),
   columns: [
     { 
-      field: 'message_subject', 
+      field: 'message_subject',
+      width: 260, 
       label: t('common.labels.subject'), 
       type: 'string', 
       sortable: true,
       link: 'view'
     },
     { 
-      field: 'sender_name', 
+      field: 'sender_name',
+      width: 150, 
       label: t('common.labels.from'), 
       type: 'string',
       render: (value, row) => {

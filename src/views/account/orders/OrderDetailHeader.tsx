@@ -72,7 +72,7 @@ const OrderDetailHeader = ({ order, onCancel, onRefresh }: OrderDetailHeaderProp
   const orderNumber = order.order_number || `ORD-${order.id}`
   const orderStatusRaw = order.status || 'pending'
   const orderStatus = orderStatusRaw.toLowerCase()
-  const isPickupReady = orderStatus === 'shipped' && order.fulfillment_method === 'pickup'
+  const isPickupReady = orderStatus === 'ready_for_pickup'
   const paymentStatusValue = order.payment_status?.toLowerCase() || 'pending'
   const createdDate = order.created_at ? new Date(order.created_at) : new Date()
 
@@ -113,14 +113,12 @@ const OrderDetailHeader = ({ order, onCancel, onRefresh }: OrderDetailHeaderProp
   // Get translated order status
   const getOrderStatusText = (status: string) => {
     if (!status) return t('statusPending')
-    if (status.toLowerCase() === 'shipped' && order.fulfillment_method === 'pickup') {
-      return t('statusReadyToPickup')
-    }
     const normalizedStatus = status.toLowerCase().replace(/\s+/g, '')
     const statusMap: { [key: string]: string } = {
       'delivered': 'statusDelivered',
       'outfordelivery': 'statusOutForDelivery',
       'readytopickup': 'statusReadyToPickup',
+      'ready_for_pickup': 'statusReadyToPickup',
       'dispatched': 'statusDispatched',
       'processing': 'statusProcessing',
       'pending': 'statusPending',

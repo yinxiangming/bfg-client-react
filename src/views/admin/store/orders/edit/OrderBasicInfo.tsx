@@ -103,12 +103,15 @@ const OrderBasicInfo = ({ order, onNavigate }: OrderBasicInfoProps) => {
   }
 
   // Order workflow steps
+  // Milestones, not statuses. "paid" is a payment_status and is labelled as one;
+  // the rest mirror Order.STATUS_CHOICES, which ends at `delivered` — there is
+  // no `completed` status, so the old final step could never light up.
   const orderSteps = [
     { label: t('orders.status.pending'), value: 'pending' },
-    { label: t('orders.status.paid'), value: 'paid' },
+    { label: t('orders.paymentStatus.paid'), value: 'paid' },
     { label: t('orders.status.processing'), value: 'processing' },
     { label: t('orders.status.shipped'), value: 'shipped' },
-    { label: t('orders.status.completed'), value: 'completed' }
+    { label: t('orders.status.delivered'), value: 'delivered' }
   ]
 
   const getCurrentStepIndex = () => {
@@ -116,10 +119,10 @@ const OrderBasicInfo = ({ order, onNavigate }: OrderBasicInfoProps) => {
     const s = (order.status || '').toLowerCase()
     if (s === 'cancelled' || s === 'refunded') return -1
     if (!paid) return 0
-    if (s === 'pending' || s === 'paid') return 1
+    if (s === 'pending') return 1
     if (s === 'processing') return 2
     if (s === 'shipped') return 3
-    if (s === 'delivered' || s === 'completed') return 4
+    if (s === 'delivered') return 4
     return 1
   }
 

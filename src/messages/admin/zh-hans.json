@@ -137,15 +137,17 @@
       "paid": "已支付",
       "processing": "处理中",
       "shipped": "已发货",
-      "readyToPickup": "待自提",
+      "ready_for_pickup": "待自提",
       "completed": "已完成",
       "cancelled": "已取消",
-      "delivered": "已送达"
+      "delivered": "已送达",
+      "refunded": "已退款"
     },
     "paymentStatus": {
       "pending": "待支付",
       "paid": "已支付",
-      "failed": "失败"
+      "failed": "失败",
+      "refunded": "已退款"
     },
     "basicInfo": {
       "storeFallback": "门店 #{store}",
@@ -182,7 +184,9 @@
         "createCustomerFailed": "创建客户失败",
         "addAtLeastOneProduct": "请至少添加一件商品",
         "createOrderFailed": "创建订单失败"
-      }
+      },
+      "pickupPoint": "自提点",
+      "noPickupPoints": "还没有配置自提点，请到「设置 › 配送」中新建。"
     },
     "listPage": {
       "title": "订单",
@@ -193,7 +197,9 @@
           "copyOrderNo": "复制订单号",
           "noteLabel": "留言",
           "customer": "客户",
-          "store": "门店",
+          "fulfillment": "配送方式",
+          "fulfillmentShipping": "配送",
+          "fulfillmentPickup": "自提",
           "total": "总计",
           "status": "状态",
           "payment": "支付",
@@ -411,7 +417,17 @@
       "phoneLabel": "电话",
       "deliveryTimelineLabel": "配送时间线",
       "notShippedYet": "订单尚未发货。",
-      "shippingCostLabel": "运费"
+      "shippingCostLabel": "运费",
+      "pickup": {
+        "title": "自提信息",
+        "pointLabel": "自提点",
+        "noPoint": "这笔订单没有记录自提点。",
+        "codeLabel": "自提码",
+        "codeHelp": "自提柜取件码或到店核销码 —— 顾客取货时报的那个。",
+        "saveCodeFailed": "保存自提码失败。",
+        "notReadyYet": "订单还未到可自提状态。",
+        "feeLabel": "自提费"
+      }
     },
     "packages": {
       "title": "包裹",
@@ -585,9 +601,7 @@
           "customer": "客户",
           "rating": "评分",
           "title": "标题",
-          "comment": "内容",
           "status": "状态",
-          "helpfulCount": "有用",
           "createdAt": "创建时间"
         }
       },
@@ -618,7 +632,10 @@
       "schema": {
         "title": "客户",
         "customerNumber": "客户编号",
-        "name": "姓名",
+        "name": "名字",
+        "phone": "电话",
+        "totalSpent": "累计消费",
+        "lastLogin": "最后使用时间",
         "companyName": "公司名称",
         "email": "邮箱",
         "taxNumber": "税号",
@@ -2018,6 +2035,7 @@
         "subtitle": "管理仓库、承运商、包装类型与配送默认配置",
         "tabs": {
           "warehouses": "仓库",
+          "pickupPoints": "自提点",
           "freightServices": "货运服务",
           "carriers": "承运商",
           "freightStatus": "货运状态",
@@ -2025,6 +2043,57 @@
           "packagingTypes": "包装类型",
           "deliveryZones": "配送区域",
           "deliverySettings": "配送设置"
+        }
+      },
+      "pickupPoints": {
+        "tab": {
+          "title": "自提点",
+          "columns": {
+            "name": "名称",
+            "code": "编码",
+            "address": "地址",
+            "phone": "电话",
+            "fee": "费用",
+            "status": "状态",
+            "default": "默认"
+          },
+          "actions": {
+            "newPoint": "新建自提点",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确定要删除这个自提点吗？"
+          },
+          "errors": {
+            "deleteFailed": "删除自提点失败：{error}。已有订单关联的自提点无法删除，请改为停用。",
+            "saveFailed": "保存自提点失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "自提点",
+          "fields": {
+            "name": "名称",
+            "code": "编码",
+            "active": "启用",
+            "defaultPoint": "默认自提点",
+            "defaultPointHelp": "自提订单未指定自提点时使用。",
+            "addressLine1": "地址第一行",
+            "addressLine2": "地址第二行",
+            "city": "城市",
+            "state": "州/省",
+            "postalCode": "邮编",
+            "country": "国家",
+            "latitude": "纬度",
+            "longitude": "经度",
+            "phone": "电话",
+            "email": "邮箱",
+            "instructions": "自提说明",
+            "instructionsHelp": "营业时间、走哪个门、在哪停车 —— 顾客可见。",
+            "fee": "自提费",
+            "feeHelp": "计入订单的配送费用一行。",
+            "sortOrder": "排序",
+            "warehouse": "货源仓库",
+            "warehouseHelp": "这个自提点的货从哪个仓库出，可不填。"
+          }
         }
       }
     },

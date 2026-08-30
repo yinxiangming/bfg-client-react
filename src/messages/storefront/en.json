@@ -250,16 +250,19 @@
       "state": "State",
       "zipCode": "ZIP code",
       "phone": "Phone",
-      "saveInfoNextTime": "Save this information for next time"
+      "saveInfoNextTime": "Save this information for next time",
+      "pickupContactTitle": "Who is collecting"
     },
     "shipping": {
-      "title": "Shipping method",
+      "title": "Delivery method",
       "loadingOptions": "Loading shipping options...",
-      "noOptions": "No shipping options available for this country.",
+      "noOptions": "No delivery or collection options are available yet.",
       "showMore": "Show {count} more shipping options",
       "showFewer": "Show fewer options",
       "businessDay": "business day",
-      "businessDays": "business days"
+      "businessDays": "business days",
+      "pickupAt": "Pick up at {point}",
+      "free": "Free"
     },
     "payment": {
       "title": "Payment",
