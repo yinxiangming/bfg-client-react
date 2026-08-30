@@ -378,6 +378,11 @@ export interface Order {
   store?: number | string
   store_name?: string
   fulfillment_method?: 'shipping' | 'pickup'
+  /** Set only on pickup orders. The list serialises the id and the name. */
+  pickup_point?: number | null
+  pickup_point_name?: string | null
+  /** Locker PIN or counter code — whatever the customer quotes on collection. */
+  pickup_code?: string
   total: number
   item_count?: number
   /** Brief item list for list view (product_name, quantity) */
@@ -437,6 +442,9 @@ export interface CreateOrderPayload {
   customer_id: number
   store_id: number
   fulfillment_method?: 'shipping' | 'pickup'
+  /** Required for pickup orders unless the workspace has a default point. */
+  pickup_point_id?: number | null
+  pickup_code?: string
   shipping_address_id?: number | null
   billing_address_id?: number | null
   status?: Order['status']

@@ -208,7 +208,7 @@ const buildOrdersSchema = (
       render: (value: any, row: Order) => {
         const method = (typeof value === 'string' ? value : row?.fulfillment_method) || ''
         if (!method) return '-'
-        return (
+        const badge = (
           <StatusBadge
             label={
               method === 'pickup'
@@ -218,6 +218,12 @@ const buildOrdersSchema = (
             color={method === 'pickup' ? 'warning' : 'info'}
           />
         )
+        // Which point to stage the order at is what a picker needs, but naming
+        // it inline would widen the column for every shipping row too.
+        if (method === 'pickup' && row?.pickup_point_name) {
+          return <Tooltip title={row.pickup_point_name}><span>{badge}</span></Tooltip>
+        }
+        return badge
       }
     },
     {

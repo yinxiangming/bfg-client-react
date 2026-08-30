@@ -1,12 +1,13 @@
 'use client'
 
 // React Imports
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 
 // i18n Imports
 import { useTranslations } from 'next-intl'
 
 // MUI Imports
+import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
@@ -15,11 +16,28 @@ import Chip from '@mui/material/Chip'
 import Box from '@mui/material/Box'
 import Avatar from '@mui/material/Avatar'
 
+import CustomTextField from '@/components/ui/TextField'
+import { updateOrder } from '@/services/store'
 import { getIntlLocale } from '@/utils/format'
+
+type PickupPointSummary = {
+  id: number
+  name: string
+  code?: string
+  address?: string
+  phone?: string
+  instructions?: string
+  latitude?: number | string | null
+  longitude?: number | string | null
+  fee?: number | string
+}
 
 type OrderDetail = {
   id: number
   status: string
+  fulfillment_method?: 'shipping' | 'pickup'
+  pickup_point?: PickupPointSummary | null
+  pickup_code?: string
   shipping_address?: {
     full_name?: string
     address_line1?: string
@@ -37,10 +55,40 @@ type OrderDetail = {
 
 type DeliveryCardProps = {
   order: OrderDetail
+  /** Refetch after the pickup code is saved, so the page and the card agree. */
+  onUpdate?: () => void | Promise<void>
 }
 
-const DeliveryCard = ({ order }: DeliveryCardProps) => {
+const DeliveryCard = ({ order, onUpdate }: DeliveryCardProps) => {
   const t = useTranslations('admin')
+
+  const isPickup = order.fulfillment_method === 'pickup'
+  const point = order.pickup_point || null
+
+  const [pickupCode, setPickupCode] = useState(order.pickup_code || '')
+  const [savingCode, setSavingCode] = useState(false)
+  const [codeError, setCodeError] = useState<string | null>(null)
+
+  // The order can be refetched under us (status changes, the fulfilment dialog),
+  // so follow the server's value unless the operator is mid-edit.
+  useEffect(() => {
+    setPickupCode(order.pickup_code || '')
+  }, [order.pickup_code])
+
+  const codeDirty = (order.pickup_code || '') !== pickupCode
+
+  const handleSaveCode = async () => {
+    setSavingCode(true)
+    setCodeError(null)
+    try {
+      await updateOrder(order.id, { pickup_code: pickupCode.trim() })
+      await onUpdate?.()
+    } catch (err: any) {
+      setCodeError(err?.message || t('orders.delivery.pickup.saveCodeFailed'))
+    } finally {
+      setSavingCode(false)
+    }
+  }
 
   const formatDateTime = (dateString?: string | null) => {
     if (!dateString) return null
@@ -58,7 +106,12 @@ const DeliveryCard = ({ order }: DeliveryCardProps) => {
       return { label: t('orders.status.delivered'), color: 'success' as const }
     }
     if (order.status === 'shipped') {
-      return { label: t('orders.status.shipped'), color: 'primary' as const }
+      // `shipped` is what a collection order is set to when it is ready to be
+      // picked up; the vocabulary is shared, the wording is not.
+      return {
+        label: isPickup ? t('orders.status.readyToPickup') : t('orders.status.shipped'),
+        color: 'primary' as const
+      }
     }
     return { label: t('orders.status.pending'), color: 'warning' as const }
   }
@@ -67,12 +120,12 @@ const DeliveryCard = ({ order }: DeliveryCardProps) => {
 
   return (
     <Card>
-      <CardHeader title={t('orders.delivery.title')} sx={{ pb: 0 }} />
+      <CardHeader title={isPickup ? t('orders.delivery.pickup.title') : t('orders.delivery.title')} sx={{ pb: 0 }} />
       <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 }, display: 'flex', flexDirection: 'column', gap: 3 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
             <Avatar sx={{ width: 40, height: 40, bgcolor: `${deliveryStatus.color}.main` }}>
-              <i className='tabler-truck-delivery' />
+              <i className={isPickup ? 'tabler-map-pin-check' : 'tabler-truck-delivery'} />
             </Avatar>
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
               <Typography variant='body2' sx={{ fontWeight: 500 }}>
@@ -88,7 +141,64 @@ const DeliveryCard = ({ order }: DeliveryCardProps) => {
           </Box>
         </Box>
 
-        {order.shipping_address && (
+        {isPickup && (
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, bgcolor: 'action.hover', p: 2, borderRadius: 1 }}>
+            <Typography variant='body2' sx={{ fontWeight: 500, mb: 1 }}>
+              {t('orders.delivery.pickup.pointLabel')}:
+            </Typography>
+            {point ? (
+              <>
+                <Typography variant='body2' color='text.primary' sx={{ fontWeight: 500 }}>
+                  {point.name}
+                </Typography>
+                {point.address && (
+                  <Typography variant='body2' color='text.secondary'>
+                    {point.address}
+                  </Typography>
+                )}
+                {point.phone && (
+                  <Typography variant='body2' color='text.secondary'>
+                    {t('orders.delivery.phoneLabel')}: {point.phone}
+                  </Typography>
+                )}
+                {point.instructions && (
+                  <Typography variant='body2' color='text.secondary' sx={{ mt: 1, whiteSpace: 'pre-line' }}>
+                    {point.instructions}
+                  </Typography>
+                )}
+              </>
+            ) : (
+              // Orders imported before pickup points existed have none.
+              <Typography variant='body2' color='text.secondary'>
+                {t('orders.delivery.pickup.noPoint')}
+              </Typography>
+            )}
+          </Box>
+        )}
+
+        {isPickup && (
+          // The card sits in a narrow sidebar column, so the button goes under
+          // the field rather than beside it, and only once there is a change to
+          // save.
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'flex-end' }}>
+            <CustomTextField
+              label={t('orders.delivery.pickup.codeLabel')}
+              value={pickupCode}
+              onChange={(e: any) => setPickupCode(e.target.value)}
+              helperText={codeError || t('orders.delivery.pickup.codeHelp')}
+              error={Boolean(codeError)}
+              disabled={savingCode}
+              fullWidth
+            />
+            {codeDirty && (
+              <Button variant='contained' size='small' onClick={handleSaveCode} disabled={savingCode}>
+                {t('common.actions.save')}
+              </Button>
+            )}
+          </Box>
+        )}
+
+        {!isPickup && order.shipping_address && (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, bgcolor: 'action.hover', p: 2, borderRadius: 1 }}>
             <Typography variant='body2' sx={{ fontWeight: 500, mb: 1 }}>
               {t('orders.delivery.shippingAddressLabel')}:
@@ -126,7 +236,7 @@ const DeliveryCard = ({ order }: DeliveryCardProps) => {
           <Typography variant='body2' sx={{ fontWeight: 500 }}>
             {t('orders.delivery.deliveryTimelineLabel')}:
           </Typography>
-          
+
           {order.shipped_at && (
             <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -134,7 +244,7 @@ const DeliveryCard = ({ order }: DeliveryCardProps) => {
                   <i className='tabler-package' />
                 </Avatar>
                 <Typography variant='body2' color='text.secondary'>
-                  {t('orders.status.shipped')}
+                  {isPickup ? t('orders.status.readyToPickup') : t('orders.status.shipped')}
                 </Typography>
               </Box>
               <Typography variant='body2' sx={{ fontWeight: 500 }}>
@@ -150,7 +260,7 @@ const DeliveryCard = ({ order }: DeliveryCardProps) => {
                   <i className='tabler-check' />
                 </Avatar>
                 <Typography variant='body2' color='text.secondary'>
-                  {t('orders.status.delivered')}
+                  {isPickup ? t('orders.delivery.pickup.collected') : t('orders.status.delivered')}
                 </Typography>
               </Box>
               <Typography variant='body2' sx={{ fontWeight: 500 }} color='success.main'>
@@ -161,7 +271,7 @@ const DeliveryCard = ({ order }: DeliveryCardProps) => {
 
           {!order.shipped_at && !order.delivered_at && (
             <Typography variant='body2' color='text.secondary'>
-              {t('orders.delivery.notShippedYet')}
+              {isPickup ? t('orders.delivery.pickup.notReadyYet') : t('orders.delivery.notShippedYet')}
             </Typography>
           )}
         </Box>
@@ -169,11 +279,11 @@ const DeliveryCard = ({ order }: DeliveryCardProps) => {
         {order.shipping_cost && parseFloat(String(order.shipping_cost)) > 0 && (
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: 'action.hover', p: 2, borderRadius: 1 }}>
             <Typography variant='body2' color='text.secondary'>
-              {t('orders.delivery.shippingCostLabel')}:
+              {isPickup ? t('orders.delivery.pickup.feeLabel') : t('orders.delivery.shippingCostLabel')}:
             </Typography>
             <Typography variant='body2' sx={{ fontWeight: 500 }}>
-              ${typeof order.shipping_cost === 'string' 
-                ? parseFloat(order.shipping_cost).toFixed(2) 
+              ${typeof order.shipping_cost === 'string'
+                ? parseFloat(order.shipping_cost).toFixed(2)
                 : order.shipping_cost.toFixed(2)}
             </Typography>
           </Box>

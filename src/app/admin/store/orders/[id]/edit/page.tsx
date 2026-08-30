@@ -450,7 +450,7 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
                   visibleSlots,
                   replacements,
                   DeliveryCard,
-                  { order }
+                  { order, onUpdate: () => fetchOrder() }
                 )}
               </Grid>
             )}
