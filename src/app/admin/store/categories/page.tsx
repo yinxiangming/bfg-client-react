@@ -17,7 +17,7 @@ import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import CategoryTreeTable from '@/components/category/CategoryTreeTable'
 
 // Service Imports
-import { getCategories, deleteCategory, type Category } from '@/services/store'
+import { getCategories, deleteCategory, updateCategory, type Category } from '@/services/store'
 
 // Hook Imports
 import { useApiData } from '@/hooks/useApiData'
@@ -45,6 +45,34 @@ export default function CategoriesPage() {
           alert(t('categories.page.errors.deleteFailed', { error: err.message }))
         }
       }
+    }
+  }
+
+  const handleToggleActive = async (item: Category, isActive: boolean) => {
+    try {
+      await updateCategory(item.id, { is_active: isActive })
+    } catch (err: any) {
+      alert(t('categories.page.errors.updateFailed', { error: err.message }))
+      throw err
+    } finally {
+      // Reload either way: on success to pick up the saved row, on failure to
+      // drop the switch back to what the server actually holds.
+      await refetch()
+    }
+  }
+
+  // The table hands over the whole renumbered sibling group. Sequential rather
+  // than parallel: it is a handful of rows, and a partial failure then leaves
+  // the ones already saved in a consistent prefix rather than scattered.
+  const handleReorder = async (changes: Array<{ id: number; order: number }>) => {
+    try {
+      for (const change of changes) {
+        await updateCategory(change.id, { order: change.order })
+      }
+    } catch (err: any) {
+      alert(t('categories.page.errors.updateFailed', { error: err.message }))
+    } finally {
+      await refetch()
     }
   }
 
@@ -85,6 +113,8 @@ export default function CategoriesPage() {
         onActionClick={handleActionClick}
         basePath="/admin/store/categories"
         lang={locale}
+        onToggleActive={handleToggleActive}
+        onReorder={handleReorder}
       />
     </Box>
   )

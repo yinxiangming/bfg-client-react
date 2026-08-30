@@ -16,7 +16,7 @@ import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
 import IconButton from '@mui/material/IconButton'
-import Chip from '@mui/material/Chip'
+import Switch from '@mui/material/Switch'
 import Typography from '@mui/material/Typography'
 import Tooltip from '@mui/material/Tooltip'
 import MenuItem from '@mui/material/MenuItem'
@@ -38,6 +38,10 @@ type CategoryTreeTableProps = {
   onActionClick?: (action: SchemaAction, item: Category) => void
   basePath?: string
   lang: string
+  /** Persist a category's visibility. Omit to render the switch read-only. */
+  onToggleActive?: (item: Category, isActive: boolean) => Promise<void> | void
+  /** Persist new `order` values. Only the rows whose order actually moved are sent. */
+  onReorder?: (changes: Array<{ id: number; order: number }>) => Promise<void> | void
 }
 
 type CategoryNode = Omit<Category, 'children'> & {
@@ -52,7 +56,9 @@ export default function CategoryTreeTable({
   categories,
   onActionClick,
   basePath,
-  lang
+  lang,
+  onToggleActive,
+  onReorder
 }: CategoryTreeTableProps) {
   const router = useRouter()
   const { confirm } = useAppDialog()
@@ -60,6 +66,15 @@ export default function CategoryTreeTable({
   const [searchQuery, setSearchQuery] = useState('')
   const [activeFilter, setActiveFilter] = useState<string>('')
   const [expandedIds, setExpandedIds] = useState<Set<number>>(new Set())
+  const [busyIds, setBusyIds] = useState<Set<number>>(new Set())
+  // Flip the switch straight away and let the reload confirm it; a round trip
+  // to the API is long enough that an unmoved switch reads as a dead control.
+  const [pendingActive, setPendingActive] = useState<Record<number, boolean>>({})
+
+  // The reload has landed, so the rows carry the truth again.
+  useEffect(() => {
+    setPendingActive({})
+  }, [categories])
 
   // Default expand all on mount
   useEffect(() => {
@@ -222,6 +237,77 @@ export default function CategoryTreeTable({
     })
   }
 
+  // Reordering happens within a sibling group, and against the unfiltered tree:
+  // a hidden neighbour is still a neighbour, so a filtered view would move a row
+  // past rows the user cannot see. The buttons are disabled while a filter is on.
+  const siblingGroups = useMemo(() => {
+    const groups = new Map<number, CategoryNode[]>()
+    const walk = (nodes: CategoryNode[]) => {
+      nodes.forEach(node => {
+        groups.set(node.id, nodes)
+        if (node.children && node.children.length > 0) walk(node.children)
+      })
+    }
+    walk(treeData.rootCategories)
+    return groups
+  }, [treeData])
+
+  const isFiltered = searchQuery.trim() !== '' || activeFilter !== ''
+
+  const withBusy = async (ids: number[], run: () => Promise<void> | void) => {
+    setBusyIds(prev => new Set([...prev, ...ids]))
+    try {
+      await run()
+    } finally {
+      setBusyIds(prev => {
+        const next = new Set(prev)
+        ids.forEach(id => next.delete(id))
+        return next
+      })
+    }
+  }
+
+  const handleToggleActive = async (item: CategoryNode, isActive: boolean) => {
+    if (!onToggleActive) return
+    setPendingActive(prev => ({ ...prev, [item.id]: isActive }))
+    await withBusy([item.id], async () => {
+      try {
+        await onToggleActive(item as Category, isActive)
+      } catch {
+        // The reload the page runs on failure restores the real state; drop the
+        // guess now so the switch does not sit on a value that never saved.
+        setPendingActive(prev => {
+          const next = { ...prev }
+          delete next[item.id]
+          return next
+        })
+      }
+    })
+  }
+
+  const handleMove = async (item: CategoryNode, delta: -1 | 1) => {
+    if (!onReorder) return
+    const siblings = siblingGroups.get(item.id)
+    if (!siblings) return
+    const from = siblings.findIndex(sibling => sibling.id === item.id)
+    const to = from + delta
+    if (from < 0 || to < 0 || to >= siblings.length) return
+
+    const moved = [...siblings]
+    moved.splice(to, 0, ...moved.splice(from, 1))
+
+    // Renumber the whole group rather than swapping two values: an imported
+    // tree tends to share one default order across every sibling, and swapping
+    // equal numbers moves nothing. Only rows that actually change are sent.
+    const changes = moved
+      .map((cat, index) => ({ id: cat.id, order: index + 1, previous: cat.order }))
+      .filter(change => change.order !== change.previous)
+      .map(({ id, order }) => ({ id, order }))
+
+    if (changes.length === 0) return
+    await withBusy(changes.map(change => change.id), () => onReorder(changes))
+  }
+
   const handleRowClick = (item: Category) => {
     if (basePath) {
       router.push(`${basePath}/${item.id}/edit`)
@@ -343,6 +429,12 @@ export default function CategoryTreeTable({
               const hasChildren = item.children && item.children.length > 0
               const isExpanded = expandedIds.has(item.id)
               const indent = item.level * 24
+              const isActive = pendingActive[item.id] ?? item.is_active
+              const isBusy = busyIds.has(item.id)
+              const siblings = siblingGroups.get(item.id)
+              const position = siblings ? siblings.findIndex(sibling => sibling.id === item.id) : -1
+              const canMoveUp = !!onReorder && !isFiltered && position > 0
+              const canMoveDown = !!onReorder && !isFiltered && position >= 0 && position < (siblings?.length ?? 0) - 1
 
               return (
                 <TableRow
@@ -379,12 +471,21 @@ export default function CategoryTreeTable({
                       {getOrderPath(item)}
                     </Typography>
                   </TableCell>
-                  <TableCell align="center">
-                    <Chip
-                      label={item.is_active ? t('categories.values.active') : t('categories.values.inactive')}
-                      color={item.is_active ? 'success' : 'default'}
-                      size="small"
-                    />
+                  <TableCell align="center" onClick={e => e.stopPropagation()}>
+                    <Tooltip title={t('categories.treeTable.tooltips.toggleActive')}>
+                      {/* A disabled control swallows the events Tooltip listens for. */}
+                      <span>
+                        <Switch
+                          size="small"
+                          checked={isActive}
+                          disabled={!onToggleActive || isBusy}
+                          onChange={e => handleToggleActive(item, e.target.checked)}
+                          inputProps={{
+                            'aria-label': t('categories.treeTable.tooltips.toggleActive')
+                          }}
+                        />
+                      </span>
+                    </Tooltip>
                   </TableCell>
                   <TableCell 
                     align="right"
@@ -405,6 +506,37 @@ export default function CategoryTreeTable({
                   </TableCell>
                   <TableCell align="center" onClick={(e) => e.stopPropagation()}>
                     <Box sx={{ display: 'flex', gap: 1, justifyContent: 'center' }}>
+                      {onReorder && (
+                        <>
+                          <Tooltip
+                            title={isFiltered ? t('categories.treeTable.actions.reorderFiltered') : t('categories.treeTable.actions.moveUp')}
+                          >
+                            {/* A disabled control swallows the events Tooltip listens for. */}
+                            <span>
+                              <IconButton
+                                size="small"
+                                disabled={!canMoveUp || isBusy}
+                                onClick={() => handleMove(item, -1)}
+                              >
+                                <i className="tabler-arrow-up" />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                          <Tooltip
+                            title={isFiltered ? t('categories.treeTable.actions.reorderFiltered') : t('categories.treeTable.actions.moveDown')}
+                          >
+                            <span>
+                              <IconButton
+                                size="small"
+                                disabled={!canMoveDown || isBusy}
+                                onClick={() => handleMove(item, 1)}
+                              >
+                                <i className="tabler-arrow-down" />
+                              </IconButton>
+                            </span>
+                          </Tooltip>
+                        </>
+                      )}
                       {basePath && (
                         <>
                           <Tooltip title={t('categories.treeTable.actions.addSubcategory')}>

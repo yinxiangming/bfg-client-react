@@ -1044,7 +1044,8 @@
         "confirmDeleteWithName": "确认删除分类 {name}？"
       },
       "errors": {
-        "deleteFailed": "删除分类失败：{error}"
+        "deleteFailed": "删除分类失败：{error}",
+        "updateFailed": "更新分类失败：{error}"
       },
       "subtitle": "顾客在前台浏览的分类树。"
     },
@@ -1174,13 +1175,17 @@
         "empty": "暂无分类"
       },
       "tooltips": {
-        "viewProducts": "点击查看该分类下的商品"
+        "viewProducts": "点击查看该分类下的商品",
+        "toggleActive": "在前台显示该分类"
       },
       "actions": {
         "addSubcategory": "新增子分类",
         "edit": "编辑",
         "delete": "删除",
-        "confirmDeleteWithName": "确认删除分类“{name}”？"
+        "confirmDeleteWithName": "确认删除分类“{name}”？",
+        "moveUp": "上移",
+        "moveDown": "下移",
+        "reorderFiltered": "清除搜索和筛选后才能排序"
       }
     }
   },

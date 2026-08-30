@@ -1044,7 +1044,8 @@
         "confirmDeleteWithName": "Are you sure you want to delete category {name}?"
       },
       "errors": {
-        "deleteFailed": "Failed to delete category: {error}"
+        "deleteFailed": "Failed to delete category: {error}",
+        "updateFailed": "Failed to update category: {error}"
       },
       "subtitle": "The category tree customers browse on the storefront."
     },
@@ -1174,13 +1175,17 @@
         "empty": "No categories found"
       },
       "tooltips": {
-        "viewProducts": "Click to view products in this category"
+        "viewProducts": "Click to view products in this category",
+        "toggleActive": "Show this category on the storefront"
       },
       "actions": {
         "addSubcategory": "Add Subcategory",
         "edit": "Edit",
         "delete": "Delete",
-        "confirmDeleteWithName": "Are you sure you want to delete category \"{name}\"?"
+        "confirmDeleteWithName": "Are you sure you want to delete category \"{name}\"?",
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "reorderFiltered": "Clear the search and filter to reorder"
       }
     }
   },
