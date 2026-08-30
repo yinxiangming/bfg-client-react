@@ -11,6 +11,7 @@ import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import { BaseDataProvider } from '@/contexts/BaseDataContext'
 import PackagesCard from '@/views/admin/store/orders/edit/PackagesCard'
+import PickupCodeField from '@/views/admin/store/orders/edit/PickupCodeField'
 import { getOrder, type Order } from '@/services/store'
 
 type OrderDetail = Order & {
@@ -97,6 +98,14 @@ export default function OrderPackagesModal({ open, onClose, orderId, onSuccess }
         )}
         {!loading && order && (
           <BaseDataProvider>
+            {/* A collection order is fulfilled by handing it over, so the code
+                the customer quotes belongs in the same dialog as the packages
+                rather than only on the order page. */}
+            {order.fulfillment_method === 'pickup' && (
+              <Box sx={{ mb: 3 }}>
+                <PickupCodeField orderId={order.id} value={order.pickup_code} onSaved={handleOrderUpdate} />
+              </Box>
+            )}
             <PackagesCard order={order} onOrderUpdate={handleOrderUpdate} />
           </BaseDataProvider>
         )}

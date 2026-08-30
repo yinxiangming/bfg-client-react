@@ -7,7 +7,6 @@ import { useEffect, useState } from 'react'
 import { useTranslations } from 'next-intl'
 
 // MUI Imports
-import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
@@ -16,8 +15,7 @@ import Chip from '@mui/material/Chip'
 import Box from '@mui/material/Box'
 import Avatar from '@mui/material/Avatar'
 
-import CustomTextField from '@/components/ui/TextField'
-import { updateOrder } from '@/services/store'
+import PickupCodeField from './PickupCodeField'
 import { getIntlLocale } from '@/utils/format'
 
 type PickupPointSummary = {
@@ -65,30 +63,9 @@ const DeliveryCard = ({ order, onUpdate }: DeliveryCardProps) => {
   const isPickup = order.fulfillment_method === 'pickup'
   const point = order.pickup_point || null
 
-  const [pickupCode, setPickupCode] = useState(order.pickup_code || '')
-  const [savingCode, setSavingCode] = useState(false)
-  const [codeError, setCodeError] = useState<string | null>(null)
 
-  // The order can be refetched under us (status changes, the fulfilment dialog),
-  // so follow the server's value unless the operator is mid-edit.
-  useEffect(() => {
-    setPickupCode(order.pickup_code || '')
-  }, [order.pickup_code])
 
-  const codeDirty = (order.pickup_code || '') !== pickupCode
 
-  const handleSaveCode = async () => {
-    setSavingCode(true)
-    setCodeError(null)
-    try {
-      await updateOrder(order.id, { pickup_code: pickupCode.trim() })
-      await onUpdate?.()
-    } catch (err: any) {
-      setCodeError(err?.message || t('orders.delivery.pickup.saveCodeFailed'))
-    } finally {
-      setSavingCode(false)
-    }
-  }
 
   const formatDateTime = (dateString?: string | null) => {
     if (!dateString) return null
@@ -172,25 +149,7 @@ const DeliveryCard = ({ order, onUpdate }: DeliveryCardProps) => {
         )}
 
         {isPickup && (
-          // The card sits in a narrow sidebar column, so the button goes under
-          // the field rather than beside it, and only once there is a change to
-          // save.
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, alignItems: 'flex-end' }}>
-            <CustomTextField
-              label={t('orders.delivery.pickup.codeLabel')}
-              value={pickupCode}
-              onChange={(e: any) => setPickupCode(e.target.value)}
-              helperText={codeError || t('orders.delivery.pickup.codeHelp')}
-              error={Boolean(codeError)}
-              disabled={savingCode}
-              fullWidth
-            />
-            {codeDirty && (
-              <Button variant='contained' size='small' onClick={handleSaveCode} disabled={savingCode}>
-                {t('common.actions.save')}
-              </Button>
-            )}
-          </Box>
+          <PickupCodeField orderId={order.id} value={order.pickup_code} onSaved={onUpdate} />
         )}
 
         {!isPickup && order.shipping_address && (
