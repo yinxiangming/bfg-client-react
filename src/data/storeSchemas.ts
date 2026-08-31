@@ -240,11 +240,14 @@ export const productsSchema: SchemaResponse = {
         }
       }
     ],
+    // 'api': the list is server-paginated, so a client-side filter would only
+    // narrow the page in front of you and report the wrong total.
     filters: [
       {
         field: 'is_active',
         label: 'Status',
         type: 'select',
+        filterMode: 'api',
         options: [
           { value: 'true', label: 'Published' },
           { value: 'false', label: 'Inactive' }
@@ -254,6 +257,7 @@ export const productsSchema: SchemaResponse = {
         field: 'is_featured',
         label: 'Featured',
         type: 'select',
+        filterMode: 'api',
         options: [
           { value: 'true', label: 'Yes' },
           { value: 'false', label: 'No' }
@@ -271,13 +275,10 @@ export const productsSchema: SchemaResponse = {
         icon: 'tabler-plus'
       },
       { id: 'edit', label: 'Edit', type: 'secondary', scope: 'row' },
-      {
-        id: 'delete',
-        label: 'Delete',
-        type: 'danger',
-        scope: 'row',
-        confirm: 'Are you sure you want to delete this product?'
-      }
+      // No `confirm` here: the page asks for confirmation itself and names the
+      // product while doing it. Setting both made deleting anything a two-dialog
+      // ritual, the second one repeating the first in vaguer words.
+      { id: 'delete', label: 'Delete', type: 'danger', scope: 'row' }
     ]
   },
   form: {

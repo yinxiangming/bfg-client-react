@@ -1507,7 +1507,8 @@
       "errors": {
         "updateStatusFailed": "更新状态失败：{error}",
         "deleteFailed": "删除商品失败：{error}",
-        "schemaNotFound": "未找到 Schema"
+        "schemaNotFound": "未找到 Schema",
+        "deleteBlockedByOrders": "该商品出现在 {count} 个订单中，删除会破坏这些订单。请改为下架，使其不在前台显示。"
       },
       "subtitle": "商品的目录、价格、库存与前台展示状态。"
     },

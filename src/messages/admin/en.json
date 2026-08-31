@@ -1507,7 +1507,8 @@
       "errors": {
         "updateStatusFailed": "Failed to update status: {error}",
         "deleteFailed": "Failed to delete product: {error}",
-        "schemaNotFound": "Schema not found"
+        "schemaNotFound": "Schema not found",
+        "deleteBlockedByOrders": "This product appears in {count} order(s), so deleting it would break them. Unpublish it instead to take it off the storefront."
       },
       "subtitle": "Catalogue, pricing, stock and storefront visibility for every product."
     },
