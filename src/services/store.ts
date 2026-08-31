@@ -820,6 +820,9 @@ type ProductsParams = {
   category?: number
   tag?: number
   featured?: boolean
+  /** Publication state. Omit for "either" — `false` means "show me the drafts". */
+  is_active?: boolean
+  is_featured?: boolean
   page?: number
   page_size?: number
 }
@@ -830,6 +833,8 @@ function buildProductsUrl(params?: ProductsParams): string {
   if (params?.category) searchParams.append('category', params.category.toString())
   if (params?.tag) searchParams.append('tag', params.tag.toString())
   if (params?.featured !== undefined) searchParams.append('featured', params.featured.toString())
+  if (params?.is_active !== undefined) searchParams.append('is_active', params.is_active.toString())
+  if (params?.is_featured !== undefined) searchParams.append('is_featured', params.is_featured.toString())
   if (params?.page) searchParams.append('page', params.page.toString())
   if (params?.page_size) searchParams.append('page_size', params.page_size.toString())
   return `${bfgApi.adminProducts()}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
