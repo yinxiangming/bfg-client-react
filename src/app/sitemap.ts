@@ -42,7 +42,12 @@ function entry(
   priority: number,
   lastModified?: string | Date
 ): SitemapEntry {
-  return { url, changeFrequency, priority, lastModified: lastModified ?? new Date() }
+  // No `new Date()` fallback here. Defaulting to "now" stamped every URL with the moment
+  // the sitemap was generated, so every entry carried one identical timestamp that
+  // advanced on each fetch — the textbook signature of an unreliable lastmod, which
+  // Google answers by discounting the field for the whole site. `undefined` makes Next
+  // omit <lastmod> for that URL, which costs one hint; a fabricated date costs all of them.
+  return { url, changeFrequency, priority, lastModified }
 }
 
 /** Flatten the category tree so child categories are indexed too. */
