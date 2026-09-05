@@ -4,7 +4,7 @@ import React, { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 import type { BlockProps } from '../../../types'
-import { getStoreImageUrl, getMediaUrl } from '@/utils/media'
+import { getMediaUrl } from '@/utils/media'
 import { storefrontApi } from '@/utils/storefrontApi'
 import styles from './styles.module.css'
 
@@ -19,6 +19,9 @@ interface Category {
 /** Transformed category with count for display */
 interface CategoryDisplay extends Pick<Category, 'name' | 'slug'> {
   count: number
+  /** Empty when the category has no image of its own — render a plain placeholder rather
+   *  than guessing at a stand-in photo, since the generic demo catalogue's stock photos
+   *  (clothing, bags) have nothing to do with an unrelated storefront's categories. */
   image: string
 }
 
@@ -39,9 +42,7 @@ const transformCategory = (apiCategory: Category): CategoryDisplay => ({
   name: apiCategory.name,
   slug: apiCategory.slug || apiCategory.name.toLowerCase().replace(/\s+/g, '-'),
   count: apiCategory.product_count ?? 0,
-  image:
-    getMediaUrl(apiCategory.image_url || apiCategory.image || '') ||
-    getStoreImageUrl('modules/cp_categorylist/views/img/3-cp_categorylist.jpg'),
+  image: getMediaUrl(apiCategory.image_url || apiCategory.image || ''),
 })
 
 export function CategoryGridV1({
@@ -128,12 +129,16 @@ export function CategoryGridV1({
             href={`/category/${category.slug}`}
             className={styles.card}
           >
-            <img
-              src={category.image}
-              alt={category.name}
-              className={styles.image}
-              style={{ height: imageHeight }}
-            />
+            {category.image ? (
+              <img
+                src={category.image}
+                alt={category.name}
+                className={styles.image}
+                style={{ height: imageHeight }}
+              />
+            ) : (
+              <div className={styles.image} style={{ height: imageHeight }} />
+            )}
             <div className={styles.content}>
               <h3 className={styles.name}>{category.name}</h3>
               {showCount && (
