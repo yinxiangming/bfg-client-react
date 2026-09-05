@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useMemo } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -124,6 +124,20 @@ export default function StoreHeader(_props: StoreHeaderProps) {
   const [themeMenuOpen, setThemeMenuOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [categoryOpen, setCategoryOpen] = useState<string | null>(null)
+  // Desktop mega-menu opens on hover and closes on a short delay, so moving the
+  // mouse from the nav link down into the dropdown panel doesn't close it first.
+  const categoryCloseTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const openCategoryMenu = (key: string) => {
+    if (categoryCloseTimeout.current) {
+      clearTimeout(categoryCloseTimeout.current)
+      categoryCloseTimeout.current = null
+    }
+    setCategoryOpen(key)
+  }
+  const scheduleCloseCategoryMenu = () => {
+    if (categoryCloseTimeout.current) clearTimeout(categoryCloseTimeout.current)
+    categoryCloseTimeout.current = setTimeout(() => setCategoryOpen(null), 150)
+  }
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [categories, setCategories] = useState<CategoryType[]>([])
   /** Raw API tree for merging CMS header menus with category subtrees. */
@@ -297,13 +311,18 @@ export default function StoreHeader(_props: StoreHeaderProps) {
                     )
                   }
                   return (
-                    <li key={row.key} className='sf-nav-item'>
+                    <li
+                      key={row.key}
+                      className='sf-nav-item'
+                      onMouseEnter={() => openCategoryMenu(row.key)}
+                      onMouseLeave={scheduleCloseCategoryMenu}
+                    >
                       <>
-                        <a href='#' className='sf-nav-link' onClick={e => { e.preventDefault(); setCategoryOpen(categoryOpen === row.key ? null : row.key) }}>
+                        <Link href={`/category/${row.slug}`} className='sf-nav-link'>
                           {row.title}
-                        </a>
+                        </Link>
                         {categoryOpen === row.key && row.subcategories.length > 0 && (
-                          <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '0.5rem', background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '8px', padding: '1rem', minWidth: '600px', zIndex: 50 }} onMouseLeave={() => setCategoryOpen(null)}>
+                          <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '0.5rem', background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '8px', padding: '1rem', minWidth: '600px', zIndex: 50 }}>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
                               {row.subcategories.map((sub, subIndex) => (
                                 <div key={sub.slug || subIndex}>
@@ -324,16 +343,21 @@ export default function StoreHeader(_props: StoreHeaderProps) {
                 categories.map((category, index) => {
                   const categoryKey = category.slug || category.name
                   return (
-                    <li key={categoryKey || index} className='sf-nav-item'>
+                    <li
+                      key={categoryKey || index}
+                      className='sf-nav-item'
+                      onMouseEnter={() => category.subcategories.length > 0 && openCategoryMenu(category.name)}
+                      onMouseLeave={scheduleCloseCategoryMenu}
+                    >
                       {category.subcategories.length === 0 ? (
                         <Link href={`/category/${category.slug}`} className='sf-nav-link'>{category.name}</Link>
                       ) : (
                         <>
-                          <a href='#' className='sf-nav-link' onClick={e => { e.preventDefault(); setCategoryOpen(categoryOpen === category.name ? null : category.name) }}>
+                          <Link href={`/category/${category.slug}`} className='sf-nav-link'>
                             {category.name}
-                          </a>
+                          </Link>
                           {categoryOpen === category.name && category.subcategories.length > 0 && (
-                            <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '0.5rem', background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '8px', padding: '1rem', minWidth: '600px', zIndex: 50 }} onMouseLeave={() => setCategoryOpen(null)}>
+                            <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '0.5rem', background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '8px', padding: '1rem', minWidth: '600px', zIndex: 50 }}>
                               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
                                 {category.subcategories.map((sub, subIndex) => (
                                   <div key={sub.slug || subIndex}>
