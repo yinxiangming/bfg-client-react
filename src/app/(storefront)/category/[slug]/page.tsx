@@ -27,16 +27,19 @@ function parsePage(raw: string | string[] | undefined): number {
   return Number.isFinite(n) && n > 1 ? n : 1
 }
 
+type CategoryAncestor = { slug: string; name: string }
+
 type CategoryNode = {
   name: string
   description: string
   children: { slug: string; name: string }[]
+  ancestors: CategoryAncestor[]
 }
 
 /** Must match `productsPerPage` in the view so the server seed fills exactly page 1. */
 const PRODUCTS_PER_PAGE = 12
 
-function walkTree(items: any[], slug: string): CategoryNode | null {
+function walkTree(items: any[], slug: string, ancestors: CategoryAncestor[] = []): CategoryNode | null {
   for (const c of items ?? []) {
     if (c.slug === slug) {
       return {
@@ -45,10 +48,11 @@ function walkTree(items: any[], slug: string): CategoryNode | null {
         children: (c.children ?? [])
           .filter((ch: any) => ch?.slug && ch?.name)
           .map((ch: any) => ({ slug: ch.slug as string, name: ch.name as string })),
+        ancestors,
       }
     }
     if (c.children?.length) {
-      const found = walkTree(c.children, slug)
+      const found = walkTree(c.children, slug, [...ancestors, { slug: c.slug, name: c.name }])
       if (found) return found
     }
   }
@@ -181,6 +185,7 @@ export default async function Page(props: Props) {
 
   const breadcrumb = buildBreadcrumbJsonLd(origin, [
     { name: 'Home', path: '/' },
+    ...(data.category?.ancestors ?? []).map(a => ({ name: a.name, path: `/category/${a.slug}` })),
     { name, path: `/category/${slug}` },
   ])
 
@@ -206,7 +211,7 @@ export default async function Page(props: Props) {
           products: data.products ?? [],
           totalCount: data.totalCount,
           category: data.category
-            ? { name: data.category.name, description: data.category.description }
+            ? { name: data.category.name, description: data.category.description, ancestors: data.category.ancestors }
             : null,
           subcategories: data.category?.children ?? [],
         }}

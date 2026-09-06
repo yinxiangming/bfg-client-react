@@ -38,6 +38,13 @@ interface PostListData {
   viewAllText?: string | Record<string, string>
 }
 
+function getPostImageUrl(post: Post): string {
+  const customImage =
+    typeof post.custom_fields?.image_url === 'string' ? post.custom_fields.image_url : ''
+
+  return post.featured_image || customImage
+}
+
 export function PostListV1({
   settings,
   data,
@@ -97,10 +104,10 @@ export function PostListV1({
         >
           {posts.map((post) => (
             <article key={post.id} className={styles.card}>
-              {showImage && post.featured_image && (
+              {showImage && getPostImageUrl(post) && (
                 <Link href={`/post/${post.slug}`} className={styles.imageWrapper}>
                   <Image
-                    src={post.featured_image}
+                    src={getPostImageUrl(post)}
                     alt={post.title}
                     fill
                     style={{ objectFit: 'cover' }}

@@ -43,6 +43,7 @@ export type StorefrontHeaderOptions = {
   show_language_switcher?: boolean
   show_style_selector?: boolean
   show_login?: boolean
+  show_register?: boolean
 }
 
 const DEFAULT_HEADER_OPTIONS: StorefrontHeaderOptions = {
@@ -51,6 +52,7 @@ const DEFAULT_HEADER_OPTIONS: StorefrontHeaderOptions = {
   show_language_switcher: true,
   show_style_selector: true,
   show_login: true,
+  show_register: false,
 }
 
 /**
@@ -82,6 +84,7 @@ export type StorefrontConfig = {
   twitter_url: string
   instagram_url: string
   default_currency: string
+  supported_currencies?: string[]
   /** ISO 3166-1 alpha-2, or '' when the workspace has not declared a market. */
   country?: string
   supported_languages?: string[]
@@ -306,6 +309,8 @@ export function getDefaultHeaderOptions(): StorefrontHeaderOptions {
  * Pass requestHost (e.g. from headers().get('host')); workspace id from env when set (same as other app surfaces).
  * Returns null when server returns 404 (e.g. workspace/site not configured yet).
  * Deduped per request via React.cache() so layout + page share one fetch.
+ * Workspace branding changes need to appear promptly, so this uses a short
+ * revalidate window rather than the default cross-request Next data cache.
  */
 export const getStorefrontConfigForServer = cache(
   async (locale: string, requestHost?: string): Promise<StorefrontConfig | null> => {
@@ -318,7 +323,7 @@ export const getStorefrontConfigForServer = cache(
           { 'Content-Type': 'application/json' },
           { requestHost }
         ),
-        next: { revalidate: 300 },
+        next: { revalidate: 30 },
         signal: controller.signal,
       })
       clearTimeout(timeoutId)

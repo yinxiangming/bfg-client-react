@@ -54,6 +54,7 @@ export type StorefrontUiSettingsPayload = {
   header?: string
   footer?: string
   header_options?: StorefrontHeaderOptionsPayload
+  supported_currencies?: string[]
   /**
    * Allowed color modes (subset of ['light', 'dark']). Single-entry → the
    * frontend forces that mode and hides any switcher. Default both.
@@ -568,4 +569,3 @@ export async function regenerateAPIKey(id: number): Promise<APIKeyCreateResponse
     method: 'POST'
   })
 }
-
