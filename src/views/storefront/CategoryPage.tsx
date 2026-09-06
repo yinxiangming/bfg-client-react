@@ -39,20 +39,24 @@ type Product = {
 
 type SortOption = 'relevance' | 'sales' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc'
 
+type CategoryAncestor = { slug: string; name: string }
+
 function findCategoryInTree(
   items: any[],
-  targetSlug: string
-): { name: string; description: string; children: any[] } | null {
+  targetSlug: string,
+  ancestors: CategoryAncestor[] = []
+): { name: string; description: string; children: any[]; ancestors: CategoryAncestor[] } | null {
   for (const c of items) {
     if (c.slug === targetSlug) {
       return {
         name: c.name ?? targetSlug,
         description: c.description ?? '',
-        children: Array.isArray(c.children) ? c.children : []
+        children: Array.isArray(c.children) ? c.children : [],
+        ancestors
       }
     }
     if (c.children?.length) {
-      const found = findCategoryInTree(c.children, targetSlug)
+      const found = findCategoryInTree(c.children, targetSlug, [...ancestors, { slug: c.slug, name: c.name }])
       if (found) return found
     }
   }
@@ -62,7 +66,7 @@ function findCategoryInTree(
 type CategoryInitialData = {
   products: any[]
   totalCount: number
-  category: { name: string; description: string } | null
+  category: { name: string; description: string; ancestors?: CategoryAncestor[] } | null
   subcategories: { slug: string; name: string }[]
 }
 
@@ -132,8 +136,10 @@ const CategoryPage = ({
   const [sortBy, setSortBy] = useState<SortOption>('relevance')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [totalCount, setTotalCount] = useState(initialData?.totalCount ?? 0)
-  const [categoryInfo, setCategoryInfo] = useState<{ name: string; description: string } | null>(
-    initialData?.category ?? null
+  const [categoryInfo, setCategoryInfo] = useState<
+    { name: string; description: string; ancestors: CategoryAncestor[] } | null
+  >(
+    initialData?.category ? { ...initialData.category, ancestors: initialData.category.ancestors ?? [] } : null
   )
   const [subcategories, setSubcategories] = useState<{ slug: string; name: string }[]>(
     initialData?.subcategories ?? []
@@ -190,7 +196,8 @@ const CategoryPage = ({
           if (found) {
             setCategoryInfo({
               name: found.name,
-              description: found.description || ''
+              description: found.description || '',
+              ancestors: found.ancestors
             })
             const subs = found.children
               .filter((ch: any) => ch?.slug && ch?.name)
@@ -230,10 +237,22 @@ const CategoryPage = ({
           )
       )}
       {/* Breadcrumbs */}
-      <nav className='sf-breadcrumb-nav'>
+      <nav className='sf-breadcrumb-nav' style={{ marginBottom: '1.5rem' }}>
         <Link href='/' className='sf-breadcrumb-link' style={{ textDecoration: 'none' }}>
           {t('nav.home')}
         </Link>
+        {(categoryInfo?.ancestors ?? []).map(ancestor => (
+          <span key={ancestor.slug}>
+            <span className='sf-breadcrumb-separator' style={{ margin: '0 0.5rem' }}>/</span>
+            <Link
+              href={`/category/${ancestor.slug}`}
+              className='sf-breadcrumb-link'
+              style={{ textDecoration: 'none' }}
+            >
+              {ancestor.name}
+            </Link>
+          </span>
+        ))}
         <span className='sf-breadcrumb-separator' style={{ margin: '0 0.5rem' }}>/</span>
         <span className='sf-breadcrumb-current'>{categoryName}</span>
       </nav>
