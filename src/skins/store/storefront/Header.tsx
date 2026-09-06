@@ -144,6 +144,22 @@ export default function StoreHeader(_props: StoreHeaderProps) {
   const allowedColorModes = getAllowedColorModes(config)
   const showStyleSelector = opts.show_style_selector !== false && allowedColorModes.length > 1
   const showLogin = opts.show_login !== false
+  const showRegister = opts.show_register === true
+  const defaultCurrency = String(config.default_currency || 'NZD').trim().toUpperCase()
+  const currencyOptions = Array.from(
+    new Set(
+      (Array.isArray(config.supported_currencies) && config.supported_currencies.length > 0
+        ? config.supported_currencies
+        : [defaultCurrency]
+      )
+        .map(code => String(code || '').trim().toUpperCase())
+        .filter(Boolean)
+    )
+  )
+  if (defaultCurrency && !currencyOptions.includes(defaultCurrency)) {
+    currencyOptions.unshift(defaultCurrency)
+  }
+  const showCurrencySwitcher = currencyOptions.length > 1
 
   useEffect(() => {
     setMounted(true)
@@ -215,17 +231,21 @@ export default function StoreHeader(_props: StoreHeaderProps) {
             <div className='sf-dropdown' style={{ position: 'relative' }}>
               <FeedbackButton variant='minimal' source='storefront' />
             </div>
-            <div className='sf-dropdown' style={{ position: 'relative', cursor: 'pointer' }} onClick={() => setCurrencyMenuOpen(!currencyMenuOpen)}>
-              <span>{config.default_currency || 'NZD'}</span>
-              <i className='tabler-chevron-down' style={{ fontSize: '0.75rem', marginLeft: '0.25rem' }} />
-              {currencyMenuOpen && (
-                <div style={{ position: 'absolute', top: '100%', right: 0, background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '8px', marginTop: '0.5rem', minWidth: '120px', zIndex: 1000 }}>
-                  <span className='sf-dropdown-link' style={{ display: 'block', padding: '0.5rem 1rem', fontSize: '0.875rem' }}>
-                    {config.default_currency || 'NZD'}
-                  </span>
-                </div>
-              )}
-            </div>
+            {showCurrencySwitcher && (
+              <div className='sf-dropdown' style={{ position: 'relative', cursor: 'pointer' }} onClick={() => setCurrencyMenuOpen(!currencyMenuOpen)}>
+                <span>{defaultCurrency}</span>
+                <i className='tabler-chevron-down' style={{ fontSize: '0.75rem', marginLeft: '0.25rem' }} />
+                {currencyMenuOpen && (
+                  <div style={{ position: 'absolute', top: '100%', right: 0, background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '8px', marginTop: '0.5rem', minWidth: '120px', zIndex: 1000 }}>
+                    {currencyOptions.map(code => (
+                      <span key={code} className='sf-dropdown-link' style={{ display: 'block', padding: '0.5rem 1rem', fontSize: '0.875rem' }}>
+                        {code}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             {showStyleSelector && (
               <div className='sf-dropdown' style={{ position: 'relative', cursor: 'pointer' }} onClick={() => setThemeMenuOpen(!themeMenuOpen)}>
                 <i
@@ -252,7 +272,9 @@ export default function StoreHeader(_props: StoreHeaderProps) {
             ) : (
               <>
                 <Link href='/auth/login' className='sf-header-top-link' style={{ textDecoration: 'none' }}>{t('topBar.login')}</Link>
-                <Link href='/auth/register' className='sf-header-top-link' style={{ textDecoration: 'none' }}>{t('topBar.register')}</Link>
+                {showRegister && (
+                  <Link href='/auth/register' className='sf-header-top-link' style={{ textDecoration: 'none' }}>{t('topBar.register')}</Link>
+                )}
               </>
             ))}
           </div>

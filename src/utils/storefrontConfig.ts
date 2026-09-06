@@ -43,6 +43,7 @@ export type StorefrontHeaderOptions = {
   show_language_switcher?: boolean
   show_style_selector?: boolean
   show_login?: boolean
+  show_register?: boolean
 }
 
 const DEFAULT_HEADER_OPTIONS: StorefrontHeaderOptions = {
@@ -51,6 +52,7 @@ const DEFAULT_HEADER_OPTIONS: StorefrontHeaderOptions = {
   show_language_switcher: true,
   show_style_selector: true,
   show_login: true,
+  show_register: false,
 }
 
 /**
@@ -82,6 +84,7 @@ export type StorefrontConfig = {
   twitter_url: string
   instagram_url: string
   default_currency: string
+  supported_currencies?: string[]
   /** ISO 3166-1 alpha-2, or '' when the workspace has not declared a market. */
   country?: string
   supported_languages?: string[]
