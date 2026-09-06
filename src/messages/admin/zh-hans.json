@@ -3693,6 +3693,7 @@
           "users": "用户",
           "roles": "角色",
           "email": "邮件",
+          "socialLogin": "第三方登录",
           "apiKeys": "API 密钥",
           "plugins": "插件",
           "versions": "版本信息"
@@ -3905,7 +3906,8 @@
             "showCart": "购物车",
             "showLanguageSwitcher": "语言",
             "showStyleSelector": "主题（亮/暗）",
-            "showLogin": "登录/账户"
+            "showLogin": "登录/账户",
+            "showRegister": "注册"
           },
           "shop": {
             "reviewModerationRequired": "开启评价审核（新评价需审核通过后才显示）",
@@ -4166,6 +4168,49 @@
             "notLiveHelp": "请先保存上面的开关,然后确认这里已填写国家、且服务器已配置 GOOGLE_MAPS_API_KEY。"
           }
         }
+      },
+      "socialLogin": {
+        "title": "第三方登录",
+        "subtitle": "多数店铺不需要在这里配置：跳转式登录始终回到我们自己的 API 域名，平台的公共 OAuth 客户端已经覆盖了。什么时候需要自己的客户端——你想让服务商的授权页显示你自己的名称，或者想在自己的域名上启用 One Tap（服务商会校验页面来源，只有你自己的客户端才能登记这个域名）。",
+        "add": "添加服务商",
+        "edit": "编辑",
+        "editTitle": "编辑服务商",
+        "delete": "删除",
+        "deleteConfirm": "删除这组凭据？该服务商的按钮会从登录页消失。",
+        "cancel": "取消",
+        "save": "保存",
+        "saving": "保存中...",
+        "saved": "已保存。",
+        "created": "已创建。",
+        "deleted": "已删除。",
+        "copied": "已复制。",
+        "provider": "服务商",
+        "providerLocked": "如需更换服务商，请删除后重新添加。",
+        "clientId": "客户端 ID",
+        "secret": "客户端密钥",
+        "secretPlaceholder": "不修改则保留已保存的密钥",
+        "secretUnchanged": "除非输入新值，否则保留已保存的密钥。",
+        "appleKeyId": "Key ID",
+        "appleCertificateKey": "签名密钥（.p8）",
+        "appleCertificateKeyPlaceholder": "粘贴 .p8 文件的内容。留空则保留已保存的密钥。",
+        "isActive": "启用",
+        "activeHint": "关闭后按钮不再显示，但凭据会保留。",
+        "status": "状态",
+        "statusLive": "已生效",
+        "statusOff": "已关闭",
+        "statusIncomplete": "未填完",
+        "consoleHeading": "把这些值填进服务商的控制台",
+        "redirectUri": "回调地址",
+        "jsOrigin": "JavaScript 来源",
+        "noDomains": "该工作区还没有域名，因此没有可授权的来源。请先添加域名。",
+        "errors": {
+          "loadFailed": "加载第三方登录设置失败",
+          "saveFailed": "保存失败。",
+          "deleteFailed": "删除失败。",
+          "copyFailed": "复制失败——请手动选中文本复制。"
+        },
+        "inheritedNotice": "{providers} 登录目前由平台的公共客户端提供，不用在这里配置就已经可用。下面添加自己的客户端，可以让授权页显示你自己的名称，并在你自己的域名上启用 One Tap。",
+        "overrideNotice": "保存后，本店将改用这个客户端，不再使用平台的公共客户端。"
       }
     }
   },

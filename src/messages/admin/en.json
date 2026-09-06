@@ -3693,6 +3693,7 @@
           "users": "Users",
           "roles": "Roles",
           "email": "Email",
+          "socialLogin": "Social Login",
           "apiKeys": "API Keys",
           "plugins": "Plugins",
           "versions": "Versions"
@@ -3905,7 +3906,8 @@
             "showCart": "Cart",
             "showLanguageSwitcher": "Language",
             "showStyleSelector": "Theme (light/dark)",
-            "showLogin": "Login / account"
+            "showLogin": "Login / account",
+            "showRegister": "Register"
           },
           "shop": {
             "reviewModerationRequired": "Require review moderation (reviews need approval before showing)",
@@ -4166,6 +4168,49 @@
             "notLiveHelp": "Save the switch above, then check that a country is set here and that GOOGLE_MAPS_API_KEY is set on the server."
           }
         }
+      },
+      "socialLogin": {
+        "title": "Social login",
+        "subtitle": "Most shops need nothing here: the platform's shared OAuth client already covers the redirect sign-in flow, because it always returns to our own API domain. Add your own client for a provider when you want your own name on its consent screen, or One Tap on your own domain — a provider checks the page's origin for that, and only your own client can list it.",
+        "add": "Add provider",
+        "edit": "Edit",
+        "editTitle": "Edit provider",
+        "delete": "Delete",
+        "deleteConfirm": "Delete these credentials? The provider's button will disappear from your sign-in page.",
+        "cancel": "Cancel",
+        "save": "Save",
+        "saving": "Saving...",
+        "saved": "Saved.",
+        "created": "Created.",
+        "deleted": "Deleted.",
+        "copied": "Copied.",
+        "provider": "Provider",
+        "providerLocked": "Delete and re-add to change the provider.",
+        "clientId": "Client ID",
+        "secret": "Client secret",
+        "secretPlaceholder": "Leave unchanged to keep the stored secret",
+        "secretUnchanged": "The stored secret is kept unless you type a new one.",
+        "appleKeyId": "Key ID",
+        "appleCertificateKey": "Signing key (.p8)",
+        "appleCertificateKeyPlaceholder": "Paste the contents of the .p8 file. Leave blank to keep the key already on file.",
+        "isActive": "Active",
+        "activeHint": "Turning this off hides the button without discarding the credentials.",
+        "status": "Status",
+        "statusLive": "Live",
+        "statusOff": "Off",
+        "statusIncomplete": "Incomplete",
+        "consoleHeading": "Paste these into the provider's console",
+        "redirectUri": "Redirect URI",
+        "jsOrigin": "JavaScript origin",
+        "noDomains": "This workspace has no domains yet, so there are no origins to authorise. Add a domain first.",
+        "errors": {
+          "loadFailed": "Failed to load social login settings",
+          "saveFailed": "Failed to save.",
+          "deleteFailed": "Failed to delete.",
+          "copyFailed": "Could not copy — select the text and copy it manually."
+        },
+        "inheritedNotice": "{providers} sign-in is currently provided by the platform's shared client, so it already works without any setup here. Add your own client below to put your own name on the consent screen and to enable One Tap on your own domain.",
+        "overrideNotice": "Saving this replaces the platform's shared client for this shop."
       }
     }
   },
