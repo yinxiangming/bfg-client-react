@@ -46,6 +46,7 @@ export type StorefrontHeaderOptionsPayload = {
   show_language_switcher?: boolean
   show_style_selector?: boolean
   show_login?: boolean
+  show_register?: boolean
 }
 
 export type StorefrontUiSettingsPayload = {
