@@ -309,6 +309,8 @@ export function getDefaultHeaderOptions(): StorefrontHeaderOptions {
  * Pass requestHost (e.g. from headers().get('host')); workspace id from env when set (same as other app surfaces).
  * Returns null when server returns 404 (e.g. workspace/site not configured yet).
  * Deduped per request via React.cache() so layout + page share one fetch.
+ * Workspace branding changes need to appear promptly, so this uses a short
+ * revalidate window rather than the default cross-request Next data cache.
  */
 export const getStorefrontConfigForServer = cache(
   async (locale: string, requestHost?: string): Promise<StorefrontConfig | null> => {
@@ -321,7 +323,7 @@ export const getStorefrontConfigForServer = cache(
           { 'Content-Type': 'application/json' },
           { requestHost }
         ),
-        next: { revalidate: 300 },
+        next: { revalidate: 30 },
         signal: controller.signal,
       })
       clearTimeout(timeoutId)

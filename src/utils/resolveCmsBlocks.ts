@@ -70,7 +70,7 @@ async function resolveCategoryGrid(
   const res = await storefrontApi.getCategories({
     requestHost,
     lang: locale,
-    next: { revalidate: 300 },
+    next: { revalidate: 30 },
   })
   block.resolvedData = listOf(res).slice(0, limit)
 }
