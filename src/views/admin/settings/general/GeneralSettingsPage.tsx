@@ -35,6 +35,7 @@ import { SettingsCard, flushPanelSx } from '@/components/admin/settings/Settings
 import UsersListTable from './UsersListTable'
 import RolesListTable from './RolesListTable'
 import EmailTab from './EmailTab'
+import SocialLoginTab from './SocialLoginTab'
 import APIKeysTab from './APIKeysTab'
 import VersionsTab from './VersionsTab'
 import PluginsTab from './PluginsTab'
@@ -89,7 +90,8 @@ const defaultHeaderOptions: StorefrontHeaderOptionsPayload = {
   show_cart: true,
   show_language_switcher: true,
   show_style_selector: true,
-  show_login: true
+  show_login: true,
+  show_register: false
 }
 
 type ColorMode = 'light' | 'dark'
@@ -195,6 +197,7 @@ const TAB_RAIL_ITEMS = [
   { value: 'users', icon: 'tabler-users', labelKey: 'settings.general.page.tabs.users' },
   { value: 'roles', icon: 'tabler-shield', labelKey: 'settings.general.page.tabs.roles' },
   { value: 'email', icon: 'tabler-mail', labelKey: 'settings.general.page.tabs.email' },
+  { value: 'social-login', icon: 'tabler-brand-google', labelKey: 'settings.general.page.tabs.socialLogin' },
   { value: 'api-keys', icon: 'tabler-key', labelKey: 'settings.general.page.tabs.apiKeys' },
   { value: 'plugins', icon: 'tabler-plug', labelKey: 'settings.general.page.tabs.plugins' },
   { value: 'versions', icon: 'tabler-tag', labelKey: 'settings.general.page.tabs.versions' }
@@ -724,6 +727,77 @@ const GeneralSettingsPage = () => {
             <TabPanel value='workspace' sx={flushPanelSx}>
               <form onSubmit={handleSubmit}>
                 <SettingsSection
+                  title={t('settings.general.basic.sections.localization')}
+                  description={t('settings.general.basic.sectionHints.localization')}
+                >
+                  <Grid container spacing={4}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <CustomTextField
+                        select
+                        fullWidth
+                        label={t('settings.general.basic.fields.defaultLanguage.label')}
+                        value={basicData.defaultLanguage}
+                        onChange={e => handleBasicChange('defaultLanguage', e.target.value)}
+                      >
+                        <MenuItem value='en'>{t('settings.web.settingsTab.languageOptions.en')}</MenuItem>
+                        <MenuItem value='zh-hans'>{t('settings.web.settingsTab.languageOptions.zhHans')}</MenuItem>
+                        <MenuItem value='zh-hant'>{t('settings.web.settingsTab.languageOptions.zhHant')}</MenuItem>
+                      </CustomTextField>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <CustomTextField
+                        select
+                        fullWidth
+                        label={t('settings.general.basic.fields.defaultCurrency.label')}
+                        value={currencies.some(c => c.code === basicData.defaultCurrency) ? basicData.defaultCurrency : (currencies[0]?.code ?? '')}
+                        onChange={e => handleBasicChange('defaultCurrency', e.target.value)}
+                      >
+                        {currencies.map(c => (
+                          <MenuItem key={c.id} value={c.code}>
+                            {c.code} ({c.symbol})
+                          </MenuItem>
+                        ))}
+                      </CustomTextField>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <CustomTextField
+                        select
+                        fullWidth
+                        label={t('settings.general.basic.fields.timezone.label')}
+                        value={basicData.defaultTimezone}
+                        onChange={e => handleBasicChange('defaultTimezone', e.target.value)}
+                        slotProps={{
+                          select: { MenuProps: { PaperProps: { style: { maxHeight: 250 } } } }
+                        }}
+                      >
+                        <MenuItem value='Pacific/Auckland'>{t('settings.general.basic.fields.timezone.options.pacificAuckland')}</MenuItem>
+                        <MenuItem value='UTC'>{t('settings.general.basic.fields.timezone.options.utc')}</MenuItem>
+                        <MenuItem value='Asia/Shanghai'>{t('settings.general.basic.fields.timezone.options.asiaShanghai')}</MenuItem>
+                      </CustomTextField>
+                    </Grid>
+                  </Grid>
+                </SettingsSection>
+
+                <SettingsSection
+                  title={t('settings.general.basic.sections.shop')}
+                  description={t('settings.general.basic.sectionHints.shop')}
+                >
+                  <FormControlLabel
+                    sx={{ ml: 0 }}
+                    control={
+                      <Checkbox
+                        checked={shopData.review_moderation_required}
+                        onChange={e => setShopData(prev => ({ ...prev, review_moderation_required: e.target.checked }))}
+                      />
+                    }
+                    label={t('settings.general.basic.fields.shop.reviewModerationRequired')}
+                  />
+                  <Typography sx={{ mt: 2, fontSize: '0.75rem', color: 'text.secondary' }}>
+                    {t('settings.general.basic.fields.shop.identifierManageHint')}
+                  </Typography>
+                </SettingsSection>
+
+                <SettingsSection
                   flush
                   title={t('settings.general.basic.subsections.adminIdentity')}
                   description={t('settings.general.basic.sectionHints.adminIdentity')}
@@ -885,77 +959,6 @@ const GeneralSettingsPage = () => {
                       </Box>
                     </>
                   )}
-                </SettingsSection>
-
-                <SettingsSection
-                  title={t('settings.general.basic.sections.localization')}
-                  description={t('settings.general.basic.sectionHints.localization')}
-                >
-                  <Grid container spacing={4}>
-                    <Grid size={{ xs: 12, sm: 6 }}>
-                      <CustomTextField
-                        select
-                        fullWidth
-                        label={t('settings.general.basic.fields.defaultLanguage.label')}
-                        value={basicData.defaultLanguage}
-                        onChange={e => handleBasicChange('defaultLanguage', e.target.value)}
-                      >
-                        <MenuItem value='en'>{t('settings.web.settingsTab.languageOptions.en')}</MenuItem>
-                        <MenuItem value='zh-hans'>{t('settings.web.settingsTab.languageOptions.zhHans')}</MenuItem>
-                        <MenuItem value='zh-hant'>{t('settings.web.settingsTab.languageOptions.zhHant')}</MenuItem>
-                      </CustomTextField>
-                    </Grid>
-                    <Grid size={{ xs: 12, sm: 6 }}>
-                      <CustomTextField
-                        select
-                        fullWidth
-                        label={t('settings.general.basic.fields.defaultCurrency.label')}
-                        value={currencies.some(c => c.code === basicData.defaultCurrency) ? basicData.defaultCurrency : (currencies[0]?.code ?? '')}
-                        onChange={e => handleBasicChange('defaultCurrency', e.target.value)}
-                      >
-                        {currencies.map(c => (
-                          <MenuItem key={c.id} value={c.code}>
-                            {c.code} ({c.symbol})
-                          </MenuItem>
-                        ))}
-                      </CustomTextField>
-                    </Grid>
-                    <Grid size={{ xs: 12, sm: 6 }}>
-                      <CustomTextField
-                        select
-                        fullWidth
-                        label={t('settings.general.basic.fields.timezone.label')}
-                        value={basicData.defaultTimezone}
-                        onChange={e => handleBasicChange('defaultTimezone', e.target.value)}
-                        slotProps={{
-                          select: { MenuProps: { PaperProps: { style: { maxHeight: 250 } } } }
-                        }}
-                      >
-                        <MenuItem value='Pacific/Auckland'>{t('settings.general.basic.fields.timezone.options.pacificAuckland')}</MenuItem>
-                        <MenuItem value='UTC'>{t('settings.general.basic.fields.timezone.options.utc')}</MenuItem>
-                        <MenuItem value='Asia/Shanghai'>{t('settings.general.basic.fields.timezone.options.asiaShanghai')}</MenuItem>
-                      </CustomTextField>
-                    </Grid>
-                  </Grid>
-                </SettingsSection>
-
-                <SettingsSection
-                  title={t('settings.general.basic.sections.shop')}
-                  description={t('settings.general.basic.sectionHints.shop')}
-                >
-                  <FormControlLabel
-                    sx={{ ml: 0 }}
-                    control={
-                      <Checkbox
-                        checked={shopData.review_moderation_required}
-                        onChange={e => setShopData(prev => ({ ...prev, review_moderation_required: e.target.checked }))}
-                      />
-                    }
-                    label={t('settings.general.basic.fields.shop.reviewModerationRequired')}
-                  />
-                  <Typography sx={{ mt: 2, fontSize: '0.75rem', color: 'text.secondary' }}>
-                    {t('settings.general.basic.fields.shop.identifierManageHint')}
-                  </Typography>
                 </SettingsSection>
 
                 <SettingsActionBar>
@@ -1421,6 +1424,15 @@ const GeneralSettingsPage = () => {
                             }
                             label={t('settings.general.basic.fields.headerOptions.showLogin')}
                           />
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={storefrontUi.header_options?.show_register === true}
+                                onChange={e => handleHeaderOptionChange('show_register', e.target.checked)}
+                              />
+                            }
+                            label={t('settings.general.basic.fields.headerOptions.showRegister')}
+                          />
                         </Box>
                       </Grid>
                     </Grid>
@@ -1548,6 +1560,11 @@ const GeneralSettingsPage = () => {
               <EmailTab />
             </TabPanel>
 
+            {/* Social login Tab — same flush treatment as the other tables. */}
+            <TabPanel value='social-login' sx={flushPanelSx}>
+              <SocialLoginTab />
+            </TabPanel>
+
             {/* API Keys Tab */}
             <TabPanel value='api-keys' sx={flushPanelSx}>
               <APIKeysTab />
@@ -1587,4 +1604,3 @@ const GeneralSettingsPage = () => {
 }
 
 export default GeneralSettingsPage
-

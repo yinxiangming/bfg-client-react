@@ -85,6 +85,7 @@ export const bfgApi = {
   addresses: () => buildApiUrl('/addresses/', API_VERSIONS.BFG2),
   settings: () => buildApiUrl('/settings/', API_VERSIONS.BFG2),
   emailConfigs: () => buildApiUrl('/email-configs/', API_VERSIONS.BFG2),
+  socialAuthConfigs: () => buildApiUrl('/social-auth-configs/', API_VERSIONS.BFG2),
   users: () => buildApiUrl('/users/', API_VERSIONS.BFG2),
   staffRoles: () => buildApiUrl('/staff-roles/', API_VERSIONS.BFG2),
   staffMembers: () => buildApiUrl('/staff-members/', API_VERSIONS.BFG2),

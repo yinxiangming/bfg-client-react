@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { getApiBaseUrl } from '@/utils/api'
+import { getApiBaseUrl, getApiHeaders } from '@/utils/api'
 
 export type SocialProvider = 'google' | 'facebook' | 'apple'
 
@@ -17,14 +17,30 @@ export type SocialProviderConfig = {
   googleClientId: string
 }
 
-let cached: SocialProviderConfig | null = null
-let inflight: Promise<SocialProviderConfig> | null = null
+/**
+ * Which shop we are asking about. Providers are configured per workspace — each
+ * shop registers its own OAuth client with Google — so one module-level cache
+ * would serve the first host's answer to every other host the bundle runs on.
+ */
+function cacheKey(): string {
+  return typeof window === 'undefined' ? '' : window.location.host
+}
+
+const cached = new Map<string, SocialProviderConfig>()
+const inflight = new Map<string, Promise<SocialProviderConfig>>()
 
 async function fetchEnabledProviders(): Promise<SocialProviderConfig> {
-  if (cached) return cached
-  if (inflight) return inflight
+  const key = cacheKey()
+  const hit = cached.get(key)
+  if (hit) return hit
+  const pending = inflight.get(key)
+  if (pending) return pending
+
   const apiBase = getApiBaseUrl().replace(/\/+$/, '')
-  inflight = fetch(`${apiBase}/api/v1/auth/providers/`)
+  // The API is a different origin from every storefront, so the workspace has
+  // to travel in a header — without it the backend cannot tell which shop is
+  // asking, and answers for none of them.
+  const request = fetch(`${apiBase}/api/v1/auth/providers/`, { headers: getApiHeaders() })
     .then(r => (r.ok ? r.json() : Promise.reject(new Error(`status ${r.status}`))))
     .then((body: { providers?: string[]; google_client_id?: string }) => {
       const config: SocialProviderConfig = {
@@ -33,21 +49,22 @@ async function fetchEnabledProviders(): Promise<SocialProviderConfig> {
         ),
         googleClientId: (body?.google_client_id || '').trim(),
       }
-      cached = config
+      cached.set(key, config)
       return config
     })
     .catch(() => {
-      // Fail open during the brief outage where the endpoint isn't deployed yet —
-      // showing all buttons is the safer default than a blank auth panel. One Tap
-      // stays off though: without a client id there is nothing to initialise.
-      const fallback: SocialProviderConfig = { providers: ALL_PROVIDERS, googleClientId: '' }
-      cached = fallback
+      // Fail closed. A shop that has not registered its own OAuth client has no
+      // working social login, so guessing at a full set of buttons would send
+      // visitors to a provider that rejects them. Email sign-in still works.
+      const fallback: SocialProviderConfig = { providers: [], googleClientId: '' }
+      cached.set(key, fallback)
       return fallback
     })
     .finally(() => {
-      inflight = null
+      inflight.delete(key)
     })
-  return inflight
+  inflight.set(key, request)
+  return request
 }
 
 /**
@@ -55,7 +72,8 @@ async function fetchEnabledProviders(): Promise<SocialProviderConfig> {
  * with `null` on the first paint (caller should hide its social row to avoid
  * a flash of buttons that immediately disappear), then populates once the
  * one-shot fetch resolves. Subsequent calls are served from a module-level
- * cache, so multiple auth pages don't re-hit the endpoint.
+ * cache keyed on the storefront host, so multiple auth pages don't re-hit the
+ * endpoint.
  */
 export function useSocialProviders(): SocialProvider[] | null {
   return useSocialProviderConfig()?.providers ?? null
@@ -66,10 +84,11 @@ export function useSocialProviders(): SocialProvider[] | null {
  * config (provider list + Google client id). `null` until it resolves.
  */
 export function useSocialProviderConfig(): SocialProviderConfig | null {
-  const [config, setConfig] = useState<SocialProviderConfig | null>(cached)
+  const [config, setConfig] = useState<SocialProviderConfig | null>(null)
   useEffect(() => {
-    if (cached) {
-      setConfig(cached)
+    const hit = cached.get(cacheKey())
+    if (hit) {
+      setConfig(hit)
       return
     }
     let alive = true
