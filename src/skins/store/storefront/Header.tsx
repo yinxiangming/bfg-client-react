@@ -430,10 +430,17 @@ export default function StoreHeader(_props: StoreHeaderProps) {
         </div>
       </div>
 
-      {mobileMenuOpen && (
+      {mobileMenuOpen && (() => {
+        const isDarkMode = theme.mode === 'system' ? theme.systemMode === 'dark' : theme.mode === 'dark'
+        const drawerBg = isDarkMode ? '#1a1a1a' : 'white'
+        const drawerText = isDarkMode ? '#e0e0e0' : '#2c3e50'
+        const drawerMuted = isDarkMode ? '#9e9e9e' : '#757575'
+        const drawerBorder = isDarkMode ? '#2d2d2d' : '#f0f0f0'
+        const drawerSubBg = isDarkMode ? '#2d2d2d' : '#fafafa'
+        return (
         <>
           <div onClick={() => setMobileMenuOpen(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 999 }} />
-          <div style={{ position: 'fixed', top: 0, left: 0, width: '80%', maxWidth: '320px', height: '100vh', background: 'white', boxShadow: '2px 0 8px rgba(0,0,0,0.1)', zIndex: 1000, padding: '1rem', overflowY: 'auto' }}>
+          <div style={{ position: 'fixed', top: 0, left: 0, width: '80%', maxWidth: '320px', height: '100vh', background: drawerBg, boxShadow: '2px 0 8px rgba(0,0,0,0.1)', zIndex: 1000, padding: '1rem', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
               <Logo
                 color='#6366f1'
@@ -442,7 +449,7 @@ export default function StoreHeader(_props: StoreHeaderProps) {
                 logoDarkSrc={config.logo_dark}
                 showNameWithLogo={config.show_site_name_with_logo}
               />
-              <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.75rem', cursor: 'pointer', color: '#757575', padding: '0.25rem' }} aria-label='Close menu'>×</button>
+              <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.75rem', cursor: 'pointer', color: drawerMuted, padding: '0.25rem' }} aria-label='Close menu'>×</button>
             </div>
             {showSearch && (
               <form
@@ -457,33 +464,33 @@ export default function StoreHeader(_props: StoreHeaderProps) {
                 }}
               >
                 <div style={{ position: 'relative' }}>
-                  <i className='tabler-search' style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', fontSize: '1.125rem', color: '#757575' }} />
+                  <i className='tabler-search' style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', fontSize: '1.125rem', color: drawerMuted }} />
                   <input
                     type='text'
                     placeholder={t('search.placeholder')}
                     value={searchKeyword}
                     onChange={e => setSearchKeyword(e.target.value)}
-                    style={{ width: '100%', padding: '0.625rem 1rem 0.625rem 2.5rem', border: '1px solid #e0e0e0', borderRadius: '8px', fontSize: '0.875rem', outline: 'none' }}
+                    style={{ width: '100%', padding: '0.625rem 1rem 0.625rem 2.5rem', border: `1px solid ${isDarkMode ? '#3d3d3d' : '#e0e0e0'}`, borderRadius: '8px', fontSize: '0.875rem', outline: 'none', background: isDarkMode ? '#2d2d2d' : 'white', color: drawerText }}
                   />
                 </div>
               </form>
             )}
             <nav>
-              <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#757575', marginBottom: '0.75rem', textTransform: 'uppercase' }}>{useMergedNav ? 'Menu' : 'Categories'}</h3>
+              <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: drawerMuted, marginBottom: '0.75rem', textTransform: 'uppercase' }}>{useMergedNav ? 'Menu' : 'Categories'}</h3>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                 {navListLoading ? (
-                  <li style={{ padding: '0.75rem 0', color: '#757575' }}>Loading...</li>
+                  <li style={{ padding: '0.75rem 0', color: drawerMuted }}>Loading...</li>
                 ) : useMergedNav && navRows ? (
                   navRows.map(row => {
                     if (row.kind === 'link') {
                       return (
-                        <li key={row.key} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                        <li key={row.key} style={{ borderBottom: `1px solid ${drawerBorder}` }}>
                           <Link
                             href={row.href}
                             onClick={() => setMobileMenuOpen(false)}
                             target={row.newTab ? '_blank' : undefined}
                             rel={row.newTab ? 'noopener noreferrer' : undefined}
-                            style={{ display: 'block', padding: '0.75rem 0', color: '#2c3e50', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}
+                            style={{ display: 'block', padding: '0.75rem 0', color: drawerText, textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}
                           >
                             {row.title}
                           </Link>
@@ -491,17 +498,17 @@ export default function StoreHeader(_props: StoreHeaderProps) {
                       )
                     }
                     return (
-                      <li key={row.key} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                      <li key={row.key} style={{ borderBottom: `1px solid ${drawerBorder}` }}>
                         <div>
-                          <button type='button' onClick={() => setCategoryOpen(categoryOpen === row.key ? null : row.key)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 0', background: 'none', border: 'none', color: '#2c3e50', fontSize: '0.9375rem', fontWeight: 500, cursor: 'pointer', textAlign: 'left' }}>
+                          <button type='button' onClick={() => setCategoryOpen(categoryOpen === row.key ? null : row.key)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 0', background: 'none', border: 'none', color: drawerText, fontSize: '0.9375rem', fontWeight: 500, cursor: 'pointer', textAlign: 'left' }}>
                             <span>{row.title}</span>
                             <i className={`tabler-chevron-${categoryOpen === row.key ? 'up' : 'down'}`} style={{ fontSize: '1rem' }} />
                           </button>
                           {categoryOpen === row.key && row.subcategories.length > 0 && (
-                            <ul style={{ listStyle: 'none', padding: '0 0 0.5rem 1rem', margin: 0, backgroundColor: '#fafafa' }}>
+                            <ul style={{ listStyle: 'none', padding: '0 0 0.5rem 1rem', margin: 0, backgroundColor: drawerSubBg }}>
                               {row.subcategories.map((sub, subIndex) => (
                                 <li key={sub.slug || subIndex}>
-                                  <Link href={`/category/${sub.slug}`} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.5rem 0', color: '#757575', textDecoration: 'none', fontSize: '0.875rem' }}>{sub.name}</Link>
+                                  <Link href={`/category/${sub.slug}`} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.5rem 0', color: drawerMuted, textDecoration: 'none', fontSize: '0.875rem' }}>{sub.name}</Link>
                                 </li>
                               ))}
                             </ul>
@@ -514,20 +521,20 @@ export default function StoreHeader(_props: StoreHeaderProps) {
                   categories.map((category, index) => {
                     const categoryKey = category.slug || category.name
                     return (
-                      <li key={categoryKey || index} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                      <li key={categoryKey || index} style={{ borderBottom: `1px solid ${drawerBorder}` }}>
                         {category.subcategories.length === 0 ? (
-                          <Link href={`/category/${category.slug}`} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: '#2c3e50', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}>{category.name}</Link>
+                          <Link href={`/category/${category.slug}`} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: drawerText, textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}>{category.name}</Link>
                         ) : (
                           <div>
-                            <button type='button' onClick={() => setCategoryOpen(categoryOpen === category.name ? null : category.name)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 0', background: 'none', border: 'none', color: '#2c3e50', fontSize: '0.9375rem', fontWeight: 500, cursor: 'pointer', textAlign: 'left' }}>
+                            <button type='button' onClick={() => setCategoryOpen(categoryOpen === category.name ? null : category.name)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 0', background: 'none', border: 'none', color: drawerText, fontSize: '0.9375rem', fontWeight: 500, cursor: 'pointer', textAlign: 'left' }}>
                               <span>{category.name}</span>
                               <i className={`tabler-chevron-${categoryOpen === category.name ? 'up' : 'down'}`} style={{ fontSize: '1rem' }} />
                             </button>
                             {categoryOpen === category.name && category.subcategories.length > 0 && (
-                              <ul style={{ listStyle: 'none', padding: '0 0 0.5rem 1rem', margin: 0, backgroundColor: '#fafafa' }}>
+                              <ul style={{ listStyle: 'none', padding: '0 0 0.5rem 1rem', margin: 0, backgroundColor: drawerSubBg }}>
                                 {category.subcategories.map((sub, subIndex) => (
                                   <li key={sub.slug || subIndex}>
-                                    <Link href={`/category/${sub.slug}`} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.5rem 0', color: '#757575', textDecoration: 'none', fontSize: '0.875rem' }}>{sub.name}</Link>
+                                    <Link href={`/category/${sub.slug}`} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.5rem 0', color: drawerMuted, textDecoration: 'none', fontSize: '0.875rem' }}>{sub.name}</Link>
                                   </li>
                                 ))}
                               </ul>
@@ -541,13 +548,13 @@ export default function StoreHeader(_props: StoreHeaderProps) {
               </ul>
             </nav>
             {showLogin && (
-              <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #f0f0f0' }}>
+              <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: `1px solid ${drawerBorder}` }}>
                 {isAuthenticated ? (
-                  <Link href='/account' onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 0', color: '#2c3e50', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}>
+                  <Link href='/account' onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 0', color: drawerText, textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}>
                     <i className='tabler-user' style={{ fontSize: '1.25rem' }} /> My Account
                   </Link>
                 ) : (
-                  <Link href='/auth/login' onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 0', color: '#2c3e50', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}>
+                  <Link href='/auth/login' onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 0', color: drawerText, textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}>
                     <i className='tabler-login' style={{ fontSize: '1.25rem' }} /> Login
                   </Link>
                 )}
@@ -555,7 +562,8 @@ export default function StoreHeader(_props: StoreHeaderProps) {
             )}
           </div>
         </>
-      )}
+        )
+      })()}
     </>
   )
 }
