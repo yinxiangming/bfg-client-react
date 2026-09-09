@@ -101,8 +101,6 @@ const UsersListTable = () => {
         first_name: '',
         last_name: '',
         email: inv.email,
-        is_staff: true,
-        is_superuser: false,
         roleName: inv.role?.name,
         status: inv.status,
         last_login: null
@@ -145,14 +143,13 @@ const UsersListTable = () => {
                 : value
         }
       }
-      if (col.field === 'is_staff') {
+      if (col.field === 'staff_role') {
         return {
           ...col,
           render: (value: any, row: any) => {
+            // A pending invitation has no membership yet, only the role it offers.
             if (isInvite(row)) return row.roleName ?? '—'
-            if (row.is_superuser) return t('settings.general.users.schema.roleValues.superuser')
-            if (row.is_staff) return t('settings.general.users.schema.roleValues.staff')
-            return t('settings.general.users.schema.roleValues.user')
+            return row.staff_role?.name || t('settings.general.users.schema.roleValues.user')
           }
         }
       }

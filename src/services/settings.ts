@@ -22,9 +22,13 @@ export type User = {
   last_name: string
   phone?: string
   avatar?: string
-  is_staff: boolean
+  /**
+   * The user's role in *this* workspace, or null if they have no active membership.
+   * Django's `is_staff` / `is_superuser` used to stand in for this; nothing in the
+   * admin is decided by them, and `/api/v1/users/` never sent them.
+   */
+  staff_role?: { id: number; code: string; name: string } | null
   is_active: boolean
-  is_superuser: boolean
   last_login?: string
   date_joined?: string
   default_workspace?: number
