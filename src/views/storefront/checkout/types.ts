@@ -68,18 +68,36 @@ export type Address = {
 export type PaymentGateway = {
   id: number
   name: string
-  gateway_type: 'stripe' | 'paypal' | 'bank_transfer' | 'wechat' | 'alipay' | 'custom'
+  gateway_type: 'stripe' | 'paypal' | 'bank_transfer' | 'pay_in_store' | 'wechat' | 'alipay' | 'custom'
   display_info: {
     bank_name?: string
     account_name?: string
     account_number?: string
     routing_number?: string
     swift_code?: string
+    accepted_methods?: string
     instructions?: string
     publishable_key?: string
     supports_saved_cards?: boolean
     client_id?: string
   }
+  /** Empty or absent means the gateway settles shipped and collected orders alike. */
+  supported_fulfillment_methods?: string[]
+}
+
+/**
+ * True when this gateway can settle an order fulfilled this way.
+ *
+ * Paying at the counter is only possible if the customer comes to the counter, so the
+ * option has to disappear the moment the shopper switches back to delivery. The server
+ * rejects the mismatch anyway — this is so it never gets offered in the first place.
+ */
+export function gatewayAllowsFulfillment(
+  gateway: PaymentGateway,
+  fulfillmentMethod: CheckoutFormData['fulfillmentMethod']
+): boolean {
+  const allowed = gateway.supported_fulfillment_methods
+  return !allowed || allowed.length === 0 || allowed.includes(fulfillmentMethod)
 }
 
 /** True when gateway shows an instructions/display panel (not Stripe card form) */
@@ -88,6 +106,7 @@ export function hasGatewayDisplayContent(gateway: PaymentGateway | null | undefi
   const d = gateway.display_info
   return !!(
     (d.instructions != null && d.instructions !== '') ||
+    d.accepted_methods ||
     d.bank_name ||
     d.account_name ||
     d.account_number ||
