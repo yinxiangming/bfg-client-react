@@ -2,10 +2,9 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import MenuItem from '@mui/material/MenuItem'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import Snackbar from '@mui/material/Snackbar'
@@ -15,8 +14,9 @@ import Stack from '@mui/material/Stack'
 import { alpha } from '@mui/material/styles'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import CustomTextField from '@/components/ui/TextField'
+import CategoryTreeSelect from '@/components/category/CategoryTreeSelect'
 import { apiFetch, buildApiUrl, API_VERSIONS } from '@/utils/api'
-import { getCategories, uploadProductMedia } from '@/services/store'
+import { getCategoriesTree, uploadProductMedia } from '@/services/store'
 import type { Category } from '@/services/store'
 
 interface PersistedState {
@@ -27,6 +27,7 @@ interface PersistedState {
 export default function ProductEntryForm() {
   const router = useRouter()
   const t = useTranslations('admin.mobileAdmin.productEntry')
+  const locale = useLocale()
   const nameRef = useRef<HTMLInputElement>(null)
 
   // Fields that reset after each submit
@@ -58,8 +59,24 @@ export default function ProductEntryForm() {
   }
 
   useEffect(() => {
-    getCategories().then(setCategories).catch(() => {})
-  }, [])
+    // The tree endpoint, scoped to the admin's language, so this picker offers the same
+    // categories as every other one. `getCategories()` returned a flat list in whatever
+    // language the fallback landed on, which is how the same shop ended up with two
+    // different category lists in the same admin.
+    getCategoriesTree(locale).then(setCategories).catch(() => {})
+  }, [locale])
+
+  // The form persists a category id across submits; the picker speaks in objects, and
+  // the tree is nested — a flat find would resolve roots only.
+  const findInTree = (nodes: Category[], id: number): Category | undefined => {
+    for (const node of nodes) {
+      if (node.id === id) return node
+      const hit = node.children?.length ? findInTree(node.children, id) : undefined
+      if (hit) return hit
+    }
+    return undefined
+  }
+  const selectedCategory = categoryId === '' ? undefined : findInTree(categories, categoryId)
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files ?? [])
@@ -172,35 +189,16 @@ export default function ProductEntryForm() {
           sx={mobileFieldSx}
         />
 
-        {/* Category */}
-        <CustomTextField
-          select
-          fullWidth
-          value={categoryId}
-          onChange={e => setCategoryId(e.target.value === '' ? '' : Number(e.target.value))}
+        {/* Category — same tree picker as the desktop product form and list filter */}
+        <CategoryTreeSelect
+          categories={categories}
+          value={selectedCategory ? [selectedCategory] : []}
+          onChange={next => setCategoryId(next[0]?.id ?? '')}
+          placeholder={t('category')}
+          multiple={false}
           sx={mobileFieldSx}
-          slotProps={{
-            select: {
-              displayEmpty: true,
-              renderValue: (value: unknown) => {
-                if (categoryId === '') {
-                  return <span style={{ color: 'var(--mui-palette-text-secondary)' }}>{t('category')}</span>
-                }
-                const selected = categories.find(cat => String(cat.id) === String(value))
-                return selected?.name || ''
-              },
-            },
-          }}
-        >
-          <MenuItem value=''>
-            <em>{t('categoryNone')}</em>
-          </MenuItem>
-          {categories.map(cat => (
-            <MenuItem key={cat.id} value={cat.id}>
-              {cat.name}
-            </MenuItem>
-          ))}
-        </CustomTextField>
+          optionSx={{ '& .MuiAutocomplete-option': { fontSize: '1.5rem', py: 1.5 } }}
+        />
 
         {/* Photos */}
         <Box>
