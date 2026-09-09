@@ -1,40 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import Box from '@mui/material/Box'
-import CircularProgress from '@mui/material/CircularProgress'
-import { authApi } from '@/utils/authApi'
-import { meApi } from '@/utils/meApi'
 
+/**
+ * Layout only. `/admin/m/*` renders inside `app/admin/layout.tsx`, which already wraps
+ * everything in <StaffMemberProvider><AdminAccessGuard>: no token redirects to the login
+ * page, a signed-in non-staff user goes to /account, and children render only for an
+ * active staff member.
+ *
+ * This file used to repeat that check against Django's `user.is_staff`, which is not what
+ * gates the admin — membership is a StaffMember row for the workspace, and a shop's own
+ * operators are staff of their workspace without being Django staff. So an admin who
+ * could use every desktop page was bounced from the mobile ones to /admin/dashboard,
+ * and the fix was to hand out a Django-wide flag to make a per-workspace screen open.
+ */
 export default function MobileAdminLayoutClient({ children }: { children: React.ReactNode }) {
-  const router = useRouter()
-  const [ready, setReady] = useState(false)
-
-  useEffect(() => {
-    if (!authApi.isAuthenticated()) {
-      router.push(`/auth/login?redirect=${encodeURIComponent('/admin/m')}`)
-      return
-    }
-    meApi.getMe().then((user: any) => {
-      if (!user?.is_staff) {
-        router.push('/admin')
-        return
-      }
-      setReady(true)
-    }).catch(() => {
-      router.push(`/auth/login?redirect=${encodeURIComponent('/admin/m')}`)
-    })
-  }, [router])
-
-  if (!ready) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '100vh' }}>
-        <CircularProgress />
-      </Box>
-    )
-  }
-
   return (
     <Box component='main' sx={{ minHeight: '100vh', bgcolor: 'background.default', p: 2 }}>
       {children}

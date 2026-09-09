@@ -110,8 +110,12 @@ export default function AccountDashboardClient() {
       .finally(() => {
         if (!cancelled) setStatsLoading(false)
       })
-    meApi.getMe().then((me) => {
-      if (!cancelled) setIsStaff(!!(me?.is_staff || me?.is_superuser))
+    // An active StaffMember row for this workspace — the same signal AdminAccessGuard
+    // uses, and `/api/v1/me/` already carries it. Django's `is_staff` was wrong in both
+    // directions: a shop's own operator never saw this shortcut, while a Django-staff
+    // user with no membership here saw it and was bounced straight back to /account.
+    meApi.getMe().then((me: any) => {
+      if (!cancelled) setIsStaff(me?.staff_member?.is_active === true)
     }).catch(() => {})
     return () => {
       cancelled = true
