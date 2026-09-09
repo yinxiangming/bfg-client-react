@@ -12,6 +12,7 @@ import TextField from '@/components/ui/TextField'
 import Chip from '@mui/material/Chip'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
+import type { SxProps, Theme } from '@mui/material/styles'
 
 // Type Imports
 import type { Category } from '@/services/store'
@@ -25,13 +26,30 @@ type CategoryTreeSelectProps = {
   placeholder?: string
   loading?: boolean
   multiple?: boolean
+  /** Styles the field. The mobile entry form scales its controls up for thumb use. */
+  sx?: SxProps<Theme>
+  /** Styles the popup. Options render in a Popper, outside `sx`'s reach. */
+  optionSx?: SxProps<Theme>
 }
 
 /**
- * Flatten category tree for Autocomplete options
- * Includes parent path in label for better UX
+ * Flatten a category tree into Autocomplete options, depth-first, so a child always
+ * follows its parent. `level` drives the indent that is the only thing telling the
+ * reader which of them is which.
+ *
+ * It used to be derived from the path — `parentPath.split(' > ').length` — which
+ * answers 1 for a root (`''.split()` yields `['']`) *and* 1 for its children (a
+ * single-segment parent path). So the whole first two levels rendered flush left, and
+ * a filter dropdown listing "新鲜蔬菜, 葱姜蒜椒, 时令水果, 莓果蓝莓…" read as a flat
+ * list of unrelated categories that matched nothing on the categories page — which
+ * shows roots only, collapsed behind a chevron. Same rows, same endpoint; only the
+ * indent was missing. Depth is passed down explicitly now.
  */
-function flattenCategories(categories: Category[], parentPath: string = ''): Array<Category & { displayLabel: string; level: number }> {
+function flattenCategories(
+  categories: Category[],
+  parentPath: string = '',
+  level: number = 0
+): Array<Category & { displayLabel: string; level: number }> {
   const result: Array<Category & { displayLabel: string; level: number }> = []
   
   if (!categories || !Array.isArray(categories)) {
@@ -47,12 +65,12 @@ function flattenCategories(categories: Category[], parentPath: string = ''): Arr
     result.push({
       ...category,
       displayLabel: currentPath,
-      level: parentPath.split(' > ').length
+      level
     })
     
     // Recursively add children
     if (category.children && Array.isArray(category.children) && category.children.length > 0) {
-      result.push(...flattenCategories(category.children, currentPath))
+      result.push(...flattenCategories(category.children, currentPath, level + 1))
     }
   })
   
@@ -67,7 +85,9 @@ export default function CategoryTreeSelect({
   label,
   placeholder = 'Select categories',
   loading = false,
-  multiple = true
+  multiple = true,
+  sx,
+  optionSx
 }: CategoryTreeSelectProps) {
   // Flatten tree structure for Autocomplete
   const flatCategories = useMemo(() => {
@@ -108,6 +128,8 @@ export default function CategoryTreeSelect({
       // renderInput's params, which overrode CustomTextField's small default —
       // this control rendered 47px tall next to the 38px selects beside it.
       size='small'
+      sx={sx}
+      slotProps={optionSx ? { paper: { sx: optionSx } } : undefined}
       multiple={multiple}
       options={flatCategories}
       getOptionLabel={(option) => option.displayLabel || option.name || ''}
@@ -174,7 +196,7 @@ export default function CategoryTreeSelect({
             component="li"
             {...otherProps}
             sx={{
-              pl: `${level * 2 + 1}rem !important`,
+              pl: `${level * 1.5 + 1}rem !important`,
               display: 'flex',
               alignItems: 'center',
               gap: 1
