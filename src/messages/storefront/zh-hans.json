@@ -288,6 +288,7 @@
         "accountNumber": "账号",
         "routingNumber": "路由号",
         "swiftCode": "SWIFT 代码",
+        "acceptedMethods": "柜台可用支付方式",
         "important": "重要提示：",
         "importantFallback": "请在备注中填写订单号作为付款凭据。"
       },

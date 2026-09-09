@@ -18,7 +18,7 @@ import CheckoutShippingSection from './CheckoutShippingSection'
 import CheckoutPaymentSection from './CheckoutPaymentSection'
 import CheckoutOrderSummary from './CheckoutOrderSummary'
 import type { CheckoutFormData, UserInfo, Address, PaymentGateway, SavedPaymentMethod } from './types'
-import { isPlaceOrderGateway } from './types'
+import { isPlaceOrderGateway, gatewayAllowsFulfillment } from './types'
 import { usePageSlots } from '@/extensions/hooks/usePageSections'
 
 import '@/styles/storefront.css'
@@ -93,12 +93,27 @@ const CheckoutPage = () => {
 
   // Computed values
   const selectedAddress = addresses.find(addr => addr.id === selectedAddressId)
-  const selectedGateway = paymentGateways.find(g => g.id === selectedGatewayId)
+  // Gateways are fetched once — they are workspace config, not per-order — and narrowed
+  // here, because the shopper can flip between delivery and collection afterwards and
+  // some gateways only work one of those ways.
+  const availableGateways = paymentGateways.filter(g => gatewayAllowsFulfillment(g, formData.fulfillmentMethod))
+  const selectedGateway = availableGateways.find(g => g.id === selectedGatewayId)
   const requiresCreditCard = selectedGateway?.gateway_type === 'stripe'
   const placeOrderThenSuccess = isPlaceOrderGateway(selectedGateway)
   const isStripeNewCardPending = requiresCreditCard && useNewCard && !paymentMethodId
   const isStripeSavedCardPending = requiresCreditCard && !useNewCard && !selectedPaymentMethodId
-  const isSubmitDisabled = submitting || !selectedGatewayId || isStripeNewCardPending || isStripeSavedCardPending
+  // `selectedGateway`, not `selectedGatewayId`: a selection the fulfillment has just
+  // ruled out is no selection at all, and submitting it would only earn a 400.
+  const isSubmitDisabled = submitting || !selectedGateway || isStripeNewCardPending || isStripeSavedCardPending
+
+  // Switching to delivery must not leave "pay at the counter" selected behind the scenes.
+  const availableGatewayIds = availableGateways.map(g => g.id).join(',')
+  useEffect(() => {
+    if (selectedGatewayId != null && availableGateways.some(g => g.id === selectedGatewayId)) return
+    setSelectedGatewayId(availableGateways[0]?.id ?? null)
+    setPaymentMethodId(null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableGatewayIds, selectedGatewayId])
   
   // Use preview prices if available, otherwise fallback to local calculation
   const subtotal = pricePreview?.subtotal ?? getSubtotal()
@@ -663,7 +678,7 @@ const CheckoutPage = () => {
                   onChange={handleChange}
                   isAuthenticated={isAuthenticated}
                   loading={loading}
-                  paymentGateways={paymentGateways}
+                  paymentGateways={availableGateways}
                   selectedGatewayId={selectedGatewayId}
                   onSelectGateway={(id) => {
                     setSelectedGatewayId(id)
@@ -698,7 +713,7 @@ const CheckoutPage = () => {
                 onChange={handleChange}
                 isAuthenticated={isAuthenticated}
                 loading={loading}
-                paymentGateways={paymentGateways}
+                paymentGateways={availableGateways}
                 selectedGatewayId={selectedGatewayId}
                 onSelectGateway={setSelectedGatewayId}
                 savedPaymentMethods={savedPaymentMethods}

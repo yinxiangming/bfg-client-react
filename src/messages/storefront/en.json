@@ -288,6 +288,7 @@
         "accountNumber": "Account Number",
         "routingNumber": "Routing Number",
         "swiftCode": "SWIFT Code",
+        "acceptedMethods": "Accepted at the counter",
         "important": "Important:",
         "importantFallback": "Please include your order number as payment reference."
       },
