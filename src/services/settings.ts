@@ -95,6 +95,12 @@ export type ShopSettingsPayload = {
 
 export type WorkspaceSettings = {
   id: number
+  /**
+   * ISO 3166-1 alpha-2. A real model field, not part of `custom_settings`:
+   * it drives the tax defaults, the checkout address format and the geo
+   * plugin's market.
+   */
+  country?: string
   /** FK to Workspace; required for admin UI to PATCH workspace name/slug */
   workspace_id?: number
   site_name?: string
@@ -376,6 +382,42 @@ export async function updateGeneralSettings(settingsId: number, general: General
   })
   invalidateWorkspaceSettingsCache()
   return result
+}
+
+/**
+ * Save the workspace's country.
+ *
+ * Separate from `updateGeneralSettings` because `country` is a column on
+ * Settings, not a key inside `custom_settings.general` — PATCHing it through
+ * the general blob would write it somewhere nothing reads.
+ */
+export async function updateCountry(settingsId: number, country: string) {
+  const result = await apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`, {
+    ...getSiteAdminOptions(),
+    method: 'PATCH',
+    body: JSON.stringify({ country })
+  })
+
+  invalidateWorkspaceSettingsCache()
+
+  return result
+}
+
+export type CountryOption = {
+  code: string
+  name: string
+  name_zh: string
+  currency?: string
+  timezone?: string
+}
+
+export async function getCountries(): Promise<CountryOption[]> {
+  const res = await apiFetch<CountryOption[] | { results: CountryOption[] }>(
+    bfgApi.countries(),
+    getSiteAdminOptions()
+  )
+
+  return Array.isArray(res) ? res : res.results
 }
 
 export async function updateStorefrontUiSettings(settingsId: number, storefront_ui: StorefrontUiSettingsPayload) {

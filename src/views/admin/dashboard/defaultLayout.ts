@@ -8,6 +8,9 @@ export interface DashboardLayout {
 /** Default dashboard: left (wide) and right (narrow) columns */
 export const DEFAULT_DASHBOARD_LAYOUT: DashboardLayout = {
   left: [
+    // First, and only while it has something to say: the block returns null
+    // once setup is complete, so a finished workspace opens straight on stats.
+    { id: 'block_default_onboarding', type: 'onboarding_progress', settings: {}, data: {} },
     { id: 'block_default_store_stats', type: 'store_stats', settings: {}, data: {} },
     { id: 'block_default_orders_chart', type: 'store_orders_chart', settings: {}, data: {} },
   ],

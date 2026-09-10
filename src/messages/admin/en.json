@@ -1,6 +1,7 @@
 {
   "nav": {
     "dashboard": "Dashboard",
+    "setup": "Setup",
     "store": "Store",
     "storeOrders": "Orders",
     "storeProducts": "Products",
@@ -3848,6 +3849,10 @@
             "placeholder": "A short tagline for your brand or store",
             "helper": "Used for SEO snippets and storefront copy; independent of the admin workspace name."
           },
+          "country": {
+            "label": "Country",
+            "helper": "Sets the tax defaults, the checkout address format and the market for address lookup."
+          },
           "defaultLanguage": {
             "label": "Default Language"
           },
@@ -4418,5 +4423,69 @@
     "saving": "Saving…",
     "emptyHint": "No blocks yet. Add blocks to customize your dashboard.",
     "subtitle": "Today's orders, revenue and customers at a glance."
+  },
+  "setup": {
+    "title": "Set up your shop",
+    "subtitle": "Tell us where you trade and what you sell, and we will write the parts nobody enjoys writing.",
+    "loadFailed": "Could not load the setup checklist.",
+    "allDone": "Everything required is done. Anything below is optional.",
+    "remaining": "{count} required {count, plural, one {item} other {items}} left, {optional} optional.",
+    "hideFromDashboard": "Hide from dashboard",
+    "optional": "Optional",
+    "go": "Set up",
+    "review": "Review",
+    "skip": "Skip",
+    "unskip": "Unskip",
+    "skipHint": "Mark as a deliberate decision. It stays on the list but stops counting against you.",
+    "unskipHint": "Put this back on the list.",
+    "stepCount": "{done} / {total}",
+    "quickStart": {
+      "title": "Quick start",
+      "subtitle": "Pick a country and an industry. We will set your currency, tax, categories, navigation and legal pages from them — and never overwrite anything you have already changed.",
+      "country": "Where you trade",
+      "countryImplies": "Sets {currency}, {timezone} and {tax}. You can change any of them afterwards.",
+      "industry": "What you sell",
+      "siteName": "Shop name",
+      "siteNamePlaceholder": "Shown in the header and on your invoices",
+      "contactEmail": "Contact email",
+      "contactEmailHelp": "Printed on your privacy, terms and returns pages.",
+      "contactPhone": "Contact phone",
+      "preview": "Show me what this does",
+      "rerunSafe": "Safe to run again — it only fills in what is still missing.",
+      "save": "Save contact details",
+      "saved": "Saved."
+    },
+    "preview": {
+      "title": "What will be created",
+      "intro": "These do not exist yet, so they will be created:",
+      "nothingToDo": "Nothing is missing — your workspace already has everything this template would create.",
+      "nonDestructive": "Pages you have edited and menus you have reordered are left exactly as they are.",
+      "cancel": "Cancel",
+      "apply": "Create them",
+      "kind": {
+        "settings": "Workspace settings",
+        "currency": "Currency",
+        "taxRate": "Tax rate",
+        "store": "Store",
+        "warehouse": "Warehouse",
+        "zone": "Delivery zone",
+        "category": "Product categories",
+        "page": "Pages",
+        "menu": "Navigation menus",
+        "shopSettings": "Storefront display",
+        "site": "Storefront site",
+        "content": "Content"
+      }
+    },
+    "checklist": {
+      "title": "What is left",
+      "subtitle": "Each row links to the screen that fixes it. The ones we cannot do for you need your own accounts and keys."
+    },
+    "block": {
+      "title": "Setup",
+      "next": "Next up: {item}",
+      "remaining": "{count} required {count, plural, one {item} other {items}} left.",
+      "continue": "Continue setup"
+    }
   }
 }

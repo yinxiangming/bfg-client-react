@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react'
 import type { ChangeEvent, SyntheticEvent, FormEvent, ReactNode } from 'react'
 
 // i18n Imports
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 // MUI Imports
 import Grid from '@mui/material/Grid'
@@ -47,6 +47,9 @@ import {
   updateAnalyticsSettings,
   fetchWorkspaceRecord,
   patchWorkspaceRecord,
+  getCountries,
+  updateCountry,
+  type CountryOption,
   type GeneralSettingsPayload,
   type StorefrontUiSettingsPayload,
   type StorefrontHeaderOptionsPayload,
@@ -57,6 +60,7 @@ import { clearStorefrontConfigCache } from '@/utils/storefrontConfig'
 import { THEME_REGISTRY } from '@/components/storefront/themes/registry.generated'
 import { bfgApi } from '@/utils/api'
 import { usePageSlots } from '@/extensions/hooks/usePageSections'
+import { useTabQueryParam } from '@/hooks/useTabQueryParam'
 
 const THEME_IDS = Object.keys(THEME_REGISTRY).sort()
 function themeDisplayName(themeId: string): string {
@@ -71,6 +75,7 @@ type BasicData = {
   siteName: string
   siteDescription: string
   workspaceNote: string
+  country: string
   defaultLanguage: string
   defaultCurrency: string
   defaultTimezone: string
@@ -136,6 +141,7 @@ const initialBasicData: BasicData = {
   siteName: '',
   siteDescription: '',
   workspaceNote: '',
+  country: '',
   defaultLanguage: 'en',
   defaultCurrency: 'NZD',
   defaultTimezone: 'Pacific/Auckland',
@@ -246,15 +252,20 @@ const assetTileSx = (background?: string) => ({
 
 const GeneralSettingsPage = () => {
   const t = useTranslations('admin')
+  const locale = useLocale()
   const { beforeSlots, afterSlots } = usePageSlots('admin/settings/general')
   // States
-  const [activeTab, setActiveTab] = useState('workspace')
+  const [activeTab, setActiveTab] = useTabQueryParam(
+    TAB_RAIL_ITEMS.map(item => item.value),
+    'workspace'
+  )
   const TAB_RAIL = TAB_RAIL_ITEMS.map(item => ({
     value: item.value,
     icon: item.icon,
     label: t(item.labelKey)
   }))
   const [basicData, setBasicData] = useState<BasicData>(initialBasicData)
+  const [countries, setCountries] = useState<CountryOption[]>([])
   const [fileInput, setFileInput] = useState<string>('')
   const [imgSrc, setImgSrc] = useState<string>(DEFAULT_AVATAR)
   const [loading, setLoading] = useState(true)
@@ -470,9 +481,12 @@ const GeneralSettingsPage = () => {
       try {
         setLoading(true)
         console.log('[GeneralSettings] Loading settings...')
-        const [settings, currenciesData, workspace] = await Promise.all([
+        const [settings, currenciesData, countriesData, workspace] = await Promise.all([
           getWorkspaceSettings(),
           getCurrencies(),
+          // Reference data, and the endpoint is cheap; a failure here must not
+          // block the whole settings page from rendering.
+          getCountries().catch(() => [] as CountryOption[]),
           fetchWorkspaceRecord()
         ])
         if (workspace) {
@@ -484,6 +498,7 @@ const GeneralSettingsPage = () => {
         }
         const activeCurrencies = currenciesData.filter(c => c.is_active)
         setCurrencies(activeCurrencies)
+        setCountries(countriesData)
         console.log('[GeneralSettings] Settings loaded:', settings)
         setSettingsId(settings.id)
         console.log('[GeneralSettings] Settings ID set to:', settings.id)
@@ -535,6 +550,7 @@ const GeneralSettingsPage = () => {
               return found ? saved : (activeCurrencies[0]?.code ?? saved)
             })(),
             defaultTimezone: general.default_timezone || (settings as any).default_timezone || initialBasicData.defaultTimezone,
+            country: settings.country || initialBasicData.country,
             contactEmail: general.contact_email || (settings as any).contact_email || initialBasicData.contactEmail,
             contactPhone: general.contact_phone || (settings as any).contact_phone || initialBasicData.contactPhone,
             facebookUrl: general.facebook_url || (settings as any).facebook_url || initialBasicData.facebookUrl,
@@ -667,6 +683,10 @@ const GeneralSettingsPage = () => {
         google_analytics_id: analyticsData.google_analytics_id.trim()
       })
 
+      // Its own PATCH: `country` is a Settings column, not a key inside
+      // custom_settings.general, so it cannot ride along on the payload above.
+      await updateCountry(currentSettingsId, basicData.country)
+
       console.log('[GeneralSettings] Save successful')
       clearStorefrontConfigCache()
       setSuccess(true)
@@ -731,6 +751,25 @@ const GeneralSettingsPage = () => {
                   description={t('settings.general.basic.sectionHints.localization')}
                 >
                   <Grid container spacing={4}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <CustomTextField
+                        select
+                        fullWidth
+                        label={t('settings.general.basic.fields.country.label')}
+                        helperText={t('settings.general.basic.fields.country.helper')}
+                        value={countries.some(c => c.code === basicData.country) ? basicData.country : ''}
+                        onChange={e => handleBasicChange('country', e.target.value)}
+                        slotProps={{
+                          select: { MenuProps: { PaperProps: { style: { maxHeight: 320 } } } }
+                        }}
+                      >
+                        {countries.map(c => (
+                          <MenuItem key={c.code} value={c.code}>
+                            {locale.startsWith('zh') ? c.name_zh || c.name : c.name}
+                          </MenuItem>
+                        ))}
+                      </CustomTextField>
+                    </Grid>
                     <Grid size={{ xs: 12, sm: 6 }}>
                       <CustomTextField
                         select
