@@ -94,6 +94,16 @@ export const bfgApi = {
   invitationAccept: () => buildApiUrl('/invitations/accept/', API_VERSIONS.BFG2),
   apiKeys: () => buildApiUrl('/api-keys/', API_VERSIONS.BFG2),
 
+  countries: () => buildApiUrl('/countries/', API_VERSIONS.BFG2),
+
+  // Setup wizard
+  onboardingStatus: () => buildApiUrl('/onboarding/status/', API_VERSIONS.BFG2),
+  onboardingOptions: () => buildApiUrl('/onboarding/options/', API_VERSIONS.BFG2),
+  onboardingPreview: () => buildApiUrl('/onboarding/preview/', API_VERSIONS.BFG2),
+  onboardingApply: () => buildApiUrl('/onboarding/apply/', API_VERSIONS.BFG2),
+  onboardingSkip: () => buildApiUrl('/onboarding/skip/', API_VERSIONS.BFG2),
+  onboardingDismiss: () => buildApiUrl('/onboarding/dismiss/', API_VERSIONS.BFG2),
+
   // Web/CMS
   sites: () => buildApiUrl('/web/sites/', API_VERSIONS.BFG2),
   themes: () => buildApiUrl('/web/themes/', API_VERSIONS.BFG2),

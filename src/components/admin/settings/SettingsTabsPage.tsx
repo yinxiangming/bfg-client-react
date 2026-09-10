@@ -15,7 +15,6 @@
  * horizontal strip starts scrolling and hides the tail behind a chevron.
  */
 
-import { useState } from 'react'
 import type { ReactNode, SyntheticEvent } from 'react'
 
 import Box from '@mui/material/Box'
@@ -29,6 +28,7 @@ import useMediaQuery from '@mui/material/useMediaQuery'
 import { useTheme } from '@mui/material/styles'
 
 import CustomTabList from '@/components/ui/TabList'
+import { useTabQueryParam } from '@/hooks/useTabQueryParam'
 import { SETTINGS_GUTTER } from './SettingsSection'
 
 export type SettingsTab = {
@@ -171,9 +171,12 @@ export const SettingsTabsPage = ({
   beforeCard,
   afterCard
 }: SettingsTabsPageProps) => {
-  const [activeTab, setActiveTab] = useState(defaultTab ?? tabs[0]?.value ?? '')
+  const [activeTab, selectTab] = useTabQueryParam(
+    tabs.map(tab => tab.value),
+    defaultTab ?? tabs[0]?.value ?? ''
+  )
 
-  const handleTabChange = (_event: SyntheticEvent, value: string) => setActiveTab(value)
+  const handleTabChange = (_event: SyntheticEvent, value: string) => selectTab(value)
 
   return (
     <Grid container spacing={3}>

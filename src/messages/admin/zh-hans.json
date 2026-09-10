@@ -1,6 +1,7 @@
 {
   "nav": {
     "dashboard": "仪表盘",
+    "setup": "初始化",
     "store": "商店",
     "storeOrders": "订单",
     "storeProducts": "商品",
@@ -3848,6 +3849,10 @@
             "placeholder": "一句话介绍你的站点或品牌",
             "helper": "用于搜索摘要等前台展示；可与后台工作区名称不同。"
           },
+          "country": {
+            "label": "国家 / 地区",
+            "helper": "决定默认税率、结算页地址格式，以及地址自动补全的适用市场。"
+          },
           "defaultLanguage": {
             "label": "默认语言"
           },
@@ -4418,5 +4423,69 @@
     "saving": "保存中…",
     "emptyHint": "暂无区块。添加区块以定制您的仪表盘。",
     "subtitle": "今日订单、收入与顾客概览。"
+  },
+  "setup": {
+    "title": "店铺初始化",
+    "subtitle": "告诉我们你在哪里经营、卖什么，剩下那些没人愿意写的内容交给我们。",
+    "loadFailed": "初始化清单加载失败。",
+    "allDone": "必填项已全部完成，下面都是可选项。",
+    "remaining": "还有 {count} 项必填、{optional} 项可选未完成。",
+    "hideFromDashboard": "不在仪表盘显示",
+    "optional": "可选",
+    "go": "去设置",
+    "review": "查看",
+    "skip": "跳过",
+    "unskip": "恢复",
+    "skipHint": "标记为“已确认不做”。它仍留在清单里，但不再计入完成度。",
+    "unskipHint": "重新计入完成度。",
+    "stepCount": "{done} / {total}",
+    "quickStart": {
+      "title": "快速开始",
+      "subtitle": "选择国家与行业，我们据此设置货币、税率、商品分类、导航与法务页面——已经被你改过的内容一律不动。",
+      "country": "经营地",
+      "countryImplies": "将设置为 {currency}、{timezone}、{tax}，之后都可以自行调整。",
+      "industry": "所属行业",
+      "siteName": "店铺名称",
+      "siteNamePlaceholder": "显示在页头与发票上",
+      "contactEmail": "联系邮箱",
+      "contactEmailHelp": "会印在隐私政策、服务条款与退换货政策上。",
+      "contactPhone": "联系电话",
+      "preview": "先看看会做什么",
+      "rerunSafe": "可以重复运行，只会补齐仍然缺失的部分。",
+      "save": "保存联系信息",
+      "saved": "已保存。"
+    },
+    "preview": {
+      "title": "将要创建的内容",
+      "intro": "以下内容目前不存在，将被创建：",
+      "nothingToDo": "没有缺失项——该模板要创建的内容你的工作区都已经有了。",
+      "nonDestructive": "你改过的页面和调整过的导航菜单会原样保留。",
+      "cancel": "取消",
+      "apply": "创建",
+      "kind": {
+        "settings": "工作区设置",
+        "currency": "货币",
+        "taxRate": "税率",
+        "store": "店铺",
+        "warehouse": "仓库",
+        "zone": "配送区域",
+        "category": "商品分类",
+        "page": "页面",
+        "menu": "导航菜单",
+        "shopSettings": "店铺展示策略",
+        "site": "站点",
+        "content": "内容"
+      }
+    },
+    "checklist": {
+      "title": "还差这些",
+      "subtitle": "每一项都直接链到对应的设置页。我们代劳不了的，是需要你自己的账号与密钥的部分。"
+    },
+    "block": {
+      "title": "初始化进度",
+      "next": "下一步：{item}",
+      "remaining": "还有 {count} 项必填未完成。",
+      "continue": "继续设置"
+    }
   }
 }

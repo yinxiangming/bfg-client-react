@@ -27,6 +27,10 @@ export const DEFAULT_SLOTS: Record<string, string[]> = {
   'admin/support/tickets/detail-dialog': ['SupportTicketBasic', 'SupportTicketReplies', 'SupportTicketAssignments'],
   'admin/store/categories/edit': ['CategoryInfo'],
   'admin/store/categories/new': ['CategoryInfo'],
+  // Admin - Setup wizard. Plugins also mount inside a single step by targeting
+  // `SetupStep:<stepKey>` — the step keys come from the server checklist
+  // (bfg/common/onboarding/checklist.py), including the ones plugins add there.
+  'admin/setup': ['SetupProgress', 'QuickStart', 'Checklist'],
   // Admin - Settings
   'admin/settings/general': ['SiteInformation', 'Localization', 'Contact', 'Social'],
   'admin/settings/store': ['StoreBasic'],
