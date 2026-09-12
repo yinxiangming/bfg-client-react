@@ -54,6 +54,23 @@ interface RegisterResponse {
   email_verification_required?: boolean
 }
 
+interface ShopperRegisterRequest {
+  email: string
+  password: string
+  password_confirm?: string
+  first_name?: string
+  last_name?: string
+  phone?: string
+}
+
+interface ShopperRegisterResponse {
+  user: RegisterResponse['user']
+  /** The Customer record created in the storefront's workspace. */
+  customer_id: number
+  access: string
+  refresh: string
+}
+
 class AuthApiClient {
   private _baseUrl?: string
   private _customBaseUrl?: string
@@ -219,46 +236,7 @@ class AuthApiClient {
     const response = await this.postJson('/api/v1/auth/register/', data as unknown as Record<string, unknown>)
 
     if (!response.ok) {
-      let errorDetail = 'Registration failed'
-      const contentType = response.headers.get('content-type')
-      const isJson = contentType && contentType.includes('application/json')
-
-      try {
-        if (isJson) {
-          const errorData = await response.json()
-          console.error('Register API error response:', errorData)
-
-          // Check for field-specific errors (DRF format)
-          if (errorData.email) {
-            errorDetail = Array.isArray(errorData.email) ? errorData.email[0] : errorData.email
-          } else if (errorData.password) {
-            errorDetail = Array.isArray(errorData.password) ? errorData.password[0] : errorData.password
-          } else if (errorData.password_confirm) {
-            errorDetail = Array.isArray(errorData.password_confirm)
-              ? errorData.password_confirm[0]
-              : errorData.password_confirm
-          } else if (errorData.detail) {
-            errorDetail = errorData.detail
-          } else if (errorData.message) {
-            errorDetail = errorData.message
-          } else {
-            // Try to get first error message from any field
-            const firstError = Object.values(errorData)[0]
-            errorDetail = Array.isArray(firstError)
-              ? firstError[0]
-              : String(firstError) || `HTTP error! status: ${response.status}`
-          }
-        } else {
-          const text = await response.text()
-          errorDetail = text || `HTTP error! status: ${response.status} ${response.statusText}`
-        }
-      } catch (e) {
-        errorDetail = `HTTP error! status: ${response.status} ${response.statusText}`
-      }
-
-      const error = new Error(errorDetail)
-      ;(error as any).status = response.status
-      throw error
+      throw await this.registrationError(response)
     }
 
     const result: RegisterResponse = await response.json()
@@ -274,6 +252,72 @@ class AuthApiClient {
     }
 
     return result
+  }
+
+  /**
+   * Register a shopper in the storefront's workspace
+   * Unlike `register` (merchant sign-up), this joins the workspace the request resolves
+   * to, creates the shopper's Customer record and signs them in: the tokens are stored.
+   */
+  async registerShopper(data: ShopperRegisterRequest): Promise<ShopperRegisterResponse> {
+    const response = await this.postJson('/api/v1/store/auth/register/', data as unknown as Record<string, unknown>)
+
+    if (!response.ok) {
+      throw await this.registrationError(response)
+    }
+
+    const result: ShopperRegisterResponse = await response.json()
+
+    if (typeof window !== 'undefined') {
+      setWorkspaceToken(result.access)
+      setWorkspaceRefreshToken(result.refresh)
+    }
+
+    return result
+  }
+
+  /** The Error for a failed registration: the first field message DRF sent, else the status. */
+  private async registrationError(response: Response): Promise<Error> {
+    let errorDetail = 'Registration failed'
+    const contentType = response.headers.get('content-type')
+    const isJson = contentType && contentType.includes('application/json')
+
+    try {
+      if (isJson) {
+        const errorData = await response.json()
+        console.error('Register API error response:', errorData)
+
+        // Check for field-specific errors (DRF format)
+        if (errorData.email) {
+          errorDetail = Array.isArray(errorData.email) ? errorData.email[0] : errorData.email
+        } else if (errorData.password) {
+          errorDetail = Array.isArray(errorData.password) ? errorData.password[0] : errorData.password
+        } else if (errorData.password_confirm) {
+          errorDetail = Array.isArray(errorData.password_confirm)
+            ? errorData.password_confirm[0]
+            : errorData.password_confirm
+        } else if (errorData.detail) {
+          errorDetail = errorData.detail
+        } else if (errorData.message) {
+          errorDetail = errorData.message
+        } else {
+          // Try to get first error message from any field
+          const firstError = Object.values(errorData)[0]
+          errorDetail = Array.isArray(firstError)
+            ? firstError[0]
+            : String(firstError) || `HTTP error! status: ${response.status}`
+        }
+      } else {
+        const text = await response.text()
+        errorDetail = text || `HTTP error! status: ${response.status} ${response.statusText}`
+      }
+    } catch (e) {
+      errorDetail = `HTTP error! status: ${response.status} ${response.statusText}`
+    }
+
+    const error = new Error(errorDetail)
+    ;(error as any).status = response.status
+    return error
   }
 
   /**

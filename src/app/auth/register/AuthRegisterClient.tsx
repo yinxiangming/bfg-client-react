@@ -15,6 +15,7 @@ import Logo from '@components/Logo'
 import Icon from '@components/Icon'
 import CustomTextField from '@components/ui/TextField'
 import { authApi } from '@/utils/authApi'
+import { isPlatformInstance } from '@/services/platform'
 import { getApiBaseUrl } from '@/utils/api'
 import { useStorefrontConfigSafe } from '@/contexts/StorefrontConfigContext'
 import { useSocialProviders } from '@/hooks/useSocialProviders'
@@ -74,6 +75,14 @@ export default function AuthRegisterClient() {
 
     setLoading(true)
     try {
+      // A shopper joins the shop they are browsing and is signed in at once. Staff
+      // invitations and sign-up on a platform instance stay on merchant registration,
+      // which may hold the account until its email address is confirmed.
+      if (!isInviteFlow && !isPlatformInstance()) {
+        await authApi.registerShopper({ email, password, password_confirm: passwordConfirm })
+        router.push(redirect)
+        return
+      }
       const result = await authApi.register({
         email,
         password,
