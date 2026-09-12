@@ -2134,8 +2134,11 @@
             "name": "名称",
             "symbol": "符号",
             "decimals": "小数位",
-            "status": "状态"
+            "status": "状态",
+            "enabled": "本店启用"
           },
+          "defaultChip": "默认",
+          "sharedNotice": "币种由平台上的所有店铺共用。请打开本店要使用的币种；默认币种（在通用设置中设置）始终保持开启。只有平台管理员可以新增、编辑或删除币种。",
           "searchPlaceholder": "搜索币种...",
           "filters": {
             "currencyType": {
@@ -2164,7 +2167,8 @@
           },
           "errors": {
             "deleteFailed": "删除失败：{error}",
-            "saveFailed": "保存失败：{error}"
+            "saveFailed": "保存失败：{error}",
+            "toggleFailed": "更新失败：{error}"
           }
         },
         "editDialog": {
@@ -2215,7 +2219,7 @@
           "title": "品牌",
           "columns": {
             "name": "名称",
-            "taxId": "税号",
+            "taxId": "GST / 税号",
             "registrationNumber": "注册号",
             "default": "默认",
             "status": "状态"
@@ -2239,8 +2243,12 @@
           "title": "品牌",
           "name": "名称",
           "logo": "Logo",
-          "addressId": "地址ID",
-          "taxId": "税号",
+          "address": "地址",
+          "noAddress": "未选择地址",
+          "chooseAddress": "选择地址",
+          "removeAddress": "移除",
+          "taxId": "GST / 税号",
+          "taxIdPlaceholder": "例如 123-456-789（会印在发票上）",
           "registrationNumber": "注册号",
           "invoiceNote": "发票备注",
           "invoiceNotePlaceholder": "输入付款说明、银行信息或其他需要在发票上显示的信息。\n\n示例：\nASB Bank\nSurlex Limited\n12-3484-0026365-00\n\n付款时请使用以下信息：\n- Particular: [公司名称]\n- Reference: [发票号]\n- Code: [客户编号]",

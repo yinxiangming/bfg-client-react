@@ -24,8 +24,6 @@ const buildInvoiceSettingFormSchema = (t: any): FormSchema => ({
     { field: 'invoice_prefix', label: t('settings.finance.invoiceSettings.editDialog.fields.invoicePrefix'), type: 'string', required: true },
     { field: 'default_due_days', label: t('settings.finance.invoiceSettings.editDialog.fields.defaultDueDays'), type: 'number', required: true },
     { field: 'default_footer', label: t('settings.finance.invoiceSettings.editDialog.fields.defaultFooter'), type: 'textarea' },
-    { field: 'enable_auto_number', label: t('settings.finance.invoiceSettings.editDialog.fields.autoNumber'), type: 'boolean', defaultValue: true },
-    { field: 'email_template_id', label: t('settings.finance.invoiceSettings.editDialog.fields.emailTemplateId'), type: 'number' },
     { field: 'is_active', label: t('settings.finance.invoiceSettings.editDialog.fields.active'), type: 'boolean', defaultValue: true }
   ]
 })
@@ -40,8 +38,6 @@ const InvoiceSettingEditDialog = ({ open, setting, onClose, onSave }: InvoiceSet
         invoice_prefix: 'INV-',
         default_due_days: 30,
         default_footer: '',
-        enable_auto_number: true,
-        email_template_id: undefined,
         is_active: true
       }
 
@@ -50,8 +46,6 @@ const InvoiceSettingEditDialog = ({ open, setting, onClose, onSave }: InvoiceSet
       invoice_prefix: data.invoice_prefix || '',
       default_due_days: Number(data.default_due_days ?? 30),
       default_footer: data.default_footer || '',
-      enable_auto_number: Boolean(data.enable_auto_number),
-      email_template_id: data.email_template_id ? Number(data.email_template_id) : undefined,
       is_active: data.is_active ?? true
     }
     await onSave(payload)

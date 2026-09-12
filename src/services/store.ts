@@ -710,6 +710,12 @@ export async function getCustomerAddresses(customerId: number): Promise<Address[
   return response.results || []
 }
 
+/** Addresses the workspace keeps for itself (stores, warehouses, brands), not its customers'. */
+export async function getWorkspaceAddresses(): Promise<Address[]> {
+  const response = await apiFetch<Address[] | { results: Address[] }>(`${bfgApi.addresses()}?scope=workspace`, getSiteAdminOptions())
+  return Array.isArray(response) ? response : response.results || []
+}
+
 export async function createAddress(data: Partial<Address>): Promise<Address> {
   return apiFetch<Address>(bfgApi.addresses(), {
     ...getSiteAdminOptions(),

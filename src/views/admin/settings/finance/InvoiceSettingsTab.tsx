@@ -138,14 +138,6 @@ const InvoiceSettingsTab = () => {
               value={String(firstSetting.default_due_days)}
             />
             <ReadOnlyField
-              label={t('settings.finance.invoiceSettings.tab.current.autoNumber')}
-              value={
-                firstSetting.enable_auto_number
-                  ? t('settings.finance.invoiceSettings.tab.current.enabled')
-                  : t('settings.finance.invoiceSettings.tab.current.disabled')
-              }
-            />
-            <ReadOnlyField
               label={t('settings.finance.invoiceSettings.tab.current.status')}
               value={
                 firstSetting.is_active
