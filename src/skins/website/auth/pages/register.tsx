@@ -8,6 +8,9 @@ import { useTranslations } from 'next-intl'
 import { authApi } from '@/utils/authApi'
 import { useStorefrontConfigSafe } from '@/contexts/StorefrontConfigContext'
 
+/** website-auth.css has no success class, so a success notice recolours `.au-error` green. */
+const successStyle = { background: '#ecfdf5', color: '#047857', borderColor: '#a7f3d0' }
+
 /** Website-skin register page — pure HTML form, no MUI. */
 export default function WebsiteRegisterPage() {
   const t = useTranslations('auth.register')
@@ -25,6 +28,8 @@ export default function WebsiteRegisterPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  // The address a confirmation link went to, once the account exists but cannot sign in yet.
+  const [verificationEmail, setVerificationEmail] = useState<string | null>(null)
 
   const inviteToken = searchParams.get('invite_token') || ''
   const inviteUuid = searchParams.get('invite_uuid') || ''
@@ -52,12 +57,18 @@ export default function WebsiteRegisterPage() {
 
     setLoading(true)
     try {
-      await authApi.register({
+      const result = await authApi.register({
         email,
         password,
         password_confirm: passwordConfirm,
         ...(inviteToken ? { invite_token: inviteToken, invite_uuid: inviteUuid } : {}),
       })
+      // Until the address is confirmed the server refuses to sign this account in, so the
+      // redirect to /auth/login below would only end in a failed login.
+      if (result.email_verification_required === true && !isInviteFlow) {
+        setVerificationEmail(result.user?.email || email)
+        return
+      }
       setSuccess(t('accountCreated'))
       const next = isInviteFlow
         ? `/auth/invite/accept?token=${encodeURIComponent(inviteToken)}${
@@ -83,59 +94,67 @@ export default function WebsiteRegisterPage() {
 
       {error && <div className='au-error'>{error}</div>}
       {success && (
-        <div
-          className='au-error'
-          style={{ background: '#ecfdf5', color: '#047857', borderColor: '#a7f3d0' }}
-        >
+        <div className='au-error' style={successStyle}>
           {success}
         </div>
       )}
 
-      <form onSubmit={handleSubmit} noValidate autoComplete='off'>
-        <div className='au-field'>
-          <label className='au-label' htmlFor='au-reg-email'>
-            {t('email')}
-          </label>
-          <input
-            id='au-reg-email'
-            className='au-input'
-            type='email'
-            placeholder={t('emailPlaceholder')}
-            value={email}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-            required
-            disabled={isInviteFlow}
-            autoFocus
+      {verificationEmail ? (
+        <>
+          <div className='au-error' style={successStyle}>
+            {t('verificationEmailSent', { email: verificationEmail })}
+          </div>
+          <Link href='/auth/login' className='au-button'>
+            {t('goToLogin')}
+          </Link>
+        </>
+      ) : (
+        <form onSubmit={handleSubmit} noValidate autoComplete='off'>
+          <div className='au-field'>
+            <label className='au-label' htmlFor='au-reg-email'>
+              {t('email')}
+            </label>
+            <input
+              id='au-reg-email'
+              className='au-input'
+              type='email'
+              placeholder={t('emailPlaceholder')}
+              value={email}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+              required
+              disabled={isInviteFlow}
+              autoFocus
+            />
+          </div>
+
+          <PasswordField
+            id='au-reg-password'
+            label={t('password')}
+            value={password}
+            onChange={setPassword}
+            shown={showPassword}
+            onToggle={() => setShowPassword(s => !s)}
           />
-        </div>
 
-        <PasswordField
-          id='au-reg-password'
-          label={t('password')}
-          value={password}
-          onChange={setPassword}
-          shown={showPassword}
-          onToggle={() => setShowPassword(s => !s)}
-        />
+          <PasswordField
+            id='au-reg-password-confirm'
+            label={t('confirmPassword')}
+            value={passwordConfirm}
+            onChange={setPasswordConfirm}
+            shown={showConfirm}
+            onToggle={() => setShowConfirm(s => !s)}
+          />
 
-        <PasswordField
-          id='au-reg-password-confirm'
-          label={t('confirmPassword')}
-          value={passwordConfirm}
-          onChange={setPasswordConfirm}
-          shown={showConfirm}
-          onToggle={() => setShowConfirm(s => !s)}
-        />
+          <button type='submit' className='au-button' disabled={loading}>
+            {loading ? t('submitting') : t('submit')}
+          </button>
 
-        <button type='submit' className='au-button' disabled={loading}>
-          {loading ? t('submitting') : t('submit')}
-        </button>
-
-        <div className='au-helper'>
-          <span>{t('alreadyHaveAccount')} </span>
-          <Link href='/auth/login'>{t('signInInstead')}</Link>
-        </div>
-      </form>
+          <div className='au-helper'>
+            <span>{t('alreadyHaveAccount')} </span>
+            <Link href='/auth/login'>{t('signInInstead')}</Link>
+          </div>
+        </form>
+      )}
     </div>
   )
 }

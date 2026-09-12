@@ -34,6 +34,8 @@
     "passwordsDoNotMatch": "两次输入的密码不一致",
     "passwordMinLength": "密码至少需要 8 个字符",
     "accountCreated": "注册成功，正在跳转到登录页...",
+    "verificationEmailSent": "注册成功！我们已向 {email} 发送验证邮件，请点击邮件中的链接完成验证后再登录。",
+    "goToLogin": "去登录",
     "registrationFailed": "注册失败，请重试。",
     "eyebrow": "{siteName} · 注册"
   },
