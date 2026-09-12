@@ -41,6 +41,9 @@ const TopMenuTopbar = ({ avatarInitial = 'N' }: Props) => {
   const [agentDialogOpen, setAgentDialogOpen] = useState(false)
 
   useEffect(() => {
+    // /settings/ is staff-only. A customer on /account gets 403 there, which left the
+    // logo empty; the account area takes its branding from the public storefront config.
+    if (normalizedPath.startsWith('/account')) return
     Promise.all([getWorkspaceSettings(), fetchWorkspaceRecord().catch(() => null)])
       .then(([s, record]) => {
         const orgName = record?.name?.trim() || undefined
@@ -54,12 +57,15 @@ const TopMenuTopbar = ({ avatarInitial = 'N' }: Props) => {
         setShowNameWithLogo(Boolean(s.custom_settings?.general?.show_site_name_with_logo))
       })
       .catch(() => {})
-  }, [])
+  }, [normalizedPath])
 
   const isAccount = normalizedPath.startsWith('/account')
   const displayName = isAccount && storefrontConfig?.site_name
     ? storefrontConfig.site_name
     : brandingName
+  const logoSrc = isAccount ? storefrontConfig?.logo || undefined : workspaceLogoSrc
+  const logoDarkSrc = isAccount ? storefrontConfig?.logo_dark || undefined : workspaceLogoDarkSrc
+  const nameWithLogo = isAccount ? Boolean(storefrontConfig?.show_site_name_with_logo) : showNameWithLogo
 
   const handleSwitchToVertical = () => {
     updateConfig({ menuPosition: 'vertical' })
@@ -70,9 +76,9 @@ const TopMenuTopbar = ({ avatarInitial = 'N' }: Props) => {
       <div className='topmenu-topbar-left'>
         <Logo
             name={displayName}
-            logoSrc={workspaceLogoSrc}
-            logoDarkSrc={workspaceLogoDarkSrc}
-            showNameWithLogo={showNameWithLogo}
+            logoSrc={logoSrc}
+            logoDarkSrc={logoDarkSrc}
+            showNameWithLogo={nameWithLogo}
           />
       </div>
       <div className='topmenu-topbar-right'>

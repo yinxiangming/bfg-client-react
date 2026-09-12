@@ -54,8 +54,9 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
   const [showNameWithLogo, setShowNameWithLogo] = useState(false)
 
   useEffect(() => {
-    const isAdminOrAccount = normalizedPath?.startsWith('/admin') || normalizedPath?.startsWith('/account')
-    if (!isAdminOrAccount) return
+    // /settings/ is staff-only. A customer on /account gets 403 there, which left the
+    // logo empty; the account area takes its branding from the public storefront config.
+    if (!normalizedPath?.startsWith('/admin')) return
     Promise.all([getWorkspaceSettings(), fetchWorkspaceRecord().catch(() => null)])
       .then(([s, record]) => {
         const orgName = record?.name?.trim() || undefined
@@ -75,6 +76,9 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
   const displayName = isAccount && storefrontConfig?.site_name
     ? storefrontConfig.site_name
     : brandingName
+  const logoSrc = isAccount ? storefrontConfig?.logo || undefined : workspaceLogoSrc
+  const logoDarkSrc = isAccount ? storefrontConfig?.logo_dark || undefined : workspaceLogoDarkSrc
+  const nameWithLogo = isAccount ? Boolean(storefrontConfig?.show_site_name_with_logo) : showNameWithLogo
 
   const i18nNamespace = useMemo(() => {
     if (normalizedPath?.startsWith('/admin')) return 'admin'
@@ -302,9 +306,9 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
         <div className='sidebar-logo'>
           <Logo
             name={displayName}
-            logoSrc={workspaceLogoSrc}
-            logoDarkSrc={workspaceLogoDarkSrc}
-            showNameWithLogo={showNameWithLogo}
+            logoSrc={logoSrc}
+            logoDarkSrc={logoDarkSrc}
+            showNameWithLogo={nameWithLogo}
           />
         </div>
         {onToggleCollapse && (
