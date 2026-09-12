@@ -2134,8 +2134,11 @@
             "name": "Name",
             "symbol": "Symbol",
             "decimals": "Decimals",
-            "status": "Status"
+            "status": "Status",
+            "enabled": "Enabled"
           },
+          "defaultChip": "Default",
+          "sharedNotice": "Currencies are shared by every shop on the platform. Switch on the ones this shop offers; the default currency, set in General settings, always stays on. Only platform administrators can add, edit or delete currencies.",
           "searchPlaceholder": "Search currencies...",
           "filters": {
             "currencyType": {
@@ -2164,7 +2167,8 @@
           },
           "errors": {
             "deleteFailed": "Failed to delete currency: {error}",
-            "saveFailed": "Failed to save currency: {error}"
+            "saveFailed": "Failed to save currency: {error}",
+            "toggleFailed": "Failed to update this currency: {error}"
           }
         },
         "editDialog": {
@@ -2215,7 +2219,7 @@
           "title": "Brands",
           "columns": {
             "name": "Name",
-            "taxId": "Tax ID",
+            "taxId": "GST / tax number",
             "registrationNumber": "Registration No.",
             "default": "Default",
             "status": "Status"
@@ -2239,8 +2243,12 @@
           "title": "Brand",
           "name": "Name",
           "logo": "Logo",
-          "addressId": "Address ID",
-          "taxId": "Tax ID",
+          "address": "Address",
+          "noAddress": "No address selected",
+          "chooseAddress": "Choose address",
+          "removeAddress": "Remove",
+          "taxId": "GST / tax number",
+          "taxIdPlaceholder": "e.g. 123-456-789 (printed on invoices)",
           "registrationNumber": "Registration Number",
           "invoiceNote": "Invoice Note",
           "invoiceNotePlaceholder": "Enter payment instructions, bank details, or other information to display on invoices.\n\nExample:\nASB Bank\nSurlex Limited\n12-3484-0026365-00\n\nPlease use the following reference when making payment:\n- Particular: [Company Name]\n- Reference: [Invoice Number]\n- Code: [Customer Number]",

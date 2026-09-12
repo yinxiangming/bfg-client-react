@@ -27,7 +27,8 @@ const buildGiftCardFormSchema = (t: any): FormSchema => ({
       label: t('settings.marketing.giftCards.editDialog.fields.currency'),
       type: 'select',
       optionsSource: 'api',
-      optionsApi: bfgApi.currencies(),
+      // Only the currencies this shop offers.
+      optionsApi: `${bfgApi.currencies()}?enabled=true`,
       optionLabelTemplate: '{{code}} ({{symbol}})',
       searchable: true,
       searchParam: 'q',

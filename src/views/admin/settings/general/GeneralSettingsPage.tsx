@@ -483,7 +483,8 @@ const GeneralSettingsPage = () => {
         console.log('[GeneralSettings] Loading settings...')
         const [settings, currenciesData, countriesData, workspace] = await Promise.all([
           getWorkspaceSettings(),
-          getCurrencies(),
+          // The default can only be one of the currencies the shop offers.
+          getCurrencies({ enabled: true }),
           // Reference data, and the endpoint is cheap; a failure here must not
           // block the whole settings page from rendering.
           getCountries().catch(() => [] as CountryOption[]),
