@@ -47,8 +47,11 @@ interface RegisterResponse {
     first_name?: string
     last_name?: string
   }
-  access: string
-  refresh: string
+  /** Omitted while the account still has to confirm its email address. */
+  access?: string
+  refresh?: string
+  /** True when the server sent a confirmation email and refuses sign-in until its link is followed. */
+  email_verification_required?: boolean
 }
 
 class AuthApiClient {
@@ -207,7 +210,8 @@ class AuthApiClient {
 
   /**
    * Register a new user account
-   * Stores token in localStorage on success
+   * Stores the tokens when the response carries them. An account that must confirm
+   * its email first (`email_verification_required`) gets none.
    */
   async register(data: RegisterRequest): Promise<RegisterResponse> {
     const url = `${this.baseUrl}/api/v1/auth/register/`

@@ -34,6 +34,8 @@
     "passwordsDoNotMatch": "Passwords do not match",
     "passwordMinLength": "Password must be at least 8 characters long",
     "accountCreated": "Account created successfully. Redirecting to login...",
+    "verificationEmailSent": "Account created! We've sent a verification email to {email}. Please click the link in the email to verify your address before signing in.",
+    "goToLogin": "Go to Login",
     "registrationFailed": "Registration failed. Please try again.",
     "eyebrow": "{siteName} · Create account"
   },

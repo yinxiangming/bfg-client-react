@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl'
 import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
 import Checkbox from '@mui/material/Checkbox'
+import Alert from '@mui/material/Alert'
 import Button from '@mui/material/Button'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Link from '@components/Link'
@@ -28,6 +29,8 @@ export default function AuthRegisterClient() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  // The address a confirmation link went to, once the account exists but cannot sign in yet.
+  const [verificationEmail, setVerificationEmail] = useState<string | null>(null)
 
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -71,12 +74,18 @@ export default function AuthRegisterClient() {
 
     setLoading(true)
     try {
-      await authApi.register({
+      const result = await authApi.register({
         email,
         password,
         password_confirm: passwordConfirm,
         ...(inviteToken ? { invite_token: inviteToken, invite_uuid: inviteUuid } : {}),
       })
+      // Until the address is confirmed the server refuses to sign this account in, so the
+      // redirect to /auth/login below would only end in a failed login.
+      if (result.email_verification_required === true && !isInviteFlow) {
+        setVerificationEmail(result.user?.email || email)
+        return
+      }
       setSuccess(t('accountCreated'))
       const next = isInviteFlow
         ? `/auth/invite/accept?token=${encodeURIComponent(inviteToken)}${inviteUuid ? `&uuid=${encodeURIComponent(inviteUuid)}` : ''}`
@@ -110,131 +119,140 @@ export default function AuthRegisterClient() {
         {error && <div className='auth-error'>{error}</div>}
         {success && <div className='auth-success'>{success}</div>}
 
-        <form noValidate autoComplete='off' onSubmit={handleSubmit} className='auth-form'>
-          <label className='auth-label'>{t('email')}</label>
-          <CustomTextField
-            autoFocus
-            fullWidth
-            placeholder={t('emailPlaceholder')}
-            type='email'
-            value={email}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
-            required
-            disabled={isInviteFlow}
-          />
-
-          <label className='auth-label'>{t('password')}</label>
-          <CustomTextField
-            fullWidth
-            placeholder='············'
-            type={isPasswordShown ? 'text' : 'password'}
-            value={password}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
-            required
-            slotProps={{
-              input: {
-                endAdornment: (
-                  <InputAdornment position='end'>
-                    <IconButton
-                      edge='end'
-                      onClick={() => setIsPasswordShown(show => !show)}
-                      onMouseDown={(e: MouseEvent) => e.preventDefault()}
-                    >
-                      <Icon icon={isPasswordShown ? 'tabler-eye-off' : 'tabler-eye'} />
-                    </IconButton>
-                  </InputAdornment>
-                )
-              }
-            }}
-          />
-
-          <label className='auth-label'>{t('confirmPassword')}</label>
-          <CustomTextField
-            fullWidth
-            placeholder='············'
-            type={isConfirmPasswordShown ? 'text' : 'password'}
-            value={passwordConfirm}
-            onChange={(e: ChangeEvent<HTMLInputElement>) => setPasswordConfirm(e.target.value)}
-            required
-            slotProps={{
-              input: {
-                endAdornment: (
-                  <InputAdornment position='end'>
-                    <IconButton
-                      edge='end'
-                      onClick={() => setIsConfirmPasswordShown(show => !show)}
-                      onMouseDown={(e: MouseEvent) => e.preventDefault()}
-                    >
-                      <Icon icon={isConfirmPasswordShown ? 'tabler-eye-off' : 'tabler-eye'} />
-                    </IconButton>
-                  </InputAdornment>
-                )
-              }
-            }}
-          />
-
-          <FormControlLabel
-            control={<Checkbox size='small' />}
-            label={
-              <>
-                <Link className='auth-link' href='/' onClick={e => e.preventDefault()}>
-                  {t('privacyAndTerms')}
-                </Link>
-              </>
-            }
-          />
-
-          <Button fullWidth variant='contained' type='submit' disabled={loading} className='auth-button'>
-            {loading ? t('submitting') : t('submit')}
-          </Button>
-
-          <div className='auth-subtext'>
-            <span>{t('alreadyHaveAccount')}</span>
-            <Link className='auth-link' href='/auth/login'>
-              {t('signInInstead')}
-            </Link>
+        {verificationEmail ? (
+          <div className='auth-form'>
+            <Alert severity='success'>{t('verificationEmailSent', { email: verificationEmail })}</Alert>
+            <Button fullWidth variant='contained' component={Link} href='/auth/login' className='auth-button'>
+              {t('goToLogin')}
+            </Button>
           </div>
+        ) : (
+          <form noValidate autoComplete='off' onSubmit={handleSubmit} className='auth-form'>
+            <label className='auth-label'>{t('email')}</label>
+            <CustomTextField
+              autoFocus
+              fullWidth
+              placeholder={t('emailPlaceholder')}
+              type='email'
+              value={email}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+              required
+              disabled={isInviteFlow}
+            />
 
-          {enabledProviders && enabledProviders.length > 0 && (
-            <>
-              <div className='auth-divider'>
-                <span>{t('or')}</span>
-              </div>
-              <div className='auth-social'>
-                {enabledProviders.includes('google') && (
-                  <IconButton
-                    className='text-error'
-                    size='small'
-                    onClick={() => socialLogin('google')}
-                    aria-label='Google'
-                  >
-                    <Icon icon='tabler-brand-google-filled' />
-                  </IconButton>
-                )}
-                {enabledProviders.includes('facebook') && (
-                  <IconButton
-                    className='text-facebook'
-                    size='small'
-                    onClick={() => socialLogin('facebook')}
-                    aria-label='Facebook'
-                  >
-                    <Icon icon='tabler-brand-facebook-filled' />
-                  </IconButton>
-                )}
-                {enabledProviders.includes('apple') && (
-                  <IconButton
-                    className='text-textPrimary'
-                    size='small'
-                    onClick={() => socialLogin('apple')}
-                    aria-label='Apple'
-                  >
-                    <Icon icon='tabler-brand-apple-filled' />
-                  </IconButton>
-                )}
-              </div>
-            </>
-          )}
-        </form>
+            <label className='auth-label'>{t('password')}</label>
+            <CustomTextField
+              fullWidth
+              placeholder='············'
+              type={isPasswordShown ? 'text' : 'password'}
+              value={password}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+              required
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position='end'>
+                      <IconButton
+                        edge='end'
+                        onClick={() => setIsPasswordShown(show => !show)}
+                        onMouseDown={(e: MouseEvent) => e.preventDefault()}
+                      >
+                        <Icon icon={isPasswordShown ? 'tabler-eye-off' : 'tabler-eye'} />
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }
+              }}
+            />
+
+            <label className='auth-label'>{t('confirmPassword')}</label>
+            <CustomTextField
+              fullWidth
+              placeholder='············'
+              type={isConfirmPasswordShown ? 'text' : 'password'}
+              value={passwordConfirm}
+              onChange={(e: ChangeEvent<HTMLInputElement>) => setPasswordConfirm(e.target.value)}
+              required
+              slotProps={{
+                input: {
+                  endAdornment: (
+                    <InputAdornment position='end'>
+                      <IconButton
+                        edge='end'
+                        onClick={() => setIsConfirmPasswordShown(show => !show)}
+                        onMouseDown={(e: MouseEvent) => e.preventDefault()}
+                      >
+                        <Icon icon={isConfirmPasswordShown ? 'tabler-eye-off' : 'tabler-eye'} />
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }
+              }}
+            />
+
+            <FormControlLabel
+              control={<Checkbox size='small' />}
+              label={
+                <>
+                  <Link className='auth-link' href='/' onClick={e => e.preventDefault()}>
+                    {t('privacyAndTerms')}
+                  </Link>
+                </>
+              }
+            />
+
+            <Button fullWidth variant='contained' type='submit' disabled={loading} className='auth-button'>
+              {loading ? t('submitting') : t('submit')}
+            </Button>
+
+            <div className='auth-subtext'>
+              <span>{t('alreadyHaveAccount')}</span>
+              <Link className='auth-link' href='/auth/login'>
+                {t('signInInstead')}
+              </Link>
+            </div>
+
+            {enabledProviders && enabledProviders.length > 0 && (
+              <>
+                <div className='auth-divider'>
+                  <span>{t('or')}</span>
+                </div>
+                <div className='auth-social'>
+                  {enabledProviders.includes('google') && (
+                    <IconButton
+                      className='text-error'
+                      size='small'
+                      onClick={() => socialLogin('google')}
+                      aria-label='Google'
+                    >
+                      <Icon icon='tabler-brand-google-filled' />
+                    </IconButton>
+                  )}
+                  {enabledProviders.includes('facebook') && (
+                    <IconButton
+                      className='text-facebook'
+                      size='small'
+                      onClick={() => socialLogin('facebook')}
+                      aria-label='Facebook'
+                    >
+                      <Icon icon='tabler-brand-facebook-filled' />
+                    </IconButton>
+                  )}
+                  {enabledProviders.includes('apple') && (
+                    <IconButton
+                      className='text-textPrimary'
+                      size='small'
+                      onClick={() => socialLogin('apple')}
+                      aria-label='Apple'
+                    >
+                      <Icon icon='tabler-brand-apple-filled' />
+                    </IconButton>
+                  )}
+                </div>
+              </>
+            )}
+          </form>
+        )}
       </div>
     </div>
   )
