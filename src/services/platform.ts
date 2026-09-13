@@ -94,18 +94,27 @@ export interface TenantWorkspace {
   extensions: unknown[]
 }
 
+/** Why GET /platform/workspaces/me/ says the user cannot create a workspace right now. */
+export type TenantWorkspaceCreateBlocked = 'workspace_create_forbidden' | 'workspace_limit_reached'
+
 export interface TenantWorkspacesResponse {
   is_platform_admin: boolean
   workspaces: TenantWorkspace[]
+  /** How many workspaces one account may own, suspended and inactive ones included. */
+  workspace_limit: number
+  /** null when a create request would go ahead now, else the code it would be refused with. */
+  create_blocked: TenantWorkspaceCreateBlocked | null
 }
 
 export interface CreateTenantWorkspaceInput {
   name: string
   /** Empty or omitted: the server generates one. */
   slug?: string
-  country: string
-  currency: string
-  language: string
+  // Omitted: the server copies each one from the workspace the access token belongs to, while
+  // the user still works there or owns it, and otherwise uses its defaults.
+  country?: string
+  currency?: string
+  language?: string
 }
 
 /** The details a workspace owner can change. */
@@ -215,9 +224,15 @@ export const TENANT_WORKSPACE_ERROR_KEYS: Record<TenantWorkspaceErrorCode, strin
  */
 export function getTenantWorkspaceErrorMessage(error: unknown): TenantWorkspaceErrorMessage | null {
   const body = (error as { validationErrors?: Record<string, unknown> } | null)?.validationErrors
-  const code = body?.code
-  const limit = body?.limit
+  return getTenantWorkspaceCodeMessage(body?.code, body?.limit)
+}
 
+/**
+ * The message for a tenant workspace error code, with the limit for workspace_limit_reached.
+ * getTenantWorkspaceErrorMessage() reads both from an error's response body; me/ reports
+ * them as create_blocked and workspace_limit. Returns null for any other code.
+ */
+export function getTenantWorkspaceCodeMessage(code: unknown, limit?: unknown): TenantWorkspaceErrorMessage | null {
   switch (code) {
     case 'workspace_create_forbidden':
     case 'workspace_owner_required':
