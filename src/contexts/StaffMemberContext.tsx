@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, type ReactNode } from '
 import { meApi } from '@/utils/meApi'
 import { authApi } from '@/utils/authApi'
 import type { PermissionMap } from '@/utils/permissions'
+import type { ExtensionAvailability } from '@/extensions/availability'
 
 export interface StaffRole {
   id: number
@@ -20,18 +21,22 @@ export interface StaffMember {
 
 interface StaffMemberContextValue {
   staffMember: StaffMember | null
+  /** Extensions switched on for the workspace; null until loaded or when the server reports none. */
+  extensions: ExtensionAvailability | null
   loading: boolean
   refresh: () => void
 }
 
 const StaffMemberContext = createContext<StaffMemberContextValue>({
   staffMember: null,
+  extensions: null,
   loading: true,
   refresh: () => {},
 })
 
 export function StaffMemberProvider({ children }: { children: ReactNode }) {
   const [staffMember, setStaffMember] = useState<StaffMember | null>(null)
+  const [extensions, setExtensions] = useState<ExtensionAvailability | null>(null)
   const [loading, setLoading] = useState(true)
 
   function load() {
@@ -40,14 +45,21 @@ export function StaffMemberProvider({ children }: { children: ReactNode }) {
     // logged-out hit on /admin fires a guaranteed 403 on /api/v1/me/.
     if (!authApi.isAuthenticated()) {
       setStaffMember(null)
+      setExtensions(null)
       setLoading(false)
       return
     }
     setLoading(true)
     meApi
       .getMe()
-      .then((me: any) => setStaffMember(me?.staff_member ?? null))
-      .catch(() => setStaffMember(null))
+      .then((me: any) => {
+        setStaffMember(me?.staff_member ?? null)
+        setExtensions(me?.extensions ?? null)
+      })
+      .catch(() => {
+        setStaffMember(null)
+        setExtensions(null)
+      })
       .finally(() => setLoading(false))
   }
 
@@ -56,7 +68,7 @@ export function StaffMemberProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <StaffMemberContext.Provider value={{ staffMember, loading, refresh: load }}>
+    <StaffMemberContext.Provider value={{ staffMember, extensions, loading, refresh: load }}>
       {children}
     </StaffMemberContext.Provider>
   )

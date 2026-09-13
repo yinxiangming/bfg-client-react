@@ -1,4 +1,9 @@
 {
+  "extensionDisabled": {
+    "title": "This extension is switched off",
+    "body": "This workspace has not switched the extension on, so its pages are unavailable. Ask a workspace administrator to switch it on.",
+    "back": "Back to dashboard"
+  },
   "nav": {
     "dashboard": "Dashboard",
     "setup": "Setup",

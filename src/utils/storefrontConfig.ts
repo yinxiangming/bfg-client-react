@@ -4,6 +4,7 @@
  */
 
 import { cache } from 'react'
+import type { ExtensionAvailability } from '@/extensions/availability'
 import { getApiBaseUrl, getApiHeaders } from './api'
 import { getCurrentLocale } from '@/i18n/http'
 import {
@@ -149,6 +150,12 @@ export type StorefrontConfig = {
   /** Resolved workspace (public storefront context). */
   workspace_id?: number
   workspace_slug?: string
+  /**
+   * Plugins with a storefront or account surface that the server manages, and the ones
+   * this workspace has switched on. Missing on servers that do not manage extensions,
+   * in which case every plugin is enabled.
+   */
+  extensions?: ExtensionAvailability
 }
 
 const STALE_MS = 5 * 60 * 1000 // 5 minutes
