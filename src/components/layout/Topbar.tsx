@@ -21,9 +21,11 @@ type Props = {
   avatarInitial?: string
   onMenuToggle?: () => void
   showMenuToggle?: boolean
+  /** The admin's workspace switcher. The account area shares this bar and has none. */
+  showWorkspaceSwitcher?: boolean
 }
 
-const Topbar = ({ avatarInitial = 'N', onMenuToggle, showMenuToggle }: Props) => {
+const Topbar = ({ avatarInitial = 'N', onMenuToggle, showMenuToggle, showWorkspaceSwitcher = false }: Props) => {
   const { config, updateConfig } = useAppLayout()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [agentDialogOpen, setAgentDialogOpen] = useState(false)
@@ -108,7 +110,7 @@ const Topbar = ({ avatarInitial = 'N', onMenuToggle, showMenuToggle }: Props) =>
         </div>
       </div>
       <div className='admin-topbar-right'>
-        <WorkspaceSwitcher />
+        {showWorkspaceSwitcher && <WorkspaceSwitcher />}
         <CurrentUserDisplay />
         <UserDropdown avatarInitial={avatarInitial} />
       </div>

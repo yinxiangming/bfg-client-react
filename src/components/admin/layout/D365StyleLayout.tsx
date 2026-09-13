@@ -87,7 +87,7 @@ const D365StyleLayout = ({ children, navItems = adminNavItems }: D365StyleLayout
         <div className='d365-content-wrapper'>
           {/* Topbar - Only spans content area */}
           <div className='d365-topbar-wrapper'>
-            <Topbar onMenuToggle={handleToggleCollapse} showMenuToggle={true} />
+            <Topbar onMenuToggle={handleToggleCollapse} showMenuToggle={true} showWorkspaceSwitcher />
           </div>
           
           {/* Main Content Area - Full Width */}
