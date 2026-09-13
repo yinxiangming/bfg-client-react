@@ -2,6 +2,7 @@ import React from 'react'
 import { getLocale } from 'next-intl/server'
 import { headers } from 'next/headers'
 import { loadExtensions } from '@/extensions'
+import { filterEnabledExtensions } from '@/extensions/availability'
 import { getPageSlotReplacements } from '@/extensions/resolve'
 import { ROOT_SLOT_ID } from '@/extensions/terminology'
 import { getSiteConfig } from '@/utils/siteMetadata'
@@ -122,7 +123,7 @@ export default async function Page() {
   // Fill in product/category grids before render so they appear in the SSR HTML.
   const pageData = await resolveCmsBlocks(rawPageData, requestHost, locale)
 
-  const extensions = await loadExtensions()
+  const extensions = filterEnabledExtensions(await loadExtensions(), config.extensions)
   const replacements = getPageSlotReplacements(extensions, 'storefront/home')
   const rootReplace = replacements.get(ROOT_SLOT_ID)
   const siteJsonLd = <SiteJsonLd origin={origin} config={config} locale={locale} />

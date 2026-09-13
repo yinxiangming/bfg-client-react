@@ -1,5 +1,9 @@
+import { headers } from 'next/headers'
+import { getLocale } from 'next-intl/server'
 import { defaultNavItems } from '@/data/navItems'
 import { loadExtensions, applyNavExtensions } from '@/extensions'
+import { filterEnabledExtensions } from '@/extensions/availability'
+import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 import { resolveAccountSkin } from '@/components/account/themes/resolve'
 import AccountLayoutClient from './AccountLayoutClient'
 
@@ -10,7 +14,12 @@ export const metadata = {
 }
 
 export default async function AccountLayout({ children }: { children: React.ReactNode }) {
-  const extensions = await loadExtensions()
+  const locale = await getLocale()
+  const requestHost = (await headers()).get('host') ?? undefined
+  const config = await getStorefrontConfigForServer(locale, requestHost)
+  // The account is served on the storefront host, so the storefront config says which
+  // plugins this workspace has switched on.
+  const extensions = filterEnabledExtensions(await loadExtensions(), config?.extensions)
   const accountNavExtensions = extensions.flatMap(e => e.accountNav || [])
   const finalNavItems = applyNavExtensions(defaultNavItems, accountNavExtensions, 100)
   const extensionIds = extensions.map(e => e.id)
