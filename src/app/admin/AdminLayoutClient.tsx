@@ -16,6 +16,7 @@ import type { MenuNode } from '@/types/menu'
 import { StaffMemberProvider, useStaffMemberContext } from '@/contexts/StaffMemberContext'
 import AdminAccessGuard from '@/components/admin/AdminAccessGuard'
 import { AdminSkinProvider } from '@/contexts/AdminSkinContext'
+import { useWorkspaceChangeReload } from '@/hooks/useWorkspaceChangeReload'
 
 type Props = {
   navItems: MenuNode[]
@@ -87,6 +88,8 @@ function AdminShell({
 }
 
 export default function AdminLayoutClient({ navItems, extensionIds, children }: Props) {
+  useWorkspaceChangeReload()
+
   return (
     <StaffMemberProvider>
       <AdminAccessGuard>
