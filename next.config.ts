@@ -48,6 +48,7 @@ const STOREFRONT_SHORT_PATH_RESERVED = new Set([
   'search',
   'plugins',
   'unknown',
+  'workspaces',
 ])
 
 /**

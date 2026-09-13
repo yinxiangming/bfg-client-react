@@ -9,6 +9,7 @@
 
 import { getPlatformApiBaseUrl } from './apiUrls'
 import { getWorkspaceToken, setWorkspaceToken, setWorkspaceRefreshToken } from './authTokens'
+import { refreshTokenIfNeeded } from './tokenRefresh'
 
 export interface SwitchWorkspaceResult {
   access: string
@@ -34,9 +35,23 @@ export class WorkspaceSwitchError extends Error {
 /**
  * Switch to the given workspace and persist the new JWT tokens.
  *
- * @throws WorkspaceSwitchError on 403 (not a member), 404 (workspace not found / inactive), or network errors.
+ * The request carries the stored access token, which can expire while a page sits open, so a
+ * 401 refreshes it the way apiFetch does and the switch is tried once more.
+ *
+ * @throws WorkspaceSwitchError on 401 (no refresh token, or the refresh failed and signed the
+ *   user out), 403 (not a member), 404 (workspace not found / inactive), or network errors.
  */
 export async function switchWorkspace(workspaceId: number): Promise<SwitchWorkspaceResult> {
+  try {
+    return await requestSwitch(workspaceId)
+  } catch (error) {
+    if (!(error instanceof WorkspaceSwitchError) || error.status !== 401) throw error
+    if (!(await refreshTokenIfNeeded())) throw error
+    return requestSwitch(workspaceId)
+  }
+}
+
+async function requestSwitch(workspaceId: number): Promise<SwitchWorkspaceResult> {
   const baseUrl = getPlatformApiBaseUrl()
   const accessToken = getWorkspaceToken()
 

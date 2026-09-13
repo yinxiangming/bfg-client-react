@@ -4524,5 +4524,53 @@
       "remaining": "{count} required {count, plural, one {item} other {items}} left.",
       "continue": "Continue setup"
     }
+  },
+  "workspaces": {
+    "title": "My shops",
+    "subtitle": "Every shop you own or work in. Open admin switches you to that shop first.",
+    "loading": "Loading your shops",
+    "loadFailed": "Couldn't load your shops.",
+    "empty": {
+      "title": "You don't have any shops yet",
+      "description": "Shops you own, and shops that add you as staff, will show up here."
+    },
+    "billingNote": "Plan, credits and extensions will show here once billing is available.",
+    "status": {
+      "active": "Open",
+      "suspended": "Suspended",
+      "inactive": "Deactivated"
+    },
+    "badges": {
+      "current": "Current shop",
+      "owner": "Owner"
+    },
+    "roles": {
+      "admin": "Administrator",
+      "manager": "Manager",
+      "staff": "Staff",
+      "store_admin": "Store Administrator",
+      "marketer": "Marketer",
+      "warehouse_manager": "Warehouse Manager",
+      "accountant": "Accountant",
+      "customer_service": "Customer Service",
+      "content_editor": "Content Editor"
+    },
+    "fields": {
+      "domain": "Domain",
+      "plan": "Plan",
+      "credits": "Credits",
+      "extensions": "Extensions"
+    },
+    "noDomain": "Not connected",
+    "enter": "Open admin",
+    "blocked": {
+      "suspended": "Suspended. Contact the platform to restore it.",
+      "inactive": "Deactivated.",
+      "notMember": "You aren't staff in this shop, so you can't open its admin."
+    },
+    "enterFailed": {
+      "notFound": "This shop no longer exists or has been deactivated.",
+      "generic": "Couldn't open this shop's admin. Try again."
+    }
   }
 }
