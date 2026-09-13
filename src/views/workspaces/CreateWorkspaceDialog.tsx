@@ -4,6 +4,7 @@
  * Create a workspace owned by the signed-in user, switch to it and open its setup wizard.
  * Only the name is asked for up front. Country, currency and language wait under "more
  * settings", and any left alone is copied by the server from the current workspace.
+ * Choosing a country also chooses its currency and language, except any the user has picked.
  */
 
 import { useEffect, useId, useMemo, useState, type FormEvent } from 'react'
@@ -33,21 +34,58 @@ const CURRENCY_CODES = [
   'JPY', 'KRW', 'MYR', 'NZD', 'PHP', 'SGD', 'THB', 'TWD', 'USD', 'VND'
 ] as const
 
-/**
- * The countries the setup wizard has defaults for, since the wizard is where a new workspace
- * goes next; the server itself takes any two-letter code. Their names are messages rather
- * than Intl.DisplayNames, so they read as they do in the wizard.
- */
-const COUNTRY_CODES = [
-  'AE', 'AU', 'CA', 'CH', 'CN', 'DE', 'ES', 'FR', 'GB', 'HK', 'ID', 'IE', 'IN',
-  'IT', 'JP', 'KR', 'MY', 'NL', 'NZ', 'PH', 'SG', 'TH', 'TW', 'US', 'VN'
-] as const
-
 /** The languages the server supports, labelled from the common namespace. */
 const LANGUAGES = [
   { code: 'en', labelKey: 'language.en' },
   { code: 'zh-hans', labelKey: 'language.zhHans' }
 ] as const
+
+/**
+ * The currency and default language the setup wizard's profile of a country gives it. Only a
+ * value the lists above offer fits, as the server refuses any other: where a profile names
+ * another, that field is left out, and choosing the country leaves the field as it is.
+ */
+type CountryPreset = {
+  currency?: (typeof CURRENCY_CODES)[number]
+  language?: (typeof LANGUAGES)[number]['code']
+}
+
+/**
+ * The countries the setup wizard has defaults for, since the wizard is where a new workspace
+ * goes next; the server itself takes any two-letter code. Their names are messages rather
+ * than Intl.DisplayNames, so they read as they do in the wizard.
+ */
+const COUNTRY_PRESETS = {
+  AE: { currency: 'AED', language: 'en' },
+  AU: { currency: 'AUD', language: 'en' },
+  CA: { currency: 'CAD', language: 'en' },
+  CH: { currency: 'CHF', language: 'en' },
+  CN: { currency: 'CNY', language: 'zh-hans' },
+  DE: { currency: 'EUR', language: 'en' },
+  ES: { currency: 'EUR', language: 'en' },
+  FR: { currency: 'EUR', language: 'en' },
+  GB: { currency: 'GBP', language: 'en' },
+  HK: { currency: 'HKD', language: 'zh-hans' },
+  ID: { currency: 'IDR', language: 'en' },
+  IE: { currency: 'EUR', language: 'en' },
+  IN: { currency: 'INR', language: 'en' },
+  IT: { currency: 'EUR', language: 'en' },
+  JP: { currency: 'JPY', language: 'en' },
+  KR: { currency: 'KRW', language: 'en' },
+  MY: { currency: 'MYR', language: 'en' },
+  NL: { currency: 'EUR', language: 'en' },
+  NZ: { currency: 'NZD', language: 'en' },
+  PH: { currency: 'PHP', language: 'en' },
+  SG: { currency: 'SGD', language: 'en' },
+  TH: { currency: 'THB', language: 'en' },
+  TW: { currency: 'TWD', language: 'zh-hans' },
+  US: { currency: 'USD', language: 'en' },
+  VN: { currency: 'VND', language: 'en' }
+} satisfies Record<string, CountryPreset>
+
+type CountryCode = keyof typeof COUNTRY_PRESETS
+
+const COUNTRY_CODES = Object.keys(COUNTRY_PRESETS) as CountryCode[]
 
 /** The server's max_length for a workspace name. */
 const NAME_MAX_LENGTH = 255
@@ -71,6 +109,34 @@ type FieldErrors = Partial<Record<Field, string>>
 type Phase = 'idle' | 'creating' | 'switching'
 
 const SAME_AS_CURRENT: Settings = { country: '', currency: '', language: '' }
+
+/** The settings that follow the country. */
+const PRESET_FIELDS = ['currency', 'language'] as const
+
+/** Which of them the user has picked since the dialog opened. */
+type Picked = Record<(typeof PRESET_FIELDS)[number], boolean>
+
+const NONE_PICKED: Picked = { currency: false, language: false }
+
+/**
+ * The settings once a country is chosen. A currency or language the user has not picked
+ * follows the country: to its preset, or back to "same as current shop" along with it. One
+ * the user has picked stays, and so does one the country's preset has no value for.
+ */
+function withCountry(settings: Settings, country: string, picked: Picked): Settings {
+  const preset: CountryPreset | undefined = Object.hasOwn(COUNTRY_PRESETS, country)
+    ? COUNTRY_PRESETS[country as CountryCode]
+    : undefined
+  const next = { ...settings, country }
+
+  for (const field of PRESET_FIELDS) {
+    if (picked[field]) continue
+    const value = country ? preset?.[field] : ''
+    if (value !== undefined) next[field] = value
+  }
+
+  return next
+}
 
 function errorStatus(error: unknown): number | undefined {
   return (error as { status?: number } | null)?.status
@@ -111,6 +177,7 @@ export default function CreateWorkspaceDialog({ open, onClose, onRefused, onSwit
 
   const [name, setName] = useState('')
   const [settings, setSettings] = useState<Settings>(SAME_AS_CURRENT)
+  const [picked, setPicked] = useState<Picked>(NONE_PICKED)
   const [moreOpen, setMoreOpen] = useState(false)
   const [phase, setPhase] = useState<Phase>('idle')
   const [formError, setFormError] = useState<string | null>(null)
@@ -121,6 +188,7 @@ export default function CreateWorkspaceDialog({ open, onClose, onRefused, onSwit
     if (!open) return
     setName('')
     setSettings(SAME_AS_CURRENT)
+    setPicked(NONE_PICKED)
     setMoreOpen(false)
     setPhase('idle')
     setFormError(null)
@@ -157,6 +225,22 @@ export default function CreateWorkspaceDialog({ open, onClose, onRefused, onSwit
       delete next[field]
       return next
     })
+  }
+
+  const changeSetting = (field: SettingField, value: string) => {
+    if (field !== 'country') {
+      setSettings(current => ({ ...current, [field]: value }))
+      setPicked(current => ({ ...current, [field]: true }))
+      clearFieldError(field)
+      return
+    }
+
+    const next = withCountry(settings, value, picked)
+    setSettings(next)
+    // An error is about the value its field held, so it goes when the country changes that value.
+    for (const changed of SETTING_FIELDS) {
+      if (next[changed] !== settings[changed]) clearFieldError(changed)
+    }
   }
 
   const showCreateError = (error: unknown) => {
@@ -280,11 +364,7 @@ export default function CreateWorkspaceDialog({ open, onClose, onRefused, onSwit
                     fullWidth
                     label={t(`fields.${field}`)}
                     value={settings[field]}
-                    onChange={event => {
-                      const value = event.target.value
-                      setSettings(current => ({ ...current, [field]: value }))
-                      clearFieldError(field)
-                    }}
+                    onChange={event => changeSetting(field, event.target.value)}
                     error={Boolean(fieldErrors[field])}
                     helperText={fieldErrors[field]}
                     slotProps={{ select: { displayEmpty: true } }}
