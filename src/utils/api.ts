@@ -3,7 +3,7 @@
 import { refreshTokenIfNeeded } from './tokenRefresh'
 import { getApiLanguageHeaders } from '@/i18n/http'
 import { getWorkspaceApiBaseUrlFromEnv } from './apiUrls'
-import { getWorkspaceToken } from './authTokens'
+import { getWorkspaceToken, readWorkspaceIdClaim, WORKSPACE_ID_KEY } from './authTokens'
 
 /**
  * Get API base URL from environment variable.
@@ -236,7 +236,7 @@ function getAuthToken(): string | null {
 export function getWorkspaceId(): string | null {
   if (typeof window !== 'undefined') {
     // Always prefer localStorage override (set during token exchange from platform login)
-    const workspaceId = localStorage.getItem('workspace_id')
+    const workspaceId = localStorage.getItem(WORKSPACE_ID_KEY)
     if (workspaceId) return workspaceId
     const envWorkspaceId = process.env.NEXT_PUBLIC_WORKSPACE_ID || null
     if (envWorkspaceId) return envWorkspaceId
@@ -253,14 +253,7 @@ export function getWorkspaceId(): string | null {
  */
 export function getWorkspaceIdFromJwt(): number | null {
   if (typeof window === 'undefined') return null
-  const token = getWorkspaceToken()
-  if (!token) return null
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]))
-    return (payload as { workspace_id?: number }).workspace_id ?? null
-  } catch {
-    return null
-  }
+  return readWorkspaceIdClaim(getWorkspaceToken())
 }
 
 export type GetApiHeadersOptions = {
