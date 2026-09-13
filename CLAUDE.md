@@ -112,7 +112,7 @@ Where `<area>` is `account`, `auth`, or `storefront`.
 | storefront | `cms` | `/[slug]` |
 | account | `dashboard` | `/account/` |
 | account | `orders`, `orders/[id]` | `/account/orders[/:id]` |
-| account | `addresses`, `payments`, `settings`, `support`, `alerts`, `comments`, `credit-slips`, `change-password`, `gdpr`, `information` | `/account/<key>` |
+| account | `returns`, `addresses`, `payments`, `settings`, `support`, `alerts`, `comments`, `credit-slips`, `change-password`, `gdpr`, `information` | `/account/<key>` |
 | account | `wallet/withdraw` | `/account/wallet/withdraw` |
 | auth | `login`, `register`, `forgot-password`, `reset-password`, `verify-email` | `/auth/<key>` |
 

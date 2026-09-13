@@ -1,321 +1,463 @@
 'use client'
 
+// React Imports
+import { useCallback, useEffect, useMemo, useState } from 'react'
+import type { ReactNode } from 'react'
+
 // Next Imports
-import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { useTranslations } from 'next-intl'
-import { useEffect, useState } from 'react'
 
 // MUI Imports
-import Grid from '@mui/material/Grid'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import Typography from '@mui/material/Typography'
-import Avatar from '@mui/material/Avatar'
-import Box from '@mui/material/Box'
-import CircularProgress from '@mui/material/CircularProgress'
+import Alert from '@mui/material/Alert'
+import Button from '@mui/material/Button'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import type { Theme } from '@mui/material/styles'
 
-// Third-party Imports
-import classnames from 'classnames'
-import { Icon } from '@iconify/react'
+// Component Imports
+import Icon from '@components/Icon'
+import StatusBadge from '@/components/schema/StatusBadge'
+import PayOrderDialog from '@/components/payments/PayOrderDialog'
+import {
+  AccountCard,
+  AccountEmpty,
+  AccountLoading,
+  AccountPageHeader,
+  formatDay,
+  formatShortDay,
+  useMoney
+} from '@/components/account/AccountUI'
+
+// Utils Imports
+import { useAccount } from '@/contexts/AccountContext'
 import { usePageSlots } from '@/extensions/hooks/usePageSections'
-import { useStorefrontConfigSafe } from '@/contexts/StorefrontConfigContext'
+import { formatCurrency } from '@/utils/format'
+import { getMediaUrl } from '@/utils/media'
 import { meApi } from '@/utils/meApi'
+import { listOf } from '@/views/account/shared/api'
+import {
+  ORDER_STATE_TONE,
+  addressLines,
+  getOrderState,
+  needsPayment,
+  trackingNumbers,
+  type StorefrontAddress,
+  type StorefrontOrder
+} from '@/views/account/shared/orders'
+import {
+  RETURN_STATE_TONE,
+  isActiveReturn,
+  returnUnits,
+  type CustomerReturn
+} from '@/views/account/shared/returns'
 
-interface AccountMenuItem {
-  titleKey: string
-  descriptionKey: string
+type Tone = 'ok' | 'warn' | 'err' | 'info' | 'neu'
+
+type AttentionItem = {
+  key: string
+  tone: Tone
   icon: string
-  href: string
+  title: string
+  detail: string
+  badge: ReactNode
+  action: ReactNode
 }
 
-// Account menu items - shortcuts for the dashboard
-const menuItemsConfig: AccountMenuItem[] = [
-  {
-    titleKey: 'orders.title',
-    descriptionKey: 'orders.description',
-    icon: 'tabler-shopping-cart',
-    href: '/account/orders'
-  },
-  {
-    titleKey: 'profile.title',
-    descriptionKey: 'profile.description',
-    icon: 'tabler-user',
-    href: '/account/settings'
-  },
-  {
-    titleKey: 'addresses.title',
-    descriptionKey: 'addresses.description',
-    icon: 'tabler-map-pin',
-    href: '/account/addresses'
-  },
-  {
-    titleKey: 'payments.title',
-    descriptionKey: 'payments.description',
-    icon: 'tabler-credit-card',
-    href: '/account/payments'
-  },
-  {
-    titleKey: 'inbox.title',
-    descriptionKey: 'inbox.description',
-    icon: 'tabler-mail',
-    href: '/account/alerts'
-  },
-  {
-    titleKey: 'support.title',
-    descriptionKey: 'support.description',
-    icon: 'tabler-headset',
-    href: '/account/support'
-  },
-  {
-    titleKey: 'settings.title',
-    descriptionKey: 'settings.description',
-    icon: 'tabler-settings',
-    href: '/account/settings'
-  }
-]
+const QUICK_ACTIONS = [
+  { key: 'track', href: '/account/orders?status=shipped', icon: 'tabler-truck-delivery' },
+  { key: 'return', href: '/account/returns', icon: 'tabler-arrow-back-up' },
+  { key: 'invoices', href: '/account/payments', icon: 'tabler-file-invoice' },
+  { key: 'help', href: '/account/support', icon: 'tabler-message-circle' }
+] as const
 
-interface DashboardStats {
-  wallet_balance: number | null
-  wallet_currency: string | null
-  order_counts: Record<string, number>
-  unread_messages_count: number
-  /** Plugin-provided stats (e.g. extensions inject their own keys here) */
-  pluginStats?: Record<string, unknown>
-}
+/** At most this many rows in "Needs your attention"; the order list has the rest. */
+const ATTENTION_LIMIT = 5
 
 export default function AccountDashboardClient() {
-  const router = useRouter()
   const t = useTranslations('account')
-  const storefrontConfig = useStorefrontConfigSafe()
-  const isBelowMdScreen = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'))
-  const isBelowSmScreen = useMediaQuery((theme: Theme) => theme.breakpoints.down('sm'))
+  const money = useMoney()
+  const isBelowMd = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'))
+  const { user, stats, refreshStats } = useAccount()
   const { beforeSlots, afterSlots, replacements } = usePageSlots('account/dashboard')
-  const [stats, setStats] = useState<DashboardStats | null>(null)
-  const [statsLoading, setStatsLoading] = useState(true)
-  const [isStaff, setIsStaff] = useState(false)
-  const displayCurrency = stats?.wallet_currency ?? storefrontConfig.default_currency
+
+  const [orders, setOrders] = useState<StorefrontOrder[] | null>(null)
+  const [returns, setReturns] = useState<CustomerReturn[]>([])
+  const [address, setAddress] = useState<StorefrontAddress | null | undefined>(undefined)
+  const [error, setError] = useState<string | null>(null)
+  const [payOrder, setPayOrder] = useState<StorefrontOrder | null>(null)
+
+  const loadOrders = useCallback(async () => {
+    try {
+      setOrders(listOf<StorefrontOrder>(await meApi.getOrders({ page: 1, page_size: 20 })))
+    } catch (err) {
+      setOrders([])
+      setError(err instanceof Error ? err.message : t('common.loadFailed'))
+    }
+  }, [t])
 
   useEffect(() => {
-    let cancelled = false
+    loadOrders()
     meApi
-      .getDashboardStats()
-      .then((data) => {
-        if (!cancelled) setStats(data)
-      })
-      .catch(() => {
-        if (!cancelled) setStats(null)
-      })
-      .finally(() => {
-        if (!cancelled) setStatsLoading(false)
-      })
-    // An active StaffMember row for this workspace — the same signal AdminAccessGuard
-    // uses, and `/api/v1/me/` already carries it. Django's `is_staff` was wrong in both
-    // directions: a shop's own operator never saw this shortcut, while a Django-staff
-    // user with no membership here saw it and was bounced straight back to /account.
-    meApi.getMe().then((me: any) => {
-      if (!cancelled) setIsStaff(me?.staff_member?.is_active === true)
-    }).catch(() => {})
-    return () => {
-      cancelled = true
-    }
-  }, [])
+      .getReturns({ page_size: 20 })
+      .then(response => setReturns(listOf<CustomerReturn>(response)))
+      .catch(() => setReturns([]))
+    meApi
+      .getDefaultAddress()
+      .then(response => setAddress(response?.id ? response : null))
+      .catch(() => setAddress(null))
+  }, [loadOrders])
 
-  const handleCardClick = (href: string) => {
-    router.push(href)
+  const attention = useMemo<AttentionItem[]>(() => {
+    const items: AttentionItem[] = []
+
+    for (const order of orders ?? []) {
+      const number = order.order_number || `#${order.id}`
+      const state = getOrderState(order)
+      const badge = <StatusBadge label={t(`orderState.${state}`)} color={ORDER_STATE_TONE[state]} />
+      const detailHref = `/account/orders/${order.id}`
+
+      if (needsPayment(order)) {
+        items.push({
+          key: `pay-${order.id}`,
+          tone: state === 'payment_failed' ? 'err' : 'warn',
+          icon: 'tabler-credit-card',
+          title: t('dashboard.attention.pay', { number }),
+          detail: [
+            t('dashboard.attention.placed', { date: formatDay(order.timestamps?.created_at) }),
+            t('common.products', { count: order.items?.length ?? 0 }),
+            money(order.amounts?.total)
+          ].join(' · '),
+          badge,
+          action: (
+            <Button size='small' variant='contained' onClick={() => setPayOrder(order)}>
+              {t('actions.payNow')}
+            </Button>
+          )
+        })
+      } else if (state === 'shipped') {
+        const tracking = trackingNumbers(order)[0]
+
+        items.push({
+          key: `shipped-${order.id}`,
+          tone: 'info',
+          icon: 'tabler-truck-delivery',
+          title: t('dashboard.attention.shipped', { number }),
+          detail: tracking
+            ? [tracking.carrier_name, tracking.tracking_number].filter(Boolean).join(' · ')
+            : t('dashboard.attention.shippedOn', { date: formatDay(order.timestamps?.shipped_at) }),
+          badge,
+          action: (
+            <Button size='small' variant='outlined' component={Link} href={`${detailHref}#tracking`}>
+              {tracking ? t('actions.track') : t('actions.view')}
+            </Button>
+          )
+        })
+      } else if (state === 'ready_for_pickup') {
+        items.push({
+          key: `pickup-${order.id}`,
+          tone: 'info',
+          icon: 'tabler-building-store',
+          title: t('dashboard.attention.pickup', { number }),
+          detail: order.pickup_point?.name
+            ? t('dashboard.attention.collectFrom', { place: order.pickup_point.name })
+            : t('dashboard.attention.placed', { date: formatDay(order.timestamps?.created_at) }),
+          badge,
+          action: (
+            <Button size='small' variant='outlined' component={Link} href={`${detailHref}#pickup`}>
+              {t('actions.pickupCode')}
+            </Button>
+          )
+        })
+      }
+    }
+
+    for (const request of returns.filter(isActiveReturn)) {
+      items.push({
+        key: `return-${request.id}`,
+        tone: request.status === 'open' ? 'warn' : 'info',
+        icon: 'tabler-receipt-refund',
+        title: t('dashboard.attention.return', { number: request.order_number || request.return_number }),
+        detail: t('dashboard.attention.returnDetail', { count: returnUnits(request), number: request.return_number }),
+        badge: <StatusBadge label={t(`returnState.${request.status}`)} color={RETURN_STATE_TONE[request.status]} />,
+        action: (
+          <Button size='small' variant='outlined' component={Link} href='/account/returns'>
+            {t('actions.viewReturn')}
+          </Button>
+        )
+      })
+    }
+
+    return items.slice(0, ATTENTION_LIMIT)
+  }, [orders, returns, money, t])
+
+  /** A plugin may replace a dashboard block outright. */
+  const slot = (slotId: string, fallback: ReactNode) => {
+    const ext = replacements.get(slotId)
+    const Component = ext?.component
+
+    return Component ? <Component key={ext.id} /> : fallback
   }
 
-  const orderStatusKeys = ['pending', 'paid', 'shipped', 'completed', 'cancelled'] as const
-  const orderCountTotal = stats
-    ? orderStatusKeys.reduce((sum, s) => sum + (stats.order_counts[s] ?? 0), 0)
-    : 0
+  const firstName = user?.first_name?.trim()
+  const recent = (orders ?? []).slice(0, 5)
+  const unread = stats?.unread_messages_count ?? 0
+  const showWallet = stats != null && stats.wallet_balance != null
+  const StatsTail = replacements.get('StatsRowTail')?.component
 
   return (
-    <div className='flex flex-col gap-6'>
-      {beforeSlots.map(
-        ext =>
-          ext.component && (
-            <div key={ext.id}>
-              <ext.component />
-            </div>
-          )
+    <div className='acc-page'>
+      {beforeSlots.map(ext => ext.component && <ext.component key={ext.id} />)}
+
+      {slot(
+        'Welcome',
+        <AccountPageHeader
+          title={firstName ? t('dashboard.welcome', { name: firstName }) : t('dashboard.welcomeNoName')}
+          subtitle={t('dashboard.subtitle')}
+        />
       )}
-      <div>
-        <Typography variant='h4' className='mbe-2'>
-          {t('pages.dashboard.title')}
-        </Typography>
-        <Typography>{t('pages.dashboard.subtitle')}</Typography>
+
+      {error && (
+        <Alert severity='error' onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
+
+      <div className='acc-grid'>
+        <div className='acc-col'>
+          <AccountCard
+            title={t('dashboard.attention.title')}
+            action={
+              orders !== null && attention.length > 0 ? (
+                <span className='acc-sub'>{t('dashboard.attention.count', { count: attention.length })}</span>
+              ) : undefined
+            }
+          >
+            {orders === null ? (
+              <AccountLoading />
+            ) : attention.length === 0 ? (
+              <div className='acc-row'>
+                <span className='acc-ico acc-ico--ok'>
+                  <Icon icon='tabler-circle-check' />
+                </span>
+                <div className='acc-grow'>
+                  <div className='acc-strong'>{t('dashboard.attention.empty')}</div>
+                  <div className='acc-sub'>{t('dashboard.attention.emptyHint')}</div>
+                </div>
+              </div>
+            ) : (
+              attention.map(item => (
+                <div key={item.key} className='acc-row acc-row--stack'>
+                  <span className={`acc-ico acc-ico--${item.tone}`}>
+                    <Icon icon={item.icon} />
+                  </span>
+                  <div className='acc-grow'>
+                    <div className='acc-strong acc-truncate'>{item.title}</div>
+                    <div className='acc-sub acc-truncate'>{item.detail}</div>
+                  </div>
+                  <span className='acc-hide-sm'>{item.badge}</span>
+                  <div className='acc-row-action'>{item.action}</div>
+                </div>
+              ))
+            )}
+          </AccountCard>
+
+          {slot(
+            'RecentOrders',
+            <AccountCard
+              title={t('dashboard.recentOrders')}
+              action={
+                <Link href='/account/orders' className='acc-link'>
+                  {t('dashboard.viewAll')}
+                  <Icon icon='tabler-chevron-right' />
+                </Link>
+              }
+            >
+              {orders === null ? (
+                <AccountLoading />
+              ) : recent.length === 0 ? (
+                <AccountEmpty
+                  icon='tabler-shopping-bag'
+                  title={t('dashboard.noOrders')}
+                  action={
+                    <Button size='small' variant='contained' component={Link} href='/'>
+                      {t('dashboard.startShopping')}
+                    </Button>
+                  }
+                />
+              ) : (
+                <>
+                  <div className='acc-table-wrap acc-hide-sm'>
+                    <table className='acc-table'>
+                      <thead>
+                        <tr>
+                          <th>{t('dashboard.columns.order')}</th>
+                          <th>{t('dashboard.columns.placed')}</th>
+                          <th>{t('dashboard.columns.items')}</th>
+                          <th className='acc-num'>{t('dashboard.columns.total')}</th>
+                          <th>{t('dashboard.columns.status')}</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {recent.map(order => {
+                          const state = getOrderState(order)
+                          const items = order.items ?? []
+                          const first = items[0]
+
+                          return (
+                            <tr key={order.id}>
+                              <td>
+                                <Link href={`/account/orders/${order.id}`} className='acc-table-link'>
+                                  {order.order_number || `#${order.id}`}
+                                </Link>
+                              </td>
+                              <td>{formatDay(order.timestamps?.created_at)}</td>
+                              <td>
+                                <div className='acc-items'>
+                                  <span className='acc-thumb'>
+                                    {first?.image_url ? (
+                                      <img src={getMediaUrl(first.image_url)} alt='' />
+                                    ) : (
+                                      <Icon icon='tabler-photo' />
+                                    )}
+                                  </span>
+                                  <span className='acc-clip acc-clip--sm'>
+                                    {first?.product_name || t('orders.unknownProduct')}
+                                  </span>
+                                  {items.length > 1 && (
+                                    <span className='acc-sub'>{t('common.more', { count: items.length - 1 })}</span>
+                                  )}
+                                </div>
+                              </td>
+                              <td className='acc-num'>{money(order.amounts?.total)}</td>
+                              <td>
+                                <StatusBadge label={t(`orderState.${state}`)} color={ORDER_STATE_TONE[state]} />
+                              </td>
+                            </tr>
+                          )
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className='acc-show-sm'>
+                    {recent.map(order => {
+                      const state = getOrderState(order)
+
+                      return (
+                        <Link key={order.id} href={`/account/orders/${order.id}`} className='acc-row'>
+                          <div className='acc-grow'>
+                            <div className='acc-strong'>{order.order_number || `#${order.id}`}</div>
+                            <div className='acc-sub'>
+                              {formatShortDay(order.timestamps?.created_at)} · {money(order.amounts?.total)}
+                            </div>
+                          </div>
+                          <StatusBadge label={t(`orderState.${state}`)} color={ORDER_STATE_TONE[state]} />
+                          <Icon icon='tabler-chevron-right' className='acc-chev' />
+                        </Link>
+                      )
+                    })}
+                  </div>
+                </>
+              )}
+            </AccountCard>
+          )}
+        </div>
+
+        <div className='acc-col'>
+          {user?.staff_member?.is_active && (
+            <Link href={isBelowMd ? '/admin/m' : '/admin'} className='acc-tile acc-staff-shortcut'>
+              <Icon icon='tabler-shield-check' className='acc-tile-icon' />
+              <div className='acc-tile-title'>{t('dashboard.adminShortcut.title')}</div>
+              <div className='acc-tile-desc'>{t('dashboard.adminShortcut.description')}</div>
+            </Link>
+          )}
+
+          <div className='acc-kpis'>
+            {showWallet && (
+              <div className='acc-kpi'>
+                <div className='acc-kpi-head'>
+                  <Icon icon='tabler-wallet' />
+                  {t('dashboard.kpi.wallet')}
+                </div>
+                <div className='acc-kpi-value'>
+                  {stats.wallet_currency
+                    ? formatCurrency(stats.wallet_balance ?? 0, stats.wallet_currency)
+                    : money(stats.wallet_balance)}
+                </div>
+                <Link href='/account/wallet/withdraw' className='acc-link acc-link--sm'>
+                  {t('dashboard.kpi.withdraw')}
+                </Link>
+              </div>
+            )}
+            <div className='acc-kpi'>
+              <div className='acc-kpi-head'>
+                <Icon icon='tabler-mail' />
+                {t('dashboard.kpi.messages')}
+              </div>
+              <div className='acc-kpi-value'>{unread}</div>
+              <Link href='/account/alerts' className='acc-link acc-link--sm'>
+                {t('dashboard.kpi.openInbox')}
+              </Link>
+            </div>
+            {StatsTail && <StatsTail />}
+          </div>
+
+          {slot(
+            'QuickLinks',
+            <AccountCard title={t('dashboard.quickActions.title')}>
+              <div className='acc-card-body'>
+                <div className='acc-tiles'>
+                  {QUICK_ACTIONS.map(action => (
+                    <Link key={action.key} href={action.href} className='acc-tile'>
+                      <Icon icon={action.icon} className='acc-tile-icon' />
+                      <div className='acc-tile-title'>{t(`dashboard.quickActions.${action.key}`)}</div>
+                      <div className='acc-tile-desc acc-hide-sm'>{t(`dashboard.quickActions.${action.key}Hint`)}</div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </AccountCard>
+          )}
+
+          <AccountCard
+            title={t('dashboard.defaultAddress.title')}
+            action={
+              <Link href='/account/addresses' className='acc-link'>
+                {t('dashboard.defaultAddress.manage')}
+              </Link>
+            }
+          >
+            <div className='acc-card-body'>
+              {address === undefined ? (
+                <AccountLoading />
+              ) : address ? (
+                <div className='acc-text'>
+                  {address.full_name && <div className='acc-strong'>{address.full_name}</div>}
+                  {addressLines(address).map(line => (
+                    <div key={line}>{line}</div>
+                  ))}
+                  {address.phone && <div className='acc-sub mbs-1.5'>{address.phone}</div>}
+                </div>
+              ) : (
+                <div className='acc-sub'>{t('dashboard.defaultAddress.empty')}</div>
+              )}
+            </div>
+          </AccountCard>
+        </div>
       </div>
 
-      {/* Stats cards: wallet, orders by status, new messages, then plugin slot StatsRowTail */}
-      {statsLoading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', py: 3 }}>
-          <CircularProgress size={32} />
-        </Box>
-      ) : stats ? (
-        <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
-          {displayCurrency && (
-            <Card
-              variant='outlined'
-              sx={{ minWidth: 160, flex: 1, cursor: 'pointer' }}
-              onClick={() => handleCardClick('/account/payments')}
-            >
-              <CardContent>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                  <Icon icon='mdi:wallet-outline' style={{ color: '#6366f1', fontSize: 20 }} />
-                  <Typography variant='caption' color='text.secondary'>
-                    {t('dashboard.stats.walletBalance')}
-                  </Typography>
-                </Box>
-                <Typography variant='h6' fontWeight={600}>
-                  {displayCurrency} {Number(stats.wallet_balance ?? 0).toLocaleString()}
-                </Typography>
-              </CardContent>
-            </Card>
-          )}
-          <Card
-            variant='outlined'
-            sx={{ minWidth: 160, flex: 1, cursor: 'pointer' }}
-            onClick={() => handleCardClick('/account/orders')}
-          >
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                <Icon icon='mdi:cart-outline' style={{ color: '#22c55e', fontSize: 20 }} />
-                <Typography variant='caption' color='text.secondary'>
-                  Orders
-                </Typography>
-              </Box>
-              <Typography variant='h6' fontWeight={600}>
-                {orderCountTotal}
-              </Typography>
-              <Typography variant='caption' color='text.secondary' sx={{ mt: 0.5, display: 'block' }}>
-                {[
-                  stats.order_counts.pending ? `${stats.order_counts.pending} ${t('dashboard.stats.ordersPending')}` : null,
-                  stats.order_counts.paid ? `${stats.order_counts.paid} ${t('dashboard.stats.ordersPaid')}` : null,
-                  stats.order_counts.shipped ? `${stats.order_counts.shipped} ${t('dashboard.stats.ordersShipped')}` : null,
-                  stats.order_counts.completed ? `${stats.order_counts.completed} ${t('dashboard.stats.ordersCompleted')}` : null,
-                  stats.order_counts.cancelled ? `${stats.order_counts.cancelled} ${t('dashboard.stats.ordersCancelled')}` : null
-                ]
-                  .filter(Boolean)
-                  .join(' · ') || '—'}
-              </Typography>
-            </CardContent>
-          </Card>
-          <Card
-            variant='outlined'
-            sx={{ minWidth: 160, flex: 1, cursor: 'pointer' }}
-            onClick={() => handleCardClick('/account/alerts')}
-          >
-            <CardContent>
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                <Icon icon='mdi:email-outline' style={{ color: '#f59e0b', fontSize: 20 }} />
-                <Typography variant='caption' color='text.secondary'>
-                  {t('dashboard.stats.newMessages')}
-                </Typography>
-              </Box>
-              <Typography variant='h6' fontWeight={600}>
-                {stats?.unread_messages_count ?? 0}
-              </Typography>
-            </CardContent>
-          </Card>
-          {(() => {
-            const ext = replacements.get('StatsRowTail')
-            const Component = ext?.component
-            return Component ? (
-              <Box key={ext!.id} sx={{ minWidth: 160, flex: 1, display: 'flex', alignSelf: 'stretch' }}>
-                <Component />
-              </Box>
-            ) : null
-          })()}
-        </Box>
-      ) : null}
+      {afterSlots.map(ext => ext.component && <ext.component key={ext.id} />)}
 
-      {isStaff && (
-        <Card
-          variant='outlined'
-          sx={{
-            borderRadius: 2,
-            boxShadow: 'none',
-            border: theme => `1px solid ${theme.palette.primary.main}`,
-            cursor: 'pointer',
-            '&:hover': { bgcolor: 'action.hover' }
+      {payOrder && (
+        <PayOrderDialog
+          open
+          order={payOrder}
+          onClose={() => setPayOrder(null)}
+          onPaymentSuccess={() => {
+            setPayOrder(null)
+            loadOrders()
+            refreshStats()
           }}
-          onClick={() => handleCardClick(isBelowMdScreen ? '/admin/m' : '/admin')}
-        >
-          <CardContent sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar variant='rounded' sx={{ bgcolor: 'primary.main', width: 48, height: 48 }}>
-              <Icon icon='tabler-shield-check' style={{ fontSize: 28, color: '#fff' }} />
-            </Avatar>
-            <div>
-              <Typography variant='subtitle1' fontWeight={600} color='primary'>
-                {t('dashboard.adminShortcut.title')}
-              </Typography>
-              <Typography variant='body2' color='text.secondary'>
-                {t('dashboard.adminShortcut.description')}
-              </Typography>
-            </div>
-            <Box sx={{ ml: 'auto' }}>
-              <Icon icon='tabler-chevron-right' style={{ fontSize: 20, color: 'inherit', opacity: 0.5 }} />
-            </Box>
-          </CardContent>
-        </Card>
-      )}
-
-      <Card
-        variant='outlined'
-        sx={{
-          borderRadius: 2,
-          boxShadow: 'none',
-          border: theme => `1px solid ${theme.palette.divider}`
-        }}
-      >
-        <CardContent>
-          <Grid container spacing={6}>
-            {menuItemsConfig.map((item, index) => (
-              <Grid
-                size={{ xs: 12, sm: 6, md: 4 }}
-                key={index}
-                className={classnames({
-                  '[&:nth-of-type(odd)>div]:pie-6 [&:nth-of-type(odd)>div]:border-ie':
-                    isBelowMdScreen && !isBelowSmScreen && index % 2 === 0 && index < menuItemsConfig.length - 1,
-                })}
-              >
-                <div
-                  onClick={() => handleCardClick(item.href)}
-                  className={classnames(
-                    'flex flex-col items-center gap-4 p-6 cursor-pointer rounded transition-colors',
-                    'hover:bg-actionHover active:bg-actionSelected'
-                  )}
-                >
-                  <Avatar variant='rounded' className='is-16 bs-16 bg-actionSelected text-textPrimary'>
-                    <i className={classnames(item.icon, 'text-3xl')} />
-                  </Avatar>
-                  <div className='flex flex-col items-center text-center gap-1'>
-                    <Typography className='font-medium text-textPrimary'>
-                      {t(`dashboard.menuItems.${item.titleKey}`)}
-                    </Typography>
-                    <Typography variant='body2' color='text.secondary'>
-                      {t(`dashboard.menuItems.${item.descriptionKey}`)}
-                    </Typography>
-                  </div>
-                </div>
-                {(isBelowMdScreen && !isBelowSmScreen && index % 2 === 0 && index < menuItemsConfig.length - 2) ||
-                  (isBelowSmScreen && index < menuItemsConfig.length - 1) ? (
-                  <div className='border-be mbs-4' />
-                ) : null}
-              </Grid>
-            ))}
-          </Grid>
-        </CardContent>
-      </Card>
-      {afterSlots.map(
-        ext =>
-          ext.component && (
-            <div key={ext.id}>
-              <ext.component />
-            </div>
-          )
+        />
       )}
     </div>
   )

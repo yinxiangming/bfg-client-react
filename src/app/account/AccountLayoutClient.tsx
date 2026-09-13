@@ -4,9 +4,9 @@ import { useEffect } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { AppLayoutProvider } from '@/contexts/LayoutSettingsContext'
 import { StorefrontConfigProvider } from '@/contexts/StorefrontConfigContext'
-import AppLayoutContainer from '@components/layout/LayoutWrapper'
-import SideMenuLayout from '@components/layout/SideMenuLayout'
-import TopMenuLayout from '@components/layout/HorizontalLayout'
+import { AccountProvider } from '@/contexts/AccountContext'
+import AccountShell from '@/components/account/AccountShell'
+import AccountSurface from '@/components/account/AccountSurface'
 import SiteAnnouncementBanner from '@/components/storefront/SiteAnnouncementBanner'
 import { authApi } from '@/utils/authApi'
 import { ExtensionLoaderProvider } from '@/extensions/context'
@@ -32,12 +32,12 @@ export default function AccountLayoutClient({ children, navItems, extensionIds }
   return (
     <ExtensionLoaderProvider extensionIds={extensionIds}>
       <StorefrontConfigProvider>
+        <AccountSurface />
         <SiteAnnouncementBanner />
         <AppLayoutProvider configCookie={null}>
-          <AppLayoutContainer
-            sideMenuLayout={<SideMenuLayout navItems={navItems}>{children}</SideMenuLayout>}
-            topMenuLayout={<TopMenuLayout>{children}</TopMenuLayout>}
-          />
+          <AccountProvider>
+            <AccountShell navItems={navItems}>{children}</AccountShell>
+          </AccountProvider>
         </AppLayoutProvider>
       </StorefrontConfigProvider>
     </ExtensionLoaderProvider>

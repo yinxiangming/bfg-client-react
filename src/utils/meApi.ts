@@ -575,6 +575,30 @@ class MeApiClient {
     })
   }
 
+  // Returns. The shop's returns API, which scopes a customer to their own requests.
+  async getReturns(params?: { order?: number; page?: number; page_size?: number }): Promise<any> {
+    const queryParams = new URLSearchParams()
+    if (params?.order != null) queryParams.append('order', String(params.order))
+    if (params?.page != null) queryParams.append('page', String(params.page))
+    if (params?.page_size != null) queryParams.append('page_size', String(params.page_size))
+    const query = queryParams.toString()
+    return this.request<any>(`/api/v1/shop/returns/${query ? `?${query}` : ''}`)
+  }
+
+  async createReturn(data: { order: number; reason_category?: string; customer_note?: string }): Promise<any> {
+    return this.request<any>('/api/v1/shop/returns/', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  }
+
+  async addReturnItem(data: { return_request: number; order_item: number; quantity: number; reason?: string }): Promise<any> {
+    return this.request<any>('/api/v1/shop/return-items/', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  }
+
   // Payment Gateways (use storefront API)
   async getPaymentGateways(): Promise<any[]> {
     return this.request<any[]>('/api/v1/store/payments/gateways/')
