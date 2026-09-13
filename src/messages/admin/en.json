@@ -4571,6 +4571,52 @@
     "enterFailed": {
       "notFound": "This shop no longer exists or has been deactivated.",
       "generic": "Couldn't open this shop's admin. Try again."
+    },
+    "create": {
+      "button": "New shop",
+      "title": "Create a shop",
+      "description": "Once it's created, you'll switch to the new shop and continue with its setup.",
+      "fields": {
+        "name": "Shop name",
+        "country": "Where you trade",
+        "currency": "Currency",
+        "language": "Default language"
+      },
+      "more": "More settings",
+      "moreHint": "Where you trade, currency and language follow your current shop unless you change them.",
+      "sameAsCurrent": "Same as current shop",
+      "submit": "Create shop",
+      "creating": "Creating…",
+      "switching": "Switching to the new shop…",
+      "failed": "Couldn't create the shop. Try again.",
+      "createdNotSwitched": "{name} has been created, but we couldn't switch you to it. Open its admin from its card below.",
+      "countries": {
+        "AE": "United Arab Emirates",
+        "AU": "Australia",
+        "CA": "Canada",
+        "CH": "Switzerland",
+        "CN": "China",
+        "DE": "Germany",
+        "ES": "Spain",
+        "FR": "France",
+        "GB": "United Kingdom",
+        "HK": "Hong Kong SAR",
+        "ID": "Indonesia",
+        "IE": "Ireland",
+        "IN": "India",
+        "IT": "Italy",
+        "JP": "Japan",
+        "KR": "South Korea",
+        "MY": "Malaysia",
+        "NL": "Netherlands",
+        "NZ": "New Zealand",
+        "PH": "Philippines",
+        "SG": "Singapore",
+        "TH": "Thailand",
+        "TW": "Taiwan",
+        "US": "United States",
+        "VN": "Vietnam"
+      }
     }
   }
 }
