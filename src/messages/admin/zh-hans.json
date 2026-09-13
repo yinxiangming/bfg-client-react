@@ -4524,5 +4524,53 @@
       "remaining": "还有 {count} 项必填未完成。",
       "continue": "继续设置"
     }
+  },
+  "workspaces": {
+    "title": "我的店铺",
+    "subtitle": "你担任店主或员工的店铺都在这里。点「进入后台」会先切换到对应的店铺。",
+    "loading": "正在加载店铺",
+    "loadFailed": "店铺列表加载失败。",
+    "empty": {
+      "title": "你还没有店铺",
+      "description": "你拥有的店铺，以及把你加为员工的店铺，都会显示在这里。"
+    },
+    "billingNote": "方案、点数和扩展会在计费功能上线后显示。",
+    "status": {
+      "active": "营业中",
+      "suspended": "已暂停",
+      "inactive": "已停用"
+    },
+    "badges": {
+      "current": "当前店铺",
+      "owner": "店主"
+    },
+    "roles": {
+      "admin": "管理员",
+      "manager": "经理",
+      "staff": "员工",
+      "store_admin": "店铺管理员",
+      "marketer": "营销专员",
+      "warehouse_manager": "仓库主管",
+      "accountant": "会计",
+      "customer_service": "客服",
+      "content_editor": "内容编辑"
+    },
+    "fields": {
+      "domain": "域名",
+      "plan": "方案",
+      "credits": "点数",
+      "extensions": "扩展"
+    },
+    "noDomain": "未绑定",
+    "enter": "进入后台",
+    "blocked": {
+      "suspended": "已暂停，请联系平台恢复。",
+      "inactive": "已停用。",
+      "notMember": "你不是这家店的员工，不能进入后台。"
+    },
+    "enterFailed": {
+      "notFound": "这家店不存在或已停用。",
+      "generic": "没能进入这家店的后台，请重试。"
+    }
   }
 }
