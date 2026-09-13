@@ -14,7 +14,7 @@ export const DEFAULT_SLOTS: Record<string, string[]> = {
     'ProductVariants', 'ProductPricing', 'ProductInventory', 'ProductOrganize'
   ],
   'admin/store/orders/edit': [
-    'OrderBasicInfo', 'OrderDetails', 'Packages', 'Invoice', 'Payment', 'OrderTimeline',
+    'OrderBasicInfo', 'OrderDetails', 'Packages', 'Invoice', 'Returns', 'Payment', 'OrderTimeline',
     'CustomerDetails', 'Addresses', 'Delivery'
   ],
   'admin/store/customers/detail': [

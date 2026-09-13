@@ -25,6 +25,7 @@ import PaymentProofCard from '@/views/admin/store/orders/edit/PaymentProofCard'
 import DeliveryCard from '@/views/admin/store/orders/edit/DeliveryCard'
 import OrderTimeline from '@/views/admin/store/orders/edit/OrderTimeline'
 import InvoiceCard from '@/views/admin/store/orders/edit/InvoiceCard'
+import ReturnsCard from '@/views/admin/store/orders/edit/ReturnsCard'
 import PackagesCard from '@/views/admin/store/orders/edit/PackagesCard'
 import ShippingFulfillmentDialog from '@/views/admin/store/orders/edit/ShippingFulfillmentDialog'
 import SchemaForm from '@/components/schema/SchemaForm'
@@ -99,6 +100,7 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
   const [shippingWizardOpen, setShippingWizardOpen] = useState(false)
   const [order, setOrder] = useState<OrderDetail | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [returnsVersion, setReturnsVersion] = useState(0)
 
   const { visibleSlots, beforeSlots, afterSlots, replacements } =
     usePageSlots('admin/store/orders/edit')
@@ -260,6 +262,7 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
       })
     }
 
+    setReturnsVersion(version => version + 1)
     await fetchOrder()
   }
 
@@ -379,6 +382,17 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
                     },
                     onInvoiceUpdate: () => fetchOrder()
                   }
+                )}
+              </Grid>
+            )}
+            {visibleSlots.includes('Returns') && (
+              <Grid size={{ xs: 12 }} id='section-returns'>
+                {renderSlot(
+                  'Returns',
+                  visibleSlots,
+                  replacements,
+                  ReturnsCard,
+                  { orderId: order.id, refreshKey: returnsVersion }
                 )}
               </Grid>
             )}
