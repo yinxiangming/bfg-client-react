@@ -1,3 +1,5 @@
+import '@/styles/account.css'
+
 import { headers } from 'next/headers'
 import { getLocale } from 'next-intl/server'
 import { defaultNavItems } from '@/data/navItems'
@@ -5,6 +7,7 @@ import { loadExtensions, applyNavExtensions } from '@/extensions'
 import { filterEnabledExtensions } from '@/extensions/availability'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 import { resolveAccountSkin } from '@/components/account/themes/resolve'
+import { AccountProvider } from '@/contexts/AccountContext'
 import AccountLayoutClient from './AccountLayoutClient'
 
 export const metadata = {
@@ -29,7 +32,7 @@ export default async function AccountLayout({ children }: { children: React.Reac
     const SkinLayout = skin.Layout
     return (
       <SkinLayout navItems={finalNavItems} extensionIds={extensionIds}>
-        {children}
+        <AccountProvider>{children}</AccountProvider>
       </SkinLayout>
     )
   }

@@ -2,6 +2,7 @@
 
 // React Imports
 import { useState, useEffect, useCallback, useMemo } from 'react'
+import type { ReactNode } from 'react'
 
 // Next Imports
 import Link from 'next/link'
@@ -35,13 +36,15 @@ type Props = {
   collapsed?: boolean
   onToggleCollapse?: () => void
   mobileOpen?: boolean
+  /** Pinned under the menu, outside its scroll area. */
+  footer?: ReactNode
 }
 
 type OpenSubmenuState = {
   [key: string]: boolean
 }
 
-const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mobileOpen = false }: Props) => {
+const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mobileOpen = false, footer }: Props) => {
   const pathname = usePathname()
   const currentPath = activePath || pathname
   const normalizedPath = useMemo(() => normalizePath(currentPath), [currentPath])
@@ -328,6 +331,7 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
           {navItems.map(item => renderMenuItem(item))}
         </ul>
       </nav>
+      {footer && <div className='sidebar-footer'>{footer}</div>}
     </aside>
   )
 }

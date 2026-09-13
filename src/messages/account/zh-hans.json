@@ -1,12 +1,35 @@
 {
   "nav": {
-    "dashboard": "仪表盘",
-    "orders": "我的订单",
-    "addresses": "地址管理",
+    "account": "账户",
+    "dashboard": "概览",
+    "orders": "订单",
+    "returns": "退货",
+    "addresses": "地址",
     "payments": "支付",
     "inbox": "消息",
     "support": "客户支持",
-    "settings": "设置"
+    "settings": "设置",
+    "backToStore": "返回商店",
+    "sections": {
+      "shopping": "购物",
+      "account": "账户",
+      "help": "帮助"
+    }
+  },
+  "topbar": {
+    "menu": "打开菜单",
+    "breadcrumb": "页面路径",
+    "inbox": "消息",
+    "unread": "{count} 条未读消息"
+  },
+  "breadcrumbs": {
+    "details": "详情",
+    "changePassword": "修改密码",
+    "information": "个人资料",
+    "withdraw": "提款",
+    "privacy": "隐私",
+    "comments": "评论",
+    "creditSlips": "退款凭证"
   },
   "pages": {
     "dashboard": {
@@ -15,19 +38,19 @@
     },
     "support": {
       "title": "客户支持",
-      "subtitle": "查看咨询进度与历史，或提交新咨询"
+      "subtitle": "查看咨询进度与历史，或提交新的咨询。"
     },
     "orders": {
       "title": "订单",
-      "subtitle": "查看您的订单历史"
+      "subtitle": "查看物流、付款或发起退货。"
     },
     "inbox": {
-      "title": "收件箱",
-      "subtitle": "查看通知和消息"
+      "title": "消息",
+      "subtitle": "来自商店的通知和消息。"
     },
     "payments": {
       "title": "支付",
-      "subtitle": "管理支付方式、查看支付记录和下载发票"
+      "subtitle": "支付方式、付款记录和发票。"
     },
     "wallet": {
       "withdraw": {
@@ -37,7 +60,25 @@
     },
     "settings": {
       "title": "设置",
-      "subtitle": "管理您的个人资料、安全、偏好设置和隐私"
+      "subtitle": "管理个人资料、通知和隐私。"
+    },
+    "changePassword": {
+      "title": "修改密码",
+      "subtitle": "设置新的登录密码。"
+    },
+    "privacy": {
+      "title": "我的数据",
+      "subtitle": "申请获取您的数据副本，或申请注销账户。"
+    },
+    "comments": {
+      "title": "评论",
+      "subtitle": "您在文章下发表的评论。",
+      "empty": "还没有评论"
+    },
+    "creditSlips": {
+      "title": "退款凭证",
+      "subtitle": "退款产生的店铺余额。",
+      "empty": "还没有退款凭证"
     }
   },
   "dashboard": {
@@ -83,6 +124,56 @@
         "title": "设置",
         "description": "账户安全、密码和隐私"
       }
+    },
+    "welcome": "欢迎回来，{name}",
+    "welcomeNoName": "欢迎回来",
+    "subtitle": "订单、退货和账户信息都在这里。",
+    "attention": {
+      "title": "待处理事项",
+      "count": "{count} 项",
+      "empty": "暂时没有需要您处理的事",
+      "emptyHint": "有需要您处理的事会显示在这里。",
+      "pay": "订单 {number} 待付款",
+      "placed": "下单于 {date}",
+      "shipped": "订单 {number} 正在配送",
+      "shippedOn": "发货于 {date}",
+      "pickup": "订单 {number} 可以自提了",
+      "collectFrom": "自提点：{place}",
+      "return": "订单 {number} 的退货",
+      "returnDetail": "{count} 件 · {number}"
+    },
+    "recentOrders": "最近订单",
+    "viewAll": "查看全部",
+    "noOrders": "还没有订单",
+    "startShopping": "去购物",
+    "columns": {
+      "order": "订单",
+      "placed": "下单时间",
+      "items": "商品",
+      "total": "金额",
+      "status": "状态"
+    },
+    "kpi": {
+      "wallet": "钱包余额",
+      "withdraw": "提款",
+      "messages": "新消息",
+      "openInbox": "查看消息"
+    },
+    "quickActions": {
+      "title": "快捷入口",
+      "track": "查看物流",
+      "trackHint": "跟踪已发货的订单",
+      "return": "发起退货",
+      "returnHint": "选择商品并说明原因",
+      "invoices": "发票",
+      "invoicesHint": "下载税务发票",
+      "help": "寻求帮助",
+      "helpHint": "咨询订单问题"
+    },
+    "defaultAddress": {
+      "title": "默认地址",
+      "manage": "管理",
+      "empty": "还没有默认地址。"
     }
   },
   "alerts": {
@@ -143,7 +234,24 @@
     "paymentPaid": "已支付",
     "paymentPending": "待支付",
     "paymentFailed": "支付失败",
-    "paymentRefunded": "已退款"
+    "paymentRefunded": "已退款",
+    "all": "全部",
+    "showAll": "显示全部订单",
+    "columns": {
+      "order": "订单",
+      "placed": "下单时间",
+      "items": "商品",
+      "delivery": "配送",
+      "total": "金额",
+      "status": "状态",
+      "actions": "操作"
+    },
+    "pickup": "自提",
+    "shipping": "快递",
+    "showing": "第 {from}–{to} 条，共 {total} 条",
+    "previousPage": "上一页",
+    "nextPage": "下一页",
+    "emptyTab": "没有这个状态的订单"
   },
   "payments": {
     "paymentMethods": "支付方式",
@@ -298,7 +406,66 @@
     "saveChanges": "保存更改",
     "saving": "保存中...",
     "failedLoad": "加载设置失败",
-    "failedUpdate": "更新设置失败"
+    "failedUpdate": "更新设置失败",
+    "savedToast": "已保存",
+    "profileCard": {
+      "title": "个人资料",
+      "changePhoto": "更换头像",
+      "photoHint": "JPG 或 PNG，最大 800 KB",
+      "firstName": "名",
+      "lastName": "姓",
+      "email": "邮箱",
+      "phone": "电话",
+      "language": "语言",
+      "timezone": "时区",
+      "cancel": "放弃修改",
+      "save": "保存修改",
+      "saving": "保存中...",
+      "saved": "个人资料已保存"
+    },
+    "notifications": {
+      "title": "通知",
+      "subtitle": "选择接收通知的方式和内容。",
+      "channels": "接收方式",
+      "topics": "通知内容",
+      "email": "邮件",
+      "sms": "短信",
+      "push": "推送",
+      "pushHint": "浏览器通知",
+      "orderUpdates": "订单动态",
+      "orderUpdatesHint": "付款、发货和送达",
+      "promotions": "促销和优惠",
+      "promotionsHint": "特卖和优惠码",
+      "productUpdates": "商品动态",
+      "productUpdatesHint": "新品和补货",
+      "supportReplies": "客服回复",
+      "supportRepliesHint": "咨询的回复"
+    },
+    "securityCard": {
+      "title": "登录与安全",
+      "password": "密码",
+      "passwordHint": "用于登录的密码",
+      "change": "修改",
+      "email": "邮箱地址",
+      "verified": "已验证"
+    },
+    "privacyCard": {
+      "title": "隐私",
+      "visibility": "资料可见性",
+      "visibilityHint": "谁可以看到您的公开资料",
+      "private": "仅自己",
+      "friends": "好友",
+      "public": "所有人",
+      "showEmail": "显示我的邮箱",
+      "showPhone": "显示我的电话",
+      "showHint": "在您的公开资料中"
+    },
+    "dataCard": {
+      "title": "我的数据",
+      "request": "下载或删除我的数据",
+      "requestHint": "联系我们，我们会为您处理。",
+      "contact": "联系我们"
+    }
   },
   "information": {
     "uploadNewPhoto": "上传新照片",
@@ -326,7 +493,7 @@
     "passwordHint": "密码长度至少为 8 个字符",
     "changePassword": "更改密码",
     "changingPassword": "更改密码中...",
-    "reset": "重置",
+    "reset": "清空",
     "passwordChanged": "密码更改成功",
     "allFieldsRequired": "所有字段都是必填的",
     "passwordMismatch": "新密码和确认密码不匹配",
@@ -421,7 +588,36 @@
     "statusPending": "待客户回复",
     "statusOnHold": "挂起",
     "statusResolved": "已解决",
-    "statusClosed": "已关闭"
+    "statusClosed": "已关闭",
+    "tabs": {
+      "open": "进行中",
+      "closed": "已结束"
+    },
+    "noOpenTickets": "没有进行中的咨询",
+    "noClosedTickets": "没有已结束的咨询",
+    "updated": "更新于 {date}",
+    "you": "我",
+    "supportTeam": "客服",
+    "replyHint": "需要补充信息？提交补充后，我们会把它和 {number} 一起处理。",
+    "followUp": "补充信息",
+    "followUpSubject": "补充 {number}：{subject}",
+    "created": "咨询已提交，我们会尽快回复。",
+    "help": {
+      "title": "需要什么帮助？",
+      "order": "我的订单到哪了？",
+      "returns": "退货和退款",
+      "payments": "发票和付款",
+      "other": "其他问题"
+    },
+    "contact": {
+      "title": "联系我们",
+      "emailHint": "请附上订单号，方便我们更快处理。"
+    },
+    "prefill": {
+      "order": "关于订单 {order} 的问题",
+      "delivery": "订单 {order} 的配送问题",
+      "data": "个人数据相关申请"
+    }
   },
   "orderDetail": {
     "order": "订单",
@@ -449,7 +645,7 @@
     "shipping": "运费",
     "tax": "税费",
     "discount": "折扣",
-    "orderActivity": "订单活动",
+    "orderActivity": "订单动态",
     "noActivity": "无订单活动记录",
     "email": "邮箱",
     "phone": "电话",
@@ -522,6 +718,141 @@
     "unitPrice": "单价",
     "close": "关闭",
     "customerNote": "订单备注",
-    "pickupCode": "自提码"
+    "pickupCode": "自提码",
+    "placed": "下单于 {date}",
+    "steps": {
+      "placed": "已下单",
+      "paid": "已付款",
+      "processing": "处理中",
+      "shipped": "已发货",
+      "delivered": "已送达",
+      "ready": "待自提",
+      "collected": "已取货"
+    },
+    "estimatedDays": "预计 {min}–{max} 天送达",
+    "cancelledNotice": "这笔订单已取消",
+    "refundedNotice": "这笔订单已退款",
+    "trackingNumber": "物流单号",
+    "trackingWith": "{carrier} 物流单号",
+    "copy": "复制",
+    "copied": "已复制",
+    "deliveryMethod": "配送方式",
+    "itemsSummary": "{products} · {units}",
+    "each": "单价 {price}",
+    "summary": "金额",
+    "payment": "付款",
+    "taxInvoice": "税务发票",
+    "download": "下载",
+    "deliveryAddress": "收货地址",
+    "pickupPoint": "自提点",
+    "helpTitle": "这笔订单需要帮助？",
+    "helpDelivery": "反馈配送问题",
+    "helpQuestion": "咨询问题",
+    "paymentRecord": {
+      "pending": "待付款",
+      "processing": "处理中",
+      "completed": "已付款",
+      "failed": "失败",
+      "cancelled": "已取消",
+      "refunded": "已退款"
+    }
+  },
+  "common": {
+    "products": "{count} 种商品",
+    "units": "{count} 件",
+    "more": "+{count}",
+    "loadFailed": "页面加载失败，请稍后重试。"
+  },
+  "orderState": {
+    "awaiting_payment": "待付款",
+    "payment_failed": "付款失败",
+    "processing": "处理中",
+    "shipped": "已发货",
+    "ready_for_pickup": "待自提",
+    "delivered": "已送达",
+    "cancelled": "已取消",
+    "refunded": "已退款"
+  },
+  "orderStatus": {
+    "pending": "待处理",
+    "processing": "处理中",
+    "shipped": "已发货",
+    "ready_for_pickup": "待自提",
+    "delivered": "已送达",
+    "cancelled": "已取消",
+    "refunded": "已退款"
+  },
+  "returnState": {
+    "open": "已申请",
+    "approved": "已同意",
+    "rejected": "已拒绝",
+    "received": "已收货",
+    "inspected": "已检验",
+    "refunded": "已退款",
+    "closed": "已关闭",
+    "cancelled": "已取消"
+  },
+  "actions": {
+    "payNow": "立即付款",
+    "track": "查看物流",
+    "pickupCode": "自提码",
+    "view": "查看",
+    "viewDetails": "查看详情",
+    "viewReturn": "查看退货",
+    "requestReturn": "申请退货",
+    "startReturn": "发起退货",
+    "getHelp": "寻求帮助",
+    "cancelOrder": "取消订单",
+    "moreActions": "更多操作"
+  },
+  "returns": {
+    "title": "退货",
+    "subtitle": "寄回商品并跟进退款。",
+    "form": {
+      "title": "发起退货",
+      "order": "订单",
+      "chooseOrder": "选择已送达的订单",
+      "orderOption": "{number} · {date} 送达 · {total}",
+      "noEligible": "只有已送达的订单可以退货，目前还没有。",
+      "items": "要退的商品",
+      "bought": "{price} · 购买 {count} 件",
+      "alreadyReturned": "已在退货中",
+      "less": "减少",
+      "more": "增加",
+      "reason": "原因",
+      "chooseReason": "选择原因",
+      "details": "详细说明",
+      "detailsPlaceholder": "请描述遇到的问题",
+      "estimate": "预计退款",
+      "reset": "清空",
+      "submit": "提交申请",
+      "submitting": "提交中...",
+      "submitted": "退货申请 {number} 已提交，审核后会通知您。",
+      "failed": "退货申请提交失败，请稍后重试。",
+      "partialFailure": "已创建退货申请 {number}，但部分商品没有添加成功。请联系我们并提供编号 {number}。",
+      "noItemIds": "这笔订单的商品暂时不能在这里选择，请联系我们办理退货。"
+    },
+    "reasons": {
+      "faulty": "有故障或无法使用",
+      "damaged": "收到时已损坏",
+      "wrong_item": "发错商品",
+      "not_as_described": "与描述不符",
+      "changed_mind": "不想要了",
+      "other": "其他原因"
+    },
+    "list": {
+      "title": "我的退货",
+      "empty": "还没有退货记录",
+      "noRefund": "不退款"
+    },
+    "how": {
+      "title": "退货流程",
+      "request": "提交申请",
+      "requestHint": "选择商品并说明原因。",
+      "send": "寄回商品",
+      "sendHint": "申请通过后，把商品寄回给我们。",
+      "refund": "退款",
+      "refundHint": "商品检验无误后为您退款。"
+    }
   }
 }

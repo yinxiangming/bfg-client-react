@@ -1,12 +1,35 @@
 {
   "nav": {
+    "account": "Account",
     "dashboard": "Dashboard",
-    "orders": "My Orders",
+    "orders": "Orders",
+    "returns": "Returns",
     "addresses": "Addresses",
     "payments": "Payments",
     "inbox": "Inbox",
-    "support": "Customer Support",
-    "settings": "Settings"
+    "support": "Customer support",
+    "settings": "Settings",
+    "backToStore": "Back to store",
+    "sections": {
+      "shopping": "Shopping",
+      "account": "Account",
+      "help": "Help"
+    }
+  },
+  "topbar": {
+    "menu": "Open menu",
+    "breadcrumb": "Breadcrumb",
+    "inbox": "Inbox",
+    "unread": "{count, plural, one {# unread message} other {# unread messages}}"
+  },
+  "breadcrumbs": {
+    "details": "Details",
+    "changePassword": "Change password",
+    "information": "Profile",
+    "withdraw": "Withdraw",
+    "privacy": "Privacy",
+    "comments": "Comments",
+    "creditSlips": "Credit slips"
   },
   "pages": {
     "dashboard": {
@@ -14,20 +37,20 @@
       "subtitle": "Manage your account settings and preferences"
     },
     "support": {
-      "title": "Customer Support",
-      "subtitle": "View ticket status and history, or submit a new ticket"
+      "title": "Customer support",
+      "subtitle": "View ticket status and history, or submit a new ticket."
     },
     "orders": {
       "title": "Orders",
-      "subtitle": "Review your order history"
+      "subtitle": "Track deliveries, pay or start a return."
     },
     "inbox": {
       "title": "Inbox",
-      "subtitle": "View notifications and messages"
+      "subtitle": "Notifications and messages from the shop."
     },
     "payments": {
       "title": "Payments",
-      "subtitle": "Manage payment methods, view payment history and download invoices"
+      "subtitle": "Payment methods, payment history and invoices."
     },
     "wallet": {
       "withdraw": {
@@ -37,7 +60,25 @@
     },
     "settings": {
       "title": "Settings",
-      "subtitle": "Manage your profile, security, preferences and privacy"
+      "subtitle": "Manage your profile, notifications and privacy."
+    },
+    "changePassword": {
+      "title": "Change password",
+      "subtitle": "Choose a new password for signing in."
+    },
+    "privacy": {
+      "title": "Your data",
+      "subtitle": "Ask for a copy of your data, or for your account to be deleted."
+    },
+    "comments": {
+      "title": "Comments",
+      "subtitle": "Comments you've left on posts.",
+      "empty": "No comments yet"
+    },
+    "creditSlips": {
+      "title": "Credit slips",
+      "subtitle": "Store credit from refunds.",
+      "empty": "No credit slips yet"
     }
   },
   "dashboard": {
@@ -83,6 +124,56 @@
         "title": "Settings",
         "description": "Account security, password and privacy"
       }
+    },
+    "welcome": "Welcome back, {name}",
+    "welcomeNoName": "Welcome back",
+    "subtitle": "Orders, returns and account details in one place.",
+    "attention": {
+      "title": "Needs your attention",
+      "count": "{count, plural, one {# item} other {# items}}",
+      "empty": "You're all caught up",
+      "emptyHint": "Anything that needs you will show up here.",
+      "pay": "Payment due for {number}",
+      "placed": "Placed {date}",
+      "shipped": "{number} is on its way",
+      "shippedOn": "Shipped {date}",
+      "pickup": "{number} is ready to collect",
+      "collectFrom": "Collect from {place}",
+      "return": "Return for {number}",
+      "returnDetail": "{count, plural, one {# item} other {# items}} · {number}"
+    },
+    "recentOrders": "Recent orders",
+    "viewAll": "View all",
+    "noOrders": "No orders yet",
+    "startShopping": "Start shopping",
+    "columns": {
+      "order": "Order",
+      "placed": "Placed",
+      "items": "Items",
+      "total": "Total",
+      "status": "Status"
+    },
+    "kpi": {
+      "wallet": "Wallet balance",
+      "withdraw": "Withdraw",
+      "messages": "New messages",
+      "openInbox": "Open inbox"
+    },
+    "quickActions": {
+      "title": "Quick actions",
+      "track": "Track a parcel",
+      "trackHint": "Follow shipped orders",
+      "return": "Start a return",
+      "returnHint": "Pick items and a reason",
+      "invoices": "Invoices",
+      "invoicesHint": "Download tax invoices",
+      "help": "Get help",
+      "helpHint": "Ask about an order"
+    },
+    "defaultAddress": {
+      "title": "Default address",
+      "manage": "Manage",
+      "empty": "No default address yet."
     }
   },
   "alerts": {
@@ -143,7 +234,24 @@
     "paymentPaid": "Paid",
     "paymentPending": "Pending",
     "paymentFailed": "Failed",
-    "paymentRefunded": "Refunded"
+    "paymentRefunded": "Refunded",
+    "all": "All",
+    "showAll": "Show all orders",
+    "columns": {
+      "order": "Order",
+      "placed": "Placed",
+      "items": "Items",
+      "delivery": "Delivery",
+      "total": "Total",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "pickup": "Pickup",
+    "shipping": "Delivery",
+    "showing": "Showing {from}–{to} of {total}",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "emptyTab": "No orders with this status"
   },
   "payments": {
     "paymentMethods": "Payment Methods",
@@ -298,7 +406,66 @@
     "saveChanges": "Save Changes",
     "saving": "Saving...",
     "failedLoad": "Failed to load settings",
-    "failedUpdate": "Failed to update settings"
+    "failedUpdate": "Failed to update settings",
+    "savedToast": "Saved",
+    "profileCard": {
+      "title": "Profile",
+      "changePhoto": "Change photo",
+      "photoHint": "JPG or PNG, up to 800 KB",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "phone": "Phone",
+      "language": "Language",
+      "timezone": "Time zone",
+      "cancel": "Discard",
+      "save": "Save changes",
+      "saving": "Saving...",
+      "saved": "Profile saved"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "subtitle": "Choose how and what you hear from us.",
+      "channels": "Channels",
+      "topics": "Topics",
+      "email": "Email",
+      "sms": "SMS",
+      "push": "Push",
+      "pushHint": "Browser notifications",
+      "orderUpdates": "Order updates",
+      "orderUpdatesHint": "Payment, shipping and delivery",
+      "promotions": "Promotions and offers",
+      "promotionsHint": "Sales and discount codes",
+      "productUpdates": "Product updates",
+      "productUpdatesHint": "New products and restocks",
+      "supportReplies": "Support replies",
+      "supportRepliesHint": "Replies to your tickets"
+    },
+    "securityCard": {
+      "title": "Sign-in & security",
+      "password": "Password",
+      "passwordHint": "The password you sign in with",
+      "change": "Change",
+      "email": "Email address",
+      "verified": "Verified"
+    },
+    "privacyCard": {
+      "title": "Privacy",
+      "visibility": "Profile visibility",
+      "visibilityHint": "Who can see your public profile",
+      "private": "Private",
+      "friends": "Friends",
+      "public": "Public",
+      "showEmail": "Show my email",
+      "showPhone": "Show my phone number",
+      "showHint": "On your public profile"
+    },
+    "dataCard": {
+      "title": "Your data",
+      "request": "Download or delete your data",
+      "requestHint": "Contact us and we'll take care of it.",
+      "contact": "Contact us"
+    }
   },
   "information": {
     "uploadNewPhoto": "Upload New Photo",
@@ -320,13 +487,13 @@
     "failedUpdate": "Failed to update user information"
   },
   "changePassword": {
-    "currentPassword": "Current Password",
-    "newPassword": "New Password",
-    "confirmNewPassword": "Confirm New Password",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "confirmNewPassword": "Confirm new password",
     "passwordHint": "Password must be at least 8 characters long",
-    "changePassword": "Change Password",
-    "changingPassword": "Changing Password...",
-    "reset": "Reset",
+    "changePassword": "Change password",
+    "changingPassword": "Changing password...",
+    "reset": "Clear",
     "passwordChanged": "Password changed successfully",
     "allFieldsRequired": "All fields are required",
     "passwordMismatch": "New password and confirm password do not match",
@@ -393,7 +560,7 @@
   },
   "support": {
     "myTickets": "My Tickets",
-    "newTicket": "New Ticket",
+    "newTicket": "New ticket",
     "loading": "Loading...",
     "noTickets": "No tickets yet",
     "ticketNumber": "Ticket #",
@@ -418,10 +585,39 @@
     "failedCreate": "Failed to create ticket",
     "statusNew": "New",
     "statusOpen": "Open",
-    "statusPending": "Pending",
-    "statusOnHold": "On Hold",
+    "statusPending": "Awaiting your reply",
+    "statusOnHold": "On hold",
     "statusResolved": "Resolved",
-    "statusClosed": "Closed"
+    "statusClosed": "Closed",
+    "tabs": {
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "noOpenTickets": "No open tickets",
+    "noClosedTickets": "No closed tickets",
+    "updated": "Updated {date}",
+    "you": "You",
+    "supportTeam": "Support team",
+    "replyHint": "Need to add something? Open a follow-up and we'll attach it to {number}.",
+    "followUp": "Follow up",
+    "followUpSubject": "Follow-up on {number}: {subject}",
+    "created": "Thanks, we've received your ticket.",
+    "help": {
+      "title": "How can we help?",
+      "order": "Where is my order?",
+      "returns": "Returns and refunds",
+      "payments": "Invoices and payments",
+      "other": "Something else"
+    },
+    "contact": {
+      "title": "Contact us",
+      "emailHint": "Include your order number so we can help faster."
+    },
+    "prefill": {
+      "order": "Question about order {order}",
+      "delivery": "Delivery problem with order {order}",
+      "data": "Request about my personal data"
+    }
   },
   "orderDetail": {
     "order": "Order",
@@ -449,7 +645,7 @@
     "shipping": "Shipping",
     "tax": "Tax",
     "discount": "Discount",
-    "orderActivity": "Order Activity",
+    "orderActivity": "Order activity",
     "noActivity": "No order activity available",
     "email": "Email",
     "phone": "Phone",
@@ -522,6 +718,141 @@
     "unitPrice": "Unit Price",
     "close": "Close",
     "customerNote": "Order note",
-    "pickupCode": "Pickup code"
+    "pickupCode": "Pickup code",
+    "placed": "Placed {date}",
+    "steps": {
+      "placed": "Placed",
+      "paid": "Paid",
+      "processing": "Processing",
+      "shipped": "Shipped",
+      "delivered": "Delivered",
+      "ready": "Ready for pickup",
+      "collected": "Collected"
+    },
+    "estimatedDays": "Estimated {min}–{max} days",
+    "cancelledNotice": "This order was cancelled",
+    "refundedNotice": "This order was refunded",
+    "trackingNumber": "Tracking number",
+    "trackingWith": "{carrier} tracking number",
+    "copy": "Copy",
+    "copied": "Copied",
+    "deliveryMethod": "Delivery method",
+    "itemsSummary": "{products} · {units}",
+    "each": "{price} each",
+    "summary": "Summary",
+    "payment": "Payment",
+    "taxInvoice": "Tax invoice",
+    "download": "Download",
+    "deliveryAddress": "Delivery address",
+    "pickupPoint": "Pickup point",
+    "helpTitle": "Need help with this order?",
+    "helpDelivery": "Report a delivery problem",
+    "helpQuestion": "Ask a question",
+    "paymentRecord": {
+      "pending": "Pending",
+      "processing": "Processing",
+      "completed": "Paid",
+      "failed": "Failed",
+      "cancelled": "Cancelled",
+      "refunded": "Refunded"
+    }
+  },
+  "common": {
+    "products": "{count, plural, one {# product} other {# products}}",
+    "units": "{count, plural, one {# item} other {# items}}",
+    "more": "+{count}",
+    "loadFailed": "Something went wrong loading this page. Please try again."
+  },
+  "orderState": {
+    "awaiting_payment": "Awaiting payment",
+    "payment_failed": "Payment failed",
+    "processing": "Processing",
+    "shipped": "Shipped",
+    "ready_for_pickup": "Ready for pickup",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled",
+    "refunded": "Refunded"
+  },
+  "orderStatus": {
+    "pending": "Pending",
+    "processing": "Processing",
+    "shipped": "Shipped",
+    "ready_for_pickup": "Ready for pickup",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled",
+    "refunded": "Refunded"
+  },
+  "returnState": {
+    "open": "Requested",
+    "approved": "Approved",
+    "rejected": "Rejected",
+    "received": "Received",
+    "inspected": "Inspected",
+    "refunded": "Refunded",
+    "closed": "Closed",
+    "cancelled": "Cancelled"
+  },
+  "actions": {
+    "payNow": "Pay now",
+    "track": "Track parcel",
+    "pickupCode": "Pickup code",
+    "view": "View",
+    "viewDetails": "View details",
+    "viewReturn": "View return",
+    "requestReturn": "Request a return",
+    "startReturn": "Start a return",
+    "getHelp": "Get help",
+    "cancelOrder": "Cancel order",
+    "moreActions": "More actions"
+  },
+  "returns": {
+    "title": "Returns",
+    "subtitle": "Send items back and follow your refund.",
+    "form": {
+      "title": "Start a return",
+      "order": "Order",
+      "chooseOrder": "Choose a delivered order",
+      "orderOption": "{number} · Delivered {date} · {total}",
+      "noEligible": "Only delivered orders can be returned, and you don't have one yet.",
+      "items": "Items to return",
+      "bought": "{price} · {count} bought",
+      "alreadyReturned": "Already in a return",
+      "less": "Fewer",
+      "more": "More",
+      "reason": "Reason",
+      "chooseReason": "Choose a reason",
+      "details": "Details",
+      "detailsPlaceholder": "Tell us what happened",
+      "estimate": "Estimated refund",
+      "reset": "Clear",
+      "submit": "Submit request",
+      "submitting": "Submitting...",
+      "submitted": "Return {number} has been sent. We'll let you know once it's been reviewed.",
+      "failed": "We couldn't open the return. Please try again.",
+      "partialFailure": "Return {number} was opened, but not every item could be added. Contact us and quote {number}.",
+      "noItemIds": "The items in this order can't be picked here yet. Contact us to arrange the return."
+    },
+    "reasons": {
+      "faulty": "Faulty or not working",
+      "damaged": "Arrived damaged",
+      "wrong_item": "Wrong item sent",
+      "not_as_described": "Not as described",
+      "changed_mind": "Changed my mind",
+      "other": "Something else"
+    },
+    "list": {
+      "title": "My returns",
+      "empty": "No returns yet",
+      "noRefund": "No refund"
+    },
+    "how": {
+      "title": "How returns work",
+      "request": "Request",
+      "requestHint": "Choose the items and tell us why.",
+      "send": "Send it back",
+      "sendHint": "Once approved, post the items back to us.",
+      "refund": "Refund",
+      "refundHint": "We refund once the items have been checked."
+    }
   }
 }

@@ -1,671 +1,421 @@
 'use client'
 
 // React Imports
-import { useState, useEffect } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import type { ChangeEvent } from 'react'
 
 // Next Imports
+import Link from 'next/link'
 import { useTranslations } from 'next-intl'
 
 // MUI Imports
-import Grid from '@mui/material/Grid'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import CardHeader from '@mui/material/CardHeader'
-import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
 import Alert from '@mui/material/Alert'
-import Divider from '@mui/material/Divider'
-import Switch from '@mui/material/Switch'
-import FormControlLabel from '@mui/material/FormControlLabel'
+import Button from '@mui/material/Button'
 import MenuItem from '@mui/material/MenuItem'
-import Tabs from '@mui/material/Tabs'
-import Tab from '@mui/material/Tab'
-import Box from '@mui/material/Box'
-import { alpha } from '@mui/material/styles'
+import Snackbar from '@mui/material/Snackbar'
+import Switch from '@mui/material/Switch'
 
 // Component Imports
+import Icon from '@components/Icon'
 import CustomTextField from '@components/ui/TextField'
-import ChangePassword from './ChangePassword'
-import Information from './Information'
+import StatusBadge from '@/components/schema/StatusBadge'
+import { AccountCard, AccountLoading } from '@/components/account/AccountUI'
 
 // Utils Imports
+import { useAccount } from '@/contexts/AccountContext'
+import { routing } from '@/i18n/routing'
+import { getAvatarUrl } from '@/utils/media'
 import { meApi } from '@/utils/meApi'
-import { useAppDialog } from '@/contexts/AppDialogContext'
+
+type Profile = {
+  first_name: string
+  last_name: string
+  email: string
+  phone: string
+  language: string
+  timezone_name: string
+}
+
+type Visibility = 'public' | 'private' | 'friends'
+
+/** The `/me/settings/` fields this page edits. */
+type Preferences = {
+  email_notifications: boolean
+  sms_notifications: boolean
+  push_notifications: boolean
+  notify_order_updates: boolean
+  notify_promotions: boolean
+  notify_product_updates: boolean
+  notify_support_replies: boolean
+  profile_visibility: Visibility
+  show_email: boolean
+  show_phone: boolean
+}
+
+type ToggleKey = Exclude<keyof Preferences, 'profile_visibility'>
+
+const LANGUAGE_LABELS: Record<string, string> = { en: 'English', 'zh-hans': '简体中文' }
+
+const TIMEZONES = [
+  'UTC',
+  'Pacific/Auckland',
+  'Australia/Sydney',
+  'Asia/Shanghai',
+  'Asia/Tokyo',
+  'Asia/Dubai',
+  'Europe/London',
+  'Europe/Paris',
+  'America/New_York',
+  'America/Los_Angeles'
+]
+
+const TOPICS: { key: ToggleKey; label: string }[] = [
+  { key: 'notify_order_updates', label: 'orderUpdates' },
+  { key: 'notify_promotions', label: 'promotions' },
+  { key: 'notify_product_updates', label: 'productUpdates' },
+  { key: 'notify_support_replies', label: 'supportReplies' }
+]
+
+const toProfile = (data: any): Profile => ({
+  first_name: data?.first_name ?? '',
+  last_name: data?.last_name ?? '',
+  email: data?.email ?? '',
+  phone: data?.phone ?? '',
+  language: data?.language ?? '',
+  timezone_name: data?.timezone_name ?? ''
+})
+
+const toPreferences = (data: any): Preferences => ({
+  email_notifications: Boolean(data?.email_notifications),
+  sms_notifications: Boolean(data?.sms_notifications),
+  push_notifications: Boolean(data?.push_notifications),
+  notify_order_updates: Boolean(data?.notify_order_updates),
+  notify_promotions: Boolean(data?.notify_promotions),
+  notify_product_updates: Boolean(data?.notify_product_updates),
+  notify_support_replies: Boolean(data?.notify_support_replies),
+  profile_visibility: (['public', 'private', 'friends'].includes(data?.profile_visibility)
+    ? data.profile_visibility
+    : 'private') as Visibility,
+  show_email: Boolean(data?.show_email),
+  show_phone: Boolean(data?.show_phone)
+})
 
 const Settings = () => {
   const t = useTranslations('account.settings')
-  const { confirm } = useAppDialog()
+  const { refreshUser } = useAccount()
+  const fileInput = useRef<HTMLInputElement>(null)
 
-  // States
-  const [loading, setLoading] = useState(false)
+  const [saved, setSaved] = useState<Profile | null>(null)
+  const [profile, setProfile] = useState<Profile | null>(null)
+  const [avatarUrl, setAvatarUrl] = useState<string | undefined>(undefined)
+  const [avatarFile, setAvatarFile] = useState<File | null>(null)
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null)
+  const [verified, setVerified] = useState(false)
+  const [preferences, setPreferences] = useState<Preferences | null>(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [success, setSuccess] = useState(false)
-  const [activeTab, setActiveTab] = useState(0)
-  const [me, setMe] = useState<{ email?: string; phone?: string } | null>(null)
+  const [notice, setNotice] = useState<string | null>(null)
 
-  const [settings, setSettings] = useState({
-    // Notification preferences
-    email_notifications: true,
-    sms_notifications: false,
-    push_notifications: true,
-    
-    // Notification types
-    order_updates: true,
-    promotions: true,
-    product_updates: false,
-    support_replies: true,
-    
-    // Privacy settings
-    profile_visibility: 'public',
-    show_email: false,
-    show_phone: false,
-    
-    // Display preferences
-    theme: 'auto',
-    items_per_page: 10,
-  })
-
-  // Fetch settings
   useEffect(() => {
-    const fetchSettings = async () => {
-      try {
-        setLoading(true)
-        setError(null)
-        const data = await meApi.getSettings()
-        setSettings({
-          email_notifications: data.email_notifications ?? true,
-          sms_notifications: data.sms_notifications ?? false,
-          push_notifications: data.push_notifications ?? true,
-          order_updates: data.order_updates ?? true,
-          promotions: data.promotions ?? true,
-          product_updates: data.product_updates ?? false,
-          support_replies: data.support_replies ?? true,
-          profile_visibility: data.profile_visibility || 'public',
-          show_email: data.show_email ?? false,
-          show_phone: data.show_phone ?? false,
-          theme: data.theme || 'auto',
-          items_per_page: data.items_per_page || 10,
-        })
-      } catch (err: any) {
-        setError(err.message || t('failedLoad'))
-        console.error('Failed to fetch settings:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
+    meApi
+      .getMe()
+      .then(data => {
+        setSaved(toProfile(data))
+        setProfile(toProfile(data))
+        setAvatarUrl(data?.avatar || undefined)
+        setVerified(Boolean(data?.customer?.is_verified))
+      })
+      .catch(err => setError(err instanceof Error ? err.message : t('failedLoad')))
+    meApi
+      .getSettings()
+      .then(data => setPreferences(toPreferences(data)))
+      .catch(err => setError(err instanceof Error ? err.message : t('failedLoad')))
+  }, [t])
 
-    fetchSettings()
-  }, [])
-
-  // Fetch basic user info for display (email/phone)
   useEffect(() => {
-    const fetchMe = async () => {
-      try {
-        const data = await meApi.getMe()
-        setMe({ email: data?.email, phone: data?.phone })
-      } catch {
-        // Ignore errors; UI will fall back to placeholders
-      }
-    }
+    if (!avatarPreview) return
 
-    fetchMe()
-  }, [])
+    return () => URL.revokeObjectURL(avatarPreview)
+  }, [avatarPreview])
 
-  const handleSettingChange = (field: string, value: any) => {
-    setSettings({ ...settings, [field]: value })
+  const update = (field: keyof Profile, value: string) => setProfile(current => current && { ...current, [field]: value })
+
+  const chooseAvatar = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+
+    if (!file) return
+
+    setAvatarFile(file)
+    setAvatarPreview(URL.createObjectURL(file))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const discard = () => {
+    setProfile(saved)
+    setAvatarFile(null)
+    setAvatarPreview(null)
+    if (fileInput.current) fileInput.current.value = ''
+  }
+
+  const saveProfile = async () => {
+    if (!profile) return
+
+    setSaving(true)
+    setError(null)
+
     try {
-      setSaving(true)
-      setError(null)
-      setSuccess(false)
-      
-      await meApi.updateSettings(settings)
-      
-      setSuccess(true)
-      setTimeout(() => setSuccess(false), 3000)
-    } catch (err: any) {
-      setError(err.message || t('failedUpdate'))
+      const response = await meApi.updateMe(avatarFile ? { ...profile, avatar: avatarFile } : profile)
+
+      setSaved(profile)
+      setAvatarFile(null)
+      setAvatarPreview(null)
+      if (response?.avatar) setAvatarUrl(response.avatar)
+      setNotice(t('profileCard.saved'))
+      refreshUser()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('failedUpdate'))
     } finally {
       setSaving(false)
     }
   }
 
+  /** Switches save as they change; a failed save puts the switch back. */
+  const savePreference = async (patch: Partial<Preferences>) => {
+    if (!preferences) return
+
+    const previous = preferences
+
+    setPreferences({ ...preferences, ...patch })
+
+    try {
+      await meApi.updateSettings(patch)
+      setNotice(t('savedToast'))
+    } catch (err) {
+      setPreferences(previous)
+      setError(err instanceof Error ? err.message : t('failedUpdate'))
+    }
+  }
+
+  const toggleRow = (key: ToggleKey, label: string, hint?: string) =>
+    preferences && (
+      <div key={key} className='acc-row'>
+        <div className='acc-grow'>
+          <div className='acc-medium'>{label}</div>
+          {hint && <div className='acc-sub acc-truncate'>{hint}</div>}
+        </div>
+        <Switch
+          checked={preferences[key]}
+          onChange={event => savePreference({ [key]: event.target.checked } as Partial<Preferences>)}
+          inputProps={{ 'aria-label': label }}
+        />
+      </div>
+    )
+
+  const dirty = Boolean(avatarFile) || JSON.stringify(profile) !== JSON.stringify(saved)
+  const displayName = [saved?.first_name, saved?.last_name].filter(Boolean).join(' ')
+  const avatar = avatarPreview || getAvatarUrl(avatarUrl)
+  const avatarInitials = (displayName || saved?.email || '?')
+    .split(/\s+/)
+    .slice(0, 2)
+    .map(part => part[0]?.toUpperCase())
+    .join('')
+  const zones = profile?.timezone_name && !TIMEZONES.includes(profile.timezone_name) ? [profile.timezone_name, ...TIMEZONES] : TIMEZONES
+
   return (
-    <Grid container spacing={6}>
-      <Grid size={{ xs: 12 }}>
-        <Tabs
-          value={activeTab}
-          onChange={(e, value) => setActiveTab(value)}
-          variant='scrollable'
-          scrollButtons='auto'
-          sx={{ borderBottom: theme => `1px solid ${theme.palette.divider}` }}
-        >
-          <Tab label={t('profile')} icon={<i className='tabler-user' />} iconPosition='start' />
-          <Tab label={t('security')} icon={<i className='tabler-lock' />} iconPosition='start' />
-          <Tab label={t('preferences')} icon={<i className='tabler-settings' />} iconPosition='start' />
-          <Tab label={t('privacy')} icon={<i className='tabler-shield-lock' />} iconPosition='start' />
-        </Tabs>
-      </Grid>
-      
-      <Grid size={{ xs: 12 }}>
-        {activeTab === 0 && (
-          <Box>
-            <Information />
-          </Box>
-        )}
+    <>
+      {error && (
+        <Alert severity='error' onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
 
-        {activeTab === 2 && (
-          <Box>
-            <form onSubmit={handleSubmit}>
-              {error && (
-                <Alert severity='error' className='mbe-6' onClose={() => setError(null)}>
-                  {error}
-                </Alert>
-              )}
-              {success && (
-                <Alert severity='success' className='mbe-6' onClose={() => setSuccess(false)}>
-                  {t('updateSuccess')}
-                </Alert>
-              )}
-              
-              <Grid container spacing={4}>
-                {/* Communication Channels Card */}
-                <Grid size={{ xs: 12, lg: 6 }}>
-                  <Card sx={{ height: '100%' }}>
-                    <CardContent>
-                      <Box className='mbe-4'>
-                        <Typography variant='h6' className='mbe-1'>
-                          {t('communicationChannels.title')}
-                        </Typography>
-                        <Typography variant='body2' color='text.secondary'>
-                          {t('communicationChannels.subtitle')}
-                        </Typography>
-                      </Box>
-                      
-                      <Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 2.25 }}>
-                          <Typography variant='body2' fontWeight={500}>
-                            {t('communicationChannels.email')}
-                          </Typography>
-                          <Switch
-                            checked={settings.email_notifications}
-                            onChange={e => handleSettingChange('email_notifications', e.target.checked)}
-                          />
-                        </Box>
-                        <Divider />
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 2.25 }}>
-                          <Typography variant='body2' fontWeight={500}>
-                            {t('communicationChannels.sms')}
-                          </Typography>
-                          <Switch
-                            checked={settings.sms_notifications}
-                            onChange={e => handleSettingChange('sms_notifications', e.target.checked)}
-                          />
-                        </Box>
-                        <Divider />
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 2.25 }}>
-                          <Typography variant='body2' fontWeight={500}>
-                            {t('communicationChannels.push')}
-                          </Typography>
-                          <Switch
-                            checked={settings.push_notifications}
-                            onChange={e => handleSettingChange('push_notifications', e.target.checked)}
-                          />
-                        </Box>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Grid>
-
-                {/* Notification Topics Card */}
-                <Grid size={{ xs: 12, lg: 6 }}>
-                  <Card sx={{ height: '100%' }}>
-                    <CardContent>
-                      <Box className='mbe-4'>
-                        <Typography variant='h6' className='mbe-1'>
-                          {t('notificationTopics.title')}
-                        </Typography>
-                        <Typography variant='body2' color='text.secondary'>
-                          {t('notificationTopics.subtitle')}
-                        </Typography>
-                      </Box>
-                      
-                      <Box>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 2.25 }}>
-                          <Typography variant='body2' fontWeight={500}>
-                            {t('notificationTopics.orderUpdates')}
-                          </Typography>
-                          <Switch
-                            checked={settings.order_updates}
-                            onChange={e => handleSettingChange('order_updates', e.target.checked)}
-                          />
-                        </Box>
-                        <Divider />
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 2.25 }}>
-                          <Typography variant='body2' fontWeight={500}>
-                            {t('notificationTopics.promotions')}
-                          </Typography>
-                          <Switch
-                            checked={settings.promotions}
-                            onChange={e => handleSettingChange('promotions', e.target.checked)}
-                          />
-                        </Box>
-                        <Divider />
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 2.25 }}>
-                          <Typography variant='body2' fontWeight={500}>
-                            {t('notificationTopics.productUpdates')}
-                          </Typography>
-                          <Switch
-                            checked={settings.product_updates}
-                            onChange={e => handleSettingChange('product_updates', e.target.checked)}
-                          />
-                        </Box>
-                        <Divider />
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 2.25 }}>
-                          <Typography variant='body2' fontWeight={500}>
-                            {t('notificationTopics.supportReplies')}
-                          </Typography>
-                          <Switch
-                            checked={settings.support_replies}
-                            onChange={e => handleSettingChange('support_replies', e.target.checked)}
-                          />
-                        </Box>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Grid>
-
-                {/* Display Settings Card */}
-                <Grid size={{ xs: 12 }}>
-                  <Card>
-                    <CardContent>
-                      <Box className='mbe-6'>
-                        <Typography variant='h6' className='mbe-1'>
-                          {t('displaySettings.title')}
-                        </Typography>
-                        <Typography variant='body2' color='text.secondary'>
-                          {t('displaySettings.subtitle')}
-                        </Typography>
-                      </Box>
-                      
-                      <Grid container spacing={6}>
-                        <Grid size={{ xs: 12, md: 6 }}>
-                          <Typography variant='body2' fontWeight={500} className='mbe-3'>
-                            {t('displaySettings.themeSelection')}
-                          </Typography>
-                          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 3 }}>
-                            {(['light', 'dark', 'auto'] as const).map(option => {
-                              const isSelected = settings.theme === option
-
-                              return (
-                                <Box key={option} sx={{ width: 92 }}>
-                                  <Box
-                                    onClick={() => handleSettingChange('theme', option)}
-                                    sx={{
-                                      cursor: 'pointer',
-                                      borderRadius: 2,
-                                      border: '2px solid',
-                                      borderColor: isSelected ? 'primary.main' : 'divider',
-                                      boxShadow: isSelected ? theme => `0 0 0 4px ${alpha(theme.palette.primary.main, 0.12)}` : 'none',
-                                      transition: 'all 0.2s',
-                                      p: 1,
-                                      '&:hover': {
-                                        borderColor: 'primary.main'
-                                      }
-                                    }}
-                                  >
-                                    <Box
-                                      sx={{
-                                        height: 56,
-                                        borderRadius: 1.5,
-                                        border: '1px solid',
-                                        borderColor: 'divider',
-                                        overflow: 'hidden',
-                                        ...(option === 'light'
-                                          ? { bgcolor: 'background.paper' }
-                                          : option === 'dark'
-                                            ? { bgcolor: 'grey.900' }
-                                            : { background: 'linear-gradient(135deg, #F3F4F6 0%, #9CA3AF 55%, #374151 100%)' })
-                                      }}
-                                    >
-                                      {option === 'light' && (
-                                        <Box sx={{ p: 1 }}>
-                                          <Box sx={{ height: 6, bgcolor: 'grey.200', borderRadius: 1, mb: 1 }} />
-                                          <Box sx={{ height: 6, bgcolor: 'grey.200', borderRadius: 1, width: '70%', mb: 1.5 }} />
-                                          <Box sx={{ height: 18, bgcolor: 'grey.100', borderRadius: 1 }} />
-                                        </Box>
-                                      )}
-                                      {option === 'dark' && (
-                                        <Box sx={{ p: 1 }}>
-                                          <Box sx={{ height: 6, bgcolor: 'grey.800', borderRadius: 1, mb: 1 }} />
-                                          <Box sx={{ height: 6, bgcolor: 'grey.800', borderRadius: 1, width: '70%', mb: 1.5 }} />
-                                          <Box sx={{ height: 18, bgcolor: 'grey.850', borderRadius: 1 }} />
-                                        </Box>
-                                      )}
-                                      {option === 'auto' && (
-                                        <Box
-                                          sx={{
-                                            height: '100%',
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            justifyContent: 'center',
-                                            color: 'text.secondary',
-                                            opacity: 0.4
-                                          }}
-                                        >
-                                          {/* Intentionally minimal preview for auto */}
-                                          <Box
-                                            sx={{
-                                              width: 28,
-                                              height: 28,
-                                              borderRadius: '50%',
-                                              bgcolor: 'action.hover'
-                                            }}
-                                          />
-                                        </Box>
-                                      )}
-                                    </Box>
-                                  </Box>
-                                  <Typography
-                                    variant='caption'
-                                    color='text.secondary'
-                                    sx={{ display: 'block', textAlign: 'center', mt: 1, textTransform: 'capitalize' }}
-                                  >
-                                    {t(`displaySettings.${option}`)}
-                                  </Typography>
-                                </Box>
-                              )
-                            })}
-                          </Box>
-                        </Grid>
-                        
-                        <Grid size={{ xs: 12, md: 6 }}>
-                          <Typography variant='body2' fontWeight={500} className='mbe-3'>
-                            {t('displaySettings.dataDensity')}
-                          </Typography>
-                          <CustomTextField
-                            select
-                            fullWidth
-                            value={settings.items_per_page}
-                            onChange={e => handleSettingChange('items_per_page', parseInt(e.target.value))}
-                          >
-                            <MenuItem value={10}>{t('displaySettings.items', { count: 10 })}</MenuItem>
-                            <MenuItem value={20}>{t('displaySettings.items', { count: 20 })}</MenuItem>
-                            <MenuItem value={50}>{t('displaySettings.items', { count: 50 })}</MenuItem>
-                            <MenuItem value={100}>{t('displaySettings.items', { count: 100 })}</MenuItem>
-                          </CustomTextField>
-                          <Typography variant='caption' color='text.secondary' className='mbs-1' display='block'>
-                            {t('displaySettings.densityHint')}
-                          </Typography>
-                        </Grid>
-                      </Grid>
-                    </CardContent>
-                  </Card>
-                </Grid>
-
-                {/* Actions */}
-                <Grid
-                  size={{ xs: 12 }}
-                  sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2, justifyContent: 'flex-end' }}
-                >
-                  <Button
-                    variant='outlined'
-                    type='button'
-                    disabled={saving || loading}
-                    onClick={() => window.location.reload()}
+      <div className='acc-grid'>
+        <div className='acc-col'>
+          <AccountCard title={t('profileCard.title')}>
+            {!profile || !saved ? (
+              <AccountLoading />
+            ) : (
+              <>
+                <div className='acc-row'>
+                  <span className='acc-avatar'>{avatar ? <img src={avatar} alt='' /> : avatarInitials}</span>
+                  <div className='acc-grow'>
+                    <div className='acc-strong acc-truncate'>{displayName || saved.email}</div>
+                    <div className='acc-sub'>{t('profileCard.photoHint')}</div>
+                  </div>
+                  <input ref={fileInput} hidden type='file' accept='image/png, image/jpeg' onChange={chooseAvatar} />
+                  <Button size='small' variant='outlined' onClick={() => fileInput.current?.click()}>
+                    {t('profileCard.changePhoto')}
+                  </Button>
+                </div>
+                <div className='acc-form-grid acc-divided'>
+                  <CustomTextField
+                    fullWidth
+                    label={t('profileCard.firstName')}
+                    value={profile.first_name}
+                    onChange={event => update('first_name', event.target.value)}
+                  />
+                  <CustomTextField
+                    fullWidth
+                    label={t('profileCard.lastName')}
+                    value={profile.last_name}
+                    onChange={event => update('last_name', event.target.value)}
+                  />
+                  <CustomTextField
+                    fullWidth
+                    type='email'
+                    label={t('profileCard.email')}
+                    value={profile.email}
+                    onChange={event => update('email', event.target.value)}
+                  />
+                  <CustomTextField
+                    fullWidth
+                    label={t('profileCard.phone')}
+                    value={profile.phone}
+                    onChange={event => update('phone', event.target.value)}
+                  />
+                  <CustomTextField
+                    select
+                    fullWidth
+                    label={t('profileCard.language')}
+                    value={profile.language}
+                    onChange={event => update('language', event.target.value)}
                   >
-                    {t('resetChanges')}
-                  </Button>
-                  <Button variant='contained' type='submit' disabled={saving || loading} disableElevation>
-                    {saving ? t('saving') : t('saveChanges')}
-                  </Button>
-                </Grid>
-              </Grid>
-            </form>
-          </Box>
-        )}
-        
-        {activeTab === 3 && (
-          <Box>
-            <form onSubmit={handleSubmit}>
-              {error && (
-                <Alert severity='error' className='mbe-6' onClose={() => setError(null)}>
-                  {error}
-                </Alert>
-              )}
-              {success && (
-                <Alert severity='success' className='mbe-6' onClose={() => setSuccess(false)}>
-                  {t('updateSuccess')}
-                </Alert>
-              )}
-              
-              <Grid container spacing={4}>
-                {/* Profile Visibility */}
-                <Grid size={{ xs: 12, md: 6 }}>
-                  <Card sx={{ height: '100%' }}>
-                    <CardContent>
-                      <Typography variant='h6' className='mbe-1'>
-                        {t('profileVisibility.title')}
-                      </Typography>
-                      <Typography variant='body2' color='text.secondary' className='mbe-6'>
-                        {t('profileVisibility.subtitle')}
-                      </Typography>
-
-                      <CustomTextField
-                        select
-                        fullWidth
-                        value={settings.profile_visibility}
-                        onChange={e => handleSettingChange('profile_visibility', e.target.value)}
-                        size='small'
-                      >
-                        <MenuItem value='private'>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <i className='tabler-lock text-xl text-textSecondary' />
-                            <Typography variant='body2'>{t('profileVisibility.private')}</Typography>
-                          </Box>
-                        </MenuItem>
-                        <MenuItem value='friends'>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <i className='tabler-users text-xl text-textSecondary' />
-                            <Typography variant='body2'>{t('profileVisibility.friends')}</Typography>
-                          </Box>
-                        </MenuItem>
-                        <MenuItem value='public'>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                            <i className='tabler-world text-xl text-textSecondary' />
-                            <Typography variant='body2'>{t('profileVisibility.public')}</Typography>
-                          </Box>
-                        </MenuItem>
-                      </CustomTextField>
-
-                      <Typography variant='caption' color='text.secondary' sx={{ display: 'block', mt: 2 }}>
-                        {settings.profile_visibility === 'private'
-                          ? t('profileVisibility.currentlyPrivate')
-                          : settings.profile_visibility === 'friends'
-                            ? t('profileVisibility.currentlyFriends')
-                            : t('profileVisibility.currentlyPublic')}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                </Grid>
-
-                {/* Contact Information */}
-                <Grid size={{ xs: 12, md: 6 }}>
-                  <Card sx={{ height: '100%' }}>
-                    <CardContent sx={{ p: 0 }}>
-                      <Box sx={{ p: 6 }}>
-                        <Typography variant='h6' className='mbe-1'>
-                          {t('contactInfo.title')}
-                        </Typography>
-                        <Typography variant='body2' color='text.secondary'>
-                          {t('contactInfo.subtitle')}
-                        </Typography>
-                      </Box>
-
-                      <Divider />
-
-                      <Box sx={{ px: 6 }}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 4 }}>
-                          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 3 }}>
-                            <i className='tabler-mail text-xl text-textSecondary' />
-                            <Box>
-                              <Typography variant='body2' fontWeight={600}>
-                                {t('contactInfo.emailAddress')}
-                              </Typography>
-                              <Typography variant='caption' color='text.secondary'>
-                                {me?.email || '—'}
-                              </Typography>
-                            </Box>
-                          </Box>
-                          <Switch
-                            checked={settings.show_email}
-                            onChange={e => handleSettingChange('show_email', e.target.checked)}
-                            size='small'
-                          />
-                        </Box>
-
-                        <Divider />
-
-                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', py: 4 }}>
-                          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 3 }}>
-                            <i className='tabler-phone text-xl text-textSecondary' />
-                            <Box>
-                              <Typography variant='body2' fontWeight={600}>
-                                {t('contactInfo.phoneNumber')}
-                              </Typography>
-                              <Typography variant='caption' color='text.secondary'>
-                                {me?.phone || '—'}
-                              </Typography>
-                            </Box>
-                          </Box>
-                          <Switch
-                            checked={settings.show_phone}
-                            onChange={e => handleSettingChange('show_phone', e.target.checked)}
-                            size='small'
-                          />
-                        </Box>
-                      </Box>
-                    </CardContent>
-                  </Card>
-                </Grid>
-
-                {/* Data Management */}
-                <Grid size={{ xs: 12 }}>
-                  <Card>
-                    <CardContent sx={{ p: 0 }}>
-                      <Box sx={{ p: 6 }}>
-                        <Typography variant='h6' className='mbe-1'>
-                          {t('dataManagement.title')}
-                        </Typography>
-                        <Typography variant='body2' color='text.secondary'>
-                          {t('dataManagement.subtitle')}
-                        </Typography>
-                      </Box>
-
-                      <Divider />
-
-                      <Grid container>
-                        <Grid size={{ xs: 12, md: 6 }} sx={{ p: 6 }}>
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
-                            <i className='tabler-download text-xl text-textSecondary' />
-                            <Typography variant='body2' fontWeight={600}>
-                              {t('dataManagement.downloadData')}
-                            </Typography>
-                          </Box>
-                          <Typography variant='body2' color='text.secondary' sx={{ mb: 4 }}>
-                            {t('dataManagement.downloadHint')}
-                          </Typography>
-                          <Button
-                            variant='outlined'
-                            startIcon={<i className='tabler-download' />}
-                            onClick={() => {
-                              // TODO: Implement GDPR data download
-                              alert(t('dataManagement.exportAlert'))
-                            }}
-                            disabled={loading || saving}
-                            fullWidth
-                            sx={{ borderRadius: 2 }}
-                          >
-                            {t('dataManagement.requestExport')}
-                          </Button>
-                        </Grid>
-
-                        <Grid
-                          size={{ xs: 12, md: 6 }}
-                          sx={{
-                            p: 6,
-                            // Colour inside the shorthand: a responsive border
-                            // shorthand resets the colour to currentColor.
-                            borderTop: { xs: '1px solid var(--mui-palette-divider)', md: 'none' },
-                            borderLeft: { xs: 'none', md: '1px solid var(--mui-palette-divider)' },
-                            borderColor: 'divider',
-                            bgcolor: theme => alpha(theme.palette.error.main, 0.06)
-                          }}
-                        >
-                          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, color: 'error.main' }}>
-                            <i className='tabler-alert-triangle text-xl' />
-                            <Typography variant='body2' fontWeight={600} color='error'>
-                              {t('dataManagement.deleteAccount')}
-                            </Typography>
-                          </Box>
-                          <Typography variant='body2' color='text.secondary' sx={{ mb: 4 }}>
-                            {t('dataManagement.deleteHint')}
-                          </Typography>
-                          <Button
-                            variant='outlined'
-                            color='error'
-                            startIcon={<i className='tabler-trash' />}
-                            onClick={async () => {
-                              if (await confirm(t('dataManagement.deleteConfirm'), { danger: true })) {
-                                // TODO: Implement account deletion
-                                alert(t('dataManagement.deleteAlert'))
-                              }
-                            }}
-                            disabled={loading || saving}
-                            fullWidth
-                            sx={{ borderRadius: 2 }}
-                          >
-                            {t('dataManagement.deleteAccount')}
-                          </Button>
-                        </Grid>
-                      </Grid>
-                    </CardContent>
-                  </Card>
-                </Grid>
-
-                {/* Actions (same position as other tabs) */}
-                <Grid
-                  size={{ xs: 12 }}
-                  sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 2, justifyContent: 'flex-end' }}
-                >
-                  <Button
-                    variant='outlined'
-                    type='button'
-                    disabled={saving || loading}
-                    onClick={() => window.location.reload()}
+                    {!profile.language && <MenuItem value=''>—</MenuItem>}
+                    {routing.locales.map(locale => (
+                      <MenuItem key={locale} value={locale}>
+                        {LANGUAGE_LABELS[locale] ?? locale}
+                      </MenuItem>
+                    ))}
+                  </CustomTextField>
+                  <CustomTextField
+                    select
+                    fullWidth
+                    label={t('profileCard.timezone')}
+                    value={profile.timezone_name}
+                    onChange={event => update('timezone_name', event.target.value)}
                   >
-                    {t('resetChanges')}
+                    {!profile.timezone_name && <MenuItem value=''>—</MenuItem>}
+                    {zones.map(zone => (
+                      <MenuItem key={zone} value={zone}>
+                        {zone}
+                      </MenuItem>
+                    ))}
+                  </CustomTextField>
+                </div>
+                <div className='acc-card-foot acc-card-foot--end'>
+                  <Button onClick={discard} disabled={!dirty || saving}>
+                    {t('profileCard.cancel')}
                   </Button>
-                  <Button variant='contained' type='submit' disabled={saving || loading} disableElevation>
-                    {saving ? t('saving') : t('saveChanges')}
+                  <Button variant='contained' onClick={saveProfile} disabled={!dirty || saving}>
+                    {saving ? t('profileCard.saving') : t('profileCard.save')}
                   </Button>
-                </Grid>
-              </Grid>
-            </form>
-          </Box>
-        )}
-        
-        {activeTab === 1 && (
-          <Box>
-            <ChangePassword />
-          </Box>
-        )}
-      </Grid>
-    </Grid>
+                </div>
+              </>
+            )}
+          </AccountCard>
+
+          <AccountCard title={t('notifications.title')} subtitle={t('notifications.subtitle')}>
+            {!preferences ? (
+              <AccountLoading />
+            ) : (
+              <div className='acc-split'>
+                <div>
+                  <div className='acc-group-label'>{t('notifications.channels')}</div>
+                  {toggleRow('email_notifications', t('notifications.email'), saved?.email)}
+                  {toggleRow('sms_notifications', t('notifications.sms'), saved?.phone || undefined)}
+                  {toggleRow('push_notifications', t('notifications.push'), t('notifications.pushHint'))}
+                </div>
+                <div>
+                  <div className='acc-group-label'>{t('notifications.topics')}</div>
+                  {TOPICS.map(topic =>
+                    toggleRow(topic.key, t(`notifications.${topic.label}`), t(`notifications.${topic.label}Hint`))
+                  )}
+                </div>
+              </div>
+            )}
+          </AccountCard>
+        </div>
+
+        <div className='acc-col'>
+          <AccountCard title={t('securityCard.title')}>
+            <div className='acc-row'>
+              <span className='acc-ico acc-ico--sm acc-ico--neu'>
+                <Icon icon='tabler-lock' />
+              </span>
+              <div className='acc-grow'>
+                <div className='acc-medium'>{t('securityCard.password')}</div>
+                <div className='acc-sub'>{t('securityCard.passwordHint')}</div>
+              </div>
+              <Button size='small' variant='outlined' component={Link} href='/account/change-password'>
+                {t('securityCard.change')}
+              </Button>
+            </div>
+            <div className='acc-row'>
+              <span className='acc-ico acc-ico--sm acc-ico--neu'>
+                <Icon icon='tabler-mail' />
+              </span>
+              <div className='acc-grow'>
+                <div className='acc-medium'>{t('securityCard.email')}</div>
+                <div className='acc-sub acc-truncate'>{saved?.email || '—'}</div>
+              </div>
+              {verified && <StatusBadge label={t('securityCard.verified')} color='success' />}
+            </div>
+          </AccountCard>
+
+          <AccountCard title={t('privacyCard.title')}>
+            {!preferences ? (
+              <AccountLoading />
+            ) : (
+              <>
+                <div className='acc-row'>
+                  <div className='acc-grow'>
+                    <div className='acc-medium'>{t('privacyCard.visibility')}</div>
+                    <div className='acc-sub'>{t('privacyCard.visibilityHint')}</div>
+                  </div>
+                  <CustomTextField
+                    select
+                    size='small'
+                    value={preferences.profile_visibility}
+                    onChange={event => savePreference({ profile_visibility: event.target.value as Visibility })}
+                    sx={{ minWidth: 120 }}
+                  >
+                    {(['private', 'friends', 'public'] as const).map(option => (
+                      <MenuItem key={option} value={option}>
+                        {t(`privacyCard.${option}`)}
+                      </MenuItem>
+                    ))}
+                  </CustomTextField>
+                </div>
+                {toggleRow('show_email', t('privacyCard.showEmail'), t('privacyCard.showHint'))}
+                {toggleRow('show_phone', t('privacyCard.showPhone'), t('privacyCard.showHint'))}
+              </>
+            )}
+          </AccountCard>
+
+          <AccountCard title={t('dataCard.title')}>
+            <div className='acc-row'>
+              <span className='acc-ico acc-ico--sm acc-ico--neu'>
+                <Icon icon='tabler-database' />
+              </span>
+              <div className='acc-grow'>
+                <div className='acc-medium'>{t('dataCard.request')}</div>
+                <div className='acc-sub'>{t('dataCard.requestHint')}</div>
+              </div>
+              <Button size='small' variant='outlined' component={Link} href='/account/support?topic=data'>
+                {t('dataCard.contact')}
+              </Button>
+            </div>
+          </AccountCard>
+        </div>
+      </div>
+
+      <Snackbar
+        open={Boolean(notice)}
+        autoHideDuration={2500}
+        onClose={() => setNotice(null)}
+        message={notice}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      />
+    </>
   )
 }
 

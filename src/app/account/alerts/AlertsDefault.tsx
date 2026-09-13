@@ -1,37 +1,25 @@
 'use client'
 
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
+import { useEffect } from 'react'
+
 import { useTranslations } from 'next-intl'
 
 import Alerts from '@/views/account/Alerts'
+import { AccountPageHeader } from '@/components/account/AccountUI'
+import { useAccount } from '@/contexts/AccountContext'
 
 const AlertsDefault = () => {
   const t = useTranslations('account')
+  const { refreshStats } = useAccount()
+
+  // Reading messages here changes the unread count the sidebar and topbar show.
+  useEffect(() => () => void refreshStats(), [refreshStats])
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, px: { xs: 1, md: 0 } }}>
-      <Box
-        sx={{
-          display: 'flex',
-          alignItems: { xs: 'flex-start', sm: 'center' },
-          justifyContent: 'space-between',
-          gap: 2,
-          pb: 1
-        }}
-      >
-        <Box>
-          <Typography variant='h5' fontWeight={700}>
-            {t('pages.inbox.title')}
-          </Typography>
-          <Typography variant='body2' color='text.secondary'>
-            {t('pages.inbox.subtitle')}
-          </Typography>
-        </Box>
-      </Box>
-
+    <div className='acc-page'>
+      <AccountPageHeader title={t('pages.inbox.title')} subtitle={t('pages.inbox.subtitle')} />
       <Alerts />
-    </Box>
+    </div>
   )
 }
 
