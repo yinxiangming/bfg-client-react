@@ -479,16 +479,35 @@ export async function refundOrder(id: number): Promise<Order> {
   })
 }
 
+export type ReturnStatus = 'open' | 'approved' | 'rejected' | 'received' | 'inspected' | 'refunded' | 'closed' | 'cancelled'
+
+export interface ReturnLineItem {
+  id: number
+  order_item: number
+  product_name?: string
+  product_price?: string | number
+  quantity: number
+  reason?: string
+  restock_action?: 'no_restock' | 'restock' | 'damage'
+}
+
 export interface ReturnRequest {
   id: number
   order: number
+  order_number?: string
   customer: number
+  customer_name?: string | null
   return_number: string
-  status: 'open' | 'approved' | 'rejected' | 'received' | 'inspected' | 'refunded' | 'closed' | 'cancelled'
+  status: ReturnStatus
   reason_category?: string
   customer_note?: string
   admin_note?: string
+  items?: ReturnLineItem[]
   created_at?: string
+  updated_at?: string
+  approved_at?: string | null
+  refunded_at?: string | null
+  closed_at?: string | null
 }
 
 export interface ReturnLineItemPayload {
@@ -500,6 +519,17 @@ export interface ReturnLineItemPayload {
 
 const returnsApi = () => buildApiUrl('/returns/', API_VERSIONS.BFG2, 'shop')
 const returnItemsApi = () => buildApiUrl('/return-items/', API_VERSIONS.BFG2, 'shop')
+
+export async function getOrderReturns(orderId: number): Promise<ReturnRequest[]> {
+  const response = await apiFetch<ReturnRequest[] | { results?: ReturnRequest[] }>(
+    `${returnsApi()}?order=${orderId}`,
+    getSiteAdminOptions()
+  )
+  if (Array.isArray(response)) {
+    return response
+  }
+  return response.results || []
+}
 
 export async function createReturnRequest(data: {
   order: number

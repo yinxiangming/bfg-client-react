@@ -593,6 +593,30 @@
         "message": "确认删除发票 {invoiceNumber}？此操作无法撤销。"
       }
     },
+    "returns": {
+      "title": "退货（{count}）",
+      "empty": "这个订单还没有退货",
+      "status": {
+        "open": "待处理",
+        "approved": "已批准",
+        "rejected": "已拒绝",
+        "received": "已收货",
+        "inspected": "已检验",
+        "refunded": "已退款",
+        "closed": "已关闭",
+        "cancelled": "已取消"
+      },
+      "labels": {
+        "requested": "申请时间",
+        "approved": "批准时间",
+        "refunded": "退款时间",
+        "closed": "关闭时间",
+        "customerNote": "顾客备注"
+      },
+      "messages": {
+        "loadFailed": "加载退货失败"
+      }
+    },
     "paymentProof": {
       "title": "付款凭证（{count}）",
       "hint": "顾客上传的截图。核对后请自行修改支付状态 —— 上传只是声明，不等于已付款。"
