@@ -2,7 +2,8 @@
  * Platform API service
  *
  * Handles workspace listing, Token Exchange, and post-login routing
- * for Platform instances (BFG_INSTANCE_TYPE=platform).
+ * for Platform instances (BFG_INSTANCE_TYPE=platform), plus creating
+ * and editing the user's own workspaces.
  */
 
 import { apiFetch, buildApiUrl } from '@/utils/api'
@@ -68,6 +69,65 @@ export interface SSOExchangeResponse {
   embedded: boolean
 }
 
+/** `inactive`: deactivated without a suspension record. */
+export type TenantWorkspaceStatus = 'active' | 'suspended' | 'inactive'
+
+/** A workspace as listed by GET /platform/workspaces/me/ and returned by POST /platform/workspaces/. */
+export interface TenantWorkspace {
+  id: number
+  name: string
+  slug: string
+  created_at: string
+  /** Primary domain hostname, or null when there is none. */
+  domain: string | null
+  status: TenantWorkspaceStatus
+  suspended_at: string | null
+  /** The user's staff role code here; null when the owner is not active staff. */
+  role: string | null
+  /** The user is active staff here, so the workspace can be switched into. */
+  is_member: boolean
+  /** The user owns the workspace; only owners may edit its details. */
+  is_owner: boolean
+  // Reserved for billing: the server sends null, null and [] until it fills them in.
+  plan: unknown | null
+  credits: unknown | null
+  extensions: unknown[]
+}
+
+export interface TenantWorkspacesResponse {
+  is_platform_admin: boolean
+  workspaces: TenantWorkspace[]
+}
+
+export interface CreateTenantWorkspaceInput {
+  name: string
+  /** Empty or omitted: the server generates one. */
+  slug?: string
+  country: string
+  currency: string
+  language: string
+}
+
+/** The details a workspace owner can change. */
+export interface WorkspaceDetailsPatch {
+  name?: string
+  email?: string
+  phone?: string
+}
+
+/** Error codes the tenant workspace endpoints send as `{ detail, code }`. */
+export type TenantWorkspaceErrorCode =
+  | 'workspace_create_forbidden'
+  | 'workspace_limit_reached'
+  | 'workspace_owner_required'
+
+export interface TenantWorkspaceErrorMessage {
+  code: TenantWorkspaceErrorCode
+  /** Key in the `common` messages namespace. */
+  key: string
+  values?: { limit: number }
+}
+
 // API functions
 
 /** Maps GET /platform/workspaces/me/ payload to WorkspaceMembership (embedded uses `id`/`slug`; standalone may use workspace_* fields). */
@@ -89,10 +149,87 @@ function mapMeWorkspacesPayload(data: {
   }))
 }
 
+/** Workspaces the user is active staff in, and so can switch into. */
 export async function getMyWorkspaces(): Promise<WorkspaceMembership[]> {
   const url = buildApiUrl('/platform/workspaces/me/')
   const data = await apiFetch<{ workspaces?: Array<Record<string, unknown> & { id: number }> }>(url)
-  return mapMeWorkspacesPayload(data)
+  // me/ also lists workspaces the user owns without being staff there (is_member: false).
+  // Servers that predate is_member leave it out, so only an explicit false is dropped.
+  return mapMeWorkspacesPayload({
+    workspaces: data.workspaces?.filter((w) => w.is_member !== false),
+  })
+}
+
+/** The user's workspaces, staff in or owned, and whether the user is a platform admin. */
+export async function listTenantWorkspaces(): Promise<TenantWorkspacesResponse> {
+  const url = buildApiUrl('/platform/workspaces/me/')
+  return apiFetch<TenantWorkspacesResponse>(url)
+}
+
+/**
+ * Create a workspace owned by the user.
+ * Fails with workspace_create_forbidden or workspace_limit_reached; see getTenantWorkspaceErrorMessage().
+ */
+export async function createTenantWorkspace(input: CreateTenantWorkspaceInput): Promise<TenantWorkspace> {
+  const url = buildApiUrl('/platform/workspaces/')
+  return apiFetch<TenantWorkspace>(url, {
+    method: 'POST',
+    body: JSON.stringify({
+      name: input.name,
+      slug: input.slug ?? '',
+      country: input.country,
+      currency: input.currency,
+      language: input.language,
+    }),
+  })
+}
+
+/**
+ * Change a workspace's name, email or phone. Owners only: anyone else gets
+ * workspace_owner_required. The response body is not used; read the change
+ * back with listTenantWorkspaces().
+ */
+export async function updateWorkspace(id: number, patch: WorkspaceDetailsPatch): Promise<void> {
+  const url = buildApiUrl(`/platform/workspaces/${id}/`)
+  // Send only the editable fields; the server refuses domain with a 400.
+  await apiFetch<unknown>(url, {
+    method: 'PATCH',
+    body: JSON.stringify({ name: patch.name, email: patch.email, phone: patch.phone }),
+  })
+}
+
+/** Message key in the `common` namespace for each tenant workspace error code. */
+export const TENANT_WORKSPACE_ERROR_KEYS: Record<TenantWorkspaceErrorCode, string> = {
+  workspace_create_forbidden: 'workspaces.errors.createForbidden',
+  workspace_limit_reached: 'workspaces.errors.limitReached',
+  workspace_owner_required: 'workspaces.errors.ownerRequired',
+}
+
+/**
+ * Turn an error thrown by the tenant workspace calls into a message:
+ * `useTranslations('common')`, then `t(message.key, message.values)`.
+ *
+ * apiFetch keeps the response body on `validationErrors`, which carries the
+ * code and, for workspace_limit_reached, the limit. Returns null for any
+ * other error; fall back to its `message`.
+ */
+export function getTenantWorkspaceErrorMessage(error: unknown): TenantWorkspaceErrorMessage | null {
+  const body = (error as { validationErrors?: Record<string, unknown> } | null)?.validationErrors
+  const code = body?.code
+  const limit = body?.limit
+
+  switch (code) {
+    case 'workspace_create_forbidden':
+    case 'workspace_owner_required':
+      return { code, key: TENANT_WORKSPACE_ERROR_KEYS[code] }
+    case 'workspace_limit_reached':
+      // The message names the limit; without a number, use the one that doesn't.
+      return typeof limit === 'number'
+        ? { code, key: TENANT_WORKSPACE_ERROR_KEYS[code], values: { limit } }
+        : { code, key: 'workspaces.errors.limitReachedGeneric' }
+    default:
+      return null
+  }
 }
 
 export async function tokenExchange(workspaceId: number): Promise<TokenExchangeResponse> {

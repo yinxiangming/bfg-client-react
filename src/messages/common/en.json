@@ -30,6 +30,14 @@
     "submit": "Submit",
     "success": "Thank you! Feedback submitted.",
     "error": "Failed to submit. Please try again."
+  },
+  "workspaces": {
+    "errors": {
+      "createForbidden": "Only the owner or an admin of an existing shop can create a new shop.",
+      "limitReached": "You can own up to {limit, plural, one {# shop} other {# shops}}, suspended ones included, and you've reached that limit.",
+      "limitReachedGeneric": "You've reached the maximum number of shops you can own, suspended ones included.",
+      "ownerRequired": "Only the shop's owner can change its details."
+    }
   }
 }
 
