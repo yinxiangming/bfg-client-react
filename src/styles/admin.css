@@ -138,6 +138,43 @@
   color: #1f2937;
 }
 
+/* Workspace switcher trigger. Below 1200px it is the icon alone, square like the buttons
+   beside it. Wider, it also shows the shop name, cut short when long, so it sizes to its
+   content instead of the square the d365 topbar makes of every .admin-topbar-btn. */
+.workspace-switcher {
+  /* As a block, the wrapper would set the button on a line of text, a few px above centre. */
+  display: flex;
+}
+
+.workspace-switcher-trigger .workspace-switcher-name,
+.admin-topbar-btn .workspace-switcher-chevron {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  .admin-topbar .admin-topbar-btn.workspace-switcher-trigger {
+    width: auto;
+    gap: 6px;
+    padding: 0 10px;
+  }
+
+  .workspace-switcher-trigger .workspace-switcher-name {
+    display: block;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .admin-topbar-btn .workspace-switcher-chevron {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+  }
+}
+
 .admin-avatar {
   width: 40px;
   height: 40px;

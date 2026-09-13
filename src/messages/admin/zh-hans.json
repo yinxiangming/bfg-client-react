@@ -4525,6 +4525,20 @@
       "continue": "继续设置"
     }
   },
+  "workspaceSwitcher": {
+    "label": "切换店铺",
+    "labelWithCurrent": "切换店铺（当前：{name}）",
+    "switching": "正在切换店铺…",
+    "loading": "正在加载店铺…",
+    "loadFailed": "店铺列表加载失败。",
+    "empty": "没有可切换的店铺。",
+    "switchFailed": {
+      "notMember": "你已不是这家店的员工。",
+      "notFound": "这家店不存在或已停用。",
+      "generic": "没能切换到这家店，请重试。"
+    },
+    "myShops": "我的店铺"
+  },
   "workspaces": {
     "title": "我的店铺",
     "subtitle": "你担任店主或员工的店铺都在这里。点「进入后台」会先切换到对应的店铺。",

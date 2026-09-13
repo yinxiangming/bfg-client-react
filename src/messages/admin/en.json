@@ -4525,6 +4525,20 @@
       "continue": "Continue setup"
     }
   },
+  "workspaceSwitcher": {
+    "label": "Switch shop",
+    "labelWithCurrent": "Switch shop (current: {name})",
+    "switching": "Switching shop…",
+    "loading": "Loading your shops…",
+    "loadFailed": "Couldn't load your shops.",
+    "empty": "No shops to switch to.",
+    "switchFailed": {
+      "notMember": "You're no longer staff in this shop.",
+      "notFound": "This shop no longer exists or has been deactivated.",
+      "generic": "Couldn't switch to this shop. Try again."
+    },
+    "myShops": "My shops"
+  },
   "workspaces": {
     "title": "My shops",
     "subtitle": "Every shop you own or work in. Open admin switches you to that shop first.",
