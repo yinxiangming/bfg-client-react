@@ -4537,10 +4537,10 @@
       "notFound": "This shop no longer exists or has been deactivated.",
       "generic": "Couldn't switch to this shop. Try again."
     },
-    "myShops": "My shops"
+    "myShops": "My workspaces"
   },
   "workspaces": {
-    "title": "My shops",
+    "title": "My workspaces",
     "subtitle": "Every shop you own or work in. Open admin switches you to that shop first.",
     "loading": "Loading your shops",
     "loadFailed": "Couldn't load your shops.",
