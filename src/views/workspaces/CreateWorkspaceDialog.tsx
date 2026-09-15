@@ -60,7 +60,7 @@ type SettingField = (typeof SETTING_FIELDS)[number]
 
 type Field = 'name' | SettingField
 
-/** '' is "same as current shop": the setting stays out of the request. */
+/** '' is "same as current workspace": the setting stays out of the request. */
 type Settings = Record<SettingField, string>
 
 type Option = { value: string; label: string }
@@ -99,7 +99,7 @@ function presetFor(choices: Choices, code: string): Partial<Record<PresetField, 
 
 /**
  * The settings once a country is chosen. A currency or language the user has not picked
- * follows the country: to its preset, or back to "same as current shop" along with it. One
+ * follows the country: to its preset, or back to "same as current workspace" along with it. One
  * the user has picked stays, and so does one the country's preset has no value for.
  */
 function withCountry(settings: Settings, country: string, picked: Picked, choices: Choices): Settings {
@@ -290,7 +290,7 @@ export default function CreateWorkspaceDialog({ open, onClose, onRefused, onSwit
 
     let workspace: TenantWorkspace
     try {
-      // A setting left on "same as current shop" is not sent, and the server copies it from
+      // A setting left on "same as current workspace" is not sent, and the server copies it from
       // the workspace the access token belongs to.
       workspace = await createTenantWorkspace({
         name: trimmedName,

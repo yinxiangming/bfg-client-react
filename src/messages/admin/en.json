@@ -4526,27 +4526,27 @@
     }
   },
   "workspaceSwitcher": {
-    "label": "Switch shop",
-    "labelWithCurrent": "Switch shop (current: {name})",
-    "switching": "Switching shop…",
-    "loading": "Loading your shops…",
-    "loadFailed": "Couldn't load your shops.",
-    "empty": "No shops to switch to.",
+    "label": "Switch workspace",
+    "labelWithCurrent": "Switch workspace (current: {name})",
+    "switching": "Switching workspace…",
+    "loading": "Loading your workspaces…",
+    "loadFailed": "Couldn't load your workspaces.",
+    "empty": "No workspaces to switch to.",
     "switchFailed": {
-      "notMember": "You're no longer staff in this shop.",
-      "notFound": "This shop no longer exists or has been deactivated.",
-      "generic": "Couldn't switch to this shop. Try again."
+      "notMember": "You're no longer staff in this workspace.",
+      "notFound": "This workspace no longer exists or has been deactivated.",
+      "generic": "Couldn't switch to this workspace. Try again."
     },
     "myShops": "My workspaces"
   },
   "workspaces": {
     "title": "My workspaces",
-    "subtitle": "Every shop you own or work in. Open admin switches you to that shop first.",
-    "loading": "Loading your shops",
-    "loadFailed": "Couldn't load your shops.",
+    "subtitle": "Every workspace you own or work in. Open admin switches you to that workspace first.",
+    "loading": "Loading your workspaces",
+    "loadFailed": "Couldn't load your workspaces.",
     "empty": {
-      "title": "You don't have any shops yet",
-      "description": "Shops you own, and shops that add you as staff, will show up here."
+      "title": "You don't have any workspaces yet",
+      "description": "Workspaces you own, and workspaces that add you as staff, will show up here."
     },
     "billingNote": "Plan, credits and extensions will show here once billing is available.",
     "status": {
@@ -4555,7 +4555,7 @@
       "inactive": "Deactivated"
     },
     "badges": {
-      "current": "Current shop",
+      "current": "Current workspace",
       "owner": "Owner"
     },
     "roles": {
@@ -4580,31 +4580,31 @@
     "blocked": {
       "suspended": "Suspended. Contact the platform to restore it.",
       "inactive": "Deactivated.",
-      "notMember": "You aren't staff in this shop, so you can't open its admin."
+      "notMember": "You aren't staff in this workspace, so you can't open its admin."
     },
     "enterFailed": {
-      "notFound": "This shop no longer exists or has been deactivated.",
-      "generic": "Couldn't open this shop's admin. Try again."
+      "notFound": "This workspace no longer exists or has been deactivated.",
+      "generic": "Couldn't open this workspace's admin. Try again."
     },
     "create": {
-      "button": "New shop",
-      "title": "Create a shop",
-      "description": "Once it's created, you'll switch to the new shop and continue with its setup.",
+      "button": "New workspace",
+      "title": "Create a workspace",
+      "description": "Once it's created, you'll switch to the new workspace and continue with its setup.",
       "fields": {
-        "name": "Shop name",
+        "name": "Workspace name",
         "country": "Where you trade",
         "currency": "Currency",
         "language": "Default language"
       },
       "more": "More settings",
-      "moreHint": "Where you trade, currency and language follow your current shop unless you change them.",
-      "sameAsCurrent": "Same as current shop",
-      "submit": "Create shop",
+      "moreHint": "Where you trade, currency and language follow your current workspace unless you change them.",
+      "sameAsCurrent": "Same as current workspace",
+      "submit": "Create workspace",
       "creating": "Creating…",
-      "switching": "Switching to the new shop…",
-      "failed": "Couldn't create the shop. Try again.",
+      "switching": "Switching to the new workspace…",
+      "failed": "Couldn't create the workspace. Try again.",
       "createdNotSwitched": "{name} has been created, but we couldn't switch you to it. Open its admin from its card below.",
-      "optionsFailed": "Couldn't load the countries, currencies and languages to choose from. The new shop will use your current shop's."
+      "optionsFailed": "Couldn't load the countries, currencies and languages to choose from. The new workspace will use your current workspace's."
     }
   }
 }

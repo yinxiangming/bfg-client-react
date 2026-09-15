@@ -210,7 +210,7 @@ export default function WorkspaceSwitcher() {
   // The link to /workspaces stays, whether the list loaded, came back empty or failed to load.
   items.push(
     <Divider key='divider' component='li' />,
-    <MenuItem key='my-shops' component={NextLink} href='/workspaces' onClick={() => setOpen(false)} sx={{ gap: 1.5 }}>
+    <MenuItem key='my-workspaces' component={NextLink} href='/workspaces' onClick={() => setOpen(false)} sx={{ gap: 1.5 }}>
       <Box component='i' className='tabler-building-store' aria-hidden sx={{ fontSize: 16 }} />
       <Box component='span' sx={{ flex: 1 }}>
         {t('myShops')}
