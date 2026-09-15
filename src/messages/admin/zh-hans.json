@@ -4550,13 +4550,13 @@
     },
     "billingNote": "方案、点数和扩展会在计费功能上线后显示。",
     "status": {
-      "active": "营业中",
+      "active": "正常",
       "suspended": "已暂停",
       "inactive": "已停用"
     },
     "badges": {
       "current": "当前工作区",
-      "owner": "拥有者"
+      "owner": "所有者"
     },
     "roles": {
       "admin": "管理员",
