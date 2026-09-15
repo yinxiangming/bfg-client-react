@@ -84,6 +84,8 @@ export interface TenantWorkspace {
   suspended_at: string | null
   /** The user's staff role code here; null when the owner is not active staff. */
   role: string | null
+  /** What the workspace calls that role, for roles without a label here; null along with role. */
+  role_name: string | null
   /** The user is active staff here, so the workspace can be switched into. */
   is_member: boolean
   /** The user owns the workspace; only owners may edit its details. */

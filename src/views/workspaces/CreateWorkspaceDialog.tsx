@@ -25,67 +25,29 @@ import MenuItem from '@mui/material/MenuItem'
 import Typography from '@mui/material/Typography'
 
 import CustomTextField from '@/components/ui/TextField'
+import { getOnboardingOptions, localised, type CountryOption } from '@/services/onboarding'
 import { createTenantWorkspace, getTenantWorkspaceErrorMessage, type TenantWorkspace } from '@/services/platform'
 import { switchWorkspace, WorkspaceSwitchError } from '@/utils/switchWorkspace'
 
-/** The currencies the server has a profile for. It refuses any other. */
-const CURRENCY_CODES = [
-  'AED', 'AUD', 'CAD', 'CHF', 'CNY', 'EUR', 'GBP', 'HKD', 'IDR', 'INR',
-  'JPY', 'KRW', 'MYR', 'NZD', 'PHP', 'SGD', 'THB', 'TWD', 'USD', 'VND'
-] as const
-
-/** The languages the server supports, labelled from the common namespace. */
-const LANGUAGES = [
-  { code: 'en', labelKey: 'language.en' },
-  { code: 'zh-hans', labelKey: 'language.zhHans' }
-] as const
-
-/**
- * The currency and default language the setup wizard's profile of a country gives it. Only a
- * value the lists above offer fits, as the server refuses any other: where a profile names
- * another, that field is left out, and choosing the country leaves the field as it is.
- */
-type CountryPreset = {
-  currency?: (typeof CURRENCY_CODES)[number]
-  language?: (typeof LANGUAGES)[number]['code']
+/** Message keys in the common namespace for the languages the server supports. */
+const LANGUAGE_LABEL_KEYS: Record<string, string> = {
+  en: 'language.en',
+  'zh-hans': 'language.zhHans'
 }
 
 /**
- * The countries the setup wizard has defaults for, since the wizard is where a new workspace
- * goes next; the server itself takes any two-letter code. Their names are messages rather
- * than Intl.DisplayNames, so they read as they do in the wizard.
+ * What the form offers, from the setup wizard's options (GET /onboarding/options/): the
+ * countries the wizard has defaults for, since the wizard is where a new workspace goes next,
+ * and the currencies and languages the server accepts. The server refuses any other currency
+ * or language; it takes any two-letter country code.
  */
-const COUNTRY_PRESETS = {
-  AE: { currency: 'AED', language: 'en' },
-  AU: { currency: 'AUD', language: 'en' },
-  CA: { currency: 'CAD', language: 'en' },
-  CH: { currency: 'CHF', language: 'en' },
-  CN: { currency: 'CNY', language: 'zh-hans' },
-  DE: { currency: 'EUR', language: 'en' },
-  ES: { currency: 'EUR', language: 'en' },
-  FR: { currency: 'EUR', language: 'en' },
-  GB: { currency: 'GBP', language: 'en' },
-  HK: { currency: 'HKD', language: 'zh-hans' },
-  ID: { currency: 'IDR', language: 'en' },
-  IE: { currency: 'EUR', language: 'en' },
-  IN: { currency: 'INR', language: 'en' },
-  IT: { currency: 'EUR', language: 'en' },
-  JP: { currency: 'JPY', language: 'en' },
-  KR: { currency: 'KRW', language: 'en' },
-  MY: { currency: 'MYR', language: 'en' },
-  NL: { currency: 'EUR', language: 'en' },
-  NZ: { currency: 'NZD', language: 'en' },
-  PH: { currency: 'PHP', language: 'en' },
-  SG: { currency: 'SGD', language: 'en' },
-  TH: { currency: 'THB', language: 'en' },
-  TW: { currency: 'TWD', language: 'zh-hans' },
-  US: { currency: 'USD', language: 'en' },
-  VN: { currency: 'VND', language: 'en' }
-} satisfies Record<string, CountryPreset>
+type Choices = {
+  countries: CountryOption[]
+  currencies: string[]
+  languages: string[]
+}
 
-type CountryCode = keyof typeof COUNTRY_PRESETS
-
-const COUNTRY_CODES = Object.keys(COUNTRY_PRESETS) as CountryCode[]
+const NO_CHOICES: Choices = { countries: [], currencies: [], languages: [] }
 
 /** The server's max_length for a workspace name. */
 const NAME_MAX_LENGTH = 255
@@ -98,7 +60,7 @@ type SettingField = (typeof SETTING_FIELDS)[number]
 
 type Field = 'name' | SettingField
 
-/** '' is "same as current shop": the setting stays out of the request. */
+/** '' is "same as current workspace": the setting stays out of the request. */
 type Settings = Record<SettingField, string>
 
 type Option = { value: string; label: string }
@@ -113,25 +75,40 @@ const SAME_AS_CURRENT: Settings = { country: '', currency: '', language: '' }
 /** The settings that follow the country. */
 const PRESET_FIELDS = ['currency', 'language'] as const
 
+type PresetField = (typeof PRESET_FIELDS)[number]
+
 /** Which of them the user has picked since the dialog opened. */
-type Picked = Record<(typeof PRESET_FIELDS)[number], boolean>
+type Picked = Record<PresetField, boolean>
 
 const NONE_PICKED: Picked = { currency: false, language: false }
 
 /**
+ * The currency and default language the wizard's profile of a country gives it. Only a value
+ * the form offers fits: where the profile names another, that field is left out, and choosing
+ * the country leaves the field as it is.
+ */
+function presetFor(choices: Choices, code: string): Partial<Record<PresetField, string>> {
+  const country = choices.countries.find(item => item.code === code)
+  const preset: Partial<Record<PresetField, string>> = {}
+
+  if (country && choices.currencies.includes(country.currency)) preset.currency = country.currency
+  if (country && choices.languages.includes(country.default_language)) preset.language = country.default_language
+
+  return preset
+}
+
+/**
  * The settings once a country is chosen. A currency or language the user has not picked
- * follows the country: to its preset, or back to "same as current shop" along with it. One
+ * follows the country: to its preset, or back to "same as current workspace" along with it. One
  * the user has picked stays, and so does one the country's preset has no value for.
  */
-function withCountry(settings: Settings, country: string, picked: Picked): Settings {
-  const preset: CountryPreset | undefined = Object.hasOwn(COUNTRY_PRESETS, country)
-    ? COUNTRY_PRESETS[country as CountryCode]
-    : undefined
+function withCountry(settings: Settings, country: string, picked: Picked, choices: Choices): Settings {
+  const preset = presetFor(choices, country)
   const next = { ...settings, country }
 
   for (const field of PRESET_FIELDS) {
     if (picked[field]) continue
-    const value = country ? preset?.[field] : ''
+    const value = country ? preset[field] : ''
     if (value !== undefined) next[field] = value
   }
 
@@ -182,6 +159,10 @@ export default function CreateWorkspaceDialog({ open, onClose, onRefused, onSwit
   const [phase, setPhase] = useState<Phase>('idle')
   const [formError, setFormError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
+  // null until the options load. They are fetched the first time the dialog opens, and again
+  // at the next opening when that fails.
+  const [choices, setChoices] = useState<Choices | null>(null)
+  const [choicesFailed, setChoicesFailed] = useState(false)
 
   // Every opening starts from a blank form.
   useEffect(() => {
@@ -195,6 +176,32 @@ export default function CreateWorkspaceDialog({ open, onClose, onRefused, onSwit
     setFieldErrors({})
   }, [open])
 
+  useEffect(() => {
+    if (!open || choices) return
+    let cancelled = false
+    setChoicesFailed(false)
+
+    getOnboardingOptions()
+      .then(options => {
+        if (cancelled) return
+        setChoices({
+          countries: options.countries,
+          // A server that predates the list leaves it out, and the form then offers no currency.
+          currencies: options.currencies ?? [],
+          languages: options.languages
+        })
+      })
+      .catch(() => {
+        if (!cancelled) setChoicesFailed(true)
+      })
+
+    return () => {
+      cancelled = true
+    }
+  }, [open, choices])
+
+  const available = choices ?? NO_CHOICES
+
   const options = useMemo<Record<SettingField, Option[]>>(() => {
     let currencyNames: Intl.DisplayNames | null = null
     try {
@@ -204,16 +211,20 @@ export default function CreateWorkspaceDialog({ open, onClose, onRefused, onSwit
     }
 
     return {
-      country: COUNTRY_CODES.map(code => ({ value: code, label: t(`countries.${code}`) })).sort((a, b) =>
-        a.label.localeCompare(b.label, locale)
-      ),
-      currency: CURRENCY_CODES.map(code => {
+      // Named as the setup wizard names them.
+      country: available.countries
+        .map(country => ({ value: country.code, label: localised(country, 'name', locale) }))
+        .sort((a, b) => a.label.localeCompare(b.label, locale)),
+      currency: available.currencies.map(code => {
         const currencyName = currencyNames?.of(code)
         return { value: code, label: currencyName && currencyName !== code ? `${code} — ${currencyName}` : code }
       }),
-      language: LANGUAGES.map(({ code, labelKey }) => ({ value: code, label: tCommon(labelKey) }))
+      language: available.languages.map(code => ({
+        value: code,
+        label: Object.hasOwn(LANGUAGE_LABEL_KEYS, code) ? tCommon(LANGUAGE_LABEL_KEYS[code]) : code
+      }))
     }
-  }, [locale, t, tCommon])
+  }, [available, locale, tCommon])
 
   const busy = phase !== 'idle'
   const trimmedName = name.trim()
@@ -235,7 +246,7 @@ export default function CreateWorkspaceDialog({ open, onClose, onRefused, onSwit
       return
     }
 
-    const next = withCountry(settings, value, picked)
+    const next = withCountry(settings, value, picked, available)
     setSettings(next)
     // An error is about the value its field held, so it goes when the country changes that value.
     for (const changed of SETTING_FIELDS) {
@@ -279,7 +290,7 @@ export default function CreateWorkspaceDialog({ open, onClose, onRefused, onSwit
 
     let workspace: TenantWorkspace
     try {
-      // A setting left on "same as current shop" is not sent, and the server copies it from
+      // A setting left on "same as current workspace" is not sent, and the server copies it from
       // the workspace the access token belongs to.
       workspace = await createTenantWorkspace({
         name: trimmedName,
@@ -357,11 +368,14 @@ export default function CreateWorkspaceDialog({ open, onClose, onRefused, onSwit
 
             <Collapse in={moreOpen} id={moreId}>
               <Box sx={{ pt: 3, display: 'flex', flexDirection: 'column', gap: 3 }}>
+                {choicesFailed && <Alert severity='warning'>{t('optionsFailed')}</Alert>}
                 {SETTING_FIELDS.map(field => (
                   <CustomTextField
                     key={field}
                     select
                     fullWidth
+                    // Nothing to choose from until the options load.
+                    disabled={!choices}
                     label={t(`fields.${field}`)}
                     value={settings[field]}
                     onChange={event => changeSetting(field, event.target.value)}

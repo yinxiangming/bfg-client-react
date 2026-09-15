@@ -125,9 +125,10 @@ export default function WorkspaceSwitcher() {
     const isCurrent = workspace.id === currentId
     // Suspended and deactivated workspaces refuse a switch.
     const blocked = workspace.status !== 'active'
-    // The roles every workspace gets have labels; a role a workspace made itself shows its code.
+    // The roles every workspace gets have labels; a role a workspace made itself shows its name.
+    const roleKey = `roles.${workspace.role}`
     const roleLabel = workspace.role
-      ? (tWorkspaces.has(`roles.${workspace.role}`) ? tWorkspaces(`roles.${workspace.role}`) : workspace.role)
+      ? (tWorkspaces.has(roleKey) ? tWorkspaces(roleKey) : workspace.role_name || workspace.role)
       : null
 
     return (
@@ -209,7 +210,7 @@ export default function WorkspaceSwitcher() {
   // The link to /workspaces stays, whether the list loaded, came back empty or failed to load.
   items.push(
     <Divider key='divider' component='li' />,
-    <MenuItem key='my-shops' component={NextLink} href='/workspaces' onClick={() => setOpen(false)} sx={{ gap: 1.5 }}>
+    <MenuItem key='my-workspaces' component={NextLink} href='/workspaces' onClick={() => setOpen(false)} sx={{ gap: 1.5 }}>
       <Box component='i' className='tabler-building-store' aria-hidden sx={{ fontSize: 16 }} />
       <Box component='span' sx={{ flex: 1 }}>
         {t('myShops')}
