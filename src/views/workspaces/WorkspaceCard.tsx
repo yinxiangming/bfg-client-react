@@ -69,9 +69,10 @@ export default function WorkspaceCard({
 
   const blockedReason = getBlockedReason(workspace)
   const statusColor = STATUS_COLOR[workspace.status]
-  // The roles every workspace gets have labels; a role a workspace made itself shows its code.
+  // The roles every workspace gets have labels; a role a workspace made itself shows its name.
+  const roleKey = `roles.${workspace.role}`
   const roleLabel = workspace.role
-    ? (t.has(`roles.${workspace.role}`) ? t(`roles.${workspace.role}`) : workspace.role)
+    ? (t.has(roleKey) ? t(roleKey) : workspace.role_name || workspace.role)
     : null
   const nameId = `workspace-${workspace.id}-name`
   const blockedId = `workspace-${workspace.id}-blocked`

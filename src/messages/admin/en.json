@@ -4604,33 +4604,7 @@
       "switching": "Switching to the new shop…",
       "failed": "Couldn't create the shop. Try again.",
       "createdNotSwitched": "{name} has been created, but we couldn't switch you to it. Open its admin from its card below.",
-      "countries": {
-        "AE": "United Arab Emirates",
-        "AU": "Australia",
-        "CA": "Canada",
-        "CH": "Switzerland",
-        "CN": "China",
-        "DE": "Germany",
-        "ES": "Spain",
-        "FR": "France",
-        "GB": "United Kingdom",
-        "HK": "Hong Kong SAR",
-        "ID": "Indonesia",
-        "IE": "Ireland",
-        "IN": "India",
-        "IT": "Italy",
-        "JP": "Japan",
-        "KR": "South Korea",
-        "MY": "Malaysia",
-        "NL": "Netherlands",
-        "NZ": "New Zealand",
-        "PH": "Philippines",
-        "SG": "Singapore",
-        "TH": "Thailand",
-        "TW": "Taiwan",
-        "US": "United States",
-        "VN": "Vietnam"
-      }
+      "optionsFailed": "Couldn't load the countries, currencies and languages to choose from. The new shop will use your current shop's."
     }
   }
 }

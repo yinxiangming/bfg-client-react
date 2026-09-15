@@ -86,6 +86,8 @@ export type OnboardingOptions = {
   countries: CountryOption[]
   industries: IndustryOption[]
   languages: string[]
+  /** Every currency a workspace can use. A server that predates the list leaves it out. */
+  currencies?: string[]
   defaults: { country: string; industry: string }
 }
 

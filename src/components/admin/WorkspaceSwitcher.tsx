@@ -125,9 +125,10 @@ export default function WorkspaceSwitcher() {
     const isCurrent = workspace.id === currentId
     // Suspended and deactivated workspaces refuse a switch.
     const blocked = workspace.status !== 'active'
-    // The roles every workspace gets have labels; a role a workspace made itself shows its code.
+    // The roles every workspace gets have labels; a role a workspace made itself shows its name.
+    const roleKey = `roles.${workspace.role}`
     const roleLabel = workspace.role
-      ? (tWorkspaces.has(`roles.${workspace.role}`) ? tWorkspaces(`roles.${workspace.role}`) : workspace.role)
+      ? (tWorkspaces.has(roleKey) ? tWorkspaces(roleKey) : workspace.role_name || workspace.role)
       : null
 
     return (

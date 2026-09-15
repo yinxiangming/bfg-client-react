@@ -350,6 +350,25 @@ export function getAgentChatRequestInit(body: Record<string, unknown>): RequestI
   return { method: 'POST', headers, body: JSON.stringify(body) }
 }
 
+/** 403 codes a new access token can clear: the token itself, or the workspace it names. */
+const TOKEN_403_CODES = new Set(['workspace_access_denied', 'token_not_valid', 'not_authenticated', 'authentication_failed'])
+
+/**
+ * Whether a 403 may be about the access token, and so worth a refresh and a retry. One that
+ * names a reason of its own in `code`, such as workspace_create_forbidden, is about the
+ * request instead: a new token only gets the same answer, two requests later.
+ */
+async function mayBeAboutTheToken(response: Response): Promise<boolean> {
+  if (!(response.headers.get('content-type') || '').includes('application/json')) return true
+  try {
+    const body: unknown = await response.clone().json()
+    const code = body && typeof body === 'object' ? (body as { code?: unknown }).code : undefined
+    return typeof code !== 'string' || TOKEN_403_CODES.has(code)
+  } catch {
+    return true
+  }
+}
+
 /**
  * Generic API fetch function with error handling and automatic token refresh
  */
@@ -404,7 +423,7 @@ export async function apiFetch<T>(
 
   // Handle 401 Unauthorized or 403 Forbidden - try to refresh token and retry once
   // Backend may return 403 when token is invalid (e.g. DRF IsAuthenticated)
-  if ((response.status === 401 || response.status === 403) && retryOn401) {
+  if (retryOn401 && (response.status === 401 || (response.status === 403 && (await mayBeAboutTheToken(response))))) {
     const newToken = await refreshTokenIfNeeded()
     if (newToken) {
       return apiFetch<T>(url, options, false)
