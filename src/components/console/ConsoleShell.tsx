@@ -47,7 +47,10 @@ export default function ConsoleShell({ children }: { children: ReactNode }) {
     const loaded = state.kind === 'loaded' ? state : null
     // A workspace is shown under Platform only while it is the one being looked at, and
     // only when it is not already a node of its own further up the tree.
-    const insideWorkspace = /^\/workspaces\/\d+(\/|$)/.test(pathname ?? '')
+    // A locale prefix, where the deployment serves one, sits in front of the path the
+    // console's links are written in; Sidebar strips it the same way.
+    const path = (pathname ?? '').replace(/^\/[a-z]{2}(-[A-Z]{2})?(?=\/|$)/, '')
+    const insideWorkspace = /^\/workspaces\/\d+(\/|$)/.test(path)
     const owns = openWorkspace
       ? Boolean(loaded?.workspaces.some(workspace => workspace.id === openWorkspace.id && workspace.is_owner))
       : false
