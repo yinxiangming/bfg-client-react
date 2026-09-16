@@ -4720,7 +4720,37 @@
       "working": "处理中",
       "workingHint": "正在归档或恢复，完成后才能改",
       "archived": "已归档",
-      "archivedHint": "数据已归档，恢复后才能开启"
+      "archivedHint": "数据已归档，恢复后才能开启",
+      "grant": {
+        "action": "赠送",
+        "title": "赠送权益给这个工作区",
+        "what": "赠送内容",
+        "basePlan": "基础套餐",
+        "basePlanHint": "套餐本身包含的全部内容，而不是某一个加购。",
+        "notSwitchedOn": "赠送不会替商家开启扩展，开不开仍然由工作区自己决定。只有因为权益到期被平台暂停的扩展会顺手恢复。",
+        "forMonths": "按月数",
+        "neverExpires": "永不过期",
+        "months": "月数",
+        "monthsHint": "1 到 {max} 个月。再长就该选“永不过期”。",
+        "reason": "理由",
+        "reasonHint": "会保留在这条权益上，方便日后解释。必填。",
+        "save": "确认赠送",
+        "done": "已把「{name}」赠送给这个工作区。",
+        "runsUntil": "有效期到 {until}。",
+        "runsForever": "永不过期。",
+        "resumed": "它之前因为权益到期被暂停，现在已经恢复。",
+        "notResumed": "它没能自动恢复：等它依赖的条件补齐后，请在它的卡片上手动开启。",
+        "failed": "没能完成赠送，请重试。",
+        "errors": {
+          "platform_admin_required": "只有平台管理员可以赠送权益。",
+          "invalid_grant": "月数和“永不过期”只能选一个，并且要写明理由。",
+          "unknown_extension": "当前平台没有这个名字的扩展。",
+          "already_entitled": "这个工作区已经持有这项权益，没有重复赠送。",
+          "already_entitled_until": "这个工作区已经持有这项权益，有效期到 {until}，没有重复赠送。",
+          "already_entitled_forever": "这个工作区已经持有这项权益且永不过期，没有重复赠送。",
+          "workspace_not_found": "这个工作区不存在。"
+        }
+      }
     },
     "all": {
       "title": "全部工作区",

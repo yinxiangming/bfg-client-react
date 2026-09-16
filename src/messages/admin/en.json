@@ -4720,7 +4720,37 @@
       "working": "Working",
       "workingHint": "Archiving or restoring; changes wait until that finishes",
       "archived": "Archived",
-      "archivedHint": "Its data is archived; restore it before switching it on"
+      "archivedHint": "Its data is archived; restore it before switching it on",
+      "grant": {
+        "action": "Grant",
+        "title": "Grant this workspace an entitlement",
+        "what": "What to grant",
+        "basePlan": "Base plan",
+        "basePlanHint": "Everything that comes with the plan, rather than one add-on.",
+        "notSwitchedOn": "Granting doesn't switch an extension on — that stays the workspace's decision. One the platform paused when its entitlement ran out is switched back on.",
+        "forMonths": "For a number of months",
+        "neverExpires": "Never expires",
+        "months": "Months",
+        "monthsHint": "From 1 to {max}. Longer than that is what “never expires” is for.",
+        "reason": "Reason",
+        "reasonHint": "Kept on the entitlement, so it can be explained later. Required.",
+        "save": "Grant it",
+        "done": "{name} is granted to this workspace.",
+        "runsUntil": "It runs until {until}.",
+        "runsForever": "It doesn't expire.",
+        "resumed": "It was paused when its entitlement ran out, and is switched back on.",
+        "notResumed": "It couldn't be switched back on: turn it on from its card once whatever it needs is in place.",
+        "failed": "Couldn't grant this. Try again.",
+        "errors": {
+          "platform_admin_required": "Only platform administrators can grant an entitlement.",
+          "invalid_grant": "Pick either a number of months or “never expires”, and say why.",
+          "unknown_extension": "This platform doesn't ship an extension by that name.",
+          "already_entitled": "This workspace already holds this, so it wasn't granted again.",
+          "already_entitled_until": "This workspace already holds this until {until}, so it wasn't granted again.",
+          "already_entitled_forever": "This workspace already holds this and it doesn't expire, so it wasn't granted again.",
+          "workspace_not_found": "This workspace doesn't exist."
+        }
+      }
     },
     "all": {
       "title": "All workspaces",
