@@ -2,6 +2,8 @@
 
 import { Fragment, type CSSProperties } from 'react'
 
+import Link from 'next/link'
+
 import { useTranslations } from 'next-intl'
 
 import Alert from '@mui/material/Alert'
@@ -52,6 +54,8 @@ type WorkspaceCardProps = {
   busy: boolean
   /** Why the last attempt to open this workspace's admin failed. */
   enterError: string | null
+  /** Where this workspace is managed in the console; absent for one the user only works in. */
+  manageHref?: string
   onEnter: () => void
   onDismissError: () => void
 }
@@ -62,6 +66,7 @@ export default function WorkspaceCard({
   entering,
   busy,
   enterError,
+  manageHref,
   onEnter,
   onDismissError
 }: WorkspaceCardProps) {
@@ -182,6 +187,11 @@ export default function WorkspaceCard({
         >
           {t('enter')}
         </Button>
+        {manageHref && (
+          <Button component={Link} href={manageHref} variant='outlined' size='small' sx={{ flexShrink: 0 }}>
+            {t('manage')}
+          </Button>
+        )}
         {blockedReason && (
           <Typography
             id={blockedId}

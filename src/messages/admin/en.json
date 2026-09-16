@@ -4605,6 +4605,125 @@
       "failed": "Couldn't create the workspace. Try again.",
       "createdNotSwitched": "{name} has been created, but we couldn't switch you to it. Open its admin from its card below.",
       "optionsFailed": "Couldn't load the countries, currencies and languages to choose from. The new workspace will use your current workspace's."
+    },
+    "manage": "Manage"
+  },
+  "console": {
+    "nav": {
+      "workspaces": "Workspaces",
+      "myWorkspaces": "My workspaces",
+      "overview": "Overview",
+      "extensions": "Extensions",
+      "usage": "Usage",
+      "billing": "Billing",
+      "bills": "Bills",
+      "platform": "Platform",
+      "allWorkspaces": "All workspaces",
+      "platformSettings": "Platform settings"
+    },
+    "topbar": {
+      "menu": "Menu"
+    },
+    "overview": {
+      "title": "Overview",
+      "subtitle": "what this workspace is, and which extensions it uses",
+      "loading": "Loading this workspace",
+      "loadFailed": "Couldn't load this workspace.",
+      "notFound": "This workspace doesn't exist, or you don't run it.",
+      "details": "Details",
+      "fields": {
+        "name": "Name",
+        "domain": "Domain",
+        "status": "Status",
+        "owner": "Owner",
+        "staff": "Staff",
+        "created": "Created"
+      },
+      "ownerIsYou": "{name} (you)",
+      "noOwner": "No owner",
+      "noDomain": "Not connected",
+      "staffCount": "{count} active",
+      "extensions": "Extensions",
+      "manageExtensions": "Manage extensions",
+      "enter": "Open admin"
+    },
+    "extensions": {
+      "title": "Extensions",
+      "subtitle": "switching one on takes effect at once; switching it off only stops the feature, and its data and settings stay",
+      "loading": "Loading extensions",
+      "loadFailed": "Couldn't load this workspace.",
+      "notFound": "This workspace doesn't exist, or you don't run it.",
+      "none": "This platform ships no extensions a workspace can switch on.",
+      "on": "On",
+      "off": "Off",
+      "offHint": "Switch it on to start using it",
+      "activate": "Turn on",
+      "deactivate": "Turn off",
+      "settings": "Settings",
+      "enter": "Open admin",
+      "enterFailed": "Couldn't open this workspace's admin. Try again.",
+      "appliesTo": "Works in",
+      "surfaces": {
+        "admin": "Admin",
+        "storefront": "Storefront",
+        "account": "Customer account",
+        "miniprogram": "Mini program"
+      },
+      "activatedAt": "On since {date}",
+      "prerequisites": "Before it can be switched on:",
+      "failed": "Couldn't change this extension. Try again.",
+      "errors": {
+        "workspace_suspended": "This workspace is suspended, so its extensions can't be changed.",
+        "workspace_inactive": "This workspace is deactivated, so its extensions can't be changed.",
+        "unknown_extension": "This extension is no longer part of the platform.",
+        "not_activatable": "This extension is always available, so it isn't switched on or off.",
+        "invalid_config": "That configuration wasn't valid, so nothing was saved.",
+        "busy": "It's being archived or restored. Try again once that finishes.",
+        "archived": "Its data was archived. Restore it before switching it on.",
+        "requires_inactive": "Switch {names} on first.",
+        "prerequisite_failed": "Something this extension needs is still missing.",
+        "not_entitled": "This workspace isn't entitled to this extension yet.",
+        "required_by_active": "Switch {names} off first: they need this one."
+      },
+      "readOnly": {
+        "suspended": "This workspace is suspended. You can look at its extensions, but not change them.",
+        "inactive": "This workspace is deactivated. You can look at its extensions, but not change them."
+      },
+      "confirm": {
+        "title": "Turn off {name}?",
+        "body": "The feature stops for this workspace right away. Its data and settings stay, so switching it back on picks up where it left off."
+      },
+      "notLive": "On, not live",
+      "notLiveHint": "Switched on, but something it needs is missing",
+      "paused": "Paused",
+      "pausedHint": "Paused when its entitlement ended; data and settings stay",
+      "working": "Working",
+      "workingHint": "Archiving or restoring; changes wait until that finishes",
+      "archived": "Archived",
+      "archivedHint": "Its data is archived; restore it before switching it on"
+    },
+    "all": {
+      "title": "All workspaces",
+      "subtitle": "every workspace on the platform, suspended and deactivated ones included",
+      "search": "Search by name or slug",
+      "loading": "Loading workspaces",
+      "loadFailed": "Couldn't load the workspaces.",
+      "empty": "No workspace matches that.",
+      "count": "{count} workspaces",
+      "columns": {
+        "workspace": "Workspace",
+        "domain": "Domain",
+        "owner": "Owner",
+        "status": "Status",
+        "extensions": "Extensions on"
+      },
+      "manage": "Manage",
+      "platform": "Platform",
+      "yours": "Yours",
+      "noOwner": "No owner",
+      "forbidden": "Only platform administrators can see every workspace.",
+      "loadMore": "Load more",
+      "showing": "Showing {shown} of {count}"
     }
   }
 }

@@ -4605,6 +4605,125 @@
       "failed": "工作区没能建好，请重试。",
       "createdNotSwitched": "工作区「{name}」已建好，但没能切换过去。请在下方它的卡片上点「进入后台」。",
       "optionsFailed": "没能加载国家/地区、币种和语言的选项，新工作区会沿用当前工作区的设置。"
+    },
+    "manage": "管理"
+  },
+  "console": {
+    "nav": {
+      "workspaces": "工作区",
+      "myWorkspaces": "我的工作区",
+      "overview": "概览",
+      "extensions": "扩展",
+      "usage": "用量",
+      "billing": "收费",
+      "bills": "账单",
+      "platform": "平台",
+      "allWorkspaces": "全部工作区",
+      "platformSettings": "平台设置"
+    },
+    "topbar": {
+      "menu": "菜单"
+    },
+    "overview": {
+      "title": "概览",
+      "subtitle": "这个工作区的基本信息和扩展开启情况",
+      "loading": "正在加载工作区",
+      "loadFailed": "没能加载这个工作区。",
+      "notFound": "这个工作区不存在，或者不归你管理。",
+      "details": "基本信息",
+      "fields": {
+        "name": "名称",
+        "domain": "域名",
+        "status": "状态",
+        "owner": "所有者",
+        "staff": "员工",
+        "created": "创建时间"
+      },
+      "ownerIsYou": "{name}（你）",
+      "noOwner": "无所有者",
+      "noDomain": "未绑定",
+      "staffCount": "{count} 人在职",
+      "extensions": "扩展",
+      "manageExtensions": "管理扩展",
+      "enter": "进入后台"
+    },
+    "extensions": {
+      "title": "扩展",
+      "subtitle": "开启后马上生效；停用只关掉功能，数据和设置都保留",
+      "loading": "正在加载扩展",
+      "loadFailed": "没能加载这个工作区。",
+      "notFound": "这个工作区不存在，或者不归你管理。",
+      "none": "当前平台没有可以开启的扩展。",
+      "on": "已开启",
+      "off": "未开启",
+      "offHint": "开启后即可使用",
+      "activate": "开启",
+      "deactivate": "停用",
+      "settings": "设置",
+      "enter": "进入后台",
+      "enterFailed": "没能进入这个工作区的后台，请重试。",
+      "appliesTo": "适用于",
+      "surfaces": {
+        "admin": "后台",
+        "storefront": "店面",
+        "account": "顾客中心",
+        "miniprogram": "小程序"
+      },
+      "activatedAt": "{date} 开启",
+      "prerequisites": "开启前还需要：",
+      "failed": "扩展没能修改，请重试。",
+      "errors": {
+        "workspace_suspended": "这个工作区已暂停，不能修改扩展。",
+        "workspace_inactive": "这个工作区已停用，不能修改扩展。",
+        "unknown_extension": "这个扩展已经不在平台里了。",
+        "not_activatable": "这个扩展一直可用，不需要开关。",
+        "invalid_config": "配置不合法，没有保存。",
+        "busy": "它正在归档或恢复，完成后再试。",
+        "archived": "数据已归档，恢复后才能开启。",
+        "requires_inactive": "请先开启 {names}。",
+        "prerequisite_failed": "这个扩展需要的条件还没满足。",
+        "not_entitled": "这个工作区还没有这个扩展的权益。",
+        "required_by_active": "{names} 依赖它，请先停用它们。"
+      },
+      "readOnly": {
+        "suspended": "这个工作区已暂停，扩展只能查看，不能修改。",
+        "inactive": "这个工作区已停用，扩展只能查看，不能修改。"
+      },
+      "confirm": {
+        "title": "停用「{name}」？",
+        "body": "这个工作区的该功能会立刻停止。数据和设置都保留，重新开启后接着用。"
+      },
+      "notLive": "已开启，未生效",
+      "notLiveHint": "开关是开着的，但它需要的条件还没满足",
+      "paused": "已暂停",
+      "pausedHint": "权益结束后暂停，数据和设置都保留",
+      "working": "处理中",
+      "workingHint": "正在归档或恢复，完成后才能改",
+      "archived": "已归档",
+      "archivedHint": "数据已归档，恢复后才能开启"
+    },
+    "all": {
+      "title": "全部工作区",
+      "subtitle": "平台上的所有工作区，包括已暂停和已停用的",
+      "search": "搜索名称或标识",
+      "loading": "正在加载工作区",
+      "loadFailed": "没能加载工作区列表。",
+      "empty": "没有匹配的工作区。",
+      "count": "共 {count} 个工作区",
+      "columns": {
+        "workspace": "工作区",
+        "domain": "域名",
+        "owner": "所有者",
+        "status": "状态",
+        "extensions": "已开启的扩展"
+      },
+      "manage": "管理",
+      "platform": "平台",
+      "yours": "你的",
+      "noOwner": "无所有者",
+      "forbidden": "只有平台管理员可以查看全部工作区。",
+      "loadMore": "加载更多",
+      "showing": "已显示 {shown} / {count}"
     }
   }
 }
