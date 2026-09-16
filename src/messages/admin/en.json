@@ -4670,7 +4670,12 @@
         "invoiceBody": "Invoice {number} comes to {total} and is due {due}. {name} is switched on as soon as it's paid.",
         "invoiceUnpaidTitle": "{name} is already on an unpaid invoice",
         "invoiceUnpaidBody": "Invoice {number} comes to {total} and is due {due}; asking again doesn't raise a second one. {name} is switched on as soon as it's paid.",
-        "viewBills": "Go to bills"
+        "viewBills": "Go to bills",
+        "trialTitle": "{name} is on, free for {days} days",
+        "trialBody": "The trial runs until {until}. After that it's charged on your monthly bill.",
+        "onBillLaterTitle": "{name} is on",
+        "onBillLaterBody": "There's no invoice for it today — this period, up to {until}, is charged on your next monthly bill.",
+        "billLaterNoEnd": "It's on now, and it'll appear on your next monthly bill."
       },
       "settings": "Settings",
       "enter": "Open admin",
@@ -4702,7 +4707,6 @@
         "no_plan": "This add-on hasn't been priced on this platform yet, so it can't be bought.",
         "no_owner": "This workspace has no owner to make the bill out to, so nothing can be bought for it yet.",
         "unknown_currency": "This workspace's currency isn't one this platform bills in, so no invoice could be written.",
-        "no_exchange_rate": "There's no rate today to price this add-on in this workspace's currency, so no invoice could be written.",
         "key_too_long": "This add-on can't be billed for: its invoice number would be too long. Whoever ships it has to give it a shorter key."
       },
       "readOnly": {
@@ -4750,6 +4754,20 @@
           "already_entitled_forever": "This workspace already holds this and it doesn't expire, so it wasn't granted again.",
           "workspace_not_found": "This workspace doesn't exist."
         }
+      },
+      "price": {
+        "included": "Included in the base plan",
+        "per": "{amount} / {unit}",
+        "perMany": "{amount} / {count} {unit}",
+        "unit": {
+          "day": "day",
+          "week": "week",
+          "month": "month",
+          "year": "year"
+        },
+        "listed": "listed at {amount}",
+        "trial": "{days}-day free trial",
+        "free": "Free"
       }
     },
     "all": {
@@ -5013,7 +5031,8 @@
         "invalid_meter_price": "That price can't be stored. Check the cost, the unit size and the margin.",
         "invalid_exchange_rate": "That rate can't be stored. Check the currencies and the number."
       }
-    }
+    },
+    "brand": "Workspaces Admin"
   },
   "workspaceReadOnly": {
     "title": "This workspace is read only",

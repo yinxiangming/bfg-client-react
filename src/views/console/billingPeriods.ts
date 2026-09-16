@@ -72,6 +72,23 @@ export function formatMoment(value: string | null | undefined, locale: string): 
   return new Intl.DateTimeFormat(getIntlLocale(locale), { dateStyle: 'medium', timeStyle: 'short' }).format(moment)
 }
 
+/**
+ * A timestamp as a date in the reader's own zone, with no time of day.
+ *
+ * For a moment whose *day* is the whole of what the reader can act on — when a period
+ * runs out, when a trial ends. Printing the minute as well makes a sentence about next
+ * month read like an appointment.
+ */
+export function formatMomentDay(value: string | null | undefined, locale: string): string {
+  if (!value) return ''
+
+  const moment = new Date(value)
+
+  if (isNaN(moment.getTime())) return value
+
+  return new Intl.DateTimeFormat(getIntlLocale(locale), { dateStyle: 'medium' }).format(moment)
+}
+
 /** This month as `YYYY-MM`, by the reader's clock — which is what they mean by "this month". */
 export function currentMonth(): string {
   const now = new Date()

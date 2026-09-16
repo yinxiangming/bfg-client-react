@@ -10,7 +10,13 @@ import Typography from '@mui/material/Typography'
 
 import Icon from '@components/Icon'
 import StatusBadge from '@/components/schema/StatusBadge'
-import { extensionDescription, extensionName, type ConsoleExtension } from '@/services/console'
+import {
+  extensionDescription,
+  extensionName,
+  formatMoney,
+  type ConsoleExtension,
+  type ConsoleExtensionPrice
+} from '@/services/console'
 
 type Props = {
   extension: ConsoleExtension
@@ -29,6 +35,9 @@ type Props = {
   onSettings?: () => void
 }
 
+/** An extension that comes with the base plan rather than being sold on top of it. */
+const PRICING_BASE = 'base'
+
 /** The date an extension was switched on, in the reader's language. */
 function activatedOn(value: string | null, locale: string): string | null {
   if (!value) return null
@@ -38,6 +47,17 @@ function activatedOn(value: string | null, locale: string): string | null {
   if (Number.isNaN(date.getTime())) return null
 
   return new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(date)
+}
+
+/**
+ * What one period costs, in the workspace's own currency where the platform could
+ * convert it, and in the platform's own where it could not — a price in the wrong
+ * currency is a better answer than a card that says nothing about what it costs.
+ */
+function priceAmount(price: ConsoleExtensionPrice): string {
+  return price.workspace_amount === null
+    ? formatMoney(price.amount, price.currency)
+    : formatMoney(price.workspace_amount, price.workspace_currency)
 }
 
 export default function ExtensionCard({
@@ -55,6 +75,37 @@ export default function ExtensionCard({
   const locale = useLocale()
   const blocked = extension.unmet_prerequisites.length > 0
   const activated = activatedOn(extension.activated_at, locale)
+  const price = extension.price ?? null
+
+  // What it costs, per period. An extension that comes with the base plan says so; one
+  // the platform has not priced says nothing at all, because "no price" is a gap in the
+  // platform's own setup and not an offer to make to whoever is reading.
+  const cost = (() => {
+    if (extension.pricing === PRICING_BASE) {
+      return { headline: t('price.included'), listed: null, trial: null }
+    }
+    if (!price) return null
+
+    // An add-on the platform gives away says so in words. "0.00 a month" is the same
+    // fact written as a charge, and reads as one.
+    if (Number(price.amount) === 0) return { headline: t('price.free'), listed: null, trial: null }
+
+    const unit = t.has(`price.unit.${price.interval}`) ? t(`price.unit.${price.interval}`) : price.interval
+
+    return {
+      headline:
+        price.interval_count > 1
+          ? t('price.perMany', { amount: priceAmount(price), count: price.interval_count, unit })
+          : t('price.per', { amount: priceAmount(price), unit }),
+      // Only where the two differ: repeating the same number in the same currency
+      // reads as two prices.
+      listed:
+        price.workspace_amount !== null && price.workspace_currency !== price.currency
+          ? t('price.listed', { amount: formatMoney(price.amount, price.currency) })
+          : null,
+      trial: price.trial_days > 0 ? t('price.trial', { days: price.trial_days }) : null
+    }
+  })()
 
   // `status` is the switch; `available` is whether it is actually running for the
   // workspace. They part company when something the extension needs falls away, and an
@@ -136,6 +187,26 @@ export default function ExtensionCard({
           <Typography variant='body2' sx={{ color: 'var(--at-row-sub)', textWrap: 'pretty' }}>
             {extensionDescription(extension, locale)}
           </Typography>
+          {cost && (
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'baseline', gap: 2 }}>
+              <Typography
+                sx={{
+                  fontSize: 14,
+                  fontWeight: 600,
+                  fontVariantNumeric: 'tabular-nums',
+                  color: 'var(--at-row-fg)'
+                }}
+              >
+                {cost.headline}
+              </Typography>
+              {cost.listed && (
+                <Typography variant='caption' sx={{ color: 'var(--at-row-sub)' }}>
+                  {cost.listed}
+                </Typography>
+              )}
+              {cost.trial && <StatusBadge noDot label={cost.trial} color='info' />}
+            </Box>
+          )}
           {extension.surfaces.length > 0 && (
             <Box sx={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: 1 }}>
               <Typography variant='caption' sx={{ color: 'var(--at-row-sub)' }}>

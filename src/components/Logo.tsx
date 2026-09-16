@@ -44,6 +44,22 @@ type LogoProps = {
    * With no logo the name always renders — it is the only branding left.
    */
   showNameWithLogo?: boolean
+  /**
+   * What stands in for a workspace that has uploaded no logo. 'default' is the
+   * framework's own mark; 'none' draws nothing, for a surface that belongs to no
+   * one workspace — the console spans every workspace an account runs, and one
+   * product's mark on top of it says something untrue about whose it is.
+   */
+  mark?: 'default' | 'none'
+  /**
+   * Whether the branding is still being read. Nothing is drawn while it is, and the
+   * space is held: the default mark appearing and being replaced a moment later
+   * reads as the page having loaded the wrong brand, and it happens on every load.
+   * Once it is false whatever there is renders, which with nothing at all is the
+   * framework's own name — the answer this was avoiding showing too early, not one
+   * to avoid showing.
+   */
+  pending?: boolean
 }
 
 // Use data URLs and absolute http(s) URLs as-is; only normalize relative media paths
@@ -64,7 +80,9 @@ const Logo = ({
   logoSrc,
   logoDarkSrc,
   surface = 'auto',
-  showNameWithLogo = false
+  showNameWithLogo = false,
+  mark = 'default',
+  pending = false
 }: LogoProps) => {
   const textStyle = color ? { color } : undefined
   const displayName = name ?? themeConfig.templateName
@@ -72,9 +90,21 @@ const Logo = ({
   // A workspace with no dark variant keeps its single logo everywhere.
   const darkSrc = resolveSrc(logoDarkSrc) || lightSrc
 
+  if (pending && !name && !lightSrc && !darkSrc) {
+    // The same height the mark and the logos are drawn at, so the header does not
+    // jump when the branding arrives.
+    return (
+      <div
+        className='flex items-center sidebar-logo-wrapper'
+        style={{ gap: '0.25rem', minHeight: imgStyle.height }}
+        aria-hidden
+      />
+    )
+  }
+
   let iconContent
   if (!lightSrc && !darkSrc) {
-    iconContent = <LogoIcon className='text-[2.6rem] sidebar-logo-icon' />
+    iconContent = mark === 'none' ? null : <LogoIcon className='text-[2.6rem] sidebar-logo-icon' />
   } else if (surface === 'dark') {
     iconContent = <img src={darkSrc} alt='' className='sidebar-logo-icon' style={imgStyle} />
   } else if (darkSrc === lightSrc) {

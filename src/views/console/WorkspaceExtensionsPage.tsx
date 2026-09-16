@@ -11,6 +11,10 @@
  * spot and comes back on; one that costs something is billed, and nothing about the
  * extension changes until that bill is paid — so the page shows the bill rather than
  * pretending the extension is now running. Asking twice is billed once.
+ *
+ * Two priced add-ons do come on straight away, and the page says a bill is still coming:
+ * one on a trial the workspace has not had, and one the platform could not bill today.
+ * Neither is free, so neither is reported as given.
  */
 
 import { useState } from 'react'
@@ -44,7 +48,7 @@ import {
 } from '@/services/console'
 import { BASE_PLAN_KEY, type ConsoleGrant } from '@/services/consoleAdmin'
 
-import { formatDay, formatMoment } from './billingPeriods'
+import { formatDay, formatMoment, formatMomentDay } from './billingPeriods'
 import ExtensionCard from './ExtensionCard'
 import GrantEntitlementDialog from './GrantEntitlementDialog'
 import { useConsoleWorkspaceDetail } from './useConsoleWorkspaceDetail'
@@ -58,6 +62,8 @@ type AcquireNotice =
   | { kind: 'granted'; name: string; on: boolean }
   | { kind: 'invoiced'; name: string; invoice: ConsoleAcquireInvoice }
   | { kind: 'platformGrant'; name: string; grant: ConsoleGrant }
+  /** On now, with the bill still to come: `days` is the trial's length, or 0 for none. */
+  | { kind: 'billedLater'; name: string; days: number; until: string | null }
 
 export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: number }) {
   const t = useTranslations('admin.console.extensions')
@@ -152,6 +158,14 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
       if (result.invoice) {
         // Nothing else was written: the workspace owes for it first.
         setNotice({ kind: 'invoiced', name, invoice: result.invoice })
+      } else if (result.trial_days || result.billed_later) {
+        // On now, but not free: the period it is on for is billed like any other.
+        setNotice({
+          kind: 'billedLater',
+          name,
+          days: result.trial_days ?? 0,
+          until: result.entitled_until ?? null
+        })
       } else {
         setNotice({ kind: 'granted', name, on: result.extension.status === 'active' })
       }
@@ -276,6 +290,26 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
       {notice?.kind === 'granted' && (
         <Alert severity='success' sx={{ mb: 4 }} onClose={() => setNotice(null)}>
           {notice.on ? t('acquired.on', { name: notice.name }) : t('acquired.granted', { name: notice.name })}
+        </Alert>
+      )}
+
+      {notice?.kind === 'billedLater' && (
+        <Alert severity='success' sx={{ mb: 4 }} onClose={() => setNotice(null)}>
+          <AlertTitle>
+            {notice.days > 0
+              ? t('acquired.trialTitle', { name: notice.name, days: notice.days })
+              : t('acquired.onBillLaterTitle', { name: notice.name })}
+          </AlertTitle>
+          {notice.until
+            ? t(notice.days > 0 ? 'acquired.trialBody' : 'acquired.onBillLaterBody', {
+                until: formatMomentDay(notice.until, locale)
+              })
+            : t('acquired.billLaterNoEnd')}
+          <Box sx={{ mt: 2 }}>
+            <Button component={Link} href={BILLS_PATH} size='small' variant='outlined' color='inherit'>
+              {t('acquired.viewBills')}
+            </Button>
+          </Box>
         </Alert>
       )}
 
