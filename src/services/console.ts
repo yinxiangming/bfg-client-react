@@ -53,6 +53,15 @@ export interface ConsoleExtension {
   activated_at: string | null
   /** Switched on with everything it needs in place, so it is live for the workspace. */
   available: boolean
+  /**
+   * Whether the workspace may use this extension at all: always true for one that comes
+   * with the base plan, and for an add-on only while a live entitlement covers it. A
+   * deployment that sells nothing calls every extension entitled.
+   *
+   * Optional, and absent is read as entitled: a server from before any of this was sold
+   * does not send it, and has nothing to acquire an extension through either.
+   */
+  entitled?: boolean
   /** What the workspace must put in place before this can be switched on. */
   unmet_prerequisites: string[]
   config: Record<string, unknown>
@@ -146,6 +155,58 @@ export async function deactivateExtension(workspaceId: number, key: string): Pro
     method: 'POST',
     body: '{}'
   })
+}
+
+/**
+ * The bill for an add-on that costs something, in the shape the bills page reads.
+ *
+ * `issued` is false when the workspace was already holding this bill unpaid: asking for
+ * the same add-on twice is billed once, and the second answer carries the first bill.
+ */
+export interface ConsoleAcquireInvoice extends ConsoleInvoice {
+  issued: boolean
+}
+
+/**
+ * What asking for an add-on came to.
+ *
+ * One the deployment prices at nothing is entitled and switched on in the same breath,
+ * and there is no `invoice`. A priced one is billed and nothing else is written until
+ * the money arrives: it is not entitled, and `extension` is as it was. Either way
+ * `extension` is how the extension now stands, so the card is put straight from it.
+ */
+export interface ConsoleAcquireResult {
+  entitled: boolean
+  invoice: ConsoleAcquireInvoice | null
+  extension: ConsoleExtension
+}
+
+/**
+ * Ask for an add-on: it is either given and switched on, or billed for.
+ *
+ * Refused with 400 and a `code` — `already_entitled`, `not_an_addon`, `no_plan`, or one
+ * of the reasons no bill could be written; read it with `getConsoleErrorCode`.
+ */
+export async function acquireExtension(workspaceId: number, key: string): Promise<ConsoleAcquireResult> {
+  return apiFetch<ConsoleAcquireResult>(buildApiUrl(`${BASE}${workspaceId}/extensions/${key}/acquire/`), {
+    method: 'POST',
+    body: '{}'
+  })
+}
+
+/** An extension sold on top of the base plan, rather than bundled with it. */
+const PRICING_ADDON = 'addon'
+
+/**
+ * Whether the workspace has to acquire this extension before it can use it.
+ *
+ * Only an add-on is ever acquired, and only while no entitlement covers it — which is
+ * an add-on that has never been had, and one paused when its entitlement ran out. An
+ * extension that does not say either way is taken as entitled, so nothing is offered
+ * for acquiring against a server that cannot acquire it.
+ */
+export function needsAcquiring(extension: ConsoleExtension): boolean {
+  return extension.pricing === PRICING_ADDON && extension.entitled === false
 }
 
 // Usage and bills
