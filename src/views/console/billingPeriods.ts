@@ -14,7 +14,9 @@ import { getIntlLocale } from '@/utils/format'
 export const MONTH_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/
 
 /** The month a `YYYY-MM` or `YYYY-MM-DD` names, as a UTC date, or null when it is neither. */
-function toUtcDate(value: string): Date | null {
+function toUtcDate(value: string | null | undefined): Date | null {
+  if (!value) return null
+
   const parts = value.split('-').map(Number)
   const [year, month, day = 1] = parts
 
@@ -26,10 +28,10 @@ function toUtcDate(value: string): Date | null {
 }
 
 /** `2026-09` as the reader's language writes a month: September 2026, or 2026年9月. */
-export function formatPeriod(period: string, locale: string): string {
+export function formatPeriod(period: string | null | undefined, locale: string): string {
   const date = toUtcDate(period)
 
-  if (!date) return period
+  if (!date) return period || ''
 
   return new Intl.DateTimeFormat(getIntlLocale(locale), {
     year: 'numeric',
@@ -38,11 +40,16 @@ export function formatPeriod(period: string, locale: string): string {
   }).format(date)
 }
 
-/** `2026-09-01` as a short date. */
-export function formatDay(day: string, locale: string): string {
+/**
+ * `2026-09-01` as a short date.
+ *
+ * A date the API leaves empty prints as nothing: an invoice can be issued with no
+ * due date, and a cell that says nothing is the honest rendering of that.
+ */
+export function formatDay(day: string | null | undefined, locale: string): string {
   const date = toUtcDate(day)
 
-  if (!date) return day
+  if (!date) return day || ''
 
   return new Intl.DateTimeFormat(getIntlLocale(locale), { dateStyle: 'medium', timeZone: 'UTC' }).format(date)
 }
