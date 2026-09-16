@@ -7,6 +7,15 @@ import { getWorkspaceToken, setWorkspaceRefreshToken, setWorkspaceToken } from '
 import { useSocialProviderConfig } from '@/hooks/useSocialProviders'
 import { trackEvent } from '@/utils/analytics'
 
+// Google's sign-in script hangs itself off the window. The address field used to
+// declare this for its own use of the same global; it no longer loads anything from
+// Google, so the declaration lives with the one script that still does.
+declare global {
+  interface Window {
+    google: any
+  }
+}
+
 const GSI_SRC = 'https://accounts.google.com/gsi/client'
 
 /** Paths One Tap stays out of: the back-office has its own sign-in story. */
