@@ -205,8 +205,9 @@ export interface ConsoleInvoice {
   number: string
   /** `YYYY-MM`, the month the invoice bills for. */
   period: string
-  issue_date: string
-  due_date: string
+  /** Both can be empty: a bill can be issued without either date. */
+  issue_date: string | null
+  due_date: string | null
   /** The server's own word for it, such as `sent` or `paid`; read it with `invoiceState`. */
   status: string
   paid_date: string | null
