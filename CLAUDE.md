@@ -194,7 +194,6 @@ These symlinks are gitignored via `extensions/*/node_modules` in the root `.giti
 | `NEXT_PUBLIC_WORKSPACE_ID` | No | Bind to a specific workspace; omit for platform instances |
 | `NEXT_PUBLIC_PLATFORM_LOGIN_URL` | No | When set, `/auth/login` redirects here |
 | `ENABLED_PLUGINS` / `NEXT_PUBLIC_ENABLED_PLUGINS` | No | Comma-separated plugin IDs (default: all) |
-| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | No | Address autocomplete |
 | `NEXT_PUBLIC_MEDIA_URL` | No | Defaults to `NEXT_PUBLIC_API_URL/media` |
 | `API_URL` | No | Server-side only (Docker internal); falls back to `NEXT_PUBLIC_API_URL` |
 | `NEXT_FILE_TRACING_ROOT` | No | Set to `/app` in Docker; auto-detected otherwise |

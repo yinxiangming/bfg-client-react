@@ -1,12 +1,12 @@
 /**
- * Address lookup, served by the server's `apps.geo` at `/api/v1/geo/`.
+ * Address lookup, served by the server at `/api/v1/geo/`.
  *
- * The web storefront talks to Google directly through the browser SDK
- * (`components/storefront/AddressAutocomplete.tsx`); these endpoints exist for
- * clients that cannot load it — the WeChat mini-program above all. The admin uses
- * `getAddressLookupStatus` to show an operator what the server actually resolved,
- * which is the only way to tell a workspace that is switched on from one that is
- * switched on but has no `GOOGLE_MAPS_API_KEY` behind it.
+ * Every client comes through here, browsers included: the provider is called from
+ * the server, so its key never ships to a page and the workspace that spent the
+ * lookup is the one billed for it. The admin uses `getAddressLookupStatus` to show
+ * an operator what the server actually resolved, which is the only way to tell a
+ * workspace that is switched on from one that is switched on but has no
+ * `GOOGLE_MAPS_API_KEY` behind it.
  *
  * Suggest, resolve and reverse are billed to the workspace, and the server refuses
  * them with 402 `usage_cap_reached` once the month's budget is gone. That refusal is
@@ -115,6 +115,49 @@ async function billedCall<T>(run: () => Promise<T>): Promise<T> {
   }
 }
 
+/**
+ * One run of the typeahead, from the first keystroke to the address that was picked.
+ *
+ * The provider prices a run, not a request: every suggestion asked for under the
+ * same token is charged once, when the resolve at the end of it says which address
+ * the run was for. A token per run therefore costs one lookup; a token per keystroke
+ * costs one per character typed, and no token at all costs the same again. So the
+ * token has to outlive each keystroke and be spent by the selection — which is what
+ * {@link renew} marks, leaving the next run to start clean.
+ *
+ * It lives here rather than in each field so that "one run, one token" is decided
+ * once, in the only place that knows what the calls cost.
+ */
+export type AddressLookupSession = {
+  /** The token every call of the run in progress carries. */
+  current(): string
+  /** End the run, once a selection has been resolved: the next call starts a new one. */
+  renew(): void
+}
+
+function newSessionToken(): string {
+  // The server truncates at 64 characters and the provider wants an opaque string;
+  // a UUID is both. `randomUUID` needs a secure context, which a form on http://
+  // in development is not, so it cannot simply be assumed.
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID()
+  }
+
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
+}
+
+/** A fresh {@link AddressLookupSession}, ready for the first keystroke. */
+export function createAddressLookupSession(): AddressLookupSession {
+  let token = newSessionToken()
+
+  return {
+    current: () => token,
+    renew: () => {
+      token = newSessionToken()
+    }
+  }
+}
+
 export async function getAddressLookupStatus(): Promise<AddressLookupStatus> {
   // Not billed, so it still answers once the cap is reached, and a client that asks
   // it first still learns whether to offer the feature at all.
@@ -131,7 +174,11 @@ export async function getAddressLookupStatus(): Promise<AddressLookupStatus> {
  * to tell that silence apart from "nothing matched" — that is the one that earns a
  * line of help under the field.
  */
-export async function suggestAddresses(query: string, sessionToken?: string): Promise<AddressSuggestion[]> {
+export async function suggestAddresses(
+  query: string,
+  sessionToken?: string,
+  signal?: AbortSignal
+): Promise<AddressSuggestion[]> {
   // Nothing is sent once the latch is set: the answer cannot change this month, and
   // a typeahead would otherwise ask again on every keystroke to be told so.
   if (usageCapped) return []
@@ -141,7 +188,7 @@ export async function suggestAddresses(query: string, sessionToken?: string): Pr
 
   try {
     const res = await billedCall(() =>
-      apiFetch<{ results: AddressSuggestion[] }>(`${geoUrl('address/suggest/')}?${params}`)
+      apiFetch<{ results: AddressSuggestion[] }>(`${geoUrl('address/suggest/')}?${params}`, { signal })
     )
 
     return res?.results ?? []
@@ -160,11 +207,15 @@ export async function suggestAddresses(query: string, sessionToken?: string): Pr
  * as {@link isAddressLookupUsageCapError}. Callers show the help line and leave the
  * fields editable rather than blocking the form.
  */
-export async function resolveAddress(placeId: string, sessionToken?: string): Promise<ResolvedAddress> {
+export async function resolveAddress(
+  placeId: string,
+  sessionToken?: string,
+  signal?: AbortSignal
+): Promise<ResolvedAddress> {
   const params = new URLSearchParams({ place_id: placeId })
   if (sessionToken) params.set('session', sessionToken)
 
-  return billedCall(() => apiFetch<ResolvedAddress>(`${geoUrl('address/resolve/')}?${params}`))
+  return billedCall(() => apiFetch<ResolvedAddress>(`${geoUrl('address/resolve/')}?${params}`, { signal }))
 }
 
 /** A dropped pin turned into address fields; capped the same way as {@link resolveAddress}. */

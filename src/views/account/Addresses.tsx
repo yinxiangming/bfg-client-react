@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 
 // Next Imports
 import { useTranslations } from 'next-intl'
@@ -26,110 +26,12 @@ import TextField from '@mui/material/TextField'
 
 // Component Imports
 import CustomTextField from '@components/ui/TextField'
+import AddressLookupField from '@/components/ui/AddressLookupField'
 
 // Utils Imports
 import { meApi } from '@/utils/meApi'
-
-declare global {
-  interface Window {
-    google: any
-  }
-}
-
-const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-
-const loadGoogleMaps = async (): Promise<any | null> => {
-  if (typeof window === 'undefined') return null
-
-  // Check if Google Maps and Places API are already loaded
-  if (window.google?.maps?.places?.Autocomplete) {
-    return window.google
-  }
-
-  if (!GOOGLE_MAPS_API_KEY) {
-    console.error('Google Maps API key is missing')
-    return null
-  }
-
-  const existingScript = document.querySelector<HTMLScriptElement>('script[src*="maps.googleapis.com/maps/api/js"]')
-  if (existingScript) {
-    // Wait for places library to be available
-    return new Promise((resolve, reject) => {
-      let attempts = 0
-      const maxAttempts = 50 // 5 seconds max wait
-
-      const checkPlaces = () => {
-        if (window.google?.maps?.places?.Autocomplete) {
-          resolve(window.google)
-        } else if (attempts >= maxAttempts) {
-          reject(new Error('Google Maps Places API failed to load'))
-        } else {
-          attempts++
-          setTimeout(checkPlaces, 100)
-        }
-      }
-
-      if (window.google?.maps?.places?.Autocomplete) {
-        resolve(window.google)
-      } else {
-        existingScript.addEventListener('load', () => {
-          checkPlaces()
-        })
-        // Also check immediately in case script already loaded
-        checkPlaces()
-      }
-    })
-  }
-
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script')
-    // Load Places API - supports both new PlaceAutocompleteElement and legacy Autocomplete
-    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}&loading=async&libraries=places`
-    script.async = true
-    script.defer = true
-
-    let attempts = 0
-    const maxAttempts = 50 // 5 seconds max wait
-
-    script.onload = () => {
-      // Wait for places library to be fully initialized
-      const checkPlaces = () => {
-        if (window.google?.maps?.places?.Autocomplete) {
-          resolve(window.google)
-        } else if (attempts >= maxAttempts) {
-          reject(new Error('Google Maps Places API failed to load'))
-        } else {
-          attempts++
-          setTimeout(checkPlaces, 100)
-        }
-      }
-      checkPlaces()
-    }
-    script.onerror = err => reject(err)
-    document.head.appendChild(script)
-  })
-}
-
-const parseAddressComponents = (components: any[]) => {
-  const getComponent = (type: string) => components.find(component => component.types.includes(type))
-
-  const streetNumber = getComponent('street_number')?.long_name || ''
-  const route = getComponent('route')?.long_name || ''
-  const sublocality = getComponent('sublocality')?.long_name || ''
-  const locality = getComponent('locality')?.long_name || getComponent('postal_town')?.long_name || ''
-  const administrativeArea = getComponent('administrative_area_level_1')?.short_name || ''
-  const postalCode = getComponent('postal_code')?.long_name || ''
-  const countryShort = getComponent('country')?.short_name || ''
-
-  return {
-    addressLine1: [streetNumber, route].filter(Boolean).join(' ').trim(),
-    addressLine2: sublocality,
-    city: locality,
-    state: administrativeArea,
-    postalCode,
-    country: countryShort // ISO alpha-2 to satisfy backend max_length=2
-  }
-}
+import { resolvedAddressFields } from '@/hooks/useAddressLookup'
+import type { ResolvedAddress } from '@/services/geo'
 
 interface Address {
   id: number
@@ -168,7 +70,6 @@ const Addresses = ({ registerOpenHandler }: AddressesProps) => {
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [editingId, setEditingId] = useState<number | null>(null)
   const [userInfo, setUserInfo] = useState<{ first_name?: string; last_name?: string; email?: string } | null>(null)
-  const addressInputRef = useRef<HTMLInputElement | null>(null)
 
   const [formData, setFormData] = useState({
     full_name: '',
@@ -202,107 +103,6 @@ const Addresses = ({ registerOpenHandler }: AddressesProps) => {
     }
   }
 
-  // Initialize Google Maps Autocomplete when dialog opens
-  useEffect(() => {
-    if (!dialogOpen) return
-
-    let autocomplete: any = null
-    let cancelled = false
-    let timeoutId: NodeJS.Timeout | null = null
-
-    const initAutocomplete = async () => {
-      try {
-        // Wait a bit for the dialog to fully render
-        await new Promise(resolve => setTimeout(resolve, 100))
-
-        if (cancelled || !addressInputRef.current) return
-
-        const google = await loadGoogleMaps()
-        if (!google || !addressInputRef.current || cancelled) return
-
-        // Verify that Autocomplete is available
-        if (!google.maps?.places?.Autocomplete) {
-          console.error('Google Maps Places Autocomplete is not available')
-          return
-        }
-
-        // Note: Using legacy Autocomplete API
-        // Google recommends PlaceAutocompleteElement (Web Component) as of March 2025
-        // However, PlaceAutocompleteElement requires different integration in React
-        // Legacy API will continue to work with bug fixes for at least 12 months
-        // TODO: Migrate to PlaceAutocompleteElement when React integration patterns are established
-        // See: https://developers.google.com/maps/documentation/javascript/places-migration-overview
-        autocomplete = new google.maps.places.Autocomplete(addressInputRef.current, {
-          types: ['address'],
-          fields: ['address_components', 'formatted_address']
-        })
-
-        // Ensure autocomplete dropdown appears above Dialog (z-index: 1300)
-        const setZIndex = () => {
-          const pacContainer = document.querySelector('.pac-container') as HTMLElement
-          if (pacContainer) {
-            pacContainer.style.zIndex = '1400'
-          }
-        }
-
-        // Set z-index immediately and also after delays to ensure it's applied
-        setZIndex()
-        setTimeout(setZIndex, 100)
-        setTimeout(setZIndex, 300)
-
-        autocomplete.addListener('place_changed', () => {
-          const place = autocomplete.getPlace()
-          if (!place || !place.address_components) return
-          const parsed = parseAddressComponents(place.address_components)
-
-          setFormData(prev => ({
-            ...prev,
-            address_line1: parsed.addressLine1 || place.formatted_address || prev.address_line1,
-            address_line2: parsed.addressLine2 || prev.address_line2,
-            city: parsed.city || prev.city,
-            state: parsed.state || prev.state,
-            postal_code: parsed.postalCode || prev.postal_code,
-            country: parsed.country || prev.country
-          }))
-        })
-
-        // Monitor for dropdown container creation and set z-index
-        const inputElement = addressInputRef.current
-        if (inputElement) {
-          const observer = new MutationObserver(() => {
-            setZIndex()
-          })
-          observer.observe(document.body, { childList: true, subtree: true })
-
-          // Store observer for cleanup
-          ;(autocomplete as any)._observer = observer
-        }
-      } catch (err) {
-        console.error('Failed to initialize Google Maps Autocomplete:', err)
-      }
-    }
-
-    timeoutId = setTimeout(() => {
-      initAutocomplete()
-    }, 200)
-
-    return () => {
-      cancelled = true
-      if (timeoutId) {
-        clearTimeout(timeoutId)
-      }
-      if (autocomplete) {
-        if (window.google?.maps?.event) {
-          window.google.maps.event.clearInstanceListeners(autocomplete)
-        }
-        // Clean up observer if it exists
-        if ((autocomplete as any)._observer) {
-          ;(autocomplete as any)._observer.disconnect()
-        }
-      }
-    }
-  }, [dialogOpen])
-
   useEffect(() => {
     if (registerOpenHandler) {
       registerOpenHandler(() => handleOpenDialog())
@@ -326,6 +126,12 @@ const Addresses = ({ registerOpenHandler }: AddressesProps) => {
 
   const handleFormChange = (field: string, value: string | boolean) => {
     setFormData({ ...formData, [field]: value })
+  }
+
+  // A suggestion is picked for the whole address, not just the street line, so the
+  // rest of the form follows it.
+  const handleAddressResolved = (resolved: ResolvedAddress) => {
+    setFormData(prev => ({ ...prev, ...resolvedAddressFields(resolved) }))
   }
 
   const handleOpenDialog = async (address?: Address) => {
@@ -448,28 +254,6 @@ const Addresses = ({ registerOpenHandler }: AddressesProps) => {
     setDeleteDialogOpen(false)
     setDeletingId(null)
   }
-
-  // Add global style for Google Maps Autocomplete dropdown
-  useEffect(() => {
-    const styleId = 'google-maps-autocomplete-zindex'
-    if (!document.getElementById(styleId)) {
-      const style = document.createElement('style')
-      style.id = styleId
-      style.textContent = `
-        .pac-container {
-          z-index: 1400 !important;
-        }
-      `
-      document.head.appendChild(style)
-    }
-
-    return () => {
-      const style = document.getElementById(styleId)
-      if (style) {
-        style.remove()
-      }
-    }
-  }, [])
 
   return (
     <Grid container spacing={6}>
@@ -632,13 +416,12 @@ const Addresses = ({ registerOpenHandler }: AddressesProps) => {
               />
             </Grid>
             <Grid size={{ xs: 12 }}>
-              {/* Use native MUI TextField to ensure inputRef works with Google Autocomplete */}
-              <TextField
-                fullWidth
-                inputRef={addressInputRef}
+              <AddressLookupField
+                component={TextField}
                 label={t('addressLine1')}
                 value={formData.address_line1}
-                onChange={e => handleFormChange('address_line1', e.target.value)}
+                onChange={value => handleFormChange('address_line1', value)}
+                onResolved={handleAddressResolved}
                 placeholder={t('addressLine1Placeholder')}
                 required
                 helperText={t('addressLine1Helper')}

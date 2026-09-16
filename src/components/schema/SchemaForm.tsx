@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useState, useEffect, useMemo, useRef, Fragment } from 'react'
+import { useState, useEffect, useMemo, useRef, useCallback, Fragment } from 'react'
 import type { ReactNode } from 'react'
 
 // i18n Imports
@@ -163,7 +163,19 @@ type SchemaFormProps<T = any> = {
   hideActions?: boolean
   hideTitle?: boolean
   formId?: string
-  customFieldRenderer?: (field: FormField, value: any, onChange: (value: any) => void, error?: string) => React.ReactNode
+  customFieldRenderer?: (
+    field: FormField,
+    value: any,
+    onChange: (value: any) => void,
+    error: string | undefined,
+    /**
+     * Write other fields of this form, for a field that answers for more than
+     * itself — an address line that also knows the city, say. `onChange` only ever
+     * reaches the field it belongs to, and the form owns the rest of the values, so
+     * without this a custom renderer has nowhere to put them.
+     */
+    setValues: (values: Record<string, any>) => void
+  ) => React.ReactNode
   /** Injected rows inside the form after the given field (legacy flat `fields` only). */
   formSlots?: { afterField: string; children: ReactNode }[]
 }
@@ -224,7 +236,7 @@ export default function SchemaForm<T extends Record<string, any>>({
     if (!customFieldRenderer) return new Set<string>()
     const customFields = new Set<string>()
     fields.forEach(field => {
-      const testRender = customFieldRenderer(field, '', () => {}, '')
+      const testRender = customFieldRenderer(field, '', () => {}, '', () => {})
       if (testRender !== null && testRender !== undefined) {
         customFields.add(field.field)
       }
@@ -416,6 +428,17 @@ export default function SchemaForm<T extends Record<string, any>>({
     }
   }, [initialData])
 
+  /** Several fields at once, for a custom renderer that resolved more than its own. */
+  const setValues = useCallback((values: Record<string, any>) => {
+    setFormData(prev => ({ ...prev, ...values }))
+    setErrors(prev => {
+      const next = { ...prev }
+      for (const field of Object.keys(values)) delete next[field]
+
+      return next
+    })
+  }, [])
+
   async function handleChange(field: string, value: any) {
     const newFormData = { ...formData, [field]: value }
     setFormData(newFormData)
@@ -582,7 +605,13 @@ export default function SchemaForm<T extends Record<string, any>>({
 
     // Use custom renderer if provided
     if (customFieldRenderer && !isReadonly) {
-      const customRendered = customFieldRenderer(field, value, (newValue) => handleChange(field.field, newValue), error)
+      const customRendered = customFieldRenderer(
+        field,
+        value,
+        newValue => handleChange(field.field, newValue),
+        error,
+        setValues
+      )
       if (customRendered !== null && customRendered !== undefined) {
         return customRendered
       }

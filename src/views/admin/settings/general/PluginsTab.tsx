@@ -34,6 +34,7 @@ import {
 } from '@/components/admin/settings/SettingsSection'
 import CustomTextField from '@/components/ui/TextField'
 import { getAddressLookupStatus, type AddressLookupStatus } from '@/services/geo'
+import { resetAddressLookupAvailability } from '@/hooks/useAddressLookup'
 import {
   getWorkspaceSettings,
   invalidateWorkspaceSettingsCache,
@@ -118,6 +119,9 @@ const PluginsTab = () => {
         }
       })
       invalidateWorkspaceSettingsCache()
+      // Address fields ask once whether there is a lookup behind them and remember
+      // the answer. It was just changed, so that memory is now wrong.
+      resetAddressLookupAvailability()
       // Re-ask the server: the country that is now in force may be the workspace's
       // own market rather than the blank field above, and only the server knows.
       await loadStatus()
