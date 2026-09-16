@@ -397,5 +397,9 @@
     "subject": "Subject",
     "message": "Message",
     "sending": "Sending..."
+  },
+  "ordering": {
+    "closedShort": "Not accepting orders",
+    "closedNotice": "This shop is not accepting new orders at the moment. You can still browse, and any order you have already placed is unaffected."
   }
 }

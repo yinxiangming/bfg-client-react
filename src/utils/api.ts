@@ -2,6 +2,7 @@
 
 import { refreshTokenIfNeeded } from './tokenRefresh'
 import { getApiLanguageHeaders } from '@/i18n/http'
+import { getApiErrorMessage } from './apiErrors'
 import { getWorkspaceApiBaseUrlFromEnv } from './apiUrls'
 import { getWorkspaceToken, readWorkspaceIdClaim, WORKSPACE_ID_KEY } from './authTokens'
 
@@ -460,6 +461,9 @@ export async function apiFetch<T>(
             errorDetail = parts.join('; ')
           }
         }
+        // A refusal with a code we explain ourselves reads better in the visitor's
+        // language than in the server's. Everything else keeps the server's wording.
+        errorDetail = getApiErrorMessage(errorData?.code) ?? errorDetail
         if (errorDetail.includes('token') && errorDetail.includes('not valid')) {
           console.error('[apiFetch] Token validation error:', errorDetail)
         }

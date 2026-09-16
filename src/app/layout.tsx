@@ -11,6 +11,7 @@ import ThemeProvider from '@components/theme/ThemeProvider'
 import RootLayoutChrome from '@components/layout/RootLayoutChrome'
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics'
 import GoogleOneTap from '@/components/auth/GoogleOneTap'
+import ApiErrorMessages from '@/components/i18n/ApiErrorMessages'
 import { CartProvider } from '@/contexts/CartContext'
 import { AppDialogProvider } from '@/contexts/AppDialogContext'
 
@@ -134,6 +135,7 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
         <GoogleOneTap />
 
         <NextIntlClientProvider messages={messages}>
+          <ApiErrorMessages />
           <ThemeProvider initialMode={initialMode}>
             <AppDialogProvider>
               <CartProvider>{content}</CartProvider>

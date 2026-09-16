@@ -399,6 +399,19 @@ body {
   font-size: 0.875rem;
 }
 
+/* Same shape as the backorder note above, in the sheet's neutral tone. A shop that is
+   not taking orders is a statement of fact about the whole shop, not a warning about
+   one item, so it does not borrow the amber. */
+.sf-ordering-closed-note {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  background-color: rgba(100, 116, 139, 0.12);
+  border: 1px solid rgba(100, 116, 139, 0.35);
+  color: #334155;
+  font-size: 0.875rem;
+}
+
 /* No general text input existed in this sheet — the only one was `.sf-search-input`,
    sized for the header. This is that treatment without the fixed width and icon inset. */
 .sf-product-notify-input {
@@ -508,6 +521,22 @@ body {
 
 .sf-btn-full {
   width: 100%;
+}
+
+/* This sheet never said what an unavailable button looks like, so one that was already
+   disabled — sold out, mid-request — kept the full primary fill and still lit up under
+   the cursor. Anything that refuses to be pressed should look like it. */
+.sf-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.sf-btn-primary:disabled:hover {
+  background-color: var(--primary-color, #6366f1);
+}
+
+.sf-btn-secondary:disabled:hover {
+  background-color: #6b7280;
 }
 
 /* Hero Carousel */
@@ -1980,6 +2009,10 @@ body {
 
 [data-mode='dark'] .sf-product-backorder-note {
   color: #fcd34d;
+}
+
+[data-mode='dark'] .sf-ordering-closed-note {
+  color: #cbd5e1;
 }
 
 [data-mode='dark'] .sf-product-notify-done {

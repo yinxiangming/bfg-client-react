@@ -15,6 +15,7 @@ import D365StyleLayout from '@/components/admin/layout/D365StyleLayout'
 import type { MenuNode } from '@/types/menu'
 import { StaffMemberProvider, useStaffMemberContext } from '@/contexts/StaffMemberContext'
 import AdminAccessGuard from '@/components/admin/AdminAccessGuard'
+import WorkspaceReadOnlyBanner from '@/components/admin/WorkspaceReadOnlyBanner'
 import { AdminSkinProvider } from '@/contexts/AdminSkinContext'
 import { useWorkspaceChangeReload } from '@/hooks/useWorkspaceChangeReload'
 
@@ -82,8 +83,14 @@ function AdminShell({
   const onDisabledPluginPage =
     extensionIds.includes(pluginSegment) && !isExtensionEnabled(pluginSegment, extensions)
 
+  // The read-only notice belongs to the shell, not to any page: every back-office
+  // page is equally affected, and stating it once here is what keeps the pages
+  // themselves from each having to remember to.
   return (
-    <D365StyleLayout navItems={navItems}>{onDisabledPluginPage ? <ExtensionDisabledNotice /> : children}</D365StyleLayout>
+    <D365StyleLayout navItems={navItems}>
+      <WorkspaceReadOnlyBanner />
+      {onDisabledPluginPage ? <ExtensionDisabledNotice /> : children}
+    </D365StyleLayout>
   )
 }
 

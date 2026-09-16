@@ -4796,5 +4796,10 @@
       "tax": "Tax",
       "total": "Total"
     }
+  },
+  "workspaceReadOnly": {
+    "title": "This workspace is read only",
+    "body": "Its plan has not been renewed, so nothing here can be changed for now. You can still read every page, run every report and export your data. Renewing puts it back the way it was — nothing has been deleted.",
+    "action": "Renew plan"
   }
 }
