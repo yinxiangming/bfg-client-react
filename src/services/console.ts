@@ -1,5 +1,6 @@
 /**
- * The console's view of the workspaces a person runs, and of the extensions each one uses.
+ * The console's view of the workspaces a person runs: the extensions each one uses, what
+ * it has metered this month, and the invoices it has been sent.
  *
  * It is backed by `/api/v1/platform/console/workspaces/`, which answers platform
  * administrators for every workspace and owners for the ones they own; anyone else is
@@ -145,6 +146,115 @@ export async function deactivateExtension(workspaceId: number, key: string): Pro
     method: 'POST',
     body: '{}'
   })
+}
+
+// Usage and bills
+
+/** What one meter recorded: how much of it ran, and what that came to in points. */
+export interface ConsoleUsageMeter {
+  /** The meter's key, which is whatever the extension that records it calls itself. */
+  meter: string
+  quantity: string
+  points: string
+}
+
+/** A meter's total for the month, with the points priced in the workspace's currency. */
+export interface ConsoleUsageMeterTotal extends ConsoleUsageMeter {
+  /** null when there was no rate to convert the points with. */
+  amount: string | null
+}
+
+export interface ConsoleUsageDay {
+  /** `YYYY-MM-DD`. */
+  day: string
+  points: string
+  meters: ConsoleUsageMeter[]
+}
+
+/**
+ * One workspace's metered usage for one month.
+ *
+ * Points are what the platform counts; `cap_points` is how many the workspace may spend
+ * before metered features stop. Every figure arrives as a decimal string, points with
+ * eight places and money with the currency's own.
+ */
+export interface ConsoleUsage {
+  /** `YYYY-MM`, the month these figures cover. */
+  month: string
+  currency: string
+  cap_points: string
+  used_points: string
+  remaining_points: string
+  /** The used points in `currency`; null when no rate could be found. */
+  estimated_amount: string | null
+  /** An invoice is past due, so metered features are paused until it is paid. */
+  overdue: boolean
+  meters: ConsoleUsageMeterTotal[]
+  days: ConsoleUsageDay[]
+}
+
+export interface ConsoleInvoiceItem {
+  description: string
+  quantity: string
+  unit_price: string
+  subtotal: string
+}
+
+export interface ConsoleInvoice {
+  id: number
+  number: string
+  /** `YYYY-MM`, the month the invoice bills for. */
+  period: string
+  issue_date: string
+  due_date: string
+  /** The server's own word for it, such as `sent` or `paid`; read it with `invoiceState`. */
+  status: string
+  paid_date: string | null
+  overdue: boolean
+  currency: string
+  subtotal: string
+  tax: string
+  total: string
+  items: ConsoleInvoiceItem[]
+}
+
+/** How an invoice reads to the person who owes it. */
+export type ConsoleInvoiceState = 'paid' | 'overdue' | 'unpaid'
+
+/**
+ * Paid wins over past due, because an invoice settled late is settled; anything the
+ * server has not called paid and has not flagged is simply still owed.
+ */
+export function invoiceState(invoice: ConsoleInvoice): ConsoleInvoiceState {
+  if (invoice.status === 'paid' || invoice.paid_date) return 'paid'
+
+  return invoice.overdue ? 'overdue' : 'unpaid'
+}
+
+/**
+ * An amount next to its currency, exactly as the server rounded it.
+ *
+ * Money arrives as a decimal string and is printed as it arrived: a round trip through a
+ * float can move the last cent, and nothing on these pages is ever added up here — every
+ * total, tax and estimate is the server's. The code rather than a symbol, because the
+ * bills page puts several workspaces on one table and `$` would not say which dollar.
+ */
+export function formatMoney(amount: string, currency: string): string {
+  return `${currency} ${amount}`
+}
+
+/** One workspace's metered usage; `month` is `YYYY-MM`, and omitting it means this month. */
+export async function getWorkspaceUsage(id: number, month?: string): Promise<ConsoleUsage> {
+  const query = month ? `?${new URLSearchParams({ month })}` : ''
+
+  return apiFetch<ConsoleUsage>(buildApiUrl(`${BASE}${id}/usage/${query}`))
+}
+
+/** Every invoice raised against one workspace, newest first as the server orders them. */
+export async function listWorkspaceInvoices(id: number): Promise<ConsoleInvoice[]> {
+  const payload = await apiFetch<Page<ConsoleInvoice> | ConsoleInvoice[]>(buildApiUrl(`${BASE}${id}/invoices/`))
+
+  return Array.isArray(payload) ? payload : payload.results ?? []
 }
 
 /** The business code a console refusal carries, such as `workspace_suspended`. */

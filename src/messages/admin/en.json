@@ -4724,6 +4724,77 @@
       "forbidden": "Only platform administrators can see every workspace.",
       "loadMore": "Load more",
       "showing": "Showing {shown} of {count}"
+    },
+    "usage": {
+      "title": "Usage",
+      "subtitle": "what this workspace has metered, and how much of its allowance is left",
+      "loading": "Loading usage",
+      "loadFailed": "Couldn't load this workspace's usage.",
+      "notFound": "This workspace doesn't exist, or you don't run it.",
+      "month": "Month",
+      "used": "Used",
+      "cap": "Allowance",
+      "remaining": "Left",
+      "points": "{points} pts",
+      "estimated": "About {amount} at this month's rate",
+      "noEstimate": "There's no rate to put a figure on these points yet.",
+      "overdue": {
+        "title": "Metered features are paused",
+        "body": "An invoice is past due. Everything metered starts up again as soon as it is paid, and nothing is lost in the meantime."
+      },
+      "byMeter": "By meter",
+      "byDay": "By day",
+      "columns": {
+        "meter": "Meter",
+        "quantity": "Quantity",
+        "points": "Points",
+        "amount": "Amount",
+        "day": "Day",
+        "meters": "Meters"
+      },
+      "empty": "Nothing was metered this month."
+    },
+    "bills": {
+      "title": "Bills",
+      "subtitle": "every invoice for the workspaces you own",
+      "loading": "Loading bills",
+      "loadFailed": "Couldn't load your workspaces.",
+      "noWorkspaces": "You don't own a workspace yet, so there is nothing to bill.",
+      "empty": "No invoice has been raised yet.",
+      "noneLoaded": "No invoice could be loaded.",
+      "partial": "Couldn't load the bills for {names}.",
+      "paymentComing": "Paying from here is on its way. Until then, settle an invoice the way you do today.",
+      "overdue": {
+        "title": "{count, plural, one {# invoice is past due} other {# invoices are past due}}",
+        "body": "Metered features stay paused for those workspaces until the invoice is paid."
+      },
+      "columns": {
+        "workspace": "Workspace",
+        "period": "Period",
+        "issued": "Issued",
+        "due": "Due",
+        "total": "Total",
+        "status": "Status"
+      },
+      "status": {
+        "paid": "Paid",
+        "unpaid": "Unpaid",
+        "overdue": "Past due"
+      },
+      "expand": "Show what is on this invoice",
+      "collapse": "Hide what is on this invoice",
+      "number": "Invoice {number}",
+      "paidOn": "Paid {date}",
+      "noLines": "This invoice has no lines.",
+      "lines": {
+        "description": "Description",
+        "quantity": "Quantity",
+        "unitPrice": "Unit price",
+        "subtotal": "Subtotal"
+      },
+      "subtotal": "Subtotal",
+      "tax": "Tax",
+      "total": "Total"
     }
   }
 }

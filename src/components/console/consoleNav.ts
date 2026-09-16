@@ -3,9 +3,10 @@
  * platform's own group for a platform administrator.
  *
  * Only an owner can manage a workspace here, so a workspace the account merely works in
- * has no node of its own; it is on the list page, which opens its admin. Usage, bills and
- * platform settings are phase 3, and sit in the tree disabled so its final shape is
- * already visible.
+ * has no node of its own; it is on the list page, which opens its admin. Bills are the
+ * account's rather than one workspace's, so they sit in their own section instead of
+ * under every workspace. Platform settings are a later round, and sit in the tree
+ * disabled so its final shape is already visible.
  */
 
 import type { MenuNode } from '@/types/menu'
@@ -58,7 +59,12 @@ function workspaceNode(workspace: ConsoleNavWorkspace, prefix: string, labels: C
         icon: 'tabler-puzzle',
         href: `${base}/extensions`
       },
-      { id: `${prefix}-${workspace.id}-usage`, label: labels.usage, icon: 'tabler-chart-bar', disabled: true }
+      {
+        id: `${prefix}-${workspace.id}-usage`,
+        label: labels.usage,
+        icon: 'tabler-chart-bar',
+        href: `${base}/usage`
+      }
     ]
   }
 }
@@ -84,7 +90,9 @@ export function buildConsoleNav({ owned, isPlatformAdmin, openWorkspace, labels 
       type: 'section',
       id: 'console-billing',
       label: labels.billing,
-      children: [{ id: 'console-bills', label: labels.bills, icon: 'tabler-file-invoice', disabled: true }]
+      children: [
+        { id: 'console-bills', label: labels.bills, icon: 'tabler-file-invoice', href: '/workspaces/billing' }
+      ]
     }
   ]
 
