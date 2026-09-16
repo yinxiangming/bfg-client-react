@@ -4835,7 +4835,6 @@
       "empty": "还没有开出过发票。",
       "noneLoaded": "一张发票都没能加载出来。",
       "partial": "没能加载 {names} 的账单。",
-      "paymentComing": "在这里付款的功能即将上线。在那之前，还是按现在的方式结清发票。",
       "overdue": {
         "title": "有 {count} 张发票已逾期",
         "body": "在付清之前，这些工作区的按量功能会一直暂停。"
@@ -4866,7 +4865,55 @@
       },
       "subtotal": "小计",
       "tax": "税费",
-      "total": "合计"
+      "total": "合计",
+      "pay": {
+        "title": "支付发票 {number}",
+        "opening": "正在发起付款…",
+        "failed": "没能发起这笔付款。",
+        "gateway": "付款渠道",
+        "pendingTitle": "这笔付款还在进行中",
+        "pending": {
+          "card": "付款单 {number} 目前是待处理。卡款由支付服务商扣取，要等服务商的确认回到我们这边，这张发票才会变成已付——不是你提交卡号的那一刻。",
+          "offline": "付款单 {number} 目前是待处理。我们收到款项并核对确认之后，这张发票才会变成已付；不是你转出的那一刻。",
+          "unknown": "付款单 {number} 目前是待处理。请按下面这个网关的要求把它完成。只有这笔付款被确认之后，这张发票才会变成已付，而那不会发生在这个页面上。"
+        },
+        "instructions": {
+          "title": "怎么付",
+          "none": "这个网关没有给出任何付款信息。告诉我们，我们来处理。"
+        },
+        "fields": {
+          "bank_name": "开户银行",
+          "account_name": "户名",
+          "account_number": "账号",
+          "routing_number": "路由号",
+          "swift_code": "SWIFT 代码",
+          "accepted_methods": "可用的付款方式"
+        },
+        "reference": "付款时请注明发票号 {number}，我们才能把这笔钱对到这张账单上。",
+        "unknownNote": "这笔付款要在控制台之外完成。请按上面这个网关给出的信息去付；如果上面没写清楚要怎么做，告诉我们。",
+        "card": {
+          "details": "卡号信息",
+          "name": "持卡人姓名（可不填）",
+          "submit": "支付 {amount}",
+          "secure": "卡号直接交给支付服务商，不会经过我们。",
+          "notReady": "卡号输入框还没加载好。稍等一下再试；要是一直加载不出来，告诉我们。",
+          "failed": "这张卡没有被受理。",
+          "charged": "卡已扣款成功。等服务商的确认回到我们这边，这张发票就会变成已付，通常就在稍后。",
+          "inFlight": "服务商还在处理这张卡。等它确认扣款之后，这张发票才会变成已付。"
+        }
+      },
+      "errors": {
+        "workspace_not_found": "你已经打不开这个工作区了，它的账单也就没法在这里付。",
+        "invoice_not_found": "这张发票已经不在了。",
+        "invoice_already_paid": "这张发票已经付过了。",
+        "invoice_cancelled": "这张发票已作废，不用再付。",
+        "invoice_nothing_to_pay": "这张发票已经没有要付的金额了。",
+        "no_payment_gateway": "平台没有启用任何支付网关，这笔钱现在没处收。告诉我们，我们去配一个。",
+        "payment_gateway_not_found": "这笔付款要走的支付网关已经不在了。告诉我们，我们来处理。",
+        "payment_gateway_unavailable": "这个支付网关现在收不了款。过一会再试；要是一直这样，告诉我们。",
+        "payment_in_progress": "这张发票已经有一笔付款正在进行。请把那一笔完成，或者找我们处理掉——再发起一次没有用。",
+        "platform_workspace_missing": "这个部署还没配好平台收款。告诉我们，我们来处理。"
+      }
     },
     "platform": {
       "title": "平台设置",

@@ -319,6 +319,87 @@ export async function listWorkspaceInvoices(id: number): Promise<ConsoleInvoice[
   return Array.isArray(payload) ? payload : payload.results ?? []
 }
 
+/**
+ * The gateway the server picked to take this payment.
+ *
+ * `type` is the gateway plugin's own word for itself — `stripe`, `bank_transfer`,
+ * `pay_in_store`, `custom`, or whatever else a deployment has installed — and the caller
+ * decides what to put in front of the payer from that.
+ */
+export interface ConsolePaymentGateway {
+  id: number
+  type: string
+  name: string
+  /**
+   * What this gateway publishes to whoever is paying: an account to transfer to, a
+   * publishable key, a note. The same set the checkout page is given, so nothing here is
+   * secret — a gateway keeps its credentials to itself.
+   */
+  instructions: Record<string, unknown>
+}
+
+/**
+ * The attempt opened against the invoice.
+ *
+ * `status` is `pending` on every answer. Asking to pay is not paying: a card is settled
+ * when the gateway calls back, and money sent offline when whoever reconciles it says so.
+ */
+export interface ConsoleInvoicePayment {
+  id: number
+  number: string
+  status: string
+  amount: string
+  currency: string
+}
+
+/** How the invoice stands now — a summary, not the whole record the list carries. */
+export interface ConsolePayableInvoice {
+  id: number
+  number: string
+  status: string
+  total: string
+  currency: string
+  due_date: string | null
+}
+
+export interface ConsolePayInvoiceResult {
+  invoice: ConsolePayableInvoice
+  payment: ConsoleInvoicePayment
+  gateway: ConsolePaymentGateway
+  /** The gateway's own half of it: Stripe sends `payment_intent_id` and `client_secret`. */
+  gateway_payload: Record<string, unknown>
+}
+
+/**
+ * Open a payment against one platform invoice, by its number.
+ *
+ * Which gateway takes it is the server's to decide and not the payer's to choose: a
+ * workspace cannot read the platform's gateways at all, so there is nothing to offer and
+ * no gateway is sent. A suspended workspace may still pay — that is when it most needs
+ * to. Refused with a `code`: `invoice_already_paid`, `payment_in_progress` and the rest;
+ * read it with `getConsoleErrorCode`.
+ */
+export async function payWorkspaceInvoice(
+  workspaceId: number,
+  invoiceNumber: string
+): Promise<ConsolePayInvoiceResult> {
+  return apiFetch<ConsolePayInvoiceResult>(
+    buildApiUrl(`${BASE}${workspaceId}/invoices/${encodeURIComponent(invoiceNumber)}/pay/`),
+    { method: 'POST', body: '{}' }
+  )
+}
+
+/**
+ * One entry of a gateway's `instructions` or `gateway_payload`, when it is text worth
+ * showing. Anything a gateway sends as a flag, a number or a structure is not something a
+ * page can put in front of a payer without knowing that gateway, so it reads as absent.
+ */
+export function gatewayText(bag: Record<string, unknown>, key: string): string {
+  const value = bag[key]
+
+  return typeof value === 'string' ? value.trim() : ''
+}
+
 /** The business code a console refusal carries, such as `workspace_suspended`. */
 export function getConsoleErrorCode(error: unknown): string | null {
   const body = (error as { validationErrors?: Record<string, unknown> } | null)?.validationErrors
