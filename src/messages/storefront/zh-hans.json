@@ -397,5 +397,9 @@
     "subject": "主题",
     "message": "留言",
     "sending": "发送中..."
+  },
+  "ordering": {
+    "closedShort": "暂不接单",
+    "closedNotice": "本店暂时不接受新订单。您仍然可以浏览商品，已经下过的订单不受影响。"
   }
 }

@@ -116,6 +116,16 @@ export type StorefrontConfig = {
   header_options?: StorefrontHeaderOptions
   /** When true, new reviews require admin approval before showing. Default false. */
   review_moderation_required?: boolean
+  /**
+   * True while the shop is not taking new orders. Public, and says only that much:
+   * why a shop is closed is the workspace's business, not the shopper's, so nothing
+   * here names a reason or an amount.
+   *
+   * Absent on servers that do not report it, which reads the same as an open shop —
+   * selling is the storefront's whole purpose and it must never close itself on a
+   * field it simply did not receive.
+   */
+  read_only?: boolean
   /** SKU / stock visibility and out-of-stock behaviour. See StorefrontDisplaySettings. */
   storefront_display?: StorefrontDisplaySettings
   /**
@@ -304,6 +314,19 @@ export function getStorefrontDisplay(
   config?: Pick<StorefrontConfig, 'storefront_display'> | null
 ): StorefrontDisplaySettings {
   return { ...DEFAULT_STOREFRONT_DISPLAY, ...(config?.storefront_display ?? {}) }
+}
+
+/**
+ * Whether this shop is taking orders.
+ *
+ * Fails open, for the same reason getStorefrontDisplay() falls back to the server's
+ * own defaults: a config that has not loaded, or a server that predates the field,
+ * must leave the purchase path alone rather than close a shop that is trading.
+ */
+export function isStorefrontAcceptingOrders(
+  config?: Pick<StorefrontConfig, 'read_only'> | null
+): boolean {
+  return config?.read_only !== true
 }
 
 /** Default header options (all true). Used when config is not yet loaded. */

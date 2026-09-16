@@ -48,6 +48,8 @@ const defaultConfig: StorefrontConfig = {
     show_login: true,
   },
   storefront_display: DEFAULT_STOREFRONT_DISPLAY,
+  // A shop whose config never arrived is still open for business.
+  read_only: false,
 }
 
 const StorefrontConfigContext = createContext<StorefrontConfigContextType | undefined>(undefined)

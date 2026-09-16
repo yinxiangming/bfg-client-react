@@ -11,6 +11,7 @@ import { useTranslations } from 'next-intl'
 
 // Component Imports
 import ProductCard from './components/ProductCard'
+import OrderingClosedNotice from './components/OrderingClosedNotice'
 import ImageViewerDialog from '@/components/ui/ImageViewerDialog'
 import { useCart } from '@/contexts/CartContext'
 
@@ -22,6 +23,7 @@ import { authApi } from '@/utils/authApi'
 import { useStorefrontConfigSafe } from '@/contexts/StorefrontConfigContext'
 import { getStorefrontDisplay } from '@/utils/storefrontConfig'
 import { useStorefrontCurrency } from '@/hooks/useStorefrontCurrency'
+import { useStorefrontOrdering } from '@/hooks/useStorefrontOrdering'
 
 // Import CSS
 import '@/styles/storefront.css'
@@ -164,6 +166,7 @@ const ProductDetailPage = ({
   const { beforeSections, afterSections } = usePageSections('storefront/product')
   const storefrontConfig = useStorefrontConfigSafe()
   const display = getStorefrontDisplay(storefrontConfig)
+  const { acceptingOrders } = useStorefrontOrdering()
 
   const fetchReviews = useCallback(async (pid: string) => {
     setReviewsLoading(true)
@@ -269,6 +272,9 @@ const ProductDetailPage = ({
 
   const handleAddToCart = async () => {
     if (!product) return
+    // The button below is already disabled; this is the same answer for anything that
+    // gets past it — a stale render, a keyboard, a script.
+    if (!acceptingOrders) return
     
     // Find variant ID based on selected size and color
     let variantId: number | undefined = undefined
@@ -654,8 +660,9 @@ const ProductDetailPage = ({
             </div>
           </div>
 
-          {/* Add to Cart, or what stands in for it when the product has run out */}
-          {product.purchasable ? (
+          {/* Add to Cart, or what stands in for it when the product has run out — or
+              when the shop is not selling anything at all, which outranks both. */}
+          {product.purchasable && acceptingOrders ? (
             <button
               onClick={handleAddToCart}
               disabled={cartLoading}
@@ -675,9 +682,13 @@ const ProductDetailPage = ({
               className='sf-btn sf-btn-primary'
               style={{ width: '100%', fontSize: '1rem', padding: '1rem', marginBottom: '1rem' }}
             >
-              {t('product.stock.soldOut')}
+              {acceptingOrders ? t('product.stock.soldOut') : t('ordering.closedShort')}
             </button>
           )}
+
+          {/* Why the button is dead. Said here rather than only on the button, because
+              the shop is still showing a price and this is the shopper's answer to it. */}
+          {!acceptingOrders && <OrderingClosedNotice style={{ marginBottom: '1rem' }} />}
 
           {/* Backorder ships later than the delivery estimate above — say so before the
               order, not in the confirmation email. */}
