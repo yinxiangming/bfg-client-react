@@ -4720,7 +4720,37 @@
       "working": "处理中",
       "workingHint": "正在归档或恢复，完成后才能改",
       "archived": "已归档",
-      "archivedHint": "数据已归档，恢复后才能开启"
+      "archivedHint": "数据已归档，恢复后才能开启",
+      "grant": {
+        "action": "赠送",
+        "title": "赠送权益给这个工作区",
+        "what": "赠送内容",
+        "basePlan": "基础套餐",
+        "basePlanHint": "套餐本身包含的全部内容，而不是某一个加购。",
+        "notSwitchedOn": "赠送不会替商家开启扩展，开不开仍然由工作区自己决定。只有因为权益到期被平台暂停的扩展会顺手恢复。",
+        "forMonths": "按月数",
+        "neverExpires": "永不过期",
+        "months": "月数",
+        "monthsHint": "1 到 {max} 个月。再长就该选“永不过期”。",
+        "reason": "理由",
+        "reasonHint": "会保留在这条权益上，方便日后解释。必填。",
+        "save": "确认赠送",
+        "done": "已把「{name}」赠送给这个工作区。",
+        "runsUntil": "有效期到 {until}。",
+        "runsForever": "永不过期。",
+        "resumed": "它之前因为权益到期被暂停，现在已经恢复。",
+        "notResumed": "它没能自动恢复：等它依赖的条件补齐后，请在它的卡片上手动开启。",
+        "failed": "没能完成赠送，请重试。",
+        "errors": {
+          "platform_admin_required": "只有平台管理员可以赠送权益。",
+          "invalid_grant": "月数和“永不过期”只能选一个，并且要写明理由。",
+          "unknown_extension": "当前平台没有这个名字的扩展。",
+          "already_entitled": "这个工作区已经持有这项权益，没有重复赠送。",
+          "already_entitled_until": "这个工作区已经持有这项权益，有效期到 {until}，没有重复赠送。",
+          "already_entitled_forever": "这个工作区已经持有这项权益且永不过期，没有重复赠送。",
+          "workspace_not_found": "这个工作区不存在。"
+        }
+      }
     },
     "all": {
       "title": "全部工作区",
@@ -4772,7 +4802,29 @@
         "day": "日期",
         "meters": "计量点"
       },
-      "empty": "这个月没有产生用量。"
+      "empty": "这个月没有产生用量。",
+      "allowance": {
+        "title": "每月额度",
+        "loading": "正在加载这个工作区的额度",
+        "loadFailed": "没能加载这个工作区的额度。",
+        "change": "修改",
+        "points": "{points} 点",
+        "ownSource": "工作区单独设置",
+        "platformSource": "跟随平台默认",
+        "ownExplains": "这个工作区有自己的额度，平台默认的 {points} 点对它不生效。",
+        "platformExplains": "这个工作区跟随平台默认的 {points} 点，平台改了它也跟着改。",
+        "followDefault": "跟随平台默认（{points} 点）",
+        "ownCap": "为这个工作区单独设置额度",
+        "zeroMeansNothing": "填 0 表示完全不允许产生计量用量；这和“跟随平台默认”是两回事。",
+        "hint": "额度用完后，这个月剩下的时间里按量功能会停掉。",
+        "save": "保存额度",
+        "saveFailed": "没能修改额度，请重试。",
+        "errors": {
+          "platform_admin_required": "只有平台管理员可以设置工作区的额度。",
+          "invalid_usage_cap": "这个额度存不下来，请填一个点数。",
+          "workspace_not_found": "这个工作区不存在。"
+        }
+      }
     },
     "bills": {
       "title": "账单",
@@ -4815,6 +4867,105 @@
       "subtotal": "小计",
       "tax": "税费",
       "total": "合计"
+    },
+    "platform": {
+      "title": "平台设置",
+      "subtitle": "平台上所有工作区的计费依据",
+      "loading": "正在加载平台设置",
+      "loadFailed": "没能确认你的身份，请刷新页面。",
+      "tabs": {
+        "variables": "平台变量",
+        "prices": "计量点价格",
+        "rates": "汇率"
+      },
+      "variables": {
+        "hint": "所有工作区共用的一组数值。改动立刻对全平台生效，所以必须写明改动理由。",
+        "loading": "正在加载平台变量",
+        "loadFailed": "没能加载平台变量。",
+        "empty": "当前平台没有可设置的变量。",
+        "columns": {
+          "variable": "变量",
+          "value": "当前值",
+          "default": "默认值",
+          "lastChange": "上次改动"
+        },
+        "overridden": "已改过",
+        "neverChanged": "从未改动",
+        "noReason": "没有填写理由",
+        "changedBy": "{who}，{when}",
+        "someone": "某人",
+        "changeAction": "修改",
+        "change": "修改 {key}",
+        "defaultIs": "默认值是 {value}。",
+        "wholeNumberDefault": "只能填整数。默认值是 {value}。",
+        "true": "是",
+        "false": "否",
+        "reason": "理由",
+        "reasonHint": "会和它解释的那些账单一起长期保留。必填。",
+        "save": "保存改动",
+        "saveFailed": "没能修改这个变量，请重试。"
+      },
+      "prices": {
+        "hint": "每个计量点的单价。价格只增不改：调价就是加一条从某个时刻起生效的新价格，这样已经开出的账单仍然对得上。",
+        "loading": "正在加载价格",
+        "loadFailed": "没能加载价格。",
+        "empty": "还没有给任何计量点定价。",
+        "add": "新增价格",
+        "addFor": "新增价格",
+        "addOnly": "价格不能修改。这里是新增一条从某个时刻起生效的价格，之前的记录原样保留。",
+        "inForce": "当前生效",
+        "hasInForce": "已定价",
+        "noneInForce": "尚未生效",
+        "noneInForceHint": "这个计量点的所有价格生效时间都在当前之后，在第一条生效之前它不产生任何费用。",
+        "fromDefault": "继承平台默认",
+        "columns": {
+          "meter": "计量点",
+          "vendorCost": "供应商成本",
+          "unitSize": "单位数量",
+          "margin": "利润率",
+          "pointsPerUnit": "每单位点数",
+          "effectiveFrom": "生效时间",
+          "added": "录入时间"
+        },
+        "meterHint": "使用它的扩展记录用量时所用的键名。",
+        "vendorCostHint": "供应商对一个“单位数量”收取的费用，按美元计。",
+        "unitSizeHint": "上面这笔成本买到多少次调用或多少个 token：按每 1,000 次报价就填 1000。",
+        "marginHint": "在成本之上加价的比例，用小数表示：0.30 表示按成本的 1.3 倍收费。留空则跟随平台默认利润率。",
+        "marginHintDefault": "在成本之上加价的比例，用小数表示：0.30 表示按成本的 1.3 倍收费。留空则跟随平台默认利润率，目前是 {margin}。",
+        "effectiveFromHint": "留空表示立刻生效。这里填的时间按平台自身的时区理解。",
+        "save": "新增价格",
+        "saveFailed": "没能新增这条价格，请重试。"
+      },
+      "rates": {
+        "hint": "账单折算所用的汇率，每天从参考数据源自动拉取一次。",
+        "loading": "正在加载汇率",
+        "loadFailed": "没能加载汇率。",
+        "empty": "没有符合条件的汇率记录。",
+        "add": "手动补录",
+        "overwritten": "手填汇率只是数据源拉取失败那天的临时替代。之后只要拉取成功，同一天的手填值会被官方数字覆盖，来源也会改回自动拉取。",
+        "feed": "自动拉取",
+        "manual": "手动填写",
+        "columns": {
+          "day": "日期",
+          "pair": "货币对",
+          "rate": "汇率",
+          "source": "来源",
+          "enteredBy": "填写人",
+          "from": "从",
+          "to": "到"
+        },
+        "dayHint": "留空表示今天。同一天已有记录时是更正，不会多出一条。",
+        "save": "保存汇率",
+        "saveFailed": "没能保存这条汇率，请重试。"
+      },
+      "errors": {
+        "platform_admin_required": "只有平台管理员可以修改平台的计费设置。",
+        "unknown_platform_variable": "当前平台没有这个名字的变量。",
+        "invalid_platform_variable": "这个变量不能设成这个值。",
+        "reason_required": "请写明这次改动的理由。",
+        "invalid_meter_price": "这条价格存不下来，请检查成本、单位数量和利润率。",
+        "invalid_exchange_rate": "这条汇率存不下来，请检查货币代码和数字。"
+      }
     }
   },
   "workspaceReadOnly": {
