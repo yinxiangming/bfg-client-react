@@ -31,6 +31,30 @@ export type ConsoleExtensionStatus =
   | 'restoring'
 
 /** One extension, as the console shows it for one workspace. */
+/**
+ * What an add-on the platform sells would cost this workspace.
+ *
+ * `amount` is the plan's own price in the currency the platform prices in, and
+ * `workspace_amount` the same period converted into the workspace's own currency —
+ * null when no exchange rate has been stored for the pair, in which case the price is
+ * still shown in the platform's currency rather than not at all.
+ *
+ * `trial_days` is what *this* workspace would get, so it is 0 for an add-on it has held
+ * before: a trial is had once.
+ */
+export interface ConsoleExtensionPrice {
+  /** The name of the plan that prices it, as the platform wrote it. */
+  plan: string
+  amount: string
+  currency: string
+  workspace_amount: string | null
+  workspace_currency: string
+  /** `day` | `week` | `month` | `year`, and how many of them one price covers. */
+  interval: string
+  interval_count: number
+  trial_days: number
+}
+
 export interface ConsoleExtension {
   key: string
   name: string
@@ -42,6 +66,12 @@ export interface ConsoleExtension {
   /** Path of the extension's page in that workspace's admin; empty when it has none. */
   admin_url: string
   pricing: string
+  /**
+   * What it costs, for an add-on the platform prices. Null for one that comes with the
+   * base plan and for one nobody has priced, which read differently: the first is
+   * included, the second is not for sale yet.
+   */
+  price?: ConsoleExtensionPrice | null
   surfaces: string[]
   requires: string[]
   meters: string[]
@@ -174,11 +204,23 @@ export interface ConsoleAcquireInvoice extends ConsoleInvoice {
  * and there is no `invoice`. A priced one is billed and nothing else is written until
  * the money arrives: it is not entitled, and `extension` is as it was. Either way
  * `extension` is how the extension now stands, so the card is put straight from it.
+ *
+ * A priced one is also switched on with no bill in two cases, and then `entitled` is
+ * true, `invoice` is null, and one of two fields says why: `trial_days` for a plan whose
+ * trial this workspace has not had, and `billed_later` when the platform had no exchange
+ * rate to write today's bill at. Neither is an add-on given away — both are periods the
+ * monthly bill charges for — so the reader is told a bill is coming.
  */
 export interface ConsoleAcquireResult {
   entitled: boolean
   invoice: ConsoleAcquireInvoice | null
   extension: ConsoleExtension
+  /** How long the trial runs, and 0 when this was not one. Absent on an older server. */
+  trial_days?: number
+  /** Whether the first period was written ahead of its bill. Absent on an older server. */
+  billed_later?: boolean
+  /** When the period written now runs out; null for one that does not expire. */
+  entitled_until?: string | null
 }
 
 /**

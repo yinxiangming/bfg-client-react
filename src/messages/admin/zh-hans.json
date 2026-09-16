@@ -4670,7 +4670,12 @@
         "invoiceBody": "账单 {number} 共 {total}，{due} 到期。付款后「{name}」会自动开启。",
         "invoiceUnpaidTitle": "「{name}」的账单还没付",
         "invoiceUnpaidBody": "账单 {number} 共 {total}，{due} 到期；再点一次也不会多开一张。付款后「{name}」会自动开启。",
-        "viewBills": "去账单页"
+        "viewBills": "去账单页",
+        "trialTitle": "{name} 已开启，前 {days} 天免费",
+        "trialBody": "试用到 {until}，之后随月度账单收费。",
+        "onBillLaterTitle": "{name} 已开启",
+        "onBillLaterBody": "今天没有开出账单——到 {until} 的这个周期会并入下一期月度账单。",
+        "billLaterNoEnd": "已经开启，费用会出现在下一期月度账单里。"
       },
       "settings": "设置",
       "enter": "进入后台",
@@ -4702,7 +4707,6 @@
         "no_plan": "这个部署还没给这个加购定价，暂时买不了。",
         "no_owner": "这个工作区还没有所有者，账单开不到人头上，暂时买不了。",
         "unknown_currency": "这个工作区的币种不在平台能开账单的币种里，账单没能开出来。",
-        "no_exchange_rate": "今天没有汇率把这个加购折算成这个工作区的币种，账单没能开出来。",
         "key_too_long": "这个加购开不出账单：账单号会超长。需要发布方把它的标识改短。"
       },
       "readOnly": {
@@ -4750,6 +4754,19 @@
           "already_entitled_forever": "这个工作区已经持有这项权益且永不过期，没有重复赠送。",
           "workspace_not_found": "这个工作区不存在。"
         }
+      },
+      "price": {
+        "included": "已包含在基础套餐中",
+        "per": "{amount} / {unit}",
+        "perMany": "{amount} / {count} {unit}",
+        "unit": {
+          "day": "天",
+          "week": "周",
+          "month": "月",
+          "year": "年"
+        },
+        "listed": "平台标价 {amount}",
+        "trial": "{days} 天免费试用"
       }
     },
     "all": {
@@ -5013,7 +5030,8 @@
         "invalid_meter_price": "这条价格存不下来，请检查成本、单位数量和利润率。",
         "invalid_exchange_rate": "这条汇率存不下来，请检查货币代码和数字。"
       }
-    }
+    },
+    "brand": "工作区管理台"
   },
   "workspaceReadOnly": {
     "title": "这个工作区目前只能查看",

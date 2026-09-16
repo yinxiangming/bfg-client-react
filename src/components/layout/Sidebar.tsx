@@ -49,19 +49,44 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
   const currentPath = activePath || pathname
   const normalizedPath = useMemo(() => normalizePath(currentPath), [currentPath])
   const { config: storefrontConfig } = useStorefrontConfig()
+  // Its own namespace rather than the one the menu labels come from: the console's
+  // pages sit outside /admin, where those are read from `common`.
+  const tConsole = useTranslations('admin.console')
   const [openSubmenus, setOpenSubmenus] = useState<OpenSubmenuState>({})
   /** Workspace organization name (API) preferred; falls back to settings `site_name`. */
   const [brandingName, setBrandingName] = useState<string | undefined>(undefined)
   const [workspaceLogoSrc, setWorkspaceLogoSrc] = useState<string | undefined>(undefined)
   const [workspaceLogoDarkSrc, setWorkspaceLogoDarkSrc] = useState<string | undefined>(undefined)
   const [showNameWithLogo, setShowNameWithLogo] = useState(false)
+  /**
+   * Whether the workspace's branding has been looked for yet. The admin reads it over
+   * the network, so until that answers there is nothing to draw — and drawing the
+   * framework's own mark in the meantime shows every operator the wrong brand for a
+   * moment on every single page load.
+   */
+  const [brandingRead, setBrandingRead] = useState(false)
+
+  const isAdmin = Boolean(normalizedPath?.startsWith('/admin'))
+  const isAccount = Boolean(normalizedPath?.startsWith('/account'))
+  // The console runs across every workspace the account has, so it is branded as itself
+  // rather than as any of them.
+  const isConsole = Boolean(normalizedPath?.startsWith('/workspaces'))
 
   useEffect(() => {
     // /settings/ is staff-only. A customer on /account gets 403 there, which left the
-    // logo empty; the account area takes its branding from the public storefront config.
-    if (!normalizedPath?.startsWith('/admin')) return
+    // logo empty; the account area takes its branding from the public storefront config,
+    // which is already here — so only the admin has anything to wait for.
+    if (!isAdmin) {
+      setBrandingRead(true)
+
+      return
+    }
+
+    let live = true
+
     Promise.all([getWorkspaceSettings(), fetchWorkspaceRecord().catch(() => null)])
       .then(([s, record]) => {
+        if (!live) return
         const orgName = record?.name?.trim() || undefined
         const siteName = s.site_name?.trim() || undefined
         setBrandingName(orgName || siteName)
@@ -73,14 +98,25 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
         setShowNameWithLogo(Boolean(s.custom_settings?.general?.show_site_name_with_logo))
       })
       .catch(() => {})
-  }, [normalizedPath])
+      .finally(() => {
+        // Whether it answered or not: a workspace whose branding could not be read
+        // falls back to the framework's name, which is the right answer and should
+        // not be held back for ever.
+        if (live) setBrandingRead(true)
+      })
 
-  const isAccount = Boolean(normalizedPath?.startsWith('/account'))
-  const displayName = isAccount && storefrontConfig?.site_name
-    ? storefrontConfig.site_name
-    : brandingName
-  const logoSrc = isAccount ? storefrontConfig?.logo || undefined : workspaceLogoSrc
-  const logoDarkSrc = isAccount ? storefrontConfig?.logo_dark || undefined : workspaceLogoDarkSrc
+    return () => {
+      live = false
+    }
+  }, [isAdmin])
+
+  const displayName = isConsole
+    ? tConsole('brand')
+    : isAccount && storefrontConfig?.site_name
+      ? storefrontConfig.site_name
+      : brandingName
+  const logoSrc = isAccount ? storefrontConfig?.logo || undefined : isConsole ? undefined : workspaceLogoSrc
+  const logoDarkSrc = isAccount ? storefrontConfig?.logo_dark || undefined : isConsole ? undefined : workspaceLogoDarkSrc
   const nameWithLogo = isAccount ? Boolean(storefrontConfig?.show_site_name_with_logo) : showNameWithLogo
 
   const i18nNamespace = useMemo(() => {
@@ -312,6 +348,8 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
             logoSrc={logoSrc}
             logoDarkSrc={logoDarkSrc}
             showNameWithLogo={nameWithLogo}
+            mark={isConsole ? 'none' : 'default'}
+            pending={!brandingRead}
           />
         </div>
         {onToggleCollapse && (
