@@ -4815,6 +4815,105 @@
       "subtotal": "Subtotal",
       "tax": "Tax",
       "total": "Total"
+    },
+    "platform": {
+      "title": "Platform settings",
+      "subtitle": "the numbers every workspace on this platform is billed by",
+      "loading": "Loading platform settings",
+      "loadFailed": "Couldn't work out who you are. Reload the page.",
+      "tabs": {
+        "variables": "Variables",
+        "prices": "Meter prices",
+        "rates": "Exchange rates"
+      },
+      "variables": {
+        "hint": "What every workspace is measured against. A change applies everywhere at once, so say why you made it.",
+        "loading": "Loading variables",
+        "loadFailed": "Couldn't load the variables.",
+        "empty": "This platform declares no variables.",
+        "columns": {
+          "variable": "Variable",
+          "value": "Value",
+          "default": "Default",
+          "lastChange": "Last change"
+        },
+        "overridden": "Changed",
+        "neverChanged": "Never changed",
+        "noReason": "No reason given",
+        "changedBy": "{who}, {when}",
+        "someone": "Someone",
+        "changeAction": "Change",
+        "change": "Change {key}",
+        "defaultIs": "The default is {value}.",
+        "wholeNumberDefault": "A whole number. The default is {value}.",
+        "true": "Yes",
+        "false": "No",
+        "reason": "Reason",
+        "reasonHint": "Kept for as long as the bills this explains. Required.",
+        "save": "Save the change",
+        "saveFailed": "Couldn't change this variable. Try again."
+      },
+      "prices": {
+        "hint": "What each meter costs. Prices are only ever added: a new rate is a new price from a moment on, so a bill already issued still adds up.",
+        "loading": "Loading prices",
+        "loadFailed": "Couldn't load the prices.",
+        "empty": "No meter has been priced yet.",
+        "add": "Add a price",
+        "addFor": "Add a price",
+        "addOnly": "Prices are never edited. This adds one from a moment on, and leaves what came before it alone.",
+        "inForce": "In force",
+        "hasInForce": "Priced",
+        "noneInForce": "Not priced yet",
+        "noneInForceHint": "Every price for this meter starts later than now, so nothing is billed for it until one does.",
+        "fromDefault": "platform default",
+        "columns": {
+          "meter": "Meter",
+          "vendorCost": "Vendor cost",
+          "unitSize": "Unit size",
+          "margin": "Margin",
+          "pointsPerUnit": "Points per unit",
+          "effectiveFrom": "In force from",
+          "added": "Added"
+        },
+        "meterHint": "The key the extension that spends it records it under.",
+        "vendorCostHint": "What the vendor charges for one unit size, in US dollars.",
+        "unitSizeHint": "How many calls or tokens that buys: a rate quoted per 1,000 requests is 1000.",
+        "marginHint": "The share added on top, as a fraction: 0.30 charges 1.3 times cost. Leave it empty to follow the platform's own margin.",
+        "marginHintDefault": "The share added on top, as a fraction: 0.30 charges 1.3 times cost. Leave it empty to follow the platform's own, which is {margin} today.",
+        "effectiveFromHint": "Now when left empty. A time typed here is read in the platform's own time zone.",
+        "save": "Add the price",
+        "saveFailed": "Couldn't add this price. Try again."
+      },
+      "rates": {
+        "hint": "What bills are converted at. Rates are read from the reference feed once a day.",
+        "loading": "Loading rates",
+        "loadFailed": "Couldn't load the rates.",
+        "empty": "No rate has been stored for that.",
+        "add": "Enter a rate",
+        "overwritten": "A rate entered by hand is a stand-in for a day the feed couldn't be read. The next refresh that does reach the feed replaces it with the published number and marks it as published.",
+        "feed": "Feed",
+        "manual": "By hand",
+        "columns": {
+          "day": "Day",
+          "pair": "Pair",
+          "rate": "Rate",
+          "source": "Source",
+          "enteredBy": "Entered by",
+          "from": "From",
+          "to": "To"
+        },
+        "dayHint": "Today when left empty. A day already stored is corrected, not duplicated.",
+        "save": "Store the rate",
+        "saveFailed": "Couldn't store this rate. Try again."
+      },
+      "errors": {
+        "platform_admin_required": "Only platform administrators can change what the platform charges.",
+        "unknown_platform_variable": "This platform doesn't have a variable by that name.",
+        "invalid_platform_variable": "That isn't a value this variable can hold.",
+        "reason_required": "Say why you're making this change.",
+        "invalid_meter_price": "That price can't be stored. Check the cost, the unit size and the margin.",
+        "invalid_exchange_rate": "That rate can't be stored. Check the currencies and the number."
+      }
     }
   },
   "workspaceReadOnly": {

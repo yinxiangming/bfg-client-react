@@ -5,8 +5,8 @@
  * Only an owner can manage a workspace here, so a workspace the account merely works in
  * has no node of its own; it is on the list page, which opens its admin. Bills are the
  * account's rather than one workspace's, so they sit in their own section instead of
- * under every workspace. Platform settings are a later round, and sit in the tree
- * disabled so its final shape is already visible.
+ * under every workspace. Platform settings are the deployment's own numbers rather than
+ * any workspace's, so they are one node beside the list of every workspace.
  */
 
 import type { MenuNode } from '@/types/menu'
@@ -116,7 +116,7 @@ export function buildConsoleNav({ owned, isPlatformAdmin, openWorkspace, labels 
     id: 'console-platform-settings',
     label: labels.platformSettings,
     icon: 'tabler-adjustments',
-    disabled: true
+    href: '/workspaces/platform/settings'
   })
 
   nav.push({ type: 'section', id: 'console-platform', label: labels.platform, children: platformChildren })
