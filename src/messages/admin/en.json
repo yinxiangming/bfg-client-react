@@ -4835,7 +4835,6 @@
       "empty": "No invoice has been raised yet.",
       "noneLoaded": "No invoice could be loaded.",
       "partial": "Couldn't load the bills for {names}.",
-      "paymentComing": "Paying from here is on its way. Until then, settle an invoice the way you do today.",
       "overdue": {
         "title": "{count, plural, one {# invoice is past due} other {# invoices are past due}}",
         "body": "Metered features stay paused for those workspaces until the invoice is paid."
@@ -4866,7 +4865,55 @@
       },
       "subtotal": "Subtotal",
       "tax": "Tax",
-      "total": "Total"
+      "total": "Total",
+      "pay": {
+        "title": "Pay invoice {number}",
+        "opening": "Opening the payment…",
+        "failed": "Couldn't start the payment.",
+        "gateway": "Paying through",
+        "pendingTitle": "This payment is pending",
+        "pending": {
+          "card": "Payment {number} is pending. The card is charged by the payment provider, and this invoice is marked paid only once the provider's confirmation reaches us — not the moment you submit the card.",
+          "offline": "Payment {number} is pending. This invoice is marked paid once we have the money and have confirmed it, which is not the moment you send it.",
+          "unknown": "Payment {number} is pending. Finish it the way this gateway asks below. The invoice is marked paid only once that payment is confirmed, which does not happen on this page."
+        },
+        "instructions": {
+          "title": "How to pay",
+          "none": "This gateway published nothing to pay against. Tell us and we'll sort it out."
+        },
+        "fields": {
+          "bank_name": "Bank",
+          "account_name": "Account name",
+          "account_number": "Account number",
+          "routing_number": "Routing number",
+          "swift_code": "SWIFT code",
+          "accepted_methods": "Accepted"
+        },
+        "reference": "Quote invoice {number} when you send the money, so we can match it to this bill.",
+        "unknownNote": "This payment is finished away from the console. Go by whatever the gateway published above; if none of it says what to do, tell us.",
+        "card": {
+          "details": "Card details",
+          "name": "Name on card (optional)",
+          "submit": "Pay {amount}",
+          "secure": "Your card details go straight to the payment provider. They never reach us.",
+          "notReady": "The card field hasn't loaded. Give it a moment and try again — and tell us if it never does.",
+          "failed": "The card wasn't accepted.",
+          "charged": "The card went through. This invoice is marked paid once the provider's confirmation reaches us, which is usually a moment later.",
+          "inFlight": "The provider is still working on this card. This invoice is marked paid once it confirms the charge."
+        }
+      },
+      "errors": {
+        "workspace_not_found": "You can't reach this workspace any more, so its bills can't be paid from here.",
+        "invoice_not_found": "This invoice no longer exists.",
+        "invoice_already_paid": "This invoice has already been paid.",
+        "invoice_cancelled": "This invoice was cancelled, so there is nothing to pay.",
+        "invoice_nothing_to_pay": "There is nothing left to pay on this invoice.",
+        "no_payment_gateway": "The platform has no payment gateway switched on, so there is nothing to take the money. Tell us and we'll put one in place.",
+        "payment_gateway_not_found": "The payment gateway this was to go through is gone. Tell us and we'll sort it out.",
+        "payment_gateway_unavailable": "The payment gateway can't take a payment right now. Try again later, and tell us if it stays that way.",
+        "payment_in_progress": "A payment is already under way for this invoice. Finish that one, or ask us to clear it — starting another will not help.",
+        "platform_workspace_missing": "This deployment isn't set up to take platform payments. Tell us and we'll sort it out."
+      }
     },
     "platform": {
       "title": "Platform settings",

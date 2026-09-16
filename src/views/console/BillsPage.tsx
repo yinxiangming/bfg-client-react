@@ -9,8 +9,9 @@
  * still see the other five's bills. Ownership is what decides the list — a workspace the
  * account merely works in is billed to whoever owns it, not to this reader.
  *
- * Paying from here is the next round; until it lands the page says so rather than
- * offering a button that does nothing.
+ * Anything still owed can be settled from its own row. What that takes depends on the
+ * gateway the server picks, which is why the dialog rather than this page decides what to
+ * put in front of the payer — see `PayBillDialog`.
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
@@ -39,13 +40,17 @@ import StatusBadge from '@/components/schema/StatusBadge'
 import { useConsole } from '@/contexts/ConsoleContext'
 import {
   formatMoney,
+  getConsoleErrorCode,
   invoiceState,
   listWorkspaceInvoices,
+  payWorkspaceInvoice,
   type ConsoleInvoice,
   type ConsoleInvoiceState
 } from '@/services/console'
 
 import { formatDay, formatPeriod } from './billingPeriods'
+import PayBillDialog, { type PayAttempt } from './PayBillDialog'
+import { refusalMessage } from './refusal'
 
 const STATE_COLOR: Record<ConsoleInvoiceState, 'success' | 'error' | 'warning'> = {
   paid: 'success',
@@ -60,6 +65,9 @@ type BillsState =
   | { kind: 'loading' }
   | { kind: 'loaded'; rows: BillRow[]; failed: string[] }
 
+/** The bill being settled, and how far asking to settle it has got. */
+type Paying = { row: BillRow; attempt: PayAttempt }
+
 export default function BillsPage() {
   const t = useTranslations('admin.console.bills')
   const tActions = useTranslations('admin.common.actions')
@@ -67,6 +75,7 @@ export default function BillsPage() {
   const { state: consoleState } = useConsole()
   const [state, setState] = useState<BillsState>({ kind: 'loading' })
   const [expanded, setExpanded] = useState<string | null>(null)
+  const [paying, setPaying] = useState<Paying | null>(null)
   const currentRequest = useRef(0)
 
   // Memoised on the console's own state, so the invoices are fetched again only when the
@@ -113,6 +122,46 @@ export default function BillsPage() {
 
     setState({ kind: 'loaded', rows, failed })
   }, [owned])
+
+  /**
+   * Ask the server to open a payment, and hand whatever it answers to the dialog.
+   *
+   * It is the click that sends this and not the dialog opening: a payment is a record the
+   * server writes, and an effect firing twice — which React does on purpose in
+   * development — would write two and have the second refused as one already in progress.
+   */
+  const startPayment = useCallback(
+    async (row: BillRow) => {
+      setPaying({ row, attempt: { kind: 'opening' } })
+
+      try {
+        const result = await payWorkspaceInvoice(row.workspaceId, row.invoice.number)
+
+        setPaying({ row, attempt: { kind: 'opened', result } })
+      } catch (error) {
+        const message = refusalMessage(error, t('pay.failed'), code =>
+          t.has(`errors.${code}`) ? t(`errors.${code}`) : null
+        )
+
+        setPaying({
+          row,
+          attempt: {
+            kind: 'refused',
+            message,
+            // A refusal the server put a name to will be the same refusal next time, and
+            // several of them say as much. Only one it could not name — a connection that
+            // dropped on the way — is worth asking for again.
+            retryable: getConsoleErrorCode(error) === null
+          }
+        })
+      }
+
+      // Either way the bill may not be what this page last read: opening a payment can
+      // mark it in progress, and a refusal is often a bill someone else has settled.
+      void load()
+    },
+    [load, t]
+  )
 
   useEffect(() => {
     void load()
@@ -179,14 +228,6 @@ export default function BillsPage() {
         </Alert>
       )}
 
-      {/* Where the pay button will go. Anyone who can be billed at all is told how to
-          settle an invoice in the meantime; an account with no workspace is not. */}
-      {owned.length > 0 && (
-        <Alert severity='info' sx={{ mb: 4 }}>
-          {t('paymentComing')}
-        </Alert>
-      )}
-
       <Card>
         {state.kind === 'loading' && (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 12 }}>
@@ -212,6 +253,7 @@ export default function BillsPage() {
                   <TableCell>{t('columns.due')}</TableCell>
                   <TableCell align='right'>{t('columns.total')}</TableCell>
                   <TableCell>{t('columns.status')}</TableCell>
+                  <TableCell align='right' />
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -248,9 +290,26 @@ export default function BillsPage() {
                       <TableCell sx={cellSx}>
                         <StatusBadge label={t(`status.${status}`)} color={STATE_COLOR[status]} />
                       </TableCell>
+                      <TableCell align='right' sx={cellSx}>
+                        {/* Nothing is offered against a bill that is already settled. A
+                            suspended or deactivated workspace still gets the button:
+                            being unable to trade is the likeliest reason to be here. */}
+                        {status !== 'paid' && (
+                          <Button
+                            size='small'
+                            variant='outlined'
+                            // Every row's button says "Pay", so the accessible name has to
+                            // carry the invoice it pays.
+                            aria-label={t('pay.title', { number: invoice.number })}
+                            onClick={() => void startPayment(row)}
+                          >
+                            {tActions('pay')}
+                          </Button>
+                        )}
+                      </TableCell>
                     </TableRow>,
                     <TableRow key={`${key}-lines`}>
-                      <TableCell colSpan={7} sx={{ py: 0, borderBottom: open ? undefined : 'none' }}>
+                      <TableCell colSpan={8} sx={{ py: 0, borderBottom: open ? undefined : 'none' }}>
                         <Collapse id={`invoice-lines-${key}`} in={open} unmountOnExit timeout='auto'>
                           <Box sx={{ py: 4 }}>
                             <Box
@@ -342,6 +401,18 @@ export default function BillsPage() {
           </Box>
         )}
       </Card>
+
+      {paying && (
+        <PayBillDialog
+          open
+          workspaceName={paying.row.workspaceName}
+          invoice={paying.row.invoice}
+          attempt={paying.attempt}
+          onRetry={() => void startPayment(paying.row)}
+          onClose={() => setPaying(null)}
+          onConfirmed={() => void load()}
+        />
+      )}
     </>
   )
 }
