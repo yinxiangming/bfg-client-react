@@ -20,6 +20,9 @@ type Props = {
   busy: boolean
   /** Some extension's change is in flight, so no other may start. */
   anyBusy: boolean
+  /** An add-on this workspace has yet to acquire: it is asked for rather than switched on. */
+  needsAcquire: boolean
+  onAcquire: () => void
   onActivate: () => void
   onDeactivate: () => void
   /** Opens the extension's own page in that workspace's admin; absent when it has none. */
@@ -42,6 +45,8 @@ export default function ExtensionCard({
   canChange,
   busy,
   anyBusy,
+  needsAcquire,
+  onAcquire,
   onActivate,
   onDeactivate,
   onSettings
@@ -75,6 +80,11 @@ export default function ExtensionCard({
   const canActivate = canChange && extension.status === 'inactive' && !blocked
   const canDeactivate = canChange && (extension.status === 'active' || extension.status === 'paused')
   const switchedOn = extension.status === 'active' || extension.status === 'paused'
+
+  // "Switch it on to start using it" is not true of something the workspace does not have
+  // yet, and acquiring a free add-on switches it on anyway — so the same conditions gate
+  // both buttons, and only the line above them changes.
+  const meta = needsAcquire ? t('acquireHint') : presentation.meta
 
   return (
     <Card component='section' sx={{ display: 'flex', flexDirection: 'column', p: 4, gap: 3 }}>
@@ -149,7 +159,7 @@ export default function ExtensionCard({
         }}
       >
         <Typography variant='caption' sx={{ color: 'var(--at-row-sub)' }}>
-          {presentation.meta}
+          {meta}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
           {busy && <CircularProgress size={16} />}
@@ -164,6 +174,10 @@ export default function ExtensionCard({
                 {t('deactivate')}
               </Button>
             </>
+          ) : needsAcquire ? (
+            <Button size='small' variant='contained' disabled={!canActivate || anyBusy} onClick={onAcquire}>
+              {t('acquire')}
+            </Button>
           ) : (
             <Button size='small' variant='contained' disabled={!canActivate || anyBusy} onClick={onActivate}>
               {t('activate')}

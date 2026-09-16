@@ -6,13 +6,19 @@
  * Extensions are managed here and nowhere else; a workspace's own admin has no page for
  * them. An owner of a suspended or deactivated workspace reads this page without being
  * able to change anything, which is also what the server answers.
+ *
+ * An add-on is acquired before it is switched on. One that costs nothing is given on the
+ * spot and comes back on; one that costs something is billed, and the page says so
+ * rather than pretending the extension is now running.
  */
 
 import { useState } from 'react'
 
+import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
 
 import Alert from '@mui/material/Alert'
+import AlertTitle from '@mui/material/AlertTitle'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
@@ -23,18 +29,31 @@ import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import { useAppDialog } from '@/contexts/AppDialogContext'
 import { useConsole, useConsoleWorkspace } from '@/contexts/ConsoleContext'
 import {
+  acquireExtension,
   activateExtension,
   consoleWorkspaceStatus,
   deactivateExtension,
   extensionName,
+  formatMoney,
   getConsoleErrorCode,
   getConsoleErrorKeys,
+  needsAcquiring,
+  type ConsoleAcquireInvoice,
   type ConsoleExtension
 } from '@/services/console'
 
+import { formatDay } from './billingPeriods'
 import ExtensionCard from './ExtensionCard'
 import { useConsoleWorkspaceDetail } from './useConsoleWorkspaceDetail'
 import { useEnterWorkspace } from './useEnterWorkspace'
+
+/** Where the bills for every workspace the account owns are read and settled. */
+const BILLS_PATH = '/workspaces/billing'
+
+/** What came of acquiring an add-on, until the reader dismisses it. */
+type AcquireNotice =
+  | { kind: 'granted'; name: string; activated: boolean }
+  | { kind: 'invoiced'; name: string; invoice: ConsoleAcquireInvoice }
 
 export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: number }) {
   const t = useTranslations('admin.console.extensions')
@@ -47,6 +66,11 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
   const enter = useEnterWorkspace(workspaceId)
   const [busyKey, setBusyKey] = useState<string | null>(null)
   const [failure, setFailure] = useState<string | null>(null)
+  const [notice, setNotice] = useState<AcquireNotice | null>(null)
+  // Keys the server has said need no acquiring, which is how a wrong guess is put right:
+  // `needsAcquiring` cannot tell an add-on the workspace already holds from one it has
+  // never had, and a card that only ever offers a button the server refuses is a dead end.
+  const [nothingToAcquire, setNothingToAcquire] = useState<string[]>([])
 
   const isPlatformAdmin = consoleState.kind === 'loaded' && consoleState.isPlatformAdmin
   const workspace = state.kind === 'loaded' ? state.workspace : null
@@ -64,10 +88,10 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
   }
 
   /** What a refusal means, with the extensions it names written out. */
-  const refusalMessage = (error: unknown): string => {
+  const refusalMessage = (error: unknown, fallback: string): string => {
     const code = getConsoleErrorCode(error)
 
-    if (!code || !t.has(`errors.${code}`)) return t('failed')
+    if (!code || !t.has(`errors.${code}`)) return fallback
 
     const named =
       code === 'requires_inactive'
@@ -89,6 +113,7 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
   const change = async (extension: ConsoleExtension, action: 'activate' | 'deactivate') => {
     setBusyKey(extension.key)
     setFailure(null)
+    setNotice(null)
 
     try {
       const updated =
@@ -98,7 +123,41 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
 
       replaceExtension(updated)
     } catch (error) {
-      setFailure(refusalMessage(error))
+      setFailure(refusalMessage(error, t('failed')))
+    } finally {
+      setBusyKey(null)
+    }
+  }
+
+  /** Ask for an add-on: it is either given, or billed. */
+  const acquire = async (extension: ConsoleExtension) => {
+    setBusyKey(extension.key)
+    setFailure(null)
+    setNotice(null)
+
+    const name = extensionName(extension, locale)
+
+    try {
+      const result = await acquireExtension(workspaceId, extension.key)
+
+      if (result.entitled) {
+        // It came back switched on, so the card is put straight from the answer.
+        replaceExtension(result.extension)
+        setNotice({ kind: 'granted', name, activated: result.activated })
+      } else {
+        // Nothing has changed for the workspace yet: it owes for it first.
+        setNotice({ kind: 'invoiced', name, invoice: result.invoice })
+      }
+    } catch (error) {
+      const code = getConsoleErrorCode(error)
+
+      // Both say the same thing about the button just pressed: there is nothing to
+      // acquire here, so the card offers the switch from now on rather than this again.
+      if (code === 'already_entitled' || code === 'not_an_addon') {
+        setNothingToAcquire(keys => (keys.includes(extension.key) ? keys : [...keys, extension.key]))
+      }
+
+      setFailure(refusalMessage(error, t('acquireFailed')))
     } finally {
       setBusyKey(null)
     }
@@ -167,6 +226,29 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
         </Alert>
       )}
 
+      {notice?.kind === 'granted' && (
+        <Alert severity='success' sx={{ mb: 4 }} onClose={() => setNotice(null)}>
+          {notice.activated ? t('acquired.on', { name: notice.name }) : t('acquired.granted', { name: notice.name })}
+        </Alert>
+      )}
+
+      {notice?.kind === 'invoiced' && (
+        <Alert severity='info' sx={{ mb: 4 }} onClose={() => setNotice(null)}>
+          <AlertTitle>{t('acquired.invoiceTitle', { name: notice.name })}</AlertTitle>
+          {t('acquired.invoiceBody', {
+            name: notice.name,
+            number: notice.invoice.number,
+            total: formatMoney(notice.invoice.total, notice.invoice.currency),
+            due: formatDay(notice.invoice.due_date, locale)
+          })}
+          <Box sx={{ mt: 2 }}>
+            <Button component={Link} href={BILLS_PATH} size='small' variant='outlined' color='inherit'>
+              {t('acquired.viewBills')}
+            </Button>
+          </Box>
+        </Alert>
+      )}
+
       {loaded.extensions.length === 0 ? (
         <Card sx={{ px: 6, py: 12, textAlign: 'center' }}>
           <Box sx={{ color: 'var(--at-row-sub)' }}>{t('none')}</Box>
@@ -186,6 +268,8 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
               canChange={canChange}
               busy={busyKey === extension.key}
               anyBusy={busyKey !== null}
+              needsAcquire={needsAcquiring(extension) && !nothingToAcquire.includes(extension.key)}
+              onAcquire={() => void acquire(extension)}
               onActivate={() => void change(extension, 'activate')}
               onDeactivate={() => void askThenDeactivate(extension)}
               onSettings={extension.admin_url && canEnter ? () => void open(extension.admin_url) : undefined}

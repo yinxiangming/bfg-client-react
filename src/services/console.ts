@@ -148,6 +148,57 @@ export async function deactivateExtension(workspaceId: number, key: string): Pro
   })
 }
 
+/** The bill raised for an add-on that costs something, as the acquire answer carries it. */
+export interface ConsoleAcquireInvoice {
+  id: number
+  number: string
+  currency: string
+  total: string
+  due_date: string
+  /** The server's own word for it, such as `sent`. */
+  status: string
+}
+
+/**
+ * What asking for an add-on came to.
+ *
+ * One that costs nothing is given straight away, and the extension comes back switched
+ * on. One that costs something is billed instead: the entitlement starts when the
+ * invoice is paid, so nothing about the extension has changed yet.
+ */
+export type ConsoleAcquireResult =
+  | { entitled: true; activated: boolean; extension: ConsoleExtension }
+  | { entitled: false; invoice: ConsoleAcquireInvoice }
+
+/**
+ * Ask for an add-on: the extension itself when it costs nothing, the invoice when it does.
+ *
+ * Refused with 400 `already_entitled`, `not_an_addon` or `no_plan`; read the code with
+ * `getConsoleErrorCode`.
+ */
+export async function acquireExtension(workspaceId: number, key: string): Promise<ConsoleAcquireResult> {
+  return apiFetch<ConsoleAcquireResult>(buildApiUrl(`${BASE}${workspaceId}/extensions/${key}/acquire/`), {
+    method: 'POST',
+    body: '{}'
+  })
+}
+
+/** An extension sold on top of the base plan, rather than bundled with it. */
+const PRICING_ADDON = 'addon'
+
+/**
+ * Whether this extension still has to be acquired before it can be switched on.
+ *
+ * Knowingly approximate. Nothing the API sends says whether a workspace holds an add-on:
+ * `available` is only ever true for an extension that is already switched on, so an
+ * add-on that is off reads the same whether it was acquired or not. Until an extension
+ * says so itself, every add-on that is off is offered for acquiring, and a workspace
+ * that already holds one is told so by the `already_entitled` refusal.
+ */
+export function needsAcquiring(extension: ConsoleExtension): boolean {
+  return extension.pricing === PRICING_ADDON && !extension.available && extension.status === 'inactive'
+}
+
 // Usage and bills
 
 /** What one meter recorded: how much of it ran, and what that came to in points. */

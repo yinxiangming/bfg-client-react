@@ -4659,6 +4659,16 @@
       "offHint": "Switch it on to start using it",
       "activate": "Turn on",
       "deactivate": "Turn off",
+      "acquire": "Get",
+      "acquireHint": "Get it before it can be switched on",
+      "acquireFailed": "Couldn't get this add-on. Try again.",
+      "acquired": {
+        "on": "{name} is yours, and it's on.",
+        "granted": "{name} is yours. Switch it on when you're ready.",
+        "invoiceTitle": "Invoice raised for {name}",
+        "invoiceBody": "Invoice {number} comes to {total} and is due {due}. {name} is switched on as soon as it's paid.",
+        "viewBills": "Go to bills"
+      },
       "settings": "Settings",
       "enter": "Open admin",
       "enterFailed": "Couldn't open this workspace's admin. Try again.",
@@ -4683,7 +4693,10 @@
         "requires_inactive": "Switch {names} on first.",
         "prerequisite_failed": "Something this extension needs is still missing.",
         "not_entitled": "This workspace isn't entitled to this extension yet.",
-        "required_by_active": "Switch {names} off first: they need this one."
+        "required_by_active": "Switch {names} off first: they need this one.",
+        "already_entitled": "This workspace already has this add-on, so there's nothing to get.",
+        "not_an_addon": "This extension comes with the base plan, so there's nothing to get.",
+        "no_plan": "This add-on hasn't been priced on this platform yet, so it can't be bought."
       },
       "readOnly": {
         "suspended": "This workspace is suspended. You can look at its extensions, but not change them.",

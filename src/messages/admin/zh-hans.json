@@ -4659,6 +4659,16 @@
       "offHint": "开启后即可使用",
       "activate": "开启",
       "deactivate": "停用",
+      "acquire": "获取",
+      "acquireHint": "获取之后才能开启",
+      "acquireFailed": "没能获取这个加购，请重试。",
+      "acquired": {
+        "on": "已获取「{name}」，并且已经开启。",
+        "granted": "已获取「{name}」，现在可以开启了。",
+        "invoiceTitle": "已为「{name}」开出账单",
+        "invoiceBody": "账单 {number} 共 {total}，{due} 到期。付款后「{name}」会自动开启。",
+        "viewBills": "去账单页"
+      },
       "settings": "设置",
       "enter": "进入后台",
       "enterFailed": "没能进入这个工作区的后台，请重试。",
@@ -4683,7 +4693,10 @@
         "requires_inactive": "请先开启 {names}。",
         "prerequisite_failed": "这个扩展需要的条件还没满足。",
         "not_entitled": "这个工作区还没有这个扩展的权益。",
-        "required_by_active": "{names} 依赖它，请先停用它们。"
+        "required_by_active": "{names} 依赖它，请先停用它们。",
+        "already_entitled": "这个工作区已经有这个加购了，不用再获取。",
+        "not_an_addon": "这个扩展属于基础套餐，不需要获取。",
+        "no_plan": "这个部署还没给这个加购定价，暂时买不了。"
       },
       "readOnly": {
         "suspended": "这个工作区已暂停，扩展只能查看，不能修改。",
