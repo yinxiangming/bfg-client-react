@@ -4724,6 +4724,77 @@
       "forbidden": "只有平台管理员可以查看全部工作区。",
       "loadMore": "加载更多",
       "showing": "已显示 {shown} / {count}"
+    },
+    "usage": {
+      "title": "用量",
+      "subtitle": "这个工作区用掉了多少计量用量，额度还剩多少",
+      "loading": "正在加载用量",
+      "loadFailed": "没能加载这个工作区的用量。",
+      "notFound": "这个工作区不存在，或者不归你管理。",
+      "month": "月份",
+      "used": "已用",
+      "cap": "额度",
+      "remaining": "剩余",
+      "points": "{points} 点",
+      "estimated": "按这个月的费率约合 {amount}",
+      "noEstimate": "暂时没有可用的汇率，折算不出金额。",
+      "overdue": {
+        "title": "按量功能已暂停",
+        "body": "有账单已逾期。付清后按量功能立刻恢复，这期间的数据不会丢。"
+      },
+      "byMeter": "按计量点",
+      "byDay": "按天",
+      "columns": {
+        "meter": "计量点",
+        "quantity": "用量",
+        "points": "点数",
+        "amount": "金额",
+        "day": "日期",
+        "meters": "计量点"
+      },
+      "empty": "这个月没有产生用量。"
+    },
+    "bills": {
+      "title": "账单",
+      "subtitle": "你名下所有工作区的发票",
+      "loading": "正在加载账单",
+      "loadFailed": "没能加载你的工作区。",
+      "noWorkspaces": "你还没有自己的工作区，暂时不会产生账单。",
+      "empty": "还没有开出过发票。",
+      "noneLoaded": "一张发票都没能加载出来。",
+      "partial": "没能加载 {names} 的账单。",
+      "paymentComing": "在这里付款的功能即将上线。在那之前，还是按现在的方式结清发票。",
+      "overdue": {
+        "title": "有 {count} 张发票已逾期",
+        "body": "在付清之前，这些工作区的按量功能会一直暂停。"
+      },
+      "columns": {
+        "workspace": "工作区",
+        "period": "账期",
+        "issued": "开票日",
+        "due": "到期日",
+        "total": "金额",
+        "status": "状态"
+      },
+      "status": {
+        "paid": "已付",
+        "unpaid": "未付",
+        "overdue": "已逾期"
+      },
+      "expand": "展开发票明细",
+      "collapse": "收起发票明细",
+      "number": "发票 {number}",
+      "paidOn": "{date} 已付",
+      "noLines": "这张发票没有明细。",
+      "lines": {
+        "description": "项目",
+        "quantity": "数量",
+        "unitPrice": "单价",
+        "subtotal": "小计"
+      },
+      "subtotal": "小计",
+      "tax": "税费",
+      "total": "合计"
     }
   }
 }

@@ -115,3 +115,23 @@ export function formatNumber(value: number | string, decimals: number = 2, local
   }).format(numValue)
 }
 
+/**
+ * A points balance, the unit the platform meters usage in.
+ *
+ * The API sends eight decimal places, because a single metered call can cost a small
+ * fraction of a point. Rounding that to two would print `0.00` against a day that did
+ * have traffic; printing all eight makes a column of numbers unreadable. Two to four
+ * places keeps a cap at `20.00` and still shows a quiet day at `0.0442`.
+ *
+ * Points are a counter, not money, so the float this goes through is only ever rounded
+ * for display — no figure on screen is worked out from it.
+ */
+export function formatPoints(value: number | string, locale?: string): string {
+  const points = typeof value === 'string' ? parseFloat(value) : value
+  if (isNaN(points)) return '-'
+  return new Intl.NumberFormat(getIntlLocale(locale), {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 4
+  }).format(points)
+}
+
