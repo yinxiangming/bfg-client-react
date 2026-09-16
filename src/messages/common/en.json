@@ -18,6 +18,9 @@
     "login": "Login",
     "guest": "Guest"
   },
+  "addressLookup": {
+    "usageCapReached": "This month's address suggestions have all been used. Please enter your address manually."
+  },
   "common": {
     "loading": "Loading..."
   },

@@ -18,6 +18,9 @@
     "login": "登录",
     "guest": "访客"
   },
+  "addressLookup": {
+    "usageCapReached": "本月的地址查询次数已用完，请手动填写地址。"
+  },
   "common": {
     "loading": "加载中..."
   },
