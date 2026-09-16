@@ -12,6 +12,9 @@ import { authApi } from '@/utils/authApi'
 import { meApi } from '@/utils/meApi'
 import { storefrontApi } from '@/utils/storefrontApi'
 
+import OrderingClosedNotice from '../components/OrderingClosedNotice'
+import { useStorefrontOrdering } from '@/hooks/useStorefrontOrdering'
+
 import CheckoutContactSection from './CheckoutContactSection'
 import CheckoutDeliverySection from './CheckoutDeliverySection'
 import CheckoutShippingSection from './CheckoutShippingSection'
@@ -27,6 +30,7 @@ const CheckoutPage = () => {
   const t = useTranslations('storefront')
   const router = useRouter()
   const { items, getSubtotal, clearCart } = useCart()
+  const { acceptingOrders } = useStorefrontOrdering()
   const { beforeSlots, afterSlots } = usePageSlots('storefront/checkout')
   const [submitting, setSubmitting] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -104,7 +108,10 @@ const CheckoutPage = () => {
   const isStripeSavedCardPending = requiresCreditCard && !useNewCard && !selectedPaymentMethodId
   // `selectedGateway`, not `selectedGatewayId`: a selection the fulfillment has just
   // ruled out is no selection at all, and submitting it would only earn a 400.
-  const isSubmitDisabled = submitting || !selectedGateway || isStripeNewCardPending || isStripeSavedCardPending
+  // A shop that is not taking orders outranks every other reason to submit: there is
+  // nothing on this page the shopper can fill in that would make the order go through.
+  const isSubmitDisabled =
+    submitting || !acceptingOrders || !selectedGateway || isStripeNewCardPending || isStripeSavedCardPending
 
   // Switching to delivery must not leave "pay at the counter" selected behind the scenes.
   const availableGatewayIds = availableGateways.map(g => g.id).join(',')
@@ -317,6 +324,9 @@ const CheckoutPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    // The submit button is already disabled; this is the same answer for anything that
+    // gets past it — a stale render, a keyboard, a script.
+    if (!acceptingOrders) return
     setSubmitting(true)
     
     try {
@@ -733,6 +743,10 @@ const CheckoutPage = () => {
               />
             )}
 
+            {/* Why the order cannot be placed, next to the button that would have
+                placed it. Everything filled in above stays filled in. */}
+            {!acceptingOrders && <OrderingClosedNotice style={{ marginBottom: '1rem' }} />}
+
             {/* Submit Button */}
             <button
               type='submit'
@@ -753,7 +767,7 @@ const CheckoutPage = () => {
               onMouseEnter={(e) => !isSubmitDisabled && (e.currentTarget.style.backgroundColor = 'var(--primary-hover, #4f46e5)')}
               onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary-color, #6366f1)')}
             >
-              {submitting ? t('buttons.processing') : (
+              {!acceptingOrders ? t('ordering.closedShort') : submitting ? t('buttons.processing') : (
                 placeOrderThenSuccess ? t('buttons.placeOrder') :
                 requiresCreditCard ? t('buttons.payNow') :
                 t('buttons.completeOrder')

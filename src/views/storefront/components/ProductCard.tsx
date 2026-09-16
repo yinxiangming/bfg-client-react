@@ -13,6 +13,7 @@ import { useTranslations } from 'next-intl'
 import { getStoreImageUrl } from '@/utils/media'
 import { useCart } from '@/contexts/CartContext'
 import { useStorefrontCurrency } from '@/hooks/useStorefrontCurrency'
+import { useStorefrontOrdering } from '@/hooks/useStorefrontOrdering'
 import { productPath } from '@/utils/productUrl'
 
 type Product = {
@@ -40,13 +41,20 @@ const ProductCard = ({ product }: { product: Product }) => {
   const inStock = product.inStock ?? true
   const purchasable = product.purchasable ?? true
   const { formatPrice } = useStorefrontCurrency()
+  const { acceptingOrders } = useStorefrontOrdering()
   const [isHovered, setIsHovered] = useState(false)
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState('')
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success')
   const { addItem, loading } = useCart()
 
+  const cannotAddToCart = loading || !purchasable || !acceptingOrders
+
   const handleAddToCart = async () => {
+    // The button below is already disabled; this is the same answer for anything that
+    // gets past it — a stale render, a keyboard, a script.
+    if (!acceptingOrders) return
+
     try {
       await addItem({
         productId: product.id,
@@ -154,18 +162,28 @@ const ProductCard = ({ product }: { product: Product }) => {
           {product.originalPrice && <span className='sf-price-original'>{formatPrice(product.originalPrice)}</span>}
         </div>
 
+        {/* A card has room for the state but not for the sentence, so the shop being
+            closed is said on the button and explained in its tooltip. The pages that
+            can afford the sentence — product, basket, checkout — print it in full.
+
+            The opacity is the card's own reveal-on-hover, and it has to carry the
+            dimming of a disabled button too, since an inline opacity is exactly what
+            would otherwise cancel it. */}
         <button
           className='sf-btn sf-btn-primary sf-btn-full'
           onClick={handleAddToCart}
-          disabled={loading || !purchasable}
-          style={{ opacity: isHovered ? 1 : 0, transition: 'opacity 0.3s' }}
+          disabled={cannotAddToCart}
+          title={acceptingOrders ? undefined : t('ordering.closedNotice')}
+          style={{ opacity: isHovered ? (cannotAddToCart ? 0.55 : 1) : 0, transition: 'opacity 0.3s' }}
         >
-          {purchasable && <i className='tabler-shopping-cart' />}
-          {!purchasable
-            ? t('product.stock.soldOut')
-            : inStock
-              ? t('buttons.addToCart')
-              : t('buttons.backorder')}
+          {purchasable && acceptingOrders && <i className='tabler-shopping-cart' />}
+          {!acceptingOrders
+            ? t('ordering.closedShort')
+            : !purchasable
+              ? t('product.stock.soldOut')
+              : inStock
+                ? t('buttons.addToCart')
+                : t('buttons.backorder')}
         </button>
       </div>
 

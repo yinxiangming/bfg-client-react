@@ -41,6 +41,9 @@
       "limitReachedGeneric": "You've reached the maximum number of shops you can own, suspended ones included.",
       "ownerRequired": "Only the shop's owner can change its details."
     }
+  },
+  "apiErrors": {
+    "workspaceReadOnly": "This workspace can only be viewed and exported until its plan is renewed, so that change was not saved."
   }
 }
 

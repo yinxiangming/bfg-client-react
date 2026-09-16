@@ -6,6 +6,7 @@
 
 import { refreshTokenIfNeeded } from './tokenRefresh'
 import { getApiBaseUrl, getWorkspaceId } from './api'
+import { getApiErrorMessage, WORKSPACE_READ_ONLY_CODE } from './apiErrors'
 import { getWorkspaceToken } from './authTokens'
 import { getOrCreateGuestCartKey } from './guestCart'
 import { getApiLanguageHeaders, getCurrentLocale } from '@/i18n/http'
@@ -181,6 +182,10 @@ class StorefrontApiClient {
             (typeof errorData === 'object' && Object.keys(errorData).length === 0 
               ? `HTTP error! status: ${response.status} ${response.statusText || ''}`.trim()
               : `HTTP error! status: ${response.status}`)
+
+          // A refusal with a code we explain ourselves reads better in the shopper's
+          // language than in the server's. Everything else keeps the server's wording.
+          errorDetail = getApiErrorMessage(errorData?.code) ?? errorDetail
         } else {
           // Try to get text response (might be HTML error page)
           const text = await responseClone.text()
@@ -219,8 +224,12 @@ class StorefrontApiClient {
         }
       }
 
-      // Redirect to login on 403 for account pages only (avoid redirect loops)
-      if (response.status === 403 && typeof window !== 'undefined') {
+      // Redirect to login on 403 for account pages only (avoid redirect loops).
+      // A shop that is temporarily read only refuses writes from everyone, signed in
+      // or not, so sending the shopper to log in would only lose their page and teach
+      // them nothing — that one keeps its explanation and stays put.
+      const readOnlyRefusal = errorData?.code === WORKSPACE_READ_ONLY_CODE
+      if (response.status === 403 && !readOnlyRefusal && typeof window !== 'undefined') {
         const { pathname, href } = window.location
         const isLogin = pathname.startsWith('/auth/login')
         const isAccountPage = pathname.startsWith('/account')

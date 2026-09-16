@@ -19,10 +19,25 @@ export interface StaffMember {
   role: StaffRole
 }
 
+/** The slice of GET /api/v1/me/ this provider reads. */
+export interface MeResponse {
+  staff_member?: StaffMember | null
+  extensions?: ExtensionAvailability | null
+  /**
+   * True while the workspace may only be read: writes are refused with
+   * workspace_read_only until its plan is renewed. Optional because a server
+   * without the feature omits it, and an absent field means an ordinary workspace —
+   * never assume the stricter answer from a field that was never sent.
+   */
+  workspace_read_only?: boolean
+}
+
 interface StaffMemberContextValue {
   staffMember: StaffMember | null
   /** Extensions switched on for the workspace; null until loaded or when the server reports none. */
   extensions: ExtensionAvailability | null
+  /** Whether the workspace currently refuses writes. False until me/ says otherwise. */
+  workspaceReadOnly: boolean
   loading: boolean
   refresh: () => void
 }
@@ -30,6 +45,7 @@ interface StaffMemberContextValue {
 const StaffMemberContext = createContext<StaffMemberContextValue>({
   staffMember: null,
   extensions: null,
+  workspaceReadOnly: false,
   loading: true,
   refresh: () => {},
 })
@@ -37,6 +53,7 @@ const StaffMemberContext = createContext<StaffMemberContextValue>({
 export function StaffMemberProvider({ children }: { children: ReactNode }) {
   const [staffMember, setStaffMember] = useState<StaffMember | null>(null)
   const [extensions, setExtensions] = useState<ExtensionAvailability | null>(null)
+  const [workspaceReadOnly, setWorkspaceReadOnly] = useState(false)
   const [loading, setLoading] = useState(true)
 
   function load() {
@@ -46,19 +63,24 @@ export function StaffMemberProvider({ children }: { children: ReactNode }) {
     if (!authApi.isAuthenticated()) {
       setStaffMember(null)
       setExtensions(null)
+      setWorkspaceReadOnly(false)
       setLoading(false)
       return
     }
     setLoading(true)
     meApi
       .getMe()
-      .then((me: any) => {
+      .then((me: MeResponse | null) => {
         setStaffMember(me?.staff_member ?? null)
         setExtensions(me?.extensions ?? null)
+        // Only an explicit `true` closes the back office. A server that does not
+        // report the field, or a response that failed to parse, leaves it open.
+        setWorkspaceReadOnly(me?.workspace_read_only === true)
       })
       .catch(() => {
         setStaffMember(null)
         setExtensions(null)
+        setWorkspaceReadOnly(false)
       })
       .finally(() => setLoading(false))
   }
@@ -68,7 +90,7 @@ export function StaffMemberProvider({ children }: { children: ReactNode }) {
   }, [])
 
   return (
-    <StaffMemberContext.Provider value={{ staffMember, extensions, loading, refresh: load }}>
+    <StaffMemberContext.Provider value={{ staffMember, extensions, workspaceReadOnly, loading, refresh: load }}>
       {children}
     </StaffMemberContext.Provider>
   )
