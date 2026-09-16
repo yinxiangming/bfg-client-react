@@ -4675,9 +4675,15 @@
       "errors": {
         "workspace_suspended": "This workspace is suspended, so its extensions can't be changed.",
         "workspace_inactive": "This workspace is deactivated, so its extensions can't be changed.",
-        "missing_requirement": "Another extension has to be switched on first.",
-        "prerequisite_unmet": "Something this extension needs is still missing.",
-        "unknown_extension": "This extension is no longer part of the platform."
+        "unknown_extension": "This extension is no longer part of the platform.",
+        "not_activatable": "This extension is always available, so it isn't switched on or off.",
+        "invalid_config": "That configuration wasn't valid, so nothing was saved.",
+        "busy": "It's being archived or restored. Try again once that finishes.",
+        "archived": "Its data was archived. Restore it before switching it on.",
+        "requires_inactive": "Switch {names} on first.",
+        "prerequisite_failed": "Something this extension needs is still missing.",
+        "not_entitled": "This workspace isn't entitled to this extension yet.",
+        "required_by_active": "Switch {names} off first: they need this one."
       },
       "readOnly": {
         "suspended": "This workspace is suspended. You can look at its extensions, but not change them.",
@@ -4686,7 +4692,15 @@
       "confirm": {
         "title": "Turn off {name}?",
         "body": "The feature stops for this workspace right away. Its data and settings stay, so switching it back on picks up where it left off."
-      }
+      },
+      "notLive": "On, not live",
+      "notLiveHint": "Switched on, but something it needs is missing",
+      "paused": "Paused",
+      "pausedHint": "Paused when its entitlement ended; data and settings stay",
+      "working": "Working",
+      "workingHint": "Archiving or restoring; changes wait until that finishes",
+      "archived": "Archived",
+      "archivedHint": "Its data is archived; restore it before switching it on"
     },
     "all": {
       "title": "All workspaces",
@@ -4696,7 +4710,6 @@
       "loadFailed": "Couldn't load the workspaces.",
       "empty": "No workspace matches that.",
       "count": "{count} workspaces",
-      "more": "Showing the first {shown}. Search to find the rest.",
       "columns": {
         "workspace": "Workspace",
         "domain": "Domain",
@@ -4708,7 +4721,9 @@
       "platform": "Platform",
       "yours": "Yours",
       "noOwner": "No owner",
-      "forbidden": "Only platform administrators can see every workspace."
+      "forbidden": "Only platform administrators can see every workspace.",
+      "loadMore": "Load more",
+      "showing": "Showing {shown} of {count}"
     }
   }
 }

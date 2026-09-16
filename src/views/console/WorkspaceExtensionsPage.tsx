@@ -28,21 +28,23 @@ import {
   deactivateExtension,
   extensionName,
   getConsoleErrorCode,
+  getConsoleErrorKeys,
   type ConsoleExtension
 } from '@/services/console'
-import { switchWorkspace } from '@/utils/switchWorkspace'
 
 import ExtensionCard from './ExtensionCard'
 import { useConsoleWorkspaceDetail } from './useConsoleWorkspaceDetail'
+import { useEnterWorkspace } from './useEnterWorkspace'
 
 export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: number }) {
   const t = useTranslations('admin.console.extensions')
   const tActions = useTranslations('admin.common.actions')
   const locale = useLocale()
   const { confirm } = useAppDialog()
-  const { state: consoleState, currentId } = useConsole()
+  const { state: consoleState } = useConsole()
   const membership = useConsoleWorkspace(workspaceId)
   const { state, reload, replaceExtension } = useConsoleWorkspaceDetail(workspaceId)
+  const enter = useEnterWorkspace(workspaceId)
   const [busyKey, setBusyKey] = useState<string | null>(null)
   const [failure, setFailure] = useState<string | null>(null)
 
@@ -56,14 +58,32 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
   const canEnter = Boolean(membership?.is_member)
 
   const open = async (path: string) => {
-    try {
-      if (currentId !== workspaceId) await switchWorkspace(workspaceId)
-      // A full page load, not router.push(): this tab holds what it fetched with the
-      // previous workspace's token.
-      window.location.assign(path)
-    } catch {
-      setFailure(t('enterFailed'))
-    }
+    setFailure(null)
+
+    if (!(await enter(path))) setFailure(t('enterFailed'))
+  }
+
+  /** What a refusal means, with the extensions it names written out. */
+  const refusalMessage = (error: unknown): string => {
+    const code = getConsoleErrorCode(error)
+
+    if (!code || !t.has(`errors.${code}`)) return t('failed')
+
+    const named =
+      code === 'requires_inactive'
+        ? getConsoleErrorKeys(error, 'requires')
+        : code === 'required_by_active'
+          ? getConsoleErrorKeys(error, 'required_by')
+          : []
+    const names = named
+      .map(key => {
+        const other = workspace?.extensions.find(extension => extension.key === key)
+
+        return other ? extensionName(other, locale) : key
+      })
+      .join(locale.startsWith('zh') ? '、' : ', ')
+
+    return t(`errors.${code}`, { names })
   }
 
   const change = async (extension: ConsoleExtension, action: 'activate' | 'deactivate') => {
@@ -78,9 +98,7 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
 
       replaceExtension(updated)
     } catch (error) {
-      const code = getConsoleErrorCode(error)
-
-      setFailure(code && t.has(`errors.${code}`) ? t(`errors.${code}`) : t('failed'))
+      setFailure(refusalMessage(error))
     } finally {
       setBusyKey(null)
     }
@@ -170,9 +188,7 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
               anyBusy={busyKey !== null}
               onActivate={() => void change(extension, 'activate')}
               onDeactivate={() => void askThenDeactivate(extension)}
-              onSettings={
-                extension.admin_url && canEnter ? () => void open(extension.admin_url) : undefined
-              }
+              onSettings={extension.admin_url && canEnter ? () => void open(extension.admin_url) : undefined}
             />
           ))}
         </Box>

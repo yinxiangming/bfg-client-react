@@ -7,7 +7,6 @@ import { useTranslations } from 'next-intl'
 import Box from '@mui/material/Box'
 
 import Icon from '@components/Icon'
-import Logo from '@/components/Logo'
 import LanguageSwitcher from '@/components/i18n/LanguageSwitcher'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
 import UserDropdown from '@/components/ui/UserDropdown'
@@ -67,14 +66,6 @@ export default function ConsoleTopbar({ showMenuToggle, onMenuToggle }: Props) {
         px: 3,
         backgroundColor: 'var(--at-card-bg)',
         borderBottom: '1px solid var(--at-card-border)',
-        // Logo is sized for the admin sidebar; fit it to a 56px bar.
-        '& .sidebar-logo-icon': { fontSize: 28, height: '28px !important' },
-        '& .sidebar-logo-text': {
-          fontFamily: 'var(--at-font-display)',
-          fontSize: 16,
-          fontWeight: 600,
-          letterSpacing: '-0.01em'
-        },
         // The switchers open from their left edge, which suits the admin's left-hand
         // toolbar; on the right of the bar that runs off a narrow screen.
         '& .theme-switcher-dropdown': { left: 'auto', right: 0 }
@@ -86,12 +77,19 @@ export default function ConsoleTopbar({ showMenuToggle, onMenuToggle }: Props) {
             <Icon icon='tabler-menu-2' />
           </button>
         )}
-        <Logo
-          skipLink
-          name={config.site_name?.trim() || undefined}
-          logoSrc={config.logo}
-          logoDarkSrc={config.logo_dark}
-        />
+        {/* The tree carries the logo; the bar only names the site, as the account's does. */}
+        <Box
+          component='span'
+          sx={{
+            fontFamily: 'var(--at-font-display)',
+            fontSize: 16,
+            fontWeight: 600,
+            letterSpacing: '-0.01em',
+            color: 'var(--at-row-fg)'
+          }}
+        >
+          {config.site_name?.trim()}
+        </Box>
       </Box>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>

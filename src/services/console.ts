@@ -20,7 +20,14 @@ export interface ConsoleChanger {
   by_platform?: boolean
 }
 
-export type ConsoleExtensionStatus = 'active' | 'inactive' | 'suspended'
+/** The states a workspace's extension record can be in; see the server's WorkspaceExtension. */
+export type ConsoleExtensionStatus =
+  | 'active'
+  | 'paused'
+  | 'inactive'
+  | 'archiving'
+  | 'archived'
+  | 'restoring'
 
 /** One extension, as the console shows it for one workspace. */
 export interface ConsoleExtension {
@@ -87,24 +94,38 @@ export interface ConsoleWorkspaceList {
   workspaces: ConsoleWorkspace[]
   /** How many there are altogether, which is more than `workspaces` when the API pages. */
   count: number
-  /** There are further pages; the console shows the first one and says so. */
-  hasMore: boolean
+  /** The next page's URL, which the API sends in full; null on the last page. */
+  next: string | null
 }
 
 const BASE = '/platform/console/workspaces/'
 
-/** The workspaces the signed-in account reaches, newest first; `search` matches name or slug. */
-export async function listConsoleWorkspaces(search?: string): Promise<ConsoleWorkspaceList> {
-  const term = search?.trim()
-  const url = buildApiUrl(`${BASE}${term ? `?search=${encodeURIComponent(term)}` : ''}`)
-  const payload = await apiFetch<Page<ConsoleWorkspace> | ConsoleWorkspace[]>(url)
+/** As many workspaces as the deployment's pagination allows in one request. */
+const PAGE_SIZE = 100
+
+function toList(payload: Page<ConsoleWorkspace> | ConsoleWorkspace[]): ConsoleWorkspaceList {
   const workspaces = Array.isArray(payload) ? payload : payload.results ?? []
 
   return {
     workspaces,
     count: Array.isArray(payload) ? payload.length : payload.count ?? workspaces.length,
-    hasMore: !Array.isArray(payload) && Boolean(payload.next)
+    next: Array.isArray(payload) ? null : payload.next ?? null
   }
+}
+
+/** The workspaces the signed-in account reaches, newest first; `search` matches name or slug. */
+export async function listConsoleWorkspaces(search?: string): Promise<ConsoleWorkspaceList> {
+  const term = search?.trim()
+  const query = new URLSearchParams({ page_size: String(PAGE_SIZE) })
+
+  if (term) query.set('search', term)
+
+  return toList(await apiFetch<Page<ConsoleWorkspace> | ConsoleWorkspace[]>(buildApiUrl(`${BASE}?${query}`)))
+}
+
+/** The next page of a list, from the URL the previous answer carried. */
+export async function listMoreConsoleWorkspaces(next: string): Promise<ConsoleWorkspaceList> {
+  return toList(await apiFetch<Page<ConsoleWorkspace> | ConsoleWorkspace[]>(next))
 }
 
 /** One workspace with every extension it can switch, each with its configuration. */
@@ -112,14 +133,10 @@ export async function getConsoleWorkspace(id: number): Promise<ConsoleWorkspaceD
   return apiFetch<ConsoleWorkspaceDetail>(buildApiUrl(`${BASE}${id}/`))
 }
 
-export async function activateExtension(
-  workspaceId: number,
-  key: string,
-  config?: Record<string, unknown>
-): Promise<ConsoleExtension> {
+export async function activateExtension(workspaceId: number, key: string): Promise<ConsoleExtension> {
   return apiFetch<ConsoleExtension>(buildApiUrl(`${BASE}${workspaceId}/extensions/${key}/activate/`), {
     method: 'POST',
-    body: JSON.stringify(config ? { config } : {})
+    body: '{}'
   })
 }
 
@@ -130,23 +147,23 @@ export async function deactivateExtension(workspaceId: number, key: string): Pro
   })
 }
 
-export async function updateExtensionConfig(
-  workspaceId: number,
-  key: string,
-  config: Record<string, unknown>
-): Promise<ConsoleExtension> {
-  return apiFetch<ConsoleExtension>(buildApiUrl(`${BASE}${workspaceId}/extensions/${key}/config/`), {
-    method: 'PATCH',
-    body: JSON.stringify({ config })
-  })
-}
-
 /** The business code a console refusal carries, such as `workspace_suspended`. */
 export function getConsoleErrorCode(error: unknown): string | null {
   const body = (error as { validationErrors?: Record<string, unknown> } | null)?.validationErrors
   const code = body?.code
 
   return typeof code === 'string' ? code : null
+}
+
+/**
+ * The extension keys a refusal names, which `requires_inactive` and `required_by_active`
+ * carry: the ones to switch on, or off, before this change can go through.
+ */
+export function getConsoleErrorKeys(error: unknown, field: 'requires' | 'required_by'): string[] {
+  const body = (error as { validationErrors?: Record<string, unknown> } | null)?.validationErrors
+  const keys = body?.[field]
+
+  return Array.isArray(keys) ? keys.filter((key): key is string => typeof key === 'string') : []
 }
 
 export function getConsoleErrorStatus(error: unknown): number | null {

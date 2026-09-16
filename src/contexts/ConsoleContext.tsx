@@ -45,7 +45,19 @@ const ConsoleContext = createContext<ConsoleContextValue | null>(null)
 export function ConsoleProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<ConsoleState>({ kind: 'loading' })
   const [currentId, setCurrentId] = useState<number | null>(null)
-  const [openWorkspace, setOpenWorkspace] = useState<OpenWorkspace | null>(null)
+  const [openWorkspace, setOpen] = useState<OpenWorkspace | null>(null)
+
+  // The pages hand back a fresh object on every load. Keeping the previous one when
+  // nothing changed leaves the tree alone, which would otherwise collapse whatever the
+  // reader had expanded.
+  const setOpenWorkspace = useCallback((next: OpenWorkspace | null) => {
+    setOpen(previous => {
+      if (previous === next) return previous
+      if (previous && next && previous.id === next.id && previous.name === next.name) return previous
+
+      return next
+    })
+  }, [])
 
   const reload = useCallback(async () => {
     // A reload keeps whatever is on screen: the tree on the left would otherwise empty
@@ -75,7 +87,7 @@ export function ConsoleProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo(
     () => ({ state, currentId, openWorkspace, setOpenWorkspace, reload }),
-    [state, currentId, openWorkspace, reload]
+    [state, currentId, openWorkspace, setOpenWorkspace, reload]
   )
 
   return <ConsoleContext.Provider value={value}>{children}</ConsoleContext.Provider>

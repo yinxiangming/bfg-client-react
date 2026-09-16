@@ -4,8 +4,9 @@
  * Every workspace on the platform, for the people who run it.
  *
  * Only a platform administrator reaches this: the server answers everyone else with the
- * workspaces they own, so the page checks first and says plainly that it is not for them.
- * From here a workspace is opened in the same pages an owner sees.
+ * workspaces they own, so the page waits until it knows which it is dealing with and then
+ * either lists or says plainly that this is not for them. From here a workspace is opened
+ * in the same pages an owner sees.
  */
 
 import { useCallback, useEffect, useState } from 'react'
@@ -34,36 +35,28 @@ import { useConsole } from '@/contexts/ConsoleContext'
 import {
   consoleWorkspaceStatus,
   listConsoleWorkspaces,
-  type ConsoleWorkspace,
-  type ConsoleWorkspaceStatus
+  listMoreConsoleWorkspaces,
+  type ConsoleWorkspace
 } from '@/services/console'
 
-const STATUS_COLOR: Record<ConsoleWorkspaceStatus, 'success' | 'error' | 'default'> = {
-  active: 'success',
-  suspended: 'error',
-  inactive: 'default'
-}
+import { WORKSPACE_STATUS_COLOR } from './workspaceStatus'
 
 type ListState =
   | { kind: 'loading' }
   | { kind: 'failed' }
-  | { kind: 'loaded'; workspaces: ConsoleWorkspace[]; count: number; hasMore: boolean }
+  | { kind: 'loaded'; workspaces: ConsoleWorkspace[]; count: number; next: string | null }
 
 export default function AllWorkspacesPage() {
   const t = useTranslations('admin.console.all')
   const tStatus = useTranslations('admin.workspaces.status')
   const tActions = useTranslations('admin.common.actions')
-  const { state: consoleState, setOpenWorkspace } = useConsole()
+  const { state: consoleState } = useConsole()
   const [search, setSearch] = useState('')
   const [term, setTerm] = useState('')
   const [state, setState] = useState<ListState>({ kind: 'loading' })
+  const [loadingMore, setLoadingMore] = useState(false)
 
-  const isPlatformAdmin = consoleState.kind !== 'loaded' || consoleState.isPlatformAdmin
-
-  // The tree's platform group carries whichever workspace is open; back on the list, none is.
-  useEffect(() => {
-    setOpenWorkspace(null)
-  }, [setOpenWorkspace])
+  const isPlatformAdmin = consoleState.kind === 'loaded' && consoleState.isPlatformAdmin
 
   useEffect(() => {
     const timer = setTimeout(() => setTerm(search.trim()), 300)
@@ -75,19 +68,58 @@ export default function AllWorkspacesPage() {
     setState({ kind: 'loading' })
 
     try {
-      const { workspaces, count, hasMore } = await listConsoleWorkspaces(term)
+      const { workspaces, count, next } = await listConsoleWorkspaces(term)
 
-      setState({ kind: 'loaded', workspaces, count, hasMore })
+      setState({ kind: 'loaded', workspaces, count, next })
     } catch {
       setState({ kind: 'failed' })
     }
   }, [term])
 
   useEffect(() => {
+    // Anyone else would only get their own workspaces back, under a title that promises
+    // all of them, so the request waits until the answer is worth making.
     if (isPlatformAdmin) void load()
   }, [isPlatformAdmin, load])
 
-  if (consoleState.kind === 'loaded' && !consoleState.isPlatformAdmin) {
+  const loadMore = async () => {
+    if (state.kind !== 'loaded' || !state.next) return
+
+    setLoadingMore(true)
+
+    try {
+      const page = await listMoreConsoleWorkspaces(state.next)
+
+      setState(previous =>
+        previous.kind === 'loaded'
+          ? {
+              kind: 'loaded',
+              workspaces: [...previous.workspaces, ...page.workspaces],
+              count: page.count,
+              next: page.next
+            }
+          : previous
+      )
+    } catch {
+      // What is already listed stays; the button can be pressed again.
+    } finally {
+      setLoadingMore(false)
+    }
+  }
+
+  if (consoleState.kind === 'loading') {
+    return (
+      <Card sx={{ display: 'flex', justifyContent: 'center', py: 12 }}>
+        <CircularProgress size={28} aria-label={t('loading')} />
+      </Card>
+    )
+  }
+
+  if (consoleState.kind === 'failed') {
+    return <Alert severity='error'>{t('loadFailed')}</Alert>
+  }
+
+  if (!isPlatformAdmin) {
     return <Alert severity='info'>{t('forbidden')}</Alert>
   }
 
@@ -185,7 +217,11 @@ export default function AllWorkspacesPage() {
                         </Box>
                       </TableCell>
                       <TableCell sx={cellSx}>
-                        {workspace.domains[0] ?? <Box component='span' sx={mutedSx}>—</Box>}
+                        {workspace.domains[0] ?? (
+                          <Box component='span' sx={mutedSx}>
+                            —
+                          </Box>
+                        )}
                       </TableCell>
                       <TableCell sx={cellSx}>
                         {workspace.owner?.username ?? (
@@ -195,7 +231,7 @@ export default function AllWorkspacesPage() {
                         )}
                       </TableCell>
                       <TableCell sx={cellSx}>
-                        <StatusBadge label={tStatus(status)} color={STATUS_COLOR[status]} />
+                        <StatusBadge label={tStatus(status)} color={WORKSPACE_STATUS_COLOR[status]} />
                       </TableCell>
                       <TableCell sx={cellSx}>
                         {workspace.active_extensions.length === 0 ? (
@@ -223,9 +259,29 @@ export default function AllWorkspacesPage() {
           </Box>
         )}
 
-        {state.kind === 'loaded' && state.hasMore && (
-          <Box sx={{ px: 6, py: 3, borderTop: '1px solid var(--at-card-border)', ...mutedSx, fontSize: 12 }}>
-            {t('more', { shown: state.workspaces.length })}
+        {state.kind === 'loaded' && state.next && (
+          <Box
+            sx={{
+              px: 6,
+              py: 3,
+              borderTop: '1px solid var(--at-card-border)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 4
+            }}
+          >
+            <Typography variant='caption' sx={mutedSx}>
+              {t('showing', { shown: state.workspaces.length, count: state.count })}
+            </Typography>
+            <Button
+              size='small'
+              sx={{ ml: 'auto' }}
+              disabled={loadingMore}
+              startIcon={loadingMore ? <CircularProgress size={14} color='inherit' /> : undefined}
+              onClick={() => void loadMore()}
+            >
+              {t('loadMore')}
+            </Button>
           </Box>
         )}
       </Card>

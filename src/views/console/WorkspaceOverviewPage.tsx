@@ -23,17 +23,12 @@ import Typography from '@mui/material/Typography'
 import Icon from '@components/Icon'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import StatusBadge from '@/components/schema/StatusBadge'
-import { useConsole, useConsoleWorkspace } from '@/contexts/ConsoleContext'
-import { consoleWorkspaceStatus, extensionName, type ConsoleWorkspaceStatus } from '@/services/console'
-import { switchWorkspace } from '@/utils/switchWorkspace'
+import { useConsoleWorkspace } from '@/contexts/ConsoleContext'
+import { consoleWorkspaceStatus, extensionName } from '@/services/console'
 
 import { useConsoleWorkspaceDetail } from './useConsoleWorkspaceDetail'
-
-const STATUS_COLOR: Record<ConsoleWorkspaceStatus, 'success' | 'error' | 'default'> = {
-  active: 'success',
-  suspended: 'error',
-  inactive: 'default'
-}
+import { useEnterWorkspace } from './useEnterWorkspace'
+import { WORKSPACE_STATUS_COLOR } from './workspaceStatus'
 
 function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -56,15 +51,35 @@ function InfoRow({ label, children }: { label: string; children: React.ReactNode
   )
 }
 
+/** The same reading of an extension's state the extensions page shows, in one line. */
+function extensionStatusLabel(
+  extension: { status: string; available: boolean },
+  t: (key: string) => string
+): string {
+  if (extension.status === 'active') return extension.available ? t('on') : t('notLive')
+  if (extension.status === 'paused') return t('paused')
+  if (extension.status === 'archived') return t('archived')
+  if (extension.status === 'archiving' || extension.status === 'restoring') return t('working')
+
+  return t('off')
+}
+
+function extensionStatusColor(extension: { status: string; available: boolean }): 'success' | 'warning' | 'default' {
+  if (extension.status === 'active') return extension.available ? 'success' : 'warning'
+  if (extension.status === 'paused') return 'warning'
+
+  return 'default'
+}
+
 export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: number }) {
   const t = useTranslations('admin.console.overview')
   const tStatus = useTranslations('admin.workspaces.status')
   const tExtensions = useTranslations('admin.console.extensions')
   const tActions = useTranslations('admin.common.actions')
   const locale = useLocale()
-  const { currentId } = useConsole()
   const membership = useConsoleWorkspace(workspaceId)
   const { state, reload } = useConsoleWorkspaceDetail(workspaceId)
+  const enter = useEnterWorkspace(workspaceId)
   const [failure, setFailure] = useState<string | null>(null)
 
   // Switching into a workspace needs active staff there, owners included, so a platform
@@ -74,14 +89,7 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
   const enterAdmin = async () => {
     setFailure(null)
 
-    try {
-      if (currentId !== workspaceId) await switchWorkspace(workspaceId)
-      // A full page load, not router.push(): this tab holds what it fetched with the
-      // previous workspace's token.
-      window.location.assign('/admin')
-    } catch {
-      setFailure(tExtensions('enterFailed'))
-    }
+    if (!(await enter('/admin'))) setFailure(tExtensions('enterFailed'))
   }
 
   if (state.kind === 'loading') {
@@ -153,7 +161,7 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
             {workspace.domains[0] ?? <Box sx={{ color: 'var(--at-row-sub)' }}>{t('noDomain')}</Box>}
           </InfoRow>
           <InfoRow label={t('fields.status')}>
-            <StatusBadge label={tStatus(status)} color={STATUS_COLOR[status]} />
+            <StatusBadge label={tStatus(status)} color={WORKSPACE_STATUS_COLOR[status]} />
           </InfoRow>
           <InfoRow label={t('fields.owner')}>
             {owner ? (
@@ -216,8 +224,8 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
                   {extensionName(extension, locale)}
                 </Box>
                 <StatusBadge
-                  label={extension.status === 'active' ? tExtensions('on') : tExtensions('off')}
-                  color={extension.status === 'active' ? 'success' : 'default'}
+                  label={extensionStatusLabel(extension, tExtensions)}
+                  color={extensionStatusColor(extension)}
                 />
               </Box>
             ))

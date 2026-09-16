@@ -45,13 +45,17 @@ export default function ConsoleShell({ children }: { children: ReactNode }) {
 
   const navItems = useMemo(() => {
     const loaded = state.kind === 'loaded' ? state : null
+    // A workspace is shown under Platform only while it is the one being looked at, and
+    // only when it is not already a node of its own further up the tree.
+    const insideWorkspace = /^\/workspaces\/\d+(\/|$)/.test(pathname ?? '')
+    const owns = openWorkspace
+      ? Boolean(loaded?.workspaces.some(workspace => workspace.id === openWorkspace.id && workspace.is_owner))
+      : false
 
     return buildConsoleNav({
       owned: (loaded?.workspaces ?? []).filter(workspace => workspace.is_owner),
       isPlatformAdmin: Boolean(loaded?.isPlatformAdmin),
-      // Only when it is not already a node of its own, further up the tree.
-      openWorkspace:
-        openWorkspace && !loaded?.workspaces.some(w => w.id === openWorkspace.id && w.is_owner) ? openWorkspace : null,
+      openWorkspace: insideWorkspace && !owns ? openWorkspace : null,
       labels: {
         workspaces: t('nav.workspaces'),
         myWorkspaces: t('nav.myWorkspaces'),
@@ -65,7 +69,7 @@ export default function ConsoleShell({ children }: { children: ReactNode }) {
         platformSettings: t('nav.platformSettings')
       }
     })
-  }, [state, openWorkspace, t])
+  }, [state, openWorkspace, pathname, t])
 
   return (
     <div className='admin-shell console-shell'>

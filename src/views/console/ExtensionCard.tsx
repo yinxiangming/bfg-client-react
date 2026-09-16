@@ -48,9 +48,33 @@ export default function ExtensionCard({
 }: Props) {
   const t = useTranslations('admin.console.extensions')
   const locale = useLocale()
-  const on = extension.status === 'active'
   const blocked = extension.unmet_prerequisites.length > 0
   const activated = activatedOn(extension.activated_at, locale)
+
+  // `status` is the switch; `available` is whether it is actually running for the
+  // workspace. They part company when something the extension needs falls away, and an
+  // extension that is on but not live must not read as working.
+  const presentation = (() => {
+    switch (extension.status) {
+      case 'active':
+        return extension.available
+          ? { label: t('on'), color: 'success' as const, meta: activated ? t('activatedAt', { date: activated }) : t('on') }
+          : { label: t('notLive'), color: 'warning' as const, meta: t('notLiveHint') }
+      case 'paused':
+        return { label: t('paused'), color: 'warning' as const, meta: t('pausedHint') }
+      case 'archiving':
+      case 'restoring':
+        return { label: t('working'), color: 'default' as const, meta: t('workingHint') }
+      case 'archived':
+        return { label: t('archived'), color: 'default' as const, meta: t('archivedHint') }
+      default:
+        return { label: t('off'), color: 'default' as const, meta: t('offHint') }
+    }
+  })()
+
+  const canActivate = canChange && extension.status === 'inactive' && !blocked
+  const canDeactivate = canChange && (extension.status === 'active' || extension.status === 'paused')
+  const switchedOn = extension.status === 'active' || extension.status === 'paused'
 
   return (
     <Card component='section' sx={{ display: 'flex', flexDirection: 'column', p: 4, gap: 3 }}>
@@ -86,7 +110,7 @@ export default function ExtensionCard({
             >
               {extensionName(extension, locale)}
             </Typography>
-            <StatusBadge label={on ? t('on') : t('off')} color={on ? 'success' : 'default'} />
+            <StatusBadge label={presentation.label} color={presentation.color} />
           </Box>
           <Typography variant='body2' sx={{ color: 'var(--at-row-sub)', textWrap: 'pretty' }}>
             {extensionDescription(extension, locale)}
@@ -106,7 +130,7 @@ export default function ExtensionCard({
             </Box>
           )}
           {blocked && (
-            <Typography variant='caption' sx={{ color: 'var(--at-warn-fg, inherit)' }}>
+            <Typography variant='caption' sx={{ color: 'var(--at-row-sub)' }}>
               {t('prerequisites')} {extension.unmet_prerequisites.join('; ')}
             </Typography>
           )}
@@ -125,28 +149,23 @@ export default function ExtensionCard({
         }}
       >
         <Typography variant='caption' sx={{ color: 'var(--at-row-sub)' }}>
-          {on ? (activated ? t('activatedAt', { date: activated }) : t('on')) : t('offHint')}
+          {presentation.meta}
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
           {busy && <CircularProgress size={16} />}
-          {on ? (
+          {switchedOn ? (
             <>
-              {onSettings && (
+              {onSettings && extension.status === 'active' && (
                 <Button size='small' startIcon={<Icon icon='tabler-adjustments' />} onClick={onSettings}>
                   {t('settings')}
                 </Button>
               )}
-              <Button size='small' variant='outlined' disabled={!canChange || anyBusy} onClick={onDeactivate}>
+              <Button size='small' variant='outlined' disabled={!canDeactivate || anyBusy} onClick={onDeactivate}>
                 {t('deactivate')}
               </Button>
             </>
           ) : (
-            <Button
-              size='small'
-              variant='contained'
-              disabled={!canChange || anyBusy || blocked}
-              onClick={onActivate}
-            >
+            <Button size='small' variant='contained' disabled={!canActivate || anyBusy} onClick={onActivate}>
               {t('activate')}
             </Button>
           )}
