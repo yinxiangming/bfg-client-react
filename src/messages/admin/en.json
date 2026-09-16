@@ -4772,7 +4772,29 @@
         "day": "Day",
         "meters": "Meters"
       },
-      "empty": "Nothing was metered this month."
+      "empty": "Nothing was metered this month.",
+      "allowance": {
+        "title": "Monthly allowance",
+        "loading": "Loading this workspace's allowance",
+        "loadFailed": "Couldn't load this workspace's allowance.",
+        "change": "Change",
+        "points": "{points} pts",
+        "ownSource": "Set on this workspace",
+        "platformSource": "Platform default",
+        "ownExplains": "This workspace has an allowance of its own, so the platform default of {points} pts doesn't apply to it.",
+        "platformExplains": "This workspace follows the platform default of {points} pts, and moves with it.",
+        "followDefault": "Follow the platform default ({points} pts)",
+        "ownCap": "Give this workspace an allowance of its own",
+        "zeroMeansNothing": "0 stops this workspace metering anything at all, which is not the same as following the default.",
+        "hint": "Metered features stop for the rest of the month once the allowance is spent.",
+        "save": "Save the allowance",
+        "saveFailed": "Couldn't change this allowance. Try again.",
+        "errors": {
+          "platform_admin_required": "Only platform administrators can set a workspace's allowance.",
+          "invalid_usage_cap": "That isn't an allowance that can be stored. Enter a number of points.",
+          "workspace_not_found": "This workspace doesn't exist."
+        }
+      }
     },
     "bills": {
       "title": "Bills",

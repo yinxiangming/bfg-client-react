@@ -41,7 +41,10 @@ import { formatMoney } from '@/services/console'
 import { formatPoints, getIntlLocale } from '@/utils/format'
 
 import { currentMonth, formatDay, formatPeriod, MONTH_PATTERN, recentMonths } from './billingPeriods'
+import SectionCard from './SectionCard'
 import { useConsoleWorkspaceUsage } from './useConsoleWorkspaceUsage'
+import { usePlatformAdmin } from './usePlatformAdmin'
+import WorkspaceUsageCapCard from './WorkspaceUsageCapCard'
 
 /** How far back the month picker goes. A year is as much as the platform bills for. */
 const MONTHS_OFFERED = 12
@@ -74,19 +77,6 @@ function Figure({ label, value, strong }: { label: string; value: string; strong
   )
 }
 
-function SectionCard({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <Card component='section'>
-      <Box sx={{ px: 4, py: 3, borderBottom: '1px solid var(--at-card-border)' }}>
-        <Typography component='h2' sx={{ fontSize: 14, fontWeight: 600, color: 'var(--at-row-fg)' }}>
-          {title}
-        </Typography>
-      </Box>
-      {children}
-    </Card>
-  )
-}
-
 export default function WorkspaceUsagePage({ workspaceId }: { workspaceId: number }) {
   const t = useTranslations('admin.console.usage')
   const tActions = useTranslations('admin.common.actions')
@@ -95,6 +85,7 @@ export default function WorkspaceUsagePage({ workspaceId }: { workspaceId: numbe
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const membership = useConsoleWorkspace(workspaceId)
+  const { isPlatformAdmin } = usePlatformAdmin()
 
   const requested = searchParams.get('month') ?? ''
   const month = MONTH_PATTERN.test(requested) ? requested : currentMonth()
@@ -217,6 +208,8 @@ export default function WorkspaceUsagePage({ workspaceId }: { workspaceId: numbe
               </Typography>
             </Box>
           </SectionCard>
+
+          {isPlatformAdmin && <WorkspaceUsageCapCard workspaceId={workspaceId} onChanged={() => void reload()} />}
 
           <SectionCard title={t('byMeter')}>
             {usage.meters.length === 0 ? (

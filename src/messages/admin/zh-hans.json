@@ -4772,7 +4772,29 @@
         "day": "日期",
         "meters": "计量点"
       },
-      "empty": "这个月没有产生用量。"
+      "empty": "这个月没有产生用量。",
+      "allowance": {
+        "title": "每月额度",
+        "loading": "正在加载这个工作区的额度",
+        "loadFailed": "没能加载这个工作区的额度。",
+        "change": "修改",
+        "points": "{points} 点",
+        "ownSource": "工作区单独设置",
+        "platformSource": "跟随平台默认",
+        "ownExplains": "这个工作区有自己的额度，平台默认的 {points} 点对它不生效。",
+        "platformExplains": "这个工作区跟随平台默认的 {points} 点，平台改了它也跟着改。",
+        "followDefault": "跟随平台默认（{points} 点）",
+        "ownCap": "为这个工作区单独设置额度",
+        "zeroMeansNothing": "填 0 表示完全不允许产生计量用量；这和“跟随平台默认”是两回事。",
+        "hint": "额度用完后，这个月剩下的时间里按量功能会停掉。",
+        "save": "保存额度",
+        "saveFailed": "没能修改额度，请重试。",
+        "errors": {
+          "platform_admin_required": "只有平台管理员可以设置工作区的额度。",
+          "invalid_usage_cap": "这个额度存不下来，请填一个点数。",
+          "workspace_not_found": "这个工作区不存在。"
+        }
+      }
     },
     "bills": {
       "title": "账单",
