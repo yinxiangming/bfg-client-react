@@ -8,8 +8,9 @@
  * able to change anything, which is also what the server answers.
  *
  * An add-on is acquired before it is switched on. One that costs nothing is given on the
- * spot and comes back on; one that costs something is billed, and the page says so
- * rather than pretending the extension is now running.
+ * spot and comes back on; one that costs something is billed, and nothing about the
+ * extension changes until that bill is paid — so the page shows the bill rather than
+ * pretending the extension is now running. Asking twice is billed once.
  */
 
 import { useState } from 'react'
@@ -52,7 +53,7 @@ const BILLS_PATH = '/workspaces/billing'
 
 /** What came of acquiring an add-on, until the reader dismisses it. */
 type AcquireNotice =
-  | { kind: 'granted'; name: string; activated: boolean }
+  | { kind: 'granted'; name: string; on: boolean }
   | { kind: 'invoiced'; name: string; invoice: ConsoleAcquireInvoice }
 
 export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: number }) {
@@ -140,19 +141,23 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
     try {
       const result = await acquireExtension(workspaceId, extension.key)
 
-      if (result.entitled) {
-        // It came back switched on, so the card is put straight from the answer.
-        replaceExtension(result.extension)
-        setNotice({ kind: 'granted', name, activated: result.activated })
-      } else {
-        // Nothing has changed for the workspace yet: it owes for it first.
+      // The answer carries the extension as it now stands either way, which for a billed
+      // one is as it was; the card is put straight from it rather than from a guess.
+      replaceExtension(result.extension)
+
+      if (result.invoice) {
+        // Nothing else was written: the workspace owes for it first.
         setNotice({ kind: 'invoiced', name, invoice: result.invoice })
+      } else {
+        setNotice({ kind: 'granted', name, on: result.extension.status === 'active' })
       }
     } catch (error) {
       const code = getConsoleErrorCode(error)
 
       // Both say the same thing about the button just pressed: there is nothing to
       // acquire here, so the card offers the switch from now on rather than this again.
+      // The page is told what the workspace holds, but it may have been read before
+      // someone else acquired this, and a button the server only ever refuses is a dead end.
       if (code === 'already_entitled' || code === 'not_an_addon') {
         setNothingToAcquire(keys => (keys.includes(extension.key) ? keys : [...keys, extension.key]))
       }
@@ -228,14 +233,18 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
 
       {notice?.kind === 'granted' && (
         <Alert severity='success' sx={{ mb: 4 }} onClose={() => setNotice(null)}>
-          {notice.activated ? t('acquired.on', { name: notice.name }) : t('acquired.granted', { name: notice.name })}
+          {notice.on ? t('acquired.on', { name: notice.name }) : t('acquired.granted', { name: notice.name })}
         </Alert>
       )}
 
       {notice?.kind === 'invoiced' && (
         <Alert severity='info' sx={{ mb: 4 }} onClose={() => setNotice(null)}>
-          <AlertTitle>{t('acquired.invoiceTitle', { name: notice.name })}</AlertTitle>
-          {t('acquired.invoiceBody', {
+          <AlertTitle>
+            {t(notice.invoice.issued ? 'acquired.invoiceTitle' : 'acquired.invoiceUnpaidTitle', {
+              name: notice.name
+            })}
+          </AlertTitle>
+          {t(notice.invoice.issued ? 'acquired.invoiceBody' : 'acquired.invoiceUnpaidBody', {
             name: notice.name,
             number: notice.invoice.number,
             total: formatMoney(notice.invoice.total, notice.invoice.currency),

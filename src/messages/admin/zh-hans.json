@@ -4661,12 +4661,15 @@
       "deactivate": "停用",
       "acquire": "获取",
       "acquireHint": "获取之后才能开启",
+      "acquireAgainHint": "权益已经结束；重新获取就能接着用，数据和设置都保留",
       "acquireFailed": "没能获取这个加购，请重试。",
       "acquired": {
         "on": "已获取「{name}」，并且已经开启。",
         "granted": "已获取「{name}」，现在可以开启了。",
         "invoiceTitle": "已为「{name}」开出账单",
         "invoiceBody": "账单 {number} 共 {total}，{due} 到期。付款后「{name}」会自动开启。",
+        "invoiceUnpaidTitle": "「{name}」的账单还没付",
+        "invoiceUnpaidBody": "账单 {number} 共 {total}，{due} 到期；再点一次也不会多开一张。付款后「{name}」会自动开启。",
         "viewBills": "去账单页"
       },
       "settings": "设置",
@@ -4696,7 +4699,11 @@
         "required_by_active": "{names} 依赖它，请先停用它们。",
         "already_entitled": "这个工作区已经有这个加购了，不用再获取。",
         "not_an_addon": "这个扩展属于基础套餐，不需要获取。",
-        "no_plan": "这个部署还没给这个加购定价，暂时买不了。"
+        "no_plan": "这个部署还没给这个加购定价，暂时买不了。",
+        "no_owner": "这个工作区还没有所有者，账单开不到人头上，暂时买不了。",
+        "unknown_currency": "这个工作区的币种不在平台能开账单的币种里，账单没能开出来。",
+        "no_exchange_rate": "今天没有汇率把这个加购折算成这个工作区的币种，账单没能开出来。",
+        "key_too_long": "这个加购开不出账单：账单号会超长。需要发布方把它的标识改短。"
       },
       "readOnly": {
         "suspended": "这个工作区已暂停，扩展只能查看，不能修改。",

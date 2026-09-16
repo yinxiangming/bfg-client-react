@@ -53,6 +53,15 @@ export interface ConsoleExtension {
   activated_at: string | null
   /** Switched on with everything it needs in place, so it is live for the workspace. */
   available: boolean
+  /**
+   * Whether the workspace may use this extension at all: always true for one that comes
+   * with the base plan, and for an add-on only while a live entitlement covers it. A
+   * deployment that sells nothing calls every extension entitled.
+   *
+   * Optional, and absent is read as entitled: a server from before any of this was sold
+   * does not send it, and has nothing to acquire an extension through either.
+   */
+  entitled?: boolean
   /** What the workspace must put in place before this can be switched on. */
   unmet_prerequisites: string[]
   config: Record<string, unknown>
@@ -148,33 +157,35 @@ export async function deactivateExtension(workspaceId: number, key: string): Pro
   })
 }
 
-/** The bill raised for an add-on that costs something, as the acquire answer carries it. */
-export interface ConsoleAcquireInvoice {
-  id: number
-  number: string
-  currency: string
-  total: string
-  due_date: string
-  /** The server's own word for it, such as `sent`. */
-  status: string
+/**
+ * The bill for an add-on that costs something, in the shape the bills page reads.
+ *
+ * `issued` is false when the workspace was already holding this bill unpaid: asking for
+ * the same add-on twice is billed once, and the second answer carries the first bill.
+ */
+export interface ConsoleAcquireInvoice extends ConsoleInvoice {
+  issued: boolean
 }
 
 /**
  * What asking for an add-on came to.
  *
- * One that costs nothing is given straight away, and the extension comes back switched
- * on. One that costs something is billed instead: the entitlement starts when the
- * invoice is paid, so nothing about the extension has changed yet.
+ * One the deployment prices at nothing is entitled and switched on in the same breath,
+ * and there is no `invoice`. A priced one is billed and nothing else is written until
+ * the money arrives: it is not entitled, and `extension` is as it was. Either way
+ * `extension` is how the extension now stands, so the card is put straight from it.
  */
-export type ConsoleAcquireResult =
-  | { entitled: true; activated: boolean; extension: ConsoleExtension }
-  | { entitled: false; invoice: ConsoleAcquireInvoice }
+export interface ConsoleAcquireResult {
+  entitled: boolean
+  invoice: ConsoleAcquireInvoice | null
+  extension: ConsoleExtension
+}
 
 /**
- * Ask for an add-on: the extension itself when it costs nothing, the invoice when it does.
+ * Ask for an add-on: it is either given and switched on, or billed for.
  *
- * Refused with 400 `already_entitled`, `not_an_addon` or `no_plan`; read the code with
- * `getConsoleErrorCode`.
+ * Refused with 400 and a `code` — `already_entitled`, `not_an_addon`, `no_plan`, or one
+ * of the reasons no bill could be written; read it with `getConsoleErrorCode`.
  */
 export async function acquireExtension(workspaceId: number, key: string): Promise<ConsoleAcquireResult> {
   return apiFetch<ConsoleAcquireResult>(buildApiUrl(`${BASE}${workspaceId}/extensions/${key}/acquire/`), {
@@ -187,16 +198,15 @@ export async function acquireExtension(workspaceId: number, key: string): Promis
 const PRICING_ADDON = 'addon'
 
 /**
- * Whether this extension still has to be acquired before it can be switched on.
+ * Whether the workspace has to acquire this extension before it can use it.
  *
- * Knowingly approximate. Nothing the API sends says whether a workspace holds an add-on:
- * `available` is only ever true for an extension that is already switched on, so an
- * add-on that is off reads the same whether it was acquired or not. Until an extension
- * says so itself, every add-on that is off is offered for acquiring, and a workspace
- * that already holds one is told so by the `already_entitled` refusal.
+ * Only an add-on is ever acquired, and only while no entitlement covers it — which is
+ * an add-on that has never been had, and one paused when its entitlement ran out. An
+ * extension that does not say either way is taken as entitled, so nothing is offered
+ * for acquiring against a server that cannot acquire it.
  */
 export function needsAcquiring(extension: ConsoleExtension): boolean {
-  return extension.pricing === PRICING_ADDON && !extension.available && extension.status === 'inactive'
+  return extension.pricing === PRICING_ADDON && extension.entitled === false
 }
 
 // Usage and bills

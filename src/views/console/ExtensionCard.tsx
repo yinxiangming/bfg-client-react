@@ -81,10 +81,21 @@ export default function ExtensionCard({
   const canDeactivate = canChange && (extension.status === 'active' || extension.status === 'paused')
   const switchedOn = extension.status === 'active' || extension.status === 'paused'
 
-  // "Switch it on to start using it" is not true of something the workspace does not have
-  // yet, and acquiring a free add-on switches it on anyway — so the same conditions gate
-  // both buttons, and only the line above them changes.
-  const meta = needsAcquire ? t('acquireHint') : presentation.meta
+  // Acquiring replaces the switch for an add-on the workspace is not entitled to: one it
+  // has never had, and one paused when its entitlement ran out, which is got again rather
+  // than switched off. An archived one, or one mid-archive, keeps its own controls: the
+  // server refuses a change either way until that has finished.
+  const acquirable = needsAcquire && (extension.status === 'inactive' || extension.status === 'paused')
+
+  // A free add-on is switched on the moment it is acquired, so whatever blocks switching
+  // one on blocks getting it.
+  const canAcquire = canChange && !blocked
+
+  // Neither "Switch it on to start using it" nor "Paused when its entitlement ended" is
+  // what to do about an add-on the workspace does not hold.
+  const meta = acquirable
+    ? t(extension.status === 'paused' ? 'acquireAgainHint' : 'acquireHint')
+    : presentation.meta
 
   return (
     <Card component='section' sx={{ display: 'flex', flexDirection: 'column', p: 4, gap: 3 }}>
@@ -163,7 +174,11 @@ export default function ExtensionCard({
         </Typography>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexShrink: 0 }}>
           {busy && <CircularProgress size={16} />}
-          {switchedOn ? (
+          {acquirable ? (
+            <Button size='small' variant='contained' disabled={!canAcquire || anyBusy} onClick={onAcquire}>
+              {t('acquire')}
+            </Button>
+          ) : switchedOn ? (
             <>
               {onSettings && extension.status === 'active' && (
                 <Button size='small' startIcon={<Icon icon='tabler-adjustments' />} onClick={onSettings}>
@@ -174,10 +189,6 @@ export default function ExtensionCard({
                 {t('deactivate')}
               </Button>
             </>
-          ) : needsAcquire ? (
-            <Button size='small' variant='contained' disabled={!canActivate || anyBusy} onClick={onAcquire}>
-              {t('acquire')}
-            </Button>
           ) : (
             <Button size='small' variant='contained' disabled={!canActivate || anyBusy} onClick={onActivate}>
               {t('activate')}

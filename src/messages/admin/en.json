@@ -4661,12 +4661,15 @@
       "deactivate": "Turn off",
       "acquire": "Get",
       "acquireHint": "Get it before it can be switched on",
+      "acquireAgainHint": "Its entitlement ran out; get it again to pick up where it left off",
       "acquireFailed": "Couldn't get this add-on. Try again.",
       "acquired": {
         "on": "{name} is yours, and it's on.",
         "granted": "{name} is yours. Switch it on when you're ready.",
         "invoiceTitle": "Invoice raised for {name}",
         "invoiceBody": "Invoice {number} comes to {total} and is due {due}. {name} is switched on as soon as it's paid.",
+        "invoiceUnpaidTitle": "{name} is already on an unpaid invoice",
+        "invoiceUnpaidBody": "Invoice {number} comes to {total} and is due {due}; asking again doesn't raise a second one. {name} is switched on as soon as it's paid.",
         "viewBills": "Go to bills"
       },
       "settings": "Settings",
@@ -4696,7 +4699,11 @@
         "required_by_active": "Switch {names} off first: they need this one.",
         "already_entitled": "This workspace already has this add-on, so there's nothing to get.",
         "not_an_addon": "This extension comes with the base plan, so there's nothing to get.",
-        "no_plan": "This add-on hasn't been priced on this platform yet, so it can't be bought."
+        "no_plan": "This add-on hasn't been priced on this platform yet, so it can't be bought.",
+        "no_owner": "This workspace has no owner to make the bill out to, so nothing can be bought for it yet.",
+        "unknown_currency": "This workspace's currency isn't one this platform bills in, so no invoice could be written.",
+        "no_exchange_rate": "There's no rate today to price this add-on in this workspace's currency, so no invoice could be written.",
+        "key_too_long": "This add-on can't be billed for: its invoice number would be too long. Whoever ships it has to give it a shorter key."
       },
       "readOnly": {
         "suspended": "This workspace is suspended. You can look at its extensions, but not change them.",
