@@ -54,6 +54,24 @@ export function formatDay(day: string | null | undefined, locale: string): strin
   return new Intl.DateTimeFormat(getIntlLocale(locale), { dateStyle: 'medium', timeZone: 'UTC' }).format(date)
 }
 
+/**
+ * A timestamp as a date and a time in the reader's own zone.
+ *
+ * The opposite case to the two above, and the reason both of them exist: a
+ * timestamp is a moment, it arrives carrying its offset, and the reader wants it
+ * where they are — "changed at 9am" means their 9am. A calendar date is not a
+ * moment and must not be read as one, which is what `formatDay` is for.
+ */
+export function formatMoment(value: string | null | undefined, locale: string): string {
+  if (!value) return ''
+
+  const moment = new Date(value)
+
+  if (isNaN(moment.getTime())) return value
+
+  return new Intl.DateTimeFormat(getIntlLocale(locale), { dateStyle: 'medium', timeStyle: 'short' }).format(moment)
+}
+
 /** This month as `YYYY-MM`, by the reader's clock — which is what they mean by "this month". */
 export function currentMonth(): string {
   const now = new Date()
