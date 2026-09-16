@@ -48,7 +48,7 @@ import {
 } from '@/services/console'
 import { BASE_PLAN_KEY, type ConsoleGrant } from '@/services/consoleAdmin'
 
-import { formatDay, formatMoment } from './billingPeriods'
+import { formatDay, formatMoment, formatMomentDay } from './billingPeriods'
 import ExtensionCard from './ExtensionCard'
 import GrantEntitlementDialog from './GrantEntitlementDialog'
 import { useConsoleWorkspaceDetail } from './useConsoleWorkspaceDetail'
@@ -302,7 +302,7 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
           </AlertTitle>
           {notice.until
             ? t(notice.days > 0 ? 'acquired.trialBody' : 'acquired.onBillLaterBody', {
-                until: formatMoment(notice.until, locale)
+                until: formatMomentDay(notice.until, locale)
               })
             : t('acquired.billLaterNoEnd')}
           <Box sx={{ mt: 2 }}>

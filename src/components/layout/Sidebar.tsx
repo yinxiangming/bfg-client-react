@@ -48,7 +48,7 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
   const pathname = usePathname()
   const currentPath = activePath || pathname
   const normalizedPath = useMemo(() => normalizePath(currentPath), [currentPath])
-  const { config: storefrontConfig } = useStorefrontConfig()
+  const { config: storefrontConfig, loading: storefrontLoading } = useStorefrontConfig()
   // Its own namespace rather than the one the menu labels come from: the console's
   // pages sit outside /admin, where those are read from `common`.
   const tConsole = useTranslations('admin.console')
@@ -58,13 +58,8 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
   const [workspaceLogoSrc, setWorkspaceLogoSrc] = useState<string | undefined>(undefined)
   const [workspaceLogoDarkSrc, setWorkspaceLogoDarkSrc] = useState<string | undefined>(undefined)
   const [showNameWithLogo, setShowNameWithLogo] = useState(false)
-  /**
-   * Whether the workspace's branding has been looked for yet. The admin reads it over
-   * the network, so until that answers there is nothing to draw — and drawing the
-   * framework's own mark in the meantime shows every operator the wrong brand for a
-   * moment on every single page load.
-   */
-  const [brandingRead, setBrandingRead] = useState(false)
+  /** Whether the admin's own branding request has come back, however it went. */
+  const [adminBrandingRead, setAdminBrandingRead] = useState(false)
 
   const isAdmin = Boolean(normalizedPath?.startsWith('/admin'))
   const isAccount = Boolean(normalizedPath?.startsWith('/account'))
@@ -76,11 +71,7 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
     // /settings/ is staff-only. A customer on /account gets 403 there, which left the
     // logo empty; the account area takes its branding from the public storefront config,
     // which is already here — so only the admin has anything to wait for.
-    if (!isAdmin) {
-      setBrandingRead(true)
-
-      return
-    }
+    if (!isAdmin) return
 
     let live = true
 
@@ -102,13 +93,23 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
         // Whether it answered or not: a workspace whose branding could not be read
         // falls back to the framework's name, which is the right answer and should
         // not be held back for ever.
-        if (live) setBrandingRead(true)
+        if (live) setAdminBrandingRead(true)
       })
 
     return () => {
       live = false
     }
   }, [isAdmin])
+
+  /**
+   * Whether there is anything still to wait for before drawing the branding. The console
+   * brands itself and waits for nothing; the admin reads the workspace's branding over
+   * the network; everywhere else it comes from the storefront config, which is fetched
+   * for the account area rather than rendered into it. Drawing the framework's own mark
+   * while one of those is in flight shows the wrong brand for a moment on every load —
+   * and it is only ever the right answer once nothing else is coming.
+   */
+  const brandingRead = isConsole || (isAdmin ? adminBrandingRead : !storefrontLoading)
 
   const displayName = isConsole
     ? tConsole('brand')

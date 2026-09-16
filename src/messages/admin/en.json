@@ -4766,7 +4766,8 @@
           "year": "year"
         },
         "listed": "listed at {amount}",
-        "trial": "{days}-day free trial"
+        "trial": "{days}-day free trial",
+        "free": "Free"
       }
     },
     "all": {

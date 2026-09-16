@@ -4766,7 +4766,8 @@
           "year": "年"
         },
         "listed": "平台标价 {amount}",
-        "trial": "{days} 天免费试用"
+        "trial": "{days} 天免费试用",
+        "free": "免费"
       }
     },
     "all": {

@@ -86,6 +86,10 @@ export default function ExtensionCard({
     }
     if (!price) return null
 
+    // An add-on the platform gives away says so in words. "0.00 a month" is the same
+    // fact written as a charge, and reads as one.
+    if (Number(price.amount) === 0) return { headline: t('price.free'), listed: null, trial: null }
+
     const unit = t.has(`price.unit.${price.interval}`) ? t(`price.unit.${price.interval}`) : price.interval
 
     return {
