@@ -4,11 +4,11 @@ import { useEffect, useState } from 'react'
 
 import { useRouter } from 'next/navigation'
 
+import ConsoleShell from '@/components/console/ConsoleShell'
 import { AdminSkinProvider } from '@/contexts/AdminSkinContext'
+import { ConsoleProvider } from '@/contexts/ConsoleContext'
 import { useWorkspaceChangeReload } from '@/hooks/useWorkspaceChangeReload'
 import { authApi } from '@/utils/authApi'
-
-import WorkspacesTopbar from './WorkspacesTopbar'
 
 type Props = {
   children: React.ReactNode
@@ -38,10 +38,9 @@ export default function WorkspacesLayoutClient({ children }: Props) {
   return (
     <AdminSkinProvider>
       {signedIn && (
-        <div className='flex min-h-screen flex-col'>
-          <WorkspacesTopbar />
-          <main className='flex-1'>{children}</main>
-        </div>
+        <ConsoleProvider>
+          <ConsoleShell>{children}</ConsoleShell>
+        </ConsoleProvider>
       )}
     </AdminSkinProvider>
   )

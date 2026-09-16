@@ -2,8 +2,11 @@
 
 import { useEffect, useState } from 'react'
 
+import { useTranslations } from 'next-intl'
+
 import Box from '@mui/material/Box'
 
+import Icon from '@components/Icon'
 import Logo from '@/components/Logo'
 import LanguageSwitcher from '@/components/i18n/LanguageSwitcher'
 import ThemeSwitcher from '@/components/theme/ThemeSwitcher'
@@ -16,13 +19,21 @@ type SignedInUser = {
   email: string
 }
 
+type Props = {
+  /** Narrow screens, where the tree is a drawer rather than a column. */
+  showMenuToggle?: boolean
+  onMenuToggle?: () => void
+}
+
 /**
- * The /workspaces bar: the site's brand, the language and colour-mode switchers, and the
+ * The console's bar: the site's brand, the language and colour-mode switchers, and the
  * signed-in user. It reuses the admin topbar's controls but leaves out the ones that act
- * on a workspace (skin, feedback, assistant, workspace switcher), since none is picked yet.
+ * on a workspace (skin, feedback, assistant, workspace switcher), since the console spans
+ * every workspace the account runs rather than working inside one.
  */
-export default function WorkspacesTopbar() {
+export default function ConsoleTopbar({ showMenuToggle, onMenuToggle }: Props) {
   const config = useStorefrontConfigSafe()
+  const t = useTranslations('admin.console')
   const [user, setUser] = useState<SignedInUser | null>(null)
 
   useEffect(() => {
@@ -69,7 +80,19 @@ export default function WorkspacesTopbar() {
         '& .theme-switcher-dropdown': { left: 'auto', right: 0 }
       }}
     >
-      <Logo skipLink name={config.site_name?.trim() || undefined} logoSrc={config.logo} logoDarkSrc={config.logo_dark} />
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        {showMenuToggle && (
+          <button type='button' className='topbar-menu-toggle' onClick={onMenuToggle} aria-label={t('topbar.menu')}>
+            <Icon icon='tabler-menu-2' />
+          </button>
+        )}
+        <Logo
+          skipLink
+          name={config.site_name?.trim() || undefined}
+          logoSrc={config.logo}
+          logoDarkSrc={config.logo_dark}
+        />
+      </Box>
 
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
         <LanguageSwitcher />
