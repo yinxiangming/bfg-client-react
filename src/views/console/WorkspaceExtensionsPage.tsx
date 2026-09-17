@@ -33,6 +33,7 @@ import Icon from '@components/Icon'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import { useAppDialog } from '@/contexts/AppDialogContext'
 import { useConsole, useConsoleWorkspace } from '@/contexts/ConsoleContext'
+import ConsoleWorkspacePanels from '@/extensions/ConsoleWorkspacePanels'
 import {
   acquireExtension,
   activateExtension,
@@ -389,6 +390,8 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
           ))}
         </Box>
       )}
+
+      <ConsoleWorkspacePanels workspaceId={workspaceId} isPlatformAdmin={isPlatformAdmin} />
     </>
   )
 }
