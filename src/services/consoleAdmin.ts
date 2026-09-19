@@ -166,6 +166,71 @@ export async function getConsoleClusterHealthSummary(): Promise<ConsoleClusterHe
   return apiFetch<ConsoleClusterHealthSummary>(buildApiUrl(`${CLUSTERS_BASE}health-summary/`))
 }
 
+// ── Placement reservations ──────────────────────────────────────────
+
+/** One capacity reservation awaiting a separately verified data-plane placement. */
+export interface ConsolePlacementRequest {
+  id: string
+  workspace: { id: number; name: string; slug: string }
+  source_cluster: Pick<ConsoleCluster, 'id' | 'name' | 'region' | 'is_active'> | null
+  target_cluster: Pick<ConsoleCluster, 'id' | 'name' | 'region' | 'is_active'>
+  profile_fence: number
+  status: 'reserved' | 'rolled_back' | 'expired'
+  reservation_expires_at: string
+  rolled_back_at: string | null
+  created_by: ConsoleChanger | null
+  created_at: string
+  updated_at: string
+  events: Array<{
+    sequence: number
+    event_type: string
+    details: Record<string, unknown>
+    created_at: string
+  }>
+}
+
+const PLACEMENT_REQUESTS_BASE = '/platform/control/placement-requests/'
+
+/** Read capacity reservations. This strict control-plane endpoint is superuser-only. */
+export async function listConsolePlacementRequests(workspaceId?: number): Promise<ConsolePlacementRequest[]> {
+  const query = workspaceId ? `?workspace=${encodeURIComponent(workspaceId)}` : ''
+  return apiFetch<ConsolePlacementRequest[]>(buildApiUrl(`${PLACEMENT_REQUESTS_BASE}${query}`))
+}
+
+/** Reserve capacity only; this never changes the Workspace's Cluster routing. */
+export async function reserveConsoleWorkspacePlacement(
+  workspaceId: number,
+  targetClusterId: string,
+  expectedPlacementFence: number,
+  reason: string
+): Promise<ConsolePlacementRequest> {
+  return apiFetch<ConsolePlacementRequest>(buildApiUrl(PLACEMENT_REQUESTS_BASE), {
+    method: 'POST',
+    headers: { 'X-Platform-Change-Reason': reason, 'X-Idempotency-Key': createIdempotencyKey() },
+    body: JSON.stringify({
+      confirm: true,
+      workspace_id: workspaceId,
+      target_cluster_id: targetClusterId,
+      expected_placement_fence: expectedPlacementFence
+    })
+  })
+}
+
+/** Release an unconsumed capacity reservation and fence out a delayed placement worker. */
+export async function rollbackConsolePlacementReservation(
+  placementRequestId: string,
+  reason: string
+): Promise<ConsolePlacementRequest> {
+  return apiFetch<ConsolePlacementRequest>(
+    buildApiUrl(`${PLACEMENT_REQUESTS_BASE}${encodeURIComponent(placementRequestId)}/rollback/`),
+    {
+      method: 'POST',
+      headers: { 'X-Platform-Change-Reason': reason, 'X-Idempotency-Key': createIdempotencyKey() },
+      body: JSON.stringify({ confirm: true })
+    }
+  )
+}
+
 // ── Audit history ────────────────────────────────────────────────────
 
 /** One completed sensitive action from the Platform control plane. */

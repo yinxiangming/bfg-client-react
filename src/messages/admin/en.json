@@ -4661,6 +4661,23 @@
       "loadingOperations": "Loading operations",
       "operationsFailed": "Couldn't load this workspace's operations.",
       "noOperations": "No lifecycle operations have been recorded for this workspace.",
+      "placement": {
+        "title": "Cluster placement",
+        "subtitle": "Reserve verified capacity before a future data-plane placement",
+        "loading": "Loading placement reservations",
+        "loadFailed": "Couldn't load this workspace's placement reservations.",
+        "retry": "Retry",
+        "migrationUnavailable": "Live Cluster migration is unavailable until a verified data-plane adapter is configured. The existing assignment has not changed.",
+        "reservationOnly": "A reservation holds capacity only. It does not copy customer data or change this workspace's routing.",
+        "reserved": "Capacity is reserved on {cluster} until {expiry}. Release it if the verified placement will not proceed.",
+        "target": "Target Cluster",
+        "noTargets": "No active Cluster is currently accepting new workspace placements.",
+        "reason": "Operator reason",
+        "reserve": "Reserve capacity",
+        "release": "Release reservation",
+        "working": "Working…",
+        "actionFailed": "The placement action could not be completed."
+      },
       "runtimeFeatures": {
         "title": "Runtime feature access",
         "subtitle": "Platform grants that the server actively enforces",

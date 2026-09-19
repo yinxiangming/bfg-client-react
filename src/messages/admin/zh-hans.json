@@ -4661,6 +4661,23 @@
       "loadingOperations": "正在加载操作记录",
       "operationsFailed": "没能加载这个工作区的操作记录。",
       "noOperations": "这个工作区还没有生命周期操作记录。",
+      "placement": {
+        "title": "集群放置",
+        "subtitle": "在未来数据面放置前预留已验证的容量",
+        "loading": "正在加载放置预留",
+        "loadFailed": "没能加载这个工作区的放置预留。",
+        "retry": "重试",
+        "migrationUnavailable": "在已配置可验证的数据面适配器前，暂不支持实时跨集群迁移。当前分配没有被修改。",
+        "reservationOnly": "预留只占用容量，不会复制客户数据，也不会改变这个工作区的路由。",
+        "reserved": "已在 {cluster} 预留容量至 {expiry}。如果不会继续已验证的放置，请释放此预留。",
+        "target": "目标集群",
+        "noTargets": "当前没有正在接受新工作区放置的活动集群。",
+        "reason": "操作原因",
+        "reserve": "预留容量",
+        "release": "释放预留",
+        "working": "处理中…",
+        "actionFailed": "放置操作未能完成。"
+      },
       "runtimeFeatures": {
         "title": "运行时功能权限",
         "subtitle": "由平台授予并由服务端实际强制执行的功能权限",
