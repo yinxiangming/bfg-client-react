@@ -13,7 +13,7 @@
  * would price every single token at a million times what it should be.
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { useTranslations } from 'next-intl'
 
@@ -41,6 +41,12 @@ type Props = {
   onAdded: (prices: ConsoleMeterPrices) => void
 }
 
+function createIdempotencyKey(): string {
+  if (typeof globalThis.crypto?.randomUUID === 'function') return globalThis.crypto.randomUUID()
+
+  return `meter-price-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
+}
+
 export default function MeterPriceAddDialog({ open, meter, defaultMargin, onClose, onAdded }: Props) {
   const t = useTranslations('admin.console.platform')
   const tActions = useTranslations('admin.common.actions')
@@ -51,6 +57,7 @@ export default function MeterPriceAddDialog({ open, meter, defaultMargin, onClos
   const [effectiveFrom, setEffectiveFrom] = useState('')
   const [saving, setSaving] = useState(false)
   const [failure, setFailure] = useState<string | null>(null)
+  const requestKey = useRef<string | null>(null)
 
   useEffect(() => {
     if (!open) return
@@ -61,6 +68,7 @@ export default function MeterPriceAddDialog({ open, meter, defaultMargin, onClos
     setMargin('')
     setEffectiveFrom('')
     setFailure(null)
+    requestKey.current = null
   }, [open, meter])
 
   const canSave = key.trim().length > 0 && vendorCost.trim().length > 0 && unitSize.trim().length > 0 && !saving
@@ -82,8 +90,10 @@ export default function MeterPriceAddDialog({ open, meter, defaultMargin, onClos
           // that moves; sending the same share as a number would pin it instead.
           ...(margin.trim() ? { margin: margin.trim() } : {}),
           ...(effectiveFrom ? { effective_from: effectiveFrom } : {})
-        })
+        }, requestKey.current ?? (requestKey.current = createIdempotencyKey()))
       )
+      requestKey.current = null
+      onClose()
     } catch (error) {
       setFailure(refusalMessage(error, t('prices.saveFailed'), code => (t.has(`errors.${code}`) ? t(`errors.${code}`) : null)))
     } finally {

@@ -113,6 +113,7 @@ export interface TenantWorkspacesResponse {
     cluster_management: boolean
     audit_log: boolean
     configuration: boolean
+    exchange_rates?: boolean
   }
   workspaces: TenantWorkspace[]
   /** How many workspaces one account may own, suspended and inactive ones included. */

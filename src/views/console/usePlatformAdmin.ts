@@ -16,7 +16,7 @@ export function usePlatformAdmin(): {
   ready: boolean
   failed: boolean
   isPlatformAdmin: boolean
-  capabilities: { cluster_management: boolean; audit_log: boolean; configuration: boolean }
+  capabilities: { cluster_management: boolean; audit_log: boolean; configuration: boolean; exchange_rates: boolean }
 } {
   const { state } = useConsole()
 
@@ -26,6 +26,6 @@ export function usePlatformAdmin(): {
     isPlatformAdmin: state.kind === 'loaded' && state.isPlatformAdmin,
     capabilities: state.kind === 'loaded'
       ? state.platformCapabilities
-      : { cluster_management: false, audit_log: false, configuration: false }
+      : { cluster_management: false, audit_log: false, configuration: false, exchange_rates: false }
   }
 }

@@ -101,6 +101,15 @@ export async function updateConsoleCluster(
   })
 }
 
+/** Run the restricted server-side health probe for one configured Cluster. */
+export async function checkConsoleClusterHealth(id: string, reason: string): Promise<ConsoleCluster> {
+  return apiFetch<ConsoleCluster>(buildApiUrl(`${CLUSTERS_BASE}${encodeURIComponent(id)}/health-check/`), {
+    method: 'POST',
+    headers: { 'X-Platform-Change-Reason': reason },
+    body: JSON.stringify({ confirm: true })
+  })
+}
+
 // ── Audit history ────────────────────────────────────────────────────
 
 /** One completed sensitive action from the Platform control plane. */
@@ -271,11 +280,13 @@ export async function listMeterPrices(meter?: string): Promise<ConsoleMeterPrice
  * a bill already issued can still be explained by the row it was calculated
  * from. The answer is the whole meter rather than the row written, because a
  * price dated behind one that already exists changes nothing today and the
- * answer says which row is in force. Refused with 400 `invalid_meter_price`.
+ * answer says which row is in force. `idempotencyKey` must remain stable while
+ * retrying one save, so a lost response cannot append the same price twice.
  */
-export async function addMeterPrice(price: ConsoleMeterPriceInput): Promise<ConsoleMeterPrices> {
+export async function addMeterPrice(price: ConsoleMeterPriceInput, idempotencyKey: string): Promise<ConsoleMeterPrices> {
   return apiFetch<ConsoleMeterPrices>(buildApiUrl(`${BASE}meter-prices/`), {
     method: 'POST',
+    headers: { 'X-Idempotency-Key': idempotencyKey },
     body: JSON.stringify({ ...price, confirm: true })
   })
 }
