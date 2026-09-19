@@ -152,19 +152,27 @@ export interface ConsoleWorkspaceList {
 const BASE = '/platform/console/workspaces/'
 
 export async function suspendConsoleWorkspace(id: number, reason: string): Promise<ConsoleWorkspace> {
-  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/suspend/`), { method: 'POST', body: JSON.stringify({ confirm: true, reason }) })
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/suspend/`), {
+    method: 'POST', headers: { 'X-Idempotency-Key': createIdempotencyKey() }, body: JSON.stringify({ confirm: true, reason })
+  })
 }
 
 export async function resumeConsoleWorkspace(id: number, reason: string): Promise<ConsoleWorkspace> {
-  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/resume/`), { method: 'POST', body: JSON.stringify({ confirm: true, reason }) })
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/resume/`), {
+    method: 'POST', headers: { 'X-Idempotency-Key': createIdempotencyKey() }, body: JSON.stringify({ confirm: true, reason })
+  })
 }
 
 export async function deleteConsoleWorkspace(id: number, reason: string): Promise<ConsoleWorkspace> {
-  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/delete/`), { method: 'POST', body: JSON.stringify({ confirm: true, reason }) })
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/delete/`), {
+    method: 'POST', headers: { 'X-Idempotency-Key': createIdempotencyKey() }, body: JSON.stringify({ confirm: true, reason })
+  })
 }
 
 export async function restoreConsoleWorkspace(id: number, reason: string): Promise<ConsoleWorkspace> {
-  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/restore/`), { method: 'POST', body: JSON.stringify({ confirm: true, reason }) })
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/restore/`), {
+    method: 'POST', headers: { 'X-Idempotency-Key': createIdempotencyKey() }, body: JSON.stringify({ confirm: true, reason })
+  })
 }
 
 export async function exportConsoleWorkspace(id: number, reason: string): Promise<Record<string, unknown>> {
