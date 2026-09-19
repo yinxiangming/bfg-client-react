@@ -18,6 +18,7 @@ import Switch from '@mui/material/Switch'
 import Avatar from '@mui/material/Avatar'
 
 // Component Imports
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import SchemaTable from '@/components/schema/SchemaTable'
 import VariantInventoryModal from '../edit/VariantInventoryModal'
 import CategoryTreeSelect from '@/components/category/CategoryTreeSelect'
@@ -37,6 +38,12 @@ import type { SchemaAction } from '@/types/schema'
 import { useAppDialog } from '@/contexts/AppDialogContext'
 
 const PRODUCTS_REFRESH_EVENT = 'bfg:products-refresh'
+
+type ProductQueryParams = {
+  category?: number
+  is_active?: boolean
+  is_featured?: boolean
+}
 
 const ProductListTable = () => {
   const router = useRouter()
@@ -88,10 +95,23 @@ const ProductListTable = () => {
     }
   }, [selectedCategoryId, categories])
 
-  const extraParams = useMemo(
-    () => (selectedCategoryId ? { category: selectedCategoryId } : {}),
-    [selectedCategoryId]
-  )
+  // The table is server-paginated, so its filters have to travel with the query:
+  // narrowing the page already fetched would filter 20 rows out of 453 and still
+  // report 453 as the total.
+  const [filters, setFilters] = useState<Record<string, string>>({})
+
+  const extraParams = useMemo(() => {
+    const params: ProductQueryParams = {}
+    if (selectedCategoryId) params.category = selectedCategoryId
+    if (filters.is_active === 'true' || filters.is_active === 'false') {
+      params.is_active = filters.is_active === 'true'
+    }
+    if (filters.is_featured === 'true' || filters.is_featured === 'false') {
+      params.is_featured = filters.is_featured === 'true'
+    }
+    return params
+  }, [selectedCategoryId, filters])
+
   const {
     items: products,
     count: totalCount,
@@ -99,9 +119,18 @@ const ProductListTable = () => {
     error,
     setPage,
     refetch,
+    patchItem,
     serverPagination,
     onSearchChange: handleSearchChange,
-  } = usePagedData<Product, { category?: number }>(getProductsPage, { extraParams })
+  } = usePagedData<Product, ProductQueryParams>(getProductsPage, { extraParams })
+
+  const handleFiltersChange = useCallback(
+    (next: Record<string, string>) => {
+      setFilters(next)
+      setPage(0)
+    },
+    [setPage]
+  )
 
   const [inventoryModalOpen, setInventoryModalOpen] = useState(false)
   const [inventoryModalProductId, setInventoryModalProductId] = useState<number | undefined>(undefined)
@@ -132,6 +161,27 @@ const ProductListTable = () => {
     router.replace(`/admin/store/products?${params.toString()}`)
   }
 
+  /**
+   * Flip one of the row's switches.
+   *
+   * Paints the new state first and only rolls back if the write fails. The old
+   * code refetched the whole page after every toggle, which flipped `loading`
+   * and made the table blink — a lot of ceremony for one boolean.
+   */
+  const toggleFlag = useCallback(
+    async (id: number, field: 'is_active' | 'is_featured', next: boolean) => {
+      patchItem(product => product.id === id, { [field]: next } as Partial<Product>)
+      try {
+        await updateProduct(id, { [field]: next })
+      } catch (err: any) {
+        patchItem(product => product.id === id, { [field]: !next } as Partial<Product>)
+        console.error(`Failed to update ${field}:`, err)
+        alert(t('products.list.errors.updateStatusFailed', { error: err.message }))
+      }
+    },
+    [patchItem, t]
+  )
+
   // Customize schema with product image rendering, categories, stock, and status
   const customSchema = useMemo(() => {
     if (!productsSchema.list) return productsSchema
@@ -160,7 +210,7 @@ const ProductListTable = () => {
                           height: 38,
                           borderRadius: 1,
                           objectFit: 'cover',
-                          backgroundColor: '#f3f4f6',
+                          backgroundColor: 'action.hover',
                           flexShrink: 0
                         }}
                       />
@@ -171,7 +221,7 @@ const ProductListTable = () => {
                           width: 38,
                           height: 38,
                           borderRadius: 1,
-                          bgcolor: 'grey.100',
+                          bgcolor: 'action.hover',
                           color: 'text.secondary',
                           fontSize: 16,
                           flexShrink: 0
@@ -181,7 +231,7 @@ const ProductListTable = () => {
                       </Avatar>
                     )}
                     <Box sx={{ minWidth: 0 }}>
-                      <Typography sx={{ fontWeight: 500 }} noWrap>
+                      <Typography sx={{ fontWeight: 500, fontSize: '0.8125rem' }} noWrap>
                         {value}
                       </Typography>
                       <Typography variant="body2" sx={{ fontSize: '0.75rem', color: 'text.secondary', mt: 0.25 }} noWrap>
@@ -269,16 +319,7 @@ const ProductListTable = () => {
                   <Switch
                     checked={value || false}
                     size="small"
-                    onChange={async (e) => {
-                      e.stopPropagation()
-                      try {
-                        await updateProduct(row.id, { is_active: e.target.checked })
-                        await refetch()
-                      } catch (err: any) {
-                        console.error('Failed to update product status:', err)
-                        alert(t('products.list.errors.updateStatusFailed', { error: err.message }))
-                      }
-                    }}
+                    onChange={(e) => toggleFlag(row.id, 'is_active', e.target.checked)}
                     onClick={(e) => e.stopPropagation()}
                   />
                 )
@@ -294,16 +335,7 @@ const ProductListTable = () => {
                   <Switch
                     checked={value || false}
                     size="small"
-                    onChange={async (e) => {
-                      e.stopPropagation()
-                      try {
-                        await updateProduct(row.id, { is_featured: e.target.checked })
-                        await refetch()
-                      } catch (err: any) {
-                        console.error('Failed to update featured:', err)
-                        alert(t('products.list.errors.updateStatusFailed', { error: (err as Error).message }))
-                      }
-                    }}
+                    onChange={(e) => toggleFlag(row.id, 'is_featured', e.target.checked)}
                     onClick={(e) => e.stopPropagation()}
                   />
                 )
@@ -351,8 +383,7 @@ const ProductListTable = () => {
           if (action.id === 'delete') {
             return {
               ...action,
-              label: t('products.list.schema.actions.delete'),
-              confirm: t('products.list.schema.actions.confirmDelete')
+              label: t('products.list.schema.actions.delete')
             }
           }
           return action
@@ -360,7 +391,7 @@ const ProductListTable = () => {
       }
     }
     return schema
-  }, [refetch, t])
+  }, [toggleFlag, t])
 
   const handleActionClick = async (action: SchemaAction, item: Product | {}) => {
     if (action.id === 'add') {
@@ -375,7 +406,14 @@ const ProductListTable = () => {
           await deleteProduct(item.id)
           await refetch()
         } catch (err: any) {
-          alert(t('products.list.errors.deleteFailed', { error: err.message }))
+          // A product that has been ordered cannot be deleted without breaking
+          // the order; the server says so rather than failing opaquely.
+          const body = err?.validationErrors
+          alert(
+            body?.code === 'product_in_orders'
+              ? t('products.list.errors.deleteBlockedByOrders', { count: body.order_count })
+              : t('products.list.errors.deleteFailed', { error: err.message })
+          )
         }
       }
     }
@@ -411,7 +449,8 @@ const ProductListTable = () => {
           categories={categories}
           value={selectedCategory ? [selectedCategory] : []}
           onChange={handleCategoryChange}
-          label={t('products.list.filters.category.label')}
+          // No label: the toolbar's other filters are label-less, and a label
+          // here pushed this control half a row below the ones beside it.
           placeholder={t('products.list.filters.category.placeholder')}
           loading={categoriesLoading}
           multiple={false}
@@ -432,11 +471,14 @@ const ProductListTable = () => {
 
   return (
     <>
+      <AdminPageHeader title={t('products.list.title')} subtitle={t('products.list.subtitle')} />
       <SchemaTable
         schema={customSchema.list}
         data={products || []}
         loading={loading}
         onActionClick={handleActionClick}
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
         customFilters={categoryFilter}
         statusColors={{
           true: 'success',

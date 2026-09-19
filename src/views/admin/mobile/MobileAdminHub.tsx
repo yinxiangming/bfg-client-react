@@ -6,8 +6,9 @@ import List from '@mui/material/List'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
-import Paper from '@mui/material/Paper'
+import Card from '@mui/material/Card'
 import Box from '@mui/material/Box'
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 
 export default function MobileAdminHub() {
   const router = useRouter()
@@ -25,7 +26,8 @@ export default function MobileAdminHub() {
 
   return (
     <Box>
-      <Paper variant='outlined'>
+      <AdminPageHeader title={t('hub.title')} subtitle={t('hub.subtitle')} />
+      <Card>
         <List disablePadding>
           {tools.map((tool, idx) => (
             <ListItemButton
@@ -42,11 +44,11 @@ export default function MobileAdminHub() {
                 secondary={tool.desc}
                 primaryTypographyProps={{ fontWeight: 600 }}
               />
-              <span className='iconify text-gray-400' data-icon='mdi:chevron-right' />
+              <Box component='span' className='iconify' data-icon='mdi:chevron-right' sx={{ color: 'text.disabled' }} />
             </ListItemButton>
           ))}
         </List>
-      </Paper>
+      </Card>
     </Box>
   )
 }

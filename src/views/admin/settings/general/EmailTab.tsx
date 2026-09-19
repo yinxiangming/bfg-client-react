@@ -12,11 +12,11 @@ import DialogTitle from '@mui/material/DialogTitle'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import MenuItem from '@mui/material/MenuItem'
 import Switch from '@mui/material/Switch'
-import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import Alert from '@mui/material/Alert'
 import Snackbar from '@mui/material/Snackbar'
 
+import { ADMIN_GUTTER } from '@/components/theme/adminSurface'
 import CustomTextField from '@/components/ui/TextField'
 import SchemaTable from '@/components/schema/SchemaTable'
 import type { ListSchema, SchemaAction } from '@/types/schema'
@@ -224,14 +224,19 @@ export default function EmailTab() {
 
   return (
     <Box>
-      <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        {t('subtitle')}
-      </Typography>
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }} onClose={() => {}}>
-          {t('errors.loadFailed')}: {error}
-        </Alert>
-      )}
+      {/* The panel is flush (p: 0) so the table can run edge to edge. This copy
+          takes the gutter the table insets its own toolbar and rows by, so the
+          sentence, the search box and the first column all start on one line. */}
+      <Box sx={{ px: `${ADMIN_GUTTER}px`, pt: 3, pb: 2 }}>
+        <Typography variant="body2" color="text.secondary">
+          {t('subtitle')}
+        </Typography>
+        {error && (
+          <Alert severity="error" sx={{ mt: 2 }} onClose={() => {}}>
+            {t('errors.loadFailed')}: {error}
+          </Alert>
+        )}
+      </Box>
       <SchemaTable
         schema={schema}
         data={data ?? []}
@@ -293,7 +298,7 @@ export default function EmailTab() {
       <Dialog open={testDialogOpen} onClose={() => setTestDialogOpen(false)}>
         <DialogTitle>{t('sendTest')}</DialogTitle>
         <DialogContent>
-          <TextField
+          <CustomTextField
             autoFocus
             margin="dense"
             label={t('testEmailTo')}

@@ -7,10 +7,10 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
-import TextField from '@mui/material/TextField'
 import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
 import Alert from '@mui/material/Alert'
+import CustomTextField from '@/components/ui/TextField'
 import { getWorkspaceId } from '@/utils/api'
 import { sendAgentChat } from '@/services/agentApi'
 
@@ -238,8 +238,8 @@ export default function AgentDialog({ open, onClose }: AgentDialogProps) {
                   maxWidth: '85%',
                   ...(m.role === 'user'
                     ? {
-                        bgcolor: 'grey.800',
-                        color: 'white',
+                        bgcolor: 'primary.main',
+                        color: 'primary.contrastText',
                         px: 1.5,
                         py: 1,
                         borderRadius: 2,
@@ -247,14 +247,14 @@ export default function AgentDialog({ open, onClose }: AgentDialogProps) {
                     : {}),
                 }}
               >
-                <Typography variant="caption" sx={{ color: m.role === 'user' ? 'grey.300' : 'text.secondary' }}>
+                <Typography variant="caption" sx={{ color: m.role === 'user' ? 'inherit' : 'text.secondary' }}>
                   {m.role === 'user' ? '我' : 'AI'}
                 </Typography>
                 {m.role === 'assistant' && (m.tool_names?.length ?? 0) > 0 && (
                   <Alert
                     severity="info"
                     icon={false}
-                    sx={{ mt: 0.5, py: 0.5, fontSize: '0.75rem', color: 'grey.600', '& .MuiAlert-message': { fontSize: '0.75rem' } }}
+                    sx={{ mt: 0.5, py: 0.5, fontSize: '0.75rem', '& .MuiAlert-message': { fontSize: '0.75rem' } }}
                   >
                     {toolNamesSummary(m.tool_names ?? [])}
                   </Alert>
@@ -263,7 +263,7 @@ export default function AgentDialog({ open, onClose }: AgentDialogProps) {
                   <Alert
                     severity="info"
                     icon={false}
-                    sx={{ mt: 0.5, py: 0.5, fontSize: '0.75rem', color: 'grey.600', '& .MuiAlert-message': { fontSize: '0.75rem' } }}
+                    sx={{ mt: 0.5, py: 0.5, fontSize: '0.75rem', '& .MuiAlert-message': { fontSize: '0.75rem' } }}
                   >
                     {toolNamesSummary(m.tool_calls_made.map((t) => t.tool_name ?? t.capability_id ?? '').filter(Boolean))}
                   </Alert>
@@ -271,7 +271,7 @@ export default function AgentDialog({ open, onClose }: AgentDialogProps) {
                 {m.role === 'assistant' && m.tool_results?.some((r) => !r.success) && (
                   <Alert
                     severity="error"
-                    sx={{ mt: 0.5, py: 0.5, fontSize: '0.75rem', '& .MuiAlert-message': { fontSize: '0.75rem', color: 'grey.700' } }}
+                    sx={{ mt: 0.5, py: 0.5, fontSize: '0.75rem', '& .MuiAlert-message': { fontSize: '0.75rem' } }}
                   >
                     {m.tool_results.filter((r) => !r.success).map((r) => (
                       <Box key={r.name} component="span" display="block">
@@ -286,13 +286,13 @@ export default function AgentDialog({ open, onClose }: AgentDialogProps) {
               </Box>
             ))}
             {chatSending && (streamingContent || streamingToolNames.length > 0 || streamingToolResults.length > 0) && (
-              <Box sx={{ mb: 2, alignSelf: 'flex-start', maxWidth: '85%', fontSize: '0.75rem', color: 'grey.600' }}>
-                <Typography variant="caption" sx={{ color: 'grey.600' }}>AI</Typography>
+              <Box sx={{ mb: 2, alignSelf: 'flex-start', maxWidth: '85%', fontSize: '0.75rem', color: 'text.secondary' }}>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>AI</Typography>
                 {streamingToolNames.length > 0 && (
                   <Alert
                     severity="info"
                     icon={false}
-                    sx={{ mt: 0.5, py: 0.5, fontSize: '0.75rem', color: 'grey.600', '& .MuiAlert-message': { fontSize: '0.75rem' } }}
+                    sx={{ mt: 0.5, py: 0.5, fontSize: '0.75rem', '& .MuiAlert-message': { fontSize: '0.75rem' } }}
                   >
                     {toolNamesSummary(streamingToolNames)}
                   </Alert>
@@ -300,7 +300,7 @@ export default function AgentDialog({ open, onClose }: AgentDialogProps) {
                 {streamingToolResults.some((r) => !r.success) && (
                   <Alert
                     severity="error"
-                    sx={{ mt: 0.5, py: 0.5, fontSize: '0.75rem', '& .MuiAlert-message': { fontSize: '0.75rem', color: 'grey.700' } }}
+                    sx={{ mt: 0.5, py: 0.5, fontSize: '0.75rem', '& .MuiAlert-message': { fontSize: '0.75rem' } }}
                   >
                     {streamingToolResults.filter((r) => !r.success).map((r) => (
                       <Box key={r.name} component="span" display="block">
@@ -309,7 +309,7 @@ export default function AgentDialog({ open, onClose }: AgentDialogProps) {
                     ))}
                   </Alert>
                 )}
-                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '0.75rem', color: 'grey.600' }}>
+                <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '0.75rem', color: 'text.secondary' }}>
                   {streamingContent || '…'}
                 </Typography>
               </Box>
@@ -321,7 +321,7 @@ export default function AgentDialog({ open, onClose }: AgentDialogProps) {
             </Alert>
           )}
           <Box display="flex" gap={1} alignItems="flex-end">
-            <TextField
+            <CustomTextField
               fullWidth
               multiline
               maxRows={4}

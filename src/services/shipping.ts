@@ -108,7 +108,7 @@ export type ShippingUpdateResult = {
 // ============================================================================
 
 export async function getPackageTemplates(): Promise<PackageTemplate[]> {
-  const url = buildApiUrl('/package-templates/?active=true', API_VERSIONS.BFG2)
+  const url = buildApiUrl('/package-templates/?active=true', API_VERSIONS.BFG2, 'delivery')
   const response = await apiFetch<PackageTemplate[] | { results?: PackageTemplate[]; data?: PackageTemplate[] }>(url)
   if (Array.isArray(response)) {
     return response
@@ -117,12 +117,12 @@ export async function getPackageTemplates(): Promise<PackageTemplate[]> {
 }
 
 export async function getPackageTemplate(id: number): Promise<PackageTemplate> {
-  const url = buildApiUrl(`/package-templates/${id}/`, API_VERSIONS.BFG2)
+  const url = buildApiUrl(`/package-templates/${id}/`, API_VERSIONS.BFG2, 'delivery')
   return apiFetch<PackageTemplate>(url)
 }
 
 export async function createPackageTemplate(data: PackageTemplatePayload): Promise<PackageTemplate> {
-  const url = buildApiUrl('/package-templates/', API_VERSIONS.BFG2)
+  const url = buildApiUrl('/package-templates/', API_VERSIONS.BFG2, 'delivery')
   return apiFetch<PackageTemplate>(url, {
     method: 'POST',
     body: JSON.stringify(data)
@@ -130,7 +130,7 @@ export async function createPackageTemplate(data: PackageTemplatePayload): Promi
 }
 
 export async function updatePackageTemplate(id: number, data: Partial<PackageTemplatePayload>): Promise<PackageTemplate> {
-  const url = buildApiUrl(`/package-templates/${id}/`, API_VERSIONS.BFG2)
+  const url = buildApiUrl(`/package-templates/${id}/`, API_VERSIONS.BFG2, 'delivery')
   return apiFetch<PackageTemplate>(url, {
     method: 'PATCH',
     body: JSON.stringify(data)
@@ -138,7 +138,7 @@ export async function updatePackageTemplate(id: number, data: Partial<PackageTem
 }
 
 export async function deletePackageTemplate(id: number): Promise<void> {
-  const url = buildApiUrl(`/package-templates/${id}/`, API_VERSIONS.BFG2)
+  const url = buildApiUrl(`/package-templates/${id}/`, API_VERSIONS.BFG2, 'delivery')
   return apiFetch<void>(url, {
     method: 'DELETE'
   })
@@ -149,7 +149,7 @@ export async function deletePackageTemplate(id: number): Promise<void> {
 // ============================================================================
 
 export async function getOrderPackages(orderId: number): Promise<OrderPackage[]> {
-  const url = buildApiUrl(`/order-packages/?order=${orderId}`, API_VERSIONS.BFG2)
+  const url = buildApiUrl(`/order-packages/?order=${orderId}`, API_VERSIONS.BFG2, 'shop')
   const response = await apiFetch<OrderPackage[] | { results?: OrderPackage[]; data?: OrderPackage[] }>(url)
   if (Array.isArray(response)) {
     return response
@@ -158,7 +158,7 @@ export async function getOrderPackages(orderId: number): Promise<OrderPackage[]>
 }
 
 export async function createOrderPackage(data: OrderPackagePayload): Promise<OrderPackage> {
-  const url = buildApiUrl('/order-packages/', API_VERSIONS.BFG2)
+  const url = buildApiUrl('/order-packages/', API_VERSIONS.BFG2, 'shop')
   return apiFetch<OrderPackage>(url, {
     method: 'POST',
     body: JSON.stringify(data)
@@ -166,7 +166,7 @@ export async function createOrderPackage(data: OrderPackagePayload): Promise<Ord
 }
 
 export async function updateOrderPackage(id: number, data: Partial<OrderPackagePayload>): Promise<OrderPackage> {
-  const url = buildApiUrl(`/order-packages/${id}/`, API_VERSIONS.BFG2)
+  const url = buildApiUrl(`/order-packages/${id}/`, API_VERSIONS.BFG2, 'shop')
   return apiFetch<OrderPackage>(url, {
     method: 'PATCH',
     body: JSON.stringify(data)
@@ -174,7 +174,7 @@ export async function updateOrderPackage(id: number, data: Partial<OrderPackageP
 }
 
 export async function deleteOrderPackage(id: number): Promise<void> {
-  const url = buildApiUrl(`/order-packages/${id}/`, API_VERSIONS.BFG2)
+  const url = buildApiUrl(`/order-packages/${id}/`, API_VERSIONS.BFG2, 'shop')
   return apiFetch<void>(url, {
     method: 'DELETE'
   })
@@ -188,7 +188,7 @@ export async function calculateShipping(
   orderId: number, 
   freightServiceId?: number
 ): Promise<ShippingCalculationResult> {
-  const url = buildApiUrl('/order-packages/calculate_shipping/', API_VERSIONS.BFG2)
+  const url = buildApiUrl('/order-packages/calculate_shipping/', API_VERSIONS.BFG2, 'shop')
   return apiFetch<ShippingCalculationResult>(url, {
     method: 'POST',
     body: JSON.stringify({
@@ -217,7 +217,7 @@ export async function updateOrderShipping(
 // ============================================================================
 
 export async function getFreightServices(): Promise<FreightService[]> {
-  const url = buildApiUrl('/freight-services/?active=true', API_VERSIONS.BFG2)
+  const url = buildApiUrl('/freight-services/?active=true', API_VERSIONS.BFG2, 'delivery')
   const response = await apiFetch<FreightService[] | { results?: FreightService[]; data?: FreightService[] }>(url)
   if (Array.isArray(response)) {
     return response
@@ -226,7 +226,7 @@ export async function getFreightServices(): Promise<FreightService[]> {
 }
 
 export async function getFreightService(id: number): Promise<FreightService> {
-  const url = buildApiUrl(`/freight-services/${id}/`, API_VERSIONS.BFG2)
+  const url = buildApiUrl(`/freight-services/${id}/`, API_VERSIONS.BFG2, 'delivery')
   return apiFetch<FreightService>(url)
 }
 

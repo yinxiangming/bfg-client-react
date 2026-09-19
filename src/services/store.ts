@@ -349,7 +349,26 @@ export async function getWarehouses(): Promise<Warehouse[]> {
 export interface OrderItemSummary {
   product_name: string
   quantity: number
+  /** First product image, absolute URL. Null when the product has no image. */
+  image?: string | null
 }
+
+/**
+ * The only order statuses the API accepts, in workflow order.
+ *
+ * Mirrors `Order.STATUS_CHOICES` in bfg/shop/models/order.py. Every screen must
+ * build its dropdowns from this list: the admin used to offer `paid` and
+ * `completed`, neither of which is an order status — `paid` belongs to
+ * payment_status — so saving either returned
+ * `status: "paid" is not a valid choice`, while `processing`, `delivered` and
+ * `refunded` could not be set at all.
+ */
+export const ORDER_STATUSES = ['pending', 'processing', 'shipped', 'ready_for_pickup', 'delivered', 'cancelled', 'refunded'] as const
+export type OrderStatus = (typeof ORDER_STATUSES)[number]
+
+/** Mirrors `Order.PAYMENT_STATUS_CHOICES`. */
+export const PAYMENT_STATUSES = ['pending', 'paid', 'failed', 'refunded'] as const
+export type PaymentStatus = (typeof PAYMENT_STATUSES)[number]
 
 export interface Order {
   id: number
@@ -359,6 +378,14 @@ export interface Order {
   store?: number | string
   store_name?: string
   fulfillment_method?: 'shipping' | 'pickup'
+  /** Set only on pickup orders. The list serialises the id and the name. */
+  pickup_point?: number | null
+  pickup_point_name?: string | null
+  /** Locker PIN or counter code — whatever the customer quotes on collection. */
+  pickup_code?: string
+  /** The shopper has attached something — a bank-transfer screenshot, all but
+   *  always. Not a payment: a human still has to look at it. */
+  has_payment_proof?: boolean
   total: number
   item_count?: number
   /** Brief item list for list view (product_name, quantity) */
@@ -366,8 +393,8 @@ export interface Order {
   customer_note?: string
   /** Number of packages for logistics column */
   packages_count?: number
-  status: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled'
-  payment_status: 'pending' | 'paid' | 'failed'
+  status: OrderStatus
+  payment_status: PaymentStatus
   created_at: string
 }
 
@@ -418,6 +445,9 @@ export interface CreateOrderPayload {
   customer_id: number
   store_id: number
   fulfillment_method?: 'shipping' | 'pickup'
+  /** Required for pickup orders unless the workspace has a default point. */
+  pickup_point_id?: number | null
+  pickup_code?: string
   shipping_address_id?: number | null
   billing_address_id?: number | null
   status?: Order['status']
@@ -449,16 +479,35 @@ export async function refundOrder(id: number): Promise<Order> {
   })
 }
 
+export type ReturnStatus = 'open' | 'approved' | 'rejected' | 'received' | 'inspected' | 'refunded' | 'closed' | 'cancelled'
+
+export interface ReturnLineItem {
+  id: number
+  order_item: number
+  product_name?: string
+  product_price?: string | number
+  quantity: number
+  reason?: string
+  restock_action?: 'no_restock' | 'restock' | 'damage'
+}
+
 export interface ReturnRequest {
   id: number
   order: number
+  order_number?: string
   customer: number
+  customer_name?: string | null
   return_number: string
-  status: 'open' | 'approved' | 'rejected' | 'received' | 'inspected' | 'refunded' | 'closed' | 'cancelled'
+  status: ReturnStatus
   reason_category?: string
   customer_note?: string
   admin_note?: string
+  items?: ReturnLineItem[]
   created_at?: string
+  updated_at?: string
+  approved_at?: string | null
+  refunded_at?: string | null
+  closed_at?: string | null
 }
 
 export interface ReturnLineItemPayload {
@@ -468,8 +517,19 @@ export interface ReturnLineItemPayload {
   restock_action?: 'no_restock' | 'restock' | 'damage'
 }
 
-const returnsApi = () => buildApiUrl('/returns/', API_VERSIONS.BFG2)
-const returnItemsApi = () => buildApiUrl('/return-items/', API_VERSIONS.BFG2)
+const returnsApi = () => buildApiUrl('/returns/', API_VERSIONS.BFG2, 'shop')
+const returnItemsApi = () => buildApiUrl('/return-items/', API_VERSIONS.BFG2, 'shop')
+
+export async function getOrderReturns(orderId: number): Promise<ReturnRequest[]> {
+  const response = await apiFetch<ReturnRequest[] | { results?: ReturnRequest[] }>(
+    `${returnsApi()}?order=${orderId}`,
+    getSiteAdminOptions()
+  )
+  if (Array.isArray(response)) {
+    return response
+  }
+  return response.results || []
+}
 
 export async function createReturnRequest(data: {
   order: number
@@ -680,6 +740,12 @@ export async function getCustomerAddresses(customerId: number): Promise<Address[
   return response.results || []
 }
 
+/** Addresses the workspace keeps for itself (stores, warehouses, brands), not its customers'. */
+export async function getWorkspaceAddresses(): Promise<Address[]> {
+  const response = await apiFetch<Address[] | { results: Address[] }>(`${bfgApi.addresses()}?scope=workspace`, getSiteAdminOptions())
+  return Array.isArray(response) ? response : response.results || []
+}
+
 export async function createAddress(data: Partial<Address>): Promise<Address> {
   return apiFetch<Address>(bfgApi.addresses(), {
     ...getSiteAdminOptions(),
@@ -790,6 +856,9 @@ type ProductsParams = {
   category?: number
   tag?: number
   featured?: boolean
+  /** Publication state. Omit for "either" — `false` means "show me the drafts". */
+  is_active?: boolean
+  is_featured?: boolean
   page?: number
   page_size?: number
 }
@@ -800,6 +869,8 @@ function buildProductsUrl(params?: ProductsParams): string {
   if (params?.category) searchParams.append('category', params.category.toString())
   if (params?.tag) searchParams.append('tag', params.tag.toString())
   if (params?.featured !== undefined) searchParams.append('featured', params.featured.toString())
+  if (params?.is_active !== undefined) searchParams.append('is_active', params.is_active.toString())
+  if (params?.is_featured !== undefined) searchParams.append('is_featured', params.is_featured.toString())
   if (params?.page) searchParams.append('page', params.page.toString())
   if (params?.page_size) searchParams.append('page_size', params.page_size.toString())
   return `${bfgApi.adminProducts()}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`

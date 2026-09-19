@@ -20,7 +20,6 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
-import Paper from '@mui/material/Paper'
 import Pagination from '@mui/material/Pagination'
 import CircularProgress from '@mui/material/CircularProgress'
 import Chip from '@mui/material/Chip'
@@ -115,7 +114,7 @@ const TransactionHistoryModal = ({ open, onClose, customerId }: TransactionHisto
   return (
     <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
       <DialogTitle sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant='h5'>{t('customers.wallet.transactions.title')}</Typography>
+        {t('customers.wallet.transactions.title')}
         <IconButton onClick={onClose} size='small'>
           <i className='tabler-x' />
         </IconButton>
@@ -130,7 +129,7 @@ const TransactionHistoryModal = ({ open, onClose, customerId }: TransactionHisto
             <Typography color='text.secondary'>{t('customers.wallet.transactions.empty')}</Typography>
           </Box>
         ) : (
-          <TableContainer component={Paper} variant='outlined'>
+          <TableContainer>
             <Table>
               <TableHead>
                 <TableRow>

@@ -8,18 +8,18 @@ import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
 // MUI Imports
-import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
 import Grid from '@mui/material/Grid'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
-import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 
 // Component Imports
+import CustomTextField from '@/components/ui/TextField'
+import { SettingsActionBar } from '@/components/admin/settings/SettingsSection'
 import CustomerEditHeader from '@/views/admin/store/customers/edit/CustomerEditHeader'
 
 // API Imports
@@ -87,7 +87,7 @@ export default function NewCustomerPage() {
 
   return (
     <>
-      <Grid container spacing={4}>
+      <Grid container spacing={3}>
         <Grid size={{ xs: 12 }}>
           <CustomerEditHeader
             customer={{ id: 0, user_id: 0 } as Customer}
@@ -98,12 +98,12 @@ export default function NewCustomerPage() {
         <Grid size={{ xs: 12, md: 8 }}>
           <Card>
             <CardContent>
-              <Typography variant='h6' sx={{ mb: 4 }}>
+              <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600, mb: 3 }}>
                 {t('customers.newPage.card.title')}
               </Typography>
-              <Grid container spacing={4}>
+              <Grid container spacing={3}>
                 <Grid size={{ xs: 12 }}>
-                  <TextField
+                  <CustomTextField
                     fullWidth
                     label={t('customers.newPage.fields.userId.label')}
                     type='number'
@@ -114,7 +114,7 @@ export default function NewCustomerPage() {
                   />
                 </Grid>
                 <Grid size={{ xs: 12 }}>
-                  <TextField
+                  <CustomTextField
                     fullWidth
                     label={t('customers.newPage.fields.companyName.label')}
                     value={formData.company_name}
@@ -122,7 +122,7 @@ export default function NewCustomerPage() {
                   />
                 </Grid>
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <TextField
+                  <CustomTextField
                     fullWidth
                     label={t('customers.newPage.fields.taxNumber.label')}
                     value={formData.tax_number}
@@ -130,7 +130,7 @@ export default function NewCustomerPage() {
                   />
                 </Grid>
                 <Grid size={{ xs: 12, md: 6 }}>
-                  <TextField
+                  <CustomTextField
                     fullWidth
                     label={t('customers.newPage.fields.creditLimit.label')}
                     type='number'
@@ -139,7 +139,7 @@ export default function NewCustomerPage() {
                   />
                 </Grid>
                 <Grid size={{ xs: 12 }}>
-                  <TextField
+                  <CustomTextField
                     fullWidth
                     label={t('customers.newPage.fields.notes.label')}
                     multiline
@@ -149,15 +149,15 @@ export default function NewCustomerPage() {
                   />
                 </Grid>
               </Grid>
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 4 }}>
-                <Button variant='outlined' color='secondary' onClick={handleDiscard} disabled={saving}>
-                  {t('customers.newPage.actions.discard')}
-                </Button>
-                <Button variant='contained' onClick={handleSave} disabled={saving}>
-                  {saving ? t('customers.newPage.actions.creating') : t('customers.newPage.actions.createCustomer')}
-                </Button>
-              </Box>
             </CardContent>
+            <SettingsActionBar>
+              <Button variant='contained' onClick={handleSave} disabled={saving}>
+                {saving ? t('customers.newPage.actions.creating') : t('customers.newPage.actions.createCustomer')}
+              </Button>
+              <Button variant='outlined' color='secondary' onClick={handleDiscard} disabled={saving}>
+                {t('customers.newPage.actions.discard')}
+              </Button>
+            </SettingsActionBar>
           </Card>
         </Grid>
       </Grid>

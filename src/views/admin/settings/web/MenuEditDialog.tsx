@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
+import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
@@ -13,9 +14,10 @@ import IconButton from '@mui/material/IconButton'
 import Grid from '@mui/material/Grid'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '@mui/material/Checkbox'
+import MenuItem from '@mui/material/MenuItem'
 
 import CustomTextField from '@/components/ui/TextField'
-import type { Menu, MenuPayload, MenuItem } from '@/services/web'
+import type { Menu, MenuPayload, MenuItem as MenuItemData } from '@/services/web'
 
 type MenuEditDialogProps = {
   open: boolean
@@ -33,7 +35,7 @@ type ItemRow = {
   is_active: boolean
 }
 
-function toItemRows(items: MenuItem[] | undefined): ItemRow[] {
+function toItemRows(items: MenuItemData[] | undefined): ItemRow[] {
   if (!items || !Array.isArray(items)) return []
   return items.map((i, idx) => ({
     id: i.id,
@@ -116,9 +118,9 @@ const MenuEditDialog = ({ open, menu, onClose, onSave }: MenuEditDialogProps) =>
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
-      <DialogTitle>{t('settings.web.menus.editDialog.title')}</DialogTitle>
-      <DialogContent>
-        <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
+        <DialogTitle>{t('settings.web.menus.editDialog.title')}</DialogTitle>
+        <DialogContent>
           <Grid container spacing={3}>
             <Grid size={{ xs: 12 }}>
               <CustomTextField
@@ -142,14 +144,13 @@ const MenuEditDialog = ({ open, menu, onClose, onSave }: MenuEditDialogProps) =>
               <CustomTextField
                 fullWidth
                 select
-                SelectProps={{ native: true }}
                 label={t('settings.web.menus.editDialog.fields.location')}
                 value={location}
                 onChange={e => setLocation(e.target.value as 'header' | 'footer' | 'sidebar')}
               >
-                <option value='header'>{t('settings.web.menus.editDialog.locationOptions.header')}</option>
-                <option value='footer'>{t('settings.web.menus.editDialog.locationOptions.footer')}</option>
-                <option value='sidebar'>{t('settings.web.menus.editDialog.locationOptions.sidebar')}</option>
+                <MenuItem value='header'>{t('settings.web.menus.editDialog.locationOptions.header')}</MenuItem>
+                <MenuItem value='footer'>{t('settings.web.menus.editDialog.locationOptions.footer')}</MenuItem>
+                <MenuItem value='sidebar'>{t('settings.web.menus.editDialog.locationOptions.sidebar')}</MenuItem>
               </CustomTextField>
             </Grid>
             <Grid size={{ xs: 12 }}>
@@ -168,7 +169,7 @@ const MenuEditDialog = ({ open, menu, onClose, onSave }: MenuEditDialogProps) =>
             </Grid>
 
             <Grid size={{ xs: 12 }}>
-              <Typography variant='subtitle1' sx={{ mb: 2 }}>
+              <Typography component='div' className='at-block-title'>
                 {t('settings.web.menus.editDialog.fields.menuItems')}
               </Typography>
               {items.map((row, idx) => (
@@ -220,18 +221,17 @@ const MenuEditDialog = ({ open, menu, onClose, onSave }: MenuEditDialogProps) =>
                 {t('settings.web.menus.editDialog.addItem')}
               </Button>
             </Grid>
-
-            <Grid size={{ xs: 12 }} sx={{ display: 'flex', gap: 2, justifyContent: 'flex-end', mt: 2 }}>
-              <Button type='button' variant='outlined' onClick={onClose}>
-                {t('common.schemaForm.cancel')}
-              </Button>
-              <Button type='submit' variant='contained' disabled={saving}>
-                {saving ? t('common.schemaForm.saving') : t('common.schemaForm.save')}
-              </Button>
-            </Grid>
           </Grid>
-        </form>
-      </DialogContent>
+        </DialogContent>
+        <DialogActions>
+          <Button type='button' variant='outlined' onClick={onClose}>
+            {t('common.schemaForm.cancel')}
+          </Button>
+          <Button type='submit' variant='contained' disabled={saving}>
+            {saving ? t('common.schemaForm.saving') : t('common.schemaForm.save')}
+          </Button>
+        </DialogActions>
+      </form>
     </Dialog>
   )
 }

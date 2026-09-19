@@ -3,24 +3,23 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
 import type { SyntheticEvent } from 'react'
 import {
-  CardContent,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
   Tab,
   Tabs,
-  TextField,
   Typography,
   Button,
   Alert,
-  FormControl,
-  InputLabel,
-  Select,
   MenuItem,
   Box,
 } from '@mui/material'
 import { useTranslations } from 'next-intl'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
+import { SETTINGS_GUTTER } from '@/components/admin/settings/SettingsSection'
 
 import SchemaTable from '@/components/schema/SchemaTable'
 import type { ListSchema, SchemaAction } from '@/types/schema'
@@ -368,21 +367,22 @@ export default function NewsletterTab() {
   }
 
   return (
-    <CardContent>
-      <Typography variant='h6' sx={{ mb: 2 }}>
-        {t('page.tabs.newsletter')}
-      </Typography>
-      {error && (
-        <Alert severity='error' sx={{ mb: 2 }} onClose={() => setError(null)}>
-          {error}
-        </Alert>
-      )}
-      <Tabs value={innerTab} onChange={handleInnerTabChange} sx={{ mb: 2 }}>
-        <Tab label={t('newsletterTab.tabs.subscribers')} value='subscribers' />
-        <Tab label={t('newsletterTab.tabs.sends')} value='sends' />
-        <Tab label={t('newsletterTab.tabs.sendLogs')} value='sendLogs' />
-        <Tab label={t('newsletterTab.tabs.templates')} value='templates' />
-      </Tabs>
+    <>
+      {/* Only the heading strip carries the settings gutter — the SchemaTables
+          below run edge to edge, flush with the page card like every other tab. */}
+      <Box sx={{ px: SETTINGS_GUTTER, pt: 3 }}>
+        {error && (
+          <Alert severity='error' sx={{ mb: 2 }} onClose={() => setError(null)}>
+            {error}
+          </Alert>
+        )}
+        <Tabs value={innerTab} onChange={handleInnerTabChange}>
+          <Tab label={t('newsletterTab.tabs.subscribers')} value='subscribers' />
+          <Tab label={t('newsletterTab.tabs.sends')} value='sends' />
+          <Tab label={t('newsletterTab.tabs.sendLogs')} value='sendLogs' />
+          <Tab label={t('newsletterTab.tabs.templates')} value='templates' />
+        </Tabs>
+      </Box>
 
       {innerTab === 'subscribers' && (
         <SchemaTable<Subscription>
@@ -424,9 +424,8 @@ export default function NewsletterTab() {
       <Dialog open={addSubOpen} onClose={() => setAddSubOpen(false)}>
         <DialogTitle>{t('newsletterTab.dialogs.addSubscriber.title')}</DialogTitle>
         <DialogContent>
-          <TextField
+          <CustomTextField
             autoFocus
-            margin='dense'
             label={t('newsletterTab.dialogs.addSubscriber.fields.email')}
             type='email'
             fullWidth
@@ -436,7 +435,7 @@ export default function NewsletterTab() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAddSubOpen(false)}>{tCommon('actions.cancel')}</Button>
-          <Button onClick={handleAddSubscription} disabled={addSubSaving || !addSubEmail.trim()}>
+          <Button variant='contained' onClick={handleAddSubscription} disabled={addSubSaving || !addSubEmail.trim()}>
             {addSubSaving ? tCommon('states.saving') : tCommon('actions.add')}
           </Button>
         </DialogActions>
@@ -460,7 +459,7 @@ export default function NewsletterTab() {
                   {t('newsletterTab.subscribers.actions.unsubscribe')}
                 </Button>
               )}
-              <Button color='error' onClick={() => editSubRow && handleDeleteSubscription(editSubRow.id)}>
+              <Button variant='contained' color='error' onClick={() => editSubRow && handleDeleteSubscription(editSubRow.id)}>
                 {tCommon('actions.delete')}
               </Button>
             </>
@@ -472,7 +471,7 @@ export default function NewsletterTab() {
         <DialogTitle>{t('newsletterTab.dialogs.addSend.title')}</DialogTitle>
         <DialogContent>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 1 }}>
-            <TextField
+            <CustomTextField
               autoFocus
               label={t('newsletterTab.dialogs.addSend.fields.subject')}
               required
@@ -480,7 +479,7 @@ export default function NewsletterTab() {
               value={addSendSubject}
               onChange={(e) => setAddSendSubject(e.target.value)}
             />
-            <TextField
+            <CustomTextField
               label={t('newsletterTab.dialogs.addSend.fields.content')}
               placeholder={t('newsletterTab.dialogs.addSend.placeholders.content')}
               fullWidth
@@ -489,41 +488,39 @@ export default function NewsletterTab() {
               value={addSendContent}
               onChange={(e) => setAddSendContent(e.target.value)}
             />
-            <FormControl fullWidth>
-              <InputLabel>{t('newsletterTab.dialogs.addSend.fields.template')}</InputLabel>
-              <Select
-                value={addSendTemplateId === '' ? '' : String(addSendTemplateId)}
-                label={t('newsletterTab.dialogs.addSend.fields.template')}
-                onChange={(e) => {
-                  const v = e.target.value
-                  setAddSendTemplateId(v === '' ? '' : Number(v))
-                }}
-              >
-                <MenuItem value=''>{t('newsletterTab.dialogs.addSend.options.none')}</MenuItem>
-                {templates.map((tmpl) => (
-                  <MenuItem key={tmpl.id} value={String(tmpl.id)}>
-                    {tmpl.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField
+            <CustomTextField
+              select
+              fullWidth
+              label={t('newsletterTab.dialogs.addSend.fields.template')}
+              value={addSendTemplateId === '' ? '' : String(addSendTemplateId)}
+              onChange={(e) => {
+                const v = e.target.value
+                setAddSendTemplateId(v === '' ? '' : Number(v))
+              }}
+            >
+              <MenuItem value=''>{t('newsletterTab.dialogs.addSend.options.none')}</MenuItem>
+              {templates.map((tmpl) => (
+                <MenuItem key={tmpl.id} value={String(tmpl.id)}>
+                  {tmpl.name}
+                </MenuItem>
+              ))}
+            </CustomTextField>
+            <CustomTextField
               label={t('newsletterTab.dialogs.addSend.fields.scheduledAt')}
               type='datetime-local'
               fullWidth
               value={addSendScheduledAt}
               onChange={(e) => setAddSendScheduledAt(e.target.value)}
-              InputLabelProps={{ shrink: true }}
             />
           </Box>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setAddSendOpen(false)}>{tCommon('actions.cancel')}</Button>
-          <Button onClick={handleCreateSend} disabled={addSendSaving || !addSendSubject.trim()}>
+          <Button variant='contained' onClick={handleCreateSend} disabled={addSendSaving || !addSendSubject.trim()}>
             {addSendSaving ? tCommon('states.saving') : tCommon('actions.add')}
           </Button>
         </DialogActions>
       </Dialog>
-    </CardContent>
+    </>
   )
 }

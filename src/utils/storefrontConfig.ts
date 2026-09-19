@@ -4,6 +4,7 @@
  */
 
 import { cache } from 'react'
+import type { ExtensionAvailability } from '@/extensions/availability'
 import { getApiBaseUrl, getApiHeaders } from './api'
 import { getCurrentLocale } from '@/i18n/http'
 import {
@@ -43,6 +44,7 @@ export type StorefrontHeaderOptions = {
   show_language_switcher?: boolean
   show_style_selector?: boolean
   show_login?: boolean
+  show_register?: boolean
 }
 
 const DEFAULT_HEADER_OPTIONS: StorefrontHeaderOptions = {
@@ -51,6 +53,26 @@ const DEFAULT_HEADER_OPTIONS: StorefrontHeaderOptions = {
   show_language_switcher: true,
   show_style_selector: true,
   show_login: true,
+  show_register: false,
+}
+
+/**
+ * How much of a product's internals the storefront is allowed to show, and what a
+ * sold-out product does. Set once per workspace in Admin → Settings → Store; the server
+ * resolves it so every theme answers these the same way.
+ */
+export type StorefrontDisplaySettings = {
+  /** 'plain' drops the workspace's SKU prefix ("SKU-KAS-301" → "KAS-301"). */
+  sku_display: 'hidden' | 'plain' | 'full'
+  /** Anything but 'exact' also withholds the figure from the API payload. */
+  stock_display: 'hidden' | 'status' | 'low_only' | 'exact'
+  out_of_stock_policy: 'hide' | 'show' | 'notify' | 'backorder'
+}
+
+export const DEFAULT_STOREFRONT_DISPLAY: StorefrontDisplaySettings = {
+  sku_display: 'plain',
+  stock_display: 'status',
+  out_of_stock_policy: 'show',
 }
 
 export type StorefrontConfig = {
@@ -63,6 +85,10 @@ export type StorefrontConfig = {
   twitter_url: string
   instagram_url: string
   default_currency: string
+  supported_currencies?: string[]
+  /** ISO 3166-1 alpha-2, or '' when the workspace has not declared a market. */
+  country?: string
+  supported_languages?: string[]
   top_bar_announcement: string
   footer_copyright: string
   site_announcement: string
@@ -90,11 +116,56 @@ export type StorefrontConfig = {
   header_options?: StorefrontHeaderOptions
   /** When true, new reviews require admin approval before showing. Default false. */
   review_moderation_required?: boolean
+  /**
+   * True while the shop is not taking new orders. Public, and says only that much:
+   * why a shop is closed is the workspace's business, not the shopper's, so nothing
+   * here names a reason or an amount.
+   *
+   * Absent on servers that do not report it, which reads the same as an open shop —
+   * selling is the storefront's whole purpose and it must never close itself on a
+   * field it simply did not receive.
+   */
+  read_only?: boolean
+  /** SKU / stock visibility and out-of-stock behaviour. See StorefrontDisplaySettings. */
+  storefront_display?: StorefrontDisplaySettings
+  /**
+   * Workspace logo. A data URL when uploaded through admin, otherwise a media
+   * URL. Blank when unset — callers fall back to the built-in mark.
+   */
+  logo?: string
+  /**
+   * The logo for dark surfaces. Blank when the workspace has not uploaded one,
+   * in which case callers fall back to `logo`.
+   */
+  logo_dark?: string
+  /** Workspace favicon, same shape as `logo`. Blank when unset. */
+  favicon?: string
+  /**
+   * Whether to print the site name next to the logo. Defaults to false — a
+   * logo usually contains the wordmark already. Ignored when no logo is set,
+   * in which case the name is the only branding there is.
+   */
+  show_site_name_with_logo?: boolean
+  /**
+   * Public, client-side analytics tag ids for this workspace. One deployment
+   * serves many storefronts, so the GA4 property travels with the config rather
+   * than a build-time env var.
+   */
+  analytics?: {
+    /** GA4 measurement id, e.g. `G-XXXXXXXXXX`. Blank when not configured. */
+    google_analytics_id?: string
+  }
   /** Primary domain configured for this workspace (hostname only, no port). */
   workspace_domain?: string
   /** Resolved workspace (public storefront context). */
   workspace_id?: number
   workspace_slug?: string
+  /**
+   * Plugins with a storefront or account surface that the server manages, and the ones
+   * this workspace has switched on. Missing on servers that do not manage extensions,
+   * in which case every plugin is enabled.
+   */
+  extensions?: ExtensionAvailability
 }
 
 const STALE_MS = 5 * 60 * 1000 // 5 minutes
@@ -224,12 +295,39 @@ export async function getStorefrontConfig(locale?: string): Promise<StorefrontCo
   data.languages = getStorefrontLanguages(data)
   if (!data.header_options) data.header_options = { ...DEFAULT_HEADER_OPTIONS }
   else data.header_options = { ...DEFAULT_HEADER_OPTIONS, ...data.header_options }
+  data.storefront_display = { ...DEFAULT_STOREFRONT_DISPLAY, ...(data.storefront_display ?? {}) }
   cached = { data, at: Date.now() }
   return data
 }
 
 /** Default theme id when not configured (standard store). */
 export const DEFAULT_THEME_ID = 'store'
+
+/**
+ * Display policy for a config that may not have loaded yet.
+ *
+ * Falls back to the same defaults the server resolves, so the first paint and the
+ * hydrated paint agree — a stock figure that appears and then vanishes is worse than
+ * one that was never shown.
+ */
+export function getStorefrontDisplay(
+  config?: Pick<StorefrontConfig, 'storefront_display'> | null
+): StorefrontDisplaySettings {
+  return { ...DEFAULT_STOREFRONT_DISPLAY, ...(config?.storefront_display ?? {}) }
+}
+
+/**
+ * Whether this shop is taking orders.
+ *
+ * Fails open, for the same reason getStorefrontDisplay() falls back to the server's
+ * own defaults: a config that has not loaded, or a server that predates the field,
+ * must leave the purchase path alone rather than close a shop that is trading.
+ */
+export function isStorefrontAcceptingOrders(
+  config?: Pick<StorefrontConfig, 'read_only'> | null
+): boolean {
+  return config?.read_only !== true
+}
 
 /** Default header options (all true). Used when config is not yet loaded. */
 export function getDefaultHeaderOptions(): StorefrontHeaderOptions {
@@ -241,6 +339,8 @@ export function getDefaultHeaderOptions(): StorefrontHeaderOptions {
  * Pass requestHost (e.g. from headers().get('host')); workspace id from env when set (same as other app surfaces).
  * Returns null when server returns 404 (e.g. workspace/site not configured yet).
  * Deduped per request via React.cache() so layout + page share one fetch.
+ * Workspace branding changes need to appear promptly, so this uses a short
+ * revalidate window rather than the default cross-request Next data cache.
  */
 export const getStorefrontConfigForServer = cache(
   async (locale: string, requestHost?: string): Promise<StorefrontConfig | null> => {
@@ -253,7 +353,7 @@ export const getStorefrontConfigForServer = cache(
           { 'Content-Type': 'application/json' },
           { requestHost }
         ),
-        next: { revalidate: 300 },
+        next: { revalidate: 30 },
         signal: controller.signal,
       })
       clearTimeout(timeoutId)
@@ -266,6 +366,7 @@ export const getStorefrontConfigForServer = cache(
       data.languages = getStorefrontLanguages(data)
       if (!data.header_options) data.header_options = { ...DEFAULT_HEADER_OPTIONS }
       else data.header_options = { ...DEFAULT_HEADER_OPTIONS, ...data.header_options }
+      data.storefront_display = { ...DEFAULT_STOREFRONT_DISPLAY, ...(data.storefront_display ?? {}) }
       return data
     } catch {
       clearTimeout(timeoutId)

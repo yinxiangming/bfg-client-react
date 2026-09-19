@@ -52,6 +52,8 @@ export type MenuSection = {
   type: 'section'
   id: string
   label: ReactNode
+  /** Translation key for the section label, as on items. */
+  i18nKey?: string
   children: MenuNode[]
 }
 

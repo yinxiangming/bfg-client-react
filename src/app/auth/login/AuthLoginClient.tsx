@@ -95,12 +95,18 @@ export default function AuthLoginClient() {
   return (
     <div className='auth-shell'>
       <Link className='auth-logo' href='/'>
-        <Logo skipLink={true} name={siteName} />
+        <Logo
+          skipLink={true}
+          name={siteName}
+          logoSrc={storefrontConfig.logo}
+          logoDarkSrc={storefrontConfig.logo_dark}
+        />
       </Link>
 
       <div className='auth-card'>
         <div className='auth-header'>
-          <h2>{t('welcome', { siteName })}</h2>
+          <div className='auth-eyebrow'>{t('eyebrow', { siteName })}</div>
+          <h2>{t('welcome')}</h2>
           <p>{t('subtitle')}</p>
         </div>
 

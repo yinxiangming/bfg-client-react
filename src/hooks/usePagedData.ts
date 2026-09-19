@@ -84,6 +84,17 @@ export function usePagedData<T, Extra extends Record<string, any> = Record<strin
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [refetch, extraKey])
 
+  /**
+   * Apply a change to rows already on screen, without a round trip.
+   *
+   * A refetch flips `loading`, which makes the whole table blink — too much
+   * ceremony for flicking one switch. The server has confirmed the write by the
+   * time this is called; the next real load reconciles anything else.
+   */
+  const patchItem = useCallback((match: (item: T) => boolean, changes: Partial<T>) => {
+    setItems(prev => (prev ? prev.map(item => (match(item) ? { ...item, ...changes } : item)) : prev))
+  }, [])
+
   const onSearchChange = useCallback((value: string) => {
     setSearch(prev => {
       if (prev !== value) setPage(0)
@@ -122,6 +133,7 @@ export function usePagedData<T, Extra extends Record<string, any> = Record<strin
     setPage,
     setSearch,
     refetch,
+    patchItem,
     serverPagination,
     onSearchChange,
   }

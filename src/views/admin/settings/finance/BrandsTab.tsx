@@ -34,8 +34,7 @@ const buildBrandsSchema = (t: any): ListSchema => ({
       label: t('settings.finance.brands.tab.columns.default'),
       type: 'select',
       render: (value) => (value ? t('settings.finance.brands.tab.values.yes') : t('settings.finance.brands.tab.values.no'))
-    },
-    { field: 'is_active', label: t('settings.finance.brands.tab.columns.status'), type: 'select', sortable: true }
+    }
   ],
   searchFields: ['name', 'tax_id'],
   actions: [

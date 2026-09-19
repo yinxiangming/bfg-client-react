@@ -360,12 +360,6 @@ const InvoiceCard = ({ order, onInvoiceUpdate }: InvoiceCardProps) => {
               size='small'
               onClick={handleCreateInvoice}
               startIcon={<i className='tabler-plus' />}
-              sx={{
-                boxShadow: 'none',
-                '&:hover': {
-                  boxShadow: 'none'
-                }
-              }}
             >
               {t('orders.invoice.createInvoice')}
             </Button>
@@ -384,8 +378,8 @@ const InvoiceCard = ({ order, onInvoiceUpdate }: InvoiceCardProps) => {
           ) : invoices.length === 0 ? (
             <Alert severity='info'>{t('orders.invoice.empty')}</Alert>
           ) : (
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              {invoices.map((invoice) => {
+            <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+              {invoices.map((invoice, invoiceIndex) => {
                 const currency = getCurrency(invoice)
                 // Only paid and cancelled invoices cannot be deleted
                 const canDelete = invoice.status !== 'paid' && invoice.status !== 'cancelled'
@@ -396,10 +390,8 @@ const InvoiceCard = ({ order, onInvoiceUpdate }: InvoiceCardProps) => {
                   <Box
                     key={invoice.id}
                     sx={{
-                      p: 2,
-                      border: 1,
-                      borderColor: 'divider',
-                      borderRadius: 1,
+                      py: 2.5,
+                      ...(invoiceIndex === 0 ? {} : { borderTop: '1px solid', borderColor: 'divider' }),
                       '&:hover': {
                         bgcolor: 'action.hover'
                       }
@@ -415,7 +407,6 @@ const InvoiceCard = ({ order, onInvoiceUpdate }: InvoiceCardProps) => {
                             label={getInvoiceStatusLabel(invoice.status)}
                             size='small'
                             color={invoiceStatusColors[invoice.status] || 'default'}
-                            sx={{ textTransform: 'uppercase', fontSize: '0.75rem' }}
                           />
                         </Box>
                         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap', mt: 1 }}>
@@ -440,7 +431,7 @@ const InvoiceCard = ({ order, onInvoiceUpdate }: InvoiceCardProps) => {
                         </Box>
                       </Box>
                       <Box sx={{ textAlign: 'right', mr: 2 }}>
-                        <Typography variant='h6' sx={{ fontWeight: 600, mb: 0.5 }}>
+                        <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600, lineHeight: 1.5, mb: 0.5 }}>
                           {formatAmount(invoice.total, currency)}
                         </Typography>
                         <Typography variant='body2' color='text.secondary'>
@@ -483,12 +474,6 @@ const InvoiceCard = ({ order, onInvoiceUpdate }: InvoiceCardProps) => {
                             color='success'
                             startIcon={<i className='tabler-credit-card' />}
                             onClick={() => setPayDialogOpen(true)}
-                            sx={{
-                              boxShadow: 'none',
-                              '&:hover': {
-                                boxShadow: 'none'
-                              }
-                            }}
                           >
                             {t('orders.invoice.actions.pay')}
                           </Button>
@@ -516,12 +501,6 @@ const InvoiceCard = ({ order, onInvoiceUpdate }: InvoiceCardProps) => {
                           variant={canEdit ? 'contained' : 'outlined'}
                           startIcon={<i className={canEdit ? 'tabler-edit' : 'tabler-eye'} />}
                           onClick={() => handleEditInvoice(invoice)}
-                          sx={canEdit ? {
-                            boxShadow: 'none',
-                            '&:hover': {
-                              boxShadow: 'none'
-                            }
-                          } : {}}
                         >
                           {canEdit ? t('orders.invoice.actions.edit') : t('orders.invoice.actions.view')}
                         </Button>

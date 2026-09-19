@@ -12,9 +12,14 @@ import { useTranslations } from 'next-intl'
 // Util Imports
 import { getStoreImageUrl } from '@/utils/media'
 import { useCart } from '@/contexts/CartContext'
+import { useStorefrontCurrency } from '@/hooks/useStorefrontCurrency'
+import { useStorefrontOrdering } from '@/hooks/useStorefrontOrdering'
+import { productPath } from '@/utils/productUrl'
 
 type Product = {
   id: number
+  /** Canonical handle; see utils/productUrl. */
+  slug?: string | null
   name: string
   brand: string
   price: number
@@ -24,17 +29,32 @@ type Product = {
   reviews: number
   image: string
   isNew: boolean
+  /** From the API; absent on callers that build a card from partial data. */
+  inStock?: boolean
+  purchasable?: boolean
 }
 
 const ProductCard = ({ product }: { product: Product }) => {
   const t = useTranslations('storefront')
+  // Default to available: a card built from partial data should not accuse a product of
+  // being sold out on no evidence.
+  const inStock = product.inStock ?? true
+  const purchasable = product.purchasable ?? true
+  const { formatPrice } = useStorefrontCurrency()
+  const { acceptingOrders } = useStorefrontOrdering()
   const [isHovered, setIsHovered] = useState(false)
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState('')
   const [snackbarSeverity, setSnackbarSeverity] = useState<'success' | 'error'>('success')
   const { addItem, loading } = useCart()
 
+  const cannotAddToCart = loading || !purchasable || !acceptingOrders
+
   const handleAddToCart = async () => {
+    // The button below is already disabled; this is the same answer for anything that
+    // gets past it — a stale render, a keyboard, a script.
+    if (!acceptingOrders) return
+
     try {
       await addItem({
         productId: product.id,
@@ -103,7 +123,7 @@ const ProductCard = ({ product }: { product: Product }) => {
       onMouseLeave={() => setIsHovered(false)}
     >
       <div className='sf-product-img-wrapper'>
-        <Link href={`/product/${product.id}`} style={{ display: 'block', lineHeight: 0 }} aria-label={product.name}>
+        <Link href={productPath(product)} style={{ display: 'block', lineHeight: 0 }} aria-label={product.name}>
           <img
             src={product.image || getStoreImageUrl('themes/PRS04099/assets/img/megnor/empty-cart.svg')}
             alt={product.name}
@@ -120,10 +140,13 @@ const ProductCard = ({ product }: { product: Product }) => {
         </div>
         {product.isNew && <span className='sf-product-badge sf-badge-new'>{t('product.badges.new')}</span>}
         {product.discount && <span className='sf-product-badge sf-badge-sale'>-{product.discount}%</span>}
+        {!inStock && (
+          <span className='sf-product-badge sf-badge-sold-out'>{t('product.stock.soldOut')}</span>
+        )}
       </div>
 
       <div className='sf-card-body'>
-        <Link href={`/product/${product.id}`} style={{ textDecoration: 'none' }}>
+        <Link href={productPath(product)} style={{ textDecoration: 'none' }}>
           <h3 className='sf-card-title' title={product.name}>
             {product.brand} {product.name}
           </h3>
@@ -135,18 +158,32 @@ const ProductCard = ({ product }: { product: Product }) => {
         </div>
 
         <div className='sf-price'>
-          <span className='sf-price-current'>${product.price.toFixed(2)}</span>
-          {product.originalPrice && <span className='sf-price-original'>${product.originalPrice.toFixed(2)}</span>}
+          <span className='sf-price-current'>{formatPrice(product.price)}</span>
+          {product.originalPrice && <span className='sf-price-original'>{formatPrice(product.originalPrice)}</span>}
         </div>
 
+        {/* A card has room for the state but not for the sentence, so the shop being
+            closed is said on the button and explained in its tooltip. The pages that
+            can afford the sentence — product, basket, checkout — print it in full.
+
+            The opacity is the card's own reveal-on-hover, and it has to carry the
+            dimming of a disabled button too, since an inline opacity is exactly what
+            would otherwise cancel it. */}
         <button
           className='sf-btn sf-btn-primary sf-btn-full'
           onClick={handleAddToCart}
-          disabled={loading}
-          style={{ opacity: isHovered ? 1 : 0, transition: 'opacity 0.3s' }}
+          disabled={cannotAddToCart}
+          title={acceptingOrders ? undefined : t('ordering.closedNotice')}
+          style={{ opacity: isHovered ? (cannotAddToCart ? 0.55 : 1) : 0, transition: 'opacity 0.3s' }}
         >
-          <i className='tabler-shopping-cart' />
-          {t('buttons.addToCart')}
+          {purchasable && acceptingOrders && <i className='tabler-shopping-cart' />}
+          {!acceptingOrders
+            ? t('ordering.closedShort')
+            : !purchasable
+              ? t('product.stock.soldOut')
+              : inStock
+                ? t('buttons.addToCart')
+                : t('buttons.backorder')}
         </button>
       </div>
 

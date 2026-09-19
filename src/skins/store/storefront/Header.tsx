@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
@@ -17,7 +17,12 @@ import { getAllowedColorModes, hasMultipleStorefrontLanguages, type StorefrontMe
 type CategoryItem = { name: string; slug: string }
 type CategorySubcategory = { name: string; slug: string; items: CategoryItem[] }
 type CategoryWithSubs = { name: string; slug: string; subcategories: CategorySubcategory[] }
-type CategoryType = string | CategoryWithSubs
+// Every entry keeps its slug, including leaves. An earlier version collapsed a
+// childless category to its bare name and the nav then linked to
+// `/category/${name.toLowerCase()}` — which is only ever the slug for
+// single-word English names. A Chinese catalogue got `/category/本地团购`,
+// percent-encoded in the address bar and matching no category on the server.
+type CategoryType = CategoryWithSubs
 
 type NavRow =
   | { kind: 'mega'; key: string; title: string; slug: string; subcategories: CategorySubcategory[] }
@@ -44,7 +49,11 @@ function transformCategoryTree(apiCategories: any[]): CategoryType[] {
         subcategories: subcategories.length > 0 ? subcategories : []
       }
     }
-    return category.name
+    return {
+      name: category.name,
+      slug: category.slug || category.name.toLowerCase().replace(/\s+/g, '-'),
+      subcategories: []
+    }
   })
 }
 
@@ -84,7 +93,7 @@ function buildNavRows(menuItems: StorefrontMenuItem[], categoryTree: any[], tran
         if (node?.children?.length) {
           const transformed = transformCategoryTree([node])
           const top = transformed[0]
-          if (typeof top !== 'string' && top.subcategories?.length) {
+          if (top?.subcategories?.length) {
             rows.push({
               kind: 'mega',
               key,
@@ -115,11 +124,24 @@ export default function StoreHeader(_props: StoreHeaderProps) {
   const [themeMenuOpen, setThemeMenuOpen] = useState(false)
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [categoryOpen, setCategoryOpen] = useState<string | null>(null)
+  // Desktop mega-menu opens on hover and closes on a short delay, so moving the
+  // mouse from the nav link down into the dropdown panel doesn't close it first.
+  const categoryCloseTimeout = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const openCategoryMenu = (key: string) => {
+    if (categoryCloseTimeout.current) {
+      clearTimeout(categoryCloseTimeout.current)
+      categoryCloseTimeout.current = null
+    }
+    setCategoryOpen(key)
+  }
+  const scheduleCloseCategoryMenu = () => {
+    if (categoryCloseTimeout.current) clearTimeout(categoryCloseTimeout.current)
+    categoryCloseTimeout.current = setTimeout(() => setCategoryOpen(null), 150)
+  }
   const [isAuthenticated, setIsAuthenticated] = useState(false)
   const [categories, setCategories] = useState<CategoryType[]>([])
   /** Raw API tree for merging CMS header menus with category subtrees. */
   const [categoryTreeRaw, setCategoryTreeRaw] = useState<any[]>([])
-  const [navRows, setNavRows] = useState<NavRow[] | null>(null)
   const [loadingCategories, setLoadingCategories] = useState(true)
   const [mounted, setMounted] = useState(false)
   const [searchKeyword, setSearchKeyword] = useState('')
@@ -136,6 +158,22 @@ export default function StoreHeader(_props: StoreHeaderProps) {
   const allowedColorModes = getAllowedColorModes(config)
   const showStyleSelector = opts.show_style_selector !== false && allowedColorModes.length > 1
   const showLogin = opts.show_login !== false
+  const showRegister = opts.show_register === true
+  const defaultCurrency = String(config.default_currency || 'NZD').trim().toUpperCase()
+  const currencyOptions = Array.from(
+    new Set(
+      (Array.isArray(config.supported_currencies) && config.supported_currencies.length > 0
+        ? config.supported_currencies
+        : [defaultCurrency]
+      )
+        .map(code => String(code || '').trim().toUpperCase())
+        .filter(Boolean)
+    )
+  )
+  if (defaultCurrency && !currencyOptions.includes(defaultCurrency)) {
+    currencyOptions.unshift(defaultCurrency)
+  }
+  const showCurrencySwitcher = currencyOptions.length > 1
 
   useEffect(() => {
     setMounted(true)
@@ -170,13 +208,16 @@ export default function StoreHeader(_props: StoreHeaderProps) {
     fetchCategories()
   }, [])
 
-  useEffect(() => {
+  // Derived during render, not in an effect. header_menus arrives from the server via
+  // StorefrontConfigProvider, so computing it here puts real category links in the
+  // server-rendered HTML; an effect would leave the first paint — the one a crawler
+  // reads — with an empty nav. buildNavRows degrades to plain links when the category
+  // tree has not loaded yet, and upgrades to mega menus once it has, so hydration
+  // matches and subcategories still appear.
+  const navRows = useMemo<NavRow[] | null>(() => {
     const menus = config?.header_menus
-    if (menus?.length) {
-      setNavRows(buildNavRows(menus, categoryTreeRaw, transformCategoryTree))
-    } else {
-      setNavRows(null)
-    }
+    if (!menus?.length) return null
+    return buildNavRows(menus, categoryTreeRaw, transformCategoryTree)
   }, [config?.header_menus, categoryTreeRaw])
 
   const useMergedNav = Boolean(navRows?.length)
@@ -204,17 +245,21 @@ export default function StoreHeader(_props: StoreHeaderProps) {
             <div className='sf-dropdown' style={{ position: 'relative' }}>
               <FeedbackButton variant='minimal' source='storefront' />
             </div>
-            <div className='sf-dropdown' style={{ position: 'relative', cursor: 'pointer' }} onClick={() => setCurrencyMenuOpen(!currencyMenuOpen)}>
-              <span>{config.default_currency || 'NZD'}</span>
-              <i className='tabler-chevron-down' style={{ fontSize: '0.75rem', marginLeft: '0.25rem' }} />
-              {currencyMenuOpen && (
-                <div style={{ position: 'absolute', top: '100%', right: 0, background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '8px', marginTop: '0.5rem', minWidth: '120px', zIndex: 1000 }}>
-                  <span className='sf-dropdown-link' style={{ display: 'block', padding: '0.5rem 1rem', fontSize: '0.875rem' }}>
-                    {config.default_currency || 'NZD'}
-                  </span>
-                </div>
-              )}
-            </div>
+            {showCurrencySwitcher && (
+              <div className='sf-dropdown' style={{ position: 'relative', cursor: 'pointer' }} onClick={() => setCurrencyMenuOpen(!currencyMenuOpen)}>
+                <span>{defaultCurrency}</span>
+                <i className='tabler-chevron-down' style={{ fontSize: '0.75rem', marginLeft: '0.25rem' }} />
+                {currencyMenuOpen && (
+                  <div style={{ position: 'absolute', top: '100%', right: 0, background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '8px', marginTop: '0.5rem', minWidth: '120px', zIndex: 1000 }}>
+                    {currencyOptions.map(code => (
+                      <span key={code} className='sf-dropdown-link' style={{ display: 'block', padding: '0.5rem 1rem', fontSize: '0.875rem' }}>
+                        {code}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
             {showStyleSelector && (
               <div className='sf-dropdown' style={{ position: 'relative', cursor: 'pointer' }} onClick={() => setThemeMenuOpen(!themeMenuOpen)}>
                 <i
@@ -241,7 +286,9 @@ export default function StoreHeader(_props: StoreHeaderProps) {
             ) : (
               <>
                 <Link href='/auth/login' className='sf-header-top-link' style={{ textDecoration: 'none' }}>{t('topBar.login')}</Link>
-                <Link href='/auth/register' className='sf-header-top-link' style={{ textDecoration: 'none' }}>{t('topBar.register')}</Link>
+                {showRegister && (
+                  <Link href='/auth/register' className='sf-header-top-link' style={{ textDecoration: 'none' }}>{t('topBar.register')}</Link>
+                )}
               </>
             ))}
           </div>
@@ -255,7 +302,13 @@ export default function StoreHeader(_props: StoreHeaderProps) {
               <i className='tabler-menu-2 sf-nav-icon' style={{ fontSize: '1.5rem' }} />
             </button>
             <div className='sf-header-logo-wrap'>
-              <Logo color='#ffffff' name={config.site_name || undefined} />
+              <Logo
+                color='#ffffff'
+                name={config.site_name || undefined}
+                logoSrc={config.logo}
+                logoDarkSrc={config.logo_dark}
+                showNameWithLogo={config.show_site_name_with_logo}
+              />
             </div>
             <Link href='/' className='sf-header-mobile-site-name' aria-hidden='true'>
               {config.site_name || 'Store'}
@@ -280,13 +333,18 @@ export default function StoreHeader(_props: StoreHeaderProps) {
                     )
                   }
                   return (
-                    <li key={row.key} className='sf-nav-item'>
+                    <li
+                      key={row.key}
+                      className='sf-nav-item'
+                      onMouseEnter={() => openCategoryMenu(row.key)}
+                      onMouseLeave={scheduleCloseCategoryMenu}
+                    >
                       <>
-                        <a href='#' className='sf-nav-link' onClick={e => { e.preventDefault(); setCategoryOpen(categoryOpen === row.key ? null : row.key) }}>
+                        <Link href={`/category/${row.slug}`} className='sf-nav-link'>
                           {row.title}
-                        </a>
+                        </Link>
                         {categoryOpen === row.key && row.subcategories.length > 0 && (
-                          <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '0.5rem', background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '8px', padding: '1rem', minWidth: '600px', zIndex: 50 }} onMouseLeave={() => setCategoryOpen(null)}>
+                          <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '0.5rem', background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '8px', padding: '1rem', minWidth: '600px', zIndex: 50 }}>
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
                               {row.subcategories.map((sub, subIndex) => (
                                 <div key={sub.slug || subIndex}>
@@ -305,18 +363,23 @@ export default function StoreHeader(_props: StoreHeaderProps) {
                 })
               ) : (
                 categories.map((category, index) => {
-                  const categoryKey = typeof category === 'string' ? category : category.slug || category.name
+                  const categoryKey = category.slug || category.name
                   return (
-                    <li key={categoryKey || index} className='sf-nav-item'>
-                      {typeof category === 'string' ? (
-                        <Link href={`/category/${category.toLowerCase()}`} className='sf-nav-link'>{category}</Link>
+                    <li
+                      key={categoryKey || index}
+                      className='sf-nav-item'
+                      onMouseEnter={() => category.subcategories.length > 0 && openCategoryMenu(category.name)}
+                      onMouseLeave={scheduleCloseCategoryMenu}
+                    >
+                      {category.subcategories.length === 0 ? (
+                        <Link href={`/category/${category.slug}`} className='sf-nav-link'>{category.name}</Link>
                       ) : (
                         <>
-                          <a href='#' className='sf-nav-link' onClick={e => { e.preventDefault(); setCategoryOpen(categoryOpen === category.name ? null : category.name) }}>
+                          <Link href={`/category/${category.slug}`} className='sf-nav-link'>
                             {category.name}
-                          </a>
+                          </Link>
                           {categoryOpen === category.name && category.subcategories.length > 0 && (
-                            <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '0.5rem', background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '8px', padding: '1rem', minWidth: '600px', zIndex: 50 }} onMouseLeave={() => setCategoryOpen(null)}>
+                            <div style={{ position: 'absolute', top: '100%', left: 0, marginTop: '0.5rem', background: 'white', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '8px', padding: '1rem', minWidth: '600px', zIndex: 50 }}>
                               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '1rem' }}>
                                 {category.subcategories.map((sub, subIndex) => (
                                   <div key={sub.slug || subIndex}>
@@ -367,13 +430,26 @@ export default function StoreHeader(_props: StoreHeaderProps) {
         </div>
       </div>
 
-      {mobileMenuOpen && (
+      {mobileMenuOpen && (() => {
+        const isDarkMode = theme.mode === 'system' ? theme.systemMode === 'dark' : theme.mode === 'dark'
+        const drawerBg = isDarkMode ? '#1a1a1a' : 'white'
+        const drawerText = isDarkMode ? '#e0e0e0' : '#2c3e50'
+        const drawerMuted = isDarkMode ? '#9e9e9e' : '#757575'
+        const drawerBorder = isDarkMode ? '#2d2d2d' : '#f0f0f0'
+        const drawerSubBg = isDarkMode ? '#2d2d2d' : '#fafafa'
+        return (
         <>
           <div onClick={() => setMobileMenuOpen(false)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', zIndex: 999 }} />
-          <div style={{ position: 'fixed', top: 0, left: 0, width: '80%', maxWidth: '320px', height: '100vh', background: 'white', boxShadow: '2px 0 8px rgba(0,0,0,0.1)', zIndex: 1000, padding: '1rem', overflowY: 'auto' }}>
+          <div style={{ position: 'fixed', top: 0, left: 0, width: '80%', maxWidth: '320px', height: '100vh', background: drawerBg, boxShadow: '2px 0 8px rgba(0,0,0,0.1)', zIndex: 1000, padding: '1rem', overflowY: 'auto' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <Logo color='#6366f1' name={config.site_name || undefined} />
-              <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.75rem', cursor: 'pointer', color: '#757575', padding: '0.25rem' }} aria-label='Close menu'>×</button>
+              <Logo
+                color='#6366f1'
+                name={config.site_name || undefined}
+                logoSrc={config.logo}
+                logoDarkSrc={config.logo_dark}
+                showNameWithLogo={config.show_site_name_with_logo}
+              />
+              <button onClick={() => setMobileMenuOpen(false)} style={{ background: 'none', border: 'none', fontSize: '1.75rem', cursor: 'pointer', color: drawerMuted, padding: '0.25rem' }} aria-label='Close menu'>×</button>
             </div>
             {showSearch && (
               <form
@@ -388,33 +464,33 @@ export default function StoreHeader(_props: StoreHeaderProps) {
                 }}
               >
                 <div style={{ position: 'relative' }}>
-                  <i className='tabler-search' style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', fontSize: '1.125rem', color: '#757575' }} />
+                  <i className='tabler-search' style={{ position: 'absolute', left: '0.75rem', top: '50%', transform: 'translateY(-50%)', fontSize: '1.125rem', color: drawerMuted }} />
                   <input
                     type='text'
                     placeholder={t('search.placeholder')}
                     value={searchKeyword}
                     onChange={e => setSearchKeyword(e.target.value)}
-                    style={{ width: '100%', padding: '0.625rem 1rem 0.625rem 2.5rem', border: '1px solid #e0e0e0', borderRadius: '8px', fontSize: '0.875rem', outline: 'none' }}
+                    style={{ width: '100%', padding: '0.625rem 1rem 0.625rem 2.5rem', border: `1px solid ${isDarkMode ? '#3d3d3d' : '#e0e0e0'}`, borderRadius: '8px', fontSize: '0.875rem', outline: 'none', background: isDarkMode ? '#2d2d2d' : 'white', color: drawerText }}
                   />
                 </div>
               </form>
             )}
             <nav>
-              <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: '#757575', marginBottom: '0.75rem', textTransform: 'uppercase' }}>{useMergedNav ? 'Menu' : 'Categories'}</h3>
+              <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: drawerMuted, marginBottom: '0.75rem', textTransform: 'uppercase' }}>{useMergedNav ? 'Menu' : 'Categories'}</h3>
               <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
                 {navListLoading ? (
-                  <li style={{ padding: '0.75rem 0', color: '#757575' }}>Loading...</li>
+                  <li style={{ padding: '0.75rem 0', color: drawerMuted }}>Loading...</li>
                 ) : useMergedNav && navRows ? (
                   navRows.map(row => {
                     if (row.kind === 'link') {
                       return (
-                        <li key={row.key} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                        <li key={row.key} style={{ borderBottom: `1px solid ${drawerBorder}` }}>
                           <Link
                             href={row.href}
                             onClick={() => setMobileMenuOpen(false)}
                             target={row.newTab ? '_blank' : undefined}
                             rel={row.newTab ? 'noopener noreferrer' : undefined}
-                            style={{ display: 'block', padding: '0.75rem 0', color: '#2c3e50', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}
+                            style={{ display: 'block', padding: '0.75rem 0', color: drawerText, textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}
                           >
                             {row.title}
                           </Link>
@@ -422,17 +498,17 @@ export default function StoreHeader(_props: StoreHeaderProps) {
                       )
                     }
                     return (
-                      <li key={row.key} style={{ borderBottom: '1px solid #f0f0f0' }}>
+                      <li key={row.key} style={{ borderBottom: `1px solid ${drawerBorder}` }}>
                         <div>
-                          <button type='button' onClick={() => setCategoryOpen(categoryOpen === row.key ? null : row.key)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 0', background: 'none', border: 'none', color: '#2c3e50', fontSize: '0.9375rem', fontWeight: 500, cursor: 'pointer', textAlign: 'left' }}>
+                          <button type='button' onClick={() => setCategoryOpen(categoryOpen === row.key ? null : row.key)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 0', background: 'none', border: 'none', color: drawerText, fontSize: '0.9375rem', fontWeight: 500, cursor: 'pointer', textAlign: 'left' }}>
                             <span>{row.title}</span>
                             <i className={`tabler-chevron-${categoryOpen === row.key ? 'up' : 'down'}`} style={{ fontSize: '1rem' }} />
                           </button>
                           {categoryOpen === row.key && row.subcategories.length > 0 && (
-                            <ul style={{ listStyle: 'none', padding: '0 0 0.5rem 1rem', margin: 0, backgroundColor: '#fafafa' }}>
+                            <ul style={{ listStyle: 'none', padding: '0 0 0.5rem 1rem', margin: 0, backgroundColor: drawerSubBg }}>
                               {row.subcategories.map((sub, subIndex) => (
                                 <li key={sub.slug || subIndex}>
-                                  <Link href={`/category/${sub.slug}`} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.5rem 0', color: '#757575', textDecoration: 'none', fontSize: '0.875rem' }}>{sub.name}</Link>
+                                  <Link href={`/category/${sub.slug}`} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.5rem 0', color: drawerMuted, textDecoration: 'none', fontSize: '0.875rem' }}>{sub.name}</Link>
                                 </li>
                               ))}
                             </ul>
@@ -443,22 +519,22 @@ export default function StoreHeader(_props: StoreHeaderProps) {
                   })
                 ) : (
                   categories.map((category, index) => {
-                    const categoryKey = typeof category === 'string' ? category : category.slug || category.name
+                    const categoryKey = category.slug || category.name
                     return (
-                      <li key={categoryKey || index} style={{ borderBottom: '1px solid #f0f0f0' }}>
-                        {typeof category === 'string' ? (
-                          <Link href={`/category/${category.toLowerCase()}`} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: '#2c3e50', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}>{category}</Link>
+                      <li key={categoryKey || index} style={{ borderBottom: `1px solid ${drawerBorder}` }}>
+                        {category.subcategories.length === 0 ? (
+                          <Link href={`/category/${category.slug}`} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.75rem 0', color: drawerText, textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}>{category.name}</Link>
                         ) : (
                           <div>
-                            <button type='button' onClick={() => setCategoryOpen(categoryOpen === category.name ? null : category.name)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 0', background: 'none', border: 'none', color: '#2c3e50', fontSize: '0.9375rem', fontWeight: 500, cursor: 'pointer', textAlign: 'left' }}>
+                            <button type='button' onClick={() => setCategoryOpen(categoryOpen === category.name ? null : category.name)} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 0', background: 'none', border: 'none', color: drawerText, fontSize: '0.9375rem', fontWeight: 500, cursor: 'pointer', textAlign: 'left' }}>
                               <span>{category.name}</span>
                               <i className={`tabler-chevron-${categoryOpen === category.name ? 'up' : 'down'}`} style={{ fontSize: '1rem' }} />
                             </button>
                             {categoryOpen === category.name && category.subcategories.length > 0 && (
-                              <ul style={{ listStyle: 'none', padding: '0 0 0.5rem 1rem', margin: 0, backgroundColor: '#fafafa' }}>
+                              <ul style={{ listStyle: 'none', padding: '0 0 0.5rem 1rem', margin: 0, backgroundColor: drawerSubBg }}>
                                 {category.subcategories.map((sub, subIndex) => (
                                   <li key={sub.slug || subIndex}>
-                                    <Link href={`/category/${sub.slug}`} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.5rem 0', color: '#757575', textDecoration: 'none', fontSize: '0.875rem' }}>{sub.name}</Link>
+                                    <Link href={`/category/${sub.slug}`} onClick={() => setMobileMenuOpen(false)} style={{ display: 'block', padding: '0.5rem 0', color: drawerMuted, textDecoration: 'none', fontSize: '0.875rem' }}>{sub.name}</Link>
                                   </li>
                                 ))}
                               </ul>
@@ -472,13 +548,13 @@ export default function StoreHeader(_props: StoreHeaderProps) {
               </ul>
             </nav>
             {showLogin && (
-              <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #f0f0f0' }}>
+              <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: `1px solid ${drawerBorder}` }}>
                 {isAuthenticated ? (
-                  <Link href='/account' onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 0', color: '#2c3e50', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}>
+                  <Link href='/account' onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 0', color: drawerText, textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}>
                     <i className='tabler-user' style={{ fontSize: '1.25rem' }} /> My Account
                   </Link>
                 ) : (
-                  <Link href='/auth/login' onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 0', color: '#2c3e50', textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}>
+                  <Link href='/auth/login' onClick={() => setMobileMenuOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.75rem 0', color: drawerText, textDecoration: 'none', fontSize: '0.9375rem', fontWeight: 500 }}>
                     <i className='tabler-login' style={{ fontSize: '1.25rem' }} /> Login
                   </Link>
                 )}
@@ -486,7 +562,8 @@ export default function StoreHeader(_props: StoreHeaderProps) {
             )}
           </div>
         </>
-      )}
+        )
+      })()}
     </>
   )
 }

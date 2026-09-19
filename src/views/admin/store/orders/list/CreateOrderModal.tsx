@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useEffect, useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 import Dialog from '@mui/material/Dialog'
@@ -8,7 +8,6 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
@@ -18,11 +17,16 @@ import Alert from '@mui/material/Alert'
 import Radio from '@mui/material/Radio'
 import RadioGroup from '@mui/material/RadioGroup'
 import FormControlLabel from '@mui/material/FormControlLabel'
+import MenuItem from '@mui/material/MenuItem'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
+
 import {
   getProducts,
   getCustomers,
@@ -37,6 +41,7 @@ import {
   type CreateOrderPayload,
   type OrderItemUpdatePayload
 } from '@/services/store'
+import { getPickupPoints, type PickupPoint } from '@/services/delivery'
 
 export type CreateOrderModalProps = {
   open: boolean
@@ -70,6 +75,20 @@ export default function CreateOrderModal({ open, onClose, onSuccess }: CreateOrd
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [fulfillmentMethod, setFulfillmentMethod] = useState<'shipping' | 'pickup'>('shipping')
+  const [pickupPoints, setPickupPoints] = useState<PickupPoint[]>([])
+  const [pickupPointId, setPickupPointId] = useState<number | ''>('')
+
+  // Loaded on demand: a shop that never collects should not pay for the call.
+  useEffect(() => {
+    if (fulfillmentMethod !== 'pickup' || pickupPoints.length > 0) return
+    getPickupPoints()
+      .then(points => {
+        setPickupPoints(points)
+        const preferred = points.find(p => p.is_default) || (points.length === 1 ? points[0] : undefined)
+        if (preferred) setPickupPointId(preferred.id)
+      })
+      .catch(() => setPickupPoints([]))
+  }, [fulfillmentMethod, pickupPoints.length])
 
   const fetchProducts = useCallback(async (q: string) => {
     if (!q.trim()) {
@@ -218,6 +237,7 @@ export default function CreateOrderModal({ open, onClose, onSuccess }: CreateOrd
         customer_id: customerId,
         store_id: storeId,
         fulfillment_method: fulfillmentMethod,
+        pickup_point_id: fulfillmentMethod === 'pickup' ? (pickupPointId || null) : null,
         shipping_address_id: shippingAddressId
       }
       const order = await createOrder(payload)
@@ -264,7 +284,7 @@ export default function CreateOrderModal({ open, onClose, onSuccess }: CreateOrd
           </Alert>
         )}
 
-        <Typography variant='subtitle2' color='text.secondary' sx={{ mt: 1, mb: 1 }}>
+        <Typography sx={{ mt: 1, mb: 1, fontSize: 'var(--at-block-title-size, 13px)', fontWeight: 600, color: 'text.primary' }}>
           {t('orders.createOrderModal.products')}
         </Typography>
         <Autocomplete
@@ -275,7 +295,7 @@ export default function CreateOrderModal({ open, onClose, onSuccess }: CreateOrd
           onInputChange={handleProductSearchChange}
           loading={productLoading}
           renderInput={params => (
-            <TextField
+            <CustomTextField
               {...params}
               size='small'
               placeholder={t('orders.createOrderModal.productSearchPlaceholder')}
@@ -304,7 +324,7 @@ export default function CreateOrderModal({ open, onClose, onSuccess }: CreateOrd
           }}
         />
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
-          <TextField
+          <CustomTextField
             type='number'
             size='small'
             sx={{ width: 80 }}
@@ -366,7 +386,7 @@ export default function CreateOrderModal({ open, onClose, onSuccess }: CreateOrd
           </Table>
         )}
 
-        <Typography variant='subtitle2' color='text.secondary' sx={{ mt: 3, mb: 1 }}>
+        <Typography sx={{ mt: 3, mb: 1, fontSize: 'var(--at-block-title-size, 13px)', fontWeight: 600, color: 'text.primary' }}>
           {t('orders.createOrderModal.fulfillmentMethod')}
         </Typography>
         <RadioGroup
@@ -379,7 +399,26 @@ export default function CreateOrderModal({ open, onClose, onSuccess }: CreateOrd
           <FormControlLabel value='pickup' control={<Radio />} label={t('orders.createOrderModal.fulfillment.pickup')} />
         </RadioGroup>
 
-        <Typography variant='subtitle2' color='text.secondary' sx={{ mt: 3, mb: 1 }}>
+        {fulfillmentMethod === 'pickup' && (
+          <CustomTextField
+            select
+            fullWidth
+            label={t('orders.createOrderModal.pickupPoint')}
+            value={pickupPointId}
+            onChange={e => setPickupPointId(e.target.value ? Number(e.target.value) : '')}
+            helperText={pickupPoints.length === 0 ? t('orders.createOrderModal.noPickupPoints') : undefined}
+            error={pickupPoints.length === 0}
+            sx={{ mb: 2 }}
+          >
+            {pickupPoints.map(point => (
+              <MenuItem key={point.id} value={point.id}>
+                {point.name}
+              </MenuItem>
+            ))}
+          </CustomTextField>
+        )}
+
+        <Typography sx={{ mt: 3, mb: 1, fontSize: 'var(--at-block-title-size, 13px)', fontWeight: 600, color: 'text.primary' }}>
           {t('orders.createOrderModal.customer')}
         </Typography>
         {!createNewCustomer ? (
@@ -397,7 +436,7 @@ export default function CreateOrderModal({ open, onClose, onSuccess }: CreateOrd
               value={selectedCustomer}
               onChange={(_, val) => setSelectedCustomer(val)}
               renderInput={params => (
-                <TextField
+                <CustomTextField
                   {...params}
                   size='small'
                   placeholder={t('orders.createOrderModal.customerSearchPlaceholder')}
@@ -423,20 +462,20 @@ export default function CreateOrderModal({ open, onClose, onSuccess }: CreateOrd
           </>
         ) : (
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
-            <TextField
+            <CustomTextField
               size='small'
               label={t('orders.createOrderModal.newCustomerName')}
               value={newCustomerName}
               onChange={e => setNewCustomerName(e.target.value)}
             />
-            <TextField
+            <CustomTextField
               size='small'
               label={t('orders.createOrderModal.newCustomerEmail')}
               type='email'
               value={newCustomerEmail}
               onChange={e => setNewCustomerEmail(e.target.value)}
             />
-            <TextField
+            <CustomTextField
               size='small'
               label={t('orders.createOrderModal.newCustomerPhone')}
               value={newCustomerPhone}

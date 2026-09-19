@@ -371,6 +371,84 @@ body {
   background-color: #ef4444;
 }
 
+/* Sold out sits top-right, opposite New/Sale. Those two share the top-left corner and
+   already stack on each other; a status stamp that can coincide with either needs its
+   own corner. Slate rather than red — red on a product card reads as a discount. */
+.sf-badge-sold-out {
+  left: auto;
+  right: 0.75rem;
+  background-color: #475569;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+/* Availability line on the product page. The value is muted like every other info row,
+   so out-of-stock needs colour of its own to register at a glance. */
+.sf-product-info-value[data-in-stock='false'] {
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.sf-product-backorder-note {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  background-color: rgba(245, 158, 11, 0.12);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+  color: #92400e;
+  font-size: 0.875rem;
+}
+
+/* Same shape as the backorder note above, in the sheet's neutral tone. A shop that is
+   not taking orders is a statement of fact about the whole shop, not a warning about
+   one item, so it does not borrow the amber. */
+.sf-ordering-closed-note {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  background-color: rgba(100, 116, 139, 0.12);
+  border: 1px solid rgba(100, 116, 139, 0.35);
+  color: #334155;
+  font-size: 0.875rem;
+}
+
+/* No general text input existed in this sheet — the only one was `.sf-search-input`,
+   sized for the header. This is that treatment without the fixed width and icon inset. */
+.sf-product-notify-input {
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.sf-product-notify-input:focus {
+  border-color: #bdbdbd;
+}
+
+.sf-product-notify-label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.sf-product-notify-done {
+  margin: 0;
+  padding: 0.75rem 1rem;
+  border-radius: 6px;
+  background-color: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  color: #065f46;
+  font-size: 0.875rem;
+}
+
+.sf-product-notify-error {
+  margin: 0.5rem 0 0;
+  color: #dc2626;
+  font-size: 0.8125rem;
+}
+
 .sf-rating {
   display: flex;
   align-items: center;
@@ -443,6 +521,22 @@ body {
 
 .sf-btn-full {
   width: 100%;
+}
+
+/* This sheet never said what an unavailable button looks like, so one that was already
+   disabled — sold out, mid-request — kept the full primary fill and still lit up under
+   the cursor. Anything that refuses to be pressed should look like it. */
+.sf-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.sf-btn-primary:disabled:hover {
+  background-color: var(--primary-color, #6366f1);
+}
+
+.sf-btn-secondary:disabled:hover {
+  background-color: #6b7280;
 }
 
 /* Hero Carousel */
@@ -1897,6 +1991,38 @@ body {
   color: #b0b0b0;
 }
 
+/* The tinted panels above are readable on white; on a dark ground the text colour is the
+   part that fails, so only that is restated. */
+[data-mode='dark'] .sf-product-info-value[data-in-stock='false'] {
+  color: #f87171;
+}
+
+[data-mode='dark'] .sf-product-notify-input {
+  background-color: #2d2d2d;
+  border-color: #3d3d3d;
+  color: #e0e0e0;
+}
+
+[data-mode='dark'] .sf-product-notify-input::placeholder {
+  color: #9e9e9e;
+}
+
+[data-mode='dark'] .sf-product-backorder-note {
+  color: #fcd34d;
+}
+
+[data-mode='dark'] .sf-ordering-closed-note {
+  color: #cbd5e1;
+}
+
+[data-mode='dark'] .sf-product-notify-done {
+  color: #6ee7b7;
+}
+
+[data-mode='dark'] .sf-product-notify-error {
+  color: #f87171;
+}
+
 [data-mode='dark'] .sf-tab-btn {
   color: #9e9e9e;
 }
@@ -3031,4 +3157,44 @@ body {
     padding: 1rem 1.25rem;
     font-size: 0.9375rem;
   }
+}
+
+/* Home page heading — rendered only when the hero carousel supplies no <h1>.
+   Keeps the most-linked page on the site from shipping without a page heading. */
+.sf-home-heading {
+  padding-block: 2rem 0.5rem;
+  text-align: center;
+}
+
+.sf-home-heading-title {
+  font-size: clamp(1.5rem, 3vw, 2.125rem);
+  font-weight: 700;
+  line-height: 1.25;
+  margin: 0 0 0.5rem;
+}
+
+.sf-home-heading-subtitle {
+  color: var(--sf-text-muted, #6b7280);
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0 auto;
+  max-width: 60ch;
+}
+
+/* ============================================================
+   Dark page colour
+   ============================================================
+   `styles/admin.css` sets `[data-mode='dark'] body` to #28243d, the back
+   office's purple-tinted neutral, and that rule is unscoped — so it was also
+   the colour behind the shop. Every storefront surface is a plain neutral
+   (#1f1f1f header, #1a1a1a sections and footer, #2d2d2d cards), so the purple
+   only ever showed as a mismatched frame: down both margins of the content
+   column and in the gap between the hero and the first section.
+
+   #121212 is one step below the sections rather than level with them, so the
+   hero and each band still read as surfaces lifted off the page instead of
+   dissolving into it. `StorefrontSurface` puts the attribute on <html>.
+   ============================================================ */
+[data-mode='dark'][data-storefront] body {
+  background: #121212;
 }

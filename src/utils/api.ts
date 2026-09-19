@@ -2,8 +2,9 @@
 
 import { refreshTokenIfNeeded } from './tokenRefresh'
 import { getApiLanguageHeaders } from '@/i18n/http'
+import { getApiErrorMessage } from './apiErrors'
 import { getWorkspaceApiBaseUrlFromEnv } from './apiUrls'
-import { getWorkspaceToken } from './authTokens'
+import { getWorkspaceToken, readWorkspaceIdClaim, WORKSPACE_ID_KEY } from './authTokens'
 
 /**
  * Get API base URL from environment variable.
@@ -85,6 +86,7 @@ export const bfgApi = {
   addresses: () => buildApiUrl('/addresses/', API_VERSIONS.BFG2),
   settings: () => buildApiUrl('/settings/', API_VERSIONS.BFG2),
   emailConfigs: () => buildApiUrl('/email-configs/', API_VERSIONS.BFG2),
+  socialAuthConfigs: () => buildApiUrl('/social-auth-configs/', API_VERSIONS.BFG2),
   users: () => buildApiUrl('/users/', API_VERSIONS.BFG2),
   staffRoles: () => buildApiUrl('/staff-roles/', API_VERSIONS.BFG2),
   staffMembers: () => buildApiUrl('/staff-members/', API_VERSIONS.BFG2),
@@ -92,6 +94,16 @@ export const bfgApi = {
   invitationPreview: () => buildApiUrl('/invitations/preview/', API_VERSIONS.BFG2),
   invitationAccept: () => buildApiUrl('/invitations/accept/', API_VERSIONS.BFG2),
   apiKeys: () => buildApiUrl('/api-keys/', API_VERSIONS.BFG2),
+
+  countries: () => buildApiUrl('/countries/', API_VERSIONS.BFG2),
+
+  // Setup wizard
+  onboardingStatus: () => buildApiUrl('/onboarding/status/', API_VERSIONS.BFG2),
+  onboardingOptions: () => buildApiUrl('/onboarding/options/', API_VERSIONS.BFG2),
+  onboardingPreview: () => buildApiUrl('/onboarding/preview/', API_VERSIONS.BFG2),
+  onboardingApply: () => buildApiUrl('/onboarding/apply/', API_VERSIONS.BFG2),
+  onboardingSkip: () => buildApiUrl('/onboarding/skip/', API_VERSIONS.BFG2),
+  onboardingDismiss: () => buildApiUrl('/onboarding/dismiss/', API_VERSIONS.BFG2),
 
   // Web/CMS
   sites: () => buildApiUrl('/web/sites/', API_VERSIONS.BFG2),
@@ -138,6 +150,7 @@ export const bfgApi = {
 
   // Delivery
   warehouses: () => buildApiUrl('/warehouses/', API_VERSIONS.BFG2, 'delivery'),
+  pickupPoints: () => buildApiUrl('/pickup-points/', API_VERSIONS.BFG2, 'delivery'),
   consignments: () => buildApiUrl('/consignments/', API_VERSIONS.BFG2, 'delivery'),
   carriers: () => buildApiUrl('/carriers/', API_VERSIONS.BFG2, 'delivery'),
   packagingTypes: () => buildApiUrl('/packaging-types/', API_VERSIONS.BFG2, 'delivery'),
@@ -224,7 +237,7 @@ function getAuthToken(): string | null {
 export function getWorkspaceId(): string | null {
   if (typeof window !== 'undefined') {
     // Always prefer localStorage override (set during token exchange from platform login)
-    const workspaceId = localStorage.getItem('workspace_id')
+    const workspaceId = localStorage.getItem(WORKSPACE_ID_KEY)
     if (workspaceId) return workspaceId
     const envWorkspaceId = process.env.NEXT_PUBLIC_WORKSPACE_ID || null
     if (envWorkspaceId) return envWorkspaceId
@@ -241,14 +254,7 @@ export function getWorkspaceId(): string | null {
  */
 export function getWorkspaceIdFromJwt(): number | null {
   if (typeof window === 'undefined') return null
-  const token = getWorkspaceToken()
-  if (!token) return null
-  try {
-    const payload = JSON.parse(atob(token.split('.')[1]))
-    return (payload as { workspace_id?: number }).workspace_id ?? null
-  } catch {
-    return null
-  }
+  return readWorkspaceIdClaim(getWorkspaceToken())
 }
 
 export type GetApiHeadersOptions = {
@@ -345,6 +351,25 @@ export function getAgentChatRequestInit(body: Record<string, unknown>): RequestI
   return { method: 'POST', headers, body: JSON.stringify(body) }
 }
 
+/** 403 codes a new access token can clear: the token itself, or the workspace it names. */
+const TOKEN_403_CODES = new Set(['workspace_access_denied', 'token_not_valid', 'not_authenticated', 'authentication_failed'])
+
+/**
+ * Whether a 403 may be about the access token, and so worth a refresh and a retry. One that
+ * names a reason of its own in `code`, such as workspace_create_forbidden, is about the
+ * request instead: a new token only gets the same answer, two requests later.
+ */
+async function mayBeAboutTheToken(response: Response): Promise<boolean> {
+  if (!(response.headers.get('content-type') || '').includes('application/json')) return true
+  try {
+    const body: unknown = await response.clone().json()
+    const code = body && typeof body === 'object' ? (body as { code?: unknown }).code : undefined
+    return typeof code !== 'string' || TOKEN_403_CODES.has(code)
+  } catch {
+    return true
+  }
+}
+
 /**
  * Generic API fetch function with error handling and automatic token refresh
  */
@@ -399,7 +424,7 @@ export async function apiFetch<T>(
 
   // Handle 401 Unauthorized or 403 Forbidden - try to refresh token and retry once
   // Backend may return 403 when token is invalid (e.g. DRF IsAuthenticated)
-  if ((response.status === 401 || response.status === 403) && retryOn401) {
+  if (retryOn401 && (response.status === 401 || (response.status === 403 && (await mayBeAboutTheToken(response))))) {
     const newToken = await refreshTokenIfNeeded()
     if (newToken) {
       return apiFetch<T>(url, options, false)
@@ -436,6 +461,9 @@ export async function apiFetch<T>(
             errorDetail = parts.join('; ')
           }
         }
+        // A refusal with a code we explain ourselves reads better in the visitor's
+        // language than in the server's. Everything else keeps the server's wording.
+        errorDetail = getApiErrorMessage(errorData?.code) ?? errorDetail
         if (errorDetail.includes('token') && errorDetail.includes('not valid')) {
           console.error('[apiFetch] Token validation error:', errorDetail)
         }

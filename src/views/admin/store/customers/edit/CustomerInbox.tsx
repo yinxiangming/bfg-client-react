@@ -7,12 +7,9 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 import { useTranslations } from 'next-intl'
 
 // MUI Imports
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
-import TextField from '@mui/material/TextField'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
@@ -23,6 +20,7 @@ import Pagination from '@mui/material/Pagination'
 import Snackbar from '@mui/material/Snackbar'
 
 // Component Imports
+import CustomTextField from '@/components/ui/TextField'
 import SchemaTable from '@/components/schema/SchemaTable'
 import SchemaForm from '@/components/schema/SchemaForm'
 
@@ -62,14 +60,16 @@ const buildInboxSchema = (t: any): ListSchema => ({
   title: t('customers.inbox.schemas.messagesTitle'),
   columns: [
     { 
-      field: 'message_subject', 
+      field: 'message_subject',
+      width: 260, 
       label: t('common.labels.subject'), 
       type: 'string', 
       sortable: true,
       link: 'view'
     },
     { 
-      field: 'sender_name', 
+      field: 'sender_name',
+      width: 150, 
       label: t('common.labels.from'), 
       type: 'string',
       render: (value, row) => {
@@ -255,59 +255,57 @@ const CustomerInbox = ({ customerId }: CustomerInboxProps) => {
 
   return (
     <>
-      <Card>
-        <CardContent>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-            <Typography variant='h6'>
-              {t('customers.inbox.title', { count: totalCount })}
-            </Typography>
-            <Button variant='contained' onClick={handleOpenSendDialog}>
-              {t('customers.inbox.sendMessage')}
-            </Button>
-          </Box>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+        <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600 }}>
+          {t('customers.inbox.title', { count: totalCount })}
+        </Typography>
+        <Button variant='contained' onClick={handleOpenSendDialog}>
+          {t('customers.inbox.sendMessage')}
+        </Button>
+      </Box>
 
-          {error && (
-            <Alert severity='error' sx={{ mb: 2 }} onClose={() => setError(null)}>
-              {error}
-            </Alert>
-          )}
+      {error && (
+        <Alert severity='error' sx={{ mb: 2 }} onClose={() => setError(null)}>
+          {error}
+        </Alert>
+      )}
 
-          <SchemaTable
-            schema={inboxSchema}
-            data={messages}
-            loading={loading}
-            onRowClick={handleRowClick}
-            onActionClick={handleActionClick}
+      {/* SchemaTable brings its own card surface — no wrapper card, or the tab
+          pays for two borders and two paddings. */}
+      <SchemaTable
+        schema={inboxSchema}
+        data={messages}
+        loading={loading}
+        onRowClick={handleRowClick}
+        onActionClick={handleActionClick}
+      />
+
+      {totalPages > 1 && (
+        <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+          <Pagination
+            count={totalPages}
+            page={currentPage}
+            onChange={handlePageChange}
+            color='primary'
+            showFirstButton
+            showLastButton
           />
-
-          {totalPages > 1 && (
-            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-              <Pagination
-                count={totalPages}
-                page={currentPage}
-                onChange={handlePageChange}
-                color='primary'
-                showFirstButton
-                showLastButton
-              />
-            </Box>
-          )}
-        </CardContent>
-      </Card>
+        </Box>
+      )}
 
       {/* Send Message Dialog */}
       <Dialog open={openSendDialog} onClose={handleCloseSendDialog} maxWidth='sm' fullWidth>
         <DialogTitle>{t('customers.inbox.sendDialog.title')}</DialogTitle>
         <DialogContent>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-            <TextField
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+            <CustomTextField
               fullWidth
               label={t('common.labels.subject')}
               value={subject}
               onChange={(e) => setSubject(e.target.value)}
               required
             />
-            <TextField
+            <CustomTextField
               fullWidth
               label={t('common.labels.message')}
               multiline
@@ -328,13 +326,8 @@ const CustomerInbox = ({ customerId }: CustomerInboxProps) => {
 
       {/* View Message Dialog */}
       <Dialog open={openViewDialog} onClose={handleCloseViewDialog} maxWidth='md' fullWidth>
-        <DialogContent
-          sx={{
-            p: 0,
-            '& .MuiCard-root': { boxShadow: 'none' },
-            '& .MuiCardContent-root': { p: 4 }
-          }}
-        >
+        <DialogTitle>{t('customers.inbox.schemas.messageDetailsTitle')}</DialogTitle>
+        <DialogContent>
           {selectedMessage && (
             <SchemaForm
               schema={messageDetailSchema}

@@ -18,18 +18,14 @@ import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
-import TextField from '@mui/material/TextField'
 import MenuItem from '@mui/material/MenuItem'
-import Select from '@mui/material/Select'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
+import Radio from '@mui/material/Radio'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
-import Paper from '@mui/material/Paper'
 import Chip from '@mui/material/Chip'
 import Alert from '@mui/material/Alert'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -57,6 +53,9 @@ import {
   type Warehouse,
   type PickupAddress
 } from '@/services/shipping'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 // Context Imports
 import { useBaseData } from '@/contexts/BaseDataContext'
@@ -585,7 +584,7 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
         ) : (
           <>
             {/* Package Table */}
-            <TableContainer component={Paper} variant='outlined'>
+            <TableContainer>
               <Table size='small'>
                 <TableHead>
                   <TableRow>
@@ -658,11 +657,11 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
             <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap' }}>
               <Box sx={{ flex: 1, minWidth: 150 }}>
                 <Typography variant='body2' color='text.secondary'>{t('orders.packages.totals.totalPackages')}</Typography>
-                <Typography variant='h6'>{totalPackages}</Typography>
+                <Typography sx={{ fontSize: '1.125rem', fontWeight: 600 }}>{totalPackages}</Typography>
               </Box>
               <Box sx={{ flex: 1, minWidth: 150 }}>
                 <Typography variant='body2' color='text.secondary'>{t('orders.packages.totals.actualWeight')}</Typography>
-                <Typography variant='h6'>
+                <Typography sx={{ fontSize: '1.125rem', fontWeight: 600 }}>
                   {typeof totalActualWeight === 'number' && !isNaN(totalActualWeight) 
                     ? totalActualWeight.toFixed(2) 
                     : '0.00'} kg
@@ -670,7 +669,7 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
               </Box>
               <Box sx={{ flex: 1, minWidth: 150 }}>
                 <Typography variant='body2' color='text.secondary'>{t('orders.packages.totals.billingWeight')}</Typography>
-                <Typography variant='h6' color='primary'>
+                <Typography sx={{ fontSize: '1.125rem', fontWeight: 600 }} color='primary'>
                   {typeof totalBillingWeight === 'number' && !isNaN(totalBillingWeight) 
                     ? totalBillingWeight.toFixed(2) 
                     : '0.00'} kg
@@ -684,7 +683,7 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
             {consignments.length > 0 && (
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
                 <Typography variant='subtitle2'>{t('orders.packages.consignments.title')}</Typography>
-                <TableContainer component={Paper} variant='outlined'>
+                <TableContainer>
                   <Table size='small'>
                     <TableHead>
                       <TableRow>
@@ -748,21 +747,22 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
                   <Typography variant='caption' color='text.secondary' fontWeight={600}>
                     {t('orders.packages.addresses.fromPickup')}
                   </Typography>
-                  <FormControl fullWidth size='small' sx={{ mt: 1 }}>
-                    <InputLabel>{t('orders.packages.addresses.selectWarehouse')}</InputLabel>
-                    <Select
-                      value={selectedWarehouse}
-                      label={t('orders.packages.addresses.selectWarehouse')}
-                      onChange={(e) => handleWarehouseChange(e.target.value as number | '')}
-                    >
-                      <MenuItem value=''>{t('orders.packages.addresses.selectPlaceholder')}</MenuItem>
-                      {warehouses.filter(w => w.is_active).map(wh => (
-                        <MenuItem key={wh.id} value={wh.id}>
-                          {wh.name} ({wh.country}) {wh.is_default && '⭐'}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                  </FormControl>
+                  <CustomTextField
+                    select
+                    fullWidth
+                    size='small'
+                    sx={{ mt: 1 }}
+                    label={t('orders.packages.addresses.selectWarehouse')}
+                    value={selectedWarehouse}
+                    onChange={(e) => handleWarehouseChange(e.target.value as number | '')}
+                  >
+                    <MenuItem value=''>{t('orders.packages.addresses.selectPlaceholder')}</MenuItem>
+                    {warehouses.filter(w => w.is_active).map(wh => (
+                      <MenuItem key={wh.id} value={wh.id}>
+                        {wh.name} ({wh.country}) {wh.is_default && '⭐'}
+                      </MenuItem>
+                    ))}
+                  </CustomTextField>
                   {selectedWarehouse && (() => {
                     const wh = warehouses.find(w => w.id === selectedWarehouse)
                     return wh ? (
@@ -831,21 +831,21 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
               <Typography variant='subtitle2'>{t('orders.packages.shipping.createShipmentTitle')}</Typography>
               
               <Box sx={{ display: 'flex', gap: 2, alignItems: 'flex-end', flexWrap: 'wrap' }}>
-                <FormControl sx={{ minWidth: 200 }} size='small'>
-                  <InputLabel>{t('orders.packages.shipping.carrierLabel')}</InputLabel>
-                  <Select
-                    value={selectedCarrier}
-                    label={t('orders.packages.shipping.carrierLabel')}
-                    onChange={(e) => handleCarrierChange(e.target.value as number | '')}
-                  >
-                    <MenuItem value=''>{t('orders.packages.addresses.selectPlaceholder')}</MenuItem>
-                    {carriers.map(carrier => (
-                      <MenuItem key={carrier.id} value={carrier.id}>
-                        {carrier.name} {carrier.is_test_mode ? t('orders.packages.shipping.testModeTag') : null}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                <CustomTextField
+                  select
+                  size='small'
+                  sx={{ minWidth: 200 }}
+                  label={t('orders.packages.shipping.carrierLabel')}
+                  value={selectedCarrier}
+                  onChange={(e) => handleCarrierChange(e.target.value as number | '')}
+                >
+                  <MenuItem value=''>{t('orders.packages.addresses.selectPlaceholder')}</MenuItem>
+                  {carriers.map(carrier => (
+                    <MenuItem key={carrier.id} value={carrier.id}>
+                      {carrier.name} {carrier.is_test_mode ? t('orders.packages.shipping.testModeTag') : null}
+                    </MenuItem>
+                  ))}
+                </CustomTextField>
                 
                 <Button
                   variant='outlined'
@@ -869,7 +869,7 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
                   <Typography variant='body2' color='text.secondary'>
                     {t('orders.packages.shipping.optionsPrompt')}
                   </Typography>
-                  <TableContainer component={Paper} variant='outlined'>
+                  <TableContainer>
                     <Table size='small'>
                       <TableHead>
                         <TableRow>
@@ -890,8 +890,8 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
                             sx={{ cursor: 'pointer' }}
                           >
                             <TableCell padding='checkbox'>
-                              <input
-                                type='radio'
+                              <Radio
+                                size='small'
                                 checked={selectedOption?.service_code === opt.service_code}
                                 onChange={() => setSelectedOption(opt)}
                               />
@@ -944,7 +944,7 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
                         <Typography variant='body2' color='text.secondary'>
                           {t('orders.packages.shipping.selected', { serviceName: selectedOption.service_name })}
                         </Typography>
-                        <Typography variant='h6' color='primary'>
+                        <Typography sx={{ fontSize: '1.125rem', fontWeight: 600 }} color='primary'>
                           {selectedOption.currency} {selectedOption.price}
                         </Typography>
                       </Box>
@@ -971,57 +971,60 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
         <DialogTitle>
           {editingPackage ? t('orders.packages.dialogs.editTitle') : t('orders.packages.dialogs.addTitle')}
         </DialogTitle>
-        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2, pt: 2 }}>
-          <FormControl fullWidth size='small'>
-            <InputLabel>{t('orders.packages.dialogs.packageTemplate')}</InputLabel>
-            <Select
-              value={formData.template || ''}
-              label={t('orders.packages.dialogs.packageTemplate')}
-              onChange={(e) => handleTemplateChange(e.target.value as number | '')}
-              disabled={loadingTemplates}
-            >
-              <MenuItem value=''>{t('orders.packages.dialogs.customDimensions')}</MenuItem>
-              {loadingTemplates ? (
-                <MenuItem disabled>{t('orders.packages.dialogs.loadingTemplates')}</MenuItem>
-              ) : (
-                Array.isArray(templates) && templates.map(template => (
-                  <MenuItem key={template.id} value={template.id}>
-                    {template.name} ({template.length}×{template.width}×{template.height} cm)
-                  </MenuItem>
-                ))
-              )}
-            </Select>
-          </FormControl>
+        <DialogContent sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          <CustomTextField
+            select
+            fullWidth
+            size='small'
+            label={t('orders.packages.dialogs.packageTemplate')}
+            value={formData.template || ''}
+            onChange={(e) => handleTemplateChange(e.target.value as number | '')}
+            disabled={loadingTemplates}
+          >
+            <MenuItem value=''>{t('orders.packages.dialogs.customDimensions')}</MenuItem>
+            {loadingTemplates ? (
+              <MenuItem disabled>{t('orders.packages.dialogs.loadingTemplates')}</MenuItem>
+            ) : (
+              Array.isArray(templates) && templates.map(template => (
+                <MenuItem key={template.id} value={template.id}>
+                  {template.name} ({template.length}×{template.width}×{template.height} cm)
+                </MenuItem>
+              ))
+            )}
+          </CustomTextField>
 
           <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField
+            <CustomTextField
               label={t('orders.packages.dialogs.length')}
               type='number'
               size='small'
               value={formData.length}
               onChange={(e) => setFormData(prev => ({ ...prev, length: parseFloat(e.target.value) || 0 }))}
+              required
               fullWidth
             />
-            <TextField
+            <CustomTextField
               label={t('orders.packages.dialogs.width')}
               type='number'
               size='small'
               value={formData.width}
               onChange={(e) => setFormData(prev => ({ ...prev, width: parseFloat(e.target.value) || 0 }))}
+              required
               fullWidth
             />
-            <TextField
+            <CustomTextField
               label={t('orders.packages.dialogs.height')}
               type='number'
               size='small'
               value={formData.height}
               onChange={(e) => setFormData(prev => ({ ...prev, height: parseFloat(e.target.value) || 0 }))}
+              required
               fullWidth
             />
           </Box>
 
           <Box sx={{ display: 'flex', gap: 2 }}>
-            <TextField
+            <CustomTextField
               label={t('orders.packages.dialogs.weight')}
               type='number'
               size='small'
@@ -1030,7 +1033,7 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
               required
               fullWidth
             />
-            <TextField
+            <CustomTextField
               label={t('orders.packages.dialogs.quantity')}
               type='number'
               size='small'
@@ -1041,7 +1044,7 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
             />
           </Box>
 
-          <TextField
+          <CustomTextField
             label={t('orders.packages.dialogs.description')}
             size='small'
             value={formData.description}
@@ -1049,7 +1052,7 @@ const PackagesCard = ({ order, onOrderUpdate, onShipmentCreated }: PackagesCardP
             fullWidth
           />
 
-          <TextField
+          <CustomTextField
             label={t('orders.packages.dialogs.notes')}
             size='small'
             value={formData.notes}

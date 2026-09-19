@@ -27,7 +27,8 @@ const buildGiftCardFormSchema = (t: any): FormSchema => ({
       label: t('settings.marketing.giftCards.editDialog.fields.currency'),
       type: 'select',
       optionsSource: 'api',
-      optionsApi: bfgApi.currencies(),
+      // Only the currencies this shop offers.
+      optionsApi: `${bfgApi.currencies()}?enabled=true`,
       optionLabelTemplate: '{{code}} ({{symbol}})',
       searchable: true,
       searchParam: 'q',
@@ -73,13 +74,7 @@ const GiftCardEditDialog = ({ open, giftCard, onClose, onSave }: GiftCardEditDia
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth='sm' fullWidth>
-      <DialogContent
-        sx={{
-          p: 0,
-          '& .MuiCard-root': { boxShadow: 'none' },
-          '& .MuiCardContent-root': { p: 4 }
-        }}
-      >
+      <DialogContent sx={{ p: 0 }}>
         <SchemaForm schema={giftCardFormSchema} initialData={initialData} onSubmit={handleSubmit} onCancel={onClose} />
       </DialogContent>
     </Dialog>

@@ -13,6 +13,7 @@ import { useTranslations } from 'next-intl'
 // Context Imports
 import { useCart, type CartItem } from '@/contexts/CartContext'
 import { useTheme } from '@/contexts/ThemeContext'
+import { useStorefrontCurrency } from '@/hooks/useStorefrontCurrency'
 import { usePageSlots } from '@/extensions/hooks/usePageSections'
 
 // Import CSS
@@ -28,6 +29,7 @@ type OrderSummary = {
 
 const CheckoutSuccessPage = () => {
   const t = useTranslations('storefront')
+  const { formatPrice } = useStorefrontCurrency()
   const router = useRouter()
   const { items, getSubtotal, getShipping, getTotalWithShipping, clearCart } = useCart()
   const theme = useTheme()
@@ -137,7 +139,7 @@ const CheckoutSuccessPage = () => {
                       </p>
                     </div>
                     <p style={{ fontSize: '1rem', fontWeight: 700, color: '#2c3e50', whiteSpace: 'nowrap' }}>
-                      ${(item.price * item.quantity).toFixed(2)}
+                      {formatPrice(item.price * item.quantity)}
                     </p>
                   </div>
                 ))}

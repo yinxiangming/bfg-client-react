@@ -11,6 +11,7 @@ import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
 
 import SchemaTable from '@/components/schema/SchemaTable'
+import { SETTINGS_GUTTER } from '@/components/admin/settings/SettingsSection'
 import type { ListSchema, SchemaAction } from '@/types/schema'
 import { useApiData } from '@/hooks/useApiData'
 import { getPosts, getCategories, deletePost, type Post, type Category } from '@/services/web'
@@ -21,8 +22,8 @@ const buildPostsSchema = (
 ): ListSchema => ({
   title: t('settings.web.posts.tab.title'),
   columns: [
-    { field: 'title', label: t('settings.web.posts.tab.columns.title'), type: 'string', sortable: true, link: 'edit' },
-    { field: 'slug', label: t('settings.web.posts.tab.columns.slug'), type: 'string', sortable: true },
+    { field: 'title', label: t('settings.web.posts.tab.columns.title'), type: 'string', sortable: true, link: 'edit', width: 260 },
+    { field: 'slug', label: t('settings.web.posts.tab.columns.slug'), type: 'string', sortable: true, width: 180 },
     { field: 'category_name', label: t('settings.web.posts.tab.columns.category'), type: 'string' },
     { field: 'status', label: t('settings.web.posts.tab.columns.status'), type: 'select', sortable: true },
     { field: 'language', label: t('settings.web.posts.tab.columns.language'), type: 'string' },
@@ -109,7 +110,7 @@ const PostsTab = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', px: SETTINGS_GUTTER, py: 6 }}>
         <CircularProgress />
       </Box>
     )
@@ -117,7 +118,7 @@ const PostsTab = () => {
 
   if (error) {
     return (
-      <Box sx={{ p: 4 }}>
+      <Box sx={{ px: SETTINGS_GUTTER, py: 5 }}>
         <Alert severity='error'>{error}</Alert>
       </Box>
     )

@@ -86,14 +86,12 @@ const SupportSettingsTab = () => {
     : undefined
 
   return (
-    <Box sx={{ p: 4 }}>
-      <SchemaForm
-        schema={formSchema}
-        initialData={initial}
-        onSubmit={handleSubmit}
-        onCancel={() => {}}
-      />
-    </Box>
+    <SchemaForm
+      schema={formSchema}
+      initialData={initial}
+      onSubmit={handleSubmit}
+      onCancel={() => {}}
+    />
   )
 }
 

@@ -15,6 +15,8 @@ type Props = {
   addresses: Address[]
   selectedAddressId: number | null
   onSelectAddress: (id: number | null) => void
+  /** Collecting: we still need a name and a phone, but no address at all. */
+  isPickup?: boolean
 }
 
 const CheckoutDeliverySection = ({
@@ -26,7 +28,8 @@ const CheckoutDeliverySection = ({
   user,
   addresses,
   selectedAddressId,
-  onSelectAddress
+  onSelectAddress,
+  isPickup = false
 }: Props) => {
   const t = useTranslations('storefront')
   const [addressesExpanded, setAddressesExpanded] = useState(false)
@@ -38,7 +41,9 @@ const CheckoutDeliverySection = ({
   return (
     <div style={{ marginBottom: '2rem' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-        <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#2c3e50' }}>{t('checkout.delivery.title')}</h2>
+        <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: '#2c3e50' }}>
+          {isPickup ? t('checkout.delivery.pickupContactTitle') : t('checkout.delivery.title')}
+        </h2>
         {isAuthenticated && user && (
           <div style={{ fontSize: '0.875rem', color: '#757575' }}>
             {t('checkout.delivery.loggedInAs', { email: user.email })}
@@ -47,7 +52,7 @@ const CheckoutDeliverySection = ({
       </div>
       
       {/* Saved Addresses for Authenticated Users */}
-      {isAuthenticated && addresses && addresses.length > 0 && (
+      {!isPickup && isAuthenticated && addresses && addresses.length > 0 && (
         <div style={{ marginBottom: '1rem' }}>
           <label style={{ display: 'block', fontSize: '0.875rem', fontWeight: 500, marginBottom: '0.5rem', color: '#2c3e50' }}>
             {t('checkout.delivery.selectSavedAddress')}
@@ -154,9 +159,10 @@ const CheckoutDeliverySection = ({
       )}
       
       {/* Show form fields only if no address selected or user is not authenticated */}
-      {(!isAuthenticated || !selectedAddressId) && (
+      {(isPickup || !isAuthenticated || !selectedAddressId) && (
         <>
           {/* Country */}
+          {!isPickup && (
           <div style={{ marginBottom: '1rem' }}>
             <select
               name='country'
@@ -179,6 +185,7 @@ const CheckoutDeliverySection = ({
               <option value='GB'>{t('checkout.delivery.country.gb')}</option>
             </select>
           </div>
+          )}
 
           {/* Name Row */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem', marginBottom: '1rem' }}>
@@ -211,6 +218,9 @@ const CheckoutDeliverySection = ({
             />
           </div>
 
+          {/* A delivery address is only asked for when something is delivered. */}
+          {!isPickup && (
+          <>
           {/* Address with Autocomplete */}
           <div style={{ marginBottom: '1rem' }}>
             <AddressAutocomplete
@@ -286,6 +296,8 @@ const CheckoutDeliverySection = ({
             />
           </div>
 
+          </>
+          )}
           {/* Phone */}
           <div style={{ marginBottom: '1rem' }}>
             <input

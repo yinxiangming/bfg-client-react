@@ -95,7 +95,7 @@ const PaymentCard = ({ payments = [] }: PaymentCardProps) => {
                     <i className='tabler-currency-dollar' />
                   </Avatar>
                   <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                    <Typography variant='h6' sx={{ fontWeight: 500 }}>
+                    <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600 }}>
                       {payment.payment_number}
                     </Typography>
                     <Typography variant='body2' color='text.secondary'>
@@ -126,7 +126,7 @@ const PaymentCard = ({ payments = [] }: PaymentCardProps) => {
                     <Typography variant='body2' color='text.secondary'>
                       {t('payments.labels.transactionId')}:
                     </Typography>
-                    <Typography variant='body2' sx={{ fontWeight: 500, fontFamily: 'monospace', fontSize: '0.75rem' }}>
+                    <Typography variant='body2' sx={{ fontWeight: 500, fontFamily: 'var(--at-font-num, monospace)', fontFeatureSettings: 'var(--at-num-feat, "tnum" 1)', fontSize: '0.75rem' }}>
                       {payment.gateway_transaction_id}
                     </Typography>
                   </Box>
@@ -154,7 +154,7 @@ const PaymentCard = ({ payments = [] }: PaymentCardProps) => {
                 <Typography variant='body2' color='text.secondary'>
                   {t('payments.labels.paymentAmount')}:
                 </Typography>
-                <Typography variant='h6' sx={{ fontWeight: 500 }} color='success.main'>
+                <Typography sx={{ fontSize: '1rem', fontWeight: 600 }} color='success.main'>
                   {formatCurrency(payment.amount, payment.currency_code)}
                 </Typography>
               </Box>

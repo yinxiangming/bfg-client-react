@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 // Next Imports
 import Link from 'next/link'
@@ -22,6 +22,8 @@ import '@/styles/storefront.css'
 
 type Product = {
   id: number
+  /** Canonical handle; see utils/productUrl. */
+  slug?: string | null
   name: string
   brand: string
   price: number
@@ -31,65 +33,133 @@ type Product = {
   reviews: number
   image: string
   isNew: boolean
+  inStock?: boolean
+  purchasable?: boolean
 }
 
 type SortOption = 'relevance' | 'sales' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc'
 
+type CategoryAncestor = { slug: string; name: string }
+
 function findCategoryInTree(
   items: any[],
-  targetSlug: string
-): { name: string; description: string; children: any[] } | null {
+  targetSlug: string,
+  ancestors: CategoryAncestor[] = []
+): { name: string; description: string; children: any[]; ancestors: CategoryAncestor[] } | null {
   for (const c of items) {
     if (c.slug === targetSlug) {
       return {
         name: c.name ?? targetSlug,
         description: c.description ?? '',
-        children: Array.isArray(c.children) ? c.children : []
+        children: Array.isArray(c.children) ? c.children : [],
+        ancestors
       }
     }
     if (c.children?.length) {
-      const found = findCategoryInTree(c.children, targetSlug)
+      const found = findCategoryInTree(c.children, targetSlug, [...ancestors, { slug: c.slug, name: c.name }])
       if (found) return found
     }
   }
   return null
 }
 
-const CategoryPage = ({ slug }: { slug: string }) => {
+type CategoryInitialData = {
+  products: any[]
+  totalCount: number
+  category: { name: string; description: string; ancestors?: CategoryAncestor[] } | null
+  subcategories: { slug: string; name: string }[]
+}
+
+/** Map an API product onto the card view model (module scope: shared by SSR seed + refetch). */
+const transformApiProduct = (apiProduct: any): Product => ({
+  id: apiProduct.id,
+  name: apiProduct.name,
+  brand: apiProduct.brand || '',
+  price: parseFloat(apiProduct.price || '0'),
+  originalPrice: apiProduct.compare_price ? parseFloat(apiProduct.compare_price) : null,
+  discount: apiProduct.discount_percentage || null,
+  rating: apiProduct.rating || 0,
+  reviews: apiProduct.reviews_count || 0,
+  image:
+    getMediaUrl(apiProduct.primary_image || (apiProduct.images && apiProduct.images[0]) || '') ||
+    getStoreImageUrl('themes/PRS04099/assets/img/megnor/empty-cart.svg'),
+  isNew: apiProduct.is_new || false,
+    inStock: apiProduct.in_stock ?? true,
+    purchasable: apiProduct.purchasable ?? true,
+  slug: apiProduct.slug ?? null
+})
+
+/**
+ * One pagination control. Disabled ends render as a span rather than a link so a crawler is
+ * never offered `?page=0` or a page past the last one.
+ */
+const PaginationLink = ({ href, disabled, label }: { href: string; disabled: boolean; label: string }) => {
+  const style = {
+    padding: '0.5rem 1rem',
+    border: '1px solid #e0e0e0',
+    borderRadius: '4px',
+    textDecoration: 'none',
+    color: 'inherit',
+    opacity: disabled ? 0.5 : 1,
+    cursor: disabled ? 'not-allowed' : 'pointer',
+  } as const
+  if (disabled) return <span className='sf-pagination-btn' style={style}>{label}</span>
+  return <Link className='sf-pagination-btn' href={href} style={style}>{label}</Link>
+}
+
+const CategoryPage = ({
+  slug,
+  initialData,
+  initialPage
+}: {
+  slug: string
+  /**
+   * First page of products fetched on the server. Without it the SSR HTML is just a loading
+   * placeholder, so a crawler indexing this category sees no products and no internal links
+   * through to the product pages.
+   */
+  initialData?: CategoryInitialData
+  /**
+   * Page number from `?page=`. Pagination is URL state rather than component state so the
+   * links are real hrefs a crawler can follow, and so a page-2 URL can be shared or
+   * bookmarked. Sort stays component state and resets when you move between pages.
+   */
+  initialPage?: number
+}) => {
   const t = useTranslations('storefront')
   const { beforeSlots, afterSlots } = usePageSlots('storefront/category')
-  const [products, setProducts] = useState<Product[]>([])
-  const [loading, setLoading] = useState(true)
+  const hasInitialData = Boolean(initialData)
+  const [products, setProducts] = useState<Product[]>(
+    () => initialData?.products?.map(transformApiProduct) ?? []
+  )
+  const [loading, setLoading] = useState(!initialData)
   const [sortBy, setSortBy] = useState<SortOption>('relevance')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [currentPage, setCurrentPage] = useState(1)
-  const [totalCount, setTotalCount] = useState(0)
-  const [categoryInfo, setCategoryInfo] = useState<{ name: string; description: string } | null>(null)
-  const [subcategories, setSubcategories] = useState<{ slug: string; name: string }[]>([])
+  const [totalCount, setTotalCount] = useState(initialData?.totalCount ?? 0)
+  const [categoryInfo, setCategoryInfo] = useState<
+    { name: string; description: string; ancestors: CategoryAncestor[] } | null
+  >(
+    initialData?.category ? { ...initialData.category, ancestors: initialData.category.ancestors ?? [] } : null
+  )
+  const [subcategories, setSubcategories] = useState<{ slug: string; name: string }[]>(
+    initialData?.subcategories ?? []
+  )
   const [showFilters, setShowFilters] = useState(false)
+  // Distinguishes the hydration pass from later sort/page changes.
+  const isFirstLoad = useRef(true)
 
   const productsPerPage = 12
+  const currentPage = Math.max(1, initialPage ?? 1)
 
-  // Transform API product
-  const transformProduct = (apiProduct: any): Product => ({
-    id: apiProduct.id,
-    name: apiProduct.name,
-    brand: apiProduct.brand || '',
-    price: parseFloat(apiProduct.price || '0'),
-    originalPrice: apiProduct.compare_price ? parseFloat(apiProduct.compare_price) : null,
-    discount: apiProduct.discount_percentage || null,
-    rating: apiProduct.rating || 0,
-    reviews: apiProduct.reviews_count || 0,
-    image:
-      getMediaUrl(apiProduct.primary_image || (apiProduct.images && apiProduct.images[0]) || '') ||
-      getStoreImageUrl('themes/PRS04099/assets/img/megnor/empty-cart.svg'),
-    isNew: apiProduct.is_new || false
-  })
+  /** Pagination hrefs: page 1 drops the parameter so the canonical URL stays clean. */
+  const pageHref = (page: number) => (page <= 1 ? `/category/${slug}` : `/category/${slug}?page=${page}`)
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        setLoading(true)
+        // Server-seeded first render already shows page 1; only later navigations spin.
+        if (!(hasInitialData && isFirstLoad.current)) setLoading(true)
+        isFirstLoad.current = false
 
         const sortMap: Record<SortOption, string | undefined> = {
           relevance: undefined,
@@ -113,7 +183,7 @@ const CategoryPage = ({ slug }: { slug: string }) => {
         const response = await storefrontApi.getProducts(params)
         const productsList = Array.isArray(response) ? response : response.results || response.data || []
 
-        setProducts(productsList.map(transformProduct))
+        setProducts(productsList.map(transformApiProduct))
         setTotalCount(response.count || productsList.length)
 
         // Fetch category info + subcategories (tree)
@@ -126,7 +196,8 @@ const CategoryPage = ({ slug }: { slug: string }) => {
           if (found) {
             setCategoryInfo({
               name: found.name,
-              description: found.description || ''
+              description: found.description || '',
+              ancestors: found.ancestors
             })
             const subs = found.children
               .filter((ch: any) => ch?.slug && ch?.name)
@@ -166,10 +237,22 @@ const CategoryPage = ({ slug }: { slug: string }) => {
           )
       )}
       {/* Breadcrumbs */}
-      <nav className='sf-breadcrumb-nav'>
+      <nav className='sf-breadcrumb-nav' style={{ marginBottom: '1.5rem' }}>
         <Link href='/' className='sf-breadcrumb-link' style={{ textDecoration: 'none' }}>
           {t('nav.home')}
         </Link>
+        {(categoryInfo?.ancestors ?? []).map(ancestor => (
+          <span key={ancestor.slug}>
+            <span className='sf-breadcrumb-separator' style={{ margin: '0 0.5rem' }}>/</span>
+            <Link
+              href={`/category/${ancestor.slug}`}
+              className='sf-breadcrumb-link'
+              style={{ textDecoration: 'none' }}
+            >
+              {ancestor.name}
+            </Link>
+          </span>
+        ))}
         <span className='sf-breadcrumb-separator' style={{ margin: '0 0.5rem' }}>/</span>
         <span className='sf-breadcrumb-current'>{categoryName}</span>
       </nav>
@@ -301,65 +384,23 @@ const CategoryPage = ({ slug }: { slug: string }) => {
               {/* Pagination */}
               {totalPages > 1 && (
                 <div className='sf-pagination' style={{ display: 'flex', justifyContent: 'center', gap: '0.5rem' }}>
-                  <button
-                    className='sf-pagination-btn'
-                    onClick={() => setCurrentPage(1)}
-                    disabled={currentPage === 1}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      border: '1px solid #e0e0e0',
-                      borderRadius: '4px',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      opacity: currentPage === 1 ? 0.5 : 1
-                    }}
-                  >
-                    {t('category.pagination.first')}
-                  </button>
-                  <button
-                    className='sf-pagination-btn'
-                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                    disabled={currentPage === 1}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      border: '1px solid #e0e0e0',
-                      borderRadius: '4px',
-                      cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
-                      opacity: currentPage === 1 ? 0.5 : 1
-                    }}
-                  >
-                    {t('category.pagination.previous')}
-                  </button>
+                  {/* Real links, not buttons: this is the only path a crawler has to products past
+                      the first page of a category, and it makes a page-2 URL shareable. */}
+                  {([
+                    { page: 1, label: t('category.pagination.first'), disabled: currentPage === 1 },
+                    { page: currentPage - 1, label: t('category.pagination.previous'), disabled: currentPage === 1 },
+                  ] as const).map(item => (
+                    <PaginationLink key={item.label} href={pageHref(item.page)} disabled={item.disabled} label={item.label} />
+                  ))}
                   <span className='sf-pagination-info' style={{ padding: '0.5rem 1rem', display: 'flex', alignItems: 'center' }}>
                     {t('category.pagination.pageOf', { page: currentPage, total: totalPages })}
                   </span>
-                  <button
-                    className='sf-pagination-btn'
-                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                    disabled={currentPage === totalPages}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      border: '1px solid #e0e0e0',
-                      borderRadius: '4px',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      opacity: currentPage === totalPages ? 0.5 : 1
-                    }}
-                  >
-                    {t('category.pagination.next')}
-                  </button>
-                  <button
-                    className='sf-pagination-btn'
-                    onClick={() => setCurrentPage(totalPages)}
-                    disabled={currentPage === totalPages}
-                    style={{
-                      padding: '0.5rem 1rem',
-                      border: '1px solid #e0e0e0',
-                      borderRadius: '4px',
-                      cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
-                      opacity: currentPage === totalPages ? 0.5 : 1
-                    }}
-                  >
-                    {t('category.pagination.last')}
-                  </button>
+                  {([
+                    { page: currentPage + 1, label: t('category.pagination.next'), disabled: currentPage === totalPages },
+                    { page: totalPages, label: t('category.pagination.last'), disabled: currentPage === totalPages },
+                  ] as const).map(item => (
+                    <PaginationLink key={item.label} href={pageHref(item.page)} disabled={item.disabled} label={item.label} />
+                  ))}
                 </div>
               )}
             </>

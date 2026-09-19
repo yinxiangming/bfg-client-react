@@ -249,18 +249,15 @@
   border-bottom: var(--at-block-rule);
 }
 
-/* Empty state inside SchemaTable */
+/* Empty state inside SchemaTable. No illustration: the icon was a block-level
+   box, so `text-align` never reached it and it sat hard against the left edge
+   while the label centred — one line of copy reads cleaner than a decoration
+   that cannot line up with it. */
 .at-schema-table .at-empty {
-  padding: 40px 16px;
+  padding: 32px 24px;
   text-align: center;
   color: var(--at-row-sub);
   font-size: 13px;
-}
-.at-schema-table .at-empty i {
-  display: block;
-  font-size: 26px;
-  opacity: 0.5;
-  margin-bottom: 8px;
 }
 
 /* ============================================================

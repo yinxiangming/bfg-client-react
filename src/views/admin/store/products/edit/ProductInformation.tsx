@@ -260,7 +260,7 @@ const ProductInformation = ({
                 }
             />
             <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 } }}>
-                <Grid container spacing={2}>
+                <Grid container spacing={3}>
                     <Grid size={{ xs: 12 }}>
                         <CustomTextField
                             fullWidth

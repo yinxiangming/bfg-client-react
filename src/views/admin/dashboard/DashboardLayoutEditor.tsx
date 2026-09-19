@@ -13,7 +13,6 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Paper,
   Typography,
   Divider,
 } from '@mui/material'
@@ -165,7 +164,7 @@ export function DashboardLayoutEditor({
   const renderColumn = (col: ColumnKey, label: string) => {
     const blocks = getBlocks(col)
     return (
-      <Paper key={col} sx={{ overflow: 'auto', p: 0, flex: col === 'left' ? 2 : 1, minWidth: 0 }}>
+      <Card key={col} sx={{ overflow: 'auto', p: 0, flex: col === 'left' ? 2 : 1, minWidth: 0 }}>
         <Box sx={{ p: 1.5, borderBottom: 1, borderColor: 'divider' }}>
           <Typography variant="subtitle2" color="text.secondary">
             {label}
@@ -188,7 +187,7 @@ export function DashboardLayoutEditor({
             Add block
           </Button>
         </Box>
-      </Paper>
+      </Card>
     )
   }
 
@@ -199,9 +198,9 @@ export function DashboardLayoutEditor({
         {renderColumn('right', 'Right (narrow)')}
       </Box>
 
-      <Paper sx={{ width: 360, overflow: 'auto', flexShrink: 0 }}>
+      <Card sx={{ width: 360, overflow: 'auto', flexShrink: 0 }}>
         <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
-          <Typography variant="h6">
+          <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600, lineHeight: 1.5 }}>
             {selectedBlock ? 'Block Settings' : 'Dashboard Blocks'}
           </Typography>
         </Box>
@@ -321,11 +320,11 @@ export function DashboardLayoutEditor({
             )}
           </Box>
         )}
-      </Paper>
+      </Card>
 
       <Drawer anchor="right" open={isBlockPickerOpen} onClose={() => setIsBlockPickerOpen(false)}>
         <Box sx={{ width: 400, p: 2 }}>
-          <Typography variant="h6" sx={{ mb: 2 }}>
+          <Typography sx={{ mb: 2, fontSize: '0.9375rem', fontWeight: 600, lineHeight: 1.5 }}>
             Add Block
           </Typography>
           {Object.entries(blocksByCategory).map(([category, defs]) => (
@@ -339,8 +338,9 @@ export function DashboardLayoutEditor({
                     <Card
                       sx={{
                         cursor: 'pointer',
-                        '&:hover': { boxShadow: 3 },
-                        transition: 'box-shadow 0.2s',
+                        // Admin cards are flat (--at-card-shadow: none), so hover
+                        // reads on the border and ground instead of elevation.
+                        '&:hover': { borderColor: 'primary.main', backgroundColor: 'action.hover' },
                       }}
                       onClick={() => handleAddBlock(def)}
                     >

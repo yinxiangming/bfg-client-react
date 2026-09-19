@@ -1,6 +1,12 @@
 {
+  "extensionDisabled": {
+    "title": "这个扩展没有开启",
+    "body": "本店还没有开启这个扩展，所以它的页面暂时不能用。请联系店铺管理员开启。",
+    "back": "返回仪表盘"
+  },
   "nav": {
     "dashboard": "仪表盘",
+    "setup": "初始化",
     "store": "商店",
     "storeOrders": "订单",
     "storeProducts": "商品",
@@ -137,15 +143,17 @@
       "paid": "已支付",
       "processing": "处理中",
       "shipped": "已发货",
-      "readyToPickup": "待自提",
+      "ready_for_pickup": "待自提",
       "completed": "已完成",
       "cancelled": "已取消",
-      "delivered": "已送达"
+      "delivered": "已送达",
+      "refunded": "已退款"
     },
     "paymentStatus": {
       "pending": "待支付",
       "paid": "已支付",
-      "failed": "失败"
+      "failed": "失败",
+      "refunded": "已退款"
     },
     "basicInfo": {
       "storeFallback": "门店 #{store}",
@@ -182,7 +190,9 @@
         "createCustomerFailed": "创建客户失败",
         "addAtLeastOneProduct": "请至少添加一件商品",
         "createOrderFailed": "创建订单失败"
-      }
+      },
+      "pickupPoint": "自提点",
+      "noPickupPoints": "还没有配置自提点，请到「设置 › 配送」中新建。"
     },
     "listPage": {
       "title": "订单",
@@ -193,7 +203,9 @@
           "copyOrderNo": "复制订单号",
           "noteLabel": "留言",
           "customer": "客户",
-          "store": "门店",
+          "fulfillment": "配送方式",
+          "fulfillmentShipping": "配送",
+          "fulfillmentPickup": "自提",
           "total": "总计",
           "status": "状态",
           "payment": "支付",
@@ -201,7 +213,8 @@
           "packagesCount": "{count} 个包裹",
           "manageLogistics": "管理",
           "addPackages": "发货",
-          "createdAt": "创建时间"
+          "createdAt": "创建时间",
+          "paymentProof": "已上传付款凭证"
         }
       },
       "logisticsModal": {
@@ -226,6 +239,11 @@
         },
         "createdTime": {
           "label": "创建时间"
+        },
+        "paymentProof": {
+          "label": "付款凭证",
+          "yes": "已上传",
+          "no": "无"
         }
       },
       "actions": {
@@ -242,7 +260,8 @@
         "cancelTodo": "取消订单功能待实现",
         "shipTodo": "发货功能待实现",
         "exportTodo": "导出 Excel 功能待实现"
-      }
+      },
+      "subtitle": "跟踪、发货、退款与导出顾客订单。"
     },
     "addressCards": {
       "labels": {
@@ -410,7 +429,17 @@
       "phoneLabel": "电话",
       "deliveryTimelineLabel": "配送时间线",
       "notShippedYet": "订单尚未发货。",
-      "shippingCostLabel": "运费"
+      "shippingCostLabel": "运费",
+      "pickup": {
+        "title": "自提信息",
+        "pointLabel": "自提点",
+        "noPoint": "这笔订单没有记录自提点。",
+        "codeLabel": "自提码",
+        "codeHelp": "自提柜取件码或到店核销码 —— 顾客取货时报的那个。",
+        "saveCodeFailed": "保存自提码失败。",
+        "notReadyYet": "订单还未到可自提状态。",
+        "feeLabel": "自提费"
+      }
     },
     "packages": {
       "title": "包裹",
@@ -568,6 +597,34 @@
         "title": "删除发票",
         "message": "确认删除发票 {invoiceNumber}？此操作无法撤销。"
       }
+    },
+    "returns": {
+      "title": "退货（{count}）",
+      "empty": "这个订单还没有退货",
+      "status": {
+        "open": "待处理",
+        "approved": "已批准",
+        "rejected": "已拒绝",
+        "received": "已收货",
+        "inspected": "已检验",
+        "refunded": "已退款",
+        "closed": "已关闭",
+        "cancelled": "已取消"
+      },
+      "labels": {
+        "requested": "申请时间",
+        "approved": "批准时间",
+        "refunded": "退款时间",
+        "closed": "关闭时间",
+        "customerNote": "顾客备注"
+      },
+      "messages": {
+        "loadFailed": "加载退货失败"
+      }
+    },
+    "paymentProof": {
+      "title": "付款凭证（{count}）",
+      "hint": "顾客上传的截图。核对后请自行修改支付状态 —— 上传只是声明，不等于已付款。"
     }
   },
   "reviews": {
@@ -584,9 +641,7 @@
           "customer": "客户",
           "rating": "评分",
           "title": "标题",
-          "comment": "内容",
           "status": "状态",
-          "helpfulCount": "有用",
           "createdAt": "创建时间"
         }
       },
@@ -607,7 +662,8 @@
       },
       "messages": {
         "actionFailed": "操作失败：{error}"
-      }
+      },
+      "subtitle": "在评价展示到前台之前进行审核。"
     }
   },
   "customers": {
@@ -616,6 +672,10 @@
       "schema": {
         "title": "客户",
         "customerNumber": "客户编号",
+        "name": "名字",
+        "phone": "电话",
+        "totalSpent": "累计消费",
+        "lastLogin": "最后使用时间",
         "companyName": "公司名称",
         "email": "邮箱",
         "taxNumber": "税号",
@@ -632,7 +692,8 @@
         "confirmDelete": "确认删除该客户？",
         "confirmDeleteCustomer": "确认删除 {name}？",
         "deleteFailed": "删除失败：{error}"
-      }
+      },
+      "subtitle": "所有下过单的顾客的账号、地址、钱包与订单记录。"
     },
     "editHeader": {
       "addCustomer": "新增客户",
@@ -1013,8 +1074,10 @@
         "confirmDeleteWithName": "确认删除分类 {name}？"
       },
       "errors": {
-        "deleteFailed": "删除分类失败：{error}"
-      }
+        "deleteFailed": "删除分类失败：{error}",
+        "updateFailed": "更新分类失败：{error}"
+      },
+      "subtitle": "顾客在前台浏览的分类树。"
     },
     "form": {
       "title": "分类详情",
@@ -1142,19 +1205,24 @@
         "empty": "暂无分类"
       },
       "tooltips": {
-        "viewProducts": "点击查看该分类下的商品"
+        "viewProducts": "点击查看该分类下的商品",
+        "toggleActive": "在前台显示该分类"
       },
       "actions": {
         "addSubcategory": "新增子分类",
         "edit": "编辑",
         "delete": "删除",
-        "confirmDeleteWithName": "确认删除分类“{name}”？"
+        "confirmDeleteWithName": "确认删除分类“{name}”？",
+        "moveUp": "上移",
+        "moveDown": "下移",
+        "reorderFiltered": "清除搜索和筛选后才能排序"
       }
     }
   },
   "stores": {
     "page": {
-      "title": "门店"
+      "title": "门店",
+      "subtitle": "销售门店及为其发货的仓库。"
     },
     "schema": {
       "title": "门店",
@@ -1202,7 +1270,9 @@
       "snackbar": {
         "saved": "门店保存成功！",
         "saveFailed": "保存门店失败"
-      }
+      },
+      "title": "编辑门店",
+      "subtitle": "该门店的联系方式、发货与前台设置。"
     }
   },
   "support": {
@@ -1212,7 +1282,8 @@
         "titleUnprocessed": "未处理",
         "titleMy": "我的工单",
         "titleInProgress": "进行中",
-        "titleClosed": "已结束"
+        "titleClosed": "已结束",
+        "subtitle": "等待团队处理的顾客会话。"
       },
       "tabs": {
         "basic": "基本信息",
@@ -1466,8 +1537,10 @@
       "errors": {
         "updateStatusFailed": "更新状态失败：{error}",
         "deleteFailed": "删除商品失败：{error}",
-        "schemaNotFound": "未找到 Schema"
-      }
+        "schemaNotFound": "未找到 Schema",
+        "deleteBlockedByOrders": "该商品出现在 {count} 个订单中，删除会破坏这些订单。请改为下架，使其不在前台显示。"
+      },
+      "subtitle": "商品的目录、价格、库存与前台展示状态。"
     },
     "description": {
       "cardTitle": "商品描述",
@@ -2008,6 +2081,7 @@
         "subtitle": "管理仓库、承运商、包装类型与配送默认配置",
         "tabs": {
           "warehouses": "仓库",
+          "pickupPoints": "自提点",
           "freightServices": "货运服务",
           "carriers": "承运商",
           "freightStatus": "货运状态",
@@ -2015,6 +2089,57 @@
           "packagingTypes": "包装类型",
           "deliveryZones": "配送区域",
           "deliverySettings": "配送设置"
+        }
+      },
+      "pickupPoints": {
+        "tab": {
+          "title": "自提点",
+          "columns": {
+            "name": "名称",
+            "code": "编码",
+            "address": "地址",
+            "phone": "电话",
+            "fee": "费用",
+            "status": "状态",
+            "default": "默认"
+          },
+          "actions": {
+            "newPoint": "新建自提点",
+            "edit": "编辑",
+            "delete": "删除",
+            "confirmDelete": "确定要删除这个自提点吗？"
+          },
+          "errors": {
+            "deleteFailed": "删除自提点失败：{error}。已有订单关联的自提点无法删除，请改为停用。",
+            "saveFailed": "保存自提点失败：{error}"
+          }
+        },
+        "editDialog": {
+          "title": "自提点",
+          "fields": {
+            "name": "名称",
+            "code": "编码",
+            "active": "启用",
+            "defaultPoint": "默认自提点",
+            "defaultPointHelp": "自提订单未指定自提点时使用。",
+            "addressLine1": "地址第一行",
+            "addressLine2": "地址第二行",
+            "city": "城市",
+            "state": "州/省",
+            "postalCode": "邮编",
+            "country": "国家",
+            "latitude": "纬度",
+            "longitude": "经度",
+            "phone": "电话",
+            "email": "邮箱",
+            "instructions": "自提说明",
+            "instructionsHelp": "营业时间、走哪个门、在哪停车 —— 顾客可见。",
+            "fee": "自提费",
+            "feeHelp": "计入订单的配送费用一行。",
+            "sortOrder": "排序",
+            "warehouse": "货源仓库",
+            "warehouseHelp": "这个自提点的货从哪个仓库出，可不填。"
+          }
         }
       }
     },
@@ -2038,8 +2163,11 @@
             "name": "名称",
             "symbol": "符号",
             "decimals": "小数位",
-            "status": "状态"
+            "status": "状态",
+            "enabled": "本店启用"
           },
+          "defaultChip": "默认",
+          "sharedNotice": "币种由平台上的所有店铺共用。请打开本店要使用的币种；默认币种（在通用设置中设置）始终保持开启。只有平台管理员可以新增、编辑或删除币种。",
           "searchPlaceholder": "搜索币种...",
           "filters": {
             "currencyType": {
@@ -2068,7 +2196,8 @@
           },
           "errors": {
             "deleteFailed": "删除失败：{error}",
-            "saveFailed": "保存失败：{error}"
+            "saveFailed": "保存失败：{error}",
+            "toggleFailed": "更新失败：{error}"
           }
         },
         "editDialog": {
@@ -2119,7 +2248,7 @@
           "title": "品牌",
           "columns": {
             "name": "名称",
-            "taxId": "税号",
+            "taxId": "GST / 税号",
             "registrationNumber": "注册号",
             "default": "默认",
             "status": "状态"
@@ -2143,8 +2272,12 @@
           "title": "品牌",
           "name": "名称",
           "logo": "Logo",
-          "addressId": "地址ID",
-          "taxId": "税号",
+          "address": "地址",
+          "noAddress": "未选择地址",
+          "chooseAddress": "选择地址",
+          "removeAddress": "移除",
+          "taxId": "GST / 税号",
+          "taxIdPlaceholder": "例如 123-456-789（会印在发票上）",
           "registrationNumber": "注册号",
           "invoiceNote": "发票备注",
           "invoiceNotePlaceholder": "输入付款说明、银行信息或其他需要在发票上显示的信息。\n\n示例：\nASB Bank\nSurlex Limited\n12-3484-0026365-00\n\n付款时请使用以下信息：\n- Particular: [公司名称]\n- Reference: [发票号]\n- Code: [客户编号]",
@@ -3184,6 +3317,53 @@
               "label": "商品扫描器 API Key",
               "placeholder": "ps-xxxxxx"
             }
+          },
+          "storefrontDisplay": {
+            "title": "店铺展示",
+            "description": "顾客在商品页看到什么,以及商品售罄后如何处理。对整个店铺生效。",
+            "skuDisplay": {
+              "label": "商品编号",
+              "options": {
+                "plain": "显示(去掉前缀)",
+                "full": "显示完整编号",
+                "hidden": "不显示"
+              },
+              "help": {
+                "plain": "去掉上面设置的前缀,SKU-KAS-301 显示为 KAS-301。",
+                "full": "原样显示,包含前缀。",
+                "hidden": "商品页不显示编号。"
+              }
+            },
+            "stockDisplay": {
+              "label": "库存",
+              "options": {
+                "status": "只显示有货/售罄",
+                "low_only": "仅在库存偏低时显示数量",
+                "exact": "显示具体数量",
+                "hidden": "不显示"
+              },
+              "help": {
+                "status": "顾客只知道能不能买,不知道你有多少。",
+                "low_only": "低于该商品的低库存阈值时才显示数量。",
+                "exact": "会公开你的库存水平,竞争对手同样能看到。",
+                "hidden": "完全不显示库存状态。"
+              }
+            },
+            "outOfStock": {
+              "label": "售罄时",
+              "options": {
+                "show": "显示,并标记售罄",
+                "notify": "显示,并接受到货通知登记",
+                "backorder": "继续销售(预订)",
+                "hide": "从店铺中隐藏"
+              },
+              "help": {
+                "show": "商品页仍可访问和被收录,购买按钮置灰。",
+                "notify": "顾客可留下邮箱,登记记录在后台可查 —— 发信目前仍需手动。",
+                "backorder": "会接受尚无现货的订单,请在配送条款中说明。",
+                "hide": "从列表消失,商品页返回 404 —— 已有的外链和搜索排名会一并失去。"
+              }
+            }
           }
         },
         "actions": {
@@ -3222,7 +3402,8 @@
             "displayType": "展示类型",
             "order": "排序",
             "linkUrl": "链接",
-            "status": "状态"
+            "status": "状态",
+            "context": "展示页面"
           },
           "actions": {
             "newDisplay": "新增展示",
@@ -3253,12 +3434,19 @@
             "rules": "规则",
             "rulesHelp": "JSON 数组，与商品分类规则一致。例：[{\"column\":\"category_id\",\"relation\":\"equals\",\"condition\":\"5\"}]",
             "post": "文章",
-            "active": "启用"
+            "active": "启用",
+            "context": "展示页面",
+            "contextHelp": "这条内容出现在哪个店铺页面。选择“全部页面”则任何请求促销位的页面都会展示。"
           },
           "displayTypeOptions": {
             "slide": "轮播图",
             "categoryEntry": "分类入口",
             "featured": "精选推荐"
+          },
+          "contextOptions": {
+            "all": "全部页面",
+            "home": "首页",
+            "category": "分类页"
           }
         }
       },
@@ -3549,7 +3737,9 @@
           "users": "用户",
           "roles": "角色",
           "email": "邮件",
+          "socialLogin": "第三方登录",
           "apiKeys": "API 密钥",
+          "plugins": "插件",
           "versions": "版本信息"
         }
       },
@@ -3645,7 +3835,19 @@
           "storefrontDisplay": "前台展示",
           "storefrontTheme": "前台主题与页头",
           "shop": "店铺",
-          "socialMediaLinks": "社交媒体链接"
+          "socialMediaLinks": "社交媒体链接",
+          "analytics": "数据分析"
+        },
+        "sectionHints": {
+          "adminIdentity": "用于在后台标识该租户，不会展示给网店访客。",
+          "localization": "工作区内新内容、价格与时间的默认设置。",
+          "shop": "该工作区的商品与评价行为设置。",
+          "storefrontBranding": "访客在页头与浏览器标签页看到的 Logo、图标与名称。",
+          "contactInformation": "展示在网店页脚与交易类页面上。",
+          "storefrontDisplay": "出现在每个网店页面顶部与底部的公告与文案。",
+          "storefrontTheme": "网店使用的皮肤、配色模式与页头布局。",
+          "analytics": "注入到每个网店页面的统计代码。",
+          "socialMediaLinks": "从网店页脚链接出去，留空则隐藏该图标。"
         },
         "subsections": {
           "adminIdentity": "后台与系统标识",
@@ -3653,7 +3855,13 @@
         },
         "logo": {
           "alt": "工作区 Logo",
-          "help": "支持 JPG、GIF 或 PNG，最大 800KB"
+          "help": "支持 JPG、GIF 或 PNG，最大 800KB",
+          "showSiteName": "在 Logo 旁同时显示站点名称"
+        },
+        "logoDark": {
+          "alt": "深色背景使用的工作区 Logo",
+          "upload": "上传深色版 Logo",
+          "help": "用于店面深色背景处：深色模式下的页头，以及始终为深色的页脚。留空则各处都使用同一个 Logo。"
         },
         "fields": {
           "workspaceOrgName": {
@@ -3677,6 +3885,10 @@
             "label": "站点描述（SEO）",
             "placeholder": "一句话介绍你的站点或品牌",
             "helper": "用于搜索摘要等前台展示；可与后台工作区名称不同。"
+          },
+          "country": {
+            "label": "国家 / 地区",
+            "helper": "决定默认税率、结算页地址格式，以及地址自动补全的适用市场。"
           },
           "defaultLanguage": {
             "label": "默认语言"
@@ -3742,7 +3954,8 @@
             "showCart": "购物车",
             "showLanguageSwitcher": "语言",
             "showStyleSelector": "主题（亮/暗）",
-            "showLogin": "登录/账户"
+            "showLogin": "登录/账户",
+            "showRegister": "注册"
           },
           "shop": {
             "reviewModerationRequired": "开启评价审核（新评价需审核通过后才显示）",
@@ -3769,6 +3982,13 @@
               "label": "Instagram",
               "placeholder": "https://instagram.com/yourprofile"
             }
+          },
+          "analytics": {
+            "googleAnalyticsId": {
+              "label": "Google Analytics 4 衡量 ID",
+              "placeholder": "G-XXXXXXXXXX",
+              "helper": "在 GA4 的「管理 → 数据流 → 网页数据流」中查看。留空即关闭跟踪。填写后，店铺前台每个页面的访问都会自动上报。"
+            }
           }
         },
         "actions": {
@@ -3786,6 +4006,11 @@
           "loadFailedWithRefresh": "加载设置失败：{error}。请刷新页面。",
           "settingsIdMissing": "未找到设置 ID，请刷新页面。",
           "saveFailed": "保存设置失败：{error}"
+        },
+        "favicon": {
+          "alt": "网站图标",
+          "upload": "上传网站图标",
+          "help": "显示在浏览器标签页上。方形 PNG、ICO 或 SVG，建议 32×32 以上。留空则使用默认图标。"
         }
       },
       "users": {
@@ -3959,6 +4184,81 @@
           "regenerateFailed": "重新生成密钥失败：{error}",
           "schemaNotFound": "未找到 API 密钥配置"
         }
+      },
+      "plugins": {
+        "title": "插件",
+        "description": "可选功能,按工作区分别开启。按次计费的功能在此处开启之前始终关闭。",
+        "save": "保存修改",
+        "saving": "保存中...",
+        "saved": "插件设置已保存",
+        "errors": {
+          "loadFailed": "加载插件设置失败:{error}",
+          "saveFailed": "保存插件设置失败:{error}",
+          "settingsIdMissing": "缺少设置 ID,请刷新页面后重试。"
+        },
+        "addressLookup": {
+          "title": "地址查询",
+          "description": "由本服务器(而非客户端)调用 Google 提供地址联想和 GPS 定位地址名称。",
+          "enabled": {
+            "label": "启用地址查询",
+            "help": "顾客输入时联想真实地址,并把 GPS 定位转成能看懂的地址名称。供微信小程序使用——小程序无法加载 Google 的浏览器 SDK。"
+          },
+          "countryCode": {
+            "label": "国家",
+            "placeholder": "NZ",
+            "help": "两位国家代码(ISO 3166-1)。该国以外的联想结果和 GPS 结果一律不返回。留空则使用工作区自身的市场设置。",
+            "invalid": "请填写两位国家代码,例如 NZ 或 CN。"
+          },
+          "status": {
+            "live": "已生效 — {country}",
+            "notLive": "未生效",
+            "liveHelp": "服务器正在响应地址查询,并已限定在该国家。",
+            "notLiveHelp": "请先保存上面的开关,然后确认这里已填写国家、且服务器已配置 GOOGLE_MAPS_API_KEY。"
+          }
+        }
+      },
+      "socialLogin": {
+        "title": "第三方登录",
+        "subtitle": "多数店铺不需要在这里配置：跳转式登录始终回到我们自己的 API 域名，平台的公共 OAuth 客户端已经覆盖了。什么时候需要自己的客户端——你想让服务商的授权页显示你自己的名称，或者想在自己的域名上启用 One Tap（服务商会校验页面来源，只有你自己的客户端才能登记这个域名）。",
+        "add": "添加服务商",
+        "edit": "编辑",
+        "editTitle": "编辑服务商",
+        "delete": "删除",
+        "deleteConfirm": "删除这组凭据？该服务商的按钮会从登录页消失。",
+        "cancel": "取消",
+        "save": "保存",
+        "saving": "保存中...",
+        "saved": "已保存。",
+        "created": "已创建。",
+        "deleted": "已删除。",
+        "copied": "已复制。",
+        "provider": "服务商",
+        "providerLocked": "如需更换服务商，请删除后重新添加。",
+        "clientId": "客户端 ID",
+        "secret": "客户端密钥",
+        "secretPlaceholder": "不修改则保留已保存的密钥",
+        "secretUnchanged": "除非输入新值，否则保留已保存的密钥。",
+        "appleKeyId": "Key ID",
+        "appleCertificateKey": "签名密钥（.p8）",
+        "appleCertificateKeyPlaceholder": "粘贴 .p8 文件的内容。留空则保留已保存的密钥。",
+        "isActive": "启用",
+        "activeHint": "关闭后按钮不再显示，但凭据会保留。",
+        "status": "状态",
+        "statusLive": "已生效",
+        "statusOff": "已关闭",
+        "statusIncomplete": "未填完",
+        "consoleHeading": "把这些值填进服务商的控制台",
+        "redirectUri": "回调地址",
+        "jsOrigin": "JavaScript 来源",
+        "noDomains": "该工作区还没有域名，因此没有可授权的来源。请先添加域名。",
+        "errors": {
+          "loadFailed": "加载第三方登录设置失败",
+          "saveFailed": "保存失败。",
+          "deleteFailed": "删除失败。",
+          "copyFailed": "复制失败——请手动选中文本复制。"
+        },
+        "inheritedNotice": "{providers} 登录目前由平台的公共客户端提供，不用在这里配置就已经可用。下面添加自己的客户端，可以让授权页显示你自己的名称，并在你自己的域名上启用 One Tap。",
+        "overrideNotice": "保存后，本店将改用这个客户端，不再使用平台的公共客户端。"
       }
     }
   },
@@ -3972,7 +4272,8 @@
     "hub": {
       "title": "管理工具",
       "productEntry": "录入产品",
-      "productEntryDesc": "录入产品型号、数量、存放位置和照片"
+      "productEntryDesc": "录入产品型号、数量、存放位置和照片",
+      "subtitle": "为手机准备的快捷操作。"
     },
     "quickEntry": {
       "title": "快捷录入",
@@ -4157,6 +4458,585 @@
     "cancel": "取消",
     "save": "保存布局",
     "saving": "保存中…",
-    "emptyHint": "暂无区块。添加区块以定制您的仪表盘。"
+    "emptyHint": "暂无区块。添加区块以定制您的仪表盘。",
+    "subtitle": "今日订单、收入与顾客概览。"
+  },
+  "setup": {
+    "title": "店铺初始化",
+    "subtitle": "告诉我们你在哪里经营、卖什么，剩下那些没人愿意写的内容交给我们。",
+    "loadFailed": "初始化清单加载失败。",
+    "allDone": "必填项已全部完成，下面都是可选项。",
+    "remaining": "还有 {count} 项必填、{optional} 项可选未完成。",
+    "hideFromDashboard": "不在仪表盘显示",
+    "optional": "可选",
+    "go": "去设置",
+    "review": "查看",
+    "skip": "跳过",
+    "unskip": "恢复",
+    "skipHint": "标记为“已确认不做”。它仍留在清单里，但不再计入完成度。",
+    "unskipHint": "重新计入完成度。",
+    "stepCount": "{done} / {total}",
+    "quickStart": {
+      "title": "快速开始",
+      "subtitle": "选择国家与行业，我们据此设置货币、税率、商品分类、导航与法务页面——已经被你改过的内容一律不动。",
+      "country": "经营地",
+      "countryImplies": "将设置为 {currency}、{timezone}、{tax}，之后都可以自行调整。",
+      "industry": "所属行业",
+      "siteName": "店铺名称",
+      "siteNamePlaceholder": "显示在页头与发票上",
+      "contactEmail": "联系邮箱",
+      "contactEmailHelp": "会印在隐私政策、服务条款与退换货政策上。",
+      "contactPhone": "联系电话",
+      "preview": "先看看会做什么",
+      "rerunSafe": "可以重复运行，只会补齐仍然缺失的部分。",
+      "save": "保存联系信息",
+      "saved": "已保存。"
+    },
+    "preview": {
+      "title": "将要创建的内容",
+      "intro": "以下内容目前不存在，将被创建：",
+      "nothingToDo": "没有缺失项——该模板要创建的内容你的工作区都已经有了。",
+      "nonDestructive": "你改过的页面和调整过的导航菜单会原样保留。",
+      "cancel": "取消",
+      "apply": "创建",
+      "kind": {
+        "settings": "工作区设置",
+        "currency": "货币",
+        "taxRate": "税率",
+        "store": "店铺",
+        "warehouse": "仓库",
+        "zone": "配送区域",
+        "category": "商品分类",
+        "page": "页面",
+        "menu": "导航菜单",
+        "shopSettings": "店铺展示策略",
+        "site": "站点",
+        "content": "内容"
+      }
+    },
+    "checklist": {
+      "title": "还差这些",
+      "subtitle": "每一项都直接链到对应的设置页。我们代劳不了的，是需要你自己的账号与密钥的部分。"
+    },
+    "block": {
+      "title": "初始化进度",
+      "next": "下一步：{item}",
+      "remaining": "还有 {count} 项必填未完成。",
+      "continue": "继续设置"
+    }
+  },
+  "workspaceSwitcher": {
+    "label": "切换工作区",
+    "labelWithCurrent": "切换工作区（当前：{name}）",
+    "switching": "正在切换工作区…",
+    "loading": "正在加载工作区…",
+    "loadFailed": "工作区列表加载失败。",
+    "empty": "没有可切换的工作区。",
+    "switchFailed": {
+      "notMember": "你已不是该工作区的员工。",
+      "notFound": "该工作区不存在或已停用。",
+      "generic": "没能切换到该工作区，请重试。"
+    },
+    "myShops": "我的工作区"
+  },
+  "workspaces": {
+    "title": "我的工作区",
+    "subtitle": "你拥有或作为员工加入的工作区都在这里。点「进入后台」会先切换到对应的工作区。",
+    "loading": "正在加载工作区",
+    "loadFailed": "工作区列表加载失败。",
+    "empty": {
+      "title": "你还没有工作区",
+      "description": "你拥有的工作区，以及把你加为员工的工作区，都会显示在这里。"
+    },
+    "billingNote": "方案、点数和扩展会在计费功能上线后显示。",
+    "status": {
+      "active": "正常",
+      "suspended": "已暂停",
+      "inactive": "已停用"
+    },
+    "badges": {
+      "current": "当前工作区",
+      "owner": "所有者"
+    },
+    "roles": {
+      "admin": "管理员",
+      "manager": "经理",
+      "staff": "员工",
+      "store_admin": "店铺管理员",
+      "marketer": "营销专员",
+      "warehouse_manager": "仓库主管",
+      "accountant": "会计",
+      "customer_service": "客服",
+      "content_editor": "内容编辑"
+    },
+    "fields": {
+      "domain": "域名",
+      "plan": "方案",
+      "credits": "点数",
+      "extensions": "扩展"
+    },
+    "noDomain": "未绑定",
+    "enter": "进入后台",
+    "blocked": {
+      "suspended": "已暂停，请联系平台恢复。",
+      "inactive": "已停用。",
+      "notMember": "你不是该工作区的员工，不能进入后台。"
+    },
+    "enterFailed": {
+      "notFound": "该工作区不存在或已停用。",
+      "generic": "没能进入该工作区的后台，请重试。"
+    },
+    "create": {
+      "button": "新建工作区",
+      "title": "新建工作区",
+      "description": "建好后会切换到新工作区，接着完成其初始化设置。",
+      "fields": {
+        "name": "工作区名称",
+        "country": "经营地",
+        "currency": "币种",
+        "language": "默认语言"
+      },
+      "more": "更多设置",
+      "moreHint": "经营地、币种和语言默认沿用当前工作区的设置。",
+      "sameAsCurrent": "沿用当前工作区",
+      "submit": "创建工作区",
+      "creating": "正在创建…",
+      "switching": "正在切换到新工作区…",
+      "failed": "工作区没能建好，请重试。",
+      "createdNotSwitched": "工作区「{name}」已建好，但没能切换过去。请在下方它的卡片上点「进入后台」。",
+      "optionsFailed": "没能加载国家/地区、币种和语言的选项，新工作区会沿用当前工作区的设置。"
+    },
+    "manage": "管理"
+  },
+  "console": {
+    "nav": {
+      "workspaces": "工作区",
+      "myWorkspaces": "我的工作区",
+      "overview": "概览",
+      "extensions": "扩展",
+      "usage": "用量",
+      "billing": "收费",
+      "bills": "账单",
+      "platform": "平台",
+      "allWorkspaces": "全部工作区",
+      "platformSettings": "平台设置"
+    },
+    "topbar": {
+      "menu": "菜单"
+    },
+    "overview": {
+      "title": "概览",
+      "subtitle": "这个工作区的基本信息和扩展开启情况",
+      "loading": "正在加载工作区",
+      "loadFailed": "没能加载这个工作区。",
+      "notFound": "这个工作区不存在，或者不归你管理。",
+      "details": "基本信息",
+      "fields": {
+        "name": "名称",
+        "domain": "域名",
+        "status": "状态",
+        "owner": "所有者",
+        "staff": "员工",
+        "created": "创建时间"
+      },
+      "ownerIsYou": "{name}（你）",
+      "noOwner": "无所有者",
+      "noDomain": "未绑定",
+      "staffCount": "{count} 人在职",
+      "extensions": "扩展",
+      "manageExtensions": "管理扩展",
+      "enter": "进入后台"
+    },
+    "extensions": {
+      "title": "扩展",
+      "subtitle": "开启后马上生效；停用只关掉功能，数据和设置都保留",
+      "loading": "正在加载扩展",
+      "loadFailed": "没能加载这个工作区。",
+      "notFound": "这个工作区不存在，或者不归你管理。",
+      "none": "当前平台没有可以开启的扩展。",
+      "on": "已开启",
+      "off": "未开启",
+      "offHint": "开启后即可使用",
+      "activate": "开启",
+      "deactivate": "停用",
+      "acquire": "获取",
+      "acquireHint": "获取之后才能开启",
+      "acquireAgainHint": "权益已经结束；重新获取就能接着用，数据和设置都保留",
+      "acquireFailed": "没能获取这个加购，请重试。",
+      "acquired": {
+        "on": "已获取「{name}」，并且已经开启。",
+        "granted": "已获取「{name}」，现在可以开启了。",
+        "invoiceTitle": "已为「{name}」开出账单",
+        "invoiceBody": "账单 {number} 共 {total}，{due} 到期。付款后「{name}」会自动开启。",
+        "invoiceUnpaidTitle": "「{name}」的账单还没付",
+        "invoiceUnpaidBody": "账单 {number} 共 {total}，{due} 到期；再点一次也不会多开一张。付款后「{name}」会自动开启。",
+        "viewBills": "去账单页",
+        "trialTitle": "{name} 已开启，前 {days} 天免费",
+        "trialBody": "试用到 {until}，之后随月度账单收费。",
+        "onBillLaterTitle": "{name} 已开启",
+        "onBillLaterBody": "今天没有开出账单——到 {until} 的这个周期会并入下一期月度账单。",
+        "billLaterNoEnd": "已经开启，费用会出现在下一期月度账单里。"
+      },
+      "settings": "设置",
+      "enter": "进入后台",
+      "enterFailed": "没能进入这个工作区的后台，请重试。",
+      "appliesTo": "适用于",
+      "surfaces": {
+        "admin": "后台",
+        "storefront": "店面",
+        "account": "顾客中心",
+        "miniprogram": "小程序"
+      },
+      "activatedAt": "{date} 开启",
+      "prerequisites": "开启前还需要：",
+      "failed": "扩展没能修改，请重试。",
+      "errors": {
+        "workspace_suspended": "这个工作区已暂停，不能修改扩展。",
+        "workspace_inactive": "这个工作区已停用，不能修改扩展。",
+        "unknown_extension": "这个扩展已经不在平台里了。",
+        "not_activatable": "这个扩展一直可用，不需要开关。",
+        "invalid_config": "配置不合法，没有保存。",
+        "busy": "它正在归档或恢复，完成后再试。",
+        "archived": "数据已归档，恢复后才能开启。",
+        "requires_inactive": "请先开启 {names}。",
+        "prerequisite_failed": "这个扩展需要的条件还没满足。",
+        "not_entitled": "这个工作区还没有这个扩展的权益。",
+        "required_by_active": "{names} 依赖它，请先停用它们。",
+        "already_entitled": "这个工作区已经有这个加购了，不用再获取。",
+        "not_an_addon": "这个扩展属于基础套餐，不需要获取。",
+        "no_plan": "这个部署还没给这个加购定价，暂时买不了。",
+        "no_owner": "这个工作区还没有所有者，账单开不到人头上，暂时买不了。",
+        "unknown_currency": "这个工作区的币种不在平台能开账单的币种里，账单没能开出来。",
+        "key_too_long": "这个加购开不出账单：账单号会超长。需要发布方把它的标识改短。"
+      },
+      "readOnly": {
+        "suspended": "这个工作区已暂停，扩展只能查看，不能修改。",
+        "inactive": "这个工作区已停用，扩展只能查看，不能修改。"
+      },
+      "confirm": {
+        "title": "停用「{name}」？",
+        "body": "这个工作区的该功能会立刻停止。数据和设置都保留，重新开启后接着用。"
+      },
+      "notLive": "已开启，未生效",
+      "notLiveHint": "开关是开着的，但它需要的条件还没满足",
+      "paused": "已暂停",
+      "pausedHint": "权益结束后暂停，数据和设置都保留",
+      "working": "处理中",
+      "workingHint": "正在归档或恢复，完成后才能改",
+      "archived": "已归档",
+      "archivedHint": "数据已归档，恢复后才能开启",
+      "grant": {
+        "action": "赠送",
+        "title": "赠送权益给这个工作区",
+        "what": "赠送内容",
+        "basePlan": "基础套餐",
+        "basePlanHint": "套餐本身包含的全部内容，而不是某一个加购。",
+        "notSwitchedOn": "赠送不会替商家开启扩展，开不开仍然由工作区自己决定。只有因为权益到期被平台暂停的扩展会顺手恢复。",
+        "forMonths": "按月数",
+        "neverExpires": "永不过期",
+        "months": "月数",
+        "monthsHint": "1 到 {max} 个月。再长就该选“永不过期”。",
+        "reason": "理由",
+        "reasonHint": "会保留在这条权益上，方便日后解释。必填。",
+        "save": "确认赠送",
+        "done": "已把「{name}」赠送给这个工作区。",
+        "runsUntil": "有效期到 {until}。",
+        "runsForever": "永不过期。",
+        "resumed": "它之前因为权益到期被暂停，现在已经恢复。",
+        "notResumed": "它没能自动恢复：等它依赖的条件补齐后，请在它的卡片上手动开启。",
+        "failed": "没能完成赠送，请重试。",
+        "errors": {
+          "platform_admin_required": "只有平台管理员可以赠送权益。",
+          "invalid_grant": "月数和“永不过期”只能选一个，并且要写明理由。",
+          "unknown_extension": "当前平台没有这个名字的扩展。",
+          "already_entitled": "这个工作区已经持有这项权益，没有重复赠送。",
+          "already_entitled_until": "这个工作区已经持有这项权益，有效期到 {until}，没有重复赠送。",
+          "already_entitled_forever": "这个工作区已经持有这项权益且永不过期，没有重复赠送。",
+          "workspace_not_found": "这个工作区不存在。"
+        }
+      },
+      "price": {
+        "included": "已包含在基础套餐中",
+        "per": "{amount} / {unit}",
+        "perMany": "{amount} / {count} {unit}",
+        "unit": {
+          "day": "天",
+          "week": "周",
+          "month": "月",
+          "year": "年"
+        },
+        "listed": "平台标价 {amount}",
+        "trial": "{days} 天免费试用",
+        "free": "免费"
+      }
+    },
+    "all": {
+      "title": "全部工作区",
+      "subtitle": "平台上的所有工作区，包括已暂停和已停用的",
+      "search": "搜索名称或标识",
+      "loading": "正在加载工作区",
+      "loadFailed": "没能加载工作区列表。",
+      "empty": "没有匹配的工作区。",
+      "count": "共 {count} 个工作区",
+      "columns": {
+        "workspace": "工作区",
+        "domain": "域名",
+        "owner": "所有者",
+        "status": "状态",
+        "extensions": "已开启的扩展"
+      },
+      "manage": "管理",
+      "platform": "平台",
+      "yours": "你的",
+      "noOwner": "无所有者",
+      "forbidden": "只有平台管理员可以查看全部工作区。",
+      "loadMore": "加载更多",
+      "showing": "已显示 {shown} / {count}"
+    },
+    "usage": {
+      "title": "用量",
+      "subtitle": "这个工作区用掉了多少计量用量，额度还剩多少",
+      "loading": "正在加载用量",
+      "loadFailed": "没能加载这个工作区的用量。",
+      "notFound": "这个工作区不存在，或者不归你管理。",
+      "month": "月份",
+      "used": "已用",
+      "cap": "额度",
+      "remaining": "剩余",
+      "points": "{points} 点",
+      "estimated": "按这个月的费率约合 {amount}",
+      "noEstimate": "暂时没有可用的汇率，折算不出金额。",
+      "overdue": {
+        "title": "按量功能已暂停",
+        "body": "有账单已逾期。付清后按量功能立刻恢复，这期间的数据不会丢。"
+      },
+      "byMeter": "按计量点",
+      "byDay": "按天",
+      "columns": {
+        "meter": "计量点",
+        "quantity": "用量",
+        "points": "点数",
+        "amount": "金额",
+        "day": "日期",
+        "meters": "计量点"
+      },
+      "empty": "这个月没有产生用量。",
+      "allowance": {
+        "title": "每月额度",
+        "loading": "正在加载这个工作区的额度",
+        "loadFailed": "没能加载这个工作区的额度。",
+        "change": "修改",
+        "points": "{points} 点",
+        "ownSource": "工作区单独设置",
+        "platformSource": "跟随平台默认",
+        "ownExplains": "这个工作区有自己的额度，平台默认的 {points} 点对它不生效。",
+        "platformExplains": "这个工作区跟随平台默认的 {points} 点，平台改了它也跟着改。",
+        "followDefault": "跟随平台默认（{points} 点）",
+        "ownCap": "为这个工作区单独设置额度",
+        "zeroMeansNothing": "填 0 表示完全不允许产生计量用量；这和“跟随平台默认”是两回事。",
+        "hint": "额度用完后，这个月剩下的时间里按量功能会停掉。",
+        "save": "保存额度",
+        "saveFailed": "没能修改额度，请重试。",
+        "errors": {
+          "platform_admin_required": "只有平台管理员可以设置工作区的额度。",
+          "invalid_usage_cap": "这个额度存不下来，请填一个点数。",
+          "workspace_not_found": "这个工作区不存在。"
+        }
+      }
+    },
+    "bills": {
+      "title": "账单",
+      "subtitle": "你名下所有工作区的发票",
+      "loading": "正在加载账单",
+      "loadFailed": "没能加载你的工作区。",
+      "noWorkspaces": "你还没有自己的工作区，暂时不会产生账单。",
+      "empty": "还没有开出过发票。",
+      "noneLoaded": "一张发票都没能加载出来。",
+      "partial": "没能加载 {names} 的账单。",
+      "overdue": {
+        "title": "有 {count} 张发票已逾期",
+        "body": "在付清之前，这些工作区的按量功能会一直暂停。"
+      },
+      "columns": {
+        "workspace": "工作区",
+        "period": "账期",
+        "issued": "开票日",
+        "due": "到期日",
+        "total": "金额",
+        "status": "状态"
+      },
+      "status": {
+        "paid": "已付",
+        "unpaid": "未付",
+        "overdue": "已逾期"
+      },
+      "expand": "展开发票明细",
+      "collapse": "收起发票明细",
+      "number": "发票 {number}",
+      "paidOn": "{date} 已付",
+      "noLines": "这张发票没有明细。",
+      "lines": {
+        "description": "项目",
+        "quantity": "数量",
+        "unitPrice": "单价",
+        "subtotal": "小计"
+      },
+      "subtotal": "小计",
+      "tax": "税费",
+      "total": "合计",
+      "pay": {
+        "title": "支付发票 {number}",
+        "opening": "正在发起付款…",
+        "failed": "没能发起这笔付款。",
+        "gateway": "付款渠道",
+        "pendingTitle": "这笔付款还在进行中",
+        "pending": {
+          "card": "付款单 {number} 目前是待处理。卡款由支付服务商扣取，要等服务商的确认回到我们这边，这张发票才会变成已付——不是你提交卡号的那一刻。",
+          "offline": "付款单 {number} 目前是待处理。我们收到款项并核对确认之后，这张发票才会变成已付；不是你转出的那一刻。",
+          "unknown": "付款单 {number} 目前是待处理。请按下面这个网关的要求把它完成。只有这笔付款被确认之后，这张发票才会变成已付，而那不会发生在这个页面上。"
+        },
+        "instructions": {
+          "title": "怎么付",
+          "none": "这个网关没有给出任何付款信息。告诉我们，我们来处理。"
+        },
+        "fields": {
+          "bank_name": "开户银行",
+          "account_name": "户名",
+          "account_number": "账号",
+          "routing_number": "路由号",
+          "swift_code": "SWIFT 代码",
+          "accepted_methods": "可用的付款方式"
+        },
+        "reference": "付款时请注明发票号 {number}，我们才能把这笔钱对到这张账单上。",
+        "unknownNote": "这笔付款要在控制台之外完成。请按上面这个网关给出的信息去付；如果上面没写清楚要怎么做，告诉我们。",
+        "card": {
+          "details": "卡号信息",
+          "name": "持卡人姓名（可不填）",
+          "submit": "支付 {amount}",
+          "secure": "卡号直接交给支付服务商，不会经过我们。",
+          "notReady": "卡号输入框还没加载好。稍等一下再试；要是一直加载不出来，告诉我们。",
+          "failed": "这张卡没有被受理。",
+          "charged": "卡已扣款成功。等服务商的确认回到我们这边，这张发票就会变成已付，通常就在稍后。",
+          "inFlight": "服务商还在处理这张卡。等它确认扣款之后，这张发票才会变成已付。"
+        }
+      },
+      "errors": {
+        "workspace_not_found": "你已经打不开这个工作区了，它的账单也就没法在这里付。",
+        "invoice_not_found": "这张发票已经不在了。",
+        "invoice_already_paid": "这张发票已经付过了。",
+        "invoice_cancelled": "这张发票已作废，不用再付。",
+        "invoice_nothing_to_pay": "这张发票已经没有要付的金额了。",
+        "no_payment_gateway": "平台没有启用任何支付网关，这笔钱现在没处收。告诉我们，我们去配一个。",
+        "payment_gateway_not_found": "这笔付款要走的支付网关已经不在了。告诉我们，我们来处理。",
+        "payment_gateway_unavailable": "这个支付网关现在收不了款。过一会再试；要是一直这样，告诉我们。",
+        "payment_in_progress": "这张发票已经有一笔付款正在进行。请把那一笔完成，或者找我们处理掉——再发起一次没有用。",
+        "platform_workspace_missing": "这个部署还没配好平台收款。告诉我们，我们来处理。"
+      }
+    },
+    "platform": {
+      "title": "平台设置",
+      "subtitle": "平台上所有工作区的计费依据",
+      "loading": "正在加载平台设置",
+      "loadFailed": "没能确认你的身份，请刷新页面。",
+      "tabs": {
+        "variables": "平台变量",
+        "prices": "计量点价格",
+        "rates": "汇率"
+      },
+      "variables": {
+        "hint": "所有工作区共用的一组数值。改动立刻对全平台生效，所以必须写明改动理由。",
+        "loading": "正在加载平台变量",
+        "loadFailed": "没能加载平台变量。",
+        "empty": "当前平台没有可设置的变量。",
+        "columns": {
+          "variable": "变量",
+          "value": "当前值",
+          "default": "默认值",
+          "lastChange": "上次改动"
+        },
+        "overridden": "已改过",
+        "neverChanged": "从未改动",
+        "noReason": "没有填写理由",
+        "changedBy": "{who}，{when}",
+        "someone": "某人",
+        "changeAction": "修改",
+        "change": "修改 {key}",
+        "defaultIs": "默认值是 {value}。",
+        "wholeNumberDefault": "只能填整数。默认值是 {value}。",
+        "true": "是",
+        "false": "否",
+        "reason": "理由",
+        "reasonHint": "会和它解释的那些账单一起长期保留。必填。",
+        "save": "保存改动",
+        "saveFailed": "没能修改这个变量，请重试。"
+      },
+      "prices": {
+        "hint": "每个计量点的单价。价格只增不改：调价就是加一条从某个时刻起生效的新价格，这样已经开出的账单仍然对得上。",
+        "loading": "正在加载价格",
+        "loadFailed": "没能加载价格。",
+        "empty": "还没有给任何计量点定价。",
+        "add": "新增价格",
+        "addFor": "新增价格",
+        "addOnly": "价格不能修改。这里是新增一条从某个时刻起生效的价格，之前的记录原样保留。",
+        "inForce": "当前生效",
+        "hasInForce": "已定价",
+        "noneInForce": "尚未生效",
+        "noneInForceHint": "这个计量点的所有价格生效时间都在当前之后，在第一条生效之前它不产生任何费用。",
+        "fromDefault": "继承平台默认",
+        "columns": {
+          "meter": "计量点",
+          "vendorCost": "供应商成本",
+          "unitSize": "单位数量",
+          "margin": "利润率",
+          "pointsPerUnit": "每单位点数",
+          "effectiveFrom": "生效时间",
+          "added": "录入时间"
+        },
+        "meterHint": "使用它的扩展记录用量时所用的键名。",
+        "vendorCostHint": "供应商对一个“单位数量”收取的费用，按美元计。",
+        "unitSizeHint": "上面这笔成本买到多少次调用或多少个 token：按每 1,000 次报价就填 1000。",
+        "marginHint": "在成本之上加价的比例，用小数表示：0.30 表示按成本的 1.3 倍收费。留空则跟随平台默认利润率。",
+        "marginHintDefault": "在成本之上加价的比例，用小数表示：0.30 表示按成本的 1.3 倍收费。留空则跟随平台默认利润率，目前是 {margin}。",
+        "effectiveFromHint": "留空表示立刻生效。这里填的时间按平台自身的时区理解。",
+        "save": "新增价格",
+        "saveFailed": "没能新增这条价格，请重试。"
+      },
+      "rates": {
+        "hint": "账单折算所用的汇率，每天从参考数据源自动拉取一次。",
+        "loading": "正在加载汇率",
+        "loadFailed": "没能加载汇率。",
+        "empty": "没有符合条件的汇率记录。",
+        "add": "手动补录",
+        "overwritten": "手填汇率只是数据源拉取失败那天的临时替代。之后只要拉取成功，同一天的手填值会被官方数字覆盖，来源也会改回自动拉取。",
+        "feed": "自动拉取",
+        "manual": "手动填写",
+        "columns": {
+          "day": "日期",
+          "pair": "货币对",
+          "rate": "汇率",
+          "source": "来源",
+          "enteredBy": "填写人",
+          "from": "从",
+          "to": "到"
+        },
+        "dayHint": "留空表示今天。同一天已有记录时是更正，不会多出一条。",
+        "save": "保存汇率",
+        "saveFailed": "没能保存这条汇率，请重试。"
+      },
+      "errors": {
+        "platform_admin_required": "只有平台管理员可以修改平台的计费设置。",
+        "unknown_platform_variable": "当前平台没有这个名字的变量。",
+        "invalid_platform_variable": "这个变量不能设成这个值。",
+        "reason_required": "请写明这次改动的理由。",
+        "invalid_meter_price": "这条价格存不下来，请检查成本、单位数量和利润率。",
+        "invalid_exchange_rate": "这条汇率存不下来，请检查货币代码和数字。"
+      }
+    },
+    "brand": "工作区管理台"
+  },
+  "workspaceReadOnly": {
+    "title": "这个工作区目前只能查看",
+    "body": "它还没有续费，所以暂时不能做任何修改。每个页面、每张报表都还能看，数据也照常导出。续费后就会恢复原样，什么都不会丢。",
+    "action": "去续费"
   }
 }

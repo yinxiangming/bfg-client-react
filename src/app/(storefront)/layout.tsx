@@ -1,11 +1,13 @@
 import React from 'react'
-// Server: load extensions; use plugin storefront layout if provided, else home __root__ override or theme-based layout
+// Server: load the plugins this workspace has on; use a plugin storefront layout if provided, else home __root__ override or theme-based layout
 import { headers } from 'next/headers'
 import { getLocale } from 'next-intl/server'
 import { StorefrontConfigProvider } from '@/contexts/StorefrontConfigContext'
 import ThemeShell from '@/components/storefront/ThemeShell'
+import StorefrontSurface from '@/components/storefront/StorefrontSurface'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 import { loadExtensions } from '@/extensions'
+import { filterEnabledExtensions } from '@/extensions/availability'
 import { ExtensionLoaderProvider } from '@/extensions/context'
 import { getPageSlotReplacements, getStorefrontLayoutOverride } from '@/extensions/resolve'
 import { ROOT_SLOT_ID } from '@/extensions/terminology'
@@ -13,20 +15,25 @@ import { redirect } from 'next/navigation'
 import { isLocalStorefrontHost, normalizeStorefrontHostname } from '@/utils/storefrontHost'
 
 export default async function StorefrontLayoutWrapper({ children }: { children: React.ReactNode }) {
-  const extensions = await loadExtensions()
+  const headersList = await headers()
+  const locale = await getLocale()
+  const requestHost = headersList.get('host') ?? undefined
+  const config = await getStorefrontConfigForServer(locale, requestHost)
+
+  // A plugin's layout or slot must not take over a workspace that has the plugin switched off.
+  const extensions = filterEnabledExtensions(await loadExtensions(), config?.extensions)
   const extensionIds = extensions.map((e) => e.id)
 
   const CustomStorefrontLayout = getStorefrontLayoutOverride(extensions)
   if (CustomStorefrontLayout) {
-    const locale = await getLocale()
     return (
       <ExtensionLoaderProvider extensionIds={extensionIds}>
+        <StorefrontSurface />
         {React.createElement(CustomStorefrontLayout, { locale, children })}
       </ExtensionLoaderProvider>
     )
   }
 
-  const headersList = await headers()
   const pathname = headersList.get('x-pathname') ?? ''
   const isStorefrontRoot = pathname === '/' || pathname === ''
   const replacements = isStorefrontRoot ? getPageSlotReplacements(extensions, 'storefront/home') : new Map()
@@ -34,9 +41,9 @@ export default async function StorefrontLayoutWrapper({ children }: { children: 
   const HomeOverride = rootReplace?.component as React.ComponentType<{ locale?: string; children?: React.ReactNode }> | undefined
 
   if (HomeOverride) {
-    const locale = await getLocale()
     return (
       <ExtensionLoaderProvider extensionIds={extensionIds}>
+        <StorefrontSurface />
         <div className='flex min-bs-screen flex-col'>
           <main className='flex-1'>{React.createElement(HomeOverride, { locale, children })}</main>
         </div>
@@ -44,9 +51,6 @@ export default async function StorefrontLayoutWrapper({ children }: { children: 
     )
   }
 
-  const locale = await getLocale()
-  const requestHost = headersList.get('host') ?? undefined
-  const config = await getStorefrontConfigForServer(locale, requestHost)
   const hostDomain = (requestHost ?? '').split(':')[0]
   const workspaceDomainRaw = (config?.workspace_domain ?? '').trim()
   const isLocal = isLocalStorefrontHost(hostDomain)
@@ -63,6 +67,7 @@ export default async function StorefrontLayoutWrapper({ children }: { children: 
 
   return (
     <ExtensionLoaderProvider extensionIds={extensionIds}>
+      <StorefrontSurface />
       <StorefrontConfigProvider initialConfig={config}>
         <ThemeShell theme={theme}>{children}</ThemeShell>
       </StorefrontConfigProvider>

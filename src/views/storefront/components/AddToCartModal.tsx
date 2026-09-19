@@ -21,6 +21,7 @@ import Grid from '@mui/material/Grid'
 
 // Component Imports
 import { useCart } from '@/contexts/CartContext'
+import { useStorefrontCurrency } from '@/hooks/useStorefrontCurrency'
 
 // Util Imports
 import { getStoreImageUrl } from '@/utils/media'
@@ -42,6 +43,7 @@ type AddToCartModalProps = {
 
 const AddToCartModal = ({ open, onClose, product }: AddToCartModalProps) => {
   const t = useTranslations('storefront')
+  const { formatPrice } = useStorefrontCurrency()
   const { items, getSubtotal, getShipping, getTotalWithShipping, getItemCount } = useCart()
 
   return (
@@ -78,7 +80,7 @@ const AddToCartModal = ({ open, onClose, product }: AddToCartModalProps) => {
                   {product.brand} {product.name}
                 </Typography>
                 <Typography variant='body1' className='font-bold text-primary mbe-2'>
-                  ${product.price.toFixed(2)}
+                  {formatPrice(product.price)}
                 </Typography>
                 <Typography variant='body2' className='text-textSecondary mbe-1'>
                   {t('modal.size')} {product.size}
@@ -103,26 +105,26 @@ const AddToCartModal = ({ open, onClose, product }: AddToCartModalProps) => {
                 <Box className='flex justify-between'>
                   <Typography variant='body2'>{t('modal.subtotal')}</Typography>
                   <Typography variant='body2' className='font-semibold'>
-                    ${getSubtotal().toFixed(2)}
+                    {formatPrice(getSubtotal())}
                   </Typography>
                 </Box>
                 <Box className='flex justify-between'>
                   <Typography variant='body2'>{t('modal.shipping')}</Typography>
                   <Typography variant='body2' className='font-semibold'>
-                    ${getShipping().toFixed(2)}
+                    {formatPrice(getShipping())}
                   </Typography>
                 </Box>
                 <Divider />
                 <Box className='flex justify-between'>
                   <Typography variant='body2'>{t('modal.totalTaxExcl')}</Typography>
                   <Typography variant='body2' className='font-semibold'>
-                    ${getTotalWithShipping().toFixed(2)}
+                    {formatPrice(getTotalWithShipping())}
                   </Typography>
                 </Box>
                 <Box className='flex justify-between'>
                   <Typography variant='body2'>{t('modal.totalTaxIncl')}</Typography>
                   <Typography variant='body2' className='font-semibold'>
-                    ${getTotalWithShipping().toFixed(2)}
+                    {formatPrice(getTotalWithShipping())}
                   </Typography>
                 </Box>
                 <Box className='flex justify-between'>

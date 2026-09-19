@@ -9,6 +9,13 @@ export const adminNavItems: MenuNode[] = [
     icon: 'tabler-layout-dashboard'
   },
   {
+    id: 'setup',
+    label: 'Setup',
+    i18nKey: 'nav.setup',
+    href: '/admin/setup',
+    icon: 'tabler-rocket'
+  },
+  {
     id: 'store',
     label: 'Store',
     i18nKey: 'nav.store',
@@ -97,33 +104,6 @@ export const adminNavItems: MenuNode[] = [
         href: '/admin/support/tickets/closed',
         icon: 'tabler-circle-check',
         activeMatch: 'exact'
-      }
-    ]
-  },
-  {
-    id: 'team',
-    label: 'Team',
-    i18nKey: 'nav.team',
-    icon: 'tabler-users-group',
-    type: 'submenu',
-    requireAdmin: true,
-    children: [
-      {
-        id: 'team-staff',
-        label: 'Staff',
-        i18nKey: 'nav.teamStaff',
-        href: '/admin/staff',
-        icon: 'tabler-user-cog',
-        activeMatch: 'exact',
-        requireAdmin: true
-      },
-      {
-        id: 'team-roles',
-        label: 'Roles & Permissions',
-        i18nKey: 'nav.teamRoles',
-        href: '/admin/staff/roles',
-        icon: 'tabler-shield-lock',
-        requireAdmin: true
       }
     ]
   },

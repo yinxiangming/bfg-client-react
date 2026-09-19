@@ -22,9 +22,13 @@ export type User = {
   last_name: string
   phone?: string
   avatar?: string
-  is_staff: boolean
+  /**
+   * The user's role in *this* workspace, or null if they have no active membership.
+   * Django's `is_staff` / `is_superuser` used to stand in for this; nothing in the
+   * admin is decided by them, and `/api/v1/users/` never sent them.
+   */
+  staff_role?: { id: number; code: string; name: string } | null
   is_active: boolean
-  is_superuser: boolean
   last_login?: string
   date_joined?: string
   default_workspace?: number
@@ -46,6 +50,7 @@ export type StorefrontHeaderOptionsPayload = {
   show_language_switcher?: boolean
   show_style_selector?: boolean
   show_login?: boolean
+  show_register?: boolean
 }
 
 export type StorefrontUiSettingsPayload = {
@@ -53,6 +58,7 @@ export type StorefrontUiSettingsPayload = {
   header?: string
   footer?: string
   header_options?: StorefrontHeaderOptionsPayload
+  supported_currencies?: string[]
   /**
    * Allowed color modes (subset of ['light', 'dark']). Single-entry → the
    * frontend forces that mode and hides any switcher. Default both.
@@ -62,16 +68,39 @@ export type StorefrontUiSettingsPayload = {
   default_color_mode?: 'light' | 'dark' | 'system'
 }
 
+export type AnalyticsSettingsPayload = {
+  /**
+   * GA4 measurement id (`G-XXXXXXXXXX`). Public client-side tag id, not a
+   * secret. Blank disables tracking for this workspace.
+   */
+  google_analytics_id?: string
+}
+
 export type ShopSettingsPayload = {
   review_moderation_required?: boolean
   product_identifiers?: {
     sku_prefix?: string
     barcode_prefix?: string
   }
+  /**
+   * SKU / stock visibility and out-of-stock behaviour for the storefront. Read back out
+   * of the public config endpoint as `storefront_display`; see StorefrontDisplaySettings.
+   */
+  storefront_display?: {
+    sku_display?: 'hidden' | 'plain' | 'full'
+    stock_display?: 'hidden' | 'status' | 'low_only' | 'exact'
+    out_of_stock_policy?: 'hide' | 'show' | 'notify' | 'backorder'
+  }
 }
 
 export type WorkspaceSettings = {
   id: number
+  /**
+   * ISO 3166-1 alpha-2. A real model field, not part of `custom_settings`:
+   * it drives the tax defaults, the checkout address format and the geo
+   * plugin's market.
+   */
+  country?: string
   /** FK to Workspace; required for admin UI to PATCH workspace name/slug */
   workspace_id?: number
   site_name?: string
@@ -86,6 +115,7 @@ export type WorkspaceSettings = {
     general?: GeneralSettingsPayload
     storefront_ui?: StorefrontUiSettingsPayload
     shop?: ShopSettingsPayload
+    analytics?: AnalyticsSettingsPayload
     support?: { notice?: string }
     plugins?: PluginsSettingsPayload
   }
@@ -147,6 +177,21 @@ export type GeneralSettingsPayload = {
   site_announcement?: string
   footer_contact?: string
   logo?: string
+  /**
+   * The logo drawn on dark surfaces — a dark-ink wordmark vanishes on the
+   * storefront's dark header and its always-dark footer. Same shape as `logo`.
+   * Blank means "use `logo` everywhere", which is what every existing workspace
+   * gets until someone uploads one.
+   */
+  logo_dark?: string
+  /** Browser tab icon. Same shape as `logo` — a data URL when uploaded here. */
+  favicon?: string
+  /**
+   * Print the site name next to the logo. Default false: a logo usually
+   * contains the wordmark, so showing both duplicates the brand. Has no effect
+   * when no logo is set.
+   */
+  show_site_name_with_logo?: boolean
   /** Optional internal note (e.g. from site-config workspace_bootstrap) */
   workspace_note?: string
 }
@@ -200,6 +245,17 @@ export type PluginsSettingsPayload = {
     enabled?: boolean
     api_key?: string
     api_url?: string
+  }
+  /**
+   * Google-backed address suggestions and reverse geocoding, served by the
+   * server's `apps.geo` (`/api/v1/geo/`). No API key here on purpose — it is a
+   * billed server credential and `custom_settings` is returned whole to anyone
+   * who can read this endpoint, so it lives in the server's environment instead.
+   */
+  address_lookup?: {
+    enabled?: boolean
+    /** ISO 3166-1 alpha-2. Blank falls back to the workspace's own market. */
+    country_code?: string
   }
 }
 
@@ -328,6 +384,42 @@ export async function updateGeneralSettings(settingsId: number, general: General
   return result
 }
 
+/**
+ * Save the workspace's country.
+ *
+ * Separate from `updateGeneralSettings` because `country` is a column on
+ * Settings, not a key inside `custom_settings.general` — PATCHing it through
+ * the general blob would write it somewhere nothing reads.
+ */
+export async function updateCountry(settingsId: number, country: string) {
+  const result = await apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`, {
+    ...getSiteAdminOptions(),
+    method: 'PATCH',
+    body: JSON.stringify({ country })
+  })
+
+  invalidateWorkspaceSettingsCache()
+
+  return result
+}
+
+export type CountryOption = {
+  code: string
+  name: string
+  name_zh: string
+  currency?: string
+  timezone?: string
+}
+
+export async function getCountries(): Promise<CountryOption[]> {
+  const res = await apiFetch<CountryOption[] | { results: CountryOption[] }>(
+    bfgApi.countries(),
+    getSiteAdminOptions()
+  )
+
+  return Array.isArray(res) ? res : res.results
+}
+
 export async function updateStorefrontUiSettings(settingsId: number, storefront_ui: StorefrontUiSettingsPayload) {
   const url = `${bfgApi.settings()}${settingsId}/`
   const current = await apiFetch<WorkspaceSettings>(url, getSiteAdminOptions())
@@ -340,11 +432,36 @@ export async function updateStorefrontUiSettings(settingsId: number, storefront_
   })
 }
 
+export async function updateAnalyticsSettings(settingsId: number, analytics: AnalyticsSettingsPayload) {
+  const url = `${bfgApi.settings()}${settingsId}/`
+  const current = await apiFetch<WorkspaceSettings>(url, getSiteAdminOptions())
+  const currentCustom = current.custom_settings || {}
+  const nextCustom = { ...currentCustom, analytics }
+  const result = await apiFetch<WorkspaceSettings>(url, {
+    ...getSiteAdminOptions(),
+    method: 'PATCH',
+    body: JSON.stringify({ custom_settings: nextCustom })
+  })
+  invalidateWorkspaceSettingsCache()
+  return result
+}
+
+/**
+ * Merge a partial shop settings payload into `custom_settings.shop`.
+ *
+ * Merges rather than replaces because two admin screens write this node and neither sends
+ * all of it: General owns `review_moderation_required`, Store owns `storefront_display`,
+ * and both send `product_identifiers`. Replacing meant whichever page saved last erased
+ * the other's field — set an out-of-stock policy in Store, save General, and it was gone.
+ *
+ * The merge is one level deep, so a nested node passed in is replaced whole. Both callers
+ * send those complete.
+ */
 export async function updateShopSettings(settingsId: number, shop: ShopSettingsPayload) {
   const url = `${bfgApi.settings()}${settingsId}/`
   const current = await apiFetch<WorkspaceSettings>(url, getSiteAdminOptions())
   const currentCustom = current.custom_settings || {}
-  const nextCustom = { ...currentCustom, shop }
+  const nextCustom = { ...currentCustom, shop: { ...(currentCustom.shop || {}), ...shop } }
   const result = await apiFetch<WorkspaceSettings>(url, {
     ...getSiteAdminOptions(),
     method: 'PATCH',
@@ -358,7 +475,10 @@ export async function updatePluginsSettings(settingsId: number, plugins: Plugins
   const url = `${bfgApi.settings()}${settingsId}/`
   const current = await apiFetch<WorkspaceSettings>(url, getSiteAdminOptions())
   const currentCustom = current.custom_settings || {}
-  const nextCustom = { ...currentCustom, plugins }
+  // Merge one plugin at a time. Each plugin's tab only knows about its own keys,
+  // so replacing the whole `plugins` node would have the General tab's save wipe
+  // whatever the Store tab had configured, and the other way round.
+  const nextCustom = { ...currentCustom, plugins: { ...(currentCustom.plugins || {}), ...plugins } }
   const result = await apiFetch<WorkspaceSettings>(url, {
     ...getSiteAdminOptions(),
     method: 'PATCH',
@@ -495,4 +615,3 @@ export async function regenerateAPIKey(id: number): Promise<APIKeyCreateResponse
     method: 'POST'
   })
 }
-

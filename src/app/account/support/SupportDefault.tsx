@@ -1,25 +1,34 @@
 'use client'
 
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
+import { Suspense } from 'react'
+
+import Link from 'next/link'
 import { useTranslations } from 'next-intl'
+
+import Button from '@mui/material/Button'
+
+import Icon from '@components/Icon'
 import Support from '@/views/account/Support'
+import { AccountLoading, AccountPageHeader } from '@/components/account/AccountUI'
 
 const SupportDefault = () => {
   const t = useTranslations('account')
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, px: { xs: 1, md: 0 } }}>
-      <Box sx={{ pb: 1 }}>
-        <Typography variant='h5' fontWeight={700}>
-          {t('pages.support.title')}
-        </Typography>
-        <Typography variant='body2' color='text.secondary'>
-          {t('pages.support.subtitle')}
-        </Typography>
-      </Box>
-      <Support />
-    </Box>
+    <div className='acc-page'>
+      <AccountPageHeader
+        title={t('pages.support.title')}
+        subtitle={t('pages.support.subtitle')}
+        actions={
+          <Button variant='contained' component={Link} href='/account/support?new=1' startIcon={<Icon icon='tabler-plus' />}>
+            {t('support.newTicket')}
+          </Button>
+        }
+      />
+      <Suspense fallback={<AccountLoading />}>
+        <Support />
+      </Suspense>
+    </div>
   )
 }
 

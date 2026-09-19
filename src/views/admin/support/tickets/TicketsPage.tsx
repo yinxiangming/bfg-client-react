@@ -14,6 +14,7 @@ import Tabs from '@mui/material/Tabs'
 import Typography from '@mui/material/Typography'
 import CustomTextField from '@/components/ui/TextField'
 
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import SchemaTable from '@/components/schema/SchemaTable'
 import SchemaForm from '@/components/schema/SchemaForm'
 import type { ListSchema, FormSchema, SchemaAction } from '@/types/schema'
@@ -221,24 +222,6 @@ export default function TicketsPage({ viewMode = 'unassigned' }: TicketsPageProp
     }
   }
 
-  if (loading && !tickets?.length) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-        <CircularProgress />
-      </Box>
-    )
-  }
-
-  if (error) {
-    return (
-      <Box>
-        <Alert severity='error' sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      </Box>
-    )
-  }
-
   const pageTitle =
     viewMode === 'my'
       ? t('support.tickets.page.titleMy')
@@ -250,11 +233,35 @@ export default function TicketsPage({ viewMode = 'unassigned' }: TicketsPageProp
             ? t('support.tickets.page.titleClosed')
             : t('support.tickets.page.title')
 
+  // The header renders in every branch — a page that loses its title while it
+  // loads (or fails) leaves the reader with no idea which list they are on.
+  const header = <AdminPageHeader title={pageTitle} subtitle={t('support.tickets.page.subtitle')} />
+
+  if (loading && !tickets?.length) {
+    return (
+      <Box>
+        {header}
+        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+          <CircularProgress />
+        </Box>
+      </Box>
+    )
+  }
+
+  if (error) {
+    return (
+      <Box>
+        {header}
+        <Alert severity='error' sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      </Box>
+    )
+  }
+
   return (
     <Box>
-      <Typography variant='h4' sx={{ mb: 4 }}>
-        {pageTitle}
-      </Typography>
+      {header}
       <SchemaTable
         schema={listSchema}
         data={tickets ?? []}
@@ -275,13 +282,7 @@ export default function TicketsPage({ viewMode = 'unassigned' }: TicketsPageProp
 
       {editItem !== null && !fetchingDetail && formSchema && (
         <Dialog open onClose={handleCancel} maxWidth='md' fullWidth>
-          <DialogContent
-            sx={{
-              p: 0,
-              '& .MuiCard-root': { boxShadow: 'none' },
-              '& .MuiCardContent-root': { p: 4 }
-            }}
-          >
+          <DialogContent sx={{ p: 0 }}>
             {isExistingTicket ? (
               <>
                 <Tabs value={detailTab} onChange={(_, v) => setDetailTab(v)} sx={{ px: 2, pt: 1, borderBottom: 1, borderColor: 'divider' }}>
@@ -301,7 +302,7 @@ export default function TicketsPage({ viewMode = 'unassigned' }: TicketsPageProp
                   )}
                   {detailTab === 1 && (
                     <Box>
-                      <Typography variant='subtitle1' fontWeight={600} sx={{ mb: 2 }}>
+                      <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600, mb: 2 }}>
                         {t('support.tickets.conversation.title')}
                       </Typography>
                       {displayedMessages.length === 0 ? (
@@ -317,12 +318,7 @@ export default function TicketsPage({ viewMode = 'unassigned' }: TicketsPageProp
                                 sx={{
                                   p: 1.5,
                                   borderRadius: 1,
-                                  bgcolor: (theme) =>
-                                    theme.palette.mode === 'dark'
-                                      ? theme.palette.background.paper
-                                      : msg.is_staff_reply
-                                        ? 'action.hover'
-                                        : 'grey.50',
+                                  bgcolor: msg.is_staff_reply ? 'action.hover' : 'background.default',
                                   border: (theme) => `1px solid ${theme.palette.divider}`
                                 }}
                               >
@@ -353,7 +349,7 @@ export default function TicketsPage({ viewMode = 'unassigned' }: TicketsPageProp
                           )}
                         </>
                       )}
-                      <Typography variant='subtitle2' fontWeight={600} sx={{ mb: 1 }}>
+                      <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600, mb: 2 }}>
                         {t('support.tickets.conversation.addReply')}
                       </Typography>
                       <CustomTextField
@@ -376,7 +372,7 @@ export default function TicketsPage({ viewMode = 'unassigned' }: TicketsPageProp
                   )}
                   {detailTab === 2 && (
                     <Box>
-                      <Typography variant='subtitle1' fontWeight={600} sx={{ mb: 2 }}>
+                      <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600, mb: 2 }}>
                         {t('support.tickets.assignments.title')}
                       </Typography>
                       {assignments.length === 0 ? (
@@ -391,8 +387,7 @@ export default function TicketsPage({ viewMode = 'unassigned' }: TicketsPageProp
                               sx={{
                                 p: 1.5,
                                 borderRadius: 1,
-                                bgcolor: (theme) =>
-                                  theme.palette.mode === 'dark' ? theme.palette.background.paper : 'grey.50',
+                                bgcolor: 'background.default',
                                 color: 'text.primary',
                                 border: (theme) => `1px solid ${theme.palette.divider}`
                               }}

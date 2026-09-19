@@ -19,6 +19,7 @@ import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 
 // Component Imports
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import SchemaForm from '@/components/schema/SchemaForm'
 import CategoryTreeSelect from '@/components/category/CategoryTreeSelect'
 import CategoryRulesEditor from '@/components/category/CategoryRulesEditor'
@@ -357,19 +358,17 @@ export default function CategoryEditPage() {
     return null
   }
 
+  // SchemaForm renders its own card and docks its own action bar; wrapping it in
+  // another Card doubles the border and clips the sticky Save/Cancel bar.
   const CategoryInfoContent = () => (
-    <Card>
-      <CardContent>
-        <SchemaForm
-          schema={categoryFormSchema}
-          initialData={initialData}
-          onSubmit={handleSubmit}
-          onCancel={handleCancel}
-          loading={saving}
-          customFieldRenderer={customFieldRenderer}
-        />
-      </CardContent>
-    </Card>
+    <SchemaForm
+      schema={categoryFormSchema}
+      initialData={initialData}
+      onSubmit={handleSubmit}
+      onCancel={handleCancel}
+      loading={saving}
+      customFieldRenderer={customFieldRenderer}
+    />
   )
 
   const tabLabels = {
@@ -380,9 +379,7 @@ export default function CategoryEditPage() {
   return (
     <>
       <Box>
-        <Typography variant='h4' sx={{ mb: 4 }}>
-          {t('categories.editPage.title')}
-        </Typography>
+        <AdminPageHeader title={t('categories.editPage.title')} />
         {beforeSlots.map(
           ext =>
             ext.component && (
@@ -418,27 +415,23 @@ export default function CategoryEditPage() {
               </Typography>
             </Alert>
             {rulesSchema ? (
-              <Card>
-                <CardContent>
-                  <SchemaForm
-                    schema={{ ...rulesSchema, title: t('categories.editPage.tabs.rules') }}
-                    initialData={rulesInitialData}
-                    onSubmit={handleConfigSubmit}
-                    onCancel={() => {}}
-                    loading={savingConfig}
-                    customFieldRenderer={(field, value, onChange, fieldError) =>
-                      field.field === 'rules' ? (
-                        <CategoryRulesEditor
-                          value={value}
-                          onChange={v => onChange(v)}
-                          error={fieldError}
-                          disabled={savingConfig}
-                        />
-                      ) : null
-                    }
-                  />
-                </CardContent>
-              </Card>
+              <SchemaForm
+                schema={{ ...rulesSchema, title: t('categories.editPage.tabs.rules') }}
+                initialData={rulesInitialData}
+                onSubmit={handleConfigSubmit}
+                onCancel={() => {}}
+                loading={savingConfig}
+                customFieldRenderer={(field, value, onChange, fieldError) =>
+                  field.field === 'rules' ? (
+                    <CategoryRulesEditor
+                      value={value}
+                      onChange={v => onChange(v)}
+                      error={fieldError}
+                      disabled={savingConfig}
+                    />
+                  ) : null
+                }
+              />
             ) : rulesSchemaLoading ? (
               <Card>
                 <CardContent sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>

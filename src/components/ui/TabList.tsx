@@ -27,8 +27,9 @@ const TabList = styled(MuiTabList)<CustomTabListProps>(({ color, theme, pill, or
     '& .MuiTab-root': {
       minHeight: 40,
       padding: theme.spacing(1, 0.5),
-      fontSize: '0.875rem',
+      fontSize: '0.8125rem',
       fontWeight: 500,
+      letterSpacing: 0,
       color: 'var(--mui-palette-text-secondary)',
       textTransform: 'none',
       '& .tabler-currency-dollar, & .tabler-credit-card, & .tabler-receipt-tax, & .tabler-building-store, & .tabler-file-dollar, & .tabler-file-invoice': {
@@ -70,15 +71,24 @@ const TabList = styled(MuiTabList)<CustomTabListProps>(({ color, theme, pill, or
     '& .Mui-selected': {
       backgroundColor: `var(--mui-palette-${color}-main) !important`,
       color: `var(--mui-palette-${color}-contrastText) !important`,
+      fontWeight: 600,
       boxShadow: `var(--mui-customShadows-${color}-sm)`
     },
     '& .MuiTab-root': {
-      minHeight: 32,
-      padding: theme.spacing(1.25, 3.5),
-      fontSize: '0.875rem',
-      borderRadius: 'var(--mui-shape-borderRadius)',
-      '& .tabler-currency-dollar, & .tabler-credit-card, & .tabler-receipt-tax, & .tabler-building-store, & .tabler-file-dollar, & .tabler-file-invoice': {
-        fontSize: '1.125rem'
+      minHeight: 34,
+      padding: theme.spacing(1, 2.5),
+      fontSize: '0.8125rem',
+      fontWeight: 500,
+      letterSpacing: 0,
+      // Sentence case, like the nav and every other label in the admin. MUI's
+      // default uppercase only ever applied to the pill variant, so tab rails
+      // shouted while the underline variant next to them did not.
+      textTransform: 'none',
+      gap: theme.spacing(1),
+      borderRadius: 'var(--at-control-radius, 8px)',
+      // Every tab icon, not the hand-listed few this used to cover.
+      '& i': {
+        fontSize: '1.0625rem'
       },
       '&:hover': {
         border: 0,

@@ -8,36 +8,45 @@ import { useTranslations } from 'next-intl'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import Chip from '@mui/material/Chip'
 import IconButton from '@mui/material/IconButton'
+import Tooltip from '@mui/material/Tooltip'
 
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import SchemaTable from '@/components/schema/SchemaTable'
+import StatusBadge from '@/components/schema/StatusBadge'
 import type { ListSchema, SchemaAction, SchemaFilter } from '@/types/schema'
 import { usePagedData } from '@/hooks/usePagedData'
-import { getOrdersPage, getOrder, deleteOrder, updateOrder, type Order, type OrderItemSummary } from '@/services/store'
+import {
+  getOrdersPage, getOrder, deleteOrder, updateOrder,
+  ORDER_STATUSES, PAYMENT_STATUSES,
+  type Order, type OrderItemSummary
+} from '@/services/store'
 import { getWorkspaceSettings } from '@/services/settings'
 import { formatCurrency, formatDate } from '@/utils/format'
 import { bfgApi } from '@/utils/api'
-import Button from '@mui/material/Button'
-import Popover from '@mui/material/Popover'
-import FormControl from '@mui/material/FormControl'
-import Select from '@mui/material/Select'
+import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
+import CustomTextField from '@/components/ui/TextField'
 import OrderPackagesModal from '@/views/admin/store/orders/list/OrderPackagesModal'
+import CustomerQuickViewDialog from '@/views/admin/store/orders/list/CustomerQuickViewDialog'
+import PaymentProofDialog from '@/views/admin/store/orders/list/PaymentProofDialog'
 import CreateOrderModal from '@/views/admin/store/orders/list/CreateOrderModal'
 
 const STATUS_COLORS: Record<string, 'warning' | 'info' | 'primary' | 'success' | 'error' | 'default'> = {
   pending: 'warning',
-  paid: 'success',
+  processing: 'info',
   shipped: 'primary',
-  completed: 'success',
-  cancelled: 'error'
+  ready_for_pickup: 'primary',
+  delivered: 'success',
+  cancelled: 'error',
+  refunded: 'default'
 }
 
 const PAYMENT_COLORS: Record<string, 'warning' | 'success' | 'error' | 'default'> = {
   pending: 'warning',
   paid: 'success',
-  failed: 'error'
+  failed: 'error',
+  refunded: 'default'
 }
 
 type PopoverState = { orderId: number | null; anchorEl: HTMLElement | null }
@@ -47,7 +56,9 @@ const buildOrdersSchema = (
   currency: string,
   openLogisticsModal: (orderId: number) => void,
   openStatusPopover: (orderId: number, anchorEl: HTMLElement) => void,
-  openPaymentPopover: (orderId: number, anchorEl: HTMLElement) => void
+  openPaymentPopover: (orderId: number, anchorEl: HTMLElement) => void,
+  openCustomer: (customerId: number) => void,
+  openProof: (orderId: number) => void
 ): ListSchema => ({
   title: t('orders.listPage.schema.title'),
   columns: [
@@ -57,6 +68,9 @@ const buildOrdersSchema = (
       type: 'string',
       sortable: true,
       link: 'edit',
+      // Holds the order number plus one line per item. Product names run to 40+
+      // CJK characters, so this column has to be capped or it eats the table.
+      width: 300,
       render: (value: any, row: Order) => {
         const num = value || row?.order_number || '-'
         const items = (row?.items || []) as OrderItemSummary[]
@@ -78,14 +92,43 @@ const buildOrdersSchema = (
             {items.length > 0 && (
               <Box component='span' display='block'>
                 {items.map((i, idx) => (
-                  <Typography key={idx} variant='body2' color='text.secondary' sx={{ fontSize: '0.9375rem', lineHeight: 1.5 }} component='span' display='block'>
-                    {i.product_name} × {i.quantity}
-                  </Typography>
+                  <Box key={idx} sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 0.5 }}>
+                    {/* Fixed box either way, so the product names stay aligned
+                        whether or not a line has an image. */}
+                    <Box
+                      sx={{
+                        width: 32,
+                        height: 32,
+                        flexShrink: 0,
+                        borderRadius: 1,
+                        overflow: 'hidden',
+                        bgcolor: 'action.hover',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                      }}
+                    >
+                      {i.image ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={i.image}
+                          alt=''
+                          loading='lazy'
+                          style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        />
+                      ) : (
+                        <i className='tabler-photo' style={{ fontSize: '1rem', opacity: 0.4 }} />
+                      )}
+                    </Box>
+                    <Typography variant='body2' color='text.secondary' sx={{ lineHeight: 1.4 }}>
+                      {i.product_name} × {i.quantity}
+                    </Typography>
+                  </Box>
                 ))}
               </Box>
             )}
             {note && (
-              <Typography variant='body2' color='text.secondary' sx={{ fontSize: '0.9375rem', fontStyle: 'italic' }} component='span' display='block'>
+              <Typography variant='body2' color='text.secondary' sx={{ fontStyle: 'italic' }} component='span' display='block'>
                 {t('orders.listPage.schema.columns.noteLabel')}: {note}
               </Typography>
             )}
@@ -98,8 +141,22 @@ const buildOrdersSchema = (
       label: t('orders.listPage.schema.columns.customer'),
       type: 'string',
       sortable: true,
+      width: 150,
       render: (value: any, row: any) => {
-        return row.customer_name || value || '-'
+        const label = row.customer_name || value || '-'
+        const customerId = typeof row.customer === 'object' ? row.customer?.id : row.customer
+        if (!customerId || label === '-') return label
+        // Who is this, and how do I reach them — the question staff ask most
+        // often about a row, and it used to mean leaving the list to answer.
+        return (
+          <Box
+            component='span'
+            onClick={(e: React.MouseEvent) => { e.stopPropagation(); openCustomer(Number(customerId)) }}
+            sx={{ cursor: 'pointer', color: 'primary.main', '&:hover': { textDecoration: 'underline' } }}
+          >
+            {label}
+          </Box>
+        )
       }
     },
     {
@@ -116,38 +173,15 @@ const buildOrdersSchema = (
       sortable: true,
       render: (value: any, row: Order) => {
         const status = (typeof value === 'string' ? value : row?.status) || ''
-        const label =
-          status === 'pending'
-            ? t('orders.status.pending')
-            : status === 'paid'
-              ? t('orders.status.paid')
-              : status === 'shipped'
-                ? (row?.fulfillment_method === 'pickup' ? t('orders.status.readyToPickup') : t('orders.status.shipped'))
-                : status === 'completed'
-                  ? t('orders.status.completed')
-                  : status === 'cancelled'
-                    ? t('orders.status.cancelled')
-                    : status || '-'
+        const label = status ? t(`orders.status.${status}`) : '-'
         const handleClick = (e: React.MouseEvent) => {
           e.stopPropagation()
           if (row?.id != null) openStatusPopover(row.id, e.currentTarget as HTMLElement)
         }
         return (
-          <Chip
-            label={label}
-            size='small'
-            color={STATUS_COLORS[status] || 'default'}
-            variant='filled'
-            onClick={handleClick}
-            sx={{
-              cursor: 'pointer',
-              height: 24,
-              fontSize: '0.8125rem',
-              fontWeight: 500,
-              ...(status === 'paid' ? { backgroundColor: '#4caf50', color: '#ffffff' } : {}),
-              '& .MuiChip-label': { px: 1.5 }
-            }}
-          />
+          <Box component='span' onClick={handleClick} sx={{ cursor: 'pointer' }}>
+            <StatusBadge label={label} color={STATUS_COLORS[status] || 'default'} />
+          </Box>
         )
       }
     },
@@ -171,60 +205,72 @@ const buildOrdersSchema = (
           if (row?.id != null) openPaymentPopover(row.id, e.currentTarget as HTMLElement)
         }
         return (
-          <Chip
-            label={label}
-            size='small'
-            color={PAYMENT_COLORS[status] || 'default'}
-            variant='filled'
-            onClick={handleClick}
-            sx={{
-              cursor: 'pointer',
-              height: 24,
-              fontSize: '0.8125rem',
-              fontWeight: 500,
-              ...(status === 'paid' ? { backgroundColor: '#4caf50', color: '#ffffff' } : {}),
-              '& .MuiChip-label': { px: 1.5 }
-            }}
-          />
+          <Box sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.75 }}>
+            <Box component='span' onClick={handleClick} sx={{ cursor: 'pointer' }}>
+              <StatusBadge label={label} color={PAYMENT_COLORS[status] || 'default'} />
+            </Box>
+            {/* A bank-transfer shopper uploads a screenshot and then waits for
+                someone to look at it. Without a mark here the only way to find
+                those orders was to open them one at a time. It does not claim
+                the order is paid — that is still a human's call. */}
+            {row?.has_payment_proof && (
+              <Tooltip title={t('orders.listPage.schema.columns.paymentProof')}>
+                <IconButton
+                  size='small'
+                  onClick={(e: React.MouseEvent) => { e.stopPropagation(); if (row?.id != null) openProof(row.id) }}
+                  aria-label={t('orders.listPage.schema.columns.paymentProof')}
+                >
+                  <i className='tabler-photo-check' style={{ fontSize: 18 }} />
+                </IconButton>
+              </Tooltip>
+            )}
+          </Box>
         )
       }
     },
     {
-      field: 'store',
-      label: t('orders.listPage.schema.columns.store'),
-      type: 'string',
-      render: (value: any, row: any) => {
-        return row.store_name || value || '-'
-      }
-    },
-    {
-      field: 'packages_count',
-      label: t('orders.listPage.schema.columns.logistics'),
-      type: 'string',
+      field: 'fulfillment_method',
+      label: t('orders.listPage.schema.columns.fulfillment'),
+      type: 'select',
+      sortable: true,
+      width: 110,
       render: (value: any, row: Order) => {
-        const count = row?.packages_count ?? value ?? 0
-        const orderId = row?.id
-        const handleClick = (e: React.MouseEvent) => {
-          e.stopPropagation()
-          if (orderId != null) openLogisticsModal(orderId)
-        }
-        if (count > 0) {
-          return (
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <Typography variant='body2' color='text.secondary'>
+        const method = (typeof value === 'string' ? value : row?.fulfillment_method) || ''
+        if (!method) return '-'
+        // The Logistics column was one icon opening one dialog, and it cost a
+        // whole column to say so. The badge that names the method is the
+        // obvious thing to click to change how it is fulfilled.
+        const count = row?.packages_count ?? 0
+        const withLogistics = (node: React.ReactNode) => (
+          <Box
+            component='span'
+            onClick={(e: React.MouseEvent) => { e.stopPropagation(); if (row?.id != null) openLogisticsModal(row.id) }}
+            sx={{ cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 0.5 }}
+          >
+            {node}
+            {count > 0 && (
+              <Typography variant='caption' color='text.secondary'>
                 {t('orders.listPage.schema.columns.packagesCount', { count })}
               </Typography>
-              <Button size='small' variant='outlined' onClick={handleClick} startIcon={<i className='tabler-package' />}>
-                {t('orders.listPage.schema.columns.manageLogistics')}
-              </Button>
-            </Box>
-          )
-        }
-        return (
-          <Button size='small' variant='outlined' color='primary' onClick={handleClick} startIcon={<i className='tabler-truck' />}>
-            {t('orders.listPage.schema.columns.addPackages')}
-          </Button>
+            )}
+          </Box>
         )
+        const badge = (
+          <StatusBadge
+            label={
+              method === 'pickup'
+                ? t('orders.listPage.schema.columns.fulfillmentPickup')
+                : t('orders.listPage.schema.columns.fulfillmentShipping')
+            }
+            color={method === 'pickup' ? 'warning' : 'info'}
+          />
+        )
+        // Which point to stage the order at is what a picker needs, but naming
+        // it inline would widen the column for every shipping row too.
+        if (method === 'pickup' && row?.pickup_point_name) {
+          return withLogistics(<Tooltip title={row.pickup_point_name}><span>{badge}</span></Tooltip>)
+        }
+        return withLogistics(badge)
       }
     },
     {
@@ -232,7 +278,8 @@ const buildOrdersSchema = (
       label: t('orders.listPage.schema.columns.createdAt'),
       type: 'datetime',
       sortable: true,
-      render: (value: any) => (value ? formatDate(value, 'yyyy-MM-dd') : '-')
+      width: 150,
+      render: (value: any) => (value ? formatDate(value, 'yyyy-MM-dd HH:mm') : '-')
     }
   ],
   filters: [
@@ -241,23 +288,23 @@ const buildOrdersSchema = (
       label: t('orders.listPage.filters.status.label'),
       type: 'select',
       filterMode: 'api',
-      options: [
-        { value: 'pending', label: t('orders.status.pending') },
-        { value: 'paid', label: t('orders.status.paid') },
-        { value: 'shipped', label: t('orders.status.shipped') },
-        { value: 'completed', label: t('orders.status.completed') },
-        { value: 'cancelled', label: t('orders.status.cancelled') }
-      ]
+      options: ORDER_STATUSES.map(value => ({ value, label: t(`orders.status.${value}`) }))
     },
     {
       field: 'payment_status',
       label: t('orders.listPage.filters.paymentStatus.label'),
       type: 'select',
       filterMode: 'api',
+      options: PAYMENT_STATUSES.map(value => ({ value, label: t(`orders.paymentStatus.${value}`) }))
+    },
+    {
+      field: 'has_payment_proof',
+      label: t('orders.listPage.filters.paymentProof.label'),
+      type: 'select',
+      filterMode: 'api',
       options: [
-        { value: 'pending', label: t('orders.paymentStatus.pending') },
-        { value: 'paid', label: t('orders.paymentStatus.paid') },
-        { value: 'failed', label: t('orders.paymentStatus.failed') }
+        { value: '1', label: t('orders.listPage.filters.paymentProof.yes') },
+        { value: '0', label: t('orders.listPage.filters.paymentProof.no') }
       ]
     },
     {
@@ -313,6 +360,8 @@ export default function OrdersPage() {
   const [currency, setCurrency] = useState<string>('USD')
   const [logisticsModalOrderId, setLogisticsModalOrderId] = useState<number | null>(null)
   const [createOrderModalOpen, setCreateOrderModalOpen] = useState(false)
+  const [customerDialogId, setCustomerDialogId] = useState<number | null>(null)
+  const [proofDialogOrderId, setProofDialogOrderId] = useState<number | null>(null)
   const [statusPopover, setStatusPopover] = useState<PopoverState>({ orderId: null, anchorEl: null })
   const [paymentPopover, setPaymentPopover] = useState<PopoverState>({ orderId: null, anchorEl: null })
   const [statusChanging, setStatusChanging] = useState(false)
@@ -328,12 +377,14 @@ export default function OrdersPage() {
   const openStatusPopover = useCallback((orderId: number, anchorEl: HTMLElement) => {
     setStatusPopover({ orderId, anchorEl })
   }, [])
+  const openCustomer = useCallback((customerId: number) => setCustomerDialogId(customerId), [])
+  const openProof = useCallback((orderId: number) => setProofDialogOrderId(orderId), [])
   const openPaymentPopover = useCallback((orderId: number, anchorEl: HTMLElement) => {
     setPaymentPopover({ orderId, anchorEl })
   }, [])
   const ordersSchema = useMemo(
-    () => buildOrdersSchema(t, currency, openLogisticsModal, openStatusPopover, openPaymentPopover),
-    [t, currency, openLogisticsModal, openStatusPopover, openPaymentPopover]
+    () => buildOrdersSchema(t, currency, openLogisticsModal, openStatusPopover, openPaymentPopover, openCustomer, openProof),
+    [t, currency, openLogisticsModal, openStatusPopover, openPaymentPopover, openCustomer, openProof]
   )
 
   const [apiFilters, setApiFilters] = useState<Record<string, string>>({})
@@ -420,9 +471,7 @@ export default function OrdersPage() {
 
   return (
     <Box>
-      <Typography variant='h4' sx={{ mb: 4 }}>
-        {t('orders.listPage.title')}
-      </Typography>
+      <AdminPageHeader title={t('orders.listPage.title')} subtitle={t('orders.listPage.subtitle')} />
       {error && (
         <Alert severity='error' sx={{ mb: 2 }}>
           {error}
@@ -451,46 +500,54 @@ export default function OrdersPage() {
         onClose={() => setCreateOrderModalOpen(false)}
         onSuccess={refetch}
       />
-      <Popover
+      {/* A menu, not a popover wrapping a second dropdown: the old shape made
+          changing a status three clicks, two of which were opening things. */}
+      <Menu
         open={Boolean(statusPopover.anchorEl)}
         anchorEl={statusPopover.anchorEl}
         onClose={() => setStatusPopover({ orderId: null, anchorEl: null })}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
       >
-        <Box sx={{ p: 2, minWidth: 150 }}>
-          <FormControl fullWidth size='small' disabled={statusChanging}>
-            <Select
-              value={orderForStatus?.status ?? ''}
-              onChange={(e) => handleStatusSelect(e.target.value)}
-            >
-              <MenuItem value='pending'>{t('orders.status.pending')}</MenuItem>
-              <MenuItem value='paid'>{t('orders.status.paid')}</MenuItem>
-              <MenuItem value='shipped'>{t('orders.status.shipped')}</MenuItem>
-              <MenuItem value='completed'>{t('orders.status.completed')}</MenuItem>
-              <MenuItem value='cancelled'>{t('orders.status.cancelled')}</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-      </Popover>
-      <Popover
+        {ORDER_STATUSES.map(value => (
+          <MenuItem
+            key={value}
+            selected={orderForStatus?.status === value}
+            disabled={statusChanging}
+            onClick={() => handleStatusSelect(value)}
+          >
+            {t(`orders.status.${value}`)}
+          </MenuItem>
+        ))}
+      </Menu>
+      <Menu
         open={Boolean(paymentPopover.anchorEl)}
         anchorEl={paymentPopover.anchorEl}
         onClose={() => setPaymentPopover({ orderId: null, anchorEl: null })}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+        transformOrigin={{ vertical: 'top', horizontal: 'left' }}
       >
-        <Box sx={{ p: 2, minWidth: 150 }}>
-          <FormControl fullWidth size='small' disabled={paymentChanging}>
-            <Select
-              value={orderForPayment?.payment_status ?? ''}
-              onChange={(e) => handlePaymentSelect(e.target.value)}
-            >
-              <MenuItem value='pending'>{t('orders.paymentStatus.pending')}</MenuItem>
-              <MenuItem value='paid'>{t('orders.paymentStatus.paid')}</MenuItem>
-              <MenuItem value='failed'>{t('orders.paymentStatus.failed')}</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
-      </Popover>
+        {PAYMENT_STATUSES.map(value => (
+          <MenuItem
+            key={value}
+            selected={orderForPayment?.payment_status === value}
+            disabled={paymentChanging}
+            onClick={() => handlePaymentSelect(value)}
+          >
+            {t(`orders.paymentStatus.${value}`)}
+          </MenuItem>
+        ))}
+      </Menu>
+      <CustomerQuickViewDialog
+        open={customerDialogId != null}
+        customerId={customerDialogId}
+        onClose={() => setCustomerDialogId(null)}
+      />
+      <PaymentProofDialog
+        open={proofDialogOrderId != null}
+        orderId={proofDialogOrderId}
+        onClose={() => setProofDialogOrderId(null)}
+      />
     </Box>
   )
 }

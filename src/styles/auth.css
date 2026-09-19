@@ -1,18 +1,43 @@
-/* Auth Layout - Business Module */
+/* Auth Layout - Business Module
+ *
+ * The sign-in surface for every workspace on the platform, so the character has
+ * to come from composition rather than from a brand: the accent is whatever
+ * `--mui-palette-primary-main` is set to, and the logo is whatever the workspace
+ * uploaded. What is fixed is the treatment — a perfboard dot field, hairline
+ * rules, mono micro-type for labels, and one flat accent. Deliberately not the
+ * stock template look it replaced (a floating pill card on flat grey with a
+ * purple gradient button and a matching purple glow), which said nothing about
+ * the product and was the same page every SaaS ships.
+ */
+
 .auth-shell {
+  --auth-field: #fbfbfd;
+  --auth-dot: #dcdfe8;
+  --auth-surface: #ffffff;
+  --auth-line: #e4e6ee;
+  --auth-ink: #16181f;
+  --auth-ink-soft: #5b6070;
+  --auth-mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+
   min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  position: relative;
-  background: #f8f8fb;
-  padding: 24px;
+  gap: 28px;
+  padding: 48px 24px;
+  background-color: var(--auth-field);
+  /* Perfboard: a 0.1"-pitch dot field, the texture of the thing this platform
+     sells against. Two layers — the dots, then a vignette that keeps the centre
+     clean so the card is never fighting the grid for attention. */
+  background-image:
+    radial-gradient(circle at center, rgba(0, 0, 0, 0) 60%, var(--auth-field) 100%),
+    radial-gradient(var(--auth-dot) 1px, transparent 1px);
+  background-size: 100% 100%, 24px 24px;
+  background-position: center, center;
 }
 
 .auth-logo {
-  position: absolute;
-  top: 28px;
-  left: 28px;
   display: inline-flex;
   align-items: center;
   gap: 12px;
@@ -22,42 +47,101 @@
 .auth-logo-text {
   font-size: 18px;
   font-weight: 700;
-  color: #4b5563;
+  color: var(--auth-ink);
 }
 
 .auth-card {
+  position: relative;
   width: 100%;
-  max-width: 520px;
-  background: #fff;
-  border-radius: 16px;
-  padding: 32px 36px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.05);
-  border: 1px solid #eef0f5;
+  max-width: 448px;
+  background: var(--auth-surface);
+  border: 1px solid var(--auth-line);
+  border-radius: 4px;
+  padding: 36px 36px 32px;
+  /* A hairline, not a drop shadow. The card sits *on* the board, not above it. */
+  box-shadow: 0 1px 0 rgba(16, 18, 31, 0.04);
+}
+
+/* Registration marks: two short rules in the top corners, the way a panel is
+   silkscreened. Purely decorative, and the only ornament on the page. */
+.auth-card::before,
+.auth-card::after {
+  content: '';
+  position: absolute;
+  top: -1px;
+  width: 28px;
+  height: 2px;
+  background: var(--mui-palette-primary-main);
+}
+
+.auth-card::before {
+  left: -1px;
+}
+
+.auth-card::after {
+  right: -1px;
+}
+
+/* Eyebrow: workspace name and what this page is, set in mono so it reads as a
+   legend rather than as a second heading competing with the one below it. */
+.auth-eyebrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--auth-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--auth-ink-soft);
+  margin-bottom: 14px;
+}
+
+.auth-eyebrow::before {
+  content: '';
+  width: 2px;
+  align-self: stretch;
+  min-height: 12px;
+  background: var(--mui-palette-primary-main);
 }
 
 .auth-header h2 {
   margin: 0;
-  font-size: 24px;
-  font-weight: 700;
-  color: #1f2937;
+  font-size: 26px;
+  line-height: 1.2;
+  font-weight: 650;
+  letter-spacing: -0.015em;
+  color: var(--auth-ink);
 }
 
 .auth-header p {
   margin: 8px 0 0;
-  color: #6b7280;
+  color: var(--auth-ink-soft);
   font-size: 14px;
+  line-height: 1.55;
 }
 
 .auth-form {
-  margin-top: 20px;
+  margin-top: 26px;
+  padding-top: 26px;
+  border-top: 1px solid var(--auth-line);
   display: grid;
-  gap: 14px;
+  gap: 6px;
 }
 
+/* Mono, small, spaced: field legends, not sentences. */
 .auth-label {
-  font-size: 13px;
-  color: #374151;
-  font-weight: 600;
+  font-family: var(--auth-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--auth-ink-soft);
+  margin-top: 14px;
+}
+
+.auth-form .auth-label:first-child {
+  margin-top: 0;
 }
 
 .auth-row {
@@ -65,18 +149,41 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
+  margin-top: 16px;
 }
 
 .auth-link {
-  color: #6c63ff;
+  color: var(--mui-palette-primary-main);
   font-weight: 600;
   font-size: 13px;
   text-decoration: none;
+  text-underline-offset: 3px;
 }
 
+.auth-link:hover {
+  text-decoration: underline;
+}
+
+/* Flat. The gradient-plus-glow it replaced is the single most recognisable
+   marker of an untouched admin template. */
 .auth-button {
-  background: linear-gradient(120deg, #7367f0, #8676ff);
-  box-shadow: 0 10px 30px rgba(115, 103, 240, 0.35);
+  margin-top: 20px;
+  background: var(--mui-palette-primary-main);
+  border-radius: 4px;
+  box-shadow: none;
+  padding-block: 11px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  text-transform: none;
+}
+
+.auth-button:hover {
+  box-shadow: none;
+  filter: brightness(0.94);
+}
+
+.auth-button:active {
+  transform: translateY(1px);
 }
 
 .auth-subtext {
@@ -84,7 +191,8 @@
   justify-content: center;
   align-items: center;
   gap: 6px;
-  color: #6b7280;
+  margin-top: 18px;
+  color: var(--auth-ink-soft);
   font-size: 14px;
 }
 
@@ -92,9 +200,13 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  color: #6b7280;
-  font-size: 13px;
+  gap: 14px;
+  margin-top: 22px;
+  font-family: var(--auth-mono);
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--auth-ink-soft);
 }
 
 .auth-divider::before,
@@ -102,69 +214,57 @@
   content: '';
   flex: 1;
   height: 1px;
-  background: #e5e7eb;
+  background: var(--auth-line);
 }
 
 .auth-social {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.auth-social .MuiIconButton-root {
+  border: 1px solid var(--auth-line);
+  border-radius: 4px;
+  width: 40px;
+  height: 40px;
+}
+
+.auth-social .MuiIconButton-root:hover {
+  border-color: var(--mui-palette-primary-main);
 }
 
 .auth-error {
-  background: rgba(255, 62, 29, 0.08);
+  background: rgba(255, 62, 29, 0.07);
   color: #b91c1c;
-  border: 1px solid rgba(255, 62, 29, 0.3);
+  border: 1px solid rgba(255, 62, 29, 0.28);
+  border-left-width: 2px;
   padding: 10px 12px;
-  border-radius: 10px;
+  border-radius: 3px;
   font-size: 13px;
-  margin-top: 12px;
+  margin-top: 18px;
 }
 
 /* Dark Mode */
 [data-mode='dark'] .auth-shell {
-  background: #28243d;
+  --auth-field: #15161c;
+  --auth-dot: rgba(231, 227, 252, 0.07);
+  --auth-surface: #1c1e27;
+  --auth-line: rgba(231, 227, 252, 0.1);
+  --auth-ink: rgba(231, 227, 252, 0.92);
+  --auth-ink-soft: rgba(231, 227, 252, 0.6);
 }
 
 [data-mode='dark'] .auth-card {
-  background: #312d4b;
-  border-color: rgba(231, 227, 252, 0.12);
-}
-
-[data-mode='dark'] .auth-header h2 {
-  color: rgba(231, 227, 252, 0.87);
-}
-
-[data-mode='dark'] .auth-header p {
-  color: rgba(231, 227, 252, 0.68);
-}
-
-[data-mode='dark'] .auth-label {
-  color: rgba(231, 227, 252, 0.87);
-}
-
-[data-mode='dark'] .auth-link {
-  color: #9b8cff;
-}
-
-[data-mode='dark'] .auth-subtext {
-  color: rgba(231, 227, 252, 0.68);
-}
-
-[data-mode='dark'] .auth-divider {
-  color: rgba(231, 227, 252, 0.68);
-}
-
-[data-mode='dark'] .auth-divider::before,
-[data-mode='dark'] .auth-divider::after {
-  background: rgba(231, 227, 252, 0.12);
+  box-shadow: none;
 }
 
 [data-mode='dark'] .auth-error {
-  background: rgba(255, 62, 29, 0.15);
-  color: #ff6b6b;
-  border-color: rgba(255, 62, 29, 0.3);
+  background: rgba(255, 62, 29, 0.14);
+  color: #ff8a80;
+  border-color: rgba(255, 62, 29, 0.32);
 }
 
 /* Responsive: on short or narrow screens the vertically-centered card can
@@ -172,31 +272,25 @@
    page scroll so the whole form (incl. the login button) is reachable. */
 @media (max-height: 780px) {
   .auth-shell {
-    align-items: flex-start;
-    padding-top: 88px;
+    justify-content: flex-start;
+    padding-top: 40px;
     padding-bottom: 24px;
   }
 }
 
 @media (max-width: 600px) {
   .auth-shell {
-    align-items: flex-start;
-    padding: 72px 14px 24px;
-  }
-
-  .auth-logo {
-    top: 18px;
-    left: 18px;
+    justify-content: flex-start;
+    padding: 36px 14px 24px;
+    gap: 22px;
   }
 
   .auth-card {
     max-width: 100%;
-    padding: 24px 18px;
-    border-radius: 12px;
+    padding: 26px 20px 24px;
   }
 
   .auth-header h2 {
-    font-size: 20px;
+    font-size: 22px;
   }
 }
-

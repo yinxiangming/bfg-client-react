@@ -533,6 +533,27 @@ export default function SchemaTable<T extends { id: number | string }>({
   const globalActions = schema.actions?.filter(a => a.scope === 'global') || []
   const rowActions = schema.actions?.filter(a => a.scope === 'row') || []
 
+  /**
+   * The action the first column opens when the schema has not named one itself.
+   *
+   * `column.link` has existed all along, but only a handful of the schemas set
+   * it, so most tables could be entered only through the ⋯ menu at the far right
+   * — the identity of the row sits on the left and the only way to open it on
+   * the opposite edge. Preferring 'edit' over 'view' matches where these tables
+   * are used: this is the back office, and opening a record here means editing
+   * it. A schema that marks its own link column has decided already; one that
+   * sets `firstColumnLink: false` has opted out.
+   */
+  const implicitFirstColumnAction = useMemo(() => {
+    if (schema.firstColumnLink === false) return null
+    if (schema.columns.some(column => column.link)) return null
+    for (const id of ['edit', 'view', 'detail', 'open']) {
+      const action = rowActions.find(a => a.id === id)
+      if (action) return action
+    }
+    return null
+  }, [schema.firstColumnLink, schema.columns, rowActions])
+
   const _sp = serverPagination
   const displayTotal = _sp ? _sp.total : filteredData.length
   const displayPage = _sp ? _sp.page : page
@@ -635,11 +656,11 @@ export default function SchemaTable<T extends { id: number | string }>({
         elevation={0}
         className="at-schema-table"
         sx={{
-          backgroundColor: 'var(--at-card-bg)',
-          boxShadow: 'var(--at-card-shadow)',
+          backgroundColor: 'var(--at-card-bg, var(--mui-palette-background-paper))',
+          boxShadow: 'var(--at-card-shadow, none)',
           border: '1px solid',
-          borderColor: 'var(--at-card-border)',
-          borderRadius: 'var(--at-card-radius)',
+          borderColor: 'var(--at-card-border, var(--mui-palette-divider))',
+          borderRadius: 'var(--at-card-radius, 8px)',
           width: '100%',
           display: 'flex',
           flexDirection: 'column',
@@ -652,7 +673,7 @@ export default function SchemaTable<T extends { id: number | string }>({
         {schema.summaryConfig && (effectiveSummary || summaryLoading) && (
           <CardContent
             sx={{
-              py: 1.25, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider)',
+              py: 1.25, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider, var(--mui-palette-divider))',
               display: 'flex', gap: 3, flexWrap: 'wrap', alignItems: 'baseline',
               backgroundColor: summaryIsSelection
                 ? 'var(--at-selected-bg, rgba(105,108,255,0.08))'
@@ -690,7 +711,7 @@ export default function SchemaTable<T extends { id: number | string }>({
         {(selectedRows.size > 0 || allMatchingSelected) && (
           <CardContent
             sx={{
-              py: 1, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider)',
+              py: 1, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider, var(--mui-palette-divider))',
               display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap',
               backgroundColor: 'var(--at-selected-bg, rgba(105,108,255,0.08))'
             }}
@@ -712,7 +733,7 @@ export default function SchemaTable<T extends { id: number | string }>({
         )}
 
         {/* Toolbar with Search, Filters, and Actions */}
-        <CardContent sx={{ py: 2, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider)' }}>
+        <CardContent sx={{ py: 2, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider, var(--mui-palette-divider))' }}>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
             {/* Search */}
             {schema.searchFields && (
@@ -980,15 +1001,15 @@ export default function SchemaTable<T extends { id: number | string }>({
                   sx={{
                     textTransform: 'none',
                     fontWeight: 500,
-                    borderRadius: 'var(--at-control-radius)',
+                    borderRadius: 'var(--at-control-radius, 8px)',
                     boxShadow: 'none',
                     height: '38px',
                     fontSize: '0.875rem',
                     ...(action.type === 'primary'
                       ? {
-                          backgroundColor: 'var(--at-accent)',
-                          color: 'var(--at-accent-fg)',
-                          '&:hover': { backgroundColor: 'var(--at-accent-strong)' }
+                          backgroundColor: 'var(--at-accent, var(--mui-palette-primary-main))',
+                          color: 'var(--at-accent-fg, var(--mui-palette-primary-contrastText))',
+                          '&:hover': { backgroundColor: 'var(--at-accent-strong, var(--mui-palette-primary-dark))' }
                         }
                       : {})
                   }}
@@ -1048,6 +1069,9 @@ export default function SchemaTable<T extends { id: number | string }>({
                       'cursor-pointer select-none': column.sortable,
                       'at-num': isNumeric
                     })}
+                    // `width` caps the column instead of letting `max-content`
+                    // size it to the longest cell. See the matching <td> below.
+                    style={column.width ? { maxWidth: column.width, width: column.width } : undefined}
                     onClick={() => column.sortable && handleSort(column.field)}
                   >
                     <div className={classnames({
@@ -1084,10 +1108,7 @@ export default function SchemaTable<T extends { id: number | string }>({
               ) : paginatedData.length === 0 ? (
                 <tr>
                   <td colSpan={schema.columns.length + 1 + (rowActions.length > 0 ? 1 : 0)}>
-                    <div className='at-empty'>
-                      <i className='tabler-inbox' aria-hidden='true' />
-                      {t('common.schemaTable.noData')}
-                    </div>
+                    <div className='at-empty'>{t('common.schemaTable.noData')}</div>
                   </td>
                 </tr>
               ) : (
@@ -1121,18 +1142,22 @@ export default function SchemaTable<T extends { id: number | string }>({
                             : '-'
                           : getNestedValue(item, column.field)
 
-                        // Check if column has a link action
-                        const hasLink = !!column.link
+                        // The action this cell opens: the one the column names, or —
+                        // for the first column — the implicit one resolved above.
+                        // Resolving to the action rather than to "a link id is set"
+                        // also stops a cell styling itself as a link when the id
+                        // matches no action, which looked clickable and did nothing.
+                        const linkAction = column.link
+                          ? schema.actions?.find(a => a.id === column.link)
+                          : columnIndex === 0
+                            ? implicitFirstColumnAction
+                            : null
+                        const hasLink = !!linkAction && !linkAction.hidden?.(item)
                         const isNumeric = column.type === 'currency' || column.type === 'number'
                         const handleColumnClick = (e: React.MouseEvent) => {
-                          if (hasLink && column.link) {
-                            e.stopPropagation()
-                            // Find the action by ID and trigger it through executeAction
-                            const action = schema.actions?.find(a => a.id === column.link)
-                            if (action) {
-                              executeAction(action, item)
-                            }
-                          }
+                          if (!hasLink || !linkAction) return
+                          e.stopPropagation()
+                          executeAction(linkAction, item)
                         }
 
                         return (
@@ -1140,10 +1165,37 @@ export default function SchemaTable<T extends { id: number | string }>({
                             key={column.field}
                             className={classnames({ 'hover:underline': hasLink, 'at-num': isNumeric })}
                             onClick={hasLink ? handleColumnClick : undefined}
-                            style={hasLink ? { 
-                              color: 'var(--mui-palette-primary-main)', 
-                              cursor: 'pointer' 
-                            } : undefined}
+                            // A cell that behaves like a link has to be reachable
+                            // without a mouse, and announce itself as actionable.
+                            role={hasLink ? 'link' : undefined}
+                            tabIndex={hasLink ? 0 : undefined}
+                            onKeyDown={
+                              hasLink
+                                ? e => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                      e.preventDefault()
+                                      handleColumnClick(e as unknown as React.MouseEvent)
+                                    }
+                                  }
+                                : undefined
+                            }
+                            style={{
+                              ...(hasLink
+                                ? { color: 'var(--mui-palette-primary-main)', cursor: 'pointer' }
+                                : {}),
+                              // The table is `min-width: max-content`, so without
+                              // a cap one long value (a 40-character product name,
+                              // say) stretches its column and pushes the rest off
+                              // screen. Wrapping rather than truncating keeps the
+                              // whole value readable inside the cap.
+                              ...(column.width
+                                ? {
+                                    maxWidth: column.width,
+                                    whiteSpace: 'normal' as const,
+                                    overflowWrap: 'anywhere' as const
+                                  }
+                                : {})
+                            }}
                           >
                             {column.render
                               ? column.render(value, item)
@@ -1153,15 +1205,17 @@ export default function SchemaTable<T extends { id: number | string }>({
                       })}
                       {rowActions.length > 0 && (
                         <td align="right" onClick={(e) => e.stopPropagation()}>
-                          <IconButton
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setActionMenuAnchor({ el: e.currentTarget, item })
-                            }}
-                          >
-                            <i className="tabler-dots-vertical" />
-                          </IconButton>
+                          {rowActions.some(a => !a.hidden?.(item)) && (
+                            <IconButton
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setActionMenuAnchor({ el: e.currentTarget, item })
+                              }}
+                            >
+                              <i className="tabler-dots-vertical" />
+                            </IconButton>
+                          )}
                         </td>
                       )}
                     </tr>
@@ -1182,7 +1236,7 @@ export default function SchemaTable<T extends { id: number | string }>({
           py: 2,
           px: 3,
           borderTop: '1px solid',
-          borderColor: 'var(--at-divider)'
+          borderColor: 'var(--at-divider, var(--mui-palette-divider))'
         }}>
           {/* Left: Showing info + Items per page */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
@@ -1230,14 +1284,14 @@ export default function SchemaTable<T extends { id: number | string }>({
                   height: 36,
                   fontSize: '0.875rem',
                   fontWeight: 500,
-                  borderRadius: 'var(--at-control-radius)',
-                  borderColor: 'var(--at-card-border)'
+                  borderRadius: 'var(--at-control-radius, 8px)',
+                  borderColor: 'var(--at-card-border, var(--mui-palette-divider))'
                 },
                 '& .MuiPaginationItem-root.Mui-selected': {
-                  backgroundColor: 'var(--at-accent)',
-                  color: 'var(--at-accent-fg)',
+                  backgroundColor: 'var(--at-accent, var(--mui-palette-primary-main))',
+                  color: 'var(--at-accent-fg, var(--mui-palette-primary-contrastText))',
                   borderColor: 'transparent',
-                  '&:hover': { backgroundColor: 'var(--at-accent-strong)' }
+                  '&:hover': { backgroundColor: 'var(--at-accent-strong, var(--mui-palette-primary-dark))' }
                 },
                 '& .MuiPaginationItem-icon': {
                   fontSize: '1.25rem'
@@ -1254,18 +1308,20 @@ export default function SchemaTable<T extends { id: number | string }>({
         open={!!actionMenuAnchor}
         onClose={() => setActionMenuAnchor(null)}
       >
-        {rowActions.map((action) => (
-          <MenuItem
-            key={action.id}
-            onClick={() => {
-              if (actionMenuAnchor) {
-                handleActionClick(action, actionMenuAnchor.item)
-              }
-            }}
-          >
-            {action.label}
-          </MenuItem>
-        ))}
+        {rowActions
+          .filter(action => !(actionMenuAnchor && action.hidden?.(actionMenuAnchor.item)))
+          .map((action) => (
+            <MenuItem
+              key={action.id}
+              onClick={() => {
+                if (actionMenuAnchor) {
+                  handleActionClick(action, actionMenuAnchor.item)
+                }
+              }}
+            >
+              {action.label}
+            </MenuItem>
+          ))}
       </Menu>
 
       {/* Bulk Actions Menu */}

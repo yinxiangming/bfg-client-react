@@ -63,7 +63,7 @@ export default function FeedbackDialog({ open, onClose, source, onSuccess }: Pro
       const pageUrl = typeof window !== 'undefined' ? window.location.href : ''
       await apiFetch(bfgApi.feedback(), {
         method: 'POST',
-        withAuth: true,
+        withAuth: false,
         body: JSON.stringify({
           type,
           content: text,

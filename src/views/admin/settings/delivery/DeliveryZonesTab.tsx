@@ -28,8 +28,8 @@ const buildDeliveryZonesSchema = (t: any): ListSchema => ({
   columns: [
     { field: 'name', label: t('settings.delivery.zones.tab.columns.name'), type: 'string', sortable: true, link: 'edit' },
     { field: 'code', label: t('settings.delivery.zones.tab.columns.code'), type: 'string', sortable: true },
-    { field: 'countries', label: t('settings.delivery.zones.tab.columns.countries'), type: 'string', render: (v) => (Array.isArray(v) ? v.join(', ') : '') },
-    { field: 'postal_code_patterns', label: t('settings.delivery.zones.tab.columns.postalCodes'), type: 'string', render: (v) => (Array.isArray(v) ? v.join(', ') : '') },
+    { field: 'countries', label: t('settings.delivery.zones.tab.columns.countries'), type: 'string', render: (v) => (Array.isArray(v) ? v.join(', ') : ''), width: 200 },
+    { field: 'postal_code_patterns', label: t('settings.delivery.zones.tab.columns.postalCodes'), type: 'string', render: (v) => (Array.isArray(v) ? v.join(', ') : ''), width: 200 },
     { field: 'is_active', label: t('settings.delivery.zones.tab.columns.status'), type: 'select', sortable: true }
   ],
   searchFields: ['name', 'code'],

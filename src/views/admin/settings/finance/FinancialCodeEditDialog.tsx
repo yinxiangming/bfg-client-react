@@ -66,13 +66,7 @@ const FinancialCodeEditDialog = ({ open, code, onClose, onSave }: FinancialCodeE
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
-      <DialogContent
-        sx={{
-          p: 0,
-          '& .MuiCard-root': { boxShadow: 'none' },
-          '& .MuiCardContent-root': { p: 4 }
-        }}
-      >
+      <DialogContent sx={{ p: 0 }}>
         <SchemaForm schema={financialCodeFormSchema} initialData={initialData} onSubmit={handleSubmit} onCancel={onClose} />
       </DialogContent>
     </Dialog>

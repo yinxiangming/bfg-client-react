@@ -184,7 +184,15 @@ class MeApiClient {
 
       const hasToken = typeof window !== 'undefined' && getWorkspaceToken()
 
-      console.error(
+      // A 401/403 with no token at all just means "not logged in" — expected on
+      // any page that probes /me/ before the auth guard runs. Only a rejection
+      // while holding a token is worth an error-level log (expired token,
+      // workspace mismatch, missing membership).
+      const isExpectedAnonymousRejection =
+        !hasToken && (response.status === 401 || response.status === 403)
+      const log = isExpectedAnonymousRejection ? console.warn : console.error
+
+      log(
         `[meApi] ${options.method || 'GET'} ${url} → ${response.status} ${response.statusText || ''} | ${errorDetail} | hasToken=${!!hasToken} | body=${JSON.stringify(errorData)}`
       )
       throw error
@@ -562,6 +570,30 @@ class MeApiClient {
 
   async createTicket(data: { subject: string; description: string; category?: number; priority?: number }): Promise<any> {
     return this.request<any>('/api/v1/me/tickets/', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  }
+
+  // Returns. The shop's returns API, which scopes a customer to their own requests.
+  async getReturns(params?: { order?: number; page?: number; page_size?: number }): Promise<any> {
+    const queryParams = new URLSearchParams()
+    if (params?.order != null) queryParams.append('order', String(params.order))
+    if (params?.page != null) queryParams.append('page', String(params.page))
+    if (params?.page_size != null) queryParams.append('page_size', String(params.page_size))
+    const query = queryParams.toString()
+    return this.request<any>(`/api/v1/shop/returns/${query ? `?${query}` : ''}`)
+  }
+
+  async createReturn(data: { order: number; reason_category?: string; customer_note?: string }): Promise<any> {
+    return this.request<any>('/api/v1/shop/returns/', {
+      method: 'POST',
+      body: JSON.stringify(data)
+    })
+  }
+
+  async addReturnItem(data: { return_request: number; order_item: number; quantity: number; reason?: string }): Promise<any> {
+    return this.request<any>('/api/v1/shop/return-items/', {
       method: 'POST',
       body: JSON.stringify(data)
     })

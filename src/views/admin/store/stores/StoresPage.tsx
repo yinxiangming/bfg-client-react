@@ -8,8 +8,8 @@ import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
 import Dialog from '@mui/material/Dialog'
 import DialogContent from '@mui/material/DialogContent'
-import Typography from '@mui/material/Typography'
 
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import SchemaTable from '@/components/schema/SchemaTable'
 import SchemaForm from '@/components/schema/SchemaForm'
 import type { SchemaAction } from '@/types/schema'
@@ -174,9 +174,7 @@ export default function StoresPage() {
 
   return (
     <Box>
-      <Typography variant='h4' sx={{ mb: 4 }}>
-        {t('stores.page.title')}
-      </Typography>
+      <AdminPageHeader title={t('stores.page.title')} subtitle={t('stores.page.subtitle')} />
       <SchemaTable
         schema={listSchema}
         data={stores ?? []}
@@ -196,13 +194,7 @@ export default function StoresPage() {
 
       {editItem !== null && !fetchingDetail && formSchema && (
         <Dialog open onClose={handleCancel} maxWidth='md' fullWidth>
-          <DialogContent
-            sx={{
-              p: 0,
-              '& .MuiCard-root': { boxShadow: 'none' },
-              '& .MuiCardContent-root': { p: 4 }
-            }}
-          >
+          <DialogContent>
             <SchemaForm
               schema={formSchema}
               initialData={formInitialData}

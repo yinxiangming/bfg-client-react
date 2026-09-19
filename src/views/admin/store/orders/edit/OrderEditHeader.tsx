@@ -15,12 +15,16 @@ import DialogTitle from '@mui/material/DialogTitle'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import Popover from '@mui/material/Popover'
-import FormControl from '@mui/material/FormControl'
-import Select from '@mui/material/Select'
-import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 
-import type { Order } from '@/services/store'
+// Component Imports
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
+import CustomTextField from '@/components/ui/TextField'
+
+import {
+  ORDER_STATUSES, PAYMENT_STATUSES,
+  type Order, type OrderStatus, type PaymentStatus
+} from '@/services/store'
 import type { OrderHeaderAction } from '@/extensions/registry'
 import { getIntlLocale } from '@/utils/format'
 
@@ -36,8 +40,8 @@ type OrderEditHeaderProps = {
     restock_action: 'no_restock' | 'restock' | 'damage'
   }) => Promise<void>
   onCancelOrder?: (reason?: string) => Promise<void>
-  onStatusChange?: (status: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled') => Promise<void>
-  onPaymentStatusChange?: (status: 'pending' | 'paid' | 'failed') => Promise<void>
+  onStatusChange?: (status: OrderStatus) => Promise<void>
+  onPaymentStatusChange?: (status: PaymentStatus) => Promise<void>
 }
 
 const OrderEditHeader = ({
@@ -90,6 +94,7 @@ const OrderEditHeader = ({
       pending: 'warning',
       processing: 'info',
       shipped: 'primary',
+      ready_for_pickup: 'primary',
       paid: 'success',
       completed: 'success',
       cancelled: 'error',
@@ -111,9 +116,6 @@ const OrderEditHeader = ({
   const formatStatusLabel = (status: string) => status.charAt(0).toUpperCase() + status.slice(1)
 
   const getOrderStatusLabel = (status: string) => {
-    if (status === 'shipped' && order.fulfillment_method === 'pickup') {
-      return t('orders.status.readyToPickup')
-    }
     const key = `orders.status.${status}`
     const has = (t as any).has ? (t as any).has(key) : true
     return has ? t(key as any) : formatStatusLabel(status)
@@ -139,7 +141,7 @@ const OrderEditHeader = ({
     }
   }
 
-  const handleStatusChange = async (newStatus: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled') => {
+  const handleStatusChange = async (newStatus: OrderStatus) => {
     if (newStatus === order.status || !onStatusChange) {
       setStatusEditAnchor(null)
       return
@@ -153,7 +155,7 @@ const OrderEditHeader = ({
     }
   }
 
-  const handlePaymentStatusChange = async (newStatus: 'pending' | 'paid' | 'failed') => {
+  const handlePaymentStatusChange = async (newStatus: PaymentStatus) => {
     if (newStatus === order.payment_status || !onPaymentStatusChange) {
       setPaymentStatusEditAnchor(null)
       return
@@ -167,8 +169,8 @@ const OrderEditHeader = ({
     }
   }
 
-  const canShip = !!onShip && !['shipped', 'completed', 'cancelled'].includes(order.status)
-  const canCancel = !!onCancelOrder && !['cancelled', 'completed', 'refunded'].includes(order.status)
+  const canShip = !!onShip && !['shipped', 'ready_for_pickup', 'delivered', 'cancelled'].includes(order.status)
+  const canCancel = !!onCancelOrder && !['cancelled', 'delivered', 'refunded'].includes(order.status)
   const canRefund = !!onRefund && !['refunded', 'cancelled'].includes(order.status)
   const enabledExtraActions = extraActions.filter(action => !action.disabled)
   const canReturn = !!onCreateReturn && !!order.items?.length && !['cancelled'].includes(order.status)
@@ -211,66 +213,64 @@ const OrderEditHeader = ({
           {submitError}
         </Alert>
       )}
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 2, mb: 1 }}>
-        <Box>
-          <Typography variant='h5'>
-            {t('orders.editHeader.orderTitle', { orderNumber: order.order_number })}
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant='body2' color='text.secondary'>
-              {t('orders.editHeader.orderStatusLabel')}:
-            </Typography>
-            <Chip
-              label={getOrderStatusLabel(order.status)}
-              color={getStatusColor(order.status)}
-              variant='filled'
-              size='medium'
-              onClick={onStatusChange ? (e) => setStatusEditAnchor(e.currentTarget as HTMLElement) : undefined}
-              sx={onStatusChange ? { cursor: 'pointer' } : {}}
-            />
-          </Box>
+      <AdminPageHeader
+        title={t('orders.editHeader.orderTitle', { orderNumber: order.order_number })}
+        actions={
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant='body2' color='text.secondary'>
+                {t('orders.editHeader.orderStatusLabel')}:
+              </Typography>
+              <Chip
+                label={getOrderStatusLabel(order.status)}
+                color={getStatusColor(order.status)}
+                variant='filled'
+                size='medium'
+                onClick={onStatusChange ? (e) => setStatusEditAnchor(e.currentTarget as HTMLElement) : undefined}
+                sx={onStatusChange ? { cursor: 'pointer' } : {}}
+              />
+            </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant='body2' color='text.secondary'>
-              {t('orders.editHeader.paymentStatusLabel')}:
-            </Typography>
-            <Chip
-              label={getPaymentStatusLabel(order.payment_status)}
-              color={getPaymentColor(order.payment_status)}
-              variant='filled'
-              size='medium'
-              onClick={onPaymentStatusChange ? (e) => setPaymentStatusEditAnchor(e.currentTarget as HTMLElement) : undefined}
-              sx={onPaymentStatusChange ? { cursor: 'pointer' } : {}}
-            />
-          </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant='body2' color='text.secondary'>
+                {t('orders.editHeader.paymentStatusLabel')}:
+              </Typography>
+              <Chip
+                label={getPaymentStatusLabel(order.payment_status)}
+                color={getPaymentColor(order.payment_status)}
+                variant='filled'
+                size='medium'
+                onClick={onPaymentStatusChange ? (e) => setPaymentStatusEditAnchor(e.currentTarget as HTMLElement) : undefined}
+                sx={onPaymentStatusChange ? { cursor: 'pointer' } : {}}
+              />
+            </Box>
 
-          {canShip && (
+            {canShip && (
+              <Button
+                variant='contained'
+                onClick={() => onShip?.()}
+                disabled={busyAction !== null}
+              >
+                {t('orders.editHeader.actions.ship')}
+              </Button>
+            )}
+
             <Button
-              variant='contained'
-              onClick={() => onShip?.()}
-              disabled={busyAction !== null}
+              variant='outlined'
+              onClick={(e) => setActionsAnchor(e.currentTarget)}
+              disabled={busyAction !== null || (!canCancel && !canRefund && !canReturn && !hasExtraActions)}
             >
-              {t('orders.editHeader.actions.ship')}
+              {t('orders.editHeader.actions.more')}
             </Button>
-          )}
 
-          <Button
-            variant='outlined'
-            onClick={(e) => setActionsAnchor(e.currentTarget)}
-            disabled={busyAction !== null || (!canCancel && !canRefund && !canReturn && !hasExtraActions)}
-          >
-            {t('orders.editHeader.actions.more')}
-          </Button>
-
-          <Button variant='text' onClick={handleBack}>
-            {t('common.actions.back')}
-          </Button>
-        </Box>
-      </Box>
+            <Button variant='text' onClick={handleBack}>
+              {t('common.actions.back')}
+            </Button>
+          </Box>
+        }
+      />
       {order.created_at && (
-        <Typography variant='body2' color='text.secondary' sx={{ fontSize: '0.875rem' }}>
+        <Typography variant='body2' color='text.secondary'>
           {t('orders.editHeader.createdAt', { date: formatDate(order.created_at) })}
         </Typography>
       )}
@@ -282,18 +282,17 @@ const OrderEditHeader = ({
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
         <Box sx={{ p: 2, minWidth: 150 }}>
-          <FormControl fullWidth size='small' disabled={statusChanging}>
-            <Select
-              value={order.status}
-              onChange={(e) => handleStatusChange(e.target.value as 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled')}
-            >
-              <MenuItem value='pending'>{t('orders.status.pending')}</MenuItem>
-              <MenuItem value='paid'>{t('orders.status.paid')}</MenuItem>
-              <MenuItem value='shipped'>{t('orders.status.shipped')}</MenuItem>
-              <MenuItem value='completed'>{t('orders.status.completed')}</MenuItem>
-              <MenuItem value='cancelled'>{t('orders.status.cancelled')}</MenuItem>
-            </Select>
-          </FormControl>
+          <CustomTextField
+            select
+            fullWidth
+            disabled={statusChanging}
+            value={order.status}
+            onChange={(e) => handleStatusChange(e.target.value as OrderStatus)}
+          >
+            {ORDER_STATUSES.map(value => (
+              <MenuItem key={value} value={value}>{t(`orders.status.${value}`)}</MenuItem>
+            ))}
+          </CustomTextField>
         </Box>
       </Popover>
 
@@ -304,16 +303,17 @@ const OrderEditHeader = ({
         anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
       >
         <Box sx={{ p: 2, minWidth: 150 }}>
-          <FormControl fullWidth size='small' disabled={paymentStatusChanging}>
-            <Select
-              value={order.payment_status}
-              onChange={(e) => handlePaymentStatusChange(e.target.value as 'pending' | 'paid' | 'failed')}
-            >
-              <MenuItem value='pending'>{t('orders.paymentStatus.pending')}</MenuItem>
-              <MenuItem value='paid'>{t('orders.paymentStatus.paid')}</MenuItem>
-              <MenuItem value='failed'>{t('orders.paymentStatus.failed')}</MenuItem>
-            </Select>
-          </FormControl>
+          <CustomTextField
+            select
+            fullWidth
+            disabled={paymentStatusChanging}
+            value={order.payment_status}
+            onChange={(e) => handlePaymentStatusChange(e.target.value as PaymentStatus)}
+          >
+            {PAYMENT_STATUSES.map(value => (
+              <MenuItem key={value} value={value}>{t(`orders.paymentStatus.${value}`)}</MenuItem>
+            ))}
+          </CustomTextField>
         </Box>
       </Popover>
 
@@ -337,7 +337,7 @@ const OrderEditHeader = ({
       <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)} maxWidth='sm' fullWidth>
         <DialogTitle>{t('orders.editHeader.dialogs.cancelTitle')}</DialogTitle>
         <DialogContent>
-          <TextField
+          <CustomTextField
             fullWidth
             multiline
             minRows={3}
@@ -358,21 +358,25 @@ const OrderEditHeader = ({
       <Dialog open={returnDialogOpen} onClose={() => setReturnDialogOpen(false)} maxWidth='sm' fullWidth>
         <DialogTitle>{t('orders.editHeader.dialogs.returnTitle')}</DialogTitle>
         <DialogContent>
-          <TextField
+          <CustomTextField
             fullWidth
             label={t('orders.editHeader.dialogs.returnCategory')}
             value={returnReasonCategory}
             onChange={(e) => setReturnReasonCategory(e.target.value)}
             sx={{ mt: 1, mb: 2 }}
           />
-          <FormControl fullWidth size='small' sx={{ mb: 2 }}>
-            <Select value={returnRestockAction} onChange={(e) => setReturnRestockAction(e.target.value as 'no_restock' | 'restock' | 'damage')}>
-              <MenuItem value='restock'>{t('orders.editHeader.restock.restock')}</MenuItem>
-              <MenuItem value='no_restock'>{t('orders.editHeader.restock.noRestock')}</MenuItem>
-              <MenuItem value='damage'>{t('orders.editHeader.restock.damage')}</MenuItem>
-            </Select>
-          </FormControl>
-          <TextField
+          <CustomTextField
+            select
+            fullWidth
+            value={returnRestockAction}
+            onChange={(e) => setReturnRestockAction(e.target.value as 'no_restock' | 'restock' | 'damage')}
+            sx={{ mb: 2 }}
+          >
+            <MenuItem value='restock'>{t('orders.editHeader.restock.restock')}</MenuItem>
+            <MenuItem value='no_restock'>{t('orders.editHeader.restock.noRestock')}</MenuItem>
+            <MenuItem value='damage'>{t('orders.editHeader.restock.damage')}</MenuItem>
+          </CustomTextField>
+          <CustomTextField
             fullWidth
             multiline
             minRows={3}

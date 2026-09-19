@@ -71,6 +71,18 @@ export interface StorefrontLayoutProps {
   locale?: string
 }
 
+/** Props for a plugin-owned panel on the shared workspace console. */
+export interface ConsoleWorkspacePanelProps {
+  workspaceId: number
+}
+
+/** A platform-only configuration panel contributed by an extension. */
+export interface ConsoleWorkspacePanelExtension {
+  id: string
+  component: ComponentType<ConsoleWorkspacePanelProps>
+  priority?: number
+}
+
 /** Resolve effective target slot from extension (supports legacy targetSection). */
 export function getTargetSlot(ext: PageSlotExtension): string | undefined {
   return ext.targetSlot ?? ext.targetSection
@@ -94,6 +106,8 @@ export interface Extension {
   orderActions?: OrderActionExtension[]
   /** Dashboard blocks for admin /admin/dashboard */
   dashboardBlocks?: BlockRegistryEntry[]
+  /** Platform-only panels shown below a workspace's extension catalogue. */
+  consoleWorkspacePanels?: ConsoleWorkspacePanelExtension[]
   /** Replaces default storefront layout (header + main + footer) for all storefront routes. children = page content (home, category, cart, etc.). */
   storefrontLayout?: ComponentType<StorefrontLayoutProps>
 }

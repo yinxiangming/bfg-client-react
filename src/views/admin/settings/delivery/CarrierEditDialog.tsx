@@ -12,16 +12,15 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Switch from '@mui/material/Switch'
 import Divider from '@mui/material/Divider'
 import Grid from '@mui/material/Grid'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 import SchemaConfigEditor, { type ConfigSchema } from '@/components/config/SchemaConfigEditor'
 import type { Carrier, CarrierPayload, CarrierPluginInfo } from '@/services/delivery'
@@ -132,109 +131,106 @@ const CarrierEditDialog = ({ open, carrier, carrierPlugins = [], onClose, onSave
     <Dialog open={open} onClose={onClose} maxWidth='md' fullWidth>
       <DialogTitle>{carrier ? t('settings.delivery.carriers.editDialog.titleEdit') : t('settings.delivery.carriers.editDialog.titleNew')}</DialogTitle>
       <DialogContent>
-        <Box sx={{ pt: 2 }}>
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
-                fullWidth
-                label={t('settings.delivery.carriers.editDialog.name')}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
-                fullWidth
-                label={t('settings.delivery.carriers.editDialog.code')}
-                value={code}
-                onChange={(e) => setCode(e.target.value)}
-                required
-              />
-            </Grid>
-            <Grid size={{ xs: 12 }}>
-              <FormControl fullWidth>
-                <InputLabel>{t('settings.delivery.carriers.editDialog.carrierType')}</InputLabel>
-                <Select
-                  value={carrierType}
-                  label={t('settings.delivery.carriers.editDialog.carrierType')}
-                  onChange={(e) => setCarrierType(e.target.value)}
-                >
-                  <MenuItem value="">
-                    <em>{t('settings.delivery.carriers.editDialog.carrierTypePlaceholder')}</em>
-                  </MenuItem>
-                  {pluginOptions.map(option => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12 }}>
-              <TextField
-                fullWidth
-                label={t('settings.delivery.carriers.editDialog.trackingUrlTemplate')}
-                value={trackingUrlTemplate}
-                onChange={(e) => setTrackingUrlTemplate(e.target.value)}
-                placeholder={t('settings.delivery.carriers.editDialog.trackingUrlPlaceholder', { tracking_number: '1234567890' })}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={isActive}
-                    onChange={(e) => setIsActive(e.target.checked)}
-                  />
-                }
-                label={t('settings.delivery.carriers.editDialog.active')}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={isTestMode}
-                    onChange={(e) => setIsTestMode(e.target.checked)}
-                  />
-                }
-                label={t('settings.delivery.carriers.editDialog.testMode')}
-              />
-            </Grid>
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <CustomTextField
+              fullWidth
+              label={t('settings.delivery.carriers.editDialog.name')}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
           </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <CustomTextField
+              fullWidth
+              label={t('settings.delivery.carriers.editDialog.code')}
+              value={code}
+              onChange={(e) => setCode(e.target.value)}
+              required
+            />
+          </Grid>
+          <Grid size={{ xs: 12 }}>
+            <CustomTextField
+              select
+              fullWidth
+              label={t('settings.delivery.carriers.editDialog.carrierType')}
+              value={carrierType}
+              onChange={(e) => setCarrierType(e.target.value)}
+            >
+              <MenuItem value="">
+                <em>{t('settings.delivery.carriers.editDialog.carrierTypePlaceholder')}</em>
+              </MenuItem>
+              {pluginOptions.map(option => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </CustomTextField>
+          </Grid>
+          <Grid size={{ xs: 12 }}>
+            <CustomTextField
+              fullWidth
+              label={t('settings.delivery.carriers.editDialog.trackingUrlTemplate')}
+              value={trackingUrlTemplate}
+              onChange={(e) => setTrackingUrlTemplate(e.target.value)}
+              placeholder={t('settings.delivery.carriers.editDialog.trackingUrlPlaceholder', { tracking_number: '1234567890' })}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={isActive}
+                  onChange={(e) => setIsActive(e.target.checked)}
+                />
+              }
+              label={t('settings.delivery.carriers.editDialog.active')}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={isTestMode}
+                  onChange={(e) => setIsTestMode(e.target.checked)}
+                />
+              }
+              label={t('settings.delivery.carriers.editDialog.testMode')}
+            />
+          </Grid>
+        </Grid>
 
-          {hasConfigSchema && (
-            <>
-              <Divider sx={{ my: 4 }} />
-              <Typography variant="h6" sx={{ mb: 3 }}>
-                {t('settings.delivery.carriers.editDialog.pluginConfiguration')}
+        {hasConfigSchema && (
+          <>
+            <Divider sx={{ my: 4 }} />
+            <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600, mb: 3 }}>
+              {t('settings.delivery.carriers.editDialog.pluginConfiguration')}
+            </Typography>
+            
+            <Box sx={{ mb: 4 }}>
+              <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, mb: 2 }}>
+                {t('settings.delivery.carriers.editDialog.liveConfig')}
               </Typography>
-              
-              <Box sx={{ mb: 4 }}>
-                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-                  {t('settings.delivery.carriers.editDialog.liveConfig')}
-                </Typography>
-                <SchemaConfigEditor
-                  schema={configSchema}
-                  value={liveConfig}
-                  onChange={setLiveConfig}
-                />
-              </Box>
+              <SchemaConfigEditor
+                schema={configSchema}
+                value={liveConfig}
+                onChange={setLiveConfig}
+              />
+            </Box>
 
-              <Box>
-                <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 600 }}>
-                  {t('settings.delivery.carriers.editDialog.testConfig')}
-                </Typography>
-                <SchemaConfigEditor
-                  schema={configSchema}
-                  value={testConfig}
-                  onChange={setTestConfig}
-                />
-              </Box>
-            </>
-          )}
-        </Box>
+            <Box>
+              <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, mb: 2 }}>
+                {t('settings.delivery.carriers.editDialog.testConfig')}
+              </Typography>
+              <SchemaConfigEditor
+                schema={configSchema}
+                value={testConfig}
+                onChange={setTestConfig}
+              />
+            </Box>
+          </>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={loading}>

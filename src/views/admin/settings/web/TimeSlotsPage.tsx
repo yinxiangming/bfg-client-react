@@ -14,8 +14,11 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Stack from '@mui/material/Stack'
-import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+
+// Component Imports
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
+import CustomTextField from '@/components/ui/TextField'
 
 import SchemaTable from '@/components/schema/SchemaTable'
 import SchemaForm from '@/components/schema/SchemaForm'
@@ -380,7 +383,7 @@ export default function TimeSlotsPage() {
   ) => {
     if (field.field === 'start_time' || field.field === 'end_time') {
       return (
-        <TextField
+        <CustomTextField
           fullWidth
           type='time'
           label={field.label}
@@ -389,7 +392,6 @@ export default function TimeSlotsPage() {
           required={field.required}
           error={!!error}
           helperText={error}
-          InputLabelProps={{ shrink: true }}
         />
       )
     }
@@ -414,6 +416,23 @@ export default function TimeSlotsPage() {
 
   return (
     <>
+      <AdminPageHeader
+        title={t('settings.web.timeSlots.title')}
+        actions={
+          <Button
+            variant='outlined'
+            startIcon={<i className='tabler-calendar-repeat' />}
+            onClick={() => {
+              setSubmitError(null)
+              setSubmitSuccess(null)
+              resetBatchForm()
+              setBatchOpen(true)
+            }}
+          >
+            {t('settings.web.timeSlots.batch.action')}
+          </Button>
+        }
+      />
       {submitSuccess && (
         <Alert severity='success' sx={{ mb: 2 }} onClose={() => setSubmitSuccess(null)}>
           {submitSuccess}
@@ -424,20 +443,6 @@ export default function TimeSlotsPage() {
           {submitError}
         </Alert>
       )}
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-        <Button
-          variant='outlined'
-          startIcon={<i className='tabler-calendar-repeat' />}
-          onClick={() => {
-            setSubmitError(null)
-            setSubmitSuccess(null)
-            resetBatchForm()
-            setBatchOpen(true)
-          }}
-        >
-          {t('settings.web.timeSlots.batch.action')}
-        </Button>
-      </Box>
       <SchemaTable
         schema={listSchema}
         data={data ?? []}
@@ -448,9 +453,7 @@ export default function TimeSlotsPage() {
         statusColors={statusColors}
       />
       <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth='sm' fullWidth>
-        <DialogContent
-          sx={{ p: 0, '& .MuiCard-root': { boxShadow: 'none' }, '& .MuiCardContent-root': { p: 4 } }}
-        >
+        <DialogContent sx={{ p: 0 }}>
           <SchemaForm
             schema={formSchema}
             initialData={initialData}
@@ -468,42 +471,38 @@ export default function TimeSlotsPage() {
               {t('settings.web.timeSlots.batch.description')}
             </Typography>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 type='date'
                 label={t('settings.web.timeSlots.batch.fields.startDate')}
                 value={batchForm.start_date}
                 onChange={(e) => handleBatchFieldChange('start_date', e.target.value)}
-                InputLabelProps={{ shrink: true }}
               />
-              <TextField
+              <CustomTextField
                 fullWidth
                 type='date'
                 label={t('settings.web.timeSlots.batch.fields.endDate')}
                 value={batchForm.end_date}
                 onChange={(e) => handleBatchFieldChange('end_date', e.target.value)}
-                InputLabelProps={{ shrink: true }}
               />
             </Stack>
             <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 type='time'
                 label={t('settings.web.timeSlots.batch.fields.startTime')}
                 value={batchForm.start_time}
                 onChange={(e) => handleBatchFieldChange('start_time', e.target.value)}
-                InputLabelProps={{ shrink: true }}
               />
-              <TextField
+              <CustomTextField
                 fullWidth
                 type='time'
                 label={t('settings.web.timeSlots.batch.fields.endTime')}
                 value={batchForm.end_time}
                 onChange={(e) => handleBatchFieldChange('end_time', e.target.value)}
-                InputLabelProps={{ shrink: true }}
               />
             </Stack>
-            <TextField
+            <CustomTextField
               fullWidth
               type='number'
               label={t('settings.web.timeSlots.batch.fields.maxBookings')}
@@ -511,13 +510,13 @@ export default function TimeSlotsPage() {
               onChange={(e) => handleBatchFieldChange('max_bookings', Math.max(1, Number(e.target.value) || 1))}
               inputProps={{ min: 1 }}
             />
-            <TextField
+            <CustomTextField
               fullWidth
               label={t('settings.web.timeSlots.fields.nameOptional')}
               value={batchForm.name}
               onChange={(e) => handleBatchFieldChange('name', e.target.value)}
             />
-            <TextField
+            <CustomTextField
               fullWidth
               multiline
               minRows={2}
@@ -526,7 +525,7 @@ export default function TimeSlotsPage() {
               onChange={(e) => handleBatchFieldChange('notes', e.target.value)}
             />
             <Box>
-              <Typography variant='subtitle2' sx={{ mb: 1.5 }}>
+              <Typography sx={{ fontSize: '0.8125rem', fontWeight: 500, mb: 1 }}>
                 {t('settings.web.timeSlots.batch.fields.weekdays')}
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
@@ -556,7 +555,7 @@ export default function TimeSlotsPage() {
             />
           </Stack>
         </DialogContent>
-        <DialogActions sx={{ px: 3, pb: 3 }}>
+        <DialogActions>
           <Button onClick={() => setBatchOpen(false)} disabled={batchSubmitting}>
             {t('settings.web.timeSlots.batch.cancel')}
           </Button>

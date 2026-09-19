@@ -27,6 +27,35 @@ export type Warehouse = {
 
 export type WarehousePayload = Omit<Warehouse, 'id' | 'created_at' | 'updated_at'>
 
+export type PickupPoint = {
+  id: number
+  name: string
+  code: string
+  /** The warehouse this point draws stock from, when it is one of ours. */
+  warehouse?: number | null
+  warehouse_name?: string | null
+  address_line1?: string
+  address_line2?: string
+  city?: string
+  state?: string
+  postal_code?: string
+  country?: string
+  latitude?: number | string | null
+  longitude?: number | string | null
+  phone?: string
+  email?: string
+  /** Opening hours, which door, where to park — shown to the shopper. */
+  instructions?: string
+  fee?: number | string
+  is_active: boolean
+  is_default?: boolean
+  sort_order?: number
+  created_at?: string
+  updated_at?: string
+}
+
+export type PickupPointPayload = Omit<PickupPoint, 'id' | 'warehouse_name' | 'created_at' | 'updated_at'>
+
 export type Carrier = {
   id: number
   name: string
@@ -151,6 +180,43 @@ export async function getWarehouses(): Promise<Warehouse[]> {
     return response
   }
   return response.results || response.data || []
+}
+
+export async function getPickupPointsPage(params?: { page?: number; page_size?: number; search?: string }): Promise<PagedResult<PickupPoint>> {
+  const q = new URLSearchParams()
+  if (params?.page) q.set('page', String(params.page))
+  if (params?.page_size) q.set('page_size', String(params.page_size))
+  if (params?.search) q.set('search', params.search)
+  const url = `${bfgApi.pickupPoints()}${q.toString() ? `?${q.toString()}` : ''}`
+  const response = await apiFetch<{ count: number; results: PickupPoint[] } | PickupPoint[]>(url, getSiteAdminOptions())
+  if (Array.isArray(response)) return { results: response, count: response.length }
+  return { results: response.results || [], count: response.count || 0 }
+}
+
+/** Every active point, for pickers. Points are few; there is nothing to page. */
+export async function getPickupPoints(): Promise<PickupPoint[]> {
+  const { results } = await getPickupPointsPage({ page_size: 200 })
+  return results.filter(p => p.is_active)
+}
+
+export async function createPickupPoint(data: PickupPointPayload): Promise<PickupPoint> {
+  return apiFetch<PickupPoint>(bfgApi.pickupPoints(), {
+    ...getSiteAdminOptions(),
+    method: 'POST',
+    body: JSON.stringify(data)
+  })
+}
+
+export async function updatePickupPoint(id: number, data: Partial<PickupPointPayload>): Promise<PickupPoint> {
+  return apiFetch<PickupPoint>(`${bfgApi.pickupPoints()}${id}/`, {
+    ...getSiteAdminOptions(),
+    method: 'PATCH',
+    body: JSON.stringify(data)
+  })
+}
+
+export async function deletePickupPoint(id: number): Promise<void> {
+  return apiFetch<void>(`${bfgApi.pickupPoints()}${id}/`, { ...getSiteAdminOptions(), method: 'DELETE' })
 }
 
 export async function getWarehousesPage(params?: { page?: number; page_size?: number; search?: string }): Promise<PagedResult<Warehouse>> {
