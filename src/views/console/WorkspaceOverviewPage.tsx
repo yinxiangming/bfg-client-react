@@ -142,8 +142,8 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
     return value && value.length >= 3 ? value : null
   }
 
-  const downloadExport = async () => {
-    const payload = await exportConsoleWorkspace(workspaceId)
+  const downloadExport = async (reason: string) => {
+    const payload = await exportConsoleWorkspace(workspaceId, reason)
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
     const url = URL.createObjectURL(blob)
     const anchor = document.createElement('a')
@@ -337,7 +337,10 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
                   if (reason) void runAction(() => suspendConsoleWorkspace(workspaceId, reason))
                 }}>{t('suspend')}</Button>
               )}
-              <Button disabled={actionBusy} onClick={() => void runAction(downloadExport)}>{t('export')}</Button>
+              <Button disabled={actionBusy} onClick={() => {
+                const reason = platformReason()
+                if (reason) void runAction(() => downloadExport(reason))
+              }}>{t('export')}</Button>
               <Button disabled={actionBusy} onClick={() => {
                 const reason = platformReason()
                 if (reason) void runAction(() => resetConsoleAdminPassword(workspaceId, reason))

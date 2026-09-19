@@ -4855,9 +4855,16 @@
       "forbidden": "只有平台管理员可以查看全部工作区。",
       "loadMore": "加载更多",
       "showing": "已显示 {shown} / {count}",
-  "import": "导入 Workspace 配置",
+      "import": "导入 Workspace 配置",
+      "importTitle": "导入 Workspace 配置",
       "importReason": "请说明导入此工作区的原因（至少 3 个字符）",
-  "importConfirm": "确定导入此工作区配置吗？这会创建一个新工作区；不会恢复成员、业务数据或媒体文件。"
+      "importConfirm": "这会根据配置导出创建一个新工作区；不会恢复成员、业务数据或媒体文件。",
+      "importChooseFile": "选择配置文件",
+      "importNoFile": "尚未选择配置文件。",
+      "importFileTooLarge": "请选择小于 1 MB 的配置文件。",
+      "importInvalidFile": "请选择有效的 JSON 工作区配置文件。",
+      "importAcknowledge": "我了解这会创建一个新工作区，并且导入的域名将保持待验证状态。",
+      "importFailed": "无法导入这个工作区配置，请检查文件后重试。"
     },
     "usage": {
       "title": "用量",

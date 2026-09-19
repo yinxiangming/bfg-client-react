@@ -4855,9 +4855,16 @@
       "forbidden": "Only platform administrators can see every workspace.",
       "loadMore": "Load more",
       "showing": "Showing {shown} of {count}",
-  "import": "Import workspace configuration",
+      "import": "Import workspace configuration",
+      "importTitle": "Import workspace configuration",
       "importReason": "Why are you importing this workspace? (at least 3 characters)",
-  "importConfirm": "Import this workspace configuration? This creates a new workspace. It does not restore members, business data, or media."
+      "importConfirm": "This creates a new workspace from a configuration export. It does not restore members, business data, or media.",
+      "importChooseFile": "Choose a configuration file",
+      "importNoFile": "No configuration file selected.",
+      "importFileTooLarge": "Choose a configuration file smaller than 1 MB.",
+      "importInvalidFile": "Choose a valid JSON workspace configuration file.",
+      "importAcknowledge": "I understand this creates a new workspace and keeps imported domains pending verification.",
+      "importFailed": "Couldn't import this workspace configuration. Check the file and try again."
     },
     "usage": {
       "title": "Usage",
