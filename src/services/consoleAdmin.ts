@@ -214,6 +214,7 @@ export async function setPlatformVariable(
 ): Promise<ConsolePlatformVariable> {
   return apiFetch<ConsolePlatformVariable>(buildApiUrl(`${BASE}variables/${encodeURIComponent(key)}/`), {
     method: 'PATCH',
+    headers: { 'X-Idempotency-Key': createIdempotencyKey() },
     body: JSON.stringify({ value, reason, confirm: true })
   })
 }
@@ -370,6 +371,7 @@ export async function listExchangeRates(query: ConsoleExchangeRateQuery = {}): P
 export async function setExchangeRate(rate: ConsoleExchangeRateInput): Promise<ConsoleExchangeRate> {
   return apiFetch<ConsoleExchangeRate>(buildApiUrl(`${BASE}exchange-rates/`), {
     method: 'POST',
+    headers: { 'X-Idempotency-Key': createIdempotencyKey() },
     body: JSON.stringify({ ...rate, confirm: true })
   })
 }
@@ -404,8 +406,15 @@ export async function getWorkspaceUsageCap(workspaceId: number): Promise<Console
 export async function setWorkspaceUsageCap(workspaceId: number, capPoints: string | null): Promise<ConsoleUsageCap> {
   return apiFetch<ConsoleUsageCap>(buildApiUrl(`${BASE}workspaces/${workspaceId}/usage-cap/`), {
     method: 'PATCH',
+    headers: { 'X-Idempotency-Key': createIdempotencyKey() },
     body: JSON.stringify({ cap_points: capPoints, confirm: true })
   })
+}
+
+function createIdempotencyKey(): string {
+  if (typeof globalThis.crypto?.randomUUID === 'function') return globalThis.crypto.randomUUID()
+
+  return `platform-config-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
 }
 
 // ── Runtime feature entitlements ─────────────────────────────────────
