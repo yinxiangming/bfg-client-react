@@ -91,6 +91,7 @@ export default function AuditLogPage() {
 
   const cellSx = { fontSize: 13, color: 'var(--at-row-fg)', verticalAlign: 'top' }
   const mutedSx = { color: 'var(--at-row-sub)' }
+  const resultLabel = (result: string) => (t.has(`results.${result}`) ? t(`results.${result}`) : result)
 
   return (
     <>
@@ -113,13 +114,14 @@ export default function AuditLogPage() {
         {state.kind === 'loaded' && state.events.length > 0 && (
           <Box sx={{ overflowX: 'auto' }}>
             <Table>
-              <TableHead><TableRow><TableCell>{t('columns.when')}</TableCell><TableCell>{t('columns.action')}</TableCell><TableCell>{t('columns.target')}</TableCell><TableCell>{t('columns.operator')}</TableCell><TableCell>{t('columns.reason')}</TableCell><TableCell align='right' /></TableRow></TableHead>
+              <TableHead><TableRow><TableCell>{t('columns.when')}</TableCell><TableCell>{t('columns.action')}</TableCell><TableCell>{t('columns.target')}</TableCell><TableCell>{t('columns.operator')}</TableCell><TableCell>{t('columns.result')}</TableCell><TableCell>{t('columns.reason')}</TableCell><TableCell align='right' /></TableRow></TableHead>
               <TableBody>{state.events.map(event => (
                 <TableRow key={event.id} hover>
                   <TableCell sx={{ ...cellSx, whiteSpace: 'nowrap' }}>{new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(event.created_at))}</TableCell>
                   <TableCell sx={cellSx}>{event.action}</TableCell>
                   <TableCell sx={cellSx}><Typography sx={{ fontSize: 13, fontWeight: 600 }}>{event.target.type}</Typography><Typography variant='caption' sx={mutedSx}>{event.target.id}</Typography></TableCell>
                   <TableCell sx={cellSx}>{event.actor?.username ?? t('system')}</TableCell>
+                  <TableCell sx={cellSx}>{resultLabel(event.result)}</TableCell>
                   <TableCell sx={{ ...cellSx, maxWidth: 360, overflowWrap: 'anywhere' }}>{event.reason}</TableCell>
                   <TableCell align='right'><Button size='small' onClick={() => setDetail(event)}>{t('details')}</Button></TableCell>
                 </TableRow>

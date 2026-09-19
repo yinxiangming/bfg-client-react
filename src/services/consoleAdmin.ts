@@ -118,6 +118,8 @@ export interface ConsoleAuditEvent {
   action: string
   target: { type: string; id: string }
   reason: string
+  /** Final server-side outcome, without secured exception detail. */
+  result: string
   /** The operator identity is limited to a username; request IPs are never exposed. */
   actor: { id: number; username: string } | null
   /** Snapshots are server-redacted again before being sent to the browser. */
