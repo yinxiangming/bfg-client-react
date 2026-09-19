@@ -4619,6 +4619,8 @@
       "bills": "Bills",
       "platform": "Platform",
       "allWorkspaces": "All workspaces",
+      "clusters": "Clusters",
+      "auditLog": "Audit log",
       "platformSettings": "Platform settings"
     },
     "topbar": {
@@ -4635,6 +4637,7 @@
         "name": "Name",
         "domain": "Domain",
         "status": "Status",
+        "cluster": "Cluster",
         "owner": "Owner",
         "staff": "Staff",
         "created": "Created"
@@ -4642,10 +4645,60 @@
       "ownerIsYou": "{name} (you)",
       "noOwner": "No owner",
       "noDomain": "Not connected",
+      "noCluster": "Not assigned",
       "staffCount": "{count} active",
       "extensions": "Extensions",
       "manageExtensions": "Manage extensions",
-      "enter": "Open admin"
+      "enter": "Open admin",
+      "platformActions": "Platform actions",
+      "operationHistory": "Operation history",
+      "loadingOperations": "Loading operations",
+      "operationsFailed": "Couldn't load this workspace's operations.",
+      "noOperations": "No lifecycle operations have been recorded for this workspace.",
+      "runtimeFeatures": {
+        "title": "Runtime feature access",
+        "subtitle": "Platform grants that the server actively enforces",
+        "names": {
+          "batch_management": "Batch management"
+        },
+        "forever": "Does not expire",
+        "until": "Until {date}",
+        "status": {
+          "effective": "Active",
+          "expired": "Expired",
+          "revoked": "Revoked",
+          "active": "Not active"
+        }
+      },
+      "grantFeature": "Grant feature",
+      "revokeFeature": "Revoke",
+      "revokeFeatureConfirm": "Revoke this runtime feature grant? The feature becomes unavailable immediately.",
+      "loadingFeatures": "Loading feature access",
+      "featuresFailed": "Couldn't load runtime feature access.",
+      "noRuntimeFeatures": "No Platform runtime feature grants have been recorded.",
+      "operations": {
+        "create": "Workspace created",
+        "suspend": "Workspace suspended",
+        "resume": "Workspace resumed",
+        "migrate": "Workspace migration",
+        "delete": "Deletion scheduled"
+      },
+      "operationStatus": {
+        "pending": "Pending",
+        "running": "Running",
+        "completed": "Completed",
+        "failed": "Failed"
+      },
+      "suspend": "Suspend",
+      "resume": "Resume",
+  "export": "Export workspace configuration",
+      "resetPassword": "Send password reset",
+      "delete": "Schedule deletion",
+      "cancelDeletion": "Cancel deletion",
+      "deleteConfirm": "Schedule this workspace for deletion in 30 days?",
+      "deletionScheduled": "This workspace is scheduled for deletion on {date}. Cancel deletion to keep it active.",
+      "reasonPrompt": "Why are you making this Platform change? (at least 3 characters)",
+      "actionFailed": "The action could not be completed."
     },
     "extensions": {
       "title": "Extensions",
@@ -4653,6 +4706,7 @@
       "loading": "Loading extensions",
       "loadFailed": "Couldn't load this workspace.",
       "notFound": "This workspace doesn't exist, or you don't run it.",
+      "unavailable": "Extension management is not available in this deployment yet.",
       "none": "This platform ships no extensions a workspace can switch on.",
       "on": "On",
       "off": "Off",
@@ -4729,6 +4783,8 @@
         "action": "Grant",
         "title": "Grant this workspace an entitlement",
         "what": "What to grant",
+        "runtimeFeature": "Batch management",
+        "runtimeFeatureHint": "This is currently the only Platform feature with an active runtime entitlement gate.",
         "basePlan": "Base plan",
         "basePlanHint": "Everything that comes with the plan, rather than one add-on.",
         "notSwitchedOn": "Granting doesn't switch an extension on — that stays the workspace's decision. One the platform paused when its entitlement ran out is switched back on.",
@@ -4774,6 +4830,12 @@
       "title": "All workspaces",
       "subtitle": "every workspace on the platform, suspended and deactivated ones included",
       "search": "Search by name or slug",
+      "filters": {
+        "status": "Status",
+        "allStatuses": "All statuses",
+        "cluster": "Cluster ID",
+        "clusterPlaceholder": "e.g. apac-1"
+      },
       "loading": "Loading workspaces",
       "loadFailed": "Couldn't load the workspaces.",
       "empty": "No workspace matches that.",
@@ -4782,6 +4844,7 @@
         "workspace": "Workspace",
         "domain": "Domain",
         "owner": "Owner",
+        "cluster": "Cluster",
         "status": "Status",
         "extensions": "Extensions on"
       },
@@ -4791,7 +4854,10 @@
       "noOwner": "No owner",
       "forbidden": "Only platform administrators can see every workspace.",
       "loadMore": "Load more",
-      "showing": "Showing {shown} of {count}"
+      "showing": "Showing {shown} of {count}",
+  "import": "Import workspace configuration",
+      "importReason": "Why are you importing this workspace? (at least 3 characters)",
+  "importConfirm": "Import this workspace configuration? This creates a new workspace. It does not restore members, business data, or media."
     },
     "usage": {
       "title": "Usage",
@@ -4799,6 +4865,7 @@
       "loading": "Loading usage",
       "loadFailed": "Couldn't load this workspace's usage.",
       "notFound": "This workspace doesn't exist, or you don't run it.",
+      "unavailable": "Usage reporting is not available in this deployment yet.",
       "month": "Month",
       "used": "Used",
       "cap": "Allowance",
@@ -4938,6 +5005,7 @@
       "subtitle": "the numbers every workspace on this platform is billed by",
       "loading": "Loading platform settings",
       "loadFailed": "Couldn't work out who you are. Reload the page.",
+      "unavailable": "Platform billing configuration is not available in this deployment yet.",
       "tabs": {
         "variables": "Variables",
         "prices": "Meter prices",
@@ -5030,6 +5098,101 @@
         "reason_required": "Say why you're making this change.",
         "invalid_meter_price": "That price can't be stored. Check the cost, the unit size and the margin.",
         "invalid_exchange_rate": "That rate can't be stored. Check the currencies and the number."
+      }
+    },
+    "clusters": {
+      "title": "Clusters",
+      "subtitle": "the infrastructure locations that host your workspaces",
+      "loading": "Loading clusters",
+      "loadFailed": "Couldn't load the clusters. Reload the page and try again.",
+      "forbidden": "Only platform administrators can manage clusters.",
+      "unavailable": "Cluster management is not available in this deployment yet.",
+      "empty": "No clusters have been configured yet.",
+      "add": "Add cluster",
+      "manage": "Manage",
+      "checkHealth": "Check health",
+      "checkHealthTitle": "Check {name}",
+      "checkHealthBody": "The Platform will call this Cluster's configured health endpoint. Redirects are not followed.",
+      "checkHealthConfirm": "I understand this runs a server-side probe and records the result.",
+      "checkHealthFailed": "Couldn't complete the Cluster health check.",
+      "createTitle": "Add cluster",
+      "editTitle": "Manage {name}",
+      "save": "Save cluster",
+      "create": "Create cluster",
+      "saveFailed": "Couldn't save this cluster. Check the fields and try again.",
+      "reason": "Reason for this change",
+      "confirm": "I understand this changes shared platform infrastructure.",
+      "redisUnchanged": "Leave blank to keep the current value",
+      "configuration": "Connection settings",
+      "capacity": "Capacity and availability",
+      "fields": {
+        "id": "Cluster ID",
+        "name": "Name",
+        "region": "Region",
+        "api": "API URL",
+        "frontend": "Frontend URL",
+        "dbHost": "Database host",
+        "dbPort": "Database port",
+        "redis": "Redis URL",
+        "bucket": "Storage bucket",
+        "capacity": "Workspace capacity",
+        "accepting": "Accepting new workspaces",
+        "active": "Cluster active"
+      },
+      "columns": {
+        "cluster": "Cluster",
+        "region": "Region",
+        "usage": "Capacity",
+        "availability": "Availability",
+        "health": "Health",
+        "endpoint": "API endpoint"
+      },
+      "regions": {
+        "us": "United States",
+        "eu": "Europe",
+        "apac": "Asia Pacific"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "accepting": "Accepting new workspaces",
+        "notAccepting": "Not accepting new workspaces",
+        "unknown": "Unknown",
+        "healthy": "Healthy",
+        "degraded": "Degraded",
+        "down": "Down"
+      }
+    },
+    "audit": {
+      "title": "Audit log",
+      "subtitle": "a read-only history of sensitive Platform changes",
+      "loading": "Loading audit history",
+      "loadFailed": "Couldn't load the audit history.",
+      "forbidden": "Only platform administrators can view audit history.",
+      "unavailable": "Audit history is not available in this deployment yet.",
+      "empty": "No Platform changes match these filters.",
+      "apply": "Apply filters",
+      "clear": "Clear",
+      "retry": "Retry",
+      "loadMore": "Load more",
+      "loadingMore": "Loading…",
+      "details": "Details",
+      "detailTitle": "Audited change",
+      "before": "Before",
+      "after": "After",
+      "close": "Close",
+      "system": "System",
+      "filters": {
+        "action": "Action",
+        "targetType": "Target type",
+        "targetId": "Target ID"
+      },
+      "columns": {
+        "when": "When",
+        "action": "Action",
+        "target": "Target",
+        "operator": "Operator",
+        "reason": "Reason"
       }
     },
     "brand": "Workspaces Admin"

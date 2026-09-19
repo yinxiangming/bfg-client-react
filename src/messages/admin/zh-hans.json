@@ -4619,6 +4619,8 @@
       "bills": "账单",
       "platform": "平台",
       "allWorkspaces": "全部工作区",
+      "clusters": "集群",
+      "auditLog": "审计日志",
       "platformSettings": "平台设置"
     },
     "topbar": {
@@ -4635,6 +4637,7 @@
         "name": "名称",
         "domain": "域名",
         "status": "状态",
+        "cluster": "集群",
         "owner": "所有者",
         "staff": "员工",
         "created": "创建时间"
@@ -4642,10 +4645,60 @@
       "ownerIsYou": "{name}（你）",
       "noOwner": "无所有者",
       "noDomain": "未绑定",
+      "noCluster": "未分配",
       "staffCount": "{count} 人在职",
       "extensions": "扩展",
       "manageExtensions": "管理扩展",
-      "enter": "进入后台"
+      "enter": "进入后台",
+      "platformActions": "平台操作",
+      "operationHistory": "操作记录",
+      "loadingOperations": "正在加载操作记录",
+      "operationsFailed": "没能加载这个工作区的操作记录。",
+      "noOperations": "这个工作区还没有生命周期操作记录。",
+      "runtimeFeatures": {
+        "title": "运行时功能权限",
+        "subtitle": "由平台授予并由服务端实际强制执行的功能权限",
+        "names": {
+          "batch_management": "批次管理"
+        },
+        "forever": "永不过期",
+        "until": "有效期至 {date}",
+        "status": {
+          "effective": "已生效",
+          "expired": "已过期",
+          "revoked": "已撤销",
+          "active": "未生效"
+        }
+      },
+      "grantFeature": "授予功能",
+      "revokeFeature": "撤销",
+      "revokeFeatureConfirm": "要撤销这项运行时功能权限吗？该功能会立即不可用。",
+      "loadingFeatures": "正在加载功能权限",
+      "featuresFailed": "没能加载运行时功能权限。",
+      "noRuntimeFeatures": "还没有记录任何平台运行时功能授权。",
+      "operations": {
+        "create": "已创建工作区",
+        "suspend": "已暂停工作区",
+        "resume": "已恢复工作区",
+        "migrate": "工作区迁移",
+        "delete": "已安排删除"
+      },
+      "operationStatus": {
+        "pending": "等待中",
+        "running": "处理中",
+        "completed": "已完成",
+        "failed": "失败"
+      },
+      "suspend": "暂停",
+      "resume": "恢复",
+  "export": "导出 Workspace 配置",
+      "resetPassword": "发送密码重置邮件",
+      "delete": "安排删除",
+      "cancelDeletion": "取消删除",
+      "deleteConfirm": "确定要安排这个 Workspace 在 30 天后删除吗？",
+      "deletionScheduled": "这个 Workspace 已安排在 {date} 删除。如需继续使用，请取消删除。",
+      "reasonPrompt": "请说明这次平台变更的原因（至少 3 个字符）",
+      "actionFailed": "操作未完成。"
     },
     "extensions": {
       "title": "扩展",
@@ -4653,6 +4706,7 @@
       "loading": "正在加载扩展",
       "loadFailed": "没能加载这个工作区。",
       "notFound": "这个工作区不存在，或者不归你管理。",
+      "unavailable": "当前部署尚未提供扩展管理功能。",
       "none": "当前平台没有可以开启的扩展。",
       "on": "已开启",
       "off": "未开启",
@@ -4729,6 +4783,8 @@
         "action": "赠送",
         "title": "赠送权益给这个工作区",
         "what": "赠送内容",
+        "runtimeFeature": "批次管理",
+        "runtimeFeatureHint": "这是目前唯一已接入运行时授权闸门的平台功能。",
         "basePlan": "基础套餐",
         "basePlanHint": "套餐本身包含的全部内容，而不是某一个加购。",
         "notSwitchedOn": "赠送不会替商家开启扩展，开不开仍然由工作区自己决定。只有因为权益到期被平台暂停的扩展会顺手恢复。",
@@ -4774,6 +4830,12 @@
       "title": "全部工作区",
       "subtitle": "平台上的所有工作区，包括已暂停和已停用的",
       "search": "搜索名称或标识",
+      "filters": {
+        "status": "状态",
+        "allStatuses": "所有状态",
+        "cluster": "Cluster ID",
+        "clusterPlaceholder": "例如 apac-1"
+      },
       "loading": "正在加载工作区",
       "loadFailed": "没能加载工作区列表。",
       "empty": "没有匹配的工作区。",
@@ -4782,6 +4844,7 @@
         "workspace": "工作区",
         "domain": "域名",
         "owner": "所有者",
+        "cluster": "Cluster",
         "status": "状态",
         "extensions": "已开启的扩展"
       },
@@ -4791,7 +4854,10 @@
       "noOwner": "无所有者",
       "forbidden": "只有平台管理员可以查看全部工作区。",
       "loadMore": "加载更多",
-      "showing": "已显示 {shown} / {count}"
+      "showing": "已显示 {shown} / {count}",
+  "import": "导入 Workspace 配置",
+      "importReason": "请说明导入此工作区的原因（至少 3 个字符）",
+  "importConfirm": "确定导入此工作区配置吗？这会创建一个新工作区；不会恢复成员、业务数据或媒体文件。"
     },
     "usage": {
       "title": "用量",
@@ -4799,6 +4865,7 @@
       "loading": "正在加载用量",
       "loadFailed": "没能加载这个工作区的用量。",
       "notFound": "这个工作区不存在，或者不归你管理。",
+      "unavailable": "当前部署尚未提供用量统计功能。",
       "month": "月份",
       "used": "已用",
       "cap": "额度",
@@ -4938,6 +5005,7 @@
       "subtitle": "平台上所有工作区的计费依据",
       "loading": "正在加载平台设置",
       "loadFailed": "没能确认你的身份，请刷新页面。",
+      "unavailable": "当前部署尚未提供平台计费配置功能。",
       "tabs": {
         "variables": "平台变量",
         "prices": "计量点价格",
@@ -5030,6 +5098,101 @@
         "reason_required": "请写明这次改动的理由。",
         "invalid_meter_price": "这条价格存不下来，请检查成本、单位数量和利润率。",
         "invalid_exchange_rate": "这条汇率存不下来，请检查货币代码和数字。"
+      }
+    },
+    "clusters": {
+      "title": "集群",
+      "subtitle": "承载工作区的基础设施位置与容量",
+      "loading": "正在加载集群",
+      "loadFailed": "没能加载集群，请刷新后重试。",
+      "forbidden": "只有平台管理员可以维护集群。",
+      "unavailable": "当前部署尚未提供集群管理功能。",
+      "empty": "还没有配置任何集群。",
+      "add": "新增集群",
+      "manage": "管理",
+      "checkHealth": "检查健康状态",
+      "checkHealthTitle": "检查 {name}",
+      "checkHealthBody": "平台将请求这个集群已配置的健康端点，并且不会跟随重定向。",
+      "checkHealthConfirm": "我了解这会执行一次服务端探测并记录结果。",
+      "checkHealthFailed": "无法完成集群健康检查。",
+      "createTitle": "新增集群",
+      "editTitle": "管理 {name}",
+      "save": "保存集群",
+      "create": "创建集群",
+      "saveFailed": "没能保存这个集群，请检查填写内容后重试。",
+      "reason": "本次变更原因",
+      "confirm": "我理解这会修改共享的平台基础设施。",
+      "redisUnchanged": "留空则保持当前配置不变",
+      "configuration": "连接配置",
+      "capacity": "容量和可用性",
+      "fields": {
+        "id": "集群 ID",
+        "name": "名称",
+        "region": "区域",
+        "api": "API 地址",
+        "frontend": "前端地址",
+        "dbHost": "数据库主机",
+        "dbPort": "数据库端口",
+        "redis": "Redis 地址",
+        "bucket": "存储 Bucket",
+        "capacity": "工作区容量",
+        "accepting": "接受新工作区",
+        "active": "集群已启用"
+      },
+      "columns": {
+        "cluster": "集群",
+        "region": "区域",
+        "usage": "容量",
+        "availability": "可用性",
+        "health": "健康状态",
+        "endpoint": "API 地址"
+      },
+      "regions": {
+        "us": "美国",
+        "eu": "欧洲",
+        "apac": "亚太"
+      },
+      "status": {
+        "active": "启用",
+        "inactive": "未启用",
+        "accepting": "接受新工作区",
+        "notAccepting": "不接受新工作区",
+        "unknown": "未知",
+        "healthy": "健康",
+        "degraded": "降级",
+        "down": "不可用"
+      }
+    },
+    "audit": {
+      "title": "审计日志",
+      "subtitle": "敏感 Platform 变更的只读历史记录",
+      "loading": "正在加载审计记录",
+      "loadFailed": "没能加载审计记录。",
+      "forbidden": "只有平台管理员可以查看审计记录。",
+      "unavailable": "当前部署尚未提供审计记录功能。",
+      "empty": "没有符合这些筛选条件的平台变更。",
+      "apply": "应用筛选",
+      "clear": "清除",
+      "retry": "重试",
+      "loadMore": "加载更多",
+      "loadingMore": "正在加载…",
+      "details": "详情",
+      "detailTitle": "已审计的变更",
+      "before": "变更前",
+      "after": "变更后",
+      "close": "关闭",
+      "system": "系统",
+      "filters": {
+        "action": "操作",
+        "targetType": "目标类型",
+        "targetId": "目标 ID"
+      },
+      "columns": {
+        "when": "时间",
+        "action": "操作",
+        "target": "目标",
+        "operator": "执行者",
+        "reason": "原因"
       }
     },
     "brand": "工作区管理台"

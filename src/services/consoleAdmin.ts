@@ -20,12 +20,140 @@
 
 import { apiFetch, buildApiUrl } from '@/utils/api'
 
-import type { ConsoleChanger, ConsoleExtensionStatus } from './console'
+import type { ConsoleChanger } from './console'
 
 const BASE = '/platform/console/'
 
 /** Everyone who is not a platform administrator is refused with this code. */
 export const PLATFORM_ADMIN_REQUIRED = 'platform_admin_required'
+
+// ── Clusters ─────────────────────────────────────────────────────────
+
+/** One deployment cluster that can host tenant workspaces. */
+export interface ConsoleCluster {
+  id: string
+  name: string
+  region: 'us' | 'eu' | 'apac'
+  api_base_url: string
+  frontend_base_url: string
+  db_host: string
+  db_port: number
+  /** A stored Redis endpoint exists; its value is write-only. */
+  redis_configured: boolean
+  s3_bucket: string
+  max_workspaces: number
+  /** Monotonic version required for a safe shared-configuration update. */
+  config_version: number
+  /** Computed from the assigned workspace profiles, rather than a stale counter. */
+  workspace_count: number
+  capacity_percentage: number
+  is_accepting_new: boolean
+  is_active: boolean
+  health_status: 'unknown' | 'healthy' | 'degraded' | 'down'
+  last_health_check: string | null
+  created_at: string
+  updated_at: string
+}
+
+/** The editable configuration needed to create or maintain one cluster. */
+export interface ConsoleClusterInput {
+  id?: string
+  name: string
+  region: ConsoleCluster['region']
+  api_base_url: string
+  frontend_base_url: string
+  db_host: string
+  db_port: number
+  redis_url: string
+  s3_bucket: string
+  max_workspaces: number
+  is_accepting_new: boolean
+  is_active: boolean
+}
+
+const CLUSTERS_BASE = '/platform/console/clusters/'
+
+export async function listConsoleClusters(): Promise<ConsoleCluster[]> {
+  return apiFetch<ConsoleCluster[]>(buildApiUrl(CLUSTERS_BASE))
+}
+
+export async function createConsoleCluster(
+  input: Required<Pick<ConsoleClusterInput, 'id'>> & ConsoleClusterInput,
+  reason: string
+): Promise<ConsoleCluster> {
+  return apiFetch<ConsoleCluster>(buildApiUrl(CLUSTERS_BASE), {
+    method: 'POST',
+    headers: { 'X-Platform-Change-Reason': reason },
+    body: JSON.stringify({ ...input, confirm: true })
+  })
+}
+
+export async function updateConsoleCluster(
+  id: string,
+  input: Partial<ConsoleClusterInput>,
+  reason: string,
+  expectedVersion: number
+): Promise<ConsoleCluster> {
+  return apiFetch<ConsoleCluster>(buildApiUrl(`${CLUSTERS_BASE}${encodeURIComponent(id)}/`), {
+    method: 'PATCH',
+    headers: { 'X-Platform-Change-Reason': reason },
+    body: JSON.stringify({ ...input, expected_version: expectedVersion, confirm: true })
+  })
+}
+
+/** Run the restricted server-side health probe for one configured Cluster. */
+export async function checkConsoleClusterHealth(id: string, reason: string): Promise<ConsoleCluster> {
+  return apiFetch<ConsoleCluster>(buildApiUrl(`${CLUSTERS_BASE}${encodeURIComponent(id)}/health-check/`), {
+    method: 'POST',
+    headers: { 'X-Platform-Change-Reason': reason },
+    body: JSON.stringify({ confirm: true })
+  })
+}
+
+// ── Audit history ────────────────────────────────────────────────────
+
+/** One completed sensitive action from the Platform control plane. */
+export interface ConsoleAuditEvent {
+  id: string
+  action: string
+  target: { type: string; id: string }
+  reason: string
+  /** The operator identity is limited to a username; request IPs are never exposed. */
+  actor: { id: number; username: string } | null
+  /** Snapshots are server-redacted again before being sent to the browser. */
+  before: Record<string, unknown>
+  after: Record<string, unknown>
+  created_at: string
+}
+
+export interface ConsoleAuditEventPage {
+  results: ConsoleAuditEvent[]
+  /** An opaque, signed cursor; null when there are no more entries. */
+  next: string | null
+}
+
+export interface ConsoleAuditEventQuery {
+  action?: string
+  targetType?: string
+  targetId?: string
+  cursor?: string
+  limit?: number
+}
+
+const AUDIT_EVENTS_BASE = '/platform/console/audit-events/'
+
+/** Read a bounded page of Platform audit history. This endpoint is superuser-only. */
+export async function listConsoleAuditEvents(query: ConsoleAuditEventQuery = {}): Promise<ConsoleAuditEventPage> {
+  const params = new URLSearchParams()
+  if (query.action?.trim()) params.set('action', query.action.trim())
+  if (query.targetType?.trim()) params.set('target_type', query.targetType.trim())
+  if (query.targetId?.trim()) params.set('target_id', query.targetId.trim())
+  if (query.cursor) params.set('cursor', query.cursor)
+  if (query.limit) params.set('limit', String(query.limit))
+  const search = params.toString()
+
+  return apiFetch<ConsoleAuditEventPage>(buildApiUrl(`${AUDIT_EVENTS_BASE}${search ? `?${search}` : ''}`))
+}
 
 // ── Platform variables ───────────────────────────────────────────────
 
@@ -84,7 +212,7 @@ export async function setPlatformVariable(
 ): Promise<ConsolePlatformVariable> {
   return apiFetch<ConsolePlatformVariable>(buildApiUrl(`${BASE}variables/${encodeURIComponent(key)}/`), {
     method: 'PATCH',
-    body: JSON.stringify({ value, reason })
+    body: JSON.stringify({ value, reason, confirm: true })
   })
 }
 
@@ -152,12 +280,14 @@ export async function listMeterPrices(meter?: string): Promise<ConsoleMeterPrice
  * a bill already issued can still be explained by the row it was calculated
  * from. The answer is the whole meter rather than the row written, because a
  * price dated behind one that already exists changes nothing today and the
- * answer says which row is in force. Refused with 400 `invalid_meter_price`.
+ * answer says which row is in force. `idempotencyKey` must remain stable while
+ * retrying one save, so a lost response cannot append the same price twice.
  */
-export async function addMeterPrice(price: ConsoleMeterPriceInput): Promise<ConsoleMeterPrices> {
+export async function addMeterPrice(price: ConsoleMeterPriceInput, idempotencyKey: string): Promise<ConsoleMeterPrices> {
   return apiFetch<ConsoleMeterPrices>(buildApiUrl(`${BASE}meter-prices/`), {
     method: 'POST',
-    body: JSON.stringify(price)
+    headers: { 'X-Idempotency-Key': idempotencyKey },
+    body: JSON.stringify({ ...price, confirm: true })
   })
 }
 
@@ -224,7 +354,7 @@ export async function listExchangeRates(query: ConsoleExchangeRateQuery = {}): P
 export async function setExchangeRate(rate: ConsoleExchangeRateInput): Promise<ConsoleExchangeRate> {
   return apiFetch<ConsoleExchangeRate>(buildApiUrl(`${BASE}exchange-rates/`), {
     method: 'POST',
-    body: JSON.stringify(rate)
+    body: JSON.stringify({ ...rate, confirm: true })
   })
 }
 
@@ -258,14 +388,11 @@ export async function getWorkspaceUsageCap(workspaceId: number): Promise<Console
 export async function setWorkspaceUsageCap(workspaceId: number, capPoints: string | null): Promise<ConsoleUsageCap> {
   return apiFetch<ConsoleUsageCap>(buildApiUrl(`${BASE}workspaces/${workspaceId}/usage-cap/`), {
     method: 'PATCH',
-    body: JSON.stringify({ cap_points: capPoints })
+    body: JSON.stringify({ cap_points: capPoints, confirm: true })
   })
 }
 
-// ── Entitlements given rather than sold ──────────────────────────────
-
-/** The key an entitlement to the base plan carries: the plan is not an extension. */
-export const BASE_PLAN_KEY = ''
+// ── Runtime feature entitlements ─────────────────────────────────────
 
 export interface ConsoleEntitlement {
   id: number
@@ -276,33 +403,18 @@ export interface ConsoleEntitlement {
   /** When it runs out; null for one that does not expire. */
   current_period_end: string | null
   reason: string
-}
-
-/**
- * What granting did to the extension itself, and null for the base plan or a
- * key the workspace has no record of.
- *
- * Granting does not switch an extension on — that is the workspace's decision —
- * with one exception: one the platform itself paused when an entitlement ran
- * out is resumed, since pausing kept its data precisely so that being entitled
- * again would pick it up. `refusal` is why that could not happen.
- */
-export interface ConsoleGrantedExtension {
-  key: string
-  status: ConsoleExtensionStatus
-  resumed: boolean
-  refusal: { code: string; detail: string } | null
+  /** True only while the server's runtime gate will honor this grant. */
+  is_effective: boolean
 }
 
 export interface ConsoleGrant {
   workspace: number
   entitlement: ConsoleEntitlement
-  extension: ConsoleGrantedExtension | null
 }
 
 /** What a grant says: what is being given, for how long, and why. */
 export interface ConsoleGrantInput {
-  /** An extension's key, or `BASE_PLAN_KEY` for the base plan. */
+  /** A feature key returned by the Platform runtime-feature registry. */
   key: string
   /** How many months it runs. Exactly one of this and `never_expires`. */
   months?: number
@@ -316,16 +428,32 @@ export const MAX_GRANT_MONTHS = 120
 /**
  * Give a workspace an entitlement it has not bought.
  *
- * Refused with 400 `invalid_grant` — which covers a body naming no period, both
- * periods, an impossible one, or no reason — 400 `unknown_extension`, or 409
- * `already_entitled` for a workspace that already holds one, carrying the
- * entitlement it holds.
+ * Refused with 400 `invalid_grant` for an invalid period/reason, 400
+ * `unknown_entitlement_feature` for a key without a runtime gate, or 409
+ * `already_entitled` for a workspace that already holds one.
  */
 export async function grantEntitlement(workspaceId: number, grant: ConsoleGrantInput): Promise<ConsoleGrant> {
   return apiFetch<ConsoleGrant>(buildApiUrl(`${BASE}workspaces/${workspaceId}/grants/`), {
     method: 'POST',
-    body: JSON.stringify(grant)
+    body: JSON.stringify({ ...grant, confirm: true })
   })
+}
+
+/** All historic and current Platform runtime feature grants for one workspace. */
+export async function listEntitlements(workspaceId: number): Promise<ConsoleEntitlement[]> {
+  return apiFetch<ConsoleEntitlement[]>(buildApiUrl(`${BASE}workspaces/${workspaceId}/grants/`))
+}
+
+/** Revoke a runtime feature grant while retaining it in the Platform audit trail. */
+export async function revokeEntitlement(
+  workspaceId: number,
+  grantId: number,
+  reason: string
+): Promise<ConsoleGrant> {
+  return apiFetch<ConsoleGrant>(
+    buildApiUrl(`${BASE}workspaces/${workspaceId}/grants/${grantId}/revoke/`),
+    { method: 'POST', body: JSON.stringify({ reason, confirm: true }) }
+  )
 }
 
 /** The entitlement an `already_entitled` refusal says the workspace already holds. */

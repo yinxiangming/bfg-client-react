@@ -1,21 +1,6 @@
 'use client'
 
-/**
- * Giving a workspace something it has not paid for, for a platform administrator.
- *
- * The base plan is one of the things that can be granted and it is not an
- * extension, so it is the first entry in the same picker rather than a control
- * of its own: what is being given and for how long is one question, and a
- * separate button for the plan would have somebody hunting for where plans are
- * granted. The server takes it as a key like any other — the empty one.
- *
- * A reason is required, as it is for every platform change that costs the
- * deployment money, and it stays on the entitlement row.
- *
- * Granting does not switch an extension on. The one exception is an extension
- * the platform itself paused when an entitlement ran out, which is resumed;
- * whoever grants is told which happened rather than left to check the card.
- */
+/** Give one server-registered runtime feature to a workspace with an audit reason. */
 
 import { useEffect, useState } from 'react'
 
@@ -30,14 +15,11 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import FormControlLabel from '@mui/material/FormControlLabel'
-import MenuItem from '@mui/material/MenuItem'
 import Radio from '@mui/material/Radio'
 import RadioGroup from '@mui/material/RadioGroup'
 import TextField from '@mui/material/TextField'
 
-import { extensionName, type ConsoleExtension } from '@/services/console'
 import {
-  BASE_PLAN_KEY,
   getHeldEntitlement,
   grantEntitlement,
   MAX_GRANT_MONTHS,
@@ -50,8 +32,6 @@ import { refusalMessage } from './refusal'
 type Props = {
   open: boolean
   workspaceId: number
-  /** Everything this deployment ships, to pick what is being granted from. */
-  extensions: ConsoleExtension[]
   onClose: () => void
   onGranted: (grant: ConsoleGrant) => void
 }
@@ -59,11 +39,10 @@ type Props = {
 /** How long a grant runs when nobody says otherwise: a year, the usual term. */
 const DEFAULT_MONTHS = '12'
 
-export default function GrantEntitlementDialog({ open, workspaceId, extensions, onClose, onGranted }: Props) {
+export default function GrantEntitlementDialog({ open, workspaceId, onClose, onGranted }: Props) {
   const t = useTranslations('admin.console.extensions.grant')
   const tActions = useTranslations('admin.common.actions')
   const locale = useLocale()
-  const [key, setKey] = useState(BASE_PLAN_KEY)
   const [period, setPeriod] = useState<'months' | 'never'>('months')
   const [months, setMonths] = useState(DEFAULT_MONTHS)
   const [reason, setReason] = useState('')
@@ -73,7 +52,6 @@ export default function GrantEntitlementDialog({ open, workspaceId, extensions, 
   useEffect(() => {
     if (!open) return
 
-    setKey(BASE_PLAN_KEY)
     setPeriod('months')
     setMonths(DEFAULT_MONTHS)
     setReason('')
@@ -104,7 +82,7 @@ export default function GrantEntitlementDialog({ open, workspaceId, extensions, 
     try {
       onGranted(
         await grantEntitlement(workspaceId, {
-          key,
+          key: 'batch_management',
           // Exactly one of the two, which is what the server takes: sending both
           // or neither is refused, and a month count of 0 is neither.
           ...(forMonths ? { months: Number(months) } : { never_expires: true }),
@@ -132,20 +110,12 @@ export default function GrantEntitlementDialog({ open, workspaceId, extensions, 
             {failure && <Alert severity='error'>{failure}</Alert>}
 
             <TextField
-              select
               fullWidth
               label={t('what')}
-              value={key}
-              onChange={event => setKey(event.target.value)}
-              helperText={key === BASE_PLAN_KEY ? t('basePlanHint') : undefined}
-            >
-              <MenuItem value={BASE_PLAN_KEY}>{t('basePlan')}</MenuItem>
-              {extensions.map(extension => (
-                <MenuItem key={extension.key} value={extension.key}>
-                  {extensionName(extension, locale)}
-                </MenuItem>
-              ))}
-            </TextField>
+              value={t('runtimeFeature')}
+              helperText={t('runtimeFeatureHint')}
+              slotProps={{ input: { readOnly: true } }}
+            />
 
             <Box>
               <RadioGroup value={period} onChange={event => setPeriod(event.target.value as 'months' | 'never')}>
