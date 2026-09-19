@@ -150,40 +150,43 @@ export interface ConsoleWorkspaceList {
 }
 
 const BASE = '/platform/console/workspaces/'
+// Tenant owners use ``BASE``. These lifecycle actions alter deployment state,
+// so they must use the separate Django-superuser-only control-plane contract.
+const CONTROL_BASE = '/platform/control/workspaces/'
 
 export async function suspendConsoleWorkspace(id: number, reason: string): Promise<ConsoleWorkspace> {
-  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/suspend/`), {
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${CONTROL_BASE}${id}/suspend/`), {
     method: 'POST', headers: { 'X-Idempotency-Key': createIdempotencyKey() }, body: JSON.stringify({ confirm: true, reason })
   })
 }
 
 export async function resumeConsoleWorkspace(id: number, reason: string): Promise<ConsoleWorkspace> {
-  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/resume/`), {
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${CONTROL_BASE}${id}/resume/`), {
     method: 'POST', headers: { 'X-Idempotency-Key': createIdempotencyKey() }, body: JSON.stringify({ confirm: true, reason })
   })
 }
 
 export async function deleteConsoleWorkspace(id: number, reason: string): Promise<ConsoleWorkspace> {
-  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/delete/`), {
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${CONTROL_BASE}${id}/delete/`), {
     method: 'POST', headers: { 'X-Idempotency-Key': createIdempotencyKey() }, body: JSON.stringify({ confirm: true, reason })
   })
 }
 
 export async function restoreConsoleWorkspace(id: number, reason: string): Promise<ConsoleWorkspace> {
-  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/restore/`), {
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${CONTROL_BASE}${id}/restore/`), {
     method: 'POST', headers: { 'X-Idempotency-Key': createIdempotencyKey() }, body: JSON.stringify({ confirm: true, reason })
   })
 }
 
 export async function exportConsoleWorkspace(id: number, reason: string): Promise<Record<string, unknown>> {
-  return apiFetch<Record<string, unknown>>(buildApiUrl(`${BASE}${id}/export/`), {
+  return apiFetch<Record<string, unknown>>(buildApiUrl(`${CONTROL_BASE}${id}/export/`), {
     method: 'POST',
     body: JSON.stringify({ confirm: true, reason })
   })
 }
 
 export async function importConsoleWorkspace(payload: Record<string, unknown>, reason: string): Promise<ConsoleWorkspace> {
-  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}import-workspace/`), {
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${CONTROL_BASE}import-workspace/`), {
     method: 'POST',
     headers: { 'X-Idempotency-Key': createIdempotencyKey() },
     body: JSON.stringify({ ...payload, confirm: true, reason })
@@ -191,7 +194,7 @@ export async function importConsoleWorkspace(payload: Record<string, unknown>, r
 }
 
 export async function resetConsoleAdminPassword(id: number, reason: string, email?: string): Promise<{ detail: string }> {
-  return apiFetch<{ detail: string }>(buildApiUrl(`${BASE}${id}/reset-admin-password/`), {
+  return apiFetch<{ detail: string }>(buildApiUrl(`${CONTROL_BASE}${id}/reset-admin-password/`), {
     method: 'POST',
     headers: { 'X-Idempotency-Key': createIdempotencyKey() },
     body: JSON.stringify({ ...(email ? { email } : {}), confirm: true, reason })
@@ -219,7 +222,7 @@ export interface ConsoleWorkspaceOperation {
 
 /** Recent lifecycle operations for a Platform-superuser-managed workspace. */
 export async function listConsoleWorkspaceOperations(id: number, limit = 10): Promise<ConsoleWorkspaceOperation[]> {
-  return apiFetch<ConsoleWorkspaceOperation[]>(buildApiUrl(`${BASE}${id}/operations/?limit=${limit}`))
+  return apiFetch<ConsoleWorkspaceOperation[]>(buildApiUrl(`${CONTROL_BASE}${id}/operations/?limit=${limit}`))
 }
 
 /** As many workspaces as the deployment's pagination allows in one request. */

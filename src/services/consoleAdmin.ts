@@ -22,7 +22,9 @@ import { apiFetch, buildApiUrl } from '@/utils/api'
 
 import type { ConsoleChanger } from './console'
 
-const BASE = '/platform/console/'
+// Deployment configuration is intentionally separate from the owner console.
+// Every route under this prefix is enforced by Django's superuser flag.
+const BASE = '/platform/control/'
 
 /** Everyone who is not a platform administrator is refused with this code. */
 export const PLATFORM_ADMIN_REQUIRED = 'platform_admin_required'
@@ -71,7 +73,7 @@ export interface ConsoleClusterInput {
   is_active: boolean
 }
 
-const CLUSTERS_BASE = '/platform/console/clusters/'
+const CLUSTERS_BASE = '/platform/control/clusters/'
 
 export async function listConsoleClusters(): Promise<ConsoleCluster[]> {
   return apiFetch<ConsoleCluster[]>(buildApiUrl(CLUSTERS_BASE))
@@ -142,7 +144,7 @@ export interface ConsoleAuditEventQuery {
   limit?: number
 }
 
-const AUDIT_EVENTS_BASE = '/platform/console/audit-events/'
+const AUDIT_EVENTS_BASE = '/platform/control/audit-events/'
 
 /** Read a bounded page of Platform audit history. This endpoint is superuser-only. */
 export async function listConsoleAuditEvents(query: ConsoleAuditEventQuery = {}): Promise<ConsoleAuditEventPage> {
