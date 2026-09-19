@@ -4790,6 +4790,7 @@
         "workspace": "工作区",
         "domain": "域名",
         "owner": "所有者",
+        "cluster": "Cluster",
         "status": "状态",
         "extensions": "已开启的扩展"
       },
