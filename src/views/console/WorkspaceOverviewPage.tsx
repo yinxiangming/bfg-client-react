@@ -24,7 +24,7 @@ import Icon from '@components/Icon'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import StatusBadge from '@/components/schema/StatusBadge'
 import { useConsole, useConsoleWorkspace } from '@/contexts/ConsoleContext'
-import { consoleWorkspaceStatus, extensionName, suspendConsoleWorkspace, resumeConsoleWorkspace, deleteConsoleWorkspace, exportConsoleWorkspace, resetConsoleAdminPassword } from '@/services/console'
+import { consoleWorkspaceStatus, extensionName, suspendConsoleWorkspace, resumeConsoleWorkspace, deleteConsoleWorkspace, restoreConsoleWorkspace, exportConsoleWorkspace, resetConsoleAdminPassword } from '@/services/console'
 
 import { useConsoleWorkspaceDetail } from './useConsoleWorkspaceDetail'
 import { useEnterWorkspace } from './useEnterWorkspace'
@@ -165,6 +165,12 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
         </Alert>
       )}
 
+      {workspace.scheduled_deletion_at && (
+        <Alert severity='warning' sx={{ mb: 4 }}>
+          {t('deletionScheduled', { date: new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(workspace.scheduled_deletion_at)) })}
+        </Alert>
+      )}
+
       <Box
         sx={{
           display: 'grid',
@@ -264,7 +270,12 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
             <Typography component='h2' sx={{ fontSize: 14, fontWeight: 600, color: 'var(--at-row-fg)' }}>{t('platformActions')}</Typography>
           </Box>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, p: 4 }}>
-            {status === 'suspended' || status === 'inactive' ? (
+            {workspace.scheduled_deletion_at ? (
+              <Button disabled={actionBusy} onClick={() => {
+                const reason = platformReason()
+                if (reason) void runAction(() => restoreConsoleWorkspace(workspaceId, reason))
+              }}>{t('cancelDeletion')}</Button>
+            ) : status === 'suspended' || status === 'inactive' ? (
               <Button disabled={actionBusy} onClick={() => {
                 const reason = platformReason()
                 if (reason) void runAction(() => resumeConsoleWorkspace(workspaceId, reason))

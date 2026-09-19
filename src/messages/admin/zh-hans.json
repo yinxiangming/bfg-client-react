@@ -4654,7 +4654,9 @@
   "export": "导出 Workspace 配置",
       "resetPassword": "发送密码重置邮件",
       "delete": "安排删除",
+      "cancelDeletion": "取消删除",
       "deleteConfirm": "确定要安排这个 Workspace 在 30 天后删除吗？",
+      "deletionScheduled": "这个 Workspace 已安排在 {date} 删除。如需继续使用，请取消删除。",
       "reasonPrompt": "请说明这次平台变更的原因（至少 3 个字符）",
       "actionFailed": "操作未完成。"
     },

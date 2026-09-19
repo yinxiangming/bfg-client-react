@@ -4654,7 +4654,9 @@
   "export": "Export workspace configuration",
       "resetPassword": "Send password reset",
       "delete": "Schedule deletion",
+      "cancelDeletion": "Cancel deletion",
       "deleteConfirm": "Schedule this workspace for deletion in 30 days?",
+      "deletionScheduled": "This workspace is scheduled for deletion on {date}. Cancel deletion to keep it active.",
       "reasonPrompt": "Why are you making this Platform change? (at least 3 characters)",
       "actionFailed": "The action could not be completed."
     },
