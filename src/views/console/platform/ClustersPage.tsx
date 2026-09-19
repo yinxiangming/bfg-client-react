@@ -30,7 +30,14 @@ import Typography from '@mui/material/Typography'
 
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import StatusBadge from '@/components/schema/StatusBadge'
-import { createConsoleCluster, listConsoleClusters, updateConsoleCluster, type ConsoleCluster, type ConsoleClusterInput } from '@/services/consoleAdmin'
+import {
+  checkConsoleClusterHealth,
+  createConsoleCluster,
+  listConsoleClusters,
+  updateConsoleCluster,
+  type ConsoleCluster,
+  type ConsoleClusterInput
+} from '@/services/consoleAdmin'
 
 import { usePlatformAdmin } from '../usePlatformAdmin'
 
@@ -93,6 +100,11 @@ export default function ClustersPage() {
   const [saveError, setSaveError] = useState<string | null>(null)
   const [reason, setReason] = useState('')
   const [confirmed, setConfirmed] = useState(false)
+  const [healthTarget, setHealthTarget] = useState<ConsoleCluster | null>(null)
+  const [healthReason, setHealthReason] = useState('')
+  const [healthConfirmed, setHealthConfirmed] = useState(false)
+  const [healthError, setHealthError] = useState<string | null>(null)
+  const [checkingHealth, setCheckingHealth] = useState(false)
 
   const load = useCallback(async () => {
     setState({ kind: 'loading' })
@@ -117,6 +129,33 @@ export default function ClustersPage() {
 
   const close = () => {
     if (!saving) setEditing(undefined)
+  }
+
+  const openHealthCheck = (cluster: ConsoleCluster) => {
+    setHealthTarget(cluster)
+    setHealthReason('')
+    setHealthConfirmed(false)
+    setHealthError(null)
+  }
+
+  const closeHealthCheck = () => {
+    if (!checkingHealth) setHealthTarget(null)
+  }
+
+  const checkHealth = async () => {
+    if (!healthTarget || healthReason.trim().length < 3 || !healthConfirmed) return
+
+    setCheckingHealth(true)
+    setHealthError(null)
+    try {
+      await checkConsoleClusterHealth(healthTarget.id, healthReason.trim())
+      setHealthTarget(null)
+      await load()
+    } catch (error) {
+      setHealthError(error instanceof Error ? error.message : t('checkHealthFailed'))
+    } finally {
+      setCheckingHealth(false)
+    }
   }
 
   const save = async () => {
@@ -223,7 +262,12 @@ export default function ClustersPage() {
                       <StatusBadge noDot color={healthColor(cluster.health_status)} label={t(`status.${cluster.health_status}`)} />
                     </TableCell>
                     <TableCell sx={{ ...cellSx, maxWidth: 260, overflowWrap: 'anywhere' }}>{cluster.api_base_url}</TableCell>
-                    <TableCell align='right'><Button size='small' onClick={() => open(cluster)}>{t('manage')}</Button></TableCell>
+                    <TableCell align='right'>
+                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                        <Button size='small' onClick={() => openHealthCheck(cluster)}>{t('checkHealth')}</Button>
+                        <Button size='small' onClick={() => open(cluster)}>{t('manage')}</Button>
+                      </Box>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -281,6 +325,34 @@ export default function ClustersPage() {
         <DialogActions>
           <Button onClick={close} disabled={saving}>Cancel</Button>
           <Button variant='contained' onClick={() => void save()} disabled={saving || reason.trim().length < 3 || !confirmed}>{editing ? t('save') : t('create')}</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={Boolean(healthTarget)} onClose={closeHealthCheck} fullWidth maxWidth='sm'>
+        <DialogTitle>{healthTarget ? t('checkHealthTitle', { name: healthTarget.name }) : t('checkHealth')}</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'grid', gap: 3, pt: 1 }}>
+            <Alert severity='info'>{t('checkHealthBody')}</Alert>
+            {healthError && <Alert severity='error'>{healthError}</Alert>}
+            <TextField
+              label={t('reason')}
+              value={healthReason}
+              required
+              multiline
+              minRows={2}
+              onChange={event => setHealthReason(event.target.value)}
+            />
+            <FormControlLabel
+              control={<Checkbox checked={healthConfirmed} onChange={event => setHealthConfirmed(event.target.checked)} />}
+              label={t('checkHealthConfirm')}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeHealthCheck} disabled={checkingHealth}>Cancel</Button>
+          <Button variant='contained' onClick={() => void checkHealth()} disabled={checkingHealth || healthReason.trim().length < 3 || !healthConfirmed}>
+            {t('checkHealth')}
+          </Button>
         </DialogActions>
       </Dialog>
     </>

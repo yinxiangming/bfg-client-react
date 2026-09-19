@@ -64,12 +64,14 @@ export default function PlatformSettingsPage() {
           icon: 'tabler-tag',
           content: <MeterPricesTab />
         },
-        {
-          value: 'rates',
-          label: t('tabs.rates'),
-          icon: 'tabler-currency-dollar',
-          content: <ExchangeRatesTab />
-        }
+        ...(capabilities.exchange_rates
+          ? [{
+              value: 'rates',
+              label: t('tabs.rates'),
+              icon: 'tabler-currency-dollar',
+              content: <ExchangeRatesTab />
+            }]
+          : [])
       ]}
     />
   )
