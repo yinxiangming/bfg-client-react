@@ -13,7 +13,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 
-import { listTenantWorkspaces, type TenantWorkspace, type TenantWorkspaceCreateBlocked } from '@/services/platform'
+import {
+  getPlatformControlStatus,
+  listTenantWorkspaces,
+  type TenantWorkspace,
+  type TenantWorkspaceCreateBlocked,
+} from '@/services/platform'
 import { getWorkspaceIdFromJwt } from '@/utils/api'
 
 export type ConsoleState =
@@ -66,17 +71,21 @@ export function ConsoleProvider({ children }: { children: ReactNode }) {
     setState(previous => (previous.kind === 'loaded' ? previous : { kind: 'loading' }))
 
     try {
-      const { workspaces, is_platform_admin, is_platform_superuser, workspace_limit, create_blocked, platform_capabilities } = await listTenantWorkspaces()
+      const { workspaces, workspace_limit, create_blocked } = await listTenantWorkspaces()
+      // ``me/`` remains the stable workspace-management contract. The isolated
+      // control endpoint succeeds only for a Django superuser, so an expected
+      // 403 means this signed-in user simply has no deployment controls.
+      const control = await getPlatformControlStatus().catch(() => null)
 
       setState({
         kind: 'loaded',
         workspaces: workspaces ?? [],
-        isPlatformAdmin: Boolean(is_platform_superuser ?? is_platform_admin),
+        isPlatformAdmin: control?.is_platform_superuser === true,
         platformCapabilities: {
-          cluster_management: Boolean(platform_capabilities?.cluster_management),
-          audit_log: Boolean(platform_capabilities?.audit_log),
-          configuration: Boolean(platform_capabilities?.configuration),
-          exchange_rates: Boolean(platform_capabilities?.exchange_rates)
+          cluster_management: Boolean(control?.platform_capabilities.cluster_management),
+          audit_log: Boolean(control?.platform_capabilities.audit_log),
+          configuration: Boolean(control?.platform_capabilities.configuration),
+          exchange_rates: Boolean(control?.platform_capabilities.exchange_rates)
         },
         createBlocked: create_blocked ?? null,
         workspaceLimit: workspace_limit
