@@ -4649,6 +4649,23 @@
       "manageExtensions": "Manage extensions",
       "enter": "Open admin",
       "platformActions": "Platform actions",
+      "operationHistory": "Operation history",
+      "loadingOperations": "Loading operations",
+      "operationsFailed": "Couldn't load this workspace's operations.",
+      "noOperations": "No lifecycle operations have been recorded for this workspace.",
+      "operations": {
+        "create": "Workspace created",
+        "suspend": "Workspace suspended",
+        "resume": "Workspace resumed",
+        "migrate": "Workspace migration",
+        "delete": "Deletion scheduled"
+      },
+      "operationStatus": {
+        "pending": "Pending",
+        "running": "Running",
+        "completed": "Completed",
+        "failed": "Failed"
+      },
       "suspend": "Suspend",
       "resume": "Resume",
   "export": "Export workspace configuration",

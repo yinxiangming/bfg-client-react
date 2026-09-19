@@ -8,7 +8,7 @@
  * and for a platform administrator looking at someone else's.
  */
 
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 
 import Link from 'next/link'
 import { useLocale, useTranslations } from 'next-intl'
@@ -24,7 +24,18 @@ import Icon from '@components/Icon'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import StatusBadge from '@/components/schema/StatusBadge'
 import { useConsole, useConsoleWorkspace } from '@/contexts/ConsoleContext'
-import { consoleWorkspaceStatus, extensionName, suspendConsoleWorkspace, resumeConsoleWorkspace, deleteConsoleWorkspace, restoreConsoleWorkspace, exportConsoleWorkspace, resetConsoleAdminPassword } from '@/services/console'
+import {
+  consoleWorkspaceStatus,
+  deleteConsoleWorkspace,
+  exportConsoleWorkspace,
+  extensionName,
+  listConsoleWorkspaceOperations,
+  resetConsoleAdminPassword,
+  restoreConsoleWorkspace,
+  resumeConsoleWorkspace,
+  suspendConsoleWorkspace,
+  type ConsoleWorkspaceOperation
+} from '@/services/console'
 
 import { useConsoleWorkspaceDetail } from './useConsoleWorkspaceDetail'
 import { useEnterWorkspace } from './useEnterWorkspace'
@@ -83,6 +94,22 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
   const enter = useEnterWorkspace(workspaceId)
   const [failure, setFailure] = useState<string | null>(null)
   const [actionBusy, setActionBusy] = useState(false)
+  const [operations, setOperations] = useState<ConsoleWorkspaceOperation[] | null>(null)
+  const [operationsFailed, setOperationsFailed] = useState(false)
+
+  const loadOperations = useCallback(async () => {
+    if (consoleState.kind !== 'loaded' || !consoleState.isPlatformAdmin) return
+    setOperationsFailed(false)
+    try {
+      setOperations(await listConsoleWorkspaceOperations(workspaceId))
+    } catch {
+      setOperationsFailed(true)
+    }
+  }, [consoleState, workspaceId])
+
+  useEffect(() => {
+    void loadOperations()
+  }, [loadOperations])
 
   // Switching into a workspace needs active staff there, owners included, so a platform
   // administrator looking at someone else's workspace is not offered the way in.
@@ -97,7 +124,15 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
   const runAction = async (action: () => Promise<unknown>) => {
     setFailure(null)
     setActionBusy(true)
-    try { await action(); await reload() } catch (error) { setFailure(error instanceof Error ? error.message : t('actionFailed')) } finally { setActionBusy(false) }
+    try {
+      await action()
+      await reload()
+      await loadOperations()
+    } catch (error) {
+      setFailure(error instanceof Error ? error.message : t('actionFailed'))
+    } finally {
+      setActionBusy(false)
+    }
   }
 
   const platformReason = () => {
@@ -265,39 +300,67 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
       </Box>
 
       {consoleState.kind === 'loaded' && consoleState.isPlatformAdmin && (
-        <Card component='section' sx={{ mt: 6 }}>
-          <Box sx={{ px: 4, py: 3, borderBottom: '1px solid var(--at-card-border)' }}>
-            <Typography component='h2' sx={{ fontSize: 14, fontWeight: 600, color: 'var(--at-row-fg)' }}>{t('platformActions')}</Typography>
-          </Box>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, p: 4 }}>
-            {workspace.scheduled_deletion_at ? (
+        <>
+          <Card component='section' sx={{ mt: 6 }}>
+            <Box sx={{ px: 4, py: 3, borderBottom: '1px solid var(--at-card-border)' }}>
+              <Typography component='h2' sx={{ fontSize: 14, fontWeight: 600, color: 'var(--at-row-fg)' }}>{t('platformActions')}</Typography>
+            </Box>
+            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, p: 4 }}>
+              {workspace.scheduled_deletion_at ? (
+                <Button disabled={actionBusy} onClick={() => {
+                  const reason = platformReason()
+                  if (reason) void runAction(() => restoreConsoleWorkspace(workspaceId, reason))
+                }}>{t('cancelDeletion')}</Button>
+              ) : status === 'suspended' || status === 'inactive' ? (
+                <Button disabled={actionBusy} onClick={() => {
+                  const reason = platformReason()
+                  if (reason) void runAction(() => resumeConsoleWorkspace(workspaceId, reason))
+                }}>{t('resume')}</Button>
+              ) : (
+                <Button disabled={actionBusy} onClick={() => {
+                  const reason = platformReason()
+                  if (reason) void runAction(() => suspendConsoleWorkspace(workspaceId, reason))
+                }}>{t('suspend')}</Button>
+              )}
+              <Button disabled={actionBusy} onClick={() => void runAction(downloadExport)}>{t('export')}</Button>
               <Button disabled={actionBusy} onClick={() => {
                 const reason = platformReason()
-                if (reason) void runAction(() => restoreConsoleWorkspace(workspaceId, reason))
-              }}>{t('cancelDeletion')}</Button>
-            ) : status === 'suspended' || status === 'inactive' ? (
-              <Button disabled={actionBusy} onClick={() => {
+                if (reason) void runAction(() => resetConsoleAdminPassword(workspaceId, reason))
+              }}>{t('resetPassword')}</Button>
+              <Button color='error' disabled={actionBusy} onClick={() => {
+                if (!window.confirm(t('deleteConfirm'))) return
                 const reason = platformReason()
-                if (reason) void runAction(() => resumeConsoleWorkspace(workspaceId, reason))
-              }}>{t('resume')}</Button>
-            ) : (
-              <Button disabled={actionBusy} onClick={() => {
-                const reason = platformReason()
-                if (reason) void runAction(() => suspendConsoleWorkspace(workspaceId, reason))
-              }}>{t('suspend')}</Button>
+                if (reason) void runAction(() => deleteConsoleWorkspace(workspaceId, reason))
+              }}>{t('delete')}</Button>
+            </Box>
+          </Card>
+
+          <Card component='section' sx={{ mt: 6 }}>
+            <Box sx={{ px: 4, py: 3, borderBottom: '1px solid var(--at-card-border)' }}>
+              <Typography component='h2' sx={{ fontSize: 14, fontWeight: 600, color: 'var(--at-row-fg)' }}>{t('operationHistory')}</Typography>
+            </Box>
+            {operations === null && !operationsFailed && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}><CircularProgress size={22} aria-label={t('loadingOperations')} /></Box>
             )}
-            <Button disabled={actionBusy} onClick={() => void runAction(downloadExport)}>{t('export')}</Button>
-            <Button disabled={actionBusy} onClick={() => {
-              const reason = platformReason()
-              if (reason) void runAction(() => resetConsoleAdminPassword(workspaceId, reason))
-            }}>{t('resetPassword')}</Button>
-            <Button color='error' disabled={actionBusy} onClick={() => {
-              if (!window.confirm(t('deleteConfirm'))) return
-              const reason = platformReason()
-              if (reason) void runAction(() => deleteConsoleWorkspace(workspaceId, reason))
-            }}>{t('delete')}</Button>
-          </Box>
-        </Card>
+            {operationsFailed && (
+              <Box sx={{ p: 4 }}><Alert severity='error' action={<Button color='inherit' size='small' onClick={() => void loadOperations()}>{tActions('retry')}</Button>}>{t('operationsFailed')}</Alert></Box>
+            )}
+            {operations?.length === 0 && <Box sx={{ px: 4, py: 5, color: 'var(--at-row-sub)', fontSize: 13 }}>{t('noOperations')}</Box>}
+            {operations?.map(operation => (
+              <Box key={operation.id} sx={{ px: 4, py: 2.5, display: 'flex', alignItems: 'center', gap: 3, '&:not(:last-child)': { borderBottom: '1px solid var(--at-card-border)' } }}>
+                <Box sx={{ minWidth: 0, flex: 1 }}>
+                  <Typography sx={{ fontSize: 13, color: 'var(--at-row-fg)' }}>{t(`operations.${operation.operation}`)}</Typography>
+                  <Typography variant='caption' sx={{ color: 'var(--at-row-sub)' }}>
+                    {new Intl.DateTimeFormat(locale, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(operation.started_at))}
+                    {operation.initiated_by?.username ? ` · ${operation.initiated_by.username}` : ''}
+                  </Typography>
+                  {operation.error && <Typography variant='caption' component='div' sx={{ color: 'var(--mui-palette-error-main)', mt: 0.5 }}>{operation.error}</Typography>}
+                </Box>
+                <StatusBadge noDot color={operation.status === 'completed' ? 'success' : operation.status === 'failed' ? 'error' : operation.status === 'running' ? 'warning' : 'default'} label={t(`operationStatus.${operation.status}`)} />
+              </Box>
+            ))}
+          </Card>
+        </>
       )}
     </>
   )
