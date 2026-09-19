@@ -219,6 +219,7 @@ export default function AllWorkspacesPage() {
                   <TableCell>{t('columns.workspace')}</TableCell>
                   <TableCell>{t('columns.domain')}</TableCell>
                   <TableCell>{t('columns.owner')}</TableCell>
+                  <TableCell>{t('columns.cluster')}</TableCell>
                   <TableCell>{t('columns.status')}</TableCell>
                   <TableCell>{t('columns.extensions')}</TableCell>
                   <TableCell align='right' />
@@ -249,6 +250,16 @@ export default function AllWorkspacesPage() {
                           <Box component='span' sx={mutedSx}>
                             {t('noOwner')}
                           </Box>
+                        )}
+                      </TableCell>
+                      <TableCell sx={cellSx}>
+                        {workspace.cluster ? (
+                          <Box>
+                            <Box>{workspace.cluster.name}</Box>
+                            <Box component='span' sx={{ ...mutedSx, fontSize: 12 }}>{workspace.cluster.region}</Box>
+                          </Box>
+                        ) : (
+                          <Box component='span' sx={mutedSx}>—</Box>
                         )}
                       </TableCell>
                       <TableCell sx={cellSx}>

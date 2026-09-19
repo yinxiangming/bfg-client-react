@@ -4790,6 +4790,7 @@
         "workspace": "Workspace",
         "domain": "Domain",
         "owner": "Owner",
+        "cluster": "Cluster",
         "status": "Status",
         "extensions": "Extensions on"
       },
