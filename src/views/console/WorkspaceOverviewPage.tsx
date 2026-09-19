@@ -227,6 +227,20 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
           <InfoRow label={t('fields.status')}>
             <StatusBadge label={tStatus(status)} color={WORKSPACE_STATUS_COLOR[status]} />
           </InfoRow>
+          <InfoRow label={t('fields.cluster')}>
+            {workspace.cluster ? (
+              <Box>
+                <Typography component='span' sx={{ fontSize: 13, color: 'var(--at-row-fg)' }}>
+                  {workspace.cluster.name}
+                </Typography>
+                <Typography component='span' sx={{ ml: 2, fontSize: 12, color: 'var(--at-row-sub)' }}>
+                  {workspace.cluster.id} · {workspace.cluster.region.toUpperCase()}
+                </Typography>
+              </Box>
+            ) : (
+              <Box sx={{ color: 'var(--at-row-sub)' }}>{t('noCluster')}</Box>
+            )}
+          </InfoRow>
           <InfoRow label={t('fields.owner')}>
             {owner ? (
               workspace.owned_by_viewer ? (

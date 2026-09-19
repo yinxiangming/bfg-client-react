@@ -4637,6 +4637,7 @@
         "name": "Name",
         "domain": "Domain",
         "status": "Status",
+        "cluster": "Cluster",
         "owner": "Owner",
         "staff": "Staff",
         "created": "Created"
@@ -4644,6 +4645,7 @@
       "ownerIsYou": "{name} (you)",
       "noOwner": "No owner",
       "noDomain": "Not connected",
+      "noCluster": "Not assigned",
       "staffCount": "{count} active",
       "extensions": "Extensions",
       "manageExtensions": "Manage extensions",
