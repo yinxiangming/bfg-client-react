@@ -104,6 +104,8 @@ export interface ConsoleWorkspace {
   is_active: boolean
   is_platform: boolean
   suspended_at: string | null
+  /** A soft deletion is pending; it must be explicitly cancelled before its deadline. */
+  scheduled_deletion_at?: string | null
   created_at: string
   /** Hostnames, the primary one first. */
   domains: string[]
@@ -159,6 +161,10 @@ export async function resumeConsoleWorkspace(id: number, reason: string): Promis
 
 export async function deleteConsoleWorkspace(id: number, reason: string): Promise<ConsoleWorkspace> {
   return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/delete/`), { method: 'POST', body: JSON.stringify({ confirm: true, reason }) })
+}
+
+export async function restoreConsoleWorkspace(id: number, reason: string): Promise<ConsoleWorkspace> {
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/restore/`), { method: 'POST', body: JSON.stringify({ confirm: true, reason }) })
 }
 
 export async function exportConsoleWorkspace(id: number): Promise<Record<string, unknown>> {
