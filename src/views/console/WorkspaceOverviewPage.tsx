@@ -18,6 +18,11 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import CircularProgress from '@mui/material/CircularProgress'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
+import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 
 import Icon from '@components/Icon'
@@ -41,6 +46,8 @@ import { useConsoleWorkspaceDetail } from './useConsoleWorkspaceDetail'
 import { useEnterWorkspace } from './useEnterWorkspace'
 import RuntimeFeatureAccessCard from './RuntimeFeatureAccessCard'
 import { WORKSPACE_STATUS_COLOR } from './workspaceStatus'
+
+type PlatformAction = 'suspend' | 'resume' | 'restore' | 'export' | 'resetPassword' | 'delete'
 
 function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -95,6 +102,8 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
   const enter = useEnterWorkspace(workspaceId)
   const [failure, setFailure] = useState<string | null>(null)
   const [actionBusy, setActionBusy] = useState(false)
+  const [pendingAction, setPendingAction] = useState<PlatformAction | null>(null)
+  const [actionReason, setActionReason] = useState('')
   const [operations, setOperations] = useState<ConsoleWorkspaceOperation[] | null>(null)
   const [operationsFailed, setOperationsFailed] = useState(false)
 
@@ -136,10 +145,34 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
     }
   }
 
-  const platformReason = () => {
-    const value = window.prompt(t('reasonPrompt'))?.trim()
+  const openAction = (action: PlatformAction) => {
+    setActionReason('')
+    setPendingAction(action)
+  }
 
-    return value && value.length >= 3 ? value : null
+  const closeAction = () => {
+    if (!actionBusy) setPendingAction(null)
+  }
+
+  const actionLabel = (action: PlatformAction): string => {
+    if (action === 'restore') return t('cancelDeletion')
+
+    return t(action)
+  }
+
+  const submitAction = async () => {
+    if (!pendingAction || actionReason.trim().length < 3) return
+
+    const action = pendingAction
+    const reason = actionReason.trim()
+    setPendingAction(null)
+
+    if (action === 'suspend') await runAction(() => suspendConsoleWorkspace(workspaceId, reason))
+    else if (action === 'resume') await runAction(() => resumeConsoleWorkspace(workspaceId, reason))
+    else if (action === 'restore') await runAction(() => restoreConsoleWorkspace(workspaceId, reason))
+    else if (action === 'export') await runAction(() => downloadExport(reason))
+    else if (action === 'resetPassword') await runAction(() => resetConsoleAdminPassword(workspaceId, reason))
+    else await runAction(() => deleteConsoleWorkspace(workspaceId, reason))
   }
 
   const downloadExport = async (reason: string) => {
@@ -322,34 +355,15 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
             </Box>
             <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, p: 4 }}>
               {workspace.scheduled_deletion_at ? (
-                <Button disabled={actionBusy} onClick={() => {
-                  const reason = platformReason()
-                  if (reason) void runAction(() => restoreConsoleWorkspace(workspaceId, reason))
-                }}>{t('cancelDeletion')}</Button>
+                <Button disabled={actionBusy} onClick={() => openAction('restore')}>{t('cancelDeletion')}</Button>
               ) : status === 'suspended' || status === 'inactive' ? (
-                <Button disabled={actionBusy} onClick={() => {
-                  const reason = platformReason()
-                  if (reason) void runAction(() => resumeConsoleWorkspace(workspaceId, reason))
-                }}>{t('resume')}</Button>
+                <Button disabled={actionBusy} onClick={() => openAction('resume')}>{t('resume')}</Button>
               ) : (
-                <Button disabled={actionBusy} onClick={() => {
-                  const reason = platformReason()
-                  if (reason) void runAction(() => suspendConsoleWorkspace(workspaceId, reason))
-                }}>{t('suspend')}</Button>
+                <Button disabled={actionBusy} onClick={() => openAction('suspend')}>{t('suspend')}</Button>
               )}
-              <Button disabled={actionBusy} onClick={() => {
-                const reason = platformReason()
-                if (reason) void runAction(() => downloadExport(reason))
-              }}>{t('export')}</Button>
-              <Button disabled={actionBusy} onClick={() => {
-                const reason = platformReason()
-                if (reason) void runAction(() => resetConsoleAdminPassword(workspaceId, reason))
-              }}>{t('resetPassword')}</Button>
-              <Button color='error' disabled={actionBusy} onClick={() => {
-                if (!window.confirm(t('deleteConfirm'))) return
-                const reason = platformReason()
-                if (reason) void runAction(() => deleteConsoleWorkspace(workspaceId, reason))
-              }}>{t('delete')}</Button>
+              <Button disabled={actionBusy} onClick={() => openAction('export')}>{t('export')}</Button>
+              <Button disabled={actionBusy} onClick={() => openAction('resetPassword')}>{t('resetPassword')}</Button>
+              <Button color='error' disabled={actionBusy} onClick={() => openAction('delete')}>{t('delete')}</Button>
             </Box>
           </Card>
 
@@ -382,6 +396,35 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
           </Card>
         </>
       )}
+
+      <Dialog open={pendingAction !== null} onClose={closeAction} fullWidth maxWidth='sm'>
+        <DialogTitle>{pendingAction ? actionLabel(pendingAction) : ''}</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'grid', gap: 3, pt: 1 }}>
+            {pendingAction === 'delete' && <Alert severity='warning'>{t('deleteConfirm')}</Alert>}
+            <TextField
+              label={t('reasonPrompt')}
+              value={actionReason}
+              required
+              multiline
+              minRows={2}
+              onChange={event => setActionReason(event.target.value)}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeAction} disabled={actionBusy}>{tActions('cancel')}</Button>
+          <Button
+            color={pendingAction === 'delete' ? 'error' : 'primary'}
+            variant='contained'
+            onClick={() => void submitAction()}
+            disabled={actionBusy || actionReason.trim().length < 3}
+            startIcon={actionBusy ? <CircularProgress size={14} color='inherit' /> : undefined}
+          >
+            {pendingAction ? actionLabel(pendingAction) : ''}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }
