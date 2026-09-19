@@ -6,6 +6,7 @@ import { useConsole } from '@/contexts/ConsoleContext'
 import {
   getConsoleErrorStatus,
   getConsoleWorkspace,
+  getOwnerWorkspace,
   type ConsoleExtension,
   type ConsoleWorkspaceDetail
 } from '@/services/console'
@@ -29,7 +30,7 @@ export type ConsoleDetailState =
  * while the switches acted on another.
  */
 export function useConsoleWorkspaceDetail(workspaceId: number) {
-  const { setOpenWorkspace } = useConsole()
+  const { state: consoleState, setOpenWorkspace } = useConsole()
   const [state, setState] = useState<ConsoleDetailState>({ kind: 'loading' })
   const currentRequest = useRef(0)
 
@@ -45,8 +46,19 @@ export function useConsoleWorkspaceDetail(workspaceId: number) {
       return
     }
 
+    // Wait for one definitive capability result before choosing a namespace. A
+    // superuser can inspect every workspace through the control plane; an owner must
+    // use the tenant-safe route, never a privileged fallback.
+    if (consoleState.kind === 'failed') {
+      setState({ kind: 'failed', notFound: false, error: consoleState.error })
+      return
+    }
+    if (consoleState.kind !== 'loaded') return
+
     try {
-      const workspace = await getConsoleWorkspace(workspaceId)
+      const workspace = consoleState.isPlatformAdmin
+        ? await getConsoleWorkspace(workspaceId)
+        : await getOwnerWorkspace(workspaceId)
 
       if (currentRequest.current !== request) return
 
@@ -59,7 +71,7 @@ export function useConsoleWorkspaceDetail(workspaceId: number) {
 
       setState({ kind: 'failed', notFound: status === 404 || status === 403, error })
     }
-  }, [workspaceId, setOpenWorkspace])
+  }, [workspaceId, consoleState, setOpenWorkspace])
 
   useEffect(() => {
     void load()

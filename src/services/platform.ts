@@ -94,18 +94,34 @@ export interface TenantWorkspace {
   plan: unknown | null
   credits: unknown | null
   extensions: unknown[]
+  capabilities?: {
+    extension_management: boolean
+    usage: boolean
+  }
 }
 
 /** Why GET /platform/workspaces/me/ says the user cannot create a workspace right now. */
 export type TenantWorkspaceCreateBlocked = 'workspace_create_forbidden' | 'workspace_limit_reached'
 
 export interface TenantWorkspacesResponse {
+  /** Existing shared-console administrator access; this is not control-plane access. */
   is_platform_admin: boolean
   workspaces: TenantWorkspace[]
   /** How many workspaces one account may own, suspended and inactive ones included. */
   workspace_limit: number
   /** null when a create request would go ahead now, else the code it would be refused with. */
   create_blocked: TenantWorkspaceCreateBlocked | null
+}
+
+/** Response from the Django-superuser-only Platform control capability endpoint. */
+export interface PlatformControlStatusResponse {
+  is_platform_superuser: true
+  platform_capabilities: {
+    cluster_management: boolean
+    audit_log: boolean
+    configuration: boolean
+    exchange_rates: boolean
+  }
 }
 
 export interface CreateTenantWorkspaceInput {
@@ -175,6 +191,16 @@ export async function getMyWorkspaces(): Promise<WorkspaceMembership[]> {
 export async function listTenantWorkspaces(): Promise<TenantWorkspacesResponse> {
   const url = buildApiUrl('/platform/workspaces/me/')
   return apiFetch<TenantWorkspacesResponse>(url)
+}
+
+/**
+ * Read the deployment-control capabilities. The endpoint is intentionally
+ * forbidden to ordinary workspace users; callers should treat a rejected
+ * request as no Platform-control access rather than as a workspace failure.
+ */
+export async function getPlatformControlStatus(): Promise<PlatformControlStatusResponse> {
+  const url = buildApiUrl('/platform/control/status/')
+  return apiFetch<PlatformControlStatusResponse>(url)
 }
 
 /**

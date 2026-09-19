@@ -9,17 +9,25 @@
  * in the same pages an owner sees.
  */
 
-import { useCallback, useEffect, useState } from 'react'
+import { type ChangeEvent, useCallback, useEffect, useState } from 'react'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
+import Checkbox from '@mui/material/Checkbox'
 import CircularProgress from '@mui/material/CircularProgress'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import InputAdornment from '@mui/material/InputAdornment'
+import MenuItem from '@mui/material/MenuItem'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -36,7 +44,9 @@ import {
   consoleWorkspaceStatus,
   listConsoleWorkspaces,
   listMoreConsoleWorkspaces,
-  type ConsoleWorkspace
+  importConsoleWorkspace,
+  type ConsoleWorkspace,
+  type ConsoleWorkspaceStatus
 } from '@/services/console'
 
 import { WORKSPACE_STATUS_COLOR } from './workspaceStatus'
@@ -50,11 +60,21 @@ export default function AllWorkspacesPage() {
   const t = useTranslations('admin.console.all')
   const tStatus = useTranslations('admin.workspaces.status')
   const tActions = useTranslations('admin.common.actions')
+  const router = useRouter()
   const { state: consoleState } = useConsole()
   const [search, setSearch] = useState('')
   const [term, setTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState<ConsoleWorkspaceStatus | ''>('')
+  const [clusterFilter, setClusterFilter] = useState('')
   const [state, setState] = useState<ListState>({ kind: 'loading' })
   const [loadingMore, setLoadingMore] = useState(false)
+  const [importOpen, setImportOpen] = useState(false)
+  const [importing, setImporting] = useState(false)
+  const [importPayload, setImportPayload] = useState<Record<string, unknown> | null>(null)
+  const [importFileName, setImportFileName] = useState('')
+  const [importReason, setImportReason] = useState('')
+  const [importConfirmed, setImportConfirmed] = useState(false)
+  const [importError, setImportError] = useState<string | null>(null)
 
   const isPlatformAdmin = consoleState.kind === 'loaded' && consoleState.isPlatformAdmin
 
@@ -68,13 +88,17 @@ export default function AllWorkspacesPage() {
     setState({ kind: 'loading' })
 
     try {
-      const { workspaces, count, next } = await listConsoleWorkspaces(term)
+      const { workspaces, count, next } = await listConsoleWorkspaces({
+        search: term,
+        status: statusFilter || undefined,
+        cluster: clusterFilter
+      })
 
       setState({ kind: 'loaded', workspaces, count, next })
     } catch {
       setState({ kind: 'failed' })
     }
-  }, [term])
+  }, [clusterFilter, statusFilter, term])
 
   useEffect(() => {
     // Anyone else would only get their own workspaces back, under a title that promises
@@ -107,6 +131,60 @@ export default function AllWorkspacesPage() {
     }
   }
 
+  const openImport = () => {
+    setImportPayload(null)
+    setImportFileName('')
+    setImportReason('')
+    setImportConfirmed(false)
+    setImportError(null)
+    setImportOpen(true)
+  }
+
+  const closeImport = () => {
+    if (!importing) setImportOpen(false)
+  }
+
+  const importFile = async (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+
+    setImportError(null)
+    if (file.size > 1_000_000) {
+      setImportPayload(null)
+      setImportFileName('')
+      setImportError(t('importFileTooLarge'))
+      return
+    }
+
+    try {
+      const payload: unknown = JSON.parse(await file.text())
+      if (!payload || typeof payload !== 'object' || Array.isArray(payload)) throw new Error('invalid')
+      setImportPayload(payload as Record<string, unknown>)
+      setImportFileName(file.name)
+    } catch {
+      setImportPayload(null)
+      setImportFileName('')
+      setImportError(t('importInvalidFile'))
+    }
+  }
+
+  const submitImport = async () => {
+    if (!importPayload || importReason.trim().length < 3 || !importConfirmed) return
+
+    setImporting(true)
+    setImportError(null)
+    try {
+      const workspace = await importConsoleWorkspace(importPayload, importReason.trim())
+      setImportOpen(false)
+      router.push(`/workspaces/${workspace.id}`)
+    } catch (error) {
+      setImportError(error instanceof Error ? error.message : t('importFailed'))
+    } finally {
+      setImporting(false)
+    }
+  }
+
   if (consoleState.kind === 'loading') {
     return (
       <Card sx={{ display: 'flex', justifyContent: 'center', py: 12 }}>
@@ -128,7 +206,11 @@ export default function AllWorkspacesPage() {
 
   return (
     <>
-      <AdminPageHeader title={t('title')} subtitle={t('subtitle')} />
+      <AdminPageHeader
+        title={t('title')}
+        subtitle={t('subtitle')}
+        actions={<Button variant='contained' onClick={openImport}>{t('import')}</Button>}
+      />
 
       <Card>
         <Box
@@ -158,10 +240,31 @@ export default function AllWorkspacesPage() {
               }
             }}
           />
+          <TextField
+            select
+            size='small'
+            value={statusFilter}
+            onChange={event => setStatusFilter(event.target.value as ConsoleWorkspaceStatus | '')}
+            label={t('filters.status')}
+            sx={{ width: { xs: '100%', sm: 160 } }}
+          >
+            <MenuItem value=''>{t('filters.allStatuses')}</MenuItem>
+            <MenuItem value='active'>{tStatus('active')}</MenuItem>
+            <MenuItem value='suspended'>{tStatus('suspended')}</MenuItem>
+            <MenuItem value='inactive'>{tStatus('inactive')}</MenuItem>
+          </TextField>
+          <TextField
+            size='small'
+            value={clusterFilter}
+            onChange={event => setClusterFilter(event.target.value)}
+            label={t('filters.cluster')}
+            placeholder={t('filters.clusterPlaceholder')}
+            sx={{ width: { xs: '100%', sm: 200 } }}
+          />
           {state.kind === 'loaded' && (
-            <Typography variant='caption' sx={{ ml: { sm: 'auto' }, ...mutedSx }}>
-              {t('count', { count: state.count })}
-            </Typography>
+            <>
+              <Typography variant='caption' sx={{ ...mutedSx, ml: { sm: 'auto' } }}>{t('count', { count: state.count })}</Typography>
+            </>
           )}
         </Box>
 
@@ -198,6 +301,7 @@ export default function AllWorkspacesPage() {
                   <TableCell>{t('columns.workspace')}</TableCell>
                   <TableCell>{t('columns.domain')}</TableCell>
                   <TableCell>{t('columns.owner')}</TableCell>
+                  <TableCell>{t('columns.cluster')}</TableCell>
                   <TableCell>{t('columns.status')}</TableCell>
                   <TableCell>{t('columns.extensions')}</TableCell>
                   <TableCell align='right' />
@@ -228,6 +332,16 @@ export default function AllWorkspacesPage() {
                           <Box component='span' sx={mutedSx}>
                             {t('noOwner')}
                           </Box>
+                        )}
+                      </TableCell>
+                      <TableCell sx={cellSx}>
+                        {workspace.cluster ? (
+                          <Box>
+                            <Box>{workspace.cluster.name}</Box>
+                            <Box component='span' sx={{ ...mutedSx, fontSize: 12 }}>{workspace.cluster.region}</Box>
+                          </Box>
+                        ) : (
+                          <Box component='span' sx={mutedSx}>—</Box>
                         )}
                       </TableCell>
                       <TableCell sx={cellSx}>
@@ -285,6 +399,41 @@ export default function AllWorkspacesPage() {
           </Box>
         )}
       </Card>
+
+      <Dialog open={importOpen} onClose={closeImport} fullWidth maxWidth='sm'>
+        <DialogTitle>{t('importTitle')}</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'grid', gap: 3, pt: 1 }}>
+            <Alert severity='info'>{t('importConfirm')}</Alert>
+            {importError && <Alert severity='error'>{importError}</Alert>}
+            <Button component='label' variant='outlined' disabled={importing} sx={{ justifySelf: 'start' }}>
+              {t('importChooseFile')}
+              <input hidden type='file' accept='application/json,.json' onChange={event => void importFile(event)} />
+            </Button>
+            <Typography variant='caption' sx={{ color: 'var(--at-row-sub)' }}>
+              {importFileName || t('importNoFile')}
+            </Typography>
+            <TextField
+              label={t('importReason')}
+              value={importReason}
+              required
+              multiline
+              minRows={2}
+              onChange={event => setImportReason(event.target.value)}
+            />
+            <FormControlLabel
+              control={<Checkbox checked={importConfirmed} onChange={event => setImportConfirmed(event.target.checked)} />}
+              label={t('importAcknowledge')}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeImport} disabled={importing}>{tActions('cancel')}</Button>
+          <Button variant='contained' onClick={() => void submitImport()} disabled={importing || !importPayload || importReason.trim().length < 3 || !importConfirmed}>
+            {importing ? t('loading') : t('import')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }

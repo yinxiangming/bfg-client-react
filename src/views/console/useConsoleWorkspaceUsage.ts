@@ -6,6 +6,7 @@ import { getConsoleErrorStatus, getWorkspaceUsage, type ConsoleUsage } from '@/s
 
 export type ConsoleUsageState =
   | { kind: 'loading' }
+  | { kind: 'unavailable' }
   | { kind: 'failed'; notFound: boolean; error: unknown }
   | { kind: 'loaded'; usage: ConsoleUsage }
 
@@ -19,7 +20,7 @@ export type ConsoleUsageState =
  * for an account that runs no workspace at all) and one that does not exist are reported
  * as "not found", exactly as the server means them to be.
  */
-export function useConsoleWorkspaceUsage(workspaceId: number, month: string) {
+export function useConsoleWorkspaceUsage(workspaceId: number, month: string, enabled = true) {
   const [state, setState] = useState<ConsoleUsageState>({ kind: 'loading' })
   const currentRequest = useRef(0)
 
@@ -28,6 +29,12 @@ export function useConsoleWorkspaceUsage(workspaceId: number, month: string) {
 
     currentRequest.current = request
     setState({ kind: 'loading' })
+
+    if (!enabled) {
+      setState({ kind: 'unavailable' })
+
+      return
+    }
 
     // /workspaces/abc/usage reaches this route too; no request is worth making for it.
     if (!Number.isInteger(workspaceId)) {
@@ -49,7 +56,7 @@ export function useConsoleWorkspaceUsage(workspaceId: number, month: string) {
 
       setState({ kind: 'failed', notFound: status === 404 || status === 403, error })
     }
-  }, [workspaceId, month])
+  }, [workspaceId, month, enabled])
 
   useEffect(() => {
     void load()

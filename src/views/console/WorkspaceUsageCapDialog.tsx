@@ -46,6 +46,7 @@ export default function WorkspaceUsageCapDialog({ open, workspaceId, cap, onClos
   const tActions = useTranslations('admin.common.actions')
   const [source, setSource] = useState<'platform' | 'workspace'>('platform')
   const [points, setPoints] = useState('')
+  const [reason, setReason] = useState('')
   const [saving, setSaving] = useState(false)
   const [failure, setFailure] = useState<string | null>(null)
 
@@ -57,11 +58,12 @@ export default function WorkspaceUsageCapDialog({ open, workspaceId, cap, onClos
 
     setSource(cap.cap_points === null ? 'platform' : 'workspace')
     setPoints(cap.cap_points ?? '')
+    setReason('')
     setFailure(null)
   }, [open, cap])
 
   const ownCap = source === 'workspace'
-  const canSave = (!ownCap || points.trim().length > 0) && !saving
+  const canSave = (!ownCap || points.trim().length > 0) && reason.trim().length >= 3 && !saving
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -73,7 +75,7 @@ export default function WorkspaceUsageCapDialog({ open, workspaceId, cap, onClos
     try {
       // null and "0" are different answers, which is the whole reason for the
       // choice above: null follows the platform, 0 permits nothing.
-      onChanged(await setWorkspaceUsageCap(workspaceId, ownCap ? points.trim() : null))
+      onChanged(await setWorkspaceUsageCap(workspaceId, ownCap ? points.trim() : null, reason.trim()))
     } catch (error) {
       setFailure(refusalMessage(error, t('saveFailed'), code => (t.has(`errors.${code}`) ? t(`errors.${code}`) : null)))
     } finally {
@@ -106,6 +108,17 @@ export default function WorkspaceUsageCapDialog({ open, workspaceId, cap, onClos
               value={points}
               onChange={event => setPoints(event.target.value)}
               helperText={t('zeroMeansNothing')}
+            />
+
+            <TextField
+              fullWidth
+              required
+              multiline
+              minRows={2}
+              label={t('reason')}
+              value={reason}
+              onChange={event => setReason(event.target.value)}
+              helperText={t('reasonHint')}
             />
 
             <Typography variant='caption' color='text.secondary'>

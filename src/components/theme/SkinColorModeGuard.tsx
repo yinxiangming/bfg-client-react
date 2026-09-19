@@ -15,8 +15,8 @@ export default function SkinColorModeGuard({ supportedColorModes, children }: Sk
   const forcedMode = supportedColorModes?.length === 1 ? supportedColorModes[0] : null
 
   useEffect(() => {
-    forceMode(forcedMode)
-    return () => forceMode(null)
+    forceMode(forcedMode, 'skin')
+    return () => forceMode(null, 'skin')
   }, [forceMode, forcedMode])
 
   return <>{children}</>

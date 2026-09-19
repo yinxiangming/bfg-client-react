@@ -10,8 +10,10 @@ type ThemeContextType = {
   mode: Mode
   systemMode: SystemMode
   setMode: (mode: Mode) => void
-  forceMode: (forced: SystemMode | null) => void
+  forceMode: (forced: SystemMode | null, source?: ThemeForceSource) => void
 }
+
+export type ThemeForceSource = 'default' | 'storefront' | 'skin'
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined)
 
@@ -77,13 +79,18 @@ export const ThemeContextProvider = ({ children, initialMode }: ThemeProviderPro
     return 'light'
   })
 
-  const [forcedMode, setForcedMode] = useState<SystemMode | null>(null)
+  const [forcedModes, setForcedModes] = useState<Record<ThemeForceSource, SystemMode | null>>({
+    default: null,
+    storefront: null,
+    skin: null,
+  })
 
   useEffect(() => {
     if (typeof window === 'undefined') return
-    const effectiveMode = forcedMode ?? (mode === 'system' ? systemMode : mode)
+    const effectiveMode =
+      forcedModes.skin ?? forcedModes.storefront ?? forcedModes.default ?? (mode === 'system' ? systemMode : mode)
     applyMode(effectiveMode)
-  }, [mode, systemMode, forcedMode])
+  }, [mode, systemMode, forcedModes])
 
   useEffect(() => {
     if (typeof window === 'undefined') return
@@ -112,11 +119,12 @@ export const ThemeContextProvider = ({ children, initialMode }: ThemeProviderPro
     }
   }, [])
 
-  const forceMode = useCallback((forced: SystemMode | null) => {
-    setForcedMode(forced)
+  const forceMode = useCallback((forced: SystemMode | null, source: ThemeForceSource = 'default') => {
+    setForcedModes(current => (current[source] === forced ? current : { ...current, [source]: forced }))
   }, [])
 
-  const effectiveMode = forcedMode ?? (mode === 'system' ? systemMode : mode)
+  const effectiveMode =
+    forcedModes.skin ?? forcedModes.storefront ?? forcedModes.default ?? (mode === 'system' ? systemMode : mode)
 
   return (
     <ThemeContext.Provider value={{ mode, systemMode: effectiveMode, setMode, forceMode }}>

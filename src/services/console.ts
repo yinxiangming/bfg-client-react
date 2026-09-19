@@ -104,6 +104,8 @@ export interface ConsoleWorkspace {
   is_active: boolean
   is_platform: boolean
   suspended_at: string | null
+  /** A soft deletion is pending; it must be explicitly cancelled before its deadline. */
+  scheduled_deletion_at?: string | null
   created_at: string
   /** Hostnames, the primary one first. */
   domains: string[]
@@ -112,10 +114,19 @@ export interface ConsoleWorkspace {
   staff_count: number
   /** Keys of the extensions the workspace has switched on. */
   active_extensions: string[]
+  cluster?: { id: string; name: string; region: string; is_active: boolean } | null
+}
+
+/** Which optional workspace-management capabilities the current deployment supports. */
+export interface ConsoleWorkspaceCapabilities {
+  extension_management: boolean
+  usage: boolean
 }
 
 export interface ConsoleWorkspaceDetail extends ConsoleWorkspace {
   extensions: ConsoleExtension[]
+  /** Missing on an older Platform response; callers must treat that as unavailable. */
+  capabilities?: ConsoleWorkspaceCapabilities
 }
 
 export type ConsoleWorkspaceStatus = 'active' | 'suspended' | 'inactive'
@@ -139,6 +150,80 @@ export interface ConsoleWorkspaceList {
 }
 
 const BASE = '/platform/console/workspaces/'
+// Tenant owners use ``BASE``. These lifecycle actions alter deployment state,
+// so they must use the separate Django-superuser-only control-plane contract.
+const CONTROL_BASE = '/platform/control/workspaces/'
+
+export async function suspendConsoleWorkspace(id: number, reason: string): Promise<ConsoleWorkspace> {
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${CONTROL_BASE}${id}/suspend/`), {
+    method: 'POST', headers: { 'X-Idempotency-Key': createIdempotencyKey() }, body: JSON.stringify({ confirm: true, reason })
+  })
+}
+
+export async function resumeConsoleWorkspace(id: number, reason: string): Promise<ConsoleWorkspace> {
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${CONTROL_BASE}${id}/resume/`), {
+    method: 'POST', headers: { 'X-Idempotency-Key': createIdempotencyKey() }, body: JSON.stringify({ confirm: true, reason })
+  })
+}
+
+export async function deleteConsoleWorkspace(id: number, reason: string): Promise<ConsoleWorkspace> {
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${CONTROL_BASE}${id}/delete/`), {
+    method: 'POST', headers: { 'X-Idempotency-Key': createIdempotencyKey() }, body: JSON.stringify({ confirm: true, reason })
+  })
+}
+
+export async function restoreConsoleWorkspace(id: number, reason: string): Promise<ConsoleWorkspace> {
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${CONTROL_BASE}${id}/restore/`), {
+    method: 'POST', headers: { 'X-Idempotency-Key': createIdempotencyKey() }, body: JSON.stringify({ confirm: true, reason })
+  })
+}
+
+export async function exportConsoleWorkspace(id: number, reason: string): Promise<Record<string, unknown>> {
+  return apiFetch<Record<string, unknown>>(buildApiUrl(`${CONTROL_BASE}${id}/export/`), {
+    method: 'POST',
+    body: JSON.stringify({ confirm: true, reason })
+  })
+}
+
+export async function importConsoleWorkspace(payload: Record<string, unknown>, reason: string): Promise<ConsoleWorkspace> {
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${CONTROL_BASE}import-workspace/`), {
+    method: 'POST',
+    headers: { 'X-Idempotency-Key': createIdempotencyKey() },
+    body: JSON.stringify({ ...payload, confirm: true, reason })
+  })
+}
+
+export async function resetConsoleAdminPassword(id: number, reason: string, email?: string): Promise<{ detail: string }> {
+  return apiFetch<{ detail: string }>(buildApiUrl(`${CONTROL_BASE}${id}/reset-admin-password/`), {
+    method: 'POST',
+    headers: { 'X-Idempotency-Key': createIdempotencyKey() },
+    body: JSON.stringify({ ...(email ? { email } : {}), confirm: true, reason })
+  })
+}
+
+function createIdempotencyKey(): string {
+  if (typeof globalThis.crypto?.randomUUID === 'function') return globalThis.crypto.randomUUID()
+
+  return `platform-action-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
+}
+
+/** A lifecycle operation the Platform has performed for one workspace. */
+export interface ConsoleWorkspaceOperation {
+  id: string
+  operation: 'create' | 'suspend' | 'resume' | 'migrate' | 'delete'
+  status: 'pending' | 'running' | 'completed' | 'failed'
+  initiated_by: ConsoleChanger | null
+  /** Audit-safe operation metadata. Worker exception text is intentionally never sent. */
+  details: Record<string, unknown>
+  error: string | null
+  started_at: string
+  completed_at: string | null
+}
+
+/** Recent lifecycle operations for a Platform-superuser-managed workspace. */
+export async function listConsoleWorkspaceOperations(id: number, limit = 10): Promise<ConsoleWorkspaceOperation[]> {
+  return apiFetch<ConsoleWorkspaceOperation[]>(buildApiUrl(`${CONTROL_BASE}${id}/operations/?limit=${limit}`))
+}
 
 /** As many workspaces as the deployment's pagination allows in one request. */
 const PAGE_SIZE = 100
@@ -153,12 +238,24 @@ function toList(payload: Page<ConsoleWorkspace> | ConsoleWorkspace[]): ConsoleWo
   }
 }
 
-/** The workspaces the signed-in account reaches, newest first; `search` matches name or slug. */
-export async function listConsoleWorkspaces(search?: string): Promise<ConsoleWorkspaceList> {
-  const term = search?.trim()
+export interface ConsoleWorkspaceQuery {
+  /** Matches a workspace name or slug. */
+  search?: string
+  status?: ConsoleWorkspaceStatus
+  /** Exact Cluster identifier. */
+  cluster?: string
+}
+
+/** The workspaces the signed-in account reaches, newest first, with optional inventory filters. */
+export async function listConsoleWorkspaces(filters: ConsoleWorkspaceQuery = {}): Promise<ConsoleWorkspaceList> {
+  const term = filters.search?.trim()
+  const status = filters.status?.trim()
+  const cluster = filters.cluster?.trim()
   const query = new URLSearchParams({ page_size: String(PAGE_SIZE) })
 
   if (term) query.set('search', term)
+  if (status) query.set('status', status)
+  if (cluster) query.set('cluster', cluster)
 
   return toList(await apiFetch<Page<ConsoleWorkspace> | ConsoleWorkspace[]>(buildApiUrl(`${BASE}?${query}`)))
 }
@@ -171,6 +268,14 @@ export async function listMoreConsoleWorkspaces(next: string): Promise<ConsoleWo
 /** One workspace with every extension it can switch, each with its configuration. */
 export async function getConsoleWorkspace(id: number): Promise<ConsoleWorkspaceDetail> {
   return apiFetch<ConsoleWorkspaceDetail>(buildApiUrl(`${BASE}${id}/`))
+}
+
+/**
+ * The tenant-safe workspace contract for an owner or member. Platform console routes
+ * deliberately remain Django-superuser-only and must never be used as an owner fallback.
+ */
+export async function getOwnerWorkspace(id: number): Promise<ConsoleWorkspaceDetail> {
+  return apiFetch<ConsoleWorkspaceDetail>(buildApiUrl(`/platform/workspaces/${id}/`))
 }
 
 export async function activateExtension(workspaceId: number, key: string): Promise<ConsoleExtension> {

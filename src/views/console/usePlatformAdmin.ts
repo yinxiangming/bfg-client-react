@@ -12,12 +12,20 @@ import { useConsole } from '@/contexts/ConsoleContext'
  * entry that appears and then disappears reads as a bug, and one the server
  * would refuse reads as a dead end.
  */
-export function usePlatformAdmin(): { ready: boolean; failed: boolean; isPlatformAdmin: boolean } {
+export function usePlatformAdmin(): {
+  ready: boolean
+  failed: boolean
+  isPlatformAdmin: boolean
+  capabilities: { cluster_management: boolean; audit_log: boolean; configuration: boolean; exchange_rates: boolean }
+} {
   const { state } = useConsole()
 
   return {
     ready: state.kind === 'loaded',
     failed: state.kind === 'failed',
-    isPlatformAdmin: state.kind === 'loaded' && state.isPlatformAdmin
+    isPlatformAdmin: state.kind === 'loaded' && state.isPlatformAdmin,
+    capabilities: state.kind === 'loaded'
+      ? state.platformCapabilities
+      : { cluster_management: false, audit_log: false, configuration: false, exchange_rates: false }
   }
 }

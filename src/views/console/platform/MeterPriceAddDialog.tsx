@@ -13,7 +13,7 @@
  * would price every single token at a million times what it should be.
  */
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { useTranslations } from 'next-intl'
 
@@ -25,6 +25,7 @@ import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
+import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
 
 import { addMeterPrice, type ConsoleMeterPrices } from '@/services/consoleAdmin'
@@ -35,13 +36,21 @@ type Props = {
   open: boolean
   /** The meter the dialog was opened from; empty when it was opened for any. */
   meter: string
+  /** Meter keys that have a server-side runtime enforcement point. */
+  meters: string[]
   /** What the deployment's margin is, for the hint under the margin field. */
   defaultMargin: string | null
   onClose: () => void
   onAdded: (prices: ConsoleMeterPrices) => void
 }
 
-export default function MeterPriceAddDialog({ open, meter, defaultMargin, onClose, onAdded }: Props) {
+function createIdempotencyKey(): string {
+  if (typeof globalThis.crypto?.randomUUID === 'function') return globalThis.crypto.randomUUID()
+
+  return `meter-price-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
+}
+
+export default function MeterPriceAddDialog({ open, meter, meters, defaultMargin, onClose, onAdded }: Props) {
   const t = useTranslations('admin.console.platform')
   const tActions = useTranslations('admin.common.actions')
   const [key, setKey] = useState('')
@@ -49,21 +58,25 @@ export default function MeterPriceAddDialog({ open, meter, defaultMargin, onClos
   const [unitSize, setUnitSize] = useState('1')
   const [margin, setMargin] = useState('')
   const [effectiveFrom, setEffectiveFrom] = useState('')
+  const [reason, setReason] = useState('')
   const [saving, setSaving] = useState(false)
   const [failure, setFailure] = useState<string | null>(null)
+  const requestKey = useRef<string | null>(null)
 
   useEffect(() => {
     if (!open) return
 
-    setKey(meter)
+    setKey(meter || meters[0] || '')
     setVendorCost('')
     setUnitSize('1')
     setMargin('')
     setEffectiveFrom('')
+    setReason('')
     setFailure(null)
-  }, [open, meter])
+    requestKey.current = null
+  }, [open, meter, meters])
 
-  const canSave = key.trim().length > 0 && vendorCost.trim().length > 0 && unitSize.trim().length > 0 && !saving
+  const canSave = meters.includes(key) && vendorCost.trim().length > 0 && unitSize.trim().length > 0 && reason.trim().length >= 3 && !saving
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -82,8 +95,10 @@ export default function MeterPriceAddDialog({ open, meter, defaultMargin, onClos
           // that moves; sending the same share as a number would pin it instead.
           ...(margin.trim() ? { margin: margin.trim() } : {}),
           ...(effectiveFrom ? { effective_from: effectiveFrom } : {})
-        })
+        }, requestKey.current ?? (requestKey.current = createIdempotencyKey()), reason.trim())
       )
+      requestKey.current = null
+      onClose()
     } catch (error) {
       setFailure(refusalMessage(error, t('prices.saveFailed'), code => (t.has(`errors.${code}`) ? t(`errors.${code}`) : null)))
     } finally {
@@ -103,13 +118,21 @@ export default function MeterPriceAddDialog({ open, meter, defaultMargin, onClos
 
             <TextField
               fullWidth
+              select
               required
               autoFocus={!meter}
               label={t('prices.columns.meter')}
               value={key}
               onChange={event => setKey(event.target.value)}
               helperText={t('prices.meterHint')}
-            />
+              disabled={Boolean(meter)}
+            >
+              {meters.map(runtimeMeter => (
+                <MenuItem key={runtimeMeter} value={runtimeMeter}>
+                  {runtimeMeter}
+                </MenuItem>
+              ))}
+            </TextField>
 
             <Box sx={{ display: 'grid', gap: 4, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
               <TextField
@@ -150,6 +173,17 @@ export default function MeterPriceAddDialog({ open, meter, defaultMargin, onClos
               onChange={event => setEffectiveFrom(event.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
               helperText={t('prices.effectiveFromHint')}
+            />
+
+            <TextField
+              fullWidth
+              required
+              multiline
+              minRows={2}
+              label={t('prices.reason')}
+              value={reason}
+              onChange={event => setReason(event.target.value)}
+              helperText={t('prices.reasonHint')}
             />
           </Box>
         </DialogContent>

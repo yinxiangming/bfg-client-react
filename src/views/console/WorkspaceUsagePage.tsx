@@ -42,6 +42,7 @@ import { formatPoints, getIntlLocale } from '@/utils/format'
 
 import { currentMonth, formatDay, formatPeriod, MONTH_PATTERN, recentMonths } from './billingPeriods'
 import SectionCard from './SectionCard'
+import { useConsoleWorkspaceDetail } from './useConsoleWorkspaceDetail'
 import { useConsoleWorkspaceUsage } from './useConsoleWorkspaceUsage'
 import { usePlatformAdmin } from './usePlatformAdmin'
 import WorkspaceUsageCapCard from './WorkspaceUsageCapCard'
@@ -89,7 +90,9 @@ export default function WorkspaceUsagePage({ workspaceId }: { workspaceId: numbe
 
   const requested = searchParams.get('month') ?? ''
   const month = MONTH_PATTERN.test(requested) ? requested : currentMonth()
-  const { state, reload } = useConsoleWorkspaceUsage(workspaceId, month)
+  const { state: detailState } = useConsoleWorkspaceDetail(workspaceId)
+  const usageAvailable = detailState.kind === 'loaded' && detailState.workspace.capabilities?.usage === true
+  const { state, reload } = useConsoleWorkspaceUsage(workspaceId, month, usageAvailable)
 
   // A month reached by link may be older than the picker offers; it still belongs in the
   // list, or the control would show nothing while the page shows that month's figures.
@@ -121,6 +124,27 @@ export default function WorkspaceUsagePage({ workspaceId }: { workspaceId: numbe
   const cellSx = { fontSize: 13, color: 'var(--at-row-fg)', whiteSpace: 'nowrap' as const }
   const mutedSx = { color: 'var(--at-row-sub)' }
   const emptySx = { px: 4, py: 6, textAlign: 'center' as const, fontSize: 13, ...mutedSx }
+
+  if (detailState.kind === 'loading') {
+    return (
+      <Card sx={{ display: 'flex', justifyContent: 'center', py: 12 }}>
+        <CircularProgress size={28} aria-label={t('loading')} />
+      </Card>
+    )
+  }
+
+  if (detailState.kind === 'failed') {
+    return <Alert severity='error'>{detailState.notFound ? t('notFound') : t('loadFailed')}</Alert>
+  }
+
+  if (!usageAvailable) {
+    return (
+      <>
+        <AdminPageHeader title={t('title')} subtitle={t('subtitle')} />
+        <Alert severity='info'>{t('unavailable')}</Alert>
+      </>
+    )
+  }
 
   return (
     <>

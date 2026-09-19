@@ -21,15 +21,24 @@ export type ConsoleNavLabels = {
   bills: string
   platform: string
   allWorkspaces: string
+  clusters: string
+  auditLog: string
   platformSettings: string
 }
 
-export type ConsoleNavWorkspace = { id: number; name: string }
+export type ConsoleNavWorkspace = {
+  id: number
+  name: string
+  capabilities?: { extension_management: boolean; usage: boolean }
+}
 
 type ConsoleNavOptions = {
   /** The workspaces the account owns. */
   owned: ConsoleNavWorkspace[]
   isPlatformAdmin: boolean
+  showClusters: boolean
+  showAuditLog: boolean
+  showPlatformSettings: boolean
   /** A workspace the account is looking at without owning it. */
   openWorkspace?: ConsoleNavWorkspace | null
   labels: ConsoleNavLabels
@@ -53,23 +62,23 @@ function workspaceNode(workspace: ConsoleNavWorkspace, prefix: string, labels: C
         href: base,
         activeMatch: 'exact'
       },
-      {
+      ...(workspace.capabilities?.extension_management ? [{
         id: `${prefix}-${workspace.id}-extensions`,
         label: labels.extensions,
         icon: 'tabler-puzzle',
         href: `${base}/extensions`
-      },
-      {
+      }] : []),
+      ...(workspace.capabilities?.usage ? [{
         id: `${prefix}-${workspace.id}-usage`,
         label: labels.usage,
         icon: 'tabler-chart-bar',
         href: `${base}/usage`
-      }
+      }] : [])
     ]
   }
 }
 
-export function buildConsoleNav({ owned, isPlatformAdmin, openWorkspace, labels }: ConsoleNavOptions): MenuNode[] {
+export function buildConsoleNav({ owned, isPlatformAdmin, showClusters, showAuditLog, showPlatformSettings, openWorkspace, labels }: ConsoleNavOptions): MenuNode[] {
   const nav: MenuNode[] = [
     {
       type: 'section',
@@ -105,19 +114,33 @@ export function buildConsoleNav({ owned, isPlatformAdmin, openWorkspace, labels 
       icon: 'tabler-buildings',
       href: '/workspaces/platform',
       activeMatch: 'exact'
-    }
+    },
+    ...(showClusters ? [{
+      id: 'console-clusters',
+      label: labels.clusters,
+      icon: 'tabler-server',
+      href: '/workspaces/platform/clusters'
+    }] : []),
+    ...(showAuditLog ? [{
+      id: 'console-audit-log',
+      label: labels.auditLog,
+      icon: 'tabler-history',
+      href: '/workspaces/platform/audit'
+    }] : [])
   ]
 
   if (openWorkspace) {
     platformChildren.push(workspaceNode(openWorkspace, 'platform-ws', labels))
   }
 
-  platformChildren.push({
-    id: 'console-platform-settings',
-    label: labels.platformSettings,
-    icon: 'tabler-adjustments',
-    href: '/workspaces/platform/settings'
-  })
+  if (showPlatformSettings) {
+    platformChildren.push({
+      id: 'console-platform-settings',
+      label: labels.platformSettings,
+      icon: 'tabler-adjustments',
+      href: '/workspaces/platform/settings'
+    })
+  }
 
   nav.push({ type: 'section', id: 'console-platform', label: labels.platform, children: platformChildren })
 
