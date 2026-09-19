@@ -121,6 +121,35 @@ export interface ConsoleClusterHealthObservation {
   observed_at: string
 }
 
+/** Deployment-wide health information derived only from stored probe observations. */
+export interface ConsoleClusterHealthSummary {
+  generated_at: string
+  window_hours: number
+  summary: {
+    active_clusters: number
+    inactive_clusters: number
+    checked_within_window: number
+    stale_or_unchecked: number
+    healthy: number
+    degraded: number
+    down: number
+    unknown: number
+  }
+  clusters: Array<{
+    id: string
+    name: string
+    region: ConsoleCluster['region']
+    is_active: boolean
+    is_accepting_new: boolean
+    observations_within_window: number
+    is_stale_or_unchecked: boolean
+    last_observation: Pick<
+      ConsoleClusterHealthObservation,
+      'health_status' | 'http_status' | 'outcome' | 'observed_at'
+    > | null
+  }>
+}
+
 /** Read recent probe results; browser code never contacts Cluster endpoints directly. */
 export async function listConsoleClusterHealthObservations(
   id: string,
@@ -130,6 +159,11 @@ export async function listConsoleClusterHealthObservations(
   return apiFetch<ConsoleClusterHealthObservation[]>(
     buildApiUrl(`${CLUSTERS_BASE}${encodeURIComponent(id)}/health-observations/?${params}`)
   )
+}
+
+/** Read a server-derived health overview; this never probes a Cluster from the browser. */
+export async function getConsoleClusterHealthSummary(): Promise<ConsoleClusterHealthSummary> {
+  return apiFetch<ConsoleClusterHealthSummary>(buildApiUrl(`${CLUSTERS_BASE}health-summary/`))
 }
 
 // ── Audit history ────────────────────────────────────────────────────

@@ -5139,6 +5139,17 @@
       "historyTitle": "{name} 的健康记录",
       "historyLoadFailed": "无法加载集群健康记录。",
       "historyEmpty": "尚未记录健康探测结果。",
+      "healthOverview": "部署健康概览",
+      "healthWindow": "基于最近 {hours} 小时内由服务端保存的探测记录。",
+      "healthStaleAlert": "有 {count} 个启用的集群在最近 24 小时内没有完成检查。系统会将其旧状态显示为未知，直到记录新的探测结果。",
+      "healthSummary": {
+        "checked": "已检查的启用集群",
+        "stale": "过期或未检查",
+        "healthy": "{count} 个健康",
+        "degraded": "{count} 个降级",
+        "down": "{count} 个不可用",
+        "unknown": "{count} 个未知"
+      },
       "close": "关闭",
       "historyColumns": {
         "when": "检查时间",

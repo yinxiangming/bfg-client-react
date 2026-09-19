@@ -5139,6 +5139,17 @@
       "historyTitle": "Health history for {name}",
       "historyLoadFailed": "Couldn't load the Cluster health history.",
       "historyEmpty": "No health observations have been recorded yet.",
+      "healthOverview": "Deployment health",
+      "healthWindow": "Based on server-side observations from the last {hours} hours.",
+      "healthStaleAlert": "{count} active Cluster(s) have not been checked in the last 24 hours. Their previous status is shown as unknown until a new probe is recorded.",
+      "healthSummary": {
+        "checked": "Active Clusters checked",
+        "stale": "Stale or unchecked",
+        "healthy": "{count} healthy",
+        "degraded": "{count} degraded",
+        "down": "{count} down",
+        "unknown": "{count} unknown"
+      },
       "close": "Close",
       "historyColumns": {
         "when": "Checked",
