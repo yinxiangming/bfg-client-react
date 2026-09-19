@@ -257,6 +257,11 @@ export interface ConsoleMeterPrices {
   prices: ConsoleMeterPrice[]
 }
 
+/** Meter keys with a verified server-side usage enforcement point. */
+export interface ConsoleRuntimeMeterResponse {
+  meters: string[]
+}
+
 /** What a new price says. `margin` left out follows the deployment's own. */
 export interface ConsoleMeterPriceInput {
   meter: string
@@ -271,6 +276,15 @@ export async function listMeterPrices(meter?: string): Promise<ConsoleMeterPrice
   const query = meter ? `?${new URLSearchParams({ meter })}` : ''
 
   return apiFetch<ConsoleMeterPrices[]>(buildApiUrl(`${BASE}meter-prices/${query}`))
+}
+
+/** Meter keys that Platform can safely price in this deployment. */
+export async function listRuntimeMeters(): Promise<string[]> {
+  const response = await apiFetch<ConsoleRuntimeMeterResponse>(
+    buildApiUrl(`${BASE}meter-prices/available-meters/`)
+  )
+
+  return response.meters
 }
 
 /**

@@ -25,6 +25,7 @@ import Dialog from '@mui/material/Dialog'
 import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
+import MenuItem from '@mui/material/MenuItem'
 import TextField from '@mui/material/TextField'
 
 import { addMeterPrice, type ConsoleMeterPrices } from '@/services/consoleAdmin'
@@ -35,6 +36,8 @@ type Props = {
   open: boolean
   /** The meter the dialog was opened from; empty when it was opened for any. */
   meter: string
+  /** Meter keys that have a server-side runtime enforcement point. */
+  meters: string[]
   /** What the deployment's margin is, for the hint under the margin field. */
   defaultMargin: string | null
   onClose: () => void
@@ -47,7 +50,7 @@ function createIdempotencyKey(): string {
   return `meter-price-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
 }
 
-export default function MeterPriceAddDialog({ open, meter, defaultMargin, onClose, onAdded }: Props) {
+export default function MeterPriceAddDialog({ open, meter, meters, defaultMargin, onClose, onAdded }: Props) {
   const t = useTranslations('admin.console.platform')
   const tActions = useTranslations('admin.common.actions')
   const [key, setKey] = useState('')
@@ -62,16 +65,16 @@ export default function MeterPriceAddDialog({ open, meter, defaultMargin, onClos
   useEffect(() => {
     if (!open) return
 
-    setKey(meter)
+    setKey(meter || meters[0] || '')
     setVendorCost('')
     setUnitSize('1')
     setMargin('')
     setEffectiveFrom('')
     setFailure(null)
     requestKey.current = null
-  }, [open, meter])
+  }, [open, meter, meters])
 
-  const canSave = key.trim().length > 0 && vendorCost.trim().length > 0 && unitSize.trim().length > 0 && !saving
+  const canSave = meters.includes(key) && vendorCost.trim().length > 0 && unitSize.trim().length > 0 && !saving
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -113,13 +116,21 @@ export default function MeterPriceAddDialog({ open, meter, defaultMargin, onClos
 
             <TextField
               fullWidth
+              select
               required
               autoFocus={!meter}
               label={t('prices.columns.meter')}
               value={key}
               onChange={event => setKey(event.target.value)}
               helperText={t('prices.meterHint')}
-            />
+              disabled={Boolean(meter)}
+            >
+              {meters.map(runtimeMeter => (
+                <MenuItem key={runtimeMeter} value={runtimeMeter}>
+                  {runtimeMeter}
+                </MenuItem>
+              ))}
+            </TextField>
 
             <Box sx={{ display: 'grid', gap: 4, gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' } }}>
               <TextField

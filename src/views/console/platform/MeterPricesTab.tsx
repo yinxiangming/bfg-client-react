@@ -30,7 +30,7 @@ import Typography from '@mui/material/Typography'
 
 import Icon from '@components/Icon'
 import StatusBadge from '@/components/schema/StatusBadge'
-import { listMeterPrices, type ConsoleMeterPrices } from '@/services/consoleAdmin'
+import { listMeterPrices, listRuntimeMeters, type ConsoleMeterPrices } from '@/services/consoleAdmin'
 
 import { formatMoment } from '../billingPeriods'
 import { refusalMessage } from '../refusal'
@@ -55,16 +55,26 @@ function inheritedMargin(groups: ConsoleMeterPrices[]): string | null {
   return null
 }
 
+type MeterPricesData = {
+  groups: ConsoleMeterPrices[]
+  meters: string[]
+}
+
 export default function MeterPricesTab() {
   const t = useTranslations('admin.console.platform')
   const tActions = useTranslations('admin.common.actions')
   const locale = useLocale()
-  const load = useCallback(() => listMeterPrices(), [])
-  const { state, reload, replace } = useLoad<ConsoleMeterPrices[]>(load)
+  const load = useCallback(async (): Promise<MeterPricesData> => {
+    const [groups, meters] = await Promise.all([listMeterPrices(), listRuntimeMeters()])
+
+    return { groups, meters }
+  }, [])
+  const { state, reload, replace } = useLoad<MeterPricesData>(load)
   // The meter the dialog opens on, and '' for one opened from the bar; null is closed.
   const [adding, setAdding] = useState<string | null>(null)
 
-  const groups = state.kind === 'loaded' ? state.data : []
+  const groups = state.kind === 'loaded' ? state.data.groups : []
+  const meters = state.kind === 'loaded' ? state.data.meters : []
 
   /**
    * Put the answer's meter back in the list, which is why the server answers
@@ -75,9 +85,12 @@ export default function MeterPricesTab() {
     const known = groups.some(group => group.meter === added.meter)
 
     replace(
-      known
-        ? groups.map(group => (group.meter === added.meter ? added : group))
-        : [...groups, added].sort((left, right) => left.meter.localeCompare(right.meter))
+      {
+        groups: known
+          ? groups.map(group => (group.meter === added.meter ? added : group))
+          : [...groups, added].sort((left, right) => left.meter.localeCompare(right.meter)),
+        meters
+      }
     )
     setAdding(null)
   }
@@ -90,6 +103,7 @@ export default function MeterPricesTab() {
           variant='contained'
           startIcon={<Icon icon='tabler-plus' />}
           onClick={() => setAdding('')}
+          disabled={state.kind !== 'loaded' || meters.length === 0}
         >
           {t('prices.add')}
         </Button>
@@ -122,10 +136,20 @@ export default function MeterPricesTab() {
                 ) : (
                   <StatusBadge color='success' label={t('prices.hasInForce')} />
                 )}
-                <Button size='small' sx={{ ml: 'auto' }} onClick={() => setAdding(group.meter)}>
+                <Button
+                  size='small'
+                  sx={{ ml: 'auto' }}
+                  onClick={() => setAdding(group.meter)}
+                  disabled={!meters.includes(group.meter)}
+                >
                   {t('prices.addFor')}
                 </Button>
               </Box>
+              {!meters.includes(group.meter) && (
+                <Typography variant='caption' sx={{ display: 'block', mt: 1, ...mutedSx }}>
+                  {t('prices.legacyMeter')}
+                </Typography>
+              )}
               {group.in_force === null && (
                 <Typography variant='caption' sx={{ display: 'block', mt: 1, ...mutedSx }}>
                   {t('prices.noneInForceHint')}
@@ -185,6 +209,7 @@ export default function MeterPricesTab() {
       <MeterPriceAddDialog
         open={adding !== null}
         meter={adding ?? ''}
+        meters={meters}
         defaultMargin={inheritedMargin(groups)}
         onClose={() => setAdding(null)}
         onAdded={onAdded}

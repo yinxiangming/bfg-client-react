@@ -5067,7 +5067,8 @@
           "effectiveFrom": "In force from",
           "added": "Added"
         },
-        "meterHint": "The key the extension that spends it records it under.",
+        "meterHint": "Only meters with a server-side runtime enforcement point can be priced.",
+        "legacyMeter": "This legacy meter has no active runtime enforcement point, so its price history is read-only.",
         "vendorCostHint": "What the vendor charges for one unit size, in US dollars.",
         "unitSizeHint": "How many calls or tokens that buys: a rate quoted per 1,000 requests is 1000.",
         "marginHint": "The share added on top, as a fraction: 0.30 charges 1.3 times cost. Leave it empty to follow the platform's own margin.",
@@ -5104,6 +5105,7 @@
         "invalid_platform_variable": "That isn't a value this variable can hold.",
         "reason_required": "Say why you're making this change.",
         "invalid_meter_price": "That price can't be stored. Check the cost, the unit size and the margin.",
+        "unknown_runtime_meter": "Choose a meter with an active runtime enforcement point.",
         "invalid_exchange_rate": "That rate can't be stored. Check the currencies and the number."
       }
     },
