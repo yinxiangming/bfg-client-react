@@ -10,6 +10,11 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import CircularProgress from '@mui/material/CircularProgress'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
+import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 
 import StatusBadge from '@/components/schema/StatusBadge'
@@ -23,6 +28,7 @@ import {
 
 import { formatMoment } from './billingPeriods'
 import GrantEntitlementDialog from './GrantEntitlementDialog'
+import { refusalMessage } from './refusal'
 
 type State =
   | { kind: 'loading' }
@@ -36,6 +42,9 @@ export default function RuntimeFeatureAccessCard({ workspaceId }: { workspaceId:
   const [state, setState] = useState<State>({ kind: 'loading' })
   const [granting, setGranting] = useState(false)
   const [busyId, setBusyId] = useState<number | null>(null)
+  const [revoking, setRevoking] = useState<ConsoleEntitlement | null>(null)
+  const [revokeReason, setRevokeReason] = useState('')
+  const [revokeFailure, setRevokeFailure] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setState({ kind: 'loading' })
@@ -54,15 +63,26 @@ export default function RuntimeFeatureAccessCard({ workspaceId }: { workspaceId:
     void load()
   }, [load])
 
-  const revoke = async (entitlement: ConsoleEntitlement) => {
-    if (!window.confirm(t('revokeFeatureConfirm'))) return
-    const reason = window.prompt(t('reasonPrompt'))?.trim()
-    if (!reason || reason.length < 3) return
+  const openRevoke = (entitlement: ConsoleEntitlement) => {
+    setRevoking(entitlement)
+    setRevokeReason('')
+    setRevokeFailure(null)
+  }
 
-    setBusyId(entitlement.id)
+  const closeRevoke = () => {
+    if (busyId === null) setRevoking(null)
+  }
+
+  const revoke = async () => {
+    if (!revoking || revokeReason.trim().length < 3) return
+    setBusyId(revoking.id)
+    setRevokeFailure(null)
     try {
-      await revokeEntitlement(workspaceId, entitlement.id, reason)
+      await revokeEntitlement(workspaceId, revoking.id, revokeReason.trim())
+      setRevoking(null)
       await load()
+    } catch (error) {
+      setRevokeFailure(refusalMessage(error, t('actionFailed'), () => null))
     } finally {
       setBusyId(null)
     }
@@ -107,7 +127,7 @@ export default function RuntimeFeatureAccessCard({ workspaceId }: { workspaceId:
             </Typography>
           </Box>
           <StatusBadge noDot color={entitlement.is_effective ? 'success' : entitlement.status === 'revoked' ? 'default' : 'warning'} label={t(`runtimeFeatures.status.${entitlement.is_effective ? 'effective' : entitlement.status}`)} />
-          {entitlement.is_effective && <Button color='error' size='small' disabled={busyId === entitlement.id} onClick={() => void revoke(entitlement)}>{t('revokeFeature')}</Button>}
+          {entitlement.is_effective && <Button color='error' size='small' disabled={busyId === entitlement.id} onClick={() => openRevoke(entitlement)}>{t('revokeFeature')}</Button>}
         </Box>
       ))}
 
@@ -118,6 +138,36 @@ export default function RuntimeFeatureAccessCard({ workspaceId }: { workspaceId:
         onClose={() => setGranting(false)}
         onGranted={onGranted}
       />
+
+      <Dialog open={Boolean(revoking)} onClose={closeRevoke} fullWidth maxWidth='sm'>
+        <DialogTitle>{t('revokeFeature')}</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'grid', gap: 3, pt: 1 }}>
+            <Alert severity='warning'>{t('revokeFeatureConfirm')}</Alert>
+            {revokeFailure && <Alert severity='error'>{revokeFailure}</Alert>}
+            <TextField
+              label={t('reasonPrompt')}
+              value={revokeReason}
+              required
+              multiline
+              minRows={2}
+              onChange={event => setRevokeReason(event.target.value)}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeRevoke} disabled={busyId !== null}>{tActions('cancel')}</Button>
+          <Button
+            color='error'
+            variant='contained'
+            onClick={() => void revoke()}
+            disabled={busyId !== null || revokeReason.trim().length < 3}
+            startIcon={busyId !== null ? <CircularProgress size={14} color='inherit' /> : undefined}
+          >
+            {t('revokeFeature')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Card>
   )
 }
