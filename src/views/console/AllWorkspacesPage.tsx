@@ -9,16 +9,23 @@
  * in the same pages an owner sees.
  */
 
-import { useCallback, useEffect, useState } from 'react'
+import { type ChangeEvent, useCallback, useEffect, useState } from 'react'
 
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { useTranslations } from 'next-intl'
 
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
+import Checkbox from '@mui/material/Checkbox'
 import CircularProgress from '@mui/material/CircularProgress'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import InputAdornment from '@mui/material/InputAdornment'
 import MenuItem from '@mui/material/MenuItem'
 import Table from '@mui/material/Table'
@@ -53,6 +60,7 @@ export default function AllWorkspacesPage() {
   const t = useTranslations('admin.console.all')
   const tStatus = useTranslations('admin.workspaces.status')
   const tActions = useTranslations('admin.common.actions')
+  const router = useRouter()
   const { state: consoleState } = useConsole()
   const [search, setSearch] = useState('')
   const [term, setTerm] = useState('')
@@ -60,7 +68,13 @@ export default function AllWorkspacesPage() {
   const [clusterFilter, setClusterFilter] = useState('')
   const [state, setState] = useState<ListState>({ kind: 'loading' })
   const [loadingMore, setLoadingMore] = useState(false)
+  const [importOpen, setImportOpen] = useState(false)
   const [importing, setImporting] = useState(false)
+  const [importPayload, setImportPayload] = useState<Record<string, unknown> | null>(null)
+  const [importFileName, setImportFileName] = useState('')
+  const [importReason, setImportReason] = useState('')
+  const [importConfirmed, setImportConfirmed] = useState(false)
+  const [importError, setImportError] = useState<string | null>(null)
 
   const isPlatformAdmin = consoleState.kind === 'loaded' && consoleState.isPlatformAdmin
 
@@ -117,19 +131,55 @@ export default function AllWorkspacesPage() {
     }
   }
 
-  const importFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const openImport = () => {
+    setImportPayload(null)
+    setImportFileName('')
+    setImportReason('')
+    setImportConfirmed(false)
+    setImportError(null)
+    setImportOpen(true)
+  }
+
+  const closeImport = () => {
+    if (!importing) setImportOpen(false)
+  }
+
+  const importFile = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
     event.target.value = ''
     if (!file) return
-    const reason = window.prompt(t('importReason'))?.trim()
-    if (!reason || reason.length < 3) return
-    if (!window.confirm(t('importConfirm'))) return
-    setImporting(true)
+
+    setImportError(null)
+    if (file.size > 1_000_000) {
+      setImportPayload(null)
+      setImportFileName('')
+      setImportError(t('importFileTooLarge'))
+      return
+    }
+
     try {
-      await importConsoleWorkspace(JSON.parse(await file.text()), reason)
-      await load()
+      const payload: unknown = JSON.parse(await file.text())
+      if (!payload || typeof payload !== 'object' || Array.isArray(payload)) throw new Error('invalid')
+      setImportPayload(payload as Record<string, unknown>)
+      setImportFileName(file.name)
     } catch {
-      setState({ kind: 'failed' })
+      setImportPayload(null)
+      setImportFileName('')
+      setImportError(t('importInvalidFile'))
+    }
+  }
+
+  const submitImport = async () => {
+    if (!importPayload || importReason.trim().length < 3 || !importConfirmed) return
+
+    setImporting(true)
+    setImportError(null)
+    try {
+      const workspace = await importConsoleWorkspace(importPayload, importReason.trim())
+      setImportOpen(false)
+      router.push(`/workspaces/${workspace.id}`)
+    } catch (error) {
+      setImportError(error instanceof Error ? error.message : t('importFailed'))
     } finally {
       setImporting(false)
     }
@@ -156,7 +206,11 @@ export default function AllWorkspacesPage() {
 
   return (
     <>
-      <AdminPageHeader title={t('title')} subtitle={t('subtitle')} />
+      <AdminPageHeader
+        title={t('title')}
+        subtitle={t('subtitle')}
+        actions={<Button variant='contained' onClick={openImport}>{t('import')}</Button>}
+      />
 
       <Card>
         <Box
@@ -209,11 +263,7 @@ export default function AllWorkspacesPage() {
           />
           {state.kind === 'loaded' && (
             <>
-              <Button component='label' size='small' disabled={importing} sx={{ ml: { sm: 'auto' } }}>
-                {importing ? t('loading') : t('import')}
-                <input hidden type='file' accept='application/json,.json' onChange={importFile} />
-              </Button>
-              <Typography variant='caption' sx={{ ...mutedSx }}>{t('count', { count: state.count })}</Typography>
+              <Typography variant='caption' sx={{ ...mutedSx, ml: { sm: 'auto' } }}>{t('count', { count: state.count })}</Typography>
             </>
           )}
         </Box>
@@ -349,6 +399,41 @@ export default function AllWorkspacesPage() {
           </Box>
         )}
       </Card>
+
+      <Dialog open={importOpen} onClose={closeImport} fullWidth maxWidth='sm'>
+        <DialogTitle>{t('importTitle')}</DialogTitle>
+        <DialogContent>
+          <Box sx={{ display: 'grid', gap: 3, pt: 1 }}>
+            <Alert severity='info'>{t('importConfirm')}</Alert>
+            {importError && <Alert severity='error'>{importError}</Alert>}
+            <Button component='label' variant='outlined' disabled={importing} sx={{ justifySelf: 'start' }}>
+              {t('importChooseFile')}
+              <input hidden type='file' accept='application/json,.json' onChange={event => void importFile(event)} />
+            </Button>
+            <Typography variant='caption' sx={{ color: 'var(--at-row-sub)' }}>
+              {importFileName || t('importNoFile')}
+            </Typography>
+            <TextField
+              label={t('importReason')}
+              value={importReason}
+              required
+              multiline
+              minRows={2}
+              onChange={event => setImportReason(event.target.value)}
+            />
+            <FormControlLabel
+              control={<Checkbox checked={importConfirmed} onChange={event => setImportConfirmed(event.target.checked)} />}
+              label={t('importAcknowledge')}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={closeImport} disabled={importing}>{tActions('cancel')}</Button>
+          <Button variant='contained' onClick={() => void submitImport()} disabled={importing || !importPayload || importReason.trim().length < 3 || !importConfirmed}>
+            {importing ? t('loading') : t('import')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   )
 }

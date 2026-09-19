@@ -167,8 +167,11 @@ export async function restoreConsoleWorkspace(id: number, reason: string): Promi
   return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/restore/`), { method: 'POST', body: JSON.stringify({ confirm: true, reason }) })
 }
 
-export async function exportConsoleWorkspace(id: number): Promise<Record<string, unknown>> {
-  return apiFetch<Record<string, unknown>>(buildApiUrl(`${BASE}${id}/export/`))
+export async function exportConsoleWorkspace(id: number, reason: string): Promise<Record<string, unknown>> {
+  return apiFetch<Record<string, unknown>>(buildApiUrl(`${BASE}${id}/export/`), {
+    method: 'POST',
+    body: JSON.stringify({ confirm: true, reason })
+  })
 }
 
 export async function importConsoleWorkspace(payload: Record<string, unknown>, reason: string): Promise<ConsoleWorkspace> {
