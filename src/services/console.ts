@@ -180,8 +180,16 @@ export async function importConsoleWorkspace(payload: Record<string, unknown>, r
 
 export async function resetConsoleAdminPassword(id: number, reason: string, email?: string): Promise<{ detail: string }> {
   return apiFetch<{ detail: string }>(buildApiUrl(`${BASE}${id}/reset-admin-password/`), {
-    method: 'POST', body: JSON.stringify({ ...(email ? { email } : {}), confirm: true, reason })
+    method: 'POST',
+    headers: { 'X-Idempotency-Key': createIdempotencyKey() },
+    body: JSON.stringify({ ...(email ? { email } : {}), confirm: true, reason })
   })
+}
+
+function createIdempotencyKey(): string {
+  if (typeof globalThis.crypto?.randomUUID === 'function') return globalThis.crypto.randomUUID()
+
+  return `platform-action-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}`
 }
 
 /** A lifecycle operation the Platform has performed for one workspace. */
