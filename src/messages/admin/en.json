@@ -4841,7 +4841,8 @@
         "status": "Status",
         "allStatuses": "All statuses",
         "cluster": "Cluster ID",
-        "clusterPlaceholder": "e.g. apac-1"
+        "clusterPlaceholder": "e.g. apac-1",
+        "unassigned": "Unassigned only"
       },
       "loading": "Loading workspaces",
       "loadFailed": "Couldn't load the workspaces.",

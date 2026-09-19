@@ -67,6 +67,7 @@ export default function AllWorkspacesPage() {
   const [term, setTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<ConsoleWorkspaceStatus | ''>('')
   const [clusterFilter, setClusterFilter] = useState('')
+  const [unassignedOnly, setUnassignedOnly] = useState(false)
   const [state, setState] = useState<ListState>({ kind: 'loading' })
   const [loadingMore, setLoadingMore] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
@@ -92,14 +93,15 @@ export default function AllWorkspacesPage() {
       const { workspaces, count, next } = await listConsoleWorkspaces({
         search: term,
         status: statusFilter || undefined,
-        cluster: clusterFilter
+        cluster: clusterFilter,
+        unassigned: unassignedOnly
       })
 
       setState({ kind: 'loaded', workspaces, count, next })
     } catch {
       setState({ kind: 'failed' })
     }
-  }, [clusterFilter, statusFilter, term])
+  }, [clusterFilter, statusFilter, term, unassignedOnly])
 
   useEffect(() => {
     // Anyone else would only get their own workspaces back, under a title that promises
@@ -261,7 +263,12 @@ export default function AllWorkspacesPage() {
             onChange={event => setClusterFilter(event.target.value)}
             label={t('filters.cluster')}
             placeholder={t('filters.clusterPlaceholder')}
+            disabled={unassignedOnly}
             sx={{ width: { xs: '100%', sm: 200 } }}
+          />
+          <FormControlLabel
+            control={<Checkbox checked={unassignedOnly} onChange={event => setUnassignedOnly(event.target.checked)} />}
+            label={t('filters.unassigned')}
           />
           {state.kind === 'loaded' && (
             <>

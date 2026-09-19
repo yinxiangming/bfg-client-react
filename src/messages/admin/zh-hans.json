@@ -4841,7 +4841,8 @@
         "status": "状态",
         "allStatuses": "所有状态",
         "cluster": "Cluster ID",
-        "clusterPlaceholder": "例如 apac-1"
+        "clusterPlaceholder": "例如 apac-1",
+        "unassigned": "仅未分配"
       },
       "loading": "正在加载工作区",
       "loadFailed": "没能加载工作区列表。",
