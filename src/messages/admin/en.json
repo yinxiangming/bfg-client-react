@@ -4788,6 +4788,12 @@
       "title": "All workspaces",
       "subtitle": "every workspace on the platform, suspended and deactivated ones included",
       "search": "Search by name or slug",
+      "filters": {
+        "status": "Status",
+        "allStatuses": "All statuses",
+        "cluster": "Cluster ID",
+        "clusterPlaceholder": "e.g. apac-1"
+      },
       "loading": "Loading workspaces",
       "loadFailed": "Couldn't load the workspaces.",
       "empty": "No workspace matches that.",
