@@ -409,11 +409,15 @@ export async function getWorkspaceUsageCap(workspaceId: number): Promise<Console
  *
  * Refused with 400 `invalid_usage_cap`.
  */
-export async function setWorkspaceUsageCap(workspaceId: number, capPoints: string | null): Promise<ConsoleUsageCap> {
+export async function setWorkspaceUsageCap(
+  workspaceId: number,
+  capPoints: string | null,
+  reason: string
+): Promise<ConsoleUsageCap> {
   return apiFetch<ConsoleUsageCap>(buildApiUrl(`${BASE}workspaces/${workspaceId}/usage-cap/`), {
     method: 'PATCH',
     headers: { 'X-Idempotency-Key': createIdempotencyKey() },
-    body: JSON.stringify({ cap_points: capPoints, confirm: true })
+    body: JSON.stringify({ cap_points: capPoints, confirm: true, reason })
   })
 }
 

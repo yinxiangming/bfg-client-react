@@ -4914,6 +4914,8 @@
         "ownCap": "Give this workspace an allowance of its own",
         "zeroMeansNothing": "0 stops this workspace metering anything at all, which is not the same as following the default.",
         "hint": "Metered features stop for the rest of the month once the allowance is spent.",
+        "reason": "Reason",
+        "reasonHint": "This is stored with the allowance change and its audit record. Required.",
         "save": "Save the allowance",
         "saveFailed": "Couldn't change this allowance. Try again.",
         "errors": {
