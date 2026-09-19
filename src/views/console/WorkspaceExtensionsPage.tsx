@@ -47,22 +47,19 @@ import {
   type ConsoleAcquireInvoice,
   type ConsoleExtension
 } from '@/services/console'
-import { BASE_PLAN_KEY, type ConsoleGrant } from '@/services/consoleAdmin'
 
 import { formatDay, formatMoment, formatMomentDay } from './billingPeriods'
 import ExtensionCard from './ExtensionCard'
-import GrantEntitlementDialog from './GrantEntitlementDialog'
 import { useConsoleWorkspaceDetail } from './useConsoleWorkspaceDetail'
 import { useEnterWorkspace } from './useEnterWorkspace'
 
 /** Where the bills for every workspace the account owns are read and settled. */
 const BILLS_PATH = '/workspaces/billing'
 
-/** What came of acquiring an add-on, or of granting one, until the reader dismisses it. */
+/** What came of acquiring an add-on, until the reader dismisses it. */
 type AcquireNotice =
   | { kind: 'granted'; name: string; on: boolean }
   | { kind: 'invoiced'; name: string; invoice: ConsoleAcquireInvoice }
-  | { kind: 'platformGrant'; name: string; grant: ConsoleGrant }
   /** On now, with the bill still to come: `days` is the trial's length, or 0 for none. */
   | { kind: 'billedLater'; name: string; days: number; until: string | null }
 
@@ -82,7 +79,6 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
   // `needsAcquiring` cannot tell an add-on the workspace already holds from one it has
   // never had, and a card that only ever offers a button the server refuses is a dead end.
   const [nothingToAcquire, setNothingToAcquire] = useState<string[]>([])
-  const [granting, setGranting] = useState(false)
 
   const isPlatformAdmin = consoleState.kind === 'loaded' && consoleState.isPlatformAdmin
   const workspace = state.kind === 'loaded' ? state.workspace : null
@@ -187,29 +183,6 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
     }
   }
 
-  /**
-   * What granting wrote, and the workspace read again from the server.
-   *
-   * Being entitled is not a field on any card, but what the cards offer follows
-   * from it: an add-on the workspace has just been given is no longer one to
-   * acquire, and one the platform had paused may now be running.
-   */
-  const onGranted = (grant: ConsoleGrant) => {
-    const { key } = grant.entitlement
-    const granted = key === BASE_PLAN_KEY ? null : workspace?.extensions.find(extension => extension.key === key)
-
-    setFailure(null)
-    setNotice({
-      kind: 'platformGrant',
-      // A key no card names is still worth naming, so an extension the deployment
-      // has since stopped shipping reads as itself rather than as the plan.
-      name: granted ? extensionName(granted, locale) : key || t('grant.basePlan'),
-      grant
-    })
-    setGranting(false)
-    void reload()
-  }
-
   const askThenDeactivate = async (extension: ConsoleExtension) => {
     const name = extensionName(extension, locale)
     const confirmed = await confirm(t('confirm.body', { name }), {
@@ -262,15 +235,8 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
         title={t('title')}
         subtitle={`${loaded.name} · ${t('subtitle')}`}
         actions={
-          // Nothing rather than an empty row of controls: a reader who may
-          // neither grant nor enter this workspace gets a plain heading.
-          isPlatformAdmin || canEnter ? (
+          canEnter ? (
             <>
-              {isPlatformAdmin && (
-                <Button variant='outlined' startIcon={<Icon icon='tabler-gift' />} onClick={() => setGranting(true)}>
-                  {t('grant.action')}
-                </Button>
-              )}
               {canEnter && (
                 <Button
                   variant='outlined'
@@ -342,33 +308,6 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
             </Button>
           </Box>
         </Alert>
-      )}
-
-      {notice?.kind === 'platformGrant' && (
-        <Alert
-          severity={notice.grant.extension?.refusal ? 'warning' : 'success'}
-          sx={{ mb: 4 }}
-          onClose={() => setNotice(null)}
-        >
-          <AlertTitle>{t('grant.done', { name: notice.name })}</AlertTitle>
-          {notice.grant.entitlement.current_period_end
-            ? t('grant.runsUntil', {
-                until: formatMoment(notice.grant.entitlement.current_period_end, locale)
-              })
-            : t('grant.runsForever')}
-          {notice.grant.extension?.resumed && ` ${t('grant.resumed')}`}
-          {notice.grant.extension?.refusal && ` ${t('grant.notResumed')}`}
-        </Alert>
-      )}
-
-      {isPlatformAdmin && (
-        <GrantEntitlementDialog
-          open={granting}
-          workspaceId={workspaceId}
-          extensions={loaded.extensions}
-          onClose={() => setGranting(false)}
-          onGranted={onGranted}
-        />
       )}
 
       {loaded.extensions.length === 0 ? (

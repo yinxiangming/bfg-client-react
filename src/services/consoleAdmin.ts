@@ -20,7 +20,7 @@
 
 import { apiFetch, buildApiUrl } from '@/utils/api'
 
-import type { ConsoleChanger, ConsoleExtensionStatus } from './console'
+import type { ConsoleChanger } from './console'
 
 const BASE = '/platform/console/'
 
@@ -381,10 +381,7 @@ export async function setWorkspaceUsageCap(workspaceId: number, capPoints: strin
   })
 }
 
-// ── Entitlements given rather than sold ──────────────────────────────
-
-/** The key an entitlement to the base plan carries: the plan is not an extension. */
-export const BASE_PLAN_KEY = ''
+// ── Runtime feature entitlements ─────────────────────────────────────
 
 export interface ConsoleEntitlement {
   id: number
@@ -395,33 +392,18 @@ export interface ConsoleEntitlement {
   /** When it runs out; null for one that does not expire. */
   current_period_end: string | null
   reason: string
-}
-
-/**
- * What granting did to the extension itself, and null for the base plan or a
- * key the workspace has no record of.
- *
- * Granting does not switch an extension on — that is the workspace's decision —
- * with one exception: one the platform itself paused when an entitlement ran
- * out is resumed, since pausing kept its data precisely so that being entitled
- * again would pick it up. `refusal` is why that could not happen.
- */
-export interface ConsoleGrantedExtension {
-  key: string
-  status: ConsoleExtensionStatus
-  resumed: boolean
-  refusal: { code: string; detail: string } | null
+  /** True only while the server's runtime gate will honor this grant. */
+  is_effective: boolean
 }
 
 export interface ConsoleGrant {
   workspace: number
   entitlement: ConsoleEntitlement
-  extension: ConsoleGrantedExtension | null
 }
 
 /** What a grant says: what is being given, for how long, and why. */
 export interface ConsoleGrantInput {
-  /** An extension's key, or `BASE_PLAN_KEY` for the base plan. */
+  /** A feature key returned by the Platform runtime-feature registry. */
   key: string
   /** How many months it runs. Exactly one of this and `never_expires`. */
   months?: number
@@ -435,16 +417,32 @@ export const MAX_GRANT_MONTHS = 120
 /**
  * Give a workspace an entitlement it has not bought.
  *
- * Refused with 400 `invalid_grant` — which covers a body naming no period, both
- * periods, an impossible one, or no reason — 400 `unknown_extension`, or 409
- * `already_entitled` for a workspace that already holds one, carrying the
- * entitlement it holds.
+ * Refused with 400 `invalid_grant` for an invalid period/reason, 400
+ * `unknown_entitlement_feature` for a key without a runtime gate, or 409
+ * `already_entitled` for a workspace that already holds one.
  */
 export async function grantEntitlement(workspaceId: number, grant: ConsoleGrantInput): Promise<ConsoleGrant> {
   return apiFetch<ConsoleGrant>(buildApiUrl(`${BASE}workspaces/${workspaceId}/grants/`), {
     method: 'POST',
     body: JSON.stringify({ ...grant, confirm: true })
   })
+}
+
+/** All historic and current Platform runtime feature grants for one workspace. */
+export async function listEntitlements(workspaceId: number): Promise<ConsoleEntitlement[]> {
+  return apiFetch<ConsoleEntitlement[]>(buildApiUrl(`${BASE}workspaces/${workspaceId}/grants/`))
+}
+
+/** Revoke a runtime feature grant while retaining it in the Platform audit trail. */
+export async function revokeEntitlement(
+  workspaceId: number,
+  grantId: number,
+  reason: string
+): Promise<ConsoleGrant> {
+  return apiFetch<ConsoleGrant>(
+    buildApiUrl(`${BASE}workspaces/${workspaceId}/grants/${grantId}/revoke/`),
+    { method: 'POST', body: JSON.stringify({ reason, confirm: true }) }
+  )
 }
 
 /** The entitlement an `already_entitled` refusal says the workspace already holds. */

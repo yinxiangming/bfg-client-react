@@ -4655,6 +4655,27 @@
       "loadingOperations": "正在加载操作记录",
       "operationsFailed": "没能加载这个工作区的操作记录。",
       "noOperations": "这个工作区还没有生命周期操作记录。",
+      "runtimeFeatures": {
+        "title": "运行时功能权限",
+        "subtitle": "由平台授予并由服务端实际强制执行的功能权限",
+        "names": {
+          "batch_management": "批次管理"
+        },
+        "forever": "永不过期",
+        "until": "有效期至 {date}",
+        "status": {
+          "effective": "已生效",
+          "expired": "已过期",
+          "revoked": "已撤销",
+          "active": "未生效"
+        }
+      },
+      "grantFeature": "授予功能",
+      "revokeFeature": "撤销",
+      "revokeFeatureConfirm": "要撤销这项运行时功能权限吗？该功能会立即不可用。",
+      "loadingFeatures": "正在加载功能权限",
+      "featuresFailed": "没能加载运行时功能权限。",
+      "noRuntimeFeatures": "还没有记录任何平台运行时功能授权。",
       "operations": {
         "create": "已创建工作区",
         "suspend": "已暂停工作区",
@@ -4762,6 +4783,8 @@
         "action": "赠送",
         "title": "赠送权益给这个工作区",
         "what": "赠送内容",
+        "runtimeFeature": "批次管理",
+        "runtimeFeatureHint": "这是目前唯一已接入运行时授权闸门的平台功能。",
         "basePlan": "基础套餐",
         "basePlanHint": "套餐本身包含的全部内容，而不是某一个加购。",
         "notSwitchedOn": "赠送不会替商家开启扩展，开不开仍然由工作区自己决定。只有因为权益到期被平台暂停的扩展会顺手恢复。",
