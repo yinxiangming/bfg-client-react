@@ -5079,6 +5079,8 @@
         "marginHint": "The share added on top, as a fraction: 0.30 charges 1.3 times cost. Leave it empty to follow the platform's own margin.",
         "marginHintDefault": "The share added on top, as a fraction: 0.30 charges 1.3 times cost. Leave it empty to follow the platform's own, which is {margin} today.",
         "effectiveFromHint": "Now when left empty. A time typed here is read in the platform's own time zone.",
+        "reason": "Reason",
+        "reasonHint": "This is stored with the price change and its audit record. Required.",
         "save": "Add the price",
         "saveFailed": "Couldn't add this price. Try again."
       },
@@ -5101,6 +5103,8 @@
           "to": "To"
         },
         "dayHint": "Today when left empty. A day already stored is corrected, not duplicated.",
+        "reason": "Reason",
+        "reasonHint": "This is stored with the rate correction and its audit record. Required.",
         "save": "Store the rate",
         "saveFailed": "Couldn't store this rate. Try again."
       },

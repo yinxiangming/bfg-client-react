@@ -49,6 +49,7 @@ export default function ExchangeRateAddDialog({ open, onClose, onAdded }: Props)
   const [to, setTo] = useState('')
   const [rate, setRate] = useState('')
   const [day, setDay] = useState('')
+  const [reason, setReason] = useState('')
   const [saving, setSaving] = useState(false)
   const [failure, setFailure] = useState<string | null>(null)
 
@@ -59,10 +60,11 @@ export default function ExchangeRateAddDialog({ open, onClose, onAdded }: Props)
     setTo('')
     setRate('')
     setDay('')
+    setReason('')
     setFailure(null)
   }, [open])
 
-  const canSave = from.length === 3 && to.length === 3 && rate.trim().length > 0 && !saving
+  const canSave = from.length === 3 && to.length === 3 && rate.trim().length > 0 && reason.trim().length >= 3 && !saving
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -78,7 +80,7 @@ export default function ExchangeRateAddDialog({ open, onClose, onAdded }: Props)
           to,
           rate: rate.trim(),
           ...(day ? { effective_date: day } : {})
-        })
+        }, reason.trim())
       )
     } catch (error) {
       setFailure(refusalMessage(error, t('rates.saveFailed'), code => (t.has(`errors.${code}`) ? t(`errors.${code}`) : null)))
@@ -132,6 +134,17 @@ export default function ExchangeRateAddDialog({ open, onClose, onAdded }: Props)
               onChange={event => setDay(event.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
               helperText={t('rates.dayHint')}
+            />
+
+            <TextField
+              fullWidth
+              required
+              multiline
+              minRows={2}
+              label={t('rates.reason')}
+              value={reason}
+              onChange={event => setReason(event.target.value)}
+              helperText={t('rates.reasonHint')}
             />
           </Box>
         </DialogContent>

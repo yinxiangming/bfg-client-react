@@ -58,6 +58,7 @@ export default function MeterPriceAddDialog({ open, meter, meters, defaultMargin
   const [unitSize, setUnitSize] = useState('1')
   const [margin, setMargin] = useState('')
   const [effectiveFrom, setEffectiveFrom] = useState('')
+  const [reason, setReason] = useState('')
   const [saving, setSaving] = useState(false)
   const [failure, setFailure] = useState<string | null>(null)
   const requestKey = useRef<string | null>(null)
@@ -70,11 +71,12 @@ export default function MeterPriceAddDialog({ open, meter, meters, defaultMargin
     setUnitSize('1')
     setMargin('')
     setEffectiveFrom('')
+    setReason('')
     setFailure(null)
     requestKey.current = null
   }, [open, meter, meters])
 
-  const canSave = meters.includes(key) && vendorCost.trim().length > 0 && unitSize.trim().length > 0 && !saving
+  const canSave = meters.includes(key) && vendorCost.trim().length > 0 && unitSize.trim().length > 0 && reason.trim().length >= 3 && !saving
 
   const submit = async (event: React.FormEvent) => {
     event.preventDefault()
@@ -93,7 +95,7 @@ export default function MeterPriceAddDialog({ open, meter, meters, defaultMargin
           // that moves; sending the same share as a number would pin it instead.
           ...(margin.trim() ? { margin: margin.trim() } : {}),
           ...(effectiveFrom ? { effective_from: effectiveFrom } : {})
-        }, requestKey.current ?? (requestKey.current = createIdempotencyKey()))
+        }, requestKey.current ?? (requestKey.current = createIdempotencyKey()), reason.trim())
       )
       requestKey.current = null
       onClose()
@@ -171,6 +173,17 @@ export default function MeterPriceAddDialog({ open, meter, meters, defaultMargin
               onChange={event => setEffectiveFrom(event.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
               helperText={t('prices.effectiveFromHint')}
+            />
+
+            <TextField
+              fullWidth
+              required
+              multiline
+              minRows={2}
+              label={t('prices.reason')}
+              value={reason}
+              onChange={event => setReason(event.target.value)}
+              helperText={t('prices.reasonHint')}
             />
           </Box>
         </DialogContent>

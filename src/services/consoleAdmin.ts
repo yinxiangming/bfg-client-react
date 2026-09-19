@@ -302,11 +302,15 @@ export async function listRuntimeMeters(): Promise<string[]> {
  * answer says which row is in force. `idempotencyKey` must remain stable while
  * retrying one save, so a lost response cannot append the same price twice.
  */
-export async function addMeterPrice(price: ConsoleMeterPriceInput, idempotencyKey: string): Promise<ConsoleMeterPrices> {
+export async function addMeterPrice(
+  price: ConsoleMeterPriceInput,
+  idempotencyKey: string,
+  reason: string
+): Promise<ConsoleMeterPrices> {
   return apiFetch<ConsoleMeterPrices>(buildApiUrl(`${BASE}meter-prices/`), {
     method: 'POST',
     headers: { 'X-Idempotency-Key': idempotencyKey },
-    body: JSON.stringify({ ...price, confirm: true })
+    body: JSON.stringify({ ...price, confirm: true, reason })
   })
 }
 
@@ -370,11 +374,11 @@ export async function listExchangeRates(query: ConsoleExchangeRateQuery = {}): P
  * duplicated, and a later refresh that does reach the feed replaces it with the
  * published number. Refused with 400 `invalid_exchange_rate`.
  */
-export async function setExchangeRate(rate: ConsoleExchangeRateInput): Promise<ConsoleExchangeRate> {
+export async function setExchangeRate(rate: ConsoleExchangeRateInput, reason: string): Promise<ConsoleExchangeRate> {
   return apiFetch<ConsoleExchangeRate>(buildApiUrl(`${BASE}exchange-rates/`), {
     method: 'POST',
     headers: { 'X-Idempotency-Key': createIdempotencyKey() },
-    body: JSON.stringify({ ...rate, confirm: true })
+    body: JSON.stringify({ ...rate, confirm: true, reason })
   })
 }
 
