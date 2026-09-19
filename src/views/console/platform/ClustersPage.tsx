@@ -33,9 +33,11 @@ import StatusBadge from '@/components/schema/StatusBadge'
 import {
   checkConsoleClusterHealth,
   createConsoleCluster,
+  listConsoleClusterHealthObservations,
   listConsoleClusters,
   updateConsoleCluster,
   type ConsoleCluster,
+  type ConsoleClusterHealthObservation,
   type ConsoleClusterInput
 } from '@/services/consoleAdmin'
 
@@ -105,6 +107,9 @@ export default function ClustersPage() {
   const [healthConfirmed, setHealthConfirmed] = useState(false)
   const [healthError, setHealthError] = useState<string | null>(null)
   const [checkingHealth, setCheckingHealth] = useState(false)
+  const [historyTarget, setHistoryTarget] = useState<ConsoleCluster | null>(null)
+  const [history, setHistory] = useState<ConsoleClusterHealthObservation[] | null>(null)
+  const [historyError, setHistoryError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setState({ kind: 'loading' })
@@ -140,6 +145,17 @@ export default function ClustersPage() {
 
   const closeHealthCheck = () => {
     if (!checkingHealth) setHealthTarget(null)
+  }
+
+  const openHistory = async (cluster: ConsoleCluster) => {
+    setHistoryTarget(cluster)
+    setHistory(null)
+    setHistoryError(null)
+    try {
+      setHistory(await listConsoleClusterHealthObservations(cluster.id))
+    } catch {
+      setHistoryError(t('historyLoadFailed'))
+    }
   }
 
   const checkHealth = async () => {
@@ -265,6 +281,7 @@ export default function ClustersPage() {
                     <TableCell align='right'>
                       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
                         <Button size='small' onClick={() => openHealthCheck(cluster)}>{t('checkHealth')}</Button>
+                        <Button size='small' onClick={() => void openHistory(cluster)}>{t('history')}</Button>
                         <Button size='small' onClick={() => open(cluster)}>{t('manage')}</Button>
                       </Box>
                     </TableCell>
@@ -354,6 +371,28 @@ export default function ClustersPage() {
             {t('checkHealth')}
           </Button>
         </DialogActions>
+      </Dialog>
+
+      <Dialog open={Boolean(historyTarget)} onClose={() => setHistoryTarget(null)} fullWidth maxWidth='sm'>
+        <DialogTitle>{historyTarget ? t('historyTitle', { name: historyTarget.name }) : t('history')}</DialogTitle>
+        <DialogContent>
+          {history === null && !historyError && <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress size={24} /></Box>}
+          {historyError && <Alert severity='error'>{historyError}</Alert>}
+          {history?.length === 0 && <Box sx={{ py: 4, ...mutedSx }}>{t('historyEmpty')}</Box>}
+          {history && history.length > 0 && (
+            <Table size='small'>
+              <TableHead><TableRow><TableCell>{t('historyColumns.when')}</TableCell><TableCell>{t('historyColumns.status')}</TableCell><TableCell>{t('historyColumns.http')}</TableCell></TableRow></TableHead>
+              <TableBody>{history.map(observation => (
+                <TableRow key={observation.id}>
+                  <TableCell>{new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(observation.observed_at))}</TableCell>
+                  <TableCell><StatusBadge noDot color={healthColor(observation.health_status)} label={t(`status.${observation.health_status}`)} /></TableCell>
+                  <TableCell>{observation.http_status ?? '—'}</TableCell>
+                </TableRow>
+              ))}</TableBody>
+            </Table>
+          )}
+        </DialogContent>
+        <DialogActions><Button onClick={() => setHistoryTarget(null)}>{t('close')}</Button></DialogActions>
       </Dialog>
     </>
   )

@@ -5135,6 +5135,16 @@
       "checkHealthBody": "The Platform will call this Cluster's configured health endpoint. Redirects are not followed.",
       "checkHealthConfirm": "I understand this runs a server-side probe and records the result.",
       "checkHealthFailed": "Couldn't complete the Cluster health check.",
+      "history": "Health history",
+      "historyTitle": "Health history for {name}",
+      "historyLoadFailed": "Couldn't load the Cluster health history.",
+      "historyEmpty": "No health observations have been recorded yet.",
+      "close": "Close",
+      "historyColumns": {
+        "when": "Checked",
+        "status": "Status",
+        "http": "HTTP"
+      },
       "createTitle": "Add cluster",
       "editTitle": "Manage {name}",
       "save": "Save cluster",

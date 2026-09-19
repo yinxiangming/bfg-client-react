@@ -5135,6 +5135,16 @@
       "checkHealthBody": "平台将请求这个集群已配置的健康端点，并且不会跟随重定向。",
       "checkHealthConfirm": "我了解这会执行一次服务端探测并记录结果。",
       "checkHealthFailed": "无法完成集群健康检查。",
+      "history": "健康记录",
+      "historyTitle": "{name} 的健康记录",
+      "historyLoadFailed": "无法加载集群健康记录。",
+      "historyEmpty": "尚未记录健康探测结果。",
+      "close": "关闭",
+      "historyColumns": {
+        "when": "检查时间",
+        "status": "状态",
+        "http": "HTTP"
+      },
       "createTitle": "新增集群",
       "editTitle": "管理 {name}",
       "save": "保存集群",

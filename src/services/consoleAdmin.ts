@@ -112,6 +112,26 @@ export async function checkConsoleClusterHealth(id: string, reason: string): Pro
   })
 }
 
+/** One redaction-safe result from a server-side Cluster health probe. */
+export interface ConsoleClusterHealthObservation {
+  id: number
+  health_status: ConsoleCluster['health_status']
+  http_status: number | null
+  outcome: 'checked' | 'configuration_unavailable' | 'configuration_changed'
+  observed_at: string
+}
+
+/** Read recent probe results; browser code never contacts Cluster endpoints directly. */
+export async function listConsoleClusterHealthObservations(
+  id: string,
+  limit = 20
+): Promise<ConsoleClusterHealthObservation[]> {
+  const params = new URLSearchParams({ limit: String(limit) })
+  return apiFetch<ConsoleClusterHealthObservation[]>(
+    buildApiUrl(`${CLUSTERS_BASE}${encodeURIComponent(id)}/health-observations/?${params}`)
+  )
+}
+
 // ── Audit history ────────────────────────────────────────────────────
 
 /** One completed sensitive action from the Platform control plane. */
