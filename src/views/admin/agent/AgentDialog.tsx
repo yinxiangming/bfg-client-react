@@ -81,7 +81,10 @@ export default function AgentDialog({ open, onClose }: AgentDialogProps) {
       if (!Number.isNaN(wid)) body.workspace_id = wid
     }
     try {
-      const res = await sendAgentChat(body)
+      const idempotencyKey = typeof globalThis.crypto?.randomUUID === 'function'
+        ? globalThis.crypto.randomUUID()
+        : `agent-${Date.now()}-${Math.random().toString(36).slice(2)}`
+      const res = await sendAgentChat(body, idempotencyKey)
       if (!res.ok) {
         const err = await res.text()
         setChatError(err || '请求失败')
