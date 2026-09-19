@@ -465,6 +465,7 @@ export const MAX_GRANT_MONTHS = 120
 export async function grantEntitlement(workspaceId: number, grant: ConsoleGrantInput): Promise<ConsoleGrant> {
   return apiFetch<ConsoleGrant>(buildApiUrl(`${BASE}workspaces/${workspaceId}/grants/`), {
     method: 'POST',
+    headers: { 'X-Idempotency-Key': createIdempotencyKey() },
     body: JSON.stringify({ ...grant, confirm: true })
   })
 }
@@ -491,7 +492,11 @@ export async function revokeEntitlement(
 ): Promise<ConsoleGrant> {
   return apiFetch<ConsoleGrant>(
     buildApiUrl(`${BASE}workspaces/${workspaceId}/grants/${grantId}/revoke/`),
-    { method: 'POST', body: JSON.stringify({ reason, confirm: true }) }
+    {
+      method: 'POST',
+      headers: { 'X-Idempotency-Key': createIdempotencyKey() },
+      body: JSON.stringify({ reason, confirm: true })
+    }
   )
 }
 
