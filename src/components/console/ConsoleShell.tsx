@@ -59,6 +59,7 @@ export default function ConsoleShell({ children }: { children: ReactNode }) {
       owned: (loaded?.workspaces ?? []).filter(workspace => workspace.is_owner),
       isPlatformAdmin: Boolean(loaded?.isPlatformAdmin),
       showClusters: Boolean(loaded?.platformCapabilities.cluster_management),
+      showAuditLog: Boolean(loaded?.platformCapabilities.audit_log),
       showPlatformSettings: Boolean(loaded?.platformCapabilities.configuration),
       openWorkspace: insideWorkspace && !owns ? openWorkspace : null,
       labels: {
@@ -72,6 +73,7 @@ export default function ConsoleShell({ children }: { children: ReactNode }) {
         platform: t('nav.platform'),
         allWorkspaces: t('nav.allWorkspaces'),
         clusters: t('nav.clusters'),
+        auditLog: t('nav.auditLog'),
         platformSettings: t('nav.platformSettings')
       }
     })

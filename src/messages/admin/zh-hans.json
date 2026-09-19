@@ -4620,6 +4620,7 @@
       "platform": "平台",
       "allWorkspaces": "全部工作区",
       "clusters": "集群",
+      "auditLog": "审计日志",
       "platformSettings": "平台设置"
     },
     "topbar": {
@@ -5105,6 +5106,38 @@
         "healthy": "健康",
         "degraded": "降级",
         "down": "不可用"
+      }
+    },
+    "audit": {
+      "title": "审计日志",
+      "subtitle": "敏感 Platform 变更的只读历史记录",
+      "loading": "正在加载审计记录",
+      "loadFailed": "没能加载审计记录。",
+      "forbidden": "只有平台管理员可以查看审计记录。",
+      "unavailable": "当前部署尚未提供审计记录功能。",
+      "empty": "没有符合这些筛选条件的平台变更。",
+      "apply": "应用筛选",
+      "clear": "清除",
+      "retry": "重试",
+      "loadMore": "加载更多",
+      "loadingMore": "正在加载…",
+      "details": "详情",
+      "detailTitle": "已审计的变更",
+      "before": "变更前",
+      "after": "变更后",
+      "close": "关闭",
+      "system": "系统",
+      "filters": {
+        "action": "操作",
+        "targetType": "目标类型",
+        "targetId": "目标 ID"
+      },
+      "columns": {
+        "when": "时间",
+        "action": "操作",
+        "target": "目标",
+        "operator": "执行者",
+        "reason": "原因"
       }
     },
     "brand": "工作区管理台"

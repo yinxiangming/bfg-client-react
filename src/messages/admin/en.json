@@ -4620,6 +4620,7 @@
       "platform": "Platform",
       "allWorkspaces": "All workspaces",
       "clusters": "Clusters",
+      "auditLog": "Audit log",
       "platformSettings": "Platform settings"
     },
     "topbar": {
@@ -5105,6 +5106,38 @@
         "healthy": "Healthy",
         "degraded": "Degraded",
         "down": "Down"
+      }
+    },
+    "audit": {
+      "title": "Audit log",
+      "subtitle": "a read-only history of sensitive Platform changes",
+      "loading": "Loading audit history",
+      "loadFailed": "Couldn't load the audit history.",
+      "forbidden": "Only platform administrators can view audit history.",
+      "unavailable": "Audit history is not available in this deployment yet.",
+      "empty": "No Platform changes match these filters.",
+      "apply": "Apply filters",
+      "clear": "Clear",
+      "retry": "Retry",
+      "loadMore": "Load more",
+      "loadingMore": "Loading…",
+      "details": "Details",
+      "detailTitle": "Audited change",
+      "before": "Before",
+      "after": "After",
+      "close": "Close",
+      "system": "System",
+      "filters": {
+        "action": "Action",
+        "targetType": "Target type",
+        "targetId": "Target ID"
+      },
+      "columns": {
+        "when": "When",
+        "action": "Action",
+        "target": "Target",
+        "operator": "Operator",
+        "reason": "Reason"
       }
     },
     "brand": "Workspaces Admin"

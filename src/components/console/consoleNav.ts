@@ -22,6 +22,7 @@ export type ConsoleNavLabels = {
   platform: string
   allWorkspaces: string
   clusters: string
+  auditLog: string
   platformSettings: string
 }
 
@@ -36,6 +37,7 @@ type ConsoleNavOptions = {
   owned: ConsoleNavWorkspace[]
   isPlatformAdmin: boolean
   showClusters: boolean
+  showAuditLog: boolean
   showPlatformSettings: boolean
   /** A workspace the account is looking at without owning it. */
   openWorkspace?: ConsoleNavWorkspace | null
@@ -76,7 +78,7 @@ function workspaceNode(workspace: ConsoleNavWorkspace, prefix: string, labels: C
   }
 }
 
-export function buildConsoleNav({ owned, isPlatformAdmin, showClusters, showPlatformSettings, openWorkspace, labels }: ConsoleNavOptions): MenuNode[] {
+export function buildConsoleNav({ owned, isPlatformAdmin, showClusters, showAuditLog, showPlatformSettings, openWorkspace, labels }: ConsoleNavOptions): MenuNode[] {
   const nav: MenuNode[] = [
     {
       type: 'section',
@@ -118,6 +120,12 @@ export function buildConsoleNav({ owned, isPlatformAdmin, showClusters, showPlat
       label: labels.clusters,
       icon: 'tabler-server',
       href: '/workspaces/platform/clusters'
+    }] : []),
+    ...(showAuditLog ? [{
+      id: 'console-audit-log',
+      label: labels.auditLog,
+      icon: 'tabler-history',
+      href: '/workspaces/platform/audit'
     }] : [])
   ]
 
