@@ -175,7 +175,11 @@ export async function exportConsoleWorkspace(id: number, reason: string): Promis
 }
 
 export async function importConsoleWorkspace(payload: Record<string, unknown>, reason: string): Promise<ConsoleWorkspace> {
-  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}import-workspace/`), { method: 'POST', body: JSON.stringify({ ...payload, confirm: true, reason }) })
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}import-workspace/`), {
+    method: 'POST',
+    headers: { 'X-Idempotency-Key': createIdempotencyKey() },
+    body: JSON.stringify({ ...payload, confirm: true, reason })
+  })
 }
 
 export async function resetConsoleAdminPassword(id: number, reason: string, email?: string): Promise<{ detail: string }> {
