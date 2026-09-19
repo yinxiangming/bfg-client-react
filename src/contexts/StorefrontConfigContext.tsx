@@ -125,9 +125,9 @@ function ColorModeEnforcer({ config }: { config: StorefrontConfig | null }) {
     if (!config) return
     const allowed = getAllowedColorModes(config)
     if (allowed.length === 1) {
-      forceMode(allowed[0])
+      forceMode(allowed[0], 'storefront')
     } else {
-      forceMode(null)
+      forceMode(null, 'storefront')
     }
   }, [config, forceMode])
   return null
