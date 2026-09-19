@@ -4557,7 +4557,8 @@
     "status": {
       "active": "正常",
       "suspended": "已暂停",
-      "inactive": "已停用"
+      "inactive": "已停用",
+      "scheduled_for_deletion": "已计划删除"
     },
     "badges": {
       "current": "当前工作区",
@@ -4770,7 +4771,8 @@
       },
       "readOnly": {
         "suspended": "这个工作区已暂停，扩展只能查看，不能修改。",
-        "inactive": "这个工作区已停用，扩展只能查看，不能修改。"
+        "inactive": "这个工作区已停用，扩展只能查看，不能修改。",
+        "scheduled_for_deletion": "这个工作区已计划删除，扩展只能查看，不能修改。"
       },
       "confirm": {
         "title": "停用「{name}」？",
@@ -4869,7 +4871,8 @@
       "importFileTooLarge": "请选择小于 1 MB 的配置文件。",
       "importInvalidFile": "请选择有效的 JSON 工作区配置文件。",
       "importAcknowledge": "我了解这会创建一个新工作区，并且导入的域名将保持待验证状态。",
-      "importFailed": "无法导入这个工作区配置，请检查文件后重试。"
+      "importFailed": "无法导入这个工作区配置，请检查文件后重试。",
+      "deletionDue": "计划于 {date} 删除"
     },
     "usage": {
       "title": "用量",

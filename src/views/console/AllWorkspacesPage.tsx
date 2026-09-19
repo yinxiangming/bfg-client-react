@@ -13,7 +13,7 @@ import { type ChangeEvent, useCallback, useEffect, useState } from 'react'
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
@@ -60,6 +60,7 @@ export default function AllWorkspacesPage() {
   const t = useTranslations('admin.console.all')
   const tStatus = useTranslations('admin.workspaces.status')
   const tActions = useTranslations('admin.common.actions')
+  const locale = useLocale()
   const router = useRouter()
   const { state: consoleState } = useConsole()
   const [search, setSearch] = useState('')
@@ -252,6 +253,7 @@ export default function AllWorkspacesPage() {
             <MenuItem value='active'>{tStatus('active')}</MenuItem>
             <MenuItem value='suspended'>{tStatus('suspended')}</MenuItem>
             <MenuItem value='inactive'>{tStatus('inactive')}</MenuItem>
+            <MenuItem value='scheduled_for_deletion'>{tStatus('scheduled_for_deletion')}</MenuItem>
           </TextField>
           <TextField
             size='small'
@@ -346,6 +348,11 @@ export default function AllWorkspacesPage() {
                       </TableCell>
                       <TableCell sx={cellSx}>
                         <StatusBadge label={tStatus(status)} color={WORKSPACE_STATUS_COLOR[status]} />
+                        {workspace.scheduled_deletion_at && (
+                          <Typography variant='caption' sx={{ display: 'block', mt: 1, ...mutedSx }}>
+                            {t('deletionDue', { date: new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(new Date(workspace.scheduled_deletion_at)) })}
+                          </Typography>
+                        )}
                       </TableCell>
                       <TableCell sx={cellSx}>
                         {workspace.active_extensions.length === 0 ? (
