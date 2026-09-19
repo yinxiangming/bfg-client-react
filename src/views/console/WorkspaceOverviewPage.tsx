@@ -39,6 +39,7 @@ import {
 
 import { useConsoleWorkspaceDetail } from './useConsoleWorkspaceDetail'
 import { useEnterWorkspace } from './useEnterWorkspace'
+import RuntimeFeatureAccessCard from './RuntimeFeatureAccessCard'
 import { WORKSPACE_STATUS_COLOR } from './workspaceStatus'
 
 function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
@@ -348,6 +349,8 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
               }}>{t('delete')}</Button>
             </Box>
           </Card>
+
+          <RuntimeFeatureAccessCard workspaceId={workspaceId} />
 
           <Card component='section' sx={{ mt: 6 }}>
             <Box sx={{ px: 4, py: 3, borderBottom: '1px solid var(--at-card-border)' }}>

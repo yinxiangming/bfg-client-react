@@ -4655,6 +4655,27 @@
       "loadingOperations": "Loading operations",
       "operationsFailed": "Couldn't load this workspace's operations.",
       "noOperations": "No lifecycle operations have been recorded for this workspace.",
+      "runtimeFeatures": {
+        "title": "Runtime feature access",
+        "subtitle": "Platform grants that the server actively enforces",
+        "names": {
+          "batch_management": "Batch management"
+        },
+        "forever": "Does not expire",
+        "until": "Until {date}",
+        "status": {
+          "effective": "Active",
+          "expired": "Expired",
+          "revoked": "Revoked",
+          "active": "Not active"
+        }
+      },
+      "grantFeature": "Grant feature",
+      "revokeFeature": "Revoke",
+      "revokeFeatureConfirm": "Revoke this runtime feature grant? The feature becomes unavailable immediately.",
+      "loadingFeatures": "Loading feature access",
+      "featuresFailed": "Couldn't load runtime feature access.",
+      "noRuntimeFeatures": "No Platform runtime feature grants have been recorded.",
       "operations": {
         "create": "Workspace created",
         "suspend": "Workspace suspended",
@@ -4762,6 +4783,8 @@
         "action": "Grant",
         "title": "Grant this workspace an entitlement",
         "what": "What to grant",
+        "runtimeFeature": "Batch management",
+        "runtimeFeatureHint": "This is currently the only Platform feature with an active runtime entitlement gate.",
         "basePlan": "Base plan",
         "basePlanHint": "Everything that comes with the plan, rather than one add-on.",
         "notSwitchedOn": "Granting doesn't switch an extension on — that stays the workspace's decision. One the platform paused when its entitlement ran out is switched back on.",
