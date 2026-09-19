@@ -5067,7 +5067,8 @@
           "effectiveFrom": "生效时间",
           "added": "录入时间"
         },
-        "meterHint": "使用它的扩展记录用量时所用的键名。",
+        "meterHint": "只有具备服务端运行时执行点的计量项可以定价。",
+        "legacyMeter": "这个旧计量项没有正在使用的运行时执行点，因此价格历史只能查看。",
         "vendorCostHint": "供应商对一个“单位数量”收取的费用，按美元计。",
         "unitSizeHint": "上面这笔成本买到多少次调用或多少个 token：按每 1,000 次报价就填 1000。",
         "marginHint": "在成本之上加价的比例，用小数表示：0.30 表示按成本的 1.3 倍收费。留空则跟随平台默认利润率。",
@@ -5104,6 +5105,7 @@
         "invalid_platform_variable": "这个变量不能设成这个值。",
         "reason_required": "请写明这次改动的理由。",
         "invalid_meter_price": "这条价格存不下来，请检查成本、单位数量和利润率。",
+        "unknown_runtime_meter": "请选择一个具备运行时执行点的计量项。",
         "invalid_exchange_rate": "这条汇率存不下来，请检查货币代码和数字。"
       }
     },
