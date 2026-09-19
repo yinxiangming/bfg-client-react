@@ -4637,6 +4637,7 @@
         "name": "名称",
         "domain": "域名",
         "status": "状态",
+        "cluster": "集群",
         "owner": "所有者",
         "staff": "员工",
         "created": "创建时间"
@@ -4644,6 +4645,7 @@
       "ownerIsYou": "{name}（你）",
       "noOwner": "无所有者",
       "noDomain": "未绑定",
+      "noCluster": "未分配",
       "staffCount": "{count} 人在职",
       "extensions": "扩展",
       "manageExtensions": "管理扩展",
