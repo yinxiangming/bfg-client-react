@@ -42,6 +42,8 @@ export interface ConsoleCluster {
   redis_configured: boolean
   s3_bucket: string
   max_workspaces: number
+  /** Monotonic version required for a safe shared-configuration update. */
+  config_version: number
   /** Computed from the assigned workspace profiles, rather than a stale counter. */
   workspace_count: number
   capacity_percentage: number
@@ -89,12 +91,13 @@ export async function createConsoleCluster(
 export async function updateConsoleCluster(
   id: string,
   input: Partial<ConsoleClusterInput>,
-  reason: string
+  reason: string,
+  expectedVersion: number
 ): Promise<ConsoleCluster> {
   return apiFetch<ConsoleCluster>(buildApiUrl(`${CLUSTERS_BASE}${encodeURIComponent(id)}/`), {
     method: 'PATCH',
     headers: { 'X-Platform-Change-Reason': reason },
-    body: JSON.stringify({ ...input, confirm: true })
+    body: JSON.stringify({ ...input, expected_version: expectedVersion, confirm: true })
   })
 }
 
