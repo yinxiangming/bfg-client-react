@@ -9,6 +9,7 @@ import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 import { resolveAccountSkin } from '@/components/account/themes/resolve'
 import { AccountProvider } from '@/contexts/AccountContext'
 import AccountLayoutClient from './AccountLayoutClient'
+import SkinColorModeGuard from '@/components/theme/SkinColorModeGuard'
 
 export const metadata = {
   // Customer account pages are per-session and must stay out of the index.
@@ -31,9 +32,11 @@ export default async function AccountLayout({ children }: { children: React.Reac
   if (skin?.Layout) {
     const SkinLayout = skin.Layout
     return (
-      <SkinLayout navItems={finalNavItems} extensionIds={extensionIds}>
-        <AccountProvider>{children}</AccountProvider>
-      </SkinLayout>
+      <SkinColorModeGuard supportedColorModes={skin.supportedColorModes}>
+        <SkinLayout navItems={finalNavItems} extensionIds={extensionIds}>
+          <AccountProvider>{children}</AccountProvider>
+        </SkinLayout>
+      </SkinColorModeGuard>
     )
   }
 
