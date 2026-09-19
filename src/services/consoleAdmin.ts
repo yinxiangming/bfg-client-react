@@ -203,7 +203,7 @@ export async function setPlatformVariable(
 ): Promise<ConsolePlatformVariable> {
   return apiFetch<ConsolePlatformVariable>(buildApiUrl(`${BASE}variables/${encodeURIComponent(key)}/`), {
     method: 'PATCH',
-    body: JSON.stringify({ value, reason })
+    body: JSON.stringify({ value, reason, confirm: true })
   })
 }
 
@@ -276,7 +276,7 @@ export async function listMeterPrices(meter?: string): Promise<ConsoleMeterPrice
 export async function addMeterPrice(price: ConsoleMeterPriceInput): Promise<ConsoleMeterPrices> {
   return apiFetch<ConsoleMeterPrices>(buildApiUrl(`${BASE}meter-prices/`), {
     method: 'POST',
-    body: JSON.stringify(price)
+    body: JSON.stringify({ ...price, confirm: true })
   })
 }
 
@@ -343,7 +343,7 @@ export async function listExchangeRates(query: ConsoleExchangeRateQuery = {}): P
 export async function setExchangeRate(rate: ConsoleExchangeRateInput): Promise<ConsoleExchangeRate> {
   return apiFetch<ConsoleExchangeRate>(buildApiUrl(`${BASE}exchange-rates/`), {
     method: 'POST',
-    body: JSON.stringify(rate)
+    body: JSON.stringify({ ...rate, confirm: true })
   })
 }
 
@@ -377,7 +377,7 @@ export async function getWorkspaceUsageCap(workspaceId: number): Promise<Console
 export async function setWorkspaceUsageCap(workspaceId: number, capPoints: string | null): Promise<ConsoleUsageCap> {
   return apiFetch<ConsoleUsageCap>(buildApiUrl(`${BASE}workspaces/${workspaceId}/usage-cap/`), {
     method: 'PATCH',
-    body: JSON.stringify({ cap_points: capPoints })
+    body: JSON.stringify({ cap_points: capPoints, confirm: true })
   })
 }
 
@@ -443,7 +443,7 @@ export const MAX_GRANT_MONTHS = 120
 export async function grantEntitlement(workspaceId: number, grant: ConsoleGrantInput): Promise<ConsoleGrant> {
   return apiFetch<ConsoleGrant>(buildApiUrl(`${BASE}workspaces/${workspaceId}/grants/`), {
     method: 'POST',
-    body: JSON.stringify(grant)
+    body: JSON.stringify({ ...grant, confirm: true })
   })
 }
 
