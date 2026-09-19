@@ -36,6 +36,7 @@ import {
   consoleWorkspaceStatus,
   listConsoleWorkspaces,
   listMoreConsoleWorkspaces,
+  importConsoleWorkspace,
   type ConsoleWorkspace
 } from '@/services/console'
 
@@ -55,6 +56,7 @@ export default function AllWorkspacesPage() {
   const [term, setTerm] = useState('')
   const [state, setState] = useState<ListState>({ kind: 'loading' })
   const [loadingMore, setLoadingMore] = useState(false)
+  const [importing, setImporting] = useState(false)
 
   const isPlatformAdmin = consoleState.kind === 'loaded' && consoleState.isPlatformAdmin
 
@@ -104,6 +106,21 @@ export default function AllWorkspacesPage() {
       // What is already listed stays; the button can be pressed again.
     } finally {
       setLoadingMore(false)
+    }
+  }
+
+  const importFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    event.target.value = ''
+    if (!file) return
+    setImporting(true)
+    try {
+      await importConsoleWorkspace(JSON.parse(await file.text()))
+      await load()
+    } catch {
+      setState({ kind: 'failed' })
+    } finally {
+      setImporting(false)
     }
   }
 
@@ -159,9 +176,13 @@ export default function AllWorkspacesPage() {
             }}
           />
           {state.kind === 'loaded' && (
-            <Typography variant='caption' sx={{ ml: { sm: 'auto' }, ...mutedSx }}>
-              {t('count', { count: state.count })}
-            </Typography>
+            <>
+              <Button component='label' size='small' disabled={importing} sx={{ ml: { sm: 'auto' } }}>
+                {importing ? t('loading') : t('import')}
+                <input hidden type='file' accept='application/json,.json' onChange={importFile} />
+              </Button>
+              <Typography variant='caption' sx={{ ...mutedSx }}>{t('count', { count: state.count })}</Typography>
+            </>
           )}
         </Box>
 

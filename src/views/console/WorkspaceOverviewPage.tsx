@@ -23,8 +23,8 @@ import Typography from '@mui/material/Typography'
 import Icon from '@components/Icon'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import StatusBadge from '@/components/schema/StatusBadge'
-import { useConsoleWorkspace } from '@/contexts/ConsoleContext'
-import { consoleWorkspaceStatus, extensionName } from '@/services/console'
+import { useConsole, useConsoleWorkspace } from '@/contexts/ConsoleContext'
+import { consoleWorkspaceStatus, extensionName, suspendConsoleWorkspace, resumeConsoleWorkspace, deleteConsoleWorkspace, exportConsoleWorkspace, resetConsoleAdminPassword } from '@/services/console'
 
 import { useConsoleWorkspaceDetail } from './useConsoleWorkspaceDetail'
 import { useEnterWorkspace } from './useEnterWorkspace'
@@ -78,9 +78,11 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
   const tActions = useTranslations('admin.common.actions')
   const locale = useLocale()
   const membership = useConsoleWorkspace(workspaceId)
+  const { state: consoleState } = useConsole()
   const { state, reload } = useConsoleWorkspaceDetail(workspaceId)
   const enter = useEnterWorkspace(workspaceId)
   const [failure, setFailure] = useState<string | null>(null)
+  const [actionBusy, setActionBusy] = useState(false)
 
   // Switching into a workspace needs active staff there, owners included, so a platform
   // administrator looking at someone else's workspace is not offered the way in.
@@ -90,6 +92,20 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
     setFailure(null)
 
     if (!(await enter('/admin'))) setFailure(tExtensions('enterFailed'))
+  }
+
+  const runAction = async (action: () => Promise<unknown>) => {
+    setFailure(null)
+    setActionBusy(true)
+    try { await action(); await reload() } catch (error) { setFailure(error instanceof Error ? error.message : t('actionFailed')) } finally { setActionBusy(false) }
+  }
+
+  const downloadExport = async () => {
+    const payload = await exportConsoleWorkspace(workspaceId)
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url; anchor.download = `workspace-${workspaceId}.json`; anchor.click(); URL.revokeObjectURL(url)
   }
 
   if (state.kind === 'loading') {
@@ -232,6 +248,24 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
           )}
         </Card>
       </Box>
+
+      {consoleState.kind === 'loaded' && consoleState.isPlatformAdmin && (
+        <Card component='section' sx={{ mt: 6 }}>
+          <Box sx={{ px: 4, py: 3, borderBottom: '1px solid var(--at-card-border)' }}>
+            <Typography component='h2' sx={{ fontSize: 14, fontWeight: 600, color: 'var(--at-row-fg)' }}>{t('platformActions')}</Typography>
+          </Box>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, p: 4 }}>
+            {status === 'suspended' || status === 'inactive' ? (
+              <Button disabled={actionBusy} onClick={() => void runAction(() => resumeConsoleWorkspace(workspaceId))}>{t('resume')}</Button>
+            ) : (
+              <Button disabled={actionBusy} onClick={() => void runAction(() => suspendConsoleWorkspace(workspaceId))}>{t('suspend')}</Button>
+            )}
+            <Button disabled={actionBusy} onClick={() => void runAction(downloadExport)}>{t('export')}</Button>
+            <Button disabled={actionBusy} onClick={() => void runAction(() => resetConsoleAdminPassword(workspaceId))}>{t('resetPassword')}</Button>
+            <Button color='error' disabled={actionBusy} onClick={() => { if (window.confirm(t('deleteConfirm'))) void runAction(() => deleteConsoleWorkspace(workspaceId)) }}>{t('delete')}</Button>
+          </Box>
+        </Card>
+      )}
     </>
   )
 }

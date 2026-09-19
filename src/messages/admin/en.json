@@ -4645,7 +4645,15 @@
       "staffCount": "{count} active",
       "extensions": "Extensions",
       "manageExtensions": "Manage extensions",
-      "enter": "Open admin"
+      "enter": "Open admin",
+      "platformActions": "Platform actions",
+      "suspend": "Suspend",
+      "resume": "Resume",
+      "export": "Export workspace",
+      "resetPassword": "Send password reset",
+      "delete": "Schedule deletion",
+      "deleteConfirm": "Schedule this workspace for deletion in 30 days?",
+      "actionFailed": "The action could not be completed."
     },
     "extensions": {
       "title": "Extensions",
@@ -4792,6 +4800,7 @@
       "forbidden": "Only platform administrators can see every workspace.",
       "loadMore": "Load more",
       "showing": "Showing {shown} of {count}"
+      ,"import": "Import workspace"
     },
     "usage": {
       "title": "Usage",

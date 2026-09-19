@@ -112,6 +112,7 @@ export interface ConsoleWorkspace {
   staff_count: number
   /** Keys of the extensions the workspace has switched on. */
   active_extensions: string[]
+  cluster?: { id: number; name: string; region: string; is_active: boolean } | null
 }
 
 export interface ConsoleWorkspaceDetail extends ConsoleWorkspace {
@@ -139,6 +140,32 @@ export interface ConsoleWorkspaceList {
 }
 
 const BASE = '/platform/console/workspaces/'
+
+export async function suspendConsoleWorkspace(id: number, reason = ''): Promise<ConsoleWorkspace> {
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/suspend/`), { method: 'POST', body: JSON.stringify({ reason }) })
+}
+
+export async function resumeConsoleWorkspace(id: number): Promise<ConsoleWorkspace> {
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/resume/`), { method: 'POST', body: '{}' })
+}
+
+export async function deleteConsoleWorkspace(id: number): Promise<ConsoleWorkspace> {
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/delete/`), { method: 'POST', body: JSON.stringify({ confirm: true }) })
+}
+
+export async function exportConsoleWorkspace(id: number): Promise<Record<string, unknown>> {
+  return apiFetch<Record<string, unknown>>(buildApiUrl(`${BASE}${id}/export/`))
+}
+
+export async function importConsoleWorkspace(payload: Record<string, unknown>): Promise<ConsoleWorkspace> {
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}import-workspace/`), { method: 'POST', body: JSON.stringify(payload) })
+}
+
+export async function resetConsoleAdminPassword(id: number, email?: string): Promise<{ detail: string }> {
+  return apiFetch<{ detail: string }>(buildApiUrl(`${BASE}${id}/reset-admin-password/`), {
+    method: 'POST', body: JSON.stringify(email ? { email } : {})
+  })
+}
 
 /** As many workspaces as the deployment's pagination allows in one request. */
 const PAGE_SIZE = 100
