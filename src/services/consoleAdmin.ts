@@ -83,7 +83,7 @@ export async function createConsoleCluster(
 ): Promise<ConsoleCluster> {
   return apiFetch<ConsoleCluster>(buildApiUrl(CLUSTERS_BASE), {
     method: 'POST',
-    headers: { 'X-Platform-Change-Reason': reason },
+    headers: { 'X-Platform-Change-Reason': reason, 'X-Idempotency-Key': createIdempotencyKey() },
     body: JSON.stringify({ ...input, confirm: true })
   })
 }
@@ -96,7 +96,7 @@ export async function updateConsoleCluster(
 ): Promise<ConsoleCluster> {
   return apiFetch<ConsoleCluster>(buildApiUrl(`${CLUSTERS_BASE}${encodeURIComponent(id)}/`), {
     method: 'PATCH',
-    headers: { 'X-Platform-Change-Reason': reason },
+    headers: { 'X-Platform-Change-Reason': reason, 'X-Idempotency-Key': createIdempotencyKey() },
     body: JSON.stringify({ ...input, expected_version: expectedVersion, confirm: true })
   })
 }
@@ -105,7 +105,7 @@ export async function updateConsoleCluster(
 export async function checkConsoleClusterHealth(id: string, reason: string): Promise<ConsoleCluster> {
   return apiFetch<ConsoleCluster>(buildApiUrl(`${CLUSTERS_BASE}${encodeURIComponent(id)}/health-check/`), {
     method: 'POST',
-    headers: { 'X-Platform-Change-Reason': reason },
+    headers: { 'X-Platform-Change-Reason': reason, 'X-Idempotency-Key': createIdempotencyKey() },
     body: JSON.stringify({ confirm: true })
   })
 }
