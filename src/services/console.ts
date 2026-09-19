@@ -112,11 +112,19 @@ export interface ConsoleWorkspace {
   staff_count: number
   /** Keys of the extensions the workspace has switched on. */
   active_extensions: string[]
-  cluster?: { id: number; name: string; region: string; is_active: boolean } | null
+  cluster?: { id: string; name: string; region: string; is_active: boolean } | null
+}
+
+/** Which optional workspace-management capabilities the current deployment supports. */
+export interface ConsoleWorkspaceCapabilities {
+  extension_management: boolean
+  usage: boolean
 }
 
 export interface ConsoleWorkspaceDetail extends ConsoleWorkspace {
   extensions: ConsoleExtension[]
+  /** Missing on an older Platform response; callers must treat that as unavailable. */
+  capabilities?: ConsoleWorkspaceCapabilities
 }
 
 export type ConsoleWorkspaceStatus = 'active' | 'suspended' | 'inactive'
@@ -141,29 +149,29 @@ export interface ConsoleWorkspaceList {
 
 const BASE = '/platform/console/workspaces/'
 
-export async function suspendConsoleWorkspace(id: number, reason = ''): Promise<ConsoleWorkspace> {
-  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/suspend/`), { method: 'POST', body: JSON.stringify({ reason }) })
+export async function suspendConsoleWorkspace(id: number, reason: string): Promise<ConsoleWorkspace> {
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/suspend/`), { method: 'POST', body: JSON.stringify({ confirm: true, reason }) })
 }
 
-export async function resumeConsoleWorkspace(id: number): Promise<ConsoleWorkspace> {
-  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/resume/`), { method: 'POST', body: '{}' })
+export async function resumeConsoleWorkspace(id: number, reason: string): Promise<ConsoleWorkspace> {
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/resume/`), { method: 'POST', body: JSON.stringify({ confirm: true, reason }) })
 }
 
-export async function deleteConsoleWorkspace(id: number): Promise<ConsoleWorkspace> {
-  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/delete/`), { method: 'POST', body: JSON.stringify({ confirm: true }) })
+export async function deleteConsoleWorkspace(id: number, reason: string): Promise<ConsoleWorkspace> {
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}${id}/delete/`), { method: 'POST', body: JSON.stringify({ confirm: true, reason }) })
 }
 
 export async function exportConsoleWorkspace(id: number): Promise<Record<string, unknown>> {
   return apiFetch<Record<string, unknown>>(buildApiUrl(`${BASE}${id}/export/`))
 }
 
-export async function importConsoleWorkspace(payload: Record<string, unknown>): Promise<ConsoleWorkspace> {
-  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}import-workspace/`), { method: 'POST', body: JSON.stringify(payload) })
+export async function importConsoleWorkspace(payload: Record<string, unknown>, reason: string): Promise<ConsoleWorkspace> {
+  return apiFetch<ConsoleWorkspace>(buildApiUrl(`${BASE}import-workspace/`), { method: 'POST', body: JSON.stringify({ ...payload, confirm: true, reason }) })
 }
 
-export async function resetConsoleAdminPassword(id: number, email?: string): Promise<{ detail: string }> {
+export async function resetConsoleAdminPassword(id: number, reason: string, email?: string): Promise<{ detail: string }> {
   return apiFetch<{ detail: string }>(buildApiUrl(`${BASE}${id}/reset-admin-password/`), {
-    method: 'POST', body: JSON.stringify(email ? { email } : {})
+    method: 'POST', body: JSON.stringify({ ...(email ? { email } : {}), confirm: true, reason })
   })
 }
 
@@ -198,6 +206,14 @@ export async function listMoreConsoleWorkspaces(next: string): Promise<ConsoleWo
 /** One workspace with every extension it can switch, each with its configuration. */
 export async function getConsoleWorkspace(id: number): Promise<ConsoleWorkspaceDetail> {
   return apiFetch<ConsoleWorkspaceDetail>(buildApiUrl(`${BASE}${id}/`))
+}
+
+/**
+ * The tenant-safe workspace contract for an owner or member. Platform console routes
+ * deliberately remain Django-superuser-only and must never be used as an owner fallback.
+ */
+export async function getOwnerWorkspace(id: number): Promise<ConsoleWorkspaceDetail> {
+  return apiFetch<ConsoleWorkspaceDetail>(buildApiUrl(`/platform/workspaces/${id}/`))
 }
 
 export async function activateExtension(workspaceId: number, key: string): Promise<ConsoleExtension> {

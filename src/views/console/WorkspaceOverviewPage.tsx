@@ -100,6 +100,12 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
     try { await action(); await reload() } catch (error) { setFailure(error instanceof Error ? error.message : t('actionFailed')) } finally { setActionBusy(false) }
   }
 
+  const platformReason = () => {
+    const value = window.prompt(t('reasonPrompt'))?.trim()
+
+    return value && value.length >= 3 ? value : null
+  }
+
   const downloadExport = async () => {
     const payload = await exportConsoleWorkspace(workspaceId)
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
@@ -135,6 +141,7 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
 
   const workspace = state.workspace
   const status = consoleWorkspaceStatus(workspace)
+  const canManageExtensions = workspace.capabilities?.extension_management === true
   const owner = workspace.owner?.username
   const createdAt = new Date(workspace.created_at)
 
@@ -214,9 +221,11 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
             <Typography component='h2' sx={{ fontSize: 14, fontWeight: 600, color: 'var(--at-row-fg)' }}>
               {t('extensions')}
             </Typography>
-            <Button component={Link} href={`/workspaces/${workspace.id}/extensions`} size='small'>
-              {t('manageExtensions')}
-            </Button>
+            {canManageExtensions && (
+              <Button component={Link} href={`/workspaces/${workspace.id}/extensions`} size='small'>
+                {t('manageExtensions')}
+              </Button>
+            )}
           </Box>
           {workspace.extensions.length === 0 ? (
             <Box sx={{ px: 4, py: 6, color: 'var(--at-row-sub)', fontSize: 13 }}>{tExtensions('none')}</Box>
@@ -256,13 +265,26 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
           </Box>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, p: 4 }}>
             {status === 'suspended' || status === 'inactive' ? (
-              <Button disabled={actionBusy} onClick={() => void runAction(() => resumeConsoleWorkspace(workspaceId))}>{t('resume')}</Button>
+              <Button disabled={actionBusy} onClick={() => {
+                const reason = platformReason()
+                if (reason) void runAction(() => resumeConsoleWorkspace(workspaceId, reason))
+              }}>{t('resume')}</Button>
             ) : (
-              <Button disabled={actionBusy} onClick={() => void runAction(() => suspendConsoleWorkspace(workspaceId))}>{t('suspend')}</Button>
+              <Button disabled={actionBusy} onClick={() => {
+                const reason = platformReason()
+                if (reason) void runAction(() => suspendConsoleWorkspace(workspaceId, reason))
+              }}>{t('suspend')}</Button>
             )}
             <Button disabled={actionBusy} onClick={() => void runAction(downloadExport)}>{t('export')}</Button>
-            <Button disabled={actionBusy} onClick={() => void runAction(() => resetConsoleAdminPassword(workspaceId))}>{t('resetPassword')}</Button>
-            <Button color='error' disabled={actionBusy} onClick={() => { if (window.confirm(t('deleteConfirm'))) void runAction(() => deleteConsoleWorkspace(workspaceId)) }}>{t('delete')}</Button>
+            <Button disabled={actionBusy} onClick={() => {
+              const reason = platformReason()
+              if (reason) void runAction(() => resetConsoleAdminPassword(workspaceId, reason))
+            }}>{t('resetPassword')}</Button>
+            <Button color='error' disabled={actionBusy} onClick={() => {
+              if (!window.confirm(t('deleteConfirm'))) return
+              const reason = platformReason()
+              if (reason) void runAction(() => deleteConsoleWorkspace(workspaceId, reason))
+            }}>{t('delete')}</Button>
           </Box>
         </Card>
       )}

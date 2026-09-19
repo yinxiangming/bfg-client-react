@@ -113,9 +113,12 @@ export default function AllWorkspacesPage() {
     const file = event.target.files?.[0]
     event.target.value = ''
     if (!file) return
+    const reason = window.prompt(t('importReason'))?.trim()
+    if (!reason || reason.length < 3) return
+    if (!window.confirm(t('importConfirm'))) return
     setImporting(true)
     try {
-      await importConsoleWorkspace(JSON.parse(await file.text()))
+      await importConsoleWorkspace(JSON.parse(await file.text()), reason)
       await load()
     } catch {
       setState({ kind: 'failed' })

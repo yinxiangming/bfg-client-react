@@ -247,6 +247,15 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
 
   const { workspace: loaded } = state
 
+  if (loaded.capabilities?.extension_management !== true) {
+    return (
+      <>
+        <AdminPageHeader title={t('title')} subtitle={`${loaded.name} · ${t('subtitle')}`} />
+        <Alert severity='info'>{t('unavailable')}</Alert>
+      </>
+    )
+  }
+
   return (
     <>
       <AdminPageHeader

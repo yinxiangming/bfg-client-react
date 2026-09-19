@@ -94,13 +94,25 @@ export interface TenantWorkspace {
   plan: unknown | null
   credits: unknown | null
   extensions: unknown[]
+  capabilities?: {
+    extension_management: boolean
+    usage: boolean
+  }
 }
 
 /** Why GET /platform/workspaces/me/ says the user cannot create a workspace right now. */
 export type TenantWorkspaceCreateBlocked = 'workspace_create_forbidden' | 'workspace_limit_reached'
 
 export interface TenantWorkspacesResponse {
+  /** Django-superuser access to the infrastructure control plane. */
+  is_platform_superuser?: boolean
+  /** @deprecated Use is_platform_superuser; retained while older servers are deployed. */
   is_platform_admin: boolean
+  /** Deployment-level capabilities for the Django-superuser control plane. */
+  platform_capabilities?: {
+    cluster_management: boolean
+    configuration: boolean
+  }
   workspaces: TenantWorkspace[]
   /** How many workspaces one account may own, suspended and inactive ones included. */
   workspace_limit: number
