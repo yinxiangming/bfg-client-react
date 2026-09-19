@@ -7,6 +7,14 @@ export type AgentChatBody = {
   stream?: boolean
 }
 
-export async function sendAgentChat(body: AgentChatBody): Promise<Response> {
-  return fetch(bfgApi.agentChat(), getAgentChatRequestInit(body))
+export async function sendAgentChat(body: AgentChatBody, idempotencyKey: string): Promise<Response> {
+  const init = getAgentChatRequestInit(body)
+
+  return fetch(bfgApi.agentChat(), {
+    ...init,
+    headers: {
+      ...init.headers,
+      'X-Idempotency-Key': idempotencyKey
+    }
+  })
 }
