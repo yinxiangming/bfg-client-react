@@ -130,7 +130,7 @@ export default function ClustersPage() {
         await updateConsoleCluster(editing.id, {
           ...changes,
           ...(redis_url.trim() ? { redis_url: redis_url.trim() } : {})
-        }, reason.trim())
+        }, reason.trim(), editing.config_version)
       }
       setEditing(undefined)
       await load()
