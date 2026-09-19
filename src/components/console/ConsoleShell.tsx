@@ -58,6 +58,8 @@ export default function ConsoleShell({ children }: { children: ReactNode }) {
     return buildConsoleNav({
       owned: (loaded?.workspaces ?? []).filter(workspace => workspace.is_owner),
       isPlatformAdmin: Boolean(loaded?.isPlatformAdmin),
+      showClusters: Boolean(loaded?.platformCapabilities.cluster_management),
+      showPlatformSettings: Boolean(loaded?.platformCapabilities.configuration),
       openWorkspace: insideWorkspace && !owns ? openWorkspace : null,
       labels: {
         workspaces: t('nav.workspaces'),
@@ -69,6 +71,7 @@ export default function ConsoleShell({ children }: { children: ReactNode }) {
         bills: t('nav.bills'),
         platform: t('nav.platform'),
         allWorkspaces: t('nav.allWorkspaces'),
+        clusters: t('nav.clusters'),
         platformSettings: t('nav.platformSettings')
       }
     })

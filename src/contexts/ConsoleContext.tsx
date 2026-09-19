@@ -23,6 +23,7 @@ export type ConsoleState =
       kind: 'loaded'
       workspaces: TenantWorkspace[]
       isPlatformAdmin: boolean
+      platformCapabilities: { cluster_management: boolean; configuration: boolean }
       /** Why a create request would be refused right now; null when it would go ahead. */
       createBlocked: TenantWorkspaceCreateBlocked | null
       workspaceLimit: number
@@ -65,12 +66,13 @@ export function ConsoleProvider({ children }: { children: ReactNode }) {
     setState(previous => (previous.kind === 'loaded' ? previous : { kind: 'loading' }))
 
     try {
-      const { workspaces, is_platform_admin, workspace_limit, create_blocked } = await listTenantWorkspaces()
+      const { workspaces, is_platform_admin, is_platform_superuser, workspace_limit, create_blocked, platform_capabilities } = await listTenantWorkspaces()
 
       setState({
         kind: 'loaded',
         workspaces: workspaces ?? [],
-        isPlatformAdmin: Boolean(is_platform_admin),
+        isPlatformAdmin: Boolean(is_platform_superuser ?? is_platform_admin),
+        platformCapabilities: platform_capabilities ?? { cluster_management: false, configuration: false },
         createBlocked: create_blocked ?? null,
         workspaceLimit: workspace_limit
       })

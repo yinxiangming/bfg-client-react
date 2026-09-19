@@ -4619,6 +4619,7 @@
       "bills": "Bills",
       "platform": "Platform",
       "allWorkspaces": "All workspaces",
+      "clusters": "Clusters",
       "platformSettings": "Platform settings"
     },
     "topbar": {
@@ -4649,10 +4650,11 @@
       "platformActions": "Platform actions",
       "suspend": "Suspend",
       "resume": "Resume",
-      "export": "Export workspace",
+  "export": "Export workspace configuration",
       "resetPassword": "Send password reset",
       "delete": "Schedule deletion",
       "deleteConfirm": "Schedule this workspace for deletion in 30 days?",
+      "reasonPrompt": "Why are you making this Platform change? (at least 3 characters)",
       "actionFailed": "The action could not be completed."
     },
     "extensions": {
@@ -4661,6 +4663,7 @@
       "loading": "Loading extensions",
       "loadFailed": "Couldn't load this workspace.",
       "notFound": "This workspace doesn't exist, or you don't run it.",
+      "unavailable": "Extension management is not available in this deployment yet.",
       "none": "This platform ships no extensions a workspace can switch on.",
       "on": "On",
       "off": "Off",
@@ -4800,8 +4803,10 @@
       "noOwner": "No owner",
       "forbidden": "Only platform administrators can see every workspace.",
       "loadMore": "Load more",
-      "showing": "Showing {shown} of {count}"
-      ,"import": "Import workspace"
+      "showing": "Showing {shown} of {count}",
+  "import": "Import workspace configuration",
+      "importReason": "Why are you importing this workspace? (at least 3 characters)",
+  "importConfirm": "Import this workspace configuration? This creates a new workspace. It does not restore members, business data, or media."
     },
     "usage": {
       "title": "Usage",
@@ -4809,6 +4814,7 @@
       "loading": "Loading usage",
       "loadFailed": "Couldn't load this workspace's usage.",
       "notFound": "This workspace doesn't exist, or you don't run it.",
+      "unavailable": "Usage reporting is not available in this deployment yet.",
       "month": "Month",
       "used": "Used",
       "cap": "Allowance",
@@ -4948,6 +4954,7 @@
       "subtitle": "the numbers every workspace on this platform is billed by",
       "loading": "Loading platform settings",
       "loadFailed": "Couldn't work out who you are. Reload the page.",
+      "unavailable": "Platform billing configuration is not available in this deployment yet.",
       "tabs": {
         "variables": "Variables",
         "prices": "Meter prices",
@@ -5040,6 +5047,64 @@
         "reason_required": "Say why you're making this change.",
         "invalid_meter_price": "That price can't be stored. Check the cost, the unit size and the margin.",
         "invalid_exchange_rate": "That rate can't be stored. Check the currencies and the number."
+      }
+    },
+    "clusters": {
+      "title": "Clusters",
+      "subtitle": "the infrastructure locations that host your workspaces",
+      "loading": "Loading clusters",
+      "loadFailed": "Couldn't load the clusters. Reload the page and try again.",
+      "forbidden": "Only platform administrators can manage clusters.",
+      "unavailable": "Cluster management is not available in this deployment yet.",
+      "empty": "No clusters have been configured yet.",
+      "add": "Add cluster",
+      "manage": "Manage",
+      "createTitle": "Add cluster",
+      "editTitle": "Manage {name}",
+      "save": "Save cluster",
+      "create": "Create cluster",
+      "saveFailed": "Couldn't save this cluster. Check the fields and try again.",
+      "reason": "Reason for this change",
+      "confirm": "I understand this changes shared platform infrastructure.",
+      "redisUnchanged": "Leave blank to keep the current value",
+      "configuration": "Connection settings",
+      "capacity": "Capacity and availability",
+      "fields": {
+        "id": "Cluster ID",
+        "name": "Name",
+        "region": "Region",
+        "api": "API URL",
+        "frontend": "Frontend URL",
+        "dbHost": "Database host",
+        "dbPort": "Database port",
+        "redis": "Redis URL",
+        "bucket": "Storage bucket",
+        "capacity": "Workspace capacity",
+        "accepting": "Accepting new workspaces",
+        "active": "Cluster active"
+      },
+      "columns": {
+        "cluster": "Cluster",
+        "region": "Region",
+        "usage": "Capacity",
+        "availability": "Availability",
+        "health": "Health",
+        "endpoint": "API endpoint"
+      },
+      "regions": {
+        "us": "United States",
+        "eu": "Europe",
+        "apac": "Asia Pacific"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "accepting": "Accepting new workspaces",
+        "notAccepting": "Not accepting new workspaces",
+        "unknown": "Unknown",
+        "healthy": "Healthy",
+        "degraded": "Degraded",
+        "down": "Down"
       }
     },
     "brand": "Workspaces Admin"

@@ -31,7 +31,7 @@ import PlatformVariablesTab from './PlatformVariablesTab'
 
 export default function PlatformSettingsPage() {
   const t = useTranslations('admin.console.platform')
-  const { ready, failed, isPlatformAdmin } = usePlatformAdmin()
+  const { ready, failed, isPlatformAdmin, capabilities } = usePlatformAdmin()
 
   if (failed) return <Alert severity='error'>{t('loadFailed')}</Alert>
 
@@ -44,6 +44,7 @@ export default function PlatformSettingsPage() {
   }
 
   if (!isPlatformAdmin) return <Alert severity='info'>{t('errors.platform_admin_required')}</Alert>
+  if (!capabilities.configuration) return <Alert severity='info'>{t('unavailable')}</Alert>
 
   return (
     <SettingsTabsPage

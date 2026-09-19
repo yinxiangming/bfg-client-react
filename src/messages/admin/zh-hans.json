@@ -4619,6 +4619,7 @@
       "bills": "账单",
       "platform": "平台",
       "allWorkspaces": "全部工作区",
+      "clusters": "集群",
       "platformSettings": "平台设置"
     },
     "topbar": {
@@ -4649,10 +4650,11 @@
       "platformActions": "平台操作",
       "suspend": "暂停",
       "resume": "恢复",
-      "export": "导出 Workspace",
+  "export": "导出 Workspace 配置",
       "resetPassword": "发送密码重置邮件",
       "delete": "安排删除",
       "deleteConfirm": "确定要安排这个 Workspace 在 30 天后删除吗？",
+      "reasonPrompt": "请说明这次平台变更的原因（至少 3 个字符）",
       "actionFailed": "操作未完成。"
     },
     "extensions": {
@@ -4661,6 +4663,7 @@
       "loading": "正在加载扩展",
       "loadFailed": "没能加载这个工作区。",
       "notFound": "这个工作区不存在，或者不归你管理。",
+      "unavailable": "当前部署尚未提供扩展管理功能。",
       "none": "当前平台没有可以开启的扩展。",
       "on": "已开启",
       "off": "未开启",
@@ -4800,8 +4803,10 @@
       "noOwner": "无所有者",
       "forbidden": "只有平台管理员可以查看全部工作区。",
       "loadMore": "加载更多",
-      "showing": "已显示 {shown} / {count}"
-      ,"import": "导入 Workspace"
+      "showing": "已显示 {shown} / {count}",
+  "import": "导入 Workspace 配置",
+      "importReason": "请说明导入此工作区的原因（至少 3 个字符）",
+  "importConfirm": "确定导入此工作区配置吗？这会创建一个新工作区；不会恢复成员、业务数据或媒体文件。"
     },
     "usage": {
       "title": "用量",
@@ -4809,6 +4814,7 @@
       "loading": "正在加载用量",
       "loadFailed": "没能加载这个工作区的用量。",
       "notFound": "这个工作区不存在，或者不归你管理。",
+      "unavailable": "当前部署尚未提供用量统计功能。",
       "month": "月份",
       "used": "已用",
       "cap": "额度",
@@ -4948,6 +4954,7 @@
       "subtitle": "平台上所有工作区的计费依据",
       "loading": "正在加载平台设置",
       "loadFailed": "没能确认你的身份，请刷新页面。",
+      "unavailable": "当前部署尚未提供平台计费配置功能。",
       "tabs": {
         "variables": "平台变量",
         "prices": "计量点价格",
@@ -5040,6 +5047,64 @@
         "reason_required": "请写明这次改动的理由。",
         "invalid_meter_price": "这条价格存不下来，请检查成本、单位数量和利润率。",
         "invalid_exchange_rate": "这条汇率存不下来，请检查货币代码和数字。"
+      }
+    },
+    "clusters": {
+      "title": "集群",
+      "subtitle": "承载工作区的基础设施位置与容量",
+      "loading": "正在加载集群",
+      "loadFailed": "没能加载集群，请刷新后重试。",
+      "forbidden": "只有平台管理员可以维护集群。",
+      "unavailable": "当前部署尚未提供集群管理功能。",
+      "empty": "还没有配置任何集群。",
+      "add": "新增集群",
+      "manage": "管理",
+      "createTitle": "新增集群",
+      "editTitle": "管理 {name}",
+      "save": "保存集群",
+      "create": "创建集群",
+      "saveFailed": "没能保存这个集群，请检查填写内容后重试。",
+      "reason": "本次变更原因",
+      "confirm": "我理解这会修改共享的平台基础设施。",
+      "redisUnchanged": "留空则保持当前配置不变",
+      "configuration": "连接配置",
+      "capacity": "容量和可用性",
+      "fields": {
+        "id": "集群 ID",
+        "name": "名称",
+        "region": "区域",
+        "api": "API 地址",
+        "frontend": "前端地址",
+        "dbHost": "数据库主机",
+        "dbPort": "数据库端口",
+        "redis": "Redis 地址",
+        "bucket": "存储 Bucket",
+        "capacity": "工作区容量",
+        "accepting": "接受新工作区",
+        "active": "集群已启用"
+      },
+      "columns": {
+        "cluster": "集群",
+        "region": "区域",
+        "usage": "容量",
+        "availability": "可用性",
+        "health": "健康状态",
+        "endpoint": "API 地址"
+      },
+      "regions": {
+        "us": "美国",
+        "eu": "欧洲",
+        "apac": "亚太"
+      },
+      "status": {
+        "active": "启用",
+        "inactive": "未启用",
+        "accepting": "接受新工作区",
+        "notAccepting": "不接受新工作区",
+        "unknown": "未知",
+        "healthy": "健康",
+        "degraded": "降级",
+        "down": "不可用"
       }
     },
     "brand": "工作区管理台"

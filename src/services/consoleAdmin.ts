@@ -27,6 +27,77 @@ const BASE = '/platform/console/'
 /** Everyone who is not a platform administrator is refused with this code. */
 export const PLATFORM_ADMIN_REQUIRED = 'platform_admin_required'
 
+// ── Clusters ─────────────────────────────────────────────────────────
+
+/** One deployment cluster that can host tenant workspaces. */
+export interface ConsoleCluster {
+  id: string
+  name: string
+  region: 'us' | 'eu' | 'apac'
+  api_base_url: string
+  frontend_base_url: string
+  db_host: string
+  db_port: number
+  /** A stored Redis endpoint exists; its value is write-only. */
+  redis_configured: boolean
+  s3_bucket: string
+  max_workspaces: number
+  /** Computed from the assigned workspace profiles, rather than a stale counter. */
+  workspace_count: number
+  capacity_percentage: number
+  is_accepting_new: boolean
+  is_active: boolean
+  health_status: 'unknown' | 'healthy' | 'degraded' | 'down'
+  last_health_check: string | null
+  created_at: string
+  updated_at: string
+}
+
+/** The editable configuration needed to create or maintain one cluster. */
+export interface ConsoleClusterInput {
+  id?: string
+  name: string
+  region: ConsoleCluster['region']
+  api_base_url: string
+  frontend_base_url: string
+  db_host: string
+  db_port: number
+  redis_url: string
+  s3_bucket: string
+  max_workspaces: number
+  is_accepting_new: boolean
+  is_active: boolean
+}
+
+const CLUSTERS_BASE = '/platform/console/clusters/'
+
+export async function listConsoleClusters(): Promise<ConsoleCluster[]> {
+  return apiFetch<ConsoleCluster[]>(buildApiUrl(CLUSTERS_BASE))
+}
+
+export async function createConsoleCluster(
+  input: Required<Pick<ConsoleClusterInput, 'id'>> & ConsoleClusterInput,
+  reason: string
+): Promise<ConsoleCluster> {
+  return apiFetch<ConsoleCluster>(buildApiUrl(CLUSTERS_BASE), {
+    method: 'POST',
+    headers: { 'X-Platform-Change-Reason': reason },
+    body: JSON.stringify({ ...input, confirm: true })
+  })
+}
+
+export async function updateConsoleCluster(
+  id: string,
+  input: Partial<ConsoleClusterInput>,
+  reason: string
+): Promise<ConsoleCluster> {
+  return apiFetch<ConsoleCluster>(buildApiUrl(`${CLUSTERS_BASE}${encodeURIComponent(id)}/`), {
+    method: 'PATCH',
+    headers: { 'X-Platform-Change-Reason': reason },
+    body: JSON.stringify({ ...input, confirm: true })
+  })
+}
+
 // ── Platform variables ───────────────────────────────────────────────
 
 /** How a variable's value is written: a decimal arrives as a string, the rest as themselves. */
