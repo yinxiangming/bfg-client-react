@@ -1024,6 +1024,11 @@
       "title": "Messages ({count})",
       "sendMessage": "Send Message",
       "system": "System",
+      "results": {
+        "succeeded": "Succeeded",
+        "failed": "Failed",
+        "replayed": "Replayed"
+      },
       "errors": {
         "fetchMessages": "Failed to fetch messages"
       },
@@ -5201,6 +5206,7 @@
         "action": "Action",
         "target": "Target",
         "operator": "Operator",
+        "result": "Result",
         "reason": "Reason"
       }
     },
