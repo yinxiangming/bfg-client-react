@@ -15,6 +15,7 @@ import Typography from '@mui/material/Typography'
 import StatusBadge from '@/components/schema/StatusBadge'
 import {
   listEntitlements,
+  listRuntimeEntitlementFeatures,
   revokeEntitlement,
   type ConsoleEntitlement,
   type ConsoleGrant
@@ -26,7 +27,7 @@ import GrantEntitlementDialog from './GrantEntitlementDialog'
 type State =
   | { kind: 'loading' }
   | { kind: 'failed' }
-  | { kind: 'loaded'; entitlements: ConsoleEntitlement[] }
+  | { kind: 'loaded'; entitlements: ConsoleEntitlement[]; features: string[] }
 
 export default function RuntimeFeatureAccessCard({ workspaceId }: { workspaceId: number }) {
   const t = useTranslations('admin.console.overview')
@@ -39,7 +40,11 @@ export default function RuntimeFeatureAccessCard({ workspaceId }: { workspaceId:
   const load = useCallback(async () => {
     setState({ kind: 'loading' })
     try {
-      setState({ kind: 'loaded', entitlements: await listEntitlements(workspaceId) })
+      const [entitlements, features] = await Promise.all([
+        listEntitlements(workspaceId),
+        listRuntimeEntitlementFeatures(workspaceId)
+      ])
+      setState({ kind: 'loaded', entitlements, features })
     } catch {
       setState({ kind: 'failed' })
     }
@@ -79,7 +84,14 @@ export default function RuntimeFeatureAccessCard({ workspaceId }: { workspaceId:
           <Typography component='h2' sx={{ fontSize: 14, fontWeight: 600, color: 'var(--at-row-fg)' }}>{t('runtimeFeatures.title')}</Typography>
           <Typography variant='caption' sx={{ color: 'var(--at-row-sub)' }}>{t('runtimeFeatures.subtitle')}</Typography>
         </Box>
-        <Button size='small' variant='outlined' onClick={() => setGranting(true)}>{t('grantFeature')}</Button>
+        <Button
+          size='small'
+          variant='outlined'
+          onClick={() => setGranting(true)}
+          disabled={state.kind !== 'loaded' || state.features.length === 0}
+        >
+          {t('grantFeature')}
+        </Button>
       </Box>
 
       {state.kind === 'loading' && <Box sx={{ display: 'flex', justifyContent: 'center', py: 5 }}><CircularProgress size={22} aria-label={t('loadingFeatures')} /></Box>}
@@ -99,7 +111,13 @@ export default function RuntimeFeatureAccessCard({ workspaceId }: { workspaceId:
         </Box>
       ))}
 
-      <GrantEntitlementDialog open={granting} workspaceId={workspaceId} onClose={() => setGranting(false)} onGranted={onGranted} />
+      <GrantEntitlementDialog
+        open={granting}
+        workspaceId={workspaceId}
+        features={state.kind === 'loaded' ? state.features : []}
+        onClose={() => setGranting(false)}
+        onGranted={onGranted}
+      />
     </Card>
   )
 }

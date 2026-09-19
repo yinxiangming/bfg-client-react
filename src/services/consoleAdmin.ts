@@ -426,6 +426,11 @@ export interface ConsoleGrant {
   entitlement: ConsoleEntitlement
 }
 
+/** Feature keys with a verified server-side entitlement gate. */
+export interface ConsoleRuntimeEntitlementFeatures {
+  features: string[]
+}
+
 /** What a grant says: what is being given, for how long, and why. */
 export interface ConsoleGrantInput {
   /** A feature key returned by the Platform runtime-feature registry. */
@@ -456,6 +461,15 @@ export async function grantEntitlement(workspaceId: number, grant: ConsoleGrantI
 /** All historic and current Platform runtime feature grants for one workspace. */
 export async function listEntitlements(workspaceId: number): Promise<ConsoleEntitlement[]> {
   return apiFetch<ConsoleEntitlement[]>(buildApiUrl(`${BASE}workspaces/${workspaceId}/grants/`))
+}
+
+/** Features that Platform can safely grant in this deployment. */
+export async function listRuntimeEntitlementFeatures(workspaceId: number): Promise<string[]> {
+  const response = await apiFetch<ConsoleRuntimeEntitlementFeatures>(
+    buildApiUrl(`${BASE}workspaces/${workspaceId}/grants/available-features/`)
+  )
+
+  return response.features
 }
 
 /** Revoke a runtime feature grant while retaining it in the Platform audit trail. */

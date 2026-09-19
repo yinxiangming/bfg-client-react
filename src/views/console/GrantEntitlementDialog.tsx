@@ -15,6 +15,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogContent from '@mui/material/DialogContent'
 import DialogTitle from '@mui/material/DialogTitle'
 import FormControlLabel from '@mui/material/FormControlLabel'
+import MenuItem from '@mui/material/MenuItem'
 import Radio from '@mui/material/Radio'
 import RadioGroup from '@mui/material/RadioGroup'
 import TextField from '@mui/material/TextField'
@@ -32,6 +33,7 @@ import { refusalMessage } from './refusal'
 type Props = {
   open: boolean
   workspaceId: number
+  features: string[]
   onClose: () => void
   onGranted: (grant: ConsoleGrant) => void
 }
@@ -39,13 +41,15 @@ type Props = {
 /** How long a grant runs when nobody says otherwise: a year, the usual term. */
 const DEFAULT_MONTHS = '12'
 
-export default function GrantEntitlementDialog({ open, workspaceId, onClose, onGranted }: Props) {
+export default function GrantEntitlementDialog({ open, workspaceId, features, onClose, onGranted }: Props) {
   const t = useTranslations('admin.console.extensions.grant')
+  const tOverview = useTranslations('admin.console.overview')
   const tActions = useTranslations('admin.common.actions')
   const locale = useLocale()
   const [period, setPeriod] = useState<'months' | 'never'>('months')
   const [months, setMonths] = useState(DEFAULT_MONTHS)
   const [reason, setReason] = useState('')
+  const [feature, setFeature] = useState('')
   const [saving, setSaving] = useState(false)
   const [failure, setFailure] = useState<string | null>(null)
 
@@ -55,11 +59,16 @@ export default function GrantEntitlementDialog({ open, workspaceId, onClose, onG
     setPeriod('months')
     setMonths(DEFAULT_MONTHS)
     setReason('')
+    setFeature(features[0] || '')
     setFailure(null)
-  }, [open])
+  }, [open, features])
 
   const forMonths = period === 'months'
-  const canSave = reason.trim().length > 0 && (!forMonths || months.trim().length > 0) && !saving
+  const canSave = features.includes(feature) && reason.trim().length > 0 && (!forMonths || months.trim().length > 0) && !saving
+
+  const featureName = (key: string) => (
+    tOverview.has(`runtimeFeatures.names.${key}`) ? tOverview(`runtimeFeatures.names.${key}`) : key
+  )
 
   /** What an `already_entitled` refusal says the workspace holds, written out. */
   const alreadyHeld = (error: unknown): string | null => {
@@ -82,7 +91,7 @@ export default function GrantEntitlementDialog({ open, workspaceId, onClose, onG
     try {
       onGranted(
         await grantEntitlement(workspaceId, {
-          key: 'batch_management',
+          key: feature,
           // Exactly one of the two, which is what the server takes: sending both
           // or neither is refused, and a month count of 0 is neither.
           ...(forMonths ? { months: Number(months) } : { never_expires: true }),
@@ -111,11 +120,18 @@ export default function GrantEntitlementDialog({ open, workspaceId, onClose, onG
 
             <TextField
               fullWidth
+              select
               label={t('what')}
-              value={t('runtimeFeature')}
+              value={feature}
+              onChange={event => setFeature(event.target.value)}
               helperText={t('runtimeFeatureHint')}
-              slotProps={{ input: { readOnly: true } }}
-            />
+            >
+              {features.map(runtimeFeature => (
+                <MenuItem key={runtimeFeature} value={runtimeFeature}>
+                  {featureName(runtimeFeature)}
+                </MenuItem>
+              ))}
+            </TextField>
 
             <Box>
               <RadioGroup value={period} onChange={event => setPeriod(event.target.value as 'months' | 'never')}>
