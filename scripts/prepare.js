@@ -360,6 +360,20 @@ function syncSkins() {
 // --- 3. Generate theme registry ---
 const THEME_REQUIRED = ['Layout.tsx', 'Header.tsx', 'Footer.tsx']
 
+function readThemeMetadata(themeDir) {
+  try {
+    const manifest = path.join(themeDir, 'theme.json')
+    if (!fs.existsSync(manifest)) return {}
+    const data = JSON.parse(fs.readFileSync(manifest, 'utf8'))
+    const modes = Array.isArray(data.supportedColorModes)
+      ? data.supportedColorModes.filter((mode) => mode === 'light' || mode === 'dark')
+      : []
+    return modes.length > 0 ? { supportedColorModes: [...new Set(modes)] } : {}
+  } catch (_) {
+    return {}
+  }
+}
+
 function getThemeIds() {
   if (!fs.existsSync(THEMES_DIR)) return []
   return fs.readdirSync(THEMES_DIR, { withFileTypes: true })
@@ -385,6 +399,9 @@ function hasHomeComponent(themeId) {
 function generateThemeRegistry() {
   const themeIds = getThemeIds()
   if (themeIds.length === 0) return
+  const themeMetadata = Object.fromEntries(
+    themeIds.map((id) => [id, readThemeMetadata(path.join(THEMES_DIR, id))]),
+  )
 
   const outputFile = path.join(THEMES_DIR, 'registry.generated.ts')
   const lines = [
@@ -423,7 +440,9 @@ function generateThemeRegistry() {
 
   lines.push('')
   lines.push('// eslint-disable-next-line @typescript-eslint/no-explicit-any')
-  lines.push('export type ThemeShell = { Layout: React.ComponentType<any>; Header: React.ComponentType<any>; Footer: React.ComponentType<any> }')
+  lines.push('import type { ColorMode } from "@/utils/storefrontConfig"')
+  lines.push('')
+  lines.push('export type ThemeShell = { Layout: React.ComponentType<any>; Header: React.ComponentType<any>; Footer: React.ComponentType<any>; supportedColorModes?: ColorMode[] }')
   lines.push('')
   lines.push('export interface ThemeHomeProps {')
   lines.push('  // eslint-disable-next-line @typescript-eslint/no-explicit-any')
@@ -439,7 +458,9 @@ function generateThemeRegistry() {
   lines.push('export const THEME_REGISTRY: Record<string, ThemeShell> = {')
   for (const id of themeIds) {
     const name = id.charAt(0).toUpperCase() + id.slice(1)
-    lines.push(`  ${id}: { Layout: ${name}Layout, Header: ${name}Header, Footer: ${name}Footer },`)
+    const modes = themeMetadata[id].supportedColorModes
+    const metadata = modes ? `, supportedColorModes: ${JSON.stringify(modes)}` : ''
+    lines.push(`  ${id}: { Layout: ${name}Layout, Header: ${name}Header, Footer: ${name}Footer${metadata} },`)
   }
   lines.push('}')
   lines.push('')
@@ -550,17 +571,20 @@ function generateAreaSkinRegistry(area, themesDir) {
       const ident = `${safe}_${safeIdent(p.key || 'index')}`
       lines.push(`import ${ident} from './${id}/pages/${p.importPath}'`)
     }
-    skinEntries.push({ id, safe, hasLayout, pages })
+    skinEntries.push({ id, safe, hasLayout, pages, metadata: readThemeMetadata(skinDir) })
   }
 
   lines.push('')
   lines.push('// eslint-disable-next-line @typescript-eslint/no-explicit-any')
   lines.push('export type SkinPage = React.ComponentType<any>')
   lines.push('')
+  lines.push('import type { ColorMode } from "@/utils/storefrontConfig"')
+  lines.push('')
   lines.push('export type AreaSkin = {')
   lines.push('  // eslint-disable-next-line @typescript-eslint/no-explicit-any')
   lines.push('  Layout?: React.ComponentType<any>')
   lines.push('  pages?: Record<string, SkinPage>')
+  lines.push('  supportedColorModes?: ColorMode[]')
   lines.push('}')
   lines.push('')
 
@@ -569,6 +593,9 @@ function generateAreaSkinRegistry(area, themesDir) {
   for (const e of skinEntries) {
     lines.push(`  ${JSON.stringify(e.id)}: {`)
     if (e.hasLayout) lines.push(`    Layout: ${e.safe}Layout,`)
+    if (e.metadata.supportedColorModes) {
+      lines.push(`    supportedColorModes: ${JSON.stringify(e.metadata.supportedColorModes)},`)
+    }
     if (e.pages.length > 0) {
       lines.push(`    pages: {`)
       for (const p of e.pages) {

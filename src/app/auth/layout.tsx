@@ -4,6 +4,7 @@ import { getLocale } from 'next-intl/server'
 import { StorefrontConfigProvider } from '@/contexts/StorefrontConfigContext'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 import { resolveAuthSkin } from '@/components/auth/themes/resolve'
+import SkinColorModeGuard from '@/components/theme/SkinColorModeGuard'
 
 /**
  * Auth layout: resolve Site by X-Workspace-ID or request host (same as storefront),
@@ -21,7 +22,11 @@ export default async function AuthLayout({ children }: { children: React.ReactNo
 
   return (
     <StorefrontConfigProvider initialConfig={config}>
-      {SkinLayout ? <SkinLayout>{children}</SkinLayout> : children}
+      {SkinLayout ? (
+        <SkinColorModeGuard supportedColorModes={skin?.supportedColorModes}>
+          <SkinLayout>{children}</SkinLayout>
+        </SkinColorModeGuard>
+      ) : children}
     </StorefrontConfigProvider>
   )
 }

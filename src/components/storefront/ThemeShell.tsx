@@ -3,6 +3,7 @@
 import React from 'react'
 import { THEME_REGISTRY } from '@/components/storefront/themes/registry.generated'
 import { DEFAULT_THEME_ID } from '@/utils/storefrontConfig'
+import SkinColorModeGuard from '@/components/theme/SkinColorModeGuard'
 
 const DEFAULT_MODE = 'light'
 
@@ -15,5 +16,9 @@ type ThemeShellProps = {
 export default function ThemeShell({ theme, children }: ThemeShellProps) {
   const shell = THEME_REGISTRY[theme] ?? THEME_REGISTRY[DEFAULT_THEME_ID]
   const Layout = shell.Layout
-  return <Layout mode={DEFAULT_MODE}>{children}</Layout>
+  return (
+    <SkinColorModeGuard supportedColorModes={shell.supportedColorModes}>
+      <Layout mode={DEFAULT_MODE}>{children}</Layout>
+    </SkinColorModeGuard>
+  )
 }

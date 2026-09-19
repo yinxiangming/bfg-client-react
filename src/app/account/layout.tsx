@@ -2,6 +2,7 @@ import { defaultNavItems } from '@/data/navItems'
 import { loadExtensions, applyNavExtensions } from '@/extensions'
 import { resolveAccountSkin } from '@/components/account/themes/resolve'
 import AccountLayoutClient from './AccountLayoutClient'
+import SkinColorModeGuard from '@/components/theme/SkinColorModeGuard'
 
 export const metadata = {
   title: { template: 'Account - %s', default: 'Account' },
@@ -17,9 +18,11 @@ export default async function AccountLayout({ children }: { children: React.Reac
   if (skin?.Layout) {
     const SkinLayout = skin.Layout
     return (
-      <SkinLayout navItems={finalNavItems} extensionIds={extensionIds}>
-        {children}
-      </SkinLayout>
+      <SkinColorModeGuard supportedColorModes={skin.supportedColorModes}>
+        <SkinLayout navItems={finalNavItems} extensionIds={extensionIds}>
+          {children}
+        </SkinLayout>
+      </SkinColorModeGuard>
     )
   }
 
