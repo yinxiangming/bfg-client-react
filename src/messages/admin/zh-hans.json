@@ -4649,6 +4649,23 @@
       "manageExtensions": "管理扩展",
       "enter": "进入后台",
       "platformActions": "平台操作",
+      "operationHistory": "操作记录",
+      "loadingOperations": "正在加载操作记录",
+      "operationsFailed": "没能加载这个工作区的操作记录。",
+      "noOperations": "这个工作区还没有生命周期操作记录。",
+      "operations": {
+        "create": "已创建工作区",
+        "suspend": "已暂停工作区",
+        "resume": "已恢复工作区",
+        "migrate": "工作区迁移",
+        "delete": "已安排删除"
+      },
+      "operationStatus": {
+        "pending": "等待中",
+        "running": "处理中",
+        "completed": "已完成",
+        "failed": "失败"
+      },
       "suspend": "暂停",
       "resume": "恢复",
   "export": "导出 Workspace 配置",

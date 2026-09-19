@@ -181,6 +181,24 @@ export async function resetConsoleAdminPassword(id: number, reason: string, emai
   })
 }
 
+/** A lifecycle operation the Platform has performed for one workspace. */
+export interface ConsoleWorkspaceOperation {
+  id: string
+  operation: 'create' | 'suspend' | 'resume' | 'migrate' | 'delete'
+  status: 'pending' | 'running' | 'completed' | 'failed'
+  initiated_by: ConsoleChanger | null
+  /** Audit-safe operation metadata. Worker exception text is intentionally never sent. */
+  details: Record<string, unknown>
+  error: string | null
+  started_at: string
+  completed_at: string | null
+}
+
+/** Recent lifecycle operations for a Platform-superuser-managed workspace. */
+export async function listConsoleWorkspaceOperations(id: number, limit = 10): Promise<ConsoleWorkspaceOperation[]> {
+  return apiFetch<ConsoleWorkspaceOperation[]>(buildApiUrl(`${BASE}${id}/operations/?limit=${limit}`))
+}
+
 /** As many workspaces as the deployment's pagination allows in one request. */
 const PAGE_SIZE = 100
 
