@@ -194,12 +194,24 @@ function toList(payload: Page<ConsoleWorkspace> | ConsoleWorkspace[]): ConsoleWo
   }
 }
 
-/** The workspaces the signed-in account reaches, newest first; `search` matches name or slug. */
-export async function listConsoleWorkspaces(search?: string): Promise<ConsoleWorkspaceList> {
-  const term = search?.trim()
+export interface ConsoleWorkspaceQuery {
+  /** Matches a workspace name or slug. */
+  search?: string
+  status?: ConsoleWorkspaceStatus
+  /** Exact Cluster identifier. */
+  cluster?: string
+}
+
+/** The workspaces the signed-in account reaches, newest first, with optional inventory filters. */
+export async function listConsoleWorkspaces(filters: ConsoleWorkspaceQuery = {}): Promise<ConsoleWorkspaceList> {
+  const term = filters.search?.trim()
+  const status = filters.status?.trim()
+  const cluster = filters.cluster?.trim()
   const query = new URLSearchParams({ page_size: String(PAGE_SIZE) })
 
   if (term) query.set('search', term)
+  if (status) query.set('status', status)
+  if (cluster) query.set('cluster', cluster)
 
   return toList(await apiFetch<Page<ConsoleWorkspace> | ConsoleWorkspace[]>(buildApiUrl(`${BASE}?${query}`)))
 }

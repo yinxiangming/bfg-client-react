@@ -4788,6 +4788,12 @@
       "title": "全部工作区",
       "subtitle": "平台上的所有工作区，包括已暂停和已停用的",
       "search": "搜索名称或标识",
+      "filters": {
+        "status": "状态",
+        "allStatuses": "所有状态",
+        "cluster": "Cluster ID",
+        "clusterPlaceholder": "例如 apac-1"
+      },
       "loading": "正在加载工作区",
       "loadFailed": "没能加载工作区列表。",
       "empty": "没有匹配的工作区。",

@@ -20,6 +20,7 @@ import Button from '@mui/material/Button'
 import Card from '@mui/material/Card'
 import CircularProgress from '@mui/material/CircularProgress'
 import InputAdornment from '@mui/material/InputAdornment'
+import MenuItem from '@mui/material/MenuItem'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -37,7 +38,8 @@ import {
   listConsoleWorkspaces,
   listMoreConsoleWorkspaces,
   importConsoleWorkspace,
-  type ConsoleWorkspace
+  type ConsoleWorkspace,
+  type ConsoleWorkspaceStatus
 } from '@/services/console'
 
 import { WORKSPACE_STATUS_COLOR } from './workspaceStatus'
@@ -54,6 +56,8 @@ export default function AllWorkspacesPage() {
   const { state: consoleState } = useConsole()
   const [search, setSearch] = useState('')
   const [term, setTerm] = useState('')
+  const [statusFilter, setStatusFilter] = useState<ConsoleWorkspaceStatus | ''>('')
+  const [clusterFilter, setClusterFilter] = useState('')
   const [state, setState] = useState<ListState>({ kind: 'loading' })
   const [loadingMore, setLoadingMore] = useState(false)
   const [importing, setImporting] = useState(false)
@@ -70,13 +74,17 @@ export default function AllWorkspacesPage() {
     setState({ kind: 'loading' })
 
     try {
-      const { workspaces, count, next } = await listConsoleWorkspaces(term)
+      const { workspaces, count, next } = await listConsoleWorkspaces({
+        search: term,
+        status: statusFilter || undefined,
+        cluster: clusterFilter
+      })
 
       setState({ kind: 'loaded', workspaces, count, next })
     } catch {
       setState({ kind: 'failed' })
     }
-  }, [term])
+  }, [clusterFilter, statusFilter, term])
 
   useEffect(() => {
     // Anyone else would only get their own workspaces back, under a title that promises
@@ -177,6 +185,27 @@ export default function AllWorkspacesPage() {
                 )
               }
             }}
+          />
+          <TextField
+            select
+            size='small'
+            value={statusFilter}
+            onChange={event => setStatusFilter(event.target.value as ConsoleWorkspaceStatus | '')}
+            label={t('filters.status')}
+            sx={{ width: { xs: '100%', sm: 160 } }}
+          >
+            <MenuItem value=''>{t('filters.allStatuses')}</MenuItem>
+            <MenuItem value='active'>{tStatus('active')}</MenuItem>
+            <MenuItem value='suspended'>{tStatus('suspended')}</MenuItem>
+            <MenuItem value='inactive'>{tStatus('inactive')}</MenuItem>
+          </TextField>
+          <TextField
+            size='small'
+            value={clusterFilter}
+            onChange={event => setClusterFilter(event.target.value)}
+            label={t('filters.cluster')}
+            placeholder={t('filters.clusterPlaceholder')}
+            sx={{ width: { xs: '100%', sm: 200 } }}
           />
           {state.kind === 'loaded' && (
             <>
