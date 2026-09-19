@@ -4645,7 +4645,15 @@
       "staffCount": "{count} 人在职",
       "extensions": "扩展",
       "manageExtensions": "管理扩展",
-      "enter": "进入后台"
+      "enter": "进入后台",
+      "platformActions": "平台操作",
+      "suspend": "暂停",
+      "resume": "恢复",
+      "export": "导出 Workspace",
+      "resetPassword": "发送密码重置邮件",
+      "delete": "安排删除",
+      "deleteConfirm": "确定要安排这个 Workspace 在 30 天后删除吗？",
+      "actionFailed": "操作未完成。"
     },
     "extensions": {
       "title": "扩展",
@@ -4792,6 +4800,7 @@
       "forbidden": "只有平台管理员可以查看全部工作区。",
       "loadMore": "加载更多",
       "showing": "已显示 {shown} / {count}"
+      ,"import": "导入 Workspace"
     },
     "usage": {
       "title": "用量",
