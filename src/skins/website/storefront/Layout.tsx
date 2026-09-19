@@ -38,8 +38,8 @@ export default function WebsiteLayout({ children }: { children: React.ReactNode 
   const { forceMode } = useTheme()
 
   useEffect(() => {
-    forceMode('light')
-    return () => forceMode(null)
+    forceMode('light', 'skin')
+    return () => forceMode(null, 'skin')
   }, [forceMode])
   const pathname = usePathname()
   const isAccountPage = pathname?.startsWith('/account') || false
