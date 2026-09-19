@@ -98,6 +98,51 @@ export async function updateConsoleCluster(
   })
 }
 
+// ── Audit history ────────────────────────────────────────────────────
+
+/** One completed sensitive action from the Platform control plane. */
+export interface ConsoleAuditEvent {
+  id: string
+  action: string
+  target: { type: string; id: string }
+  reason: string
+  /** The operator identity is limited to a username; request IPs are never exposed. */
+  actor: { id: number; username: string } | null
+  /** Snapshots are server-redacted again before being sent to the browser. */
+  before: Record<string, unknown>
+  after: Record<string, unknown>
+  created_at: string
+}
+
+export interface ConsoleAuditEventPage {
+  results: ConsoleAuditEvent[]
+  /** An opaque, signed cursor; null when there are no more entries. */
+  next: string | null
+}
+
+export interface ConsoleAuditEventQuery {
+  action?: string
+  targetType?: string
+  targetId?: string
+  cursor?: string
+  limit?: number
+}
+
+const AUDIT_EVENTS_BASE = '/platform/console/audit-events/'
+
+/** Read a bounded page of Platform audit history. This endpoint is superuser-only. */
+export async function listConsoleAuditEvents(query: ConsoleAuditEventQuery = {}): Promise<ConsoleAuditEventPage> {
+  const params = new URLSearchParams()
+  if (query.action?.trim()) params.set('action', query.action.trim())
+  if (query.targetType?.trim()) params.set('target_type', query.targetType.trim())
+  if (query.targetId?.trim()) params.set('target_id', query.targetId.trim())
+  if (query.cursor) params.set('cursor', query.cursor)
+  if (query.limit) params.set('limit', String(query.limit))
+  const search = params.toString()
+
+  return apiFetch<ConsoleAuditEventPage>(buildApiUrl(`${AUDIT_EVENTS_BASE}${search ? `?${search}` : ''}`))
+}
+
 // ── Platform variables ───────────────────────────────────────────────
 
 /** How a variable's value is written: a decimal arrives as a string, the rest as themselves. */

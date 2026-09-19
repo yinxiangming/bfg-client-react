@@ -111,6 +111,7 @@ export interface TenantWorkspacesResponse {
   /** Deployment-level capabilities for the Django-superuser control plane. */
   platform_capabilities?: {
     cluster_management: boolean
+    audit_log: boolean
     configuration: boolean
   }
   workspaces: TenantWorkspace[]
