@@ -533,7 +533,7 @@ function generateThemeRegistry() {
     const name = toThemeIdentifier(id)
     const modes = themeMetadata[id].supportedColorModes
     const metadata = modes ? `, supportedColorModes: ${JSON.stringify(modes)}` : ''
-    lines.push(`  ${id}: { Layout: ${name}Layout, Header: ${name}Header, Footer: ${name}Footer${metadata} },`)
+    lines.push(`  ${JSON.stringify(id)}: { Layout: ${name}Layout, Header: ${name}Header, Footer: ${name}Footer${metadata} },`)
   }
   lines.push('}')
   lines.push('')
@@ -544,7 +544,7 @@ function generateThemeRegistry() {
   for (const id of themeIds) {
     const hasHome = homeThemes.includes(id)
     const name = toThemeIdentifier(id)
-    lines.push(`  ${id}: ${hasHome ? name + 'Home' : 'null'},`)
+    lines.push(`  ${JSON.stringify(id)}: ${hasHome ? name + 'Home' : 'null'},`)
   }
   lines.push('}')
   lines.push('')
@@ -552,11 +552,11 @@ function generateThemeRegistry() {
   for (const id of themeIds) {
     const pages = themePages[id]
     if (!pages || pages.length === 0) {
-      lines.push(`  ${id}: {},`)
+      lines.push(`  ${JSON.stringify(id)}: {},`)
       continue
     }
     const safe = safeIdent(id)
-    lines.push(`  ${id}: {`)
+    lines.push(`  ${JSON.stringify(id)}: {`)
     for (const p of pages) {
       const ident = `${safe}_pages_${safeIdent(p.key || 'index')}`
       lines.push(`    ${JSON.stringify(p.key)}: ${ident},`)
