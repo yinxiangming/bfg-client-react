@@ -112,6 +112,125 @@ export async function checkConsoleClusterHealth(id: string, reason: string): Pro
   })
 }
 
+/** One redaction-safe result from a server-side Cluster health probe. */
+export interface ConsoleClusterHealthObservation {
+  id: number
+  health_status: ConsoleCluster['health_status']
+  http_status: number | null
+  outcome: 'checked' | 'configuration_unavailable' | 'configuration_changed'
+  observed_at: string
+}
+
+/** Deployment-wide health information derived only from stored probe observations. */
+export interface ConsoleClusterHealthSummary {
+  generated_at: string
+  window_hours: number
+  summary: {
+    active_clusters: number
+    inactive_clusters: number
+    checked_within_window: number
+    stale_or_unchecked: number
+    healthy: number
+    degraded: number
+    down: number
+    unknown: number
+  }
+  clusters: Array<{
+    id: string
+    name: string
+    region: ConsoleCluster['region']
+    is_active: boolean
+    is_accepting_new: boolean
+    observations_within_window: number
+    is_stale_or_unchecked: boolean
+    last_observation: Pick<
+      ConsoleClusterHealthObservation,
+      'health_status' | 'http_status' | 'outcome' | 'observed_at'
+    > | null
+  }>
+}
+
+/** Read recent probe results; browser code never contacts Cluster endpoints directly. */
+export async function listConsoleClusterHealthObservations(
+  id: string,
+  limit = 20
+): Promise<ConsoleClusterHealthObservation[]> {
+  const params = new URLSearchParams({ limit: String(limit) })
+  return apiFetch<ConsoleClusterHealthObservation[]>(
+    buildApiUrl(`${CLUSTERS_BASE}${encodeURIComponent(id)}/health-observations/?${params}`)
+  )
+}
+
+/** Read a server-derived health overview; this never probes a Cluster from the browser. */
+export async function getConsoleClusterHealthSummary(): Promise<ConsoleClusterHealthSummary> {
+  return apiFetch<ConsoleClusterHealthSummary>(buildApiUrl(`${CLUSTERS_BASE}health-summary/`))
+}
+
+// ── Placement reservations ──────────────────────────────────────────
+
+/** One capacity reservation awaiting a separately verified data-plane placement. */
+export interface ConsolePlacementRequest {
+  id: string
+  workspace: { id: number; name: string; slug: string }
+  source_cluster: Pick<ConsoleCluster, 'id' | 'name' | 'region' | 'is_active'> | null
+  target_cluster: Pick<ConsoleCluster, 'id' | 'name' | 'region' | 'is_active'>
+  profile_fence: number
+  status: 'reserved' | 'rolled_back' | 'expired'
+  reservation_expires_at: string
+  rolled_back_at: string | null
+  created_by: ConsoleChanger | null
+  created_at: string
+  updated_at: string
+  events: Array<{
+    sequence: number
+    event_type: string
+    details: Record<string, unknown>
+    created_at: string
+  }>
+}
+
+const PLACEMENT_REQUESTS_BASE = '/platform/control/placement-requests/'
+
+/** Read capacity reservations. This strict control-plane endpoint is superuser-only. */
+export async function listConsolePlacementRequests(workspaceId?: number): Promise<ConsolePlacementRequest[]> {
+  const query = workspaceId ? `?workspace=${encodeURIComponent(workspaceId)}` : ''
+  return apiFetch<ConsolePlacementRequest[]>(buildApiUrl(`${PLACEMENT_REQUESTS_BASE}${query}`))
+}
+
+/** Reserve capacity only; this never changes the Workspace's Cluster routing. */
+export async function reserveConsoleWorkspacePlacement(
+  workspaceId: number,
+  targetClusterId: string,
+  expectedPlacementFence: number,
+  reason: string
+): Promise<ConsolePlacementRequest> {
+  return apiFetch<ConsolePlacementRequest>(buildApiUrl(PLACEMENT_REQUESTS_BASE), {
+    method: 'POST',
+    headers: { 'X-Platform-Change-Reason': reason, 'X-Idempotency-Key': createIdempotencyKey() },
+    body: JSON.stringify({
+      confirm: true,
+      workspace_id: workspaceId,
+      target_cluster_id: targetClusterId,
+      expected_placement_fence: expectedPlacementFence
+    })
+  })
+}
+
+/** Release an unconsumed capacity reservation and fence out a delayed placement worker. */
+export async function rollbackConsolePlacementReservation(
+  placementRequestId: string,
+  reason: string
+): Promise<ConsolePlacementRequest> {
+  return apiFetch<ConsolePlacementRequest>(
+    buildApiUrl(`${PLACEMENT_REQUESTS_BASE}${encodeURIComponent(placementRequestId)}/rollback/`),
+    {
+      method: 'POST',
+      headers: { 'X-Platform-Change-Reason': reason, 'X-Idempotency-Key': createIdempotencyKey() },
+      body: JSON.stringify({ confirm: true })
+    }
+  )
+}
+
 // ── Audit history ────────────────────────────────────────────────────
 
 /** One completed sensitive action from the Platform control plane. */

@@ -127,12 +127,15 @@ export interface ConsoleWorkspaceDetail extends ConsoleWorkspace {
   extensions: ConsoleExtension[]
   /** Missing on an older Platform response; callers must treat that as unavailable. */
   capabilities?: ConsoleWorkspaceCapabilities
+  /** Strict Platform-control response only; absent for the owner console. */
+  placement_fence?: number
 }
 
-export type ConsoleWorkspaceStatus = 'active' | 'suspended' | 'inactive'
+export type ConsoleWorkspaceStatus = 'active' | 'suspended' | 'inactive' | 'scheduled_for_deletion'
 
 /** Suspended wins over inactive, as `suspend_workspace` leaves a workspace as both. */
 export function consoleWorkspaceStatus(workspace: ConsoleWorkspace): ConsoleWorkspaceStatus {
+  if (workspace.scheduled_deletion_at) return 'scheduled_for_deletion'
   if (workspace.suspended_at) return 'suspended'
 
   return workspace.is_active ? 'active' : 'inactive'
@@ -244,6 +247,8 @@ export interface ConsoleWorkspaceQuery {
   status?: ConsoleWorkspaceStatus
   /** Exact Cluster identifier. */
   cluster?: string
+  /** Only workspaces that have not been placed on a Cluster. */
+  unassigned?: boolean
 }
 
 /** The workspaces the signed-in account reaches, newest first, with optional inventory filters. */
@@ -256,6 +261,7 @@ export async function listConsoleWorkspaces(filters: ConsoleWorkspaceQuery = {})
   if (term) query.set('search', term)
   if (status) query.set('status', status)
   if (cluster) query.set('cluster', cluster)
+  if (filters.unassigned) query.set('unassigned', 'true')
 
   return toList(await apiFetch<Page<ConsoleWorkspace> | ConsoleWorkspace[]>(buildApiUrl(`${BASE}?${query}`)))
 }
@@ -268,6 +274,11 @@ export async function listMoreConsoleWorkspaces(next: string): Promise<ConsoleWo
 /** One workspace with every extension it can switch, each with its configuration. */
 export async function getConsoleWorkspace(id: number): Promise<ConsoleWorkspaceDetail> {
   return apiFetch<ConsoleWorkspaceDetail>(buildApiUrl(`${BASE}${id}/`))
+}
+
+/** Deployment metadata for a Django-superuser-only Platform control action. */
+export async function getConsoleControlWorkspace(id: number): Promise<ConsoleWorkspaceDetail> {
+  return apiFetch<ConsoleWorkspaceDetail>(buildApiUrl(`${CONTROL_BASE}${id}/`))
 }
 
 /**

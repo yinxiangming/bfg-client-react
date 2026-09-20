@@ -45,6 +45,7 @@ import {
 import { useConsoleWorkspaceDetail } from './useConsoleWorkspaceDetail'
 import { useEnterWorkspace } from './useEnterWorkspace'
 import RuntimeFeatureAccessCard from './RuntimeFeatureAccessCard'
+import WorkspacePlacementCard from './WorkspacePlacementCard'
 import { WORKSPACE_STATUS_COLOR } from './workspaceStatus'
 
 type PlatformAction = 'suspend' | 'resume' | 'restore' | 'export' | 'resetPassword' | 'delete'
@@ -368,6 +369,8 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
           </Card>
 
           <RuntimeFeatureAccessCard workspaceId={workspaceId} />
+
+          <WorkspacePlacementCard workspaceId={workspaceId} />
 
           <Card component='section' sx={{ mt: 6 }}>
             <Box sx={{ px: 4, py: 3, borderBottom: '1px solid var(--at-card-border)' }}>
