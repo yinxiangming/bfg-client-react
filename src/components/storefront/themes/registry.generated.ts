@@ -2,12 +2,24 @@
 
 import React from "react"
 
+import AtelierGridLayout from './atelier-grid/Layout'
+import AtelierGridHeader from './atelier-grid/Header'
+import AtelierGridFooter from './atelier-grid/Footer'
+import ProjectGridLayout from './project-grid/Layout'
+import ProjectGridHeader from './project-grid/Header'
+import ProjectGridFooter from './project-grid/Footer'
+import RepairGridLayout from './repair-grid/Layout'
+import RepairGridHeader from './repair-grid/Header'
+import RepairGridFooter from './repair-grid/Footer'
 import StoreLayout from './store/Layout'
 import StoreHeader from './store/Header'
 import StoreFooter from './store/Footer'
 import WebsiteLayout from './website/Layout'
 import WebsiteHeader from './website/Header'
 import WebsiteFooter from './website/Footer'
+import AtelierGridHome from './atelier-grid/Home'
+import ProjectGridHome from './project-grid/Home'
+import RepairGridHome from './repair-grid/Home'
 import StoreHome from './store/Home'
 import WebsiteHome from './website/Home'
 
@@ -22,12 +34,32 @@ export interface ThemeHomeProps {
   workspace_slug?: string
 }
 
+export type ThemeMetadata = {
+  displayName: string
+  description?: string
+  supportedColorModes?: Array<'light' | 'dark'>
+}
+
+export const THEME_METADATA: Record<string, ThemeMetadata> = {
+  "atelier-grid": {"displayName":"Atelier Grid","description":"A restrained editorial grid for architecture, interiors, and craft-led studios.","supportedColorModes":["light"]},
+  "project-grid": {"displayName":"Project Grid","description":"A practical light-only grid skin for engineering, fabrication, installation, and project-led businesses.","supportedColorModes":["light"]},
+  "repair-grid": {"displayName":"Repair Grid","description":"A practical light-only grid skin for mobility service, repair, and parts businesses.","supportedColorModes":["light"]},
+  "store": {"displayName":"Store"},
+  "website": {"displayName":"Website"},
+}
+
 export const THEME_REGISTRY: Record<string, ThemeShell> = {
+  atelier-grid: { Layout: AtelierGridLayout, Header: AtelierGridHeader, Footer: AtelierGridFooter },
+  project-grid: { Layout: ProjectGridLayout, Header: ProjectGridHeader, Footer: ProjectGridFooter },
+  repair-grid: { Layout: RepairGridLayout, Header: RepairGridHeader, Footer: RepairGridFooter },
   store: { Layout: StoreLayout, Header: StoreHeader, Footer: StoreFooter },
   website: { Layout: WebsiteLayout, Header: WebsiteHeader, Footer: WebsiteFooter },
 }
 
 export const HOME_REGISTRY: Record<string, React.ComponentType<ThemeHomeProps> | null> = {
+  atelier-grid: AtelierGridHome,
+  project-grid: ProjectGridHome,
+  repair-grid: RepairGridHome,
   store: StoreHome,
   website: WebsiteHome,
 }

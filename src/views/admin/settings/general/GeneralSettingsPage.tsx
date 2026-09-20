@@ -48,13 +48,13 @@ import {
 } from '@/services/settings'
 import { getCurrencies, type Currency } from '@/services/finance'
 import { clearStorefrontConfigCache } from '@/utils/storefrontConfig'
-import { THEME_REGISTRY } from '@/components/storefront/themes/registry.generated'
+import { THEME_METADATA, THEME_REGISTRY } from '@/components/storefront/themes/registry.generated'
 import { bfgApi } from '@/utils/api'
 import { usePageSlots } from '@/extensions/hooks/usePageSections'
 
 const THEME_IDS = Object.keys(THEME_REGISTRY).sort()
 function themeDisplayName(themeId: string): string {
-  return themeId.charAt(0).toUpperCase() + themeId.slice(1)
+  return THEME_METADATA[themeId]?.displayName || themeId.split(/[-_]+/).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ')
 }
 
 import { DEFAULT_AVATAR_URL } from '@/utils/media'
@@ -1228,4 +1228,3 @@ const GeneralSettingsPage = () => {
 }
 
 export default GeneralSettingsPage
-

@@ -13,6 +13,7 @@ Requires the BFG Django backend running. See [../server/README.md](../server/REA
 - **i18n** — next-intl; English + Simplified Chinese out of the box
 - **Plugin system** — per-workspace UI extensions auto-loaded from `src/plugins/`
 - **Extension registry** — composable terminology, config, and hook overrides via `src/extensions/`
+- **Builtin storefront skins** — `atelier-grid` and `project-grid` are brand-neutral light-only skins discovered from `src/components/storefront/themes/`
 
 ---
 
@@ -48,6 +49,11 @@ Open http://localhost:3000.
 | `npm run lint` | ESLint |
 
 > `npm run dev` and `npm run build` both run `scripts/prepare.js` first to auto-discover plugins and regenerate `src/plugins/loaders.generated.ts`. You don't need to run this manually.
+
+The same prepare step discovers builtin storefront skins and regenerates
+`src/components/storefront/themes/registry.generated.ts`. A skin directory must
+provide `Layout.tsx`, `Header.tsx`, and `Footer.tsx`; add `Home.tsx` and
+`theme.json` when it supplies a home layout and display metadata.
 
 ---
 
