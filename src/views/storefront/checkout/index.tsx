@@ -12,13 +12,16 @@ import { authApi } from '@/utils/authApi'
 import { meApi } from '@/utils/meApi'
 import { storefrontApi } from '@/utils/storefrontApi'
 
+import OrderingClosedNotice from '../components/OrderingClosedNotice'
+import { useStorefrontOrdering } from '@/hooks/useStorefrontOrdering'
+
 import CheckoutContactSection from './CheckoutContactSection'
 import CheckoutDeliverySection from './CheckoutDeliverySection'
 import CheckoutShippingSection from './CheckoutShippingSection'
 import CheckoutPaymentSection from './CheckoutPaymentSection'
 import CheckoutOrderSummary from './CheckoutOrderSummary'
 import type { CheckoutFormData, UserInfo, Address, PaymentGateway, SavedPaymentMethod } from './types'
-import { isPlaceOrderGateway } from './types'
+import { isPlaceOrderGateway, gatewayAllowsFulfillment } from './types'
 import { usePageSlots } from '@/extensions/hooks/usePageSections'
 
 import '@/styles/storefront.css'
@@ -27,6 +30,7 @@ const CheckoutPage = () => {
   const t = useTranslations('storefront')
   const router = useRouter()
   const { items, getSubtotal, clearCart } = useCart()
+  const { acceptingOrders } = useStorefrontOrdering()
   const { beforeSlots, afterSlots } = usePageSlots('storefront/checkout')
   const [submitting, setSubmitting] = useState(false)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
@@ -56,7 +60,7 @@ const CheckoutPage = () => {
     city: '',
     state: '',
     zip: '',
-    country: 'US'
+    country: 'NZ'
   })
   const [showNewBillingAddressForm, setShowNewBillingAddressForm] = useState(false)
 
@@ -69,9 +73,10 @@ const CheckoutPage = () => {
     city: '',
     state: '',
     zip: '',
-    country: 'US',
+    country: 'NZ',
     phone: '',
     shippingMethod: 'standard',
+    fulfillmentMethod: 'shipping',
     cardNumber: '',
     cardExpiry: '',
     cardCvv: '',
@@ -92,9 +97,30 @@ const CheckoutPage = () => {
 
   // Computed values
   const selectedAddress = addresses.find(addr => addr.id === selectedAddressId)
-  const selectedGateway = paymentGateways.find(g => g.id === selectedGatewayId)
+  // Gateways are fetched once — they are workspace config, not per-order — and narrowed
+  // here, because the shopper can flip between delivery and collection afterwards and
+  // some gateways only work one of those ways.
+  const availableGateways = paymentGateways.filter(g => gatewayAllowsFulfillment(g, formData.fulfillmentMethod))
+  const selectedGateway = availableGateways.find(g => g.id === selectedGatewayId)
   const requiresCreditCard = selectedGateway?.gateway_type === 'stripe'
   const placeOrderThenSuccess = isPlaceOrderGateway(selectedGateway)
+  const isStripeNewCardPending = requiresCreditCard && useNewCard && !paymentMethodId
+  const isStripeSavedCardPending = requiresCreditCard && !useNewCard && !selectedPaymentMethodId
+  // `selectedGateway`, not `selectedGatewayId`: a selection the fulfillment has just
+  // ruled out is no selection at all, and submitting it would only earn a 400.
+  // A shop that is not taking orders outranks every other reason to submit: there is
+  // nothing on this page the shopper can fill in that would make the order go through.
+  const isSubmitDisabled =
+    submitting || !acceptingOrders || !selectedGateway || isStripeNewCardPending || isStripeSavedCardPending
+
+  // Switching to delivery must not leave "pay at the counter" selected behind the scenes.
+  const availableGatewayIds = availableGateways.map(g => g.id).join(',')
+  useEffect(() => {
+    if (selectedGatewayId != null && availableGateways.some(g => g.id === selectedGatewayId)) return
+    setSelectedGatewayId(availableGateways[0]?.id ?? null)
+    setPaymentMethodId(null)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [availableGatewayIds, selectedGatewayId])
   
   // Use preview prices if available, otherwise fallback to local calculation
   const subtotal = pricePreview?.subtotal ?? getSubtotal()
@@ -112,7 +138,8 @@ const CheckoutPage = () => {
       try {
         const preview = await storefrontApi.getCartPreview(
           formData.freightServiceId ? undefined : formData.shippingMethod,
-          formData.freightServiceId || undefined
+          formData.freightServiceId || undefined,
+          { method: formData.fulfillmentMethod, pickupPointId: formData.pickupPointId }
         )
         setPricePreview({
           subtotal: parseFloat(preview.subtotal),
@@ -131,7 +158,7 @@ const CheckoutPage = () => {
     if (items.length > 0) {
       fetchPricePreview()
     }
-  }, [items, formData.shippingMethod, formData.freightServiceId])
+  }, [items, formData.shippingMethod, formData.freightServiceId, formData.fulfillmentMethod, formData.pickupPointId])
 
   // Initialize checkout data
   useEffect(() => {
@@ -263,6 +290,9 @@ const CheckoutPage = () => {
       if (name === 'freightServiceId') {
         updates.freightServiceId = value ? parseInt(value, 10) : undefined
       }
+      if (name === 'pickupPointId') {
+        updates.pickupPointId = value ? parseInt(value, 10) : undefined
+      }
       
       return {
         ...prev,
@@ -294,6 +324,9 @@ const CheckoutPage = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
+    // The submit button is already disabled; this is the same answer for anything that
+    // gets past it — a stale render, a keyboard, a script.
+    if (!acceptingOrders) return
     setSubmitting(true)
     
     try {
@@ -318,8 +351,20 @@ const CheckoutPage = () => {
         }
       }
       
-      // Validate address fields
-      if (!selectedAddressId) {
+      const isPickup = formData.fulfillmentMethod === 'pickup'
+
+      // Validate address fields. A collection order has no address to check —
+      // only the name and phone the shop needs to hand the order over.
+      if (isPickup) {
+        const missingFields: string[] = []
+        if (!formData.lastName?.trim()) missingFields.push(t('checkout.delivery.lastName'))
+        if (!formData.phone?.trim()) missingFields.push(t('checkout.delivery.phone'))
+        if (missingFields.length > 0) {
+          alert(t('checkout.errors.missingRequiredFields', { fields: missingFields.join(', ') }))
+          setSubmitting(false)
+          return
+        }
+      } else if (!selectedAddressId) {
         const missingFields: string[] = []
         if (!formData.lastName?.trim()) missingFields.push(t('checkout.delivery.lastName'))
         if (!formData.address?.trim()) missingFields.push(t('checkout.delivery.address'))
@@ -342,7 +387,7 @@ const CheckoutPage = () => {
       if (isAuthenticated) {
         let shippingAddressId = selectedAddressId
         
-        if (!shippingAddressId) {
+        if (!shippingAddressId && !isPickup) {
           const newAddress = await meApi.createAddress({
             full_name: `${formData.firstName} ${formData.lastName}`.trim(),
             phone: formData.phone.trim(),
@@ -361,7 +406,9 @@ const CheckoutPage = () => {
         // Determine billing address
         let finalBillingAddressId: number | null = null
         
-        if (formData.sameAsBilling) {
+        if (isPickup) {
+          // Nothing is posted anywhere, so there is no address to bill to either.
+        } else if (formData.sameAsBilling) {
           // Use shipping address as billing address
           finalBillingAddressId = shippingAddressId
         } else if (billingAddressId) {
@@ -390,14 +437,19 @@ const CheckoutPage = () => {
           }
         }
         
-        if (!shippingAddressId || !finalBillingAddressId) {
+        if (!isPickup && (!shippingAddressId || !finalBillingAddressId)) {
           throw new Error('Failed to get valid address IDs')
         }
         
-        orderResponse = await storefrontApi.checkout({
+        orderResponse = await storefrontApi.checkout(isPickup ? {
           store: storeId,
-          shipping_address: shippingAddressId,
-          billing_address: finalBillingAddressId,
+          fulfillment_method: 'pickup',
+          pickup_point: formData.pickupPointId,
+          customer_note: ''
+        } : {
+          store: storeId,
+          shipping_address: shippingAddressId!,
+          billing_address: finalBillingAddressId!,
           customer_note: '',
           freight_service_id: formData.freightServiceId,
           shipping_method: formData.freightServiceId ? undefined : formData.shippingMethod
@@ -406,7 +458,9 @@ const CheckoutPage = () => {
         // Guest checkout - prepare billing address if different from shipping
         const guestCheckoutData: any = {
           store: storeId,
-          shipping_address: {
+          fulfillment_method: formData.fulfillmentMethod,
+          pickup_point: isPickup ? formData.pickupPointId : undefined,
+          shipping_address: isPickup ? undefined : {
             full_name: `${formData.firstName} ${formData.lastName}`,
             phone: formData.phone,
             email: formData.email,
@@ -439,7 +493,9 @@ const CheckoutPage = () => {
           }
         }
         
-        if (formData.freightServiceId) {
+        if (isPickup) {
+          // Freight would only confuse the total for an order nobody carries.
+        } else if (formData.freightServiceId) {
           guestCheckoutData.freight_service_id = formData.freightServiceId
         } else {
           guestCheckoutData.shipping_method = formData.shippingMethod
@@ -597,6 +653,7 @@ const CheckoutPage = () => {
               addresses={addresses}
               selectedAddressId={selectedAddressId}
               onSelectAddress={setSelectedAddressId}
+              isPickup={formData.fulfillmentMethod === 'pickup'}
             />
 
             {/* Shipping Method */}
@@ -610,6 +667,17 @@ const CheckoutPage = () => {
                   freightServiceId: serviceId || undefined
                 }))
               }}
+              onFulfillmentChange={(method, pickupPointId) => {
+                setFormData(prev => ({
+                  ...prev,
+                  fulfillmentMethod: method,
+                  pickupPointId: method === 'pickup' ? pickupPointId : undefined,
+                  freightServiceId: method === 'pickup' ? undefined : prev.freightServiceId
+                }))
+                // A saved delivery address is meaningless once the order is
+                // being collected, and would otherwise be sent anyway.
+                if (method === 'pickup') setSelectedAddressId(null)
+              }}
             />
 
             {/* Payment */}
@@ -620,7 +688,7 @@ const CheckoutPage = () => {
                   onChange={handleChange}
                   isAuthenticated={isAuthenticated}
                   loading={loading}
-                  paymentGateways={paymentGateways}
+                  paymentGateways={availableGateways}
                   selectedGatewayId={selectedGatewayId}
                   onSelectGateway={(id) => {
                     setSelectedGatewayId(id)
@@ -655,7 +723,7 @@ const CheckoutPage = () => {
                 onChange={handleChange}
                 isAuthenticated={isAuthenticated}
                 loading={loading}
-                paymentGateways={paymentGateways}
+                paymentGateways={availableGateways}
                 selectedGatewayId={selectedGatewayId}
                 onSelectGateway={setSelectedGatewayId}
                 savedPaymentMethods={savedPaymentMethods}
@@ -675,27 +743,31 @@ const CheckoutPage = () => {
               />
             )}
 
+            {/* Why the order cannot be placed, next to the button that would have
+                placed it. Everything filled in above stays filled in. */}
+            {!acceptingOrders && <OrderingClosedNotice style={{ marginBottom: '1rem' }} />}
+
             {/* Submit Button */}
             <button
               type='submit'
-              disabled={submitting || !selectedGatewayId}
+              disabled={isSubmitDisabled}
               style={{
                 width: '100%',
                 padding: '1.125rem',
-                backgroundColor: '#6366f1',
+                backgroundColor: 'var(--primary-color, #6366f1)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
                 fontSize: '1rem',
                 fontWeight: 600,
-                cursor: (submitting || !selectedGatewayId) ? 'not-allowed' : 'pointer',
-                opacity: (submitting || !selectedGatewayId) ? 0.7 : 1,
+                cursor: isSubmitDisabled ? 'not-allowed' : 'pointer',
+                opacity: isSubmitDisabled ? 0.7 : 1,
                 transition: 'all 0.2s'
               }}
-              onMouseEnter={(e) => !submitting && selectedGatewayId && (e.currentTarget.style.backgroundColor = '#4f46e5')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#6366f1')}
+              onMouseEnter={(e) => !isSubmitDisabled && (e.currentTarget.style.backgroundColor = 'var(--primary-hover, #4f46e5)')}
+              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'var(--primary-color, #6366f1)')}
             >
-              {submitting ? t('buttons.processing') : (
+              {!acceptingOrders ? t('ordering.closedShort') : submitting ? t('buttons.processing') : (
                 placeOrderThenSuccess ? t('buttons.placeOrder') :
                 requiresCreditCard ? t('buttons.payNow') :
                 t('buttons.completeOrder')

@@ -13,12 +13,32 @@ export function getIntlLocale(locale?: string): string {
   return toIntlLocale(resolved)
 }
 
-export function formatCurrency(value: number | string, currency: string = 'USD', locale?: string): string {
+/** Code-level fallback when no currency is known. Mirrors the server's `DEFAULT_CURRENCY_CODE`. */
+export const DEFAULT_CURRENCY_CODE = 'USD'
+
+/**
+ * Coerce a currency code into something `Intl` accepts.
+ *
+ * `Intl.NumberFormat` throws a RangeError on anything that isn't three ASCII
+ * letters, so an empty or malformed code coming back from the API would take
+ * down whatever page renders a price. Well-formed but unknown codes are safe —
+ * `Intl` renders those as the code itself.
+ */
+export function normalizeCurrencyCode(code?: string | null, fallback: string = DEFAULT_CURRENCY_CODE): string {
+  const trimmed = (code ?? '').trim().toUpperCase()
+  return /^[A-Z]{3}$/.test(trimmed) ? trimmed : fallback
+}
+
+export function formatCurrency(
+  value: number | string,
+  currency: string = DEFAULT_CURRENCY_CODE,
+  locale?: string
+): string {
   const numValue = typeof value === 'string' ? parseFloat(value) : value
   if (isNaN(numValue)) return '-'
   return new Intl.NumberFormat(getIntlLocale(locale), {
     style: 'currency',
-    currency
+    currency: normalizeCurrencyCode(currency)
   }).format(numValue)
 }
 
@@ -93,5 +113,25 @@ export function formatNumber(value: number | string, decimals: number = 2, local
     minimumFractionDigits: decimals,
     maximumFractionDigits: decimals
   }).format(numValue)
+}
+
+/**
+ * A points balance, the unit the platform meters usage in.
+ *
+ * The API sends eight decimal places, because a single metered call can cost a small
+ * fraction of a point. Rounding that to two would print `0.00` against a day that did
+ * have traffic; printing all eight makes a column of numbers unreadable. Two to four
+ * places keeps a cap at `20.00` and still shows a quiet day at `0.0442`.
+ *
+ * Points are a counter, not money, so the float this goes through is only ever rounded
+ * for display — no figure on screen is worked out from it.
+ */
+export function formatPoints(value: number | string, locale?: string): string {
+  const points = typeof value === 'string' ? parseFloat(value) : value
+  if (isNaN(points)) return '-'
+  return new Intl.NumberFormat(getIntlLocale(locale), {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 4
+  }).format(points)
 }
 

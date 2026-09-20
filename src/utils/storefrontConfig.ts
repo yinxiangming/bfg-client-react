@@ -4,8 +4,15 @@
  */
 
 import { cache } from 'react'
+import type { ExtensionAvailability } from '@/extensions/availability'
 import { getApiBaseUrl, getApiHeaders } from './api'
-import { getApiLanguageHeaders, getCurrentLocale } from '@/i18n/http'
+import { getCurrentLocale } from '@/i18n/http'
+import {
+  DEFAULT_APP_LOCALE,
+  normalizeAppLocale,
+  uniqueAppLocales,
+  type AppLocale,
+} from '@/i18n/locales'
 
 export type StorefrontMenuKind = 'link' | 'category' | 'page' | 'post'
 
@@ -27,12 +34,17 @@ export type StorefrontFooterMenuGroup = {
   items: StorefrontMenuItem[]
 }
 
+export type ColorMode = 'light' | 'dark'
+
+export const ALL_COLOR_MODES: ColorMode[] = ['light', 'dark']
+
 export type StorefrontHeaderOptions = {
   show_search?: boolean
   show_cart?: boolean
   show_language_switcher?: boolean
   show_style_selector?: boolean
   show_login?: boolean
+  show_register?: boolean
 }
 
 const DEFAULT_HEADER_OPTIONS: StorefrontHeaderOptions = {
@@ -41,6 +53,26 @@ const DEFAULT_HEADER_OPTIONS: StorefrontHeaderOptions = {
   show_language_switcher: true,
   show_style_selector: true,
   show_login: true,
+  show_register: false,
+}
+
+/**
+ * How much of a product's internals the storefront is allowed to show, and what a
+ * sold-out product does. Set once per workspace in Admin → Settings → Store; the server
+ * resolves it so every theme answers these the same way.
+ */
+export type StorefrontDisplaySettings = {
+  /** 'plain' drops the workspace's SKU prefix ("SKU-KAS-301" → "KAS-301"). */
+  sku_display: 'hidden' | 'plain' | 'full'
+  /** Anything but 'exact' also withholds the figure from the API payload. */
+  stock_display: 'hidden' | 'status' | 'low_only' | 'exact'
+  out_of_stock_policy: 'hide' | 'show' | 'notify' | 'backorder'
+}
+
+export const DEFAULT_STOREFRONT_DISPLAY: StorefrontDisplaySettings = {
+  sku_display: 'plain',
+  stock_display: 'status',
+  out_of_stock_policy: 'show',
 }
 
 export type StorefrontConfig = {
@@ -53,6 +85,10 @@ export type StorefrontConfig = {
   twitter_url: string
   instagram_url: string
   default_currency: string
+  supported_currencies?: string[]
+  /** ISO 3166-1 alpha-2, or '' when the workspace has not declared a market. */
+  country?: string
+  supported_languages?: string[]
   top_bar_announcement: string
   footer_copyright: string
   site_announcement: string
@@ -61,21 +97,157 @@ export type StorefrontConfig = {
   footer_menus: StorefrontMenuItem[]
   footer_menu_groups?: StorefrontFooterMenuGroup[]
   default_language?: string
+  languages?: string[]
+  /**
+   * Allowed color modes (subset of ['light', 'dark']). When this contains
+   * a single entry, the storefront / account / auth UIs force that mode and
+   * hide any mode-switcher. Defaults to both when omitted.
+   */
+  allowed_color_modes?: ColorMode[]
+  /**
+   * Preferred default color mode. Accepts 'light' | 'dark' | 'system'.
+   * 'system' means "follow the OS preference"; only meaningful when more
+   * than one entry is in allowed_color_modes.
+   */
+  default_color_mode?: 'light' | 'dark' | 'system'
   theme?: string
   header?: string
   footer?: string
   header_options?: StorefrontHeaderOptions
   /** When true, new reviews require admin approval before showing. Default false. */
   review_moderation_required?: boolean
+  /**
+   * True while the shop is not taking new orders. Public, and says only that much:
+   * why a shop is closed is the workspace's business, not the shopper's, so nothing
+   * here names a reason or an amount.
+   *
+   * Absent on servers that do not report it, which reads the same as an open shop —
+   * selling is the storefront's whole purpose and it must never close itself on a
+   * field it simply did not receive.
+   */
+  read_only?: boolean
+  /** SKU / stock visibility and out-of-stock behaviour. See StorefrontDisplaySettings. */
+  storefront_display?: StorefrontDisplaySettings
+  /**
+   * Workspace logo. A data URL when uploaded through admin, otherwise a media
+   * URL. Blank when unset — callers fall back to the built-in mark.
+   */
+  logo?: string
+  /**
+   * The logo for dark surfaces. Blank when the workspace has not uploaded one,
+   * in which case callers fall back to `logo`.
+   */
+  logo_dark?: string
+  /** Workspace favicon, same shape as `logo`. Blank when unset. */
+  favicon?: string
+  /**
+   * Whether to print the site name next to the logo. Defaults to false — a
+   * logo usually contains the wordmark already. Ignored when no logo is set,
+   * in which case the name is the only branding there is.
+   */
+  show_site_name_with_logo?: boolean
+  /**
+   * Public, client-side analytics tag ids for this workspace. One deployment
+   * serves many storefronts, so the GA4 property travels with the config rather
+   * than a build-time env var.
+   */
+  analytics?: {
+    /** GA4 measurement id, e.g. `G-XXXXXXXXXX`. Blank when not configured. */
+    google_analytics_id?: string
+  }
   /** Primary domain configured for this workspace (hostname only, no port). */
   workspace_domain?: string
   /** Resolved workspace (public storefront context). */
   workspace_id?: number
   workspace_slug?: string
+  /**
+   * Plugins with a storefront or account surface that the server manages, and the ones
+   * this workspace has switched on. Missing on servers that do not manage extensions,
+   * in which case every plugin is enabled.
+   */
+  extensions?: ExtensionAvailability
 }
 
 const STALE_MS = 5 * 60 * 1000 // 5 minutes
 let cached: { data: StorefrontConfig; at: number } | null = null
+
+export function getStorefrontLanguages(config?: Pick<StorefrontConfig, 'default_language' | 'languages'> | null): AppLocale[] {
+  const configured = uniqueAppLocales(config?.languages ?? [])
+  const defaultLanguage = normalizeAppLocale(config?.default_language)
+
+  if (configured.length > 0) {
+    return configured
+  }
+  if (defaultLanguage) {
+    return [defaultLanguage]
+  }
+  return [DEFAULT_APP_LOCALE]
+}
+
+export function hasMultipleStorefrontLanguages(
+  config?: Pick<StorefrontConfig, 'default_language' | 'languages'> | null
+): boolean {
+  return getStorefrontLanguages(config).length > 1
+}
+
+/**
+ * Allowed color modes for the current storefront. Defaults to both modes
+ * when the config doesn't specify a (non-empty) list — i.e. opt-out, not
+ * opt-in. When a single mode is returned, the UI should force it and hide
+ * any switcher (mirrors the language-list pattern).
+ */
+export function getAllowedColorModes(
+  config?: Pick<StorefrontConfig, 'allowed_color_modes'> | null
+): ColorMode[] {
+  const raw = config?.allowed_color_modes
+  if (Array.isArray(raw)) {
+    const filtered = raw.filter((m): m is ColorMode => m === 'light' || m === 'dark')
+    if (filtered.length > 0) return Array.from(new Set(filtered)) as ColorMode[]
+  }
+  return [...ALL_COLOR_MODES]
+}
+
+export function hasMultipleColorModes(
+  config?: Pick<StorefrontConfig, 'allowed_color_modes'> | null
+): boolean {
+  return getAllowedColorModes(config).length > 1
+}
+
+/**
+ * Resolve the effective color mode given the config + the user's stored
+ * preference. When only one mode is allowed, that mode wins regardless of
+ * what the user previously chose.
+ */
+export function resolveColorMode(
+  config: Pick<StorefrontConfig, 'allowed_color_modes' | 'default_color_mode'> | null | undefined,
+  preferred?: 'light' | 'dark' | 'system' | null
+): 'light' | 'dark' | 'system' {
+  const allowed = getAllowedColorModes(config)
+  if (allowed.length === 1) return allowed[0]
+  if (preferred === 'light' || preferred === 'dark') {
+    if (allowed.includes(preferred)) return preferred
+  }
+  if (preferred === 'system') return 'system'
+  const def = config?.default_color_mode
+  if (def === 'light' || def === 'dark') {
+    if (allowed.includes(def)) return def
+  }
+  return def === 'system' ? 'system' : 'system'
+}
+
+export function resolveStorefrontLocale(
+  config?: Pick<StorefrontConfig, 'default_language' | 'languages'> | null,
+  preferredLocale?: string | null
+): AppLocale {
+  const languages = getStorefrontLanguages(config)
+  const preferred = normalizeAppLocale(preferredLocale)
+  const defaultLanguage = normalizeAppLocale(config?.default_language)
+
+  if (languages.length === 1) return languages[0]
+  if (preferred && languages.includes(preferred)) return preferred
+  if (defaultLanguage && languages.includes(defaultLanguage)) return defaultLanguage
+  return languages[0] ?? DEFAULT_APP_LOCALE
+}
 
 /** Clear in-memory storefront config cache (e.g. after admin saves general settings). */
 export function clearStorefrontConfigCache(): void {
@@ -96,7 +268,7 @@ function getStorefrontConfigUrl(locale: string): string {
 
 /**
  * Fetch storefront config (sanitized settings + header/footer menus).
- * Uses request host when in browser so backend can resolve workspace by domain (same as storefront).
+ * Uses request host when in browser; workspace id header follows `getWorkspaceId()` when set (same as account/admin).
  * Returns null when server returns 404 or request fails (e.g. not configured yet).
  * Uses in-memory cache for 5 minutes when config is loaded.
  */
@@ -110,7 +282,7 @@ export async function getStorefrontConfig(locale?: string): Promise<StorefrontCo
   const res = await fetch(url, {
     headers: getApiHeaders(
       { 'Content-Type': 'application/json' },
-      { requestHost, storefrontScope: true }
+      { requestHost }
     ),
     credentials: 'include',
   })
@@ -119,14 +291,43 @@ export async function getStorefrontConfig(locale?: string): Promise<StorefrontCo
   }
   const data = (await res.json()) as StorefrontConfig
   if (!data.theme) data.theme = 'store'
+  data.default_language = resolveStorefrontLocale(data, data.default_language)
+  data.languages = getStorefrontLanguages(data)
   if (!data.header_options) data.header_options = { ...DEFAULT_HEADER_OPTIONS }
   else data.header_options = { ...DEFAULT_HEADER_OPTIONS, ...data.header_options }
+  data.storefront_display = { ...DEFAULT_STOREFRONT_DISPLAY, ...(data.storefront_display ?? {}) }
   cached = { data, at: Date.now() }
   return data
 }
 
 /** Default theme id when not configured (standard store). */
 export const DEFAULT_THEME_ID = 'store'
+
+/**
+ * Display policy for a config that may not have loaded yet.
+ *
+ * Falls back to the same defaults the server resolves, so the first paint and the
+ * hydrated paint agree — a stock figure that appears and then vanishes is worse than
+ * one that was never shown.
+ */
+export function getStorefrontDisplay(
+  config?: Pick<StorefrontConfig, 'storefront_display'> | null
+): StorefrontDisplaySettings {
+  return { ...DEFAULT_STOREFRONT_DISPLAY, ...(config?.storefront_display ?? {}) }
+}
+
+/**
+ * Whether this shop is taking orders.
+ *
+ * Fails open, for the same reason getStorefrontDisplay() falls back to the server's
+ * own defaults: a config that has not loaded, or a server that predates the field,
+ * must leave the purchase path alone rather than close a shop that is trading.
+ */
+export function isStorefrontAcceptingOrders(
+  config?: Pick<StorefrontConfig, 'read_only'> | null
+): boolean {
+  return config?.read_only !== true
+}
 
 /** Default header options (all true). Used when config is not yet loaded. */
 export function getDefaultHeaderOptions(): StorefrontHeaderOptions {
@@ -135,9 +336,11 @@ export function getDefaultHeaderOptions(): StorefrontHeaderOptions {
 
 /**
  * Fetch storefront config on server (e.g. in layout or page).
- * Pass requestHost (e.g. from headers().get('host')) so backend resolves workspace by domain (same as storefront).
+ * Pass requestHost (e.g. from headers().get('host')); workspace id from env when set (same as other app surfaces).
  * Returns null when server returns 404 (e.g. workspace/site not configured yet).
  * Deduped per request via React.cache() so layout + page share one fetch.
+ * Workspace branding changes need to appear promptly, so this uses a short
+ * revalidate window rather than the default cross-request Next data cache.
  */
 export const getStorefrontConfigForServer = cache(
   async (locale: string, requestHost?: string): Promise<StorefrontConfig | null> => {
@@ -148,9 +351,9 @@ export const getStorefrontConfigForServer = cache(
       const res = await fetch(url, {
         headers: getApiHeaders(
           { 'Content-Type': 'application/json' },
-          { requestHost, storefrontScope: true }
+          { requestHost }
         ),
-        next: { revalidate: 300 },
+        next: { revalidate: 30 },
         signal: controller.signal,
       })
       clearTimeout(timeoutId)
@@ -159,8 +362,11 @@ export const getStorefrontConfigForServer = cache(
       }
       const data = (await res.json()) as StorefrontConfig
       if (!data.theme) data.theme = 'store'
+      data.default_language = resolveStorefrontLocale(data, data.default_language)
+      data.languages = getStorefrontLanguages(data)
       if (!data.header_options) data.header_options = { ...DEFAULT_HEADER_OPTIONS }
       else data.header_options = { ...DEFAULT_HEADER_OPTIONS, ...data.header_options }
+      data.storefront_display = { ...DEFAULT_STOREFRONT_DISPLAY, ...(data.storefront_display ?? {}) }
       return data
     } catch {
       clearTimeout(timeoutId)

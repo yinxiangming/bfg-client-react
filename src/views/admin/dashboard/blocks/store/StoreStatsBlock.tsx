@@ -1,10 +1,13 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { Card, CardContent, Typography, Box, CircularProgress, Alert, TextField } from '@mui/material'
+import { Card, CardContent, Typography, Box, CircularProgress, Alert } from '@mui/material'
 import { Icon } from '@iconify/react'
 import { getDashboardStats } from '@/services/store'
 import type { BlockDefinition, BlockProps, BlockSettingsProps } from '@/views/common/blocks'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 export const definition: BlockDefinition = {
   type: 'store_stats',
@@ -22,7 +25,7 @@ interface StoreStatsSettingsProps extends BlockSettingsProps<{ title?: string },
 
 export function StoreStatsBlockSettings({ settings, onSettingsChange }: StoreStatsSettingsProps) {
   return (
-    <TextField
+    <CustomTextField
       fullWidth
       size="small"
       label="Title"
@@ -84,29 +87,31 @@ export function StoreStatsBlock({ block, settings, data, resolvedData }: StoreSt
   const customers = stats?.customers_count ?? 0
 
   const items = [
-    { label: 'Orders Today', value: ordersToday, icon: 'mdi:cart-outline', color: '#6366f1' },
-    { label: 'Revenue Today', value: `$${Number(revenueToday).toLocaleString()}`, icon: 'mdi:currency-usd', color: '#22c55e' },
-    { label: 'Total Customers', value: customers, icon: 'mdi:account-group', color: '#f59e0b' },
+    { label: 'Orders Today', value: ordersToday, icon: 'mdi:cart-outline', color: 'primary.main' },
+    { label: 'Revenue Today', value: `$${Number(revenueToday).toLocaleString()}`, icon: 'mdi:currency-usd', color: 'success.main' },
+    { label: 'Total Customers', value: customers, icon: 'mdi:account-group', color: 'warning.main' },
   ]
 
   return (
     <Box>
       {title ? (
-        <Typography variant="subtitle1" sx={{ mb: 2 }}>
+        <Typography sx={{ mb: 2, fontSize: 'var(--at-block-title-size, 13px)', fontWeight: 600 }}>
           {title}
         </Typography>
       ) : null}
       <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
       {items.map((item) => (
-        <Card key={item.label} variant="outlined" sx={{ minWidth: 160, flex: 1 }}>
+        <Card key={item.label} sx={{ minWidth: 160, flex: 1 }}>
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-              <Icon icon={item.icon} style={{ color: item.color, fontSize: 20 }} />
+              {/* Box, not a bare style attr: the colours are palette keys and
+                  only sx resolves those. */}
+              <Box component={Icon} icon={item.icon} sx={{ color: item.color, fontSize: 20 }} />
               <Typography variant="caption" color="text.secondary">
                 {item.label}
               </Typography>
             </Box>
-            <Typography variant="h5" fontWeight={600}>
+            <Typography sx={{ fontSize: '1.25rem', fontWeight: 600, fontFamily: 'var(--at-font-num, inherit)' }}>
               {item.value}
             </Typography>
           </CardContent>

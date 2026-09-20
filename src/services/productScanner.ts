@@ -34,6 +34,16 @@ function ensureApiUrl(config: ProductScannerConfig): void {
   }
 }
 
+async function readErrorMessage(response: Response): Promise<string> {
+  try {
+    const text = await response.clone().text()
+    if (text) return text
+  } catch {
+    // ignore
+  }
+  return response.statusText || `HTTP ${response.status}`
+}
+
 function wrapNetworkError(err: unknown): Error {
   const message = err instanceof Error ? err.message : String(err)
   if (message === 'Failed to fetch' || message.includes('NetworkError') || message.includes('Load failed')) {
@@ -56,19 +66,19 @@ export async function searchProductsByText(
   let response: Response
   try {
     response = await fetch(`${baseUrl}/search`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-API-Key': config.apiKey
-    },
-    body: JSON.stringify({ query, include_image_urls: includeImageUrls })
-  })
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': config.apiKey
+      },
+      body: JSON.stringify({ query, include_image_urls: includeImageUrls })
+    })
   } catch (e) {
     throw wrapNetworkError(e)
   }
 
   if (!response.ok) {
-    throw new Error(`Product Scanner API error: ${response.statusText}`)
+    throw new Error(`Product Scanner API error: ${await readErrorMessage(response)}`)
   }
 
   const data = await response.json()
@@ -91,18 +101,18 @@ export async function searchProductsByImage(
   let response: Response
   try {
     response = await fetch(`${baseUrl}/search`, {
-    method: 'POST',
-    headers: {
-      'X-API-Key': config.apiKey
-    },
-    body: formData
-  })
+      method: 'POST',
+      headers: {
+        'X-API-Key': config.apiKey
+      },
+      body: formData
+    })
   } catch (e) {
     throw wrapNetworkError(e)
   }
 
   if (!response.ok) {
-    throw new Error(`Product Scanner API error: ${response.statusText}`)
+    throw new Error(`Product Scanner API error: ${await readErrorMessage(response)}`)
   }
 
   const data = await response.json()
@@ -143,23 +153,23 @@ export async function getProductDetails(
   let response: Response
   try {
     response = await fetch(`${baseUrl}/product`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-API-Key': config.apiKey
-    },
-    body: JSON.stringify({
-      product_name: candidate.name,
-      brand: candidate.brand,
-      model: candidate.model
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-API-Key': config.apiKey
+      },
+      body: JSON.stringify({
+        product_name: candidate.name,
+        brand: candidate.brand,
+        model: candidate.model
+      })
     })
-  })
   } catch (e) {
     throw wrapNetworkError(e)
   }
 
   if (!response.ok) {
-    throw new Error(`Product Scanner API error: ${response.statusText}`)
+    throw new Error(`Product Scanner API error: ${await readErrorMessage(response)}`)
   }
 
   const data = await response.json()

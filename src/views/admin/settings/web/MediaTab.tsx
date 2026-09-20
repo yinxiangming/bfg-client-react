@@ -10,6 +10,7 @@ import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
 
 import SchemaTable from '@/components/schema/SchemaTable'
+import { SETTINGS_GUTTER } from '@/components/admin/settings/SettingsSection'
 import type { ListSchema, SchemaAction } from '@/types/schema'
 import { useApiData } from '@/hooks/useApiData'
 import MediaEditDialog from './MediaEditDialog'
@@ -26,7 +27,7 @@ import {
 const buildMediaSchema = (t: any): ListSchema => ({
   title: t('settings.web.media.tab.title'),
   columns: [
-    { field: 'file_name', label: t('settings.web.media.tab.columns.fileName'), type: 'string', sortable: true, link: 'edit' },
+    { field: 'file_name', label: t('settings.web.media.tab.columns.fileName'), type: 'string', sortable: true, link: 'edit', width: 260 },
     { field: 'file', label: t('settings.web.media.tab.columns.preview'), type: 'image' },
     { field: 'file_type', label: t('settings.web.media.tab.columns.fileType'), type: 'select', sortable: true },
     { field: 'file_size', label: t('settings.web.media.tab.columns.fileSize'), type: 'string' },
@@ -101,7 +102,7 @@ const MediaTab = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', px: SETTINGS_GUTTER, py: 6 }}>
         <CircularProgress />
       </Box>
     )
@@ -109,7 +110,7 @@ const MediaTab = () => {
 
   if (error) {
     return (
-      <Box sx={{ p: 4 }}>
+      <Box sx={{ px: SETTINGS_GUTTER, py: 5 }}>
         <Alert severity='error'>{error}</Alert>
       </Box>
     )

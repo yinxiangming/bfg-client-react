@@ -10,6 +10,7 @@ import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
 
 import SchemaTable from '@/components/schema/SchemaTable'
+import { SETTINGS_GUTTER } from '@/components/admin/settings/SettingsSection'
 import type { ListSchema, SchemaAction } from '@/types/schema'
 import { useApiData } from '@/hooks/useApiData'
 import SiteEditDialog from './SiteEditDialog'
@@ -27,7 +28,7 @@ const buildSitesSchema = (t: any): ListSchema => ({
   title: t('settings.web.sites.tab.title'),
   columns: [
     { field: 'name', label: t('settings.web.sites.tab.columns.name'), type: 'string', sortable: true, link: 'edit' },
-    { field: 'domain', label: t('settings.web.sites.tab.columns.domain'), type: 'string', sortable: true },
+    { field: 'domain', label: t('settings.web.sites.tab.columns.domain'), type: 'string', sortable: true, width: 200 },
     { field: 'theme_name', label: t('settings.web.sites.tab.columns.theme'), type: 'string' },
     { field: 'default_language', label: t('settings.web.sites.tab.columns.defaultLanguage'), type: 'string' },
     { field: 'is_default', label: t('settings.web.sites.tab.columns.isDefault'), type: 'select', sortable: true },
@@ -101,7 +102,7 @@ const SitesTab = () => {
 
   if (loading) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', px: SETTINGS_GUTTER, py: 6 }}>
         <CircularProgress />
       </Box>
     )
@@ -109,7 +110,7 @@ const SitesTab = () => {
 
   if (error) {
     return (
-      <Box sx={{ p: 4 }}>
+      <Box sx={{ px: SETTINGS_GUTTER, py: 5 }}>
         <Alert severity='error'>{error}</Alert>
       </Box>
     )

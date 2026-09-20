@@ -11,6 +11,7 @@ import { useTranslations } from 'next-intl'
 
 // Component Imports
 import ProductCard from './components/ProductCard'
+import OrderingClosedNotice from './components/OrderingClosedNotice'
 import ImageViewerDialog from '@/components/ui/ImageViewerDialog'
 import { useCart } from '@/contexts/CartContext'
 
@@ -20,6 +21,9 @@ import { storefrontApi } from '@/utils/storefrontApi'
 import { usePageSections } from '@/extensions/hooks/usePageSections'
 import { authApi } from '@/utils/authApi'
 import { useStorefrontConfigSafe } from '@/contexts/StorefrontConfigContext'
+import { getStorefrontDisplay } from '@/utils/storefrontConfig'
+import { useStorefrontCurrency } from '@/hooks/useStorefrontCurrency'
+import { useStorefrontOrdering } from '@/hooks/useStorefrontOrdering'
 
 // Import CSS
 import '@/styles/storefront.css'
@@ -36,18 +40,113 @@ type Product = {
   reviews: number
   images: string[]
   description: string
+  /** The blurb beside the price. Empty is fine — most catalogues never set it. */
+  shortDescription: string
   reference: string
-  stock: number
+  /** Units left, or null when the workspace withholds the figure. */
+  stock: number | null
+  inStock: boolean
+  lowStock: boolean
+  /** Whether add-to-cart should work — false on a sold-out product unless backordered. */
+  purchasable: boolean
   sizes: string[]
   colors: { name: string; value: string }[]
+  /** First category the product belongs to, for the breadcrumb. Null when it has none. */
+  category: { name: string; slug: string } | null
 }
 
-const ProductDetailPage = ({ productId }: { productId: string }) => {
+/**
+ * Map an API product onto the view model.
+ *
+ * Lives at module scope so the server-rendered `initialProduct` and the client refetch
+ * produce identical markup — any divergence would show up as a hydration mismatch.
+ */
+/**
+ * The blurb that belongs beside the price: words, and not many of them.
+ *
+ * That slot used to render the whole description. On an imported catalogue the
+ * description is four full-width marketing images and no text at all, so the
+ * size, quantity and add-to-cart controls were pushed off the screen — the one
+ * thing the top of a product page exists to show. The pictures are not lost:
+ * the Description tab below still renders the HTML in full.
+ *
+ * Stripped with a regex rather than DOMParser because this runs during SSR too,
+ * and both passes have to produce the same string or hydration breaks.
+ */
+const priceAdjacentSummary = (shortDescription: string, description: string): string => {
+  if (shortDescription.trim()) return shortDescription
+  const withoutMedia = description
+    .replace(/<(img|video|iframe|picture|source)\b[^>]*>/gi, '')
+    .replace(/<\/(video|iframe|picture)>/gi, '')
+  // What is left is often just the empty tags that wrapped the images.
+  return withoutMedia.replace(/<[^>]+>/g, '').trim() ? withoutMedia : ''
+}
+
+const transformProduct = (productData: any, descriptionFallback: string): Product => {
+  const productVariants = productData.variants || []
+  return {
+    id: productData.id,
+    name: productData.name,
+    brand: productData.brand || '',
+    condition: productData.condition || '',
+    price: parseFloat(productData.price || '0'),
+    originalPrice: productData.compare_price ? parseFloat(productData.compare_price) : null,
+    discount: productData.discount_percentage || null,
+    rating: productData.rating || 0,
+    reviews: productData.reviews_count || 0,
+    images:
+      productData.images && productData.images.length > 0
+        ? productData.images.map((img: string) => getMediaUrl(img))
+        : productData.primary_image
+          ? [getMediaUrl(productData.primary_image)]
+          : [getStoreImageUrl('themes/PRS04099/assets/img/megnor/empty-cart.svg')],
+    description: productData.description || descriptionFallback,
+    shortDescription: productData.short_description || '',
+    reference: productData.sku || '',
+    // Availability is decided by the server, which applies the workspace's display
+    // policy and reads the same numbers the cart enforces. Summing variant counts here
+    // used to disagree with both: it ignored the policy, and it subtracted warehouse
+    // reservations the cart's own check never looked at.
+    stock: productData.stock_quantity ?? null,
+    inStock: productData.in_stock ?? true,
+    lowStock: productData.low_stock ?? false,
+    purchasable: productData.purchasable ?? true,
+    sizes: productVariants.map((v: any) => v.options?.size).filter(Boolean) || [],
+    colors:
+      productVariants
+        ?.map((v: any) => ({
+          name: v.options?.color || v.name,
+          value: v.options?.color || '#000000'
+        }))
+        .filter((c: any) => c.name) || [],
+    category: productData.categories?.[0]?.slug
+      ? { name: productData.categories[0].name, slug: productData.categories[0].slug }
+      : null
+  }
+}
+
+const ProductDetailPage = ({
+  productId,
+  initialProduct
+}: {
+  productId: string
+  /**
+   * Product fetched on the server. When present the first paint already contains the real
+   * product markup, so crawlers (and users on a cold cache) never see the loading state.
+   */
+  initialProduct?: any
+}) => {
   const t = useTranslations('storefront')
-  const [product, setProduct] = useState<Product | null>(null)
-  const [variants, setVariants] = useState<any[]>([])
+  const { formatPrice } = useStorefrontCurrency()
+  const hasInitialProduct = Boolean(initialProduct)
+  // Same fallback string as the client refetch below, otherwise a product with an empty
+  // description would render one text on the server and another after hydration.
+  const [product, setProduct] = useState<Product | null>(() =>
+    initialProduct ? transformProduct(initialProduct, t('product.descriptionFallback')) : null
+  )
+  const [variants, setVariants] = useState<any[]>(() => initialProduct?.variants || [])
   const [relatedProducts, setRelatedProducts] = useState<any[]>([])
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(!initialProduct)
   const [error, setError] = useState<string | null>(null)
   const [selectedImage, setSelectedImage] = useState(0)
   const [imageViewerOpen, setImageViewerOpen] = useState(false)
@@ -61,9 +160,13 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
   const [reviewSubmitting, setReviewSubmitting] = useState(false)
   const [helpfulSent, setHelpfulSent] = useState<Set<number>>(new Set())
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [notifyEmail, setNotifyEmail] = useState('')
+  const [notifyState, setNotifyState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
   const { addItem, loading: cartLoading } = useCart()
   const { beforeSections, afterSections } = usePageSections('storefront/product')
   const storefrontConfig = useStorefrontConfigSafe()
+  const display = getStorefrontDisplay(storefrontConfig)
+  const { acceptingOrders } = useStorefrontOrdering()
 
   const fetchReviews = useCallback(async (pid: string) => {
     setReviewsLoading(true)
@@ -86,7 +189,9 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        setLoading(true)
+        // Keep showing the server-rendered product while refreshing price/stock in the
+        // background; only a cold client load should surface the spinner.
+        if (!hasInitialProduct) setLoading(true)
         setError(null)
 
         const productData = await storefrontApi.getProduct(productId)
@@ -95,36 +200,10 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
         const productVariants = productData.variants || []
         setVariants(productVariants)
 
-        const transformedProduct: Product = {
-          id: productData.id,
-          name: productData.name,
-          brand: productData.brand || '',
-          condition: productData.condition || '',
-          price: parseFloat(productData.price || '0'),
-          originalPrice: productData.compare_price ? parseFloat(productData.compare_price) : null,
-          discount: productData.discount_percentage || null,
-          rating: productData.rating || 0,
-          reviews: productData.reviews_count || 0,
-          images:
-            productData.images && productData.images.length > 0
-              ? productData.images.map((img: string) => getMediaUrl(img))
-              : productData.primary_image
-                ? [getMediaUrl(productData.primary_image)]
-                : [getStoreImageUrl('themes/PRS04099/assets/img/megnor/empty-cart.svg')],
-          description: productData.description || t('product.descriptionFallback'),
-          reference: productData.sku || '',
-          stock: productVariants.length
-            ? productVariants.reduce((sum: number, v: any) => sum + (v.stock_available || 0), 0) || 0
-            : (productData.stock_quantity ?? 0),
-          sizes: productVariants.map((v: any) => v.options?.size).filter(Boolean) || [],
-          colors:
-            productVariants
-              ?.map((v: any) => ({
-                name: v.options?.color || v.name,
-                value: v.options?.color || '#000000'
-              }))
-              .filter((c: any) => c.name) || []
-        }
+        const transformedProduct: Product = transformProduct(
+          productData,
+          t('product.descriptionFallback')
+        )
         setProduct(transformedProduct)
 
         // Set default selections
@@ -153,7 +232,10 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
                   image:
                     getMediaUrl(p.primary_image || (p.images && p.images[0]) || '') ||
                     getStoreImageUrl('themes/PRS04099/assets/img/megnor/empty-cart.svg'),
-                  isNew: p.is_new || false
+                  isNew: p.is_new || false,
+                  inStock: p.in_stock ?? true,
+                  purchasable: p.purchasable ?? true,
+                  slug: p.slug ?? null
                 }))
             )
           }
@@ -169,14 +251,30 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
     }
 
     fetchProduct()
-  }, [productId])
+  }, [productId, hasInitialProduct])
 
   useEffect(() => {
     if (activeTab === 'reviews' && productId) fetchReviews(productId)
   }, [activeTab, productId, fetchReviews])
 
+  const handleNotifyMe = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!product || notifyState === 'sending') return
+    setNotifyState('sending')
+    try {
+      await storefrontApi.notifyWhenInStock(String(product.id), notifyEmail)
+      setNotifyState('done')
+      setNotifyEmail('')
+    } catch {
+      setNotifyState('error')
+    }
+  }
+
   const handleAddToCart = async () => {
     if (!product) return
+    // The button below is already disabled; this is the same answer for anything that
+    // gets past it — a stale render, a keyboard, a script.
+    if (!acceptingOrders) return
     
     // Find variant ID based on selected size and color
     let variantId: number | undefined = undefined
@@ -325,10 +423,18 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
           {t('nav.home')}
         </Link>
         <span className='sf-breadcrumb-separator' style={{ margin: '0 0.5rem' }}>/</span>
-        <Link href='/category/clothes' className='sf-breadcrumb-link' style={{ textDecoration: 'none' }}>
-          {t('category.sidebar.sampleClothes')}
-        </Link>
-        <span className='sf-breadcrumb-separator' style={{ margin: '0 0.5rem' }}>/</span>
+        {product.category && (
+          <>
+            <Link
+              href={`/category/${product.category.slug}`}
+              className='sf-breadcrumb-link'
+              style={{ textDecoration: 'none' }}
+            >
+              {product.category.name}
+            </Link>
+            <span className='sf-breadcrumb-separator' style={{ margin: '0 0.5rem' }}>/</span>
+          </>
+        )}
         <span className='sf-breadcrumb-current'>{product.name}</span>
       </nav>
 
@@ -393,11 +499,11 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
           </div>
           <div className='sf-product-detail-price-row'>
             <span style={{ fontSize: '2rem', fontWeight: 700, color: 'var(--primary-color, #6366f1)' }}>
-              ${product.price.toFixed(2)}
+              {formatPrice(product.price)}
             </span>
             {product.originalPrice && (
               <span className='sf-price-original' style={{ fontSize: '1.25rem', textDecoration: 'line-through' }}>
-                ${product.originalPrice.toFixed(2)}
+                {formatPrice(product.originalPrice)}
               </span>
             )}
             {product.discount && (
@@ -415,11 +521,26 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
               </span>
             )}
           </div>
-          <div
-            className='sf-product-description'
-            style={{ fontSize: '0.875rem', lineHeight: 1.6, marginBottom: '1.5rem' }}
-            dangerouslySetInnerHTML={{ __html: product.description || '' }}
-          />
+          {(() => {
+            const summary = priceAdjacentSummary(product.shortDescription, product.description || '')
+            if (!summary) return null
+            return (
+              <div
+                className='sf-product-description'
+                style={{
+                  fontSize: '0.875rem',
+                  lineHeight: 1.6,
+                  marginBottom: '1.5rem',
+                  // A wordy description should not push the buy controls away either.
+                  display: '-webkit-box',
+                  WebkitLineClamp: 4,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden'
+                }}
+                dangerouslySetInnerHTML={{ __html: summary }}
+              />
+            )
+          })()}
 
           {/* Size Selection */}
           {product.sizes.length > 0 && (
@@ -539,31 +660,111 @@ const ProductDetailPage = ({ productId }: { productId: string }) => {
             </div>
           </div>
 
-          {/* Add to Cart */}
-          <button
-            onClick={handleAddToCart}
-            disabled={cartLoading}
-            className='sf-btn sf-btn-primary'
-            style={{ width: '100%', fontSize: '1rem', padding: '1rem', marginBottom: '1rem' }}
-          >
-            <i className='tabler-shopping-cart' style={{ marginRight: '0.5rem' }} />
-            {cartLoading ? t('buttons.adding') : t('buttons.addToCart')}
-          </button>
+          {/* Add to Cart, or what stands in for it when the product has run out — or
+              when the shop is not selling anything at all, which outranks both. */}
+          {product.purchasable && acceptingOrders ? (
+            <button
+              onClick={handleAddToCart}
+              disabled={cartLoading}
+              className='sf-btn sf-btn-primary'
+              style={{ width: '100%', fontSize: '1rem', padding: '1rem', marginBottom: '1rem' }}
+            >
+              <i className='tabler-shopping-cart' style={{ marginRight: '0.5rem' }} />
+              {cartLoading
+                ? t('buttons.adding')
+                : product.inStock
+                  ? t('buttons.addToCart')
+                  : t('buttons.backorder')}
+            </button>
+          ) : (
+            <button
+              disabled
+              className='sf-btn sf-btn-primary'
+              style={{ width: '100%', fontSize: '1rem', padding: '1rem', marginBottom: '1rem' }}
+            >
+              {acceptingOrders ? t('product.stock.soldOut') : t('ordering.closedShort')}
+            </button>
+          )}
+
+          {/* Why the button is dead. Said here rather than only on the button, because
+              the shop is still showing a price and this is the shopper's answer to it. */}
+          {!acceptingOrders && <OrderingClosedNotice style={{ marginBottom: '1rem' }} />}
+
+          {/* Backorder ships later than the delivery estimate above — say so before the
+              order, not in the confirmation email. */}
+          {product.purchasable && !product.inStock && (
+            <p className='sf-product-backorder-note' style={{ marginBottom: '1rem' }}>
+              {t('product.stock.backorderNote')}
+            </p>
+          )}
+
+          {/* Back-in-stock registration. Only offered when the workspace has undertaken
+              to actually write back — see out_of_stock_policy. */}
+          {!product.inStock && display.out_of_stock_policy === 'notify' && (
+            <form onSubmit={handleNotifyMe} style={{ marginBottom: '1rem' }}>
+              {notifyState === 'done' ? (
+                <p className='sf-product-notify-done'>{t('product.stock.notifyDone')}</p>
+              ) : (
+                <>
+                  <label htmlFor='sf-notify-email' className='sf-product-notify-label'>
+                    {t('product.stock.notifyPrompt')}
+                  </label>
+                  <div style={{ display: 'flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+                    <input
+                      id='sf-notify-email'
+                      type='email'
+                      required
+                      value={notifyEmail}
+                      onChange={e => setNotifyEmail(e.target.value)}
+                      placeholder={t('product.stock.notifyPlaceholder')}
+                      className='sf-product-notify-input'
+                      style={{ flex: 1 }}
+                    />
+                    <button
+                      type='submit'
+                      disabled={notifyState === 'sending'}
+                      className='sf-btn sf-btn-secondary'
+                    >
+                      {notifyState === 'sending' ? t('buttons.adding') : t('buttons.notifyMe')}
+                    </button>
+                  </div>
+                  {notifyState === 'error' && (
+                    <p className='sf-product-notify-error'>{t('product.stock.notifyFailed')}</p>
+                  )}
+                </>
+              )}
+            </form>
+          )}
 
           {/* Product Info */}
           <div className='sf-product-info-box'>
-            <p className='sf-product-info-item'>
-              <strong className='sf-product-info-label'>{t('product.labels.reference')}</strong>{' '}
-              <span className='sf-product-info-value'>{product.reference}</span>
-            </p>
-            <p className='sf-product-info-item'>
-              <strong className='sf-product-info-label'>{t('product.labels.inStock')}</strong>{' '}
-              <span className='sf-product-info-value'>
-                {product.stock} {t('product.labels.items')}
-              </span>
-            </p>
+            {display.sku_display !== 'hidden' && product.reference && (
+              <p className='sf-product-info-item'>
+                <strong className='sf-product-info-label'>{t('product.labels.reference')}</strong>{' '}
+                <span className='sf-product-info-value'>{product.reference}</span>
+              </p>
+            )}
+            {display.stock_display !== 'hidden' && (
+              <p className='sf-product-info-item'>
+                <strong className='sf-product-info-label'>{t('product.labels.availability')}</strong>{' '}
+                <span
+                  className='sf-product-info-value'
+                  data-in-stock={product.inStock ? 'true' : 'false'}
+                >
+                  {/* `stock` is null unless the shop publishes figures, so this reads as a
+                      count only when there is one to read. */}
+                  {!product.inStock
+                    ? t('product.stock.soldOut')
+                    : product.stock === null
+                      ? t('product.stock.inStock')
+                      : product.lowStock
+                        ? t('product.stock.onlyLeft', { count: product.stock })
+                        : `${product.stock} ${t('product.labels.items')}`}
+                </span>
+              </p>
+            )}
           </div>
-          {/* Extension sections after ProductInfo (e.g. Resale owner info) */}
+          {/* Extension sections after ProductInfo */}
           {afterProductInfoSections.map(
             ext =>
               ext.component && (

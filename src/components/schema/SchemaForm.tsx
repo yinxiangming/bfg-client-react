@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useState, useEffect, useMemo, useRef, Fragment } from 'react'
+import { useState, useEffect, useMemo, useRef, useCallback, Fragment } from 'react'
 import type { ReactNode } from 'react'
 
 // i18n Imports
@@ -12,10 +12,8 @@ import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Grid from '@mui/material/Grid'
-import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import Autocomplete from '@mui/material/Autocomplete'
 import Chip from '@mui/material/Chip'
@@ -26,8 +24,13 @@ import Switch from '@mui/material/Switch'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Avatar from '@mui/material/Avatar'
 import Collapse from '@mui/material/Collapse'
-import IconButton from '@mui/material/IconButton'
 import CircularProgress from '@mui/material/CircularProgress'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
+
+// Theme Imports
+import { ADMIN_GUTTER } from '@/components/theme/adminSurface'
 
 // Type Imports
 import type { FormSchema, FormField, FormFieldBlock } from '@/types/schema'
@@ -45,6 +48,69 @@ import {
   filterOptionsFromCache,
   type OptionItem as OptionItemType
 } from '@/services/options'
+
+/**
+ * Fields that claim a whole row; everything else pairs up two-per-row at md+.
+ * Shared by the grid sizing and by the boolean renderer, which has to know
+ * whether it is standing next to a labelled field.
+ */
+function isFullRowField(field: FormField): boolean {
+  if (field.fullWidth || field.newline) return true
+  return field.type === 'textarea' || field.type === 'image' || field.type === 'file'
+}
+
+/**
+ * Height of the label block CustomTextField stacks above every control in the
+ * admin: 13px type at a 1.153 line-height, plus its 6px bottom margin. A
+ * control with no label of its own has to drop by exactly this much to sit on
+ * the same line as its neighbour.
+ */
+const FIELD_LABEL_BLOCK = 'calc(0.8125rem * 1.153 + 6px)'
+
+/**
+ * A switch carries its label inline, so unlike every other control it has
+ * nothing stacked above it and starts a label-block higher than a text field
+ * sharing its row. Replaying the grid's own wrapping tells us which switches
+ * actually have such a neighbour — two switches side by side line up with each
+ * other already, and one sitting alone on its row has nothing to line up with,
+ * so neither should be nudged.
+ *
+ * `rowBreakAfter` carries the fields that a caller's `formSlots` follow: those
+ * slots are full-width rows of their own, so they close the row early.
+ */
+function collectSwitchesNeedingOffset(fields: FormField[], rowBreakAfter?: Set<string>): Set<string> {
+  const rows: FormField[][] = []
+  let row: FormField[] = []
+  let filled = 0
+
+  for (const field of fields) {
+    const span = isFullRowField(field) ? 12 : 6
+    if (filled + span > 12) {
+      rows.push(row)
+      row = []
+      filled = 0
+    }
+    row.push(field)
+    filled += span
+    if (filled >= 12 || rowBreakAfter?.has(field.field)) {
+      rows.push(row)
+      row = []
+      filled = 0
+    }
+  }
+  if (row.length) rows.push(row)
+
+  const needsOffset = new Set<string>()
+  for (const r of rows) {
+    for (const field of r) {
+      if (field.type !== 'boolean') continue
+      if (r.some(other => other !== field && other.type !== 'boolean')) {
+        needsOffset.add(field.field)
+      }
+    }
+  }
+  return needsOffset
+}
 
 function resolveFileImagePreviewSrc(value: unknown): string | null {
   if (typeof value !== 'string' || !value) return null
@@ -97,7 +163,19 @@ type SchemaFormProps<T = any> = {
   hideActions?: boolean
   hideTitle?: boolean
   formId?: string
-  customFieldRenderer?: (field: FormField, value: any, onChange: (value: any) => void, error?: string) => React.ReactNode
+  customFieldRenderer?: (
+    field: FormField,
+    value: any,
+    onChange: (value: any) => void,
+    error: string | undefined,
+    /**
+     * Write other fields of this form, for a field that answers for more than
+     * itself — an address line that also knows the city, say. `onChange` only ever
+     * reaches the field it belongs to, and the form owns the rest of the values, so
+     * without this a custom renderer has nowhere to put them.
+     */
+    setValues: (values: Record<string, any>) => void
+  ) => React.ReactNode
   /** Injected rows inside the form after the given field (legacy flat `fields` only). */
   formSlots?: { afterField: string; children: ReactNode }[]
 }
@@ -129,6 +207,18 @@ export default function SchemaForm<T extends Record<string, any>>({
     return schema.fields || []
   }, [schema])
 
+  const switchesNeedingOffset = useMemo(() => {
+    if (schema.blocks) {
+      // Each block lays out its own grid, so rows never straddle two blocks.
+      return schema.blocks.reduce<Set<string>>((acc, block) => {
+        collectSwitchesNeedingOffset(block.fields).forEach(name => acc.add(name))
+        return acc
+      }, new Set())
+    }
+    const rowBreakAfter = new Set(formSlots?.map(slot => slot.afterField) ?? [])
+    return collectSwitchesNeedingOffset(schema.fields || [], rowBreakAfter)
+  }, [schema, formSlots])
+
   // Initialize options cache on mount
   useEffect(() => {
     const initOptions = async () => {
@@ -146,7 +236,7 @@ export default function SchemaForm<T extends Record<string, any>>({
     if (!customFieldRenderer) return new Set<string>()
     const customFields = new Set<string>()
     fields.forEach(field => {
-      const testRender = customFieldRenderer(field, '', () => {}, '')
+      const testRender = customFieldRenderer(field, '', () => {}, '', () => {})
       if (testRender !== null && testRender !== undefined) {
         customFields.add(field.field)
       }
@@ -338,6 +428,17 @@ export default function SchemaForm<T extends Record<string, any>>({
     }
   }, [initialData])
 
+  /** Several fields at once, for a custom renderer that resolved more than its own. */
+  const setValues = useCallback((values: Record<string, any>) => {
+    setFormData(prev => ({ ...prev, ...values }))
+    setErrors(prev => {
+      const next = { ...prev }
+      for (const field of Object.keys(values)) delete next[field]
+
+      return next
+    })
+  }, [])
+
   async function handleChange(field: string, value: any) {
     const newFormData = { ...formData, [field]: value }
     setFormData(newFormData)
@@ -504,7 +605,13 @@ export default function SchemaForm<T extends Record<string, any>>({
 
     // Use custom renderer if provided
     if (customFieldRenderer && !isReadonly) {
-      const customRendered = customFieldRenderer(field, value, (newValue) => handleChange(field.field, newValue), error)
+      const customRendered = customFieldRenderer(
+        field,
+        value,
+        newValue => handleChange(field.field, newValue),
+        error,
+        setValues
+      )
       if (customRendered !== null && customRendered !== undefined) {
         return customRendered
       }
@@ -529,12 +636,14 @@ export default function SchemaForm<T extends Record<string, any>>({
       }
       
       return (
-        <Box>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+        // Same label metrics as an editable field (13px, 6px gap) so a form
+        // that mixes readonly and editable rows keeps one baseline grid.
+        <Box sx={{ minHeight: 38 }}>
+          <Typography sx={{ mb: 0.75, fontSize: '0.8125rem', lineHeight: 1.153, color: 'text.secondary' }}>
             {field.label}
             {field.required && <Typography component="span" color="error.main"> *</Typography>}
           </Typography>
-          <Typography variant="body1" sx={{ mt: 0.5, fontWeight: 500 }}>
+          <Typography sx={{ fontSize: '0.8125rem', lineHeight: 1.5, fontWeight: 500 }}>
             {displayValue}
           </Typography>
         </Box>
@@ -553,7 +662,7 @@ export default function SchemaForm<T extends Record<string, any>>({
     switch (field.type) {
       case 'email':
         return (
-          <TextField
+          <CustomTextField
             fullWidth
             type="email"
             label={labelNode}
@@ -569,7 +678,7 @@ export default function SchemaForm<T extends Record<string, any>>({
 
       case 'string':
         return (
-          <TextField
+          <CustomTextField
             fullWidth
             label={labelNode}
             value={value}
@@ -584,7 +693,7 @@ export default function SchemaForm<T extends Record<string, any>>({
 
       case 'textarea':
         return (
-          <TextField
+          <CustomTextField
             fullWidth
             multiline
             rows={field.rows || 4}
@@ -595,14 +704,13 @@ export default function SchemaForm<T extends Record<string, any>>({
             error={!!error}
             helperText={helperText}
             placeholder={field.placeholder}
-            InputLabelProps={{ shrink: true }}
-            sx={{ ...requiredAsteriskSx, mt: 0.5 }}
+            sx={requiredAsteriskSx}
           />
         )
 
       case 'number':
         return (
-          <TextField
+          <CustomTextField
             fullWidth
             type="number"
             label={field.label}
@@ -622,7 +730,7 @@ export default function SchemaForm<T extends Record<string, any>>({
 
       case 'currency':
         return (
-          <TextField
+          <CustomTextField
             fullWidth
             type="number"
             label={field.label}
@@ -665,7 +773,7 @@ export default function SchemaForm<T extends Record<string, any>>({
                 onChange={(_, newValue) => handleChange(field.field, newValue.map(opt => opt.value))}
                 loading={isLoading}
                 renderInput={(params) => (
-                  <TextField
+                  <CustomTextField
                     {...params}
                     label={field.label}
                     required={field.required}
@@ -726,7 +834,7 @@ export default function SchemaForm<T extends Record<string, any>>({
               isOptionEqualToValue={(opt, val) => opt.value === val.value}
               filterOptions={(options) => options} // Disable client-side filtering, use server-side only
               renderInput={(params) => (
-                <TextField
+                <CustomTextField
                   {...params}
                   label={field.label}
                   required={field.required}
@@ -750,22 +858,24 @@ export default function SchemaForm<T extends Record<string, any>>({
         }
 
         return (
-          <FormControl fullWidth required={field.required} error={!!error} sx={requiredAsteriskSx}>
-            <InputLabel>{field.label}</InputLabel>
-            <Select
-              value={value}
-              label={field.label}
-              onChange={(e) => handleChange(field.field, e.target.value)}
-              disabled={isLoading}
-            >
+          <CustomTextField
+            select
+            fullWidth
+            label={field.label}
+            value={value}
+            onChange={(e) => handleChange(field.field, e.target.value)}
+            required={field.required}
+            error={!!error}
+            helperText={helperText}
+            disabled={isLoading}
+            sx={requiredAsteriskSx}
+          >
             {selectOptions.map((option) => (
               <MenuItem key={option.value} value={option.value}>
                 {option.label}
               </MenuItem>
             ))}
-            </Select>
-            {(error || field.helperText) && <FormHelperText>{helperText}</FormHelperText>}
-          </FormControl>
+          </CustomTextField>
         )
 
       case 'multiselect':
@@ -789,7 +899,7 @@ export default function SchemaForm<T extends Record<string, any>>({
               onChange={(_, newValue) => handleChange(field.field, newValue.map(opt => opt.value))}
               loading={multiIsLoading}
               renderInput={(params) => (
-                <TextField
+                <CustomTextField
                   {...params}
                   label={field.label}
                   required={field.required}
@@ -825,20 +935,42 @@ export default function SchemaForm<T extends Record<string, any>>({
 
       case 'boolean':
         return (
-          <FormControlLabel
-            control={
-              <Switch
-                checked={!!value}
-                onChange={(e) => handleChange(field.field, e.target.checked)}
-              />
-            }
-            label={field.label}
-          />
+          // A switch carries its label inline, so it has nothing stacked above
+          // it and starts a label-block higher than the field beside it. When
+          // it shares a row, drop it by exactly that block: switch and input
+          // are both 38px tall, so aligning their tops aligns their centres.
+          // On a row of its own there is nothing to line up with, so it sits
+          // flush and adds no height.
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              height: '100%',
+              minHeight: 38,
+              // Below md every field is a full row of its own, so nothing
+              // is ever beside the switch there.
+              pt: switchesNeedingOffset.has(field.field) ? { xs: 0, md: FIELD_LABEL_BLOCK } : 0
+            }}
+          >
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={!!value}
+                  onChange={(e) => handleChange(field.field, e.target.checked)}
+                />
+              }
+              label={field.label}
+              // Field labels are 13px in the admin; the switch label was
+              // inheriting body1 and coming out the largest text on the form.
+              slotProps={{ typography: { fontSize: '0.8125rem' } }}
+              sx={{ mr: 0 }}
+            />
+          </Box>
         )
 
       case 'date':
         return (
-          <TextField
+          <CustomTextField
             fullWidth
             type="date"
             label={field.label}
@@ -847,14 +979,13 @@ export default function SchemaForm<T extends Record<string, any>>({
             required={field.required}
             error={!!error}
             helperText={error}
-            InputLabelProps={{ shrink: true }}
             sx={requiredAsteriskSx}
           />
         )
 
       case 'datetime':
         return (
-          <TextField
+          <CustomTextField
             fullWidth
             type="datetime-local"
             label={field.label}
@@ -863,7 +994,6 @@ export default function SchemaForm<T extends Record<string, any>>({
             required={field.required}
             error={!!error}
             helperText={error}
-            InputLabelProps={{ shrink: true }}
             sx={requiredAsteriskSx}
           />
         )
@@ -871,7 +1001,7 @@ export default function SchemaForm<T extends Record<string, any>>({
       case 'color':
         return (
           <Box>
-            <TextField
+            <CustomTextField
               fullWidth
               type="color"
               label={field.label}
@@ -880,7 +1010,6 @@ export default function SchemaForm<T extends Record<string, any>>({
               required={field.required}
               error={!!error}
               helperText={error}
-              InputLabelProps={{ shrink: true }}
               sx={requiredAsteriskSx}
             />
           </Box>
@@ -956,7 +1085,7 @@ export default function SchemaForm<T extends Record<string, any>>({
 
       default:
         return (
-          <TextField
+          <CustomTextField
             fullWidth
             label={field.label}
             value={value}
@@ -987,14 +1116,11 @@ export default function SchemaForm<T extends Record<string, any>>({
     const isCollapsible = block.className === 'collapse'
 
     const blockContent = (
-      <Grid container spacing={4}>
+      <Grid container rowSpacing={2.5} columnSpacing={3}>
         {block.fields.map((field) => (
           <Grid
             key={field.field}
-            size={{
-              xs: 12,
-              md: field.fullWidth || field.newline ? 12 : (field.type === 'textarea' || field.type === 'image' || field.type === 'file' ? 12 : 6)
-            }}
+            size={{ xs: 12, md: isFullRowField(field) ? 12 : 6 }}
           >
             {renderField(field)}
           </Grid>
@@ -1002,26 +1128,54 @@ export default function SchemaForm<T extends Record<string, any>>({
       </Grid>
     )
 
+    // Separate sections from each other, but leave the last one flush: the
+    // action bar supplies the gap below it.
+    const isLast = blockIndex === (schema.blocks?.length ?? 1) - 1
+    const blockSx = { mb: isLast ? 0 : 4 }
+
     if (isCollapsible) {
       return (
-        <Box key={blockIndex} sx={{ mb: 3 }}>
-          <Box 
-            sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'space-between',
-              cursor: 'pointer',
-              mb: 4,
-              p: 2,
-              bgcolor: 'action.hover',
-              borderRadius: 1
-            }}
+        <Box key={blockIndex} sx={blockSx}>
+          {/* A collapsible section is still a section — same title + rule as a
+              plain one, with the chevron sitting on the rule. The old filled
+              grey panel was the only tinted block in the admin. */}
+          <Box
+            component="button"
+            type="button"
             onClick={() => toggleBlock(blockIndex)}
+            aria-expanded={!isCollapsed}
+            className="at-block-title"
+            sx={{
+              // `.at-block-title` is a global class, and emotion is prepended
+              // (AppRouterCacheProvider `prepend: true`), so a plain sx rule
+              // loses the tie on `display`. Qualifying with the class itself
+              // wins on specificity while leaving the skin tokens in charge of
+              // type, colour and rule.
+              '&.at-block-title': {
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                gap: 1,
+                width: '100%',
+                // Undo the UA button box only. Type, colour and the rule stay
+                // with `.at-block-title` so skins keep driving them.
+                appearance: 'none',
+                background: 'none',
+                borderInline: 0,
+                borderBlockStart: 0,
+                paddingInline: 0,
+                paddingBlockStart: 0,
+                textAlign: 'start',
+                cursor: 'pointer'
+              }
+            }}
           >
-            <Typography variant="h6">{block.title || t('common.schemaForm.details')}</Typography>
-            <IconButton size="small">
-              <i className={isCollapsed ? 'tabler-chevron-down' : 'tabler-chevron-up'} />
-            </IconButton>
+            {block.title || t('common.schemaForm.details')}
+            <Box
+              component="i"
+              className={isCollapsed ? 'tabler-chevron-down' : 'tabler-chevron-up'}
+              sx={{ fontSize: '1rem', color: 'text.secondary' }}
+            />
           </Box>
           <Collapse in={!isCollapsed}>
             {blockContent}
@@ -1031,9 +1185,9 @@ export default function SchemaForm<T extends Record<string, any>>({
     }
 
     return (
-      <Box key={blockIndex} sx={{ mb: 3 }} className={block.className}>
+      <Box key={blockIndex} sx={blockSx} className={block.className}>
         {block.title && (
-          <Typography variant="h6" sx={{ mb: 3 }}>
+          <Typography component="div" className="at-block-title">
             {block.title}
           </Typography>
         )}
@@ -1050,14 +1204,14 @@ export default function SchemaForm<T extends Record<string, any>>({
     
     // Legacy: render fields directly
     return (
-      <Grid container spacing={4}>
+      // Rows sit tighter than columns on purpose: every field already carries
+      // its label stacked above the control, so a symmetric 24px gutter reads
+      // as ~30px of vertical air between one control and the next label.
+      <Grid container rowSpacing={2.5} columnSpacing={3}>
         {fields.map(field => (
           <Fragment key={field.field}>
             <Grid
-              size={{
-                xs: 12,
-                md: field.fullWidth || field.newline ? 12 : (field.type === 'textarea' || field.type === 'image' || field.type === 'file' ? 12 : 6)
-              }}
+              size={{ xs: 12, md: isFullRowField(field) ? 12 : 6 }}
             >
               {renderField(field)}
             </Grid>
@@ -1075,25 +1229,107 @@ export default function SchemaForm<T extends Record<string, any>>({
   }
 
   return (
-    <Card>
-      <CardContent>
-        {!hideTitle && schema.title && (
-          <Typography variant="h5" sx={{ mb: 4 }}>
-            {schema.title}
-          </Typography>
-        )}
+    <Card
+      elevation={0}
+      className="at-schema-form"
+      sx={{
+        backgroundColor: 'var(--at-card-bg, var(--mui-palette-background-paper))',
+        border: '1px solid',
+        // Fallbacks throughout: an undefined custom property makes the whole
+        // declaration invalid, and `border-color` then falls back to
+        // currentColor — a near-black box in light mode.
+        borderColor: 'var(--at-card-border, var(--mui-palette-divider))',
+        borderRadius: 'var(--at-card-radius, 8px)',
+        boxShadow: 'var(--at-card-shadow, none)',
+        // The action bar below sticks to the bottom of whatever scrolls — a
+        // Dialog's content area, or the page. `overflow: hidden` (MUI's Card
+        // default) would trap it inside the card and it would never stick.
+        overflow: 'visible'
+      }}
+    >
+      {/* Its own row, not the first line of the body: same metrics as
+          MuiDialogTitle (see adminSurface), so a form that supplies its own
+          title and one hosted under a real <DialogTitle> get the same header. */}
+      {!hideTitle && schema.title && (
+        <Typography
+          component="h2"
+          sx={{
+            px: `${ADMIN_GUTTER}px`,
+            py: 2,
+            fontFamily: 'var(--at-font-display, inherit)',
+            // Was h5 (1.5rem) — a display size for what is really a panel
+            // heading, and the loudest thing in any edit dialog.
+            fontSize: '0.9375rem',
+            fontWeight: 600,
+            lineHeight: 1.5,
+            color: 'var(--at-block-title-fg, var(--mui-palette-text-primary))',
+            borderBottom: '1px solid',
+            borderColor: 'var(--at-card-border, var(--mui-palette-divider))'
+          }}
+        >
+          {schema.title}
+        </Typography>
+      )}
 
+      <CardContent
+        sx={{
+          p: `${ADMIN_GUTTER}px`,
+          // The action bar carries the gutter below the last field, so the body
+          // must not add its own — the bar's border would sit 24px adrift. With
+          // `hideActions` there is no bar, and MUI's own last-child rule would
+          // otherwise leave the final field flush against the dialog footer.
+          '&:last-child': { pb: hideActions ? `${ADMIN_GUTTER}px` : 0 }
+        }}
+      >
         <form id={formId} onSubmit={handleSubmit} noValidate>
           {renderFields()}
 
           {!hideActions && (
-            <Box sx={{ display: 'flex', gap: 2, mt: 4, justifyContent: 'flex-end' }}>
+            <Box
+              sx={{
+                position: 'sticky',
+                bottom: 0,
+                zIndex: 2,
+                display: 'flex',
+                gap: 1,
+                justifyContent: 'flex-end',
+                mt: 3,
+                // Bleed to the card edges so the rule reads as a footer, not a
+                // floating strip, and land on the same metrics as
+                // MuiDialogActions: 12px block, ADMIN_GUTTER inline, 8px gap.
+                mx: `${-ADMIN_GUTTER}px`,
+                px: `${ADMIN_GUTTER}px`,
+                py: 1.5,
+                borderTop: '1px solid',
+                borderColor: 'var(--at-card-border, var(--mui-palette-divider))',
+                backgroundColor: 'var(--at-card-bg, var(--mui-palette-background-paper))',
+                borderEndStartRadius: 'inherit',
+                borderEndEndRadius: 'inherit'
+              }}
+            >
               {onCancel && (
-                <Button variant="outlined" onClick={onCancel} disabled={loading}>
+                <Button
+                  variant="outlined"
+                  onClick={onCancel}
+                  disabled={loading}
+                  sx={{ textTransform: 'none', borderRadius: 'var(--at-control-radius, 8px)' }}
+                >
                   {t('common.schemaForm.cancel')}
                 </Button>
               )}
-              <Button type="submit" variant="contained" disabled={loading}>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={loading}
+                sx={{
+                  textTransform: 'none',
+                  borderRadius: 'var(--at-control-radius, 8px)',
+                  boxShadow: 'none',
+                  backgroundColor: 'var(--at-accent, var(--mui-palette-primary-main))',
+                  color: 'var(--at-accent-fg, var(--mui-palette-primary-contrastText))',
+                  '&:hover': { backgroundColor: 'var(--at-accent-strong, var(--mui-palette-primary-dark))' }
+                }}
+              >
                 {loading ? t('common.schemaForm.saving') : t('common.schemaForm.save')}
               </Button>
             </Box>

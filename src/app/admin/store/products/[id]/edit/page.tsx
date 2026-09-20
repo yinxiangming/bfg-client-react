@@ -83,7 +83,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
       const mediaItems = mediaRes?.items ?? (data as any)?.media ?? []
       const merged = { ...data, media: mediaItems }
       setProductData(merged)
-      setFormData(prev => ({ ...prev, media: mediaItems }))
+      setFormData(prev => ({ ...prev, media: mediaItems, stock_quantity: data.stock_quantity }))
     } catch (e) {
       console.error('Failed to refetch product', e)
     }
@@ -139,7 +139,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
       setProductData(response)
       setFormData(response)
 
-      // Run extension afterSave hooks (e.g. ResaleProduct create/update)
+      // Run extension afterSave hooks for plugin-owned related data.
       await runAfterSave({ productId: parseInt(id), formData })
 
       setSnackbar({ open: true, message: t('products.edit.snackbar.saved'), severity: 'success' })
@@ -185,8 +185,8 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
   }
 
   return (
-    <Box sx={{ p: 4 }}>
-      <Grid container spacing={4}>
+    <>
+      <Grid container spacing={3}>
         <Grid size={{ xs: 12 }}>
           <ProductEditHeader
             productId={id}
@@ -196,7 +196,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
           />
         </Grid>
         <Grid size={{ xs: 12, md: 8 }}>
-          <Grid container spacing={4}>
+          <Grid container spacing={3}>
             {/* Extension slots before default slots */}
             {beforeSlots.map(ext => (
               ext.component && (
@@ -239,7 +239,8 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
                 {renderSlot('ProductVariants', ProductVariants, {
                   productId: id,
                   productMedia: (productData as any)?.media,
-                  initialVariants: (productData as any)?.variants
+                  initialVariants: (productData as any)?.variants,
+                  onInventoryUpdate: refetchProduct
                 })}
               </Grid>
             )}
@@ -255,7 +256,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
           </Grid>
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
-          <Grid container spacing={4}>
+          <Grid container spacing={3}>
             {visibleSlots.includes('ProductPricing') && (
               <Grid key="ProductPricing" size={{ xs: 12 }}>
                 {renderSlot('ProductPricing', ProductPricing, {
@@ -264,7 +265,7 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
                 })}
               </Grid>
             )}
-            {/* Extension slots after ProductPricing (e.g. Resale) */}
+            {/* Extension slots after ProductPricing */}
             {afterSlots
               .filter(ext => (ext.targetSlot ?? ext.targetSection) === 'ProductPricing')
               .map(ext => ext.component && (
@@ -316,7 +317,6 @@ export default function ProductEditPage({ params }: { params: Promise<{ id: stri
           {snackbar.message}
         </Alert>
       </Snackbar>
-    </Box>
+    </>
   )
 }
-

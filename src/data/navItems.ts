@@ -1,6 +1,12 @@
 import type { MenuNode } from '@/types/menu'
 
-// Simplified navigation with refreshed icons
+/**
+ * Customer account navigation, grouped the way the back office groups its menu.
+ *
+ * Item ids are stable: extensions place their own entries against them
+ * (`applyNavExtensions` looks inside sections), and the account shell hangs its
+ * counts on `orders` and `inbox`.
+ */
 export const defaultNavItems: MenuNode[] = [
   {
     id: 'dashboard',
@@ -11,45 +17,76 @@ export const defaultNavItems: MenuNode[] = [
     activeMatch: 'exact'
   },
   {
-    id: 'orders',
-    label: 'My Orders',
-    i18nKey: 'nav.orders',
-    href: '/account/orders',
-    icon: 'tabler-shopping-cart'
+    type: 'section',
+    id: 'shopping',
+    label: 'Shopping',
+    i18nKey: 'nav.sections.shopping',
+    children: [
+      {
+        id: 'orders',
+        label: 'Orders',
+        i18nKey: 'nav.orders',
+        href: '/account/orders',
+        icon: 'tabler-shopping-cart'
+      },
+      {
+        id: 'returns',
+        label: 'Returns',
+        i18nKey: 'nav.returns',
+        href: '/account/returns',
+        icon: 'tabler-receipt-refund'
+      }
+    ]
   },
   {
-    id: 'addresses',
-    label: 'Addresses',
-    i18nKey: 'nav.addresses',
-    href: '/account/addresses',
-    icon: 'tabler-map-pin'
+    type: 'section',
+    id: 'account',
+    label: 'Account',
+    i18nKey: 'nav.sections.account',
+    children: [
+      {
+        id: 'addresses',
+        label: 'Addresses',
+        i18nKey: 'nav.addresses',
+        href: '/account/addresses',
+        icon: 'tabler-map-pin'
+      },
+      {
+        id: 'payments',
+        label: 'Payments',
+        i18nKey: 'nav.payments',
+        href: '/account/payments',
+        icon: 'tabler-credit-card'
+      },
+      {
+        id: 'settings',
+        label: 'Settings',
+        i18nKey: 'nav.settings',
+        href: '/account/settings',
+        icon: 'tabler-settings'
+      }
+    ]
   },
   {
-    id: 'payments',
-    label: 'Payments',
-    i18nKey: 'nav.payments',
-    href: '/account/payments',
-    icon: 'tabler-credit-card'
-  },
-  {
-    id: 'inbox',
-    label: 'Inbox',
-    i18nKey: 'nav.inbox',
-    href: '/account/alerts',
-    icon: 'tabler-mail'
-  },
-  {
-    id: 'support',
-    label: 'Customer Support',
-    i18nKey: 'nav.support',
-    href: '/account/support',
-    icon: 'tabler-headset'
-  },
-  {
-    id: 'settings',
-    label: 'Settings',
-    i18nKey: 'nav.settings',
-    href: '/account/settings',
-    icon: 'tabler-settings'
+    type: 'section',
+    id: 'help',
+    label: 'Help',
+    i18nKey: 'nav.sections.help',
+    children: [
+      {
+        id: 'inbox',
+        label: 'Inbox',
+        i18nKey: 'nav.inbox',
+        href: '/account/alerts',
+        icon: 'tabler-mail'
+      },
+      {
+        id: 'support',
+        label: 'Customer support',
+        i18nKey: 'nav.support',
+        href: '/account/support',
+        icon: 'tabler-headset'
+      }
+    ]
   }
 ]

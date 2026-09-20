@@ -272,10 +272,6 @@ const CategoriesTab = () => {
       <Card
         elevation={0}
         sx={{
-          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
-          border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: 2,
           width: '100%',
           display: 'flex',
           flexDirection: 'column',
@@ -292,11 +288,7 @@ const CategoriesTab = () => {
               sx={{
                 minWidth: 200,
                 flexGrow: { xs: 1, sm: 0 },
-                maxWidth: 320,
-                '& .MuiOutlinedInput-root': {
-                  borderRadius: 1.5,
-                  height: '38px'
-                }
+                maxWidth: 320
               }}
             />
             <Box
@@ -325,14 +317,6 @@ const CategoriesTab = () => {
                     {}
                   )
                 }
-                sx={{
-                  textTransform: 'none',
-                  fontWeight: 500,
-                  borderRadius: 1.5,
-                  boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-                  height: '38px',
-                  fontSize: '0.875rem'
-                }}
               >
                 {t('settings.web.categories.tab.actions.newCategory')}
               </Button>
@@ -348,9 +332,9 @@ const CategoriesTab = () => {
             '&::-webkit-scrollbar': { height: '8px' },
             '&::-webkit-scrollbar-track': { background: 'transparent' },
             '&::-webkit-scrollbar-thumb': {
-              background: 'rgba(0, 0, 0, 0.2)',
+              background: 'var(--mui-palette-divider)',
               borderRadius: '4px',
-              '&:hover': { background: 'rgba(0, 0, 0, 0.3)' }
+              '&:hover': { background: 'var(--mui-palette-action-disabled)' }
             }
           }}
         >
@@ -377,9 +361,7 @@ const CategoriesTab = () => {
               {displayRows.length === 0 ? (
                 <tr>
                   <td colSpan={7} align='center'>
-                    <Typography variant='body2' color='text.secondary'>
-                      {emptyMessage}
-                    </Typography>
+                    <Typography color='text.secondary'>{emptyMessage}</Typography>
                   </td>
                 </tr>
               ) : (
@@ -409,12 +391,12 @@ const CategoriesTab = () => {
                                 borderRadius: '50%',
                                 backgroundColor: item.color,
                                 mr: 1,
-                                border: '1px solid rgba(0,0,0,0.1)'
+                                border: '1px solid',
+                                borderColor: 'divider'
                               }}
                             />
                           )}
                           <Typography
-                            variant='body2'
                             className='cursor-pointer hover:text-primary'
                             onClick={() =>
                               handleActionClick(
@@ -434,24 +416,20 @@ const CategoriesTab = () => {
                         </Box>
                       </td>
                       <td>
-                        <Typography variant='body2' color='text.secondary'>
-                          {item.slug}
-                        </Typography>
+                        <Typography color='text.secondary'>{item.slug}</Typography>
                       </td>
                       <td>
                         {item.content_type_name ? (
                           <Chip label={item.content_type_name} size='small' variant='outlined' />
                         ) : (
-                          <Typography variant='body2' color='text.secondary'>
-                            -
-                          </Typography>
+                          <Typography color='text.secondary'>-</Typography>
                         )}
                       </td>
                       <td>
-                        <Typography variant='body2'>{item.language}</Typography>
+                        <Typography>{item.language}</Typography>
                       </td>
                       <td align='right'>
-                        <Typography variant='body2' sx={{ fontFamily: 'monospace' }}>
+                        <Typography sx={{ fontFamily: 'monospace' }}>
                           {item.order || 100}
                         </Typography>
                       </td>

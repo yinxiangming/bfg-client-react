@@ -21,6 +21,9 @@ interface Product {
   primary_image?: string
   images?: string[]
   is_new?: boolean
+  in_stock?: boolean
+  purchasable?: boolean
+  slug?: string | null
 }
 
 interface ProductGridSettings {
@@ -52,6 +55,9 @@ const transformProduct = (apiProduct: Product) => ({
     getMediaUrl(apiProduct.primary_image || (apiProduct.images && apiProduct.images[0]) || '') ||
     getStoreImageUrl('themes/PRS04099/assets/img/megnor/empty-cart.svg'),
   isNew: apiProduct.is_new || false,
+    inStock: apiProduct.in_stock ?? true,
+    purchasable: apiProduct.purchasable ?? true,
+  slug: apiProduct.slug ?? null,
 })
 
 export function ProductGridV1({
@@ -62,11 +68,23 @@ export function ProductGridV1({
   isEditing,
 }: BlockProps<ProductGridSettings, ProductGridData>) {
   const t = useTranslations('storefront')
-  const [products, setProducts] = useState<ReturnType<typeof transformProduct>[]>([])
-  const [loading, setLoading] = useState(true)
 
   const { columns = 4, limit = 8, showTitle = true, altBackground = false } = settings
   const { source = 'auto', productType = 'featured', title, emptyMessage } = data
+
+  // Seed from server-resolved data during render, not in an effect: effects do not run
+  // during SSR, so an effect-only path leaves a "loading" placeholder in the HTML that
+  // crawlers index instead of the products.
+  const seeded =
+    resolvedData && Array.isArray(resolvedData)
+      ? resolvedData.slice(0, limit).map(transformProduct)
+      : source === 'manual' && data.products
+        ? data.products.slice(0, limit).map(transformProduct)
+        : null
+  const [products, setProducts] = useState<ReturnType<typeof transformProduct>[]>(
+    () => seeded ?? []
+  )
+  const [loading, setLoading] = useState(seeded === null)
 
   // Use resolved data from server if available
   useEffect(() => {

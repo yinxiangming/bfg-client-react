@@ -5,22 +5,22 @@ import { useTranslations } from 'next-intl'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import Chip from '@mui/material/Chip'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import SchemaTable from '@/components/schema/SchemaTable'
+import StatusBadge from '@/components/schema/StatusBadge'
 import type { ListSchema, SchemaAction, SchemaFilter } from '@/types/schema'
-import { useApiData } from '@/hooks/useApiData'
+import { usePagedData } from '@/hooks/usePagedData'
 import {
-  getReviews,
+  getReviewsPage,
   approveReview,
   rejectReview,
   deleteReview,
-  type ProductReview as AdminProductReview,
-  type GetReviewsParams
+  type ProductReview as AdminProductReview
 } from '@/services/store'
 import { formatDate } from '@/utils/format'
 import { bfgApi } from '@/utils/api'
@@ -32,7 +32,7 @@ function renderStars(rating: number) {
       <i
         key={i}
         className={i < rating ? 'tabler-star-filled' : 'tabler-star'}
-        style={{ color: '#fbbf24', fontSize: '0.875rem' }}
+        style={{ color: 'var(--mui-palette-warning-main)', fontSize: '0.875rem' }}
       />
     )
   }
@@ -48,15 +48,41 @@ function buildReviewsSchema(
     columns: [
       {
         field: 'product_name',
+        width: 220,
         label: t('reviews.listPage.schema.columns.product'),
         type: 'string',
         sortable: true
       },
       {
         field: 'customer_name',
+        width: 150,
         label: t('reviews.listPage.schema.columns.customer'),
         type: 'string',
         sortable: true
+      },
+      {
+        field: 'is_approved',
+        label: t('reviews.listPage.schema.columns.status'),
+        type: 'select',
+        sortable: true,
+        render: (value: boolean, row: AdminProductReview) => {
+          const approved = !!value
+          const label = approved ? t('reviews.status.approved') : t('reviews.status.pending')
+          const badge = <StatusBadge label={label} color={approved ? 'success' : 'warning'} />
+          if (approved) return badge
+          return (
+            <Box
+              component='span'
+              onClick={(e: React.MouseEvent) => {
+                e.stopPropagation()
+                opts.onApprove(row)
+              }}
+              sx={{ cursor: 'pointer' }}
+            >
+              {badge}
+            </Box>
+          )
+        }
       },
       {
         field: 'rating',
@@ -74,6 +100,7 @@ function buildReviewsSchema(
       },
       {
         field: 'title',
+        width: 260,
         label: t('reviews.listPage.schema.columns.title'),
         type: 'string',
         link: 'view',
@@ -81,32 +108,6 @@ function buildReviewsSchema(
           const text = value || row.comment || '-'
           const truncated = typeof text === 'string' && text.length > 60 ? text.slice(0, 60) + '…' : text
           return truncated
-        }
-      },
-      {
-        field: 'is_approved',
-        label: t('reviews.listPage.schema.columns.status'),
-        type: 'select',
-        sortable: true,
-        render: (value: boolean, row: AdminProductReview) => {
-          const approved = !!value
-          return (
-            <Chip
-              size='small'
-              label={approved ? t('reviews.status.approved') : t('reviews.status.pending')}
-              color={approved ? 'success' : 'warning'}
-              variant='filled'
-              onClick={
-                approved
-                  ? undefined
-                  : (e: React.MouseEvent) => {
-                      e.stopPropagation()
-                      opts.onApprove(row)
-                    }
-                  }
-              style={approved ? undefined : { cursor: 'pointer' }}
-            />
-          )
         }
       },
       {
@@ -124,7 +125,7 @@ function buildReviewsSchema(
         type: 'select',
         filterMode: 'api',
         optionsSource: 'api',
-        optionsApi: bfgApi.products(),
+        optionsApi: bfgApi.adminProducts(),
         optionsValueField: 'id',
         optionsLabelField: 'name'
       },
@@ -177,10 +178,15 @@ export default function ReviewsPage() {
   const [apiFilters, setApiFilters] = useState<Record<string, string>>({})
   const [selectedReview, setSelectedReview] = useState<AdminProductReview | null>(null)
 
-  const { data: reviews, loading, error, refetch } = useApiData<AdminProductReview[]>({
-    fetchFn: useCallback(() => getReviews(apiFilters as GetReviewsParams), [apiFilters]),
-    deps: [JSON.stringify(apiFilters)]
-  })
+  const extraParams = useMemo(() => ({ ...apiFilters }), [apiFilters])
+  const {
+    items: reviews,
+    loading,
+    error,
+    serverPagination,
+    onSearchChange,
+    refetch,
+  } = usePagedData<AdminProductReview, Record<string, string>>(getReviewsPage, { extraParams })
 
   const handleApprove = useCallback(
     async (row: AdminProductReview) => {
@@ -237,9 +243,7 @@ export default function ReviewsPage() {
 
   return (
     <Box>
-      <Typography variant='h4' sx={{ mb: 4 }}>
-        {t('reviews.listPage.title')}
-      </Typography>
+      <AdminPageHeader title={t('reviews.listPage.title')} subtitle={t('reviews.listPage.subtitle')} />
       {error && (
         <Alert severity='error' sx={{ mb: 2 }}>
           {error}
@@ -252,6 +256,8 @@ export default function ReviewsPage() {
         onActionClick={handleActionClick}
         filters={apiFilters}
         onFiltersChange={setApiFilters}
+        serverPagination={serverPagination}
+        onSearchChange={onSearchChange}
       />
 
       <Dialog open={!!selectedReview} onClose={() => setSelectedReview(null)} maxWidth='sm' fullWidth>
@@ -270,7 +276,7 @@ export default function ReviewsPage() {
               {selectedReview.title && (
                 <Typography variant='subtitle2'>{selectedReview.title}</Typography>
               )}
-              <Typography variant='body1' sx={{ whiteSpace: 'pre-wrap' }}>
+              <Typography variant='body2' sx={{ whiteSpace: 'pre-wrap' }}>
                 {selectedReview.comment || '-'}
               </Typography>
             </Box>

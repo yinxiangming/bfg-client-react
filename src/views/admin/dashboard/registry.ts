@@ -10,6 +10,7 @@ import type {
   BlockRegistryEntry,
 } from '@/views/common/blocks'
 import { coreDashboardBlocks } from './blocks/store'
+import { systemDashboardBlocks } from './blocks/system'
 
 const registry = new Map<string, BlockRegistryEntry>()
 const definitions: BlockDefinition[] = []
@@ -24,6 +25,7 @@ export function buildDashboardBlockRegistry(extensions: Extension[]): void {
   registry.clear()
   definitions.length = 0
 
+  systemDashboardBlocks.forEach(registerEntry)
   coreDashboardBlocks.forEach(registerEntry)
   extensions.forEach((ext) => {
     ;(ext.dashboardBlocks || []).forEach(registerEntry)

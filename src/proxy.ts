@@ -1,27 +1,22 @@
 import { NextRequest, NextResponse } from 'next/server'
-
-const MOBILE_UA = /Mobi|Android|iPhone|iPad/i
+import { isIndexableHost } from '@/utils/indexable'
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  if (pathname.startsWith('/admin')) {
-    const isMobile = MOBILE_UA.test(request.headers.get('user-agent') ?? '')
-
-    if (isMobile && !pathname.startsWith('/admin/m')) {
-      return NextResponse.redirect(new URL('/admin/m', request.url))
-    }
-
-    if (!isMobile && pathname.startsWith('/admin/m')) {
-      return NextResponse.redirect(new URL('/admin', request.url))
-    }
-  }
-
   const requestHeaders = new Headers(request.headers)
   requestHeaders.set('x-pathname', pathname)
-  return NextResponse.next({
+  const response = NextResponse.next({
     request: { headers: requestHeaders },
   })
+
+  // Belt and braces alongside robots.txt. Disallow only asks a crawler not to fetch;
+  // this is the header that actually keeps a URL out of an index, and it still
+  // reaches crawlers that skip robots.txt or already hold the URL.
+  if (!isIndexableHost(request.headers.get('x-forwarded-host') || request.headers.get('host'))) {
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow')
+  }
+  return response
 }
 
 export const config = {

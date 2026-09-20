@@ -20,7 +20,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Divider from '@mui/material/Divider'
 
 // API Imports
-import { getCustomerAddresses, createAddress, updateAddress, type Address } from '@/services/store'
+import { getCustomerAddresses, getWorkspaceAddresses, createAddress, updateAddress, type Address } from '@/services/store'
 import { meApi } from '@/utils/meApi'
 
 // Address autocomplete (Google Places)
@@ -36,6 +36,8 @@ type AddressSelectModalProps = {
   customerId?: number
   currentAddressId?: number
   allowCreate?: boolean
+  /** `workspace`: the workspace's own addresses (stores, brands) instead of one customer's. */
+  scope?: 'customer' | 'workspace'
 }
 
 const AddressSelectModal = ({
@@ -44,7 +46,8 @@ const AddressSelectModal = ({
   onSelect,
   customerId,
   currentAddressId,
-  allowCreate = true
+  allowCreate = true,
+  scope = 'customer'
 }: AddressSelectModalProps) => {
   const [addresses, setAddresses] = useState<Address[]>([])
   const [selectedAddressId, setSelectedAddressId] = useState<number | null>(currentAddressId || null)
@@ -66,10 +69,10 @@ const AddressSelectModal = ({
   })
 
   useEffect(() => {
-    if (open && customerId) {
+    if (open && (customerId || scope === 'workspace')) {
       fetchAddresses()
     }
-  }, [open, customerId])
+  }, [open, customerId, scope])
 
   useEffect(() => {
     if (open) {
@@ -80,12 +83,12 @@ const AddressSelectModal = ({
   }, [open, currentAddressId])
 
   const fetchAddresses = async () => {
-    if (!customerId) return
+    if (scope !== 'workspace' && !customerId) return
 
     setLoading(true)
     setError(null)
     try {
-      const data = await getCustomerAddresses(customerId)
+      const data = scope === 'workspace' ? await getWorkspaceAddresses() : await getCustomerAddresses(customerId!)
       setAddresses(data)
     } catch (err: any) {
       console.error('Failed to fetch addresses', err)
@@ -171,16 +174,16 @@ const AddressSelectModal = ({
   }
 
   const handleCreateAddress = async () => {
-    if (!customerId) return
+    if (scope !== 'workspace' && !customerId) return
 
     setLoading(true)
     setError(null)
     try {
-      // Create address via meApi (which will associate it with the customer)
-      const created = await meApi.createAddress({
+      const addressData = {
         full_name: newAddress.full_name || '',
         phone: newAddress.phone || '',
         email: newAddress.email,
+        company: newAddress.company,
         address_line1: newAddress.address_line1 || '',
         address_line2: newAddress.address_line2,
         city: newAddress.city || '',
@@ -188,7 +191,10 @@ const AddressSelectModal = ({
         postal_code: newAddress.postal_code || '',
         country: newAddress.country || '',
         is_default: false
-      })
+      }
+      // A workspace address belongs to no customer; meApi links a customer's to them.
+      const created =
+        scope === 'workspace' ? await createAddress(addressData) : await meApi.createAddress(addressData)
 
       // Refresh addresses list
       await fetchAddresses()
@@ -318,7 +324,7 @@ const AddressSelectModal = ({
                   </FormControl>
                 ) : (
                   <Typography color='text.secondary' sx={{ mb: 2 }}>
-                    No addresses found for this customer.
+                    {scope === 'workspace' ? 'No saved addresses yet.' : 'No addresses found for this customer.'}
                   </Typography>
                 )}
 

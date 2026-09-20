@@ -15,6 +15,8 @@ import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
 import Alert from '@mui/material/Alert'
 import Chip from '@mui/material/Chip'
+import Checkbox from '@mui/material/Checkbox'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import IconButton from '@mui/material/IconButton'
 import Grid from '@mui/material/Grid'
 import Dialog from '@mui/material/Dialog'
@@ -165,17 +167,20 @@ const StripeCardForm = ({
             {error}
           </Alert>
         )}
-        <Grid container spacing={4}>
+        <Grid container spacing={2}>
           <Grid size={{ xs: 12 }}>
             <Typography variant='body2' color='text.secondary' sx={{ mb: 1 }}>
               {t('customers.paymentMethods.addDialog.fields.cardDetails')}
             </Typography>
             <Box
               sx={{
-                border: '1px solid #ccc',
+                // Colour stays inside the shorthand: a bare '1px solid' resolves
+                // to currentColor and goes near-black in light, invisible in dark.
+                border: '1px solid',
+                borderColor: 'divider',
                 borderRadius: 1,
                 p: 2,
-                '&:hover': { borderColor: '#999' },
+                '&:hover': { borderColor: 'action.active' },
                 '&:focus-within': { borderColor: 'primary.main', borderWidth: 2 }
               }}
             >
@@ -197,18 +202,17 @@ const StripeCardForm = ({
           </Grid>
           
           <Grid size={{ xs: 12 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <input
-                type='checkbox'
-                id='is_default'
-                checked={isDefault}
-                onChange={e => setIsDefault(e.target.checked)}
-                style={{ marginRight: '8px' }}
-              />
-              <label htmlFor='is_default'>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={isDefault}
+                  onChange={e => setIsDefault(e.target.checked)}
+                />
+              }
+              label={
                 <Typography variant='body2'>{t('customers.paymentMethods.addDialog.fields.setAsDefault')}</Typography>
-              </label>
-            </Box>
+              }
+            />
           </Grid>
           
           {/* Security Notice */}
@@ -438,7 +442,7 @@ const CustomerPaymentMethods = ({ customerId, onUpdate }: CustomerPaymentMethods
     <Card>
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
-          <Typography variant='h6'>
+          <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600 }}>
             {t('customers.paymentMethods.title', { count: paymentMethods.length })}
           </Typography>
           <Button
@@ -477,32 +481,25 @@ const CustomerPaymentMethods = ({ customerId, onUpdate }: CustomerPaymentMethods
             {paymentMethods.map((method) => (
               <Grid size={{ xs: 12, sm: 6, md: 6 }} key={method.id}>
                 <Card
-                  variant='outlined'
                   sx={{
                     border: method.is_default ? 2 : 1,
                     borderColor: method.is_default ? 'primary.main' : 'divider',
                     height: '100%',
-                    position: 'relative',
-                    borderRadius: 2,
-                    transition: 'all 0.2s ease-in-out',
-                    '&:hover': {
-                      boxShadow: 2,
-                      transform: 'translateY(-2px)'
-                    }
+                    position: 'relative'
                   }}
                 >
-                  <CardContent sx={{ p: 3 }}>
+                  <CardContent>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
                       <Box sx={{ flex: 1, minWidth: 0 }}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
-                          <Typography variant='h6' sx={{ textTransform: 'capitalize' }}>
+                          <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, textTransform: 'capitalize' }}>
                             {method.brand || method.type || t('customers.paymentMethods.values.card')}
                           </Typography>
                           {method.is_default && (
                             <Chip label={t('customers.paymentMethods.values.default')} size='small' color='primary' />
                           )}
                         </Box>
-                        <Typography variant='body1' sx={{ mb: 1, fontFamily: 'monospace', fontWeight: 600, fontSize: '1.1rem' }}>
+                        <Typography sx={{ mb: 1, fontFamily: 'var(--at-font-num, ui-monospace, SFMono-Regular, monospace)', fontWeight: 600, fontSize: '0.9375rem' }}>
                           •••• {method.last4 || '****'}
                         </Typography>
                         {method.expiry_month && method.expiry_year && (

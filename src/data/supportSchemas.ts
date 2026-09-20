@@ -14,11 +14,11 @@ export function buildTicketsSchema(t: SupportTranslation, supportOptions: Suppor
   const list: ListSchema = {
     title: t('support.tickets.page.title'),
     columns: [
-      { field: 'ticket_number', label: t('support.tickets.schema.columns.ticketNumber'), type: 'string', sortable: true, link: 'edit' },
-      { field: 'subject', label: t('support.tickets.schema.columns.subject'), type: 'string', sortable: true },
+      { field: 'subject', label: t('support.tickets.schema.columns.subject'), type: 'string', sortable: true, link: 'edit' },
+      { field: 'ticket_number', label: t('support.tickets.schema.columns.ticketNumber'), type: 'string', sortable: true },
       { field: 'customer_name', label: t('support.tickets.schema.columns.customer'), type: 'string', sortable: true },
-      { field: 'priority_name', label: t('support.tickets.schema.columns.priority'), type: 'string', sortable: true },
       { field: 'status', label: t('support.tickets.schema.columns.status'), type: 'select', sortable: true, options: statusOptions },
+      { field: 'priority_name', label: t('support.tickets.schema.columns.priority'), type: 'string', sortable: true },
       { field: 'assigned_to_name', label: t('support.tickets.schema.columns.assignedTo'), type: 'string' },
       { field: 'created_at', label: t('support.tickets.schema.columns.createdAt'), type: 'datetime', sortable: true }
     ],

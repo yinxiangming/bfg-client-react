@@ -2,25 +2,21 @@
 
 // React Imports
 import { useState, useEffect } from 'react'
-import type { ChangeEvent, SyntheticEvent, FormEvent } from 'react'
+import type { ChangeEvent, SyntheticEvent, FormEvent, ReactNode } from 'react'
 
 // i18n Imports
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 // MUI Imports
 import Grid from '@mui/material/Grid'
 import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import MenuItem from '@mui/material/MenuItem'
-import Tab from '@mui/material/Tab'
-import TabContext from '@mui/lab/TabContext'
 import TabPanel from '@mui/lab/TabPanel'
 import CircularProgress from '@mui/material/CircularProgress'
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
-import Tooltip from '@mui/material/Tooltip'
 import Popover from '@mui/material/Popover'
 import Alert from '@mui/material/Alert'
 import Snackbar from '@mui/material/Snackbar'
@@ -28,19 +24,32 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import Checkbox from '@mui/material/Checkbox'
 
 // Component Imports
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import CustomTextField from '@/components/ui/TextField'
-import CustomTabList from '@/components/ui/TabList'
+import {
+  SettingsSection,
+  ReadOnlyField,
+  SettingsActionBar
+} from '@/components/admin/settings/SettingsSection'
+import { SettingsCard, flushPanelSx } from '@/components/admin/settings/SettingsTabsPage'
 import UsersListTable from './UsersListTable'
 import RolesListTable from './RolesListTable'
 import EmailTab from './EmailTab'
+import SocialLoginTab from './SocialLoginTab'
 import APIKeysTab from './APIKeysTab'
+import VersionsTab from './VersionsTab'
+import PluginsTab from './PluginsTab'
 import {
   getWorkspaceSettings,
   updateGeneralSettings,
   updateStorefrontUiSettings,
   updateShopSettings,
+  updateAnalyticsSettings,
   fetchWorkspaceRecord,
   patchWorkspaceRecord,
+  getCountries,
+  updateCountry,
+  type CountryOption,
   type GeneralSettingsPayload,
   type StorefrontUiSettingsPayload,
   type StorefrontHeaderOptionsPayload,
@@ -51,6 +60,7 @@ import { clearStorefrontConfigCache } from '@/utils/storefrontConfig'
 import { THEME_METADATA, THEME_REGISTRY } from '@/components/storefront/themes/registry.generated'
 import { bfgApi } from '@/utils/api'
 import { usePageSlots } from '@/extensions/hooks/usePageSections'
+import { useTabQueryParam } from '@/hooks/useTabQueryParam'
 
 const THEME_IDS = Object.keys(THEME_REGISTRY).sort()
 function themeDisplayName(themeId: string): string {
@@ -65,6 +75,7 @@ type BasicData = {
   siteName: string
   siteDescription: string
   workspaceNote: string
+  country: string
   defaultLanguage: string
   defaultCurrency: string
   defaultTimezone: string
@@ -84,17 +95,34 @@ const defaultHeaderOptions: StorefrontHeaderOptionsPayload = {
   show_cart: true,
   show_language_switcher: true,
   show_style_selector: true,
-  show_login: true
+  show_login: true,
+  show_register: false
 }
+
+type ColorMode = 'light' | 'dark'
 
 type StorefrontUiData = {
   theme: string
   header_options: StorefrontHeaderOptionsPayload
+  allowed_color_modes: ColorMode[]
+  default_color_mode: 'light' | 'dark' | 'system'
 }
+
+const ALL_COLOR_MODES: ColorMode[] = ['light', 'dark']
 
 const initialStorefrontUi: StorefrontUiData = {
   theme: THEME_IDS[0] ?? 'store',
-  header_options: { ...defaultHeaderOptions }
+  header_options: { ...defaultHeaderOptions },
+  allowed_color_modes: [...ALL_COLOR_MODES],
+  default_color_mode: 'system'
+}
+
+type AnalyticsData = {
+  google_analytics_id: string
+}
+
+const initialAnalyticsData: AnalyticsData = {
+  google_analytics_id: ''
 }
 
 type ShopData = {
@@ -113,6 +141,7 @@ const initialBasicData: BasicData = {
   siteName: '',
   siteDescription: '',
   workspaceNote: '',
+  country: '',
   defaultLanguage: 'en',
   defaultCurrency: 'NZD',
   defaultTimezone: 'Pacific/Auckland',
@@ -167,12 +196,76 @@ function FieldHelperTip({ helperText, ariaLabel }: FieldHelperTipProps) {
   )
 }
 
+/** Rail entries. Labels resolve per render; ids and icons are static. */
+const TAB_RAIL_ITEMS = [
+  { value: 'workspace', icon: 'tabler-building', labelKey: 'settings.general.page.tabs.workspace' },
+  { value: 'storefront', icon: 'tabler-layout-dashboard', labelKey: 'settings.general.page.tabs.storefront' },
+  { value: 'users', icon: 'tabler-users', labelKey: 'settings.general.page.tabs.users' },
+  { value: 'roles', icon: 'tabler-shield', labelKey: 'settings.general.page.tabs.roles' },
+  { value: 'email', icon: 'tabler-mail', labelKey: 'settings.general.page.tabs.email' },
+  { value: 'social-login', icon: 'tabler-brand-google', labelKey: 'settings.general.page.tabs.socialLogin' },
+  { value: 'api-keys', icon: 'tabler-key', labelKey: 'settings.general.page.tabs.apiKeys' },
+  { value: 'plugins', icon: 'tabler-plug', labelKey: 'settings.general.page.tabs.plugins' },
+  { value: 'versions', icon: 'tabler-tag', labelKey: 'settings.general.page.tabs.versions' }
+]
+
+/** Every branding preview occupies the same square, whatever its art measures. */
+const ASSET_PREVIEW_SIZE = 120
+
+/**
+ * One branding asset: a fixed-width preview, then its controls and help text.
+ *
+ * The gutter is the same width for every row — the favicon's art is half the size
+ * of the logo's, but its tile is not. Sizing each preview to its own content is
+ * what left three sets of buttons starting at three different x positions, which
+ * reads as three unrelated widgets rather than one branding block. Declared at
+ * module scope rather than inside the page so a re-render does not remount the
+ * rows and wipe the file inputs they contain.
+ */
+const AssetRow = ({ preview, children }: { preview: ReactNode; children: ReactNode }) => (
+  <Box
+    sx={{
+      display: 'flex',
+      flexDirection: { xs: 'column', sm: 'row' },
+      alignItems: 'flex-start',
+      gap: 4,
+      mb: 5
+    }}
+  >
+    <Box sx={{ width: ASSET_PREVIEW_SIZE, flexShrink: 0 }}>{preview}</Box>
+    <Box sx={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 2 }}>{children}</Box>
+  </Box>
+)
+
+/** The square a preview sits in: same size everywhere, art centred and never cropped. */
+const assetTileSx = (background?: string) => ({
+  height: ASSET_PREVIEW_SIZE,
+  width: ASSET_PREVIEW_SIZE,
+  borderRadius: 1,
+  border: '1px solid var(--mui-palette-divider)',
+  backgroundColor: background,
+  display: 'flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+  overflow: 'hidden'
+})
+
 const GeneralSettingsPage = () => {
   const t = useTranslations('admin')
+  const locale = useLocale()
   const { beforeSlots, afterSlots } = usePageSlots('admin/settings/general')
   // States
-  const [activeTab, setActiveTab] = useState('workspace')
+  const [activeTab, setActiveTab] = useTabQueryParam(
+    TAB_RAIL_ITEMS.map(item => item.value),
+    'workspace'
+  )
+  const TAB_RAIL = TAB_RAIL_ITEMS.map(item => ({
+    value: item.value,
+    icon: item.icon,
+    label: t(item.labelKey)
+  }))
   const [basicData, setBasicData] = useState<BasicData>(initialBasicData)
+  const [countries, setCountries] = useState<CountryOption[]>([])
   const [fileInput, setFileInput] = useState<string>('')
   const [imgSrc, setImgSrc] = useState<string>(DEFAULT_AVATAR)
   const [loading, setLoading] = useState(true)
@@ -182,6 +275,23 @@ const GeneralSettingsPage = () => {
   const [settingsId, setSettingsId] = useState<number | null>(null)
   const [storefrontUi, setStorefrontUi] = useState<StorefrontUiData>(initialStorefrontUi)
   const [shopData, setShopData] = useState<ShopData>(initialShopData)
+  const [analyticsData, setAnalyticsData] = useState<AnalyticsData>(initialAnalyticsData)
+  /**
+   * The logo value as it should be persisted: a data URL, or '' for "no logo".
+   * Kept apart from `imgSrc`, which falls back to a placeholder image that must
+   * never be saved, and from `fileInput`, which only holds a *freshly picked*
+   * file and is cleared after every save.
+   */
+  const [logoValue, setLogoValue] = useState<string>('')
+  /**
+   * The dark-surface logo, same value semantics as `logoValue` — doubles as the
+   * preview src. Empty means "no separate dark logo", and the storefront falls
+   * back to the light one, which is what every workspace had before this field.
+   */
+  const [logoDarkValue, setLogoDarkValue] = useState<string>('')
+  /** Favicon, same value semantics as `logoValue` — doubles as the preview src. */
+  const [faviconSrc, setFaviconSrc] = useState<string>('')
+  const [showNameWithLogo, setShowNameWithLogo] = useState(false)
   const [currencies, setCurrencies] = useState<Currency[]>([])
   const [workspaceId, setWorkspaceId] = useState<number | null>(null)
   const [workspaceOrgName, setWorkspaceOrgName] = useState('')
@@ -213,7 +323,14 @@ const GeneralSettingsPage = () => {
     site_announcement: basicData.siteAnnouncement,
     footer_contact: basicData.footerContact,
     workspace_note: workspaceNote,
-    logo: fileInput || undefined
+    // Always an explicit string. `undefined` would be dropped by JSON.stringify,
+    // and since the PATCH replaces custom_settings.general wholesale, a missing
+    // key erases the stored logo — which is how saving this form for any other
+    // reason (a GA4 id, a footer tweak) used to wipe the workspace's logo.
+    logo: logoValue,
+    logo_dark: logoDarkValue,
+    favicon: faviconSrc,
+    show_site_name_with_logo: showNameWithLogo
   })
 
   const startAdminIdentityEdit = () => {
@@ -302,6 +419,7 @@ const GeneralSettingsPage = () => {
       reader.onload = () => {
         setImgSrc(reader.result as string)
         setFileInput(reader.result as string)
+        setLogoValue(reader.result as string)
       }
       reader.readAsDataURL(files[0])
     }
@@ -316,8 +434,45 @@ const GeneralSettingsPage = () => {
 
   const handleFileInputReset = () => {
     setFileInput('')
+    setLogoValue('')
     setImgSrc(DEFAULT_AVATAR)
     clearLogoFileInputs()
+  }
+
+  const handleLogoDarkInputChange = (event: ChangeEvent) => {
+    const reader = new FileReader()
+    const { files } = event.target as HTMLInputElement
+
+    if (files && files.length !== 0) {
+      reader.onload = () => {
+        setLogoDarkValue(reader.result as string)
+      }
+      reader.readAsDataURL(files[0])
+    }
+  }
+
+  const handleLogoDarkReset = () => {
+    setLogoDarkValue('')
+    const el = document.getElementById('general-settings-upload-logo-dark') as HTMLInputElement | null
+    if (el) el.value = ''
+  }
+
+  const handleFaviconInputChange = (event: ChangeEvent) => {
+    const reader = new FileReader()
+    const { files } = event.target as HTMLInputElement
+
+    if (files && files.length !== 0) {
+      reader.onload = () => {
+        setFaviconSrc(reader.result as string)
+      }
+      reader.readAsDataURL(files[0])
+    }
+  }
+
+  const handleFaviconReset = () => {
+    setFaviconSrc('')
+    const el = document.getElementById('general-settings-upload-favicon') as HTMLInputElement | null
+    if (el) el.value = ''
   }
 
   // Load initial data
@@ -326,9 +481,13 @@ const GeneralSettingsPage = () => {
       try {
         setLoading(true)
         console.log('[GeneralSettings] Loading settings...')
-        const [settings, currenciesData, workspace] = await Promise.all([
+        const [settings, currenciesData, countriesData, workspace] = await Promise.all([
           getWorkspaceSettings(),
-          getCurrencies(),
+          // The default can only be one of the currencies the shop offers.
+          getCurrencies({ enabled: true }),
+          // Reference data, and the endpoint is cheap; a failure here must not
+          // block the whole settings page from rendering.
+          getCountries().catch(() => [] as CountryOption[]),
           fetchWorkspaceRecord()
         ])
         if (workspace) {
@@ -340,6 +499,7 @@ const GeneralSettingsPage = () => {
         }
         const activeCurrencies = currenciesData.filter(c => c.is_active)
         setCurrencies(activeCurrencies)
+        setCountries(countriesData)
         console.log('[GeneralSettings] Settings loaded:', settings)
         setSettingsId(settings.id)
         console.log('[GeneralSettings] Settings ID set to:', settings.id)
@@ -347,9 +507,24 @@ const GeneralSettingsPage = () => {
         const storefront_ui = (settings.custom_settings as any)?.storefront_ui || {}
         if (storefront_ui && Object.keys(storefront_ui).length > 0) {
           const themeId = storefront_ui.theme ?? 'store'
+          const rawModes = Array.isArray(storefront_ui.allowed_color_modes)
+            ? (storefront_ui.allowed_color_modes as unknown[]).filter(
+                (m): m is ColorMode => m === 'light' || m === 'dark'
+              )
+            : []
+          const allowedColorModes: ColorMode[] = rawModes.length > 0 ? Array.from(new Set(rawModes)) as ColorMode[] : [...ALL_COLOR_MODES]
+          const rawDefault = storefront_ui.default_color_mode
+          const defaultColorMode: 'light' | 'dark' | 'system' =
+            rawDefault === 'light' || rawDefault === 'dark' || rawDefault === 'system'
+              ? rawDefault
+              : allowedColorModes.length === 1
+              ? allowedColorModes[0]
+              : 'system'
           setStorefrontUi({
             theme: THEME_IDS.includes(themeId) ? themeId : THEME_IDS[0] ?? 'store',
-            header_options: { ...defaultHeaderOptions, ...(storefront_ui.header_options || {}) }
+            header_options: { ...defaultHeaderOptions, ...(storefront_ui.header_options || {}) },
+            allowed_color_modes: allowedColorModes,
+            default_color_mode: defaultColorMode
           })
         }
 
@@ -359,6 +534,11 @@ const GeneralSettingsPage = () => {
           sku_prefix: shop.product_identifiers?.sku_prefix ?? initialShopData.sku_prefix,
           barcode_prefix: shop.product_identifiers?.barcode_prefix ?? initialShopData.barcode_prefix
         })
+        const analytics = (settings.custom_settings as any)?.analytics || {}
+        setAnalyticsData({
+          google_analytics_id: analytics.google_analytics_id ?? initialAnalyticsData.google_analytics_id
+        })
+
         const general = (settings.custom_settings as any)?.general || {}
         if (general || (settings as any).site_name != null || (settings as any).site_description != null) {
           setBasicData({
@@ -371,6 +551,7 @@ const GeneralSettingsPage = () => {
               return found ? saved : (activeCurrencies[0]?.code ?? saved)
             })(),
             defaultTimezone: general.default_timezone || (settings as any).default_timezone || initialBasicData.defaultTimezone,
+            country: settings.country || initialBasicData.country,
             contactEmail: general.contact_email || (settings as any).contact_email || initialBasicData.contactEmail,
             contactPhone: general.contact_phone || (settings as any).contact_phone || initialBasicData.contactPhone,
             facebookUrl: general.facebook_url || (settings as any).facebook_url || initialBasicData.facebookUrl,
@@ -386,7 +567,17 @@ const GeneralSettingsPage = () => {
           const logoUrl = general.logo || (settings as any).logo
           if (logoUrl) {
             setImgSrc(logoUrl)
+            setLogoValue(logoUrl)
           }
+          // No model field to fall back to — the dark variant lives only here.
+          if (general.logo_dark) {
+            setLogoDarkValue(general.logo_dark)
+          }
+          const faviconUrl = general.favicon || (settings as any).favicon
+          if (faviconUrl) {
+            setFaviconSrc(faviconUrl)
+          }
+          setShowNameWithLogo(Boolean(general.show_site_name_with_logo))
         } else {
           console.log('[GeneralSettings] No general settings found, using defaults')
         }
@@ -474,7 +665,9 @@ const GeneralSettingsPage = () => {
 
       const storefrontPayload: StorefrontUiSettingsPayload = {
         theme: storefrontUi.theme || undefined,
-        header_options: storefrontUi.header_options
+        header_options: storefrontUi.header_options,
+        allowed_color_modes: storefrontUi.allowed_color_modes,
+        default_color_mode: storefrontUi.default_color_mode
       }
       await updateStorefrontUiSettings(currentSettingsId, storefrontPayload)
 
@@ -486,6 +679,14 @@ const GeneralSettingsPage = () => {
         }
       }
       await updateShopSettings(currentSettingsId, shopPayload)
+
+      await updateAnalyticsSettings(currentSettingsId, {
+        google_analytics_id: analyticsData.google_analytics_id.trim()
+      })
+
+      // Its own PATCH: `country` is a Settings column, not a key inside
+      // custom_settings.general, so it cannot ride along on the payload above.
+      await updateCountry(currentSettingsId, basicData.country)
 
       console.log('[GeneralSettings] Save successful')
       clearStorefrontConfigCache()
@@ -516,14 +717,11 @@ const GeneralSettingsPage = () => {
     <Grid container spacing={3}>
       {/* Page Header */}
       <Grid size={{ xs: 12 }}>
-        <div>
-          <Typography variant='h4' sx={{ mb: 1 }}>
-            {t('settings.general.page.title')}
-          </Typography>
-          <Typography variant='body2' color='text.secondary'>
-            {t('settings.general.page.subtitle')}
-          </Typography>
-        </div>
+        <AdminPageHeader
+          flush
+          title={t('settings.general.page.title')}
+          subtitle={t('settings.general.page.subtitle')}
+        />
       </Grid>
 
       {error && (
@@ -544,664 +742,882 @@ const GeneralSettingsPage = () => {
       )}
 
       <Grid size={{ xs: 12 }}>
-        <Card>
-          <TabContext value={activeTab}>
-            <CardContent>
-              <CustomTabList onChange={handleTabChange} variant='scrollable' pill='true'>
-                <Tab label={t('settings.general.page.tabs.workspace')} icon={<i className='tabler-building' />} iconPosition='start' value='workspace' />
-                <Tab label={t('settings.general.page.tabs.storefront')} icon={<i className='tabler-layout-dashboard' />} iconPosition='start' value='storefront' />
-                <Tab label={t('settings.general.page.tabs.users')} icon={<i className='tabler-users' />} iconPosition='start' value='users' />
-                <Tab label={t('settings.general.page.tabs.roles')} icon={<i className='tabler-shield' />} iconPosition='start' value='roles' />
-                <Tab label={t('settings.general.page.tabs.email')} icon={<i className='tabler-mail' />} iconPosition='start' value='email' />
-                <Tab label={t('settings.general.page.tabs.apiKeys')} icon={<i className='tabler-key' />} iconPosition='start' value='api-keys' />
-              </CustomTabList>
-            </CardContent>
+        <SettingsCard activeTab={activeTab} tabs={TAB_RAIL} onTabChange={handleTabChange}>
 
             {/* Workspace: tenant identity, defaults, shop toggles */}
-            <TabPanel value='workspace' className='p-0'>
-              <CardContent>
-                <form onSubmit={handleSubmit}>
-                  <Card variant='outlined' sx={{ mb: 6 }}>
-                    <CardContent>
-                      <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                        {!adminIdentityEditing && (
-                          <Tooltip title={t('common.actions.edit')}>
-                            <span>
-                              <IconButton
-                                size='small'
-                                onClick={startAdminIdentityEdit}
-                                aria-label={t('common.actions.edit')}
-                              >
-                                <i className='tabler-edit' />
-                              </IconButton>
-                            </span>
-                          </Tooltip>
-                        )}
-                      </Box>
+            <TabPanel value='workspace' sx={flushPanelSx}>
+              <form onSubmit={handleSubmit}>
+                <SettingsSection
+                  title={t('settings.general.basic.sections.localization')}
+                  description={t('settings.general.basic.sectionHints.localization')}
+                >
+                  <Grid container spacing={4}>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <CustomTextField
+                        select
+                        fullWidth
+                        label={t('settings.general.basic.fields.country.label')}
+                        helperText={t('settings.general.basic.fields.country.helper')}
+                        value={countries.some(c => c.code === basicData.country) ? basicData.country : ''}
+                        onChange={e => handleBasicChange('country', e.target.value)}
+                        slotProps={{
+                          select: { MenuProps: { PaperProps: { style: { maxHeight: 320 } } } }
+                        }}
+                      >
+                        {countries.map(c => (
+                          <MenuItem key={c.code} value={c.code}>
+                            {locale.startsWith('zh') ? c.name_zh || c.name : c.name}
+                          </MenuItem>
+                        ))}
+                      </CustomTextField>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <CustomTextField
+                        select
+                        fullWidth
+                        label={t('settings.general.basic.fields.defaultLanguage.label')}
+                        value={basicData.defaultLanguage}
+                        onChange={e => handleBasicChange('defaultLanguage', e.target.value)}
+                      >
+                        <MenuItem value='en'>{t('settings.web.settingsTab.languageOptions.en')}</MenuItem>
+                        <MenuItem value='zh-hans'>{t('settings.web.settingsTab.languageOptions.zhHans')}</MenuItem>
+                        <MenuItem value='zh-hant'>{t('settings.web.settingsTab.languageOptions.zhHant')}</MenuItem>
+                      </CustomTextField>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <CustomTextField
+                        select
+                        fullWidth
+                        label={t('settings.general.basic.fields.defaultCurrency.label')}
+                        value={currencies.some(c => c.code === basicData.defaultCurrency) ? basicData.defaultCurrency : (currencies[0]?.code ?? '')}
+                        onChange={e => handleBasicChange('defaultCurrency', e.target.value)}
+                      >
+                        {currencies.map(c => (
+                          <MenuItem key={c.id} value={c.code}>
+                            {c.code} ({c.symbol})
+                          </MenuItem>
+                        ))}
+                      </CustomTextField>
+                    </Grid>
+                    <Grid size={{ xs: 12, sm: 6 }}>
+                      <CustomTextField
+                        select
+                        fullWidth
+                        label={t('settings.general.basic.fields.timezone.label')}
+                        value={basicData.defaultTimezone}
+                        onChange={e => handleBasicChange('defaultTimezone', e.target.value)}
+                        slotProps={{
+                          select: { MenuProps: { PaperProps: { style: { maxHeight: 250 } } } }
+                        }}
+                      >
+                        <MenuItem value='Pacific/Auckland'>{t('settings.general.basic.fields.timezone.options.pacificAuckland')}</MenuItem>
+                        <MenuItem value='UTC'>{t('settings.general.basic.fields.timezone.options.utc')}</MenuItem>
+                        <MenuItem value='Asia/Shanghai'>{t('settings.general.basic.fields.timezone.options.asiaShanghai')}</MenuItem>
+                      </CustomTextField>
+                    </Grid>
+                  </Grid>
+                </SettingsSection>
 
-                      {!adminIdentityEditing ? (
-                        <Grid container spacing={4}>
-                          <Grid size={{ xs: 12, sm: 6 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, mb: 0.5, flexWrap: 'wrap' }}>
-                              <Typography variant='caption' color='text.secondary' component='span'>
+                <SettingsSection
+                  title={t('settings.general.basic.sections.shop')}
+                  description={t('settings.general.basic.sectionHints.shop')}
+                >
+                  <FormControlLabel
+                    sx={{ ml: 0 }}
+                    control={
+                      <Checkbox
+                        checked={shopData.review_moderation_required}
+                        onChange={e => setShopData(prev => ({ ...prev, review_moderation_required: e.target.checked }))}
+                      />
+                    }
+                    label={t('settings.general.basic.fields.shop.reviewModerationRequired')}
+                  />
+                  <Typography sx={{ mt: 2, fontSize: '0.75rem', color: 'text.secondary' }}>
+                    {t('settings.general.basic.fields.shop.identifierManageHint')}
+                  </Typography>
+                </SettingsSection>
+
+                <SettingsSection
+                  flush
+                  title={t('settings.general.basic.subsections.adminIdentity')}
+                  description={t('settings.general.basic.sectionHints.adminIdentity')}
+                  action={
+                    !adminIdentityEditing && (
+                      <Button
+                        type='button'
+                        size='small'
+                        variant='outlined'
+                        color='secondary'
+                        onClick={startAdminIdentityEdit}
+                        startIcon={<i className='tabler-edit' />}
+                      >
+                        {t('common.actions.edit')}
+                      </Button>
+                    )
+                  }
+                >
+                  {!adminIdentityEditing ? (
+                    <Grid container spacing={4}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <ReadOnlyField
+                          label={
+                            <>
+                              <Typography component='span' sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
                                 {t('settings.general.basic.fields.workspaceOrgName.label')}
                               </Typography>
                               <FieldHelperTip
                                 helperText={t('settings.general.basic.fields.workspaceOrgName.helper')}
                                 ariaLabel={t('settings.general.basic.helperTipAria')}
                               />
-                            </Box>
-                            <Typography variant='body1' sx={{ wordBreak: 'break-word' }}>
-                              {workspaceOrgName.trim() || '—'}
-                            </Typography>
-                          </Grid>
-                          <Grid size={{ xs: 12, sm: 6 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, mb: 0.5, flexWrap: 'wrap' }}>
-                              <Typography variant='caption' color='text.secondary' component='span'>
+                            </>
+                          }
+                          value={workspaceOrgName.trim()}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <ReadOnlyField
+                          label={
+                            <>
+                              <Typography component='span' sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
                                 {t('settings.general.basic.fields.workspaceSlug.label')}
                               </Typography>
                               <FieldHelperTip
                                 helperText={t('settings.general.basic.fields.workspaceSlug.helper')}
                                 ariaLabel={t('settings.general.basic.helperTipAria')}
                               />
-                            </Box>
-                            <Typography variant='body1' sx={{ wordBreak: 'break-all' }}>
-                              {workspaceSlug.trim() || '—'}
-                            </Typography>
-                          </Grid>
-                          <Grid size={{ xs: 12 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.25, mb: 0.5, flexWrap: 'wrap' }}>
-                              <Typography variant='caption' color='text.secondary' component='span'>
+                            </>
+                          }
+                          value={workspaceSlug.trim()}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12 }}>
+                        <ReadOnlyField
+                          multiline
+                          label={
+                            <>
+                              <Typography component='span' sx={{ fontSize: '0.75rem', color: 'text.secondary' }}>
                                 {t('settings.general.basic.fields.workspaceNote.label')}
                               </Typography>
                               <FieldHelperTip
                                 helperText={t('settings.general.basic.fields.workspaceNote.helper')}
                                 ariaLabel={t('settings.general.basic.helperTipAria')}
                               />
-                            </Box>
-                            <Typography
-                              variant='body1'
-                              sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
-                            >
-                              {basicData.workspaceNote.trim() ? basicData.workspaceNote : '—'}
-                            </Typography>
-                          </Grid>
-                        </Grid>
-                      ) : (
-                        <>
-                          <Grid container spacing={4}>
-                            <Grid size={{ xs: 12, sm: 6 }}>
-                              <CustomTextField
-                                fullWidth
-                                label={
-                                  <Box
-                                    component='span'
-                                    sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, flexWrap: 'wrap' }}
-                                  >
-                                    <span>{t('settings.general.basic.fields.workspaceOrgName.label')}</span>
-                                    <FieldHelperTip
-                                      helperText={t('settings.general.basic.fields.workspaceOrgName.helper')}
-                                      ariaLabel={t('settings.general.basic.helperTipAria')}
-                                    />
-                                  </Box>
-                                }
-                                value={draftOrgName}
-                                onChange={e => setDraftOrgName(e.target.value)}
-                              />
-                            </Grid>
-                            <Grid size={{ xs: 12, sm: 6 }}>
-                              <CustomTextField
-                                fullWidth
-                                label={
-                                  <Box
-                                    component='span'
-                                    sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, flexWrap: 'wrap' }}
-                                  >
-                                    <span>{t('settings.general.basic.fields.workspaceSlug.label')}</span>
-                                    <FieldHelperTip
-                                      helperText={t('settings.general.basic.fields.workspaceSlug.helper')}
-                                      ariaLabel={t('settings.general.basic.helperTipAria')}
-                                    />
-                                  </Box>
-                                }
-                                value={draftSlug}
-                                onChange={e => setDraftSlug(e.target.value)}
-                              />
-                            </Grid>
-                            <Grid size={{ xs: 12 }}>
-                              <CustomTextField
-                                fullWidth
-                                label={
-                                  <Box
-                                    component='span'
-                                    sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, flexWrap: 'wrap' }}
-                                  >
-                                    <span>{t('settings.general.basic.fields.workspaceNote.label')}</span>
-                                    <FieldHelperTip
-                                      helperText={t('settings.general.basic.fields.workspaceNote.helper')}
-                                      ariaLabel={t('settings.general.basic.helperTipAria')}
-                                    />
-                                  </Box>
-                                }
-                                value={draftNote}
-                                onChange={e => setDraftNote(e.target.value)}
-                                multiline
-                                rows={2}
-                              />
-                            </Grid>
-                          </Grid>
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 2 }}>
-                            <Button
-                              type='button'
-                              variant='contained'
-                              onClick={saveAdminIdentity}
-                              disabled={savingAdminIdentity}
-                              startIcon={
-                                savingAdminIdentity ? (
-                                  <CircularProgress size={16} color='inherit' />
-                                ) : (
-                                  <i className='tabler-check' />
-                                )
-                              }
-                            >
-                              {t('common.schemaTable.confirm')}
-                            </Button>
-                            <Button
-                              type='button'
-                              variant='outlined'
-                              color='secondary'
-                              onClick={cancelAdminIdentityEdit}
-                              disabled={savingAdminIdentity}
-                            >
-                              {t('common.schemaForm.cancel')}
-                            </Button>
-                          </Box>
-                        </>
-                      )}
-
-                    </CardContent>
-                  </Card>
-
-                  {/* Localization Section */}
-                  <Card variant='outlined' sx={{ mb: 6 }}>
-                    <CardContent>
-                      <Typography variant='h6' sx={{ mb: 4 }}>
-                        {t('settings.general.basic.sections.localization')}
-                      </Typography>
+                            </>
+                          }
+                          value={basicData.workspaceNote.trim()}
+                        />
+                      </Grid>
+                    </Grid>
+                  ) : (
+                    <>
                       <Grid container spacing={4}>
-                        <Grid size={{ xs: 12, sm: 4 }}>
+                        <Grid size={{ xs: 12, sm: 6 }}>
                           <CustomTextField
-                            select
                             fullWidth
-                            label={t('settings.general.basic.fields.defaultLanguage.label')}
-                            value={basicData.defaultLanguage}
-                            onChange={e => handleBasicChange('defaultLanguage', e.target.value)}
-                          >
-                            <MenuItem value='en'>{t('settings.web.settingsTab.languageOptions.en')}</MenuItem>
-                            <MenuItem value='zh-hans'>{t('settings.web.settingsTab.languageOptions.zhHans')}</MenuItem>
-                            <MenuItem value='zh-hant'>{t('settings.web.settingsTab.languageOptions.zhHant')}</MenuItem>
-                          </CustomTextField>
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 4 }}>
-                          <CustomTextField
-                            select
-                            fullWidth
-                            label={t('settings.general.basic.fields.defaultCurrency.label')}
-                            value={currencies.some(c => c.code === basicData.defaultCurrency) ? basicData.defaultCurrency : (currencies[0]?.code ?? '')}
-                            onChange={e => handleBasicChange('defaultCurrency', e.target.value)}
-                          >
-                            {currencies.map(c => (
-                              <MenuItem key={c.id} value={c.code}>
-                                {c.code} ({c.symbol})
-                              </MenuItem>
-                            ))}
-                          </CustomTextField>
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 4 }}>
-                          <CustomTextField
-                            select
-                            fullWidth
-                            label={t('settings.general.basic.fields.timezone.label')}
-                            value={basicData.defaultTimezone}
-                            onChange={e => handleBasicChange('defaultTimezone', e.target.value)}
-                            slotProps={{
-                              select: { MenuProps: { PaperProps: { style: { maxHeight: 250 } } } }
-                            }}
-                          >
-                            <MenuItem value='Pacific/Auckland'>{t('settings.general.basic.fields.timezone.options.pacificAuckland')}</MenuItem>
-                            <MenuItem value='UTC'>{t('settings.general.basic.fields.timezone.options.utc')}</MenuItem>
-                            <MenuItem value='Asia/Shanghai'>{t('settings.general.basic.fields.timezone.options.asiaShanghai')}</MenuItem>
-                          </CustomTextField>
-                        </Grid>
-                      </Grid>
-                    </CardContent>
-                  </Card>
-
-                  {/* Shop / Reviews Section */}
-                  <Card variant='outlined' sx={{ mb: 6 }}>
-                    <CardContent>
-                      <Typography variant='h6' sx={{ mb: 2 }}>
-                        {t('settings.general.basic.sections.shop')}
-                      </Typography>
-                      <FormControlLabel
-                        control={
-                          <Checkbox
-                            checked={shopData.review_moderation_required}
-                            onChange={e => setShopData(prev => ({ ...prev, review_moderation_required: e.target.checked }))}
+                            label={
+                              <Box
+                                component='span'
+                                sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, flexWrap: 'wrap' }}
+                              >
+                                <span>{t('settings.general.basic.fields.workspaceOrgName.label')}</span>
+                                <FieldHelperTip
+                                  helperText={t('settings.general.basic.fields.workspaceOrgName.helper')}
+                                  ariaLabel={t('settings.general.basic.helperTipAria')}
+                                />
+                              </Box>
+                            }
+                            value={draftOrgName}
+                            onChange={e => setDraftOrgName(e.target.value)}
                           />
-                        }
-                        label={t('settings.general.basic.fields.shop.reviewModerationRequired')}
-                      />
-                      <Grid container spacing={4} sx={{ mt: 1 }}>
+                        </Grid>
+                        <Grid size={{ xs: 12, sm: 6 }}>
+                          <CustomTextField
+                            fullWidth
+                            label={
+                              <Box
+                                component='span'
+                                sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, flexWrap: 'wrap' }}
+                              >
+                                <span>{t('settings.general.basic.fields.workspaceSlug.label')}</span>
+                                <FieldHelperTip
+                                  helperText={t('settings.general.basic.fields.workspaceSlug.helper')}
+                                  ariaLabel={t('settings.general.basic.helperTipAria')}
+                                />
+                              </Box>
+                            }
+                            value={draftSlug}
+                            onChange={e => setDraftSlug(e.target.value)}
+                          />
+                        </Grid>
                         <Grid size={{ xs: 12 }}>
-                          <Typography variant='body2' color='text.secondary'>
-                            {t('settings.general.basic.fields.shop.identifierManageHint')}
-                          </Typography>
+                          <CustomTextField
+                            fullWidth
+                            label={
+                              <Box
+                                component='span'
+                                sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, flexWrap: 'wrap' }}
+                              >
+                                <span>{t('settings.general.basic.fields.workspaceNote.label')}</span>
+                                <FieldHelperTip
+                                  helperText={t('settings.general.basic.fields.workspaceNote.helper')}
+                                  ariaLabel={t('settings.general.basic.helperTipAria')}
+                                />
+                              </Box>
+                            }
+                            value={draftNote}
+                            onChange={e => setDraftNote(e.target.value)}
+                            multiline
+                            rows={2}
+                          />
                         </Grid>
                       </Grid>
-                    </CardContent>
-                  </Card>
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 4 }}>
+                        <Button
+                          type='button'
+                          variant='contained'
+                          onClick={saveAdminIdentity}
+                          disabled={savingAdminIdentity}
+                          startIcon={
+                            savingAdminIdentity ? (
+                              <CircularProgress size={16} color='inherit' />
+                            ) : (
+                              <i className='tabler-check' />
+                            )
+                          }
+                        >
+                          {t('common.schemaTable.confirm')}
+                        </Button>
+                        <Button
+                          type='button'
+                          variant='outlined'
+                          color='secondary'
+                          onClick={cancelAdminIdentityEdit}
+                          disabled={savingAdminIdentity}
+                        >
+                          {t('common.schemaForm.cancel')}
+                        </Button>
+                      </Box>
+                    </>
+                  )}
+                </SettingsSection>
 
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 6 }}>
-                    <Button 
-                      variant='contained' 
-                      type='submit' 
-                      disabled={saving || loading || savingAdminIdentity}
-                      startIcon={saving ? <CircularProgress size={16} /> : <i className='tabler-check' />}
-                    >
-                      {saving ? t('settings.general.basic.actions.saving') : t('settings.general.basic.actions.saveChanges')}
-                    </Button>
-                    <Button 
-                      variant='outlined' 
-                      color='secondary' 
-                      onClick={() => setBasicData(initialBasicData)}
-                      disabled={saving || loading || savingAdminIdentity}
-                    >
-                      {t('settings.general.basic.actions.resetForm')}
-                    </Button>
-                  </Box>
-                </form>
-              </CardContent>
+                <SettingsActionBar>
+                  <Button
+                    variant='contained'
+                    type='submit'
+                    disabled={saving || loading || savingAdminIdentity}
+                    startIcon={saving ? <CircularProgress size={16} /> : <i className='tabler-check' />}
+                  >
+                    {saving ? t('settings.general.basic.actions.saving') : t('settings.general.basic.actions.saveChanges')}
+                  </Button>
+                  <Button
+                    variant='outlined'
+                    color='secondary'
+                    onClick={() => setBasicData(initialBasicData)}
+                    disabled={saving || loading || savingAdminIdentity}
+                  >
+                    {t('settings.general.basic.actions.resetForm')}
+                  </Button>
+                </SettingsActionBar>
+              </form>
             </TabPanel>
 
             {/* Storefront: customer-visible branding, contact, theme, social */}
-            <TabPanel value='storefront' className='p-0'>
-              <CardContent>
-                <form onSubmit={handleSubmit}>
-                  <Card variant='outlined' sx={{ mb: 6 }}>
-                    <CardContent>
-                      <Typography variant='subtitle2' color='text.secondary' sx={{ mb: 1 }}>
-                        {t('settings.general.basic.subsections.storefrontBranding')}
+            <TabPanel value='storefront' sx={flushPanelSx}>
+              <form onSubmit={handleSubmit}>
+                <SettingsSection
+                  flush
+                  title={t('settings.general.basic.subsections.storefrontBranding')}
+                  description={t('settings.general.basic.sectionHints.storefrontBranding')}
+                >
+                    <AssetRow
+                      preview={
+                        <Box sx={assetTileSx()}>
+                          <img
+                            src={imgSrc}
+                            alt={t('settings.general.basic.logo.alt')}
+                            style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
+                          />
+                        </Box>
+                      }
+                    >
+                      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+                        <Button
+                          component='label'
+                          variant='contained'
+                          htmlFor='general-settings-upload-image-storefront'
+                          startIcon={<i className='tabler-upload' />}
+                        >
+                          {t('settings.general.basic.actions.uploadNewPhoto')}
+                          <input
+                            hidden
+                            type='file'
+                            accept='image/png, image/jpeg, image/jpg, image/gif'
+                            onChange={handleFileInputChange}
+                            id='general-settings-upload-image-storefront'
+                          />
+                        </Button>
+                        <Button
+                          variant='outlined'
+                          color='secondary'
+                          onClick={handleFileInputReset}
+                          startIcon={<i className='tabler-refresh' />}
+                        >
+                          {t('settings.general.basic.actions.resetPhoto')}
+                        </Button>
+                      </Box>
+                      <Typography variant='body2' color='text.secondary'>
+                        {t('settings.general.basic.logo.help')}
                       </Typography>
-                      <Typography variant='body2' color='text.secondary' sx={{ mb: 3 }}>
-                        {t('settings.general.basic.sections.storefrontBrandingIntro')}
-                      </Typography>
+                    </AssetRow>
 
-                      <Grid container spacing={4} sx={{ mb: 4 }}>
-                        <Grid size={{ xs: 12, sm: 'auto' }}>
-                          <div className='flex items-center justify-center'>
-                            <img 
-                              height={120} 
-                              width={120} 
-                              className='rounded' 
-                              src={imgSrc} 
-                              alt={t('settings.general.basic.logo.alt')}
-                              style={{ objectFit: 'cover', border: '1px solid rgba(0,0,0,0.12)' }}
+                    {/* The dark-surface variant, previewed on a dark tile because that is the
+                        only background it will ever be seen against — a light-ink mark on the
+                        page's own card looks broken until you put it where it belongs. */}
+                    <AssetRow
+                      preview={
+                        <Box sx={{ ...assetTileSx('#1a1a1a'), color: 'rgba(255,255,255,0.4)' }}>
+                          {logoDarkValue ? (
+                            <img
+                              src={logoDarkValue}
+                              alt={t('settings.general.basic.logoDark.alt')}
+                              style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }}
                             />
-                          </div>
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 'auto' }}>
-                          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
-                            <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
-                              <Button 
-                                component='label' 
-                                variant='contained' 
-                                htmlFor='general-settings-upload-image-storefront'
-                                startIcon={<i className='tabler-upload' />}
-                              >
-                                {t('settings.general.basic.actions.uploadNewPhoto')}
-                                <input
-                                  hidden
-                                  type='file'
-                                  accept='image/png, image/jpeg, image/jpg, image/gif'
-                                  onChange={handleFileInputChange}
-                                  id='general-settings-upload-image-storefront'
-                                />
-                              </Button>
-                              <Button 
-                                variant='outlined' 
-                                color='secondary' 
-                                onClick={handleFileInputReset}
-                                startIcon={<i className='tabler-refresh' />}
-                              >
-                                {t('settings.general.basic.actions.resetPhoto')}
-                              </Button>
+                          ) : (
+                            <i className='tabler-moon' style={{ fontSize: '1.75rem' }} />
+                          )}
+                        </Box>
+                      }
+                    >
+                      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+                        <Button
+                          component='label'
+                          variant='contained'
+                          htmlFor='general-settings-upload-logo-dark'
+                          startIcon={<i className='tabler-upload' />}
+                        >
+                          {t('settings.general.basic.logoDark.upload')}
+                          <input
+                            hidden
+                            type='file'
+                            accept='image/png, image/jpeg, image/jpg, image/gif, image/svg+xml'
+                            onChange={handleLogoDarkInputChange}
+                            id='general-settings-upload-logo-dark'
+                          />
+                        </Button>
+                        <Button
+                          variant='outlined'
+                          color='secondary'
+                          onClick={handleLogoDarkReset}
+                          startIcon={<i className='tabler-refresh' />}
+                        >
+                          {t('settings.general.basic.actions.resetPhoto')}
+                        </Button>
+                      </Box>
+                      <Typography variant='body2' color='text.secondary'>
+                        {t('settings.general.basic.logoDark.help')}
+                      </Typography>
+                    </AssetRow>
+
+                    {/* Below both logos, not beside one of them: the setting governs the pair.
+                        Indented into the same column as the buttons above so the controls of
+                        this block share one left edge. */}
+                    <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 4, mb: 5 }}>
+                      <Box sx={{ width: ASSET_PREVIEW_SIZE, flexShrink: 0, display: { xs: 'none', sm: 'block' } }} />
+                      <FormControlLabel
+                        control={
+                          <Checkbox
+                            checked={showNameWithLogo}
+                            onChange={e => setShowNameWithLogo(e.target.checked)}
+                          />
+                        }
+                        label={t('settings.general.basic.logo.showSiteName')}
+                      />
+                    </Box>
+
+                    <AssetRow
+                      preview={
+                        <Box
+                          sx={{
+                            ...assetTileSx(),
+                            ...(faviconSrc ? {} : { borderStyle: 'dashed', color: 'text.disabled' })
+                          }}
+                        >
+                          {faviconSrc ? (
+                            <img
+                              height={64}
+                              width={64}
+                              src={faviconSrc}
+                              alt={t('settings.general.basic.favicon.alt')}
+                              style={{ objectFit: 'contain' }}
+                            />
+                          ) : (
+                            <i className='tabler-world' style={{ fontSize: '1.75rem' }} />
+                          )}
+                        </Box>
+                      }
+                    >
+                      <Box sx={{ display: 'flex', flexDirection: { xs: 'column', sm: 'row' }, gap: 2 }}>
+                        <Button
+                          component='label'
+                          variant='contained'
+                          htmlFor='general-settings-upload-favicon'
+                          startIcon={<i className='tabler-upload' />}
+                        >
+                          {t('settings.general.basic.favicon.upload')}
+                          <input
+                            hidden
+                            type='file'
+                            accept='image/png, image/x-icon, image/vnd.microsoft.icon, image/svg+xml'
+                            onChange={handleFaviconInputChange}
+                            id='general-settings-upload-favicon'
+                          />
+                        </Button>
+                        <Button
+                          variant='outlined'
+                          color='secondary'
+                          onClick={handleFaviconReset}
+                          startIcon={<i className='tabler-refresh' />}
+                        >
+                          {t('settings.general.basic.actions.resetPhoto')}
+                        </Button>
+                      </Box>
+                      <Typography variant='body2' color='text.secondary'>
+                        {t('settings.general.basic.favicon.help')}
+                      </Typography>
+                    </AssetRow>
+
+                    <Grid container spacing={2}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <CustomTextField
+                          fullWidth
+                          label={t('settings.general.basic.fields.siteName.label')}
+                          value={basicData.siteName}
+                          placeholder={t('settings.general.basic.fields.siteName.placeholder')}
+                          onChange={e => handleBasicChange('siteName', e.target.value)}
+                          helperText={t('settings.general.basic.fields.siteName.helper')}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12 }}>
+                        <CustomTextField
+                          fullWidth
+                          label={t('settings.general.basic.fields.siteDescription.label')}
+                          value={basicData.siteDescription}
+                          placeholder={t('settings.general.basic.fields.siteDescription.placeholder')}
+                          multiline
+                          rows={3}
+                          onChange={e => handleBasicChange('siteDescription', e.target.value)}
+                          helperText={t('settings.general.basic.fields.siteDescription.helper')}
+                        />
+                      </Grid>
+                    </Grid>
+                </SettingsSection>
+
+                <SettingsSection
+                  title={t('settings.general.basic.sections.contactInformation')}
+                  description={t('settings.general.basic.sectionHints.contactInformation')}
+                >
+                    <Grid container spacing={2}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <CustomTextField
+                          fullWidth
+                          label={t('settings.general.basic.fields.contactEmail.label')}
+                          type='email'
+                          value={basicData.contactEmail}
+                          placeholder={t('settings.general.basic.fields.contactEmail.placeholder')}
+                          onChange={e => handleBasicChange('contactEmail', e.target.value)}
+                          slotProps={{
+                            input: {
+                              startAdornment: <i className='tabler-mail' />
+                            }
+                          }}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <CustomTextField
+                          fullWidth
+                          label={t('settings.general.basic.fields.contactPhone.label')}
+                          value={basicData.contactPhone}
+                          placeholder={t('settings.general.basic.fields.contactPhone.placeholder')}
+                          onChange={e => handleBasicChange('contactPhone', e.target.value)}
+                          slotProps={{
+                            input: {
+                              startAdornment: <i className='tabler-phone' />
+                            }
+                          }}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12 }}>
+                        <CustomTextField
+                          fullWidth
+                          label={t('settings.general.basic.fields.footerContact.label')}
+                          value={basicData.footerContact}
+                          placeholder={t('settings.general.basic.fields.footerContact.placeholder')}
+                          onChange={e => handleBasicChange('footerContact', e.target.value)}
+                          multiline
+                          rows={3}
+                          slotProps={{
+                            input: {
+                              startAdornment: (
+                                <Box component='span' sx={{ mr: 1.5, display: 'flex', alignItems: 'flex-start', pt: 1.25 }}>
+                                  <i className='tabler-address-book' />
+                                </Box>
+                              )
+                            }
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                </SettingsSection>
+
+                <SettingsSection
+                  title={t('settings.general.basic.sections.storefrontDisplay')}
+                  description={t('settings.general.basic.sectionHints.storefrontDisplay')}
+                >
+                    <Grid container spacing={2}>
+                      <Grid size={{ xs: 12 }}>
+                        <CustomTextField
+                          fullWidth
+                          label={t('settings.general.basic.fields.topBarAnnouncement.label')}
+                          value={basicData.topBarAnnouncement}
+                          placeholder={t('settings.general.basic.fields.topBarAnnouncement.placeholder')}
+                          onChange={e => handleBasicChange('topBarAnnouncement', e.target.value)}
+                          slotProps={{
+                            input: {
+                              startAdornment: <i className='tabler-message' />
+                            }
+                          }}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12 }}>
+                        <CustomTextField
+                          fullWidth
+                          label={t('settings.general.basic.fields.footerCopyright.label')}
+                          value={basicData.footerCopyright}
+                          placeholder={t('settings.general.basic.fields.footerCopyright.placeholder')}
+                          onChange={e => handleBasicChange('footerCopyright', e.target.value)}
+                          slotProps={{
+                            input: {
+                              startAdornment: <i className='tabler-copyright' />
+                            }
+                          }}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12 }}>
+                        <CustomTextField
+                          fullWidth
+                          label={t('settings.general.basic.fields.siteAnnouncement.label')}
+                          value={basicData.siteAnnouncement}
+                          placeholder={t('settings.general.basic.fields.siteAnnouncement.placeholder')}
+                          onChange={e => handleBasicChange('siteAnnouncement', e.target.value)}
+                          multiline
+                          rows={2}
+                          slotProps={{
+                            input: {
+                              startAdornment: (
+                                <Box component='span' sx={{ mr: 1.5, display: 'flex', alignItems: 'flex-start', pt: 1.25 }}>
+                                  <i className='tabler-info-circle' />
+                                </Box>
+                              )
+                            }
+                          }}
+                        />
+                      </Grid>
+                    </Grid>
+                </SettingsSection>
+
+                <SettingsSection
+                  title={t('settings.general.basic.sections.storefrontTheme')}
+                  description={t('settings.general.basic.sectionHints.storefrontTheme')}
+                >
+                    <Grid container spacing={2}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <CustomTextField
+                          select
+                          fullWidth
+                          label={t('settings.general.basic.fields.storefrontTheme.label')}
+                          value={THEME_IDS.includes(storefrontUi.theme) ? storefrontUi.theme : THEME_IDS[0] ?? 'store'}
+                          onChange={e => handleStorefrontUiChange('theme', e.target.value)}
+                        >
+                          {THEME_IDS.map(id => (
+                            <MenuItem key={id} value={id}>
+                              {themeDisplayName(id)}
+                            </MenuItem>
+                          ))}
+                        </CustomTextField>
+                      </Grid>
+                      <Grid size={{ xs: 12 }}>
+                        <Typography variant='subtitle2' color='text.secondary' sx={{ mb: 2 }}>
+                          Allowed color modes
+                        </Typography>
+                        <Typography variant='caption' color='text.secondary' sx={{ display: 'block', mb: 2 }}>
+                          Tick the modes the storefront / account / auth UIs may render in.
+                          When only one is selected, the switcher is hidden and that mode is
+                          forced for all visitors.
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                          {ALL_COLOR_MODES.map(mode => {
+                            const checked = storefrontUi.allowed_color_modes.includes(mode)
+                            const isOnlyOne = checked && storefrontUi.allowed_color_modes.length === 1
+                            return (
+                              <FormControlLabel
+                                key={mode}
+                                control={
+                                  <Checkbox
+                                    checked={checked}
+                                    disabled={isOnlyOne}
+                                    onChange={e => {
+                                      const next = e.target.checked
+                                        ? Array.from(new Set([...storefrontUi.allowed_color_modes, mode]))
+                                        : storefrontUi.allowed_color_modes.filter(m => m !== mode)
+                                      // Never let the admin save an empty allow-list — that
+                                      // would lock the site out of any color scheme.
+                                      if (next.length === 0) return
+                                      handleStorefrontUiChange('allowed_color_modes', next as ColorMode[])
+                                      // If the configured default falls outside the new set,
+                                      // snap it back to the first allowed mode.
+                                      const cur = storefrontUi.default_color_mode
+                                      if (next.length === 1) {
+                                        handleStorefrontUiChange('default_color_mode', next[0])
+                                      } else if ((cur === 'light' || cur === 'dark') && !next.includes(cur)) {
+                                        handleStorefrontUiChange('default_color_mode', next[0])
+                                      }
+                                    }}
+                                  />
+                                }
+                                label={mode === 'light' ? 'Light' : 'Dark'}
+                              />
+                            )
+                          })}
+                        </Box>
+                        {storefrontUi.allowed_color_modes.length > 1 && (
+                          <Box sx={{ mt: 2, maxWidth: 280 }}>
+                            <CustomTextField
+                              select
+                              fullWidth
+                              label='Default color mode'
+                              value={storefrontUi.default_color_mode}
+                              onChange={e =>
+                                handleStorefrontUiChange(
+                                  'default_color_mode',
+                                  e.target.value as 'light' | 'dark' | 'system'
+                                )
+                              }
+                            >
+                              <MenuItem value='system'>Follow OS preference</MenuItem>
+                              {storefrontUi.allowed_color_modes.map(m => (
+                                <MenuItem key={m} value={m}>
+                                  {m === 'light' ? 'Light' : 'Dark'}
+                                </MenuItem>
+                              ))}
+                            </CustomTextField>
+                          </Box>
+                        )}
+                      </Grid>
+                      <Grid size={{ xs: 12 }}>
+                        <Typography variant='subtitle2' color='text.secondary' sx={{ mb: 2 }}>
+                          {t('settings.general.basic.fields.headerOptions.label')}
+                        </Typography>
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={storefrontUi.header_options?.show_search !== false}
+                                onChange={e => handleHeaderOptionChange('show_search', e.target.checked)}
+                              />
+                            }
+                            label={t('settings.general.basic.fields.headerOptions.showSearch')}
+                          />
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={storefrontUi.header_options?.show_cart !== false}
+                                onChange={e => handleHeaderOptionChange('show_cart', e.target.checked)}
+                              />
+                            }
+                            label={t('settings.general.basic.fields.headerOptions.showCart')}
+                          />
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={storefrontUi.header_options?.show_language_switcher !== false}
+                                onChange={e => handleHeaderOptionChange('show_language_switcher', e.target.checked)}
+                              />
+                            }
+                            label={t('settings.general.basic.fields.headerOptions.showLanguageSwitcher')}
+                          />
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={storefrontUi.header_options?.show_style_selector !== false}
+                                onChange={e => handleHeaderOptionChange('show_style_selector', e.target.checked)}
+                              />
+                            }
+                            label={t('settings.general.basic.fields.headerOptions.showStyleSelector')}
+                          />
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={storefrontUi.header_options?.show_login !== false}
+                                onChange={e => handleHeaderOptionChange('show_login', e.target.checked)}
+                              />
+                            }
+                            label={t('settings.general.basic.fields.headerOptions.showLogin')}
+                          />
+                          <FormControlLabel
+                            control={
+                              <Checkbox
+                                checked={storefrontUi.header_options?.show_register === true}
+                                onChange={e => handleHeaderOptionChange('show_register', e.target.checked)}
+                              />
+                            }
+                            label={t('settings.general.basic.fields.headerOptions.showRegister')}
+                          />
+                        </Box>
+                      </Grid>
+                    </Grid>
+                </SettingsSection>
+
+                <SettingsSection
+                  title={t('settings.general.basic.sections.analytics')}
+                  description={t('settings.general.basic.sectionHints.analytics')}
+                >
+                    <Grid container spacing={2}>
+                      <Grid size={{ xs: 12, sm: 6 }}>
+                        <CustomTextField
+                          fullWidth
+                          label={
+                            <Box
+                              component='span'
+                              sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.25, flexWrap: 'wrap' }}
+                            >
+                              <span>{t('settings.general.basic.fields.analytics.googleAnalyticsId.label')}</span>
+                              <FieldHelperTip
+                                helperText={t('settings.general.basic.fields.analytics.googleAnalyticsId.helper')}
+                                ariaLabel={t('settings.general.basic.helperTipAria')}
+                              />
                             </Box>
-                            <Typography variant='body2' color='text.secondary'>
-                              {t('settings.general.basic.logo.help')}
-                            </Typography>
-                          </Box>
-                        </Grid>
+                          }
+                          value={analyticsData.google_analytics_id}
+                          placeholder={t('settings.general.basic.fields.analytics.googleAnalyticsId.placeholder')}
+                          onChange={e => setAnalyticsData({ google_analytics_id: e.target.value })}
+                          slotProps={{
+                            input: {
+                              startAdornment: <i className='tabler-chart-bar' />
+                            }
+                          }}
+                        />
                       </Grid>
+                    </Grid>
+                </SettingsSection>
 
-                      <Grid container spacing={4}>
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                          <CustomTextField
-                            fullWidth
-                            label={t('settings.general.basic.fields.siteName.label')}
-                            value={basicData.siteName}
-                            placeholder={t('settings.general.basic.fields.siteName.placeholder')}
-                            onChange={e => handleBasicChange('siteName', e.target.value)}
-                            helperText={t('settings.general.basic.fields.siteName.helper')}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12 }}>
-                          <CustomTextField
-                            fullWidth
-                            label={t('settings.general.basic.fields.siteDescription.label')}
-                            value={basicData.siteDescription}
-                            placeholder={t('settings.general.basic.fields.siteDescription.placeholder')}
-                            multiline
-                            rows={3}
-                            onChange={e => handleBasicChange('siteDescription', e.target.value)}
-                            helperText={t('settings.general.basic.fields.siteDescription.helper')}
-                          />
-                        </Grid>
+                <SettingsSection
+                  title={t('settings.general.basic.sections.socialMediaLinks')}
+                  description={t('settings.general.basic.sectionHints.socialMediaLinks')}
+                >
+                    <Grid container spacing={2}>
+                      <Grid size={{ xs: 12, sm: 4 }}>
+                        <CustomTextField
+                          fullWidth
+                          label={t('settings.general.basic.fields.social.facebook.label')}
+                          value={basicData.facebookUrl}
+                          placeholder={t('settings.general.basic.fields.social.facebook.placeholder')}
+                          onChange={e => handleBasicChange('facebookUrl', e.target.value)}
+                          slotProps={{
+                            input: {
+                              startAdornment: <i className='tabler-brand-facebook' />
+                            }
+                          }}
+                        />
                       </Grid>
-                    </CardContent>
-                  </Card>
-
-                  <Card variant='outlined' sx={{ mb: 6 }}>
-                    <CardContent>
-                      <Typography variant='h6' sx={{ mb: 4 }}>
-                        {t('settings.general.basic.sections.contactInformation')}
-                      </Typography>
-                      <Grid container spacing={4}>
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                          <CustomTextField
-                            fullWidth
-                            label={t('settings.general.basic.fields.contactEmail.label')}
-                            type='email'
-                            value={basicData.contactEmail}
-                            placeholder={t('settings.general.basic.fields.contactEmail.placeholder')}
-                            onChange={e => handleBasicChange('contactEmail', e.target.value)}
-                            slotProps={{
-                              input: {
-                                startAdornment: <i className='tabler-mail' />
-                              }
-                            }}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                          <CustomTextField
-                            fullWidth
-                            label={t('settings.general.basic.fields.contactPhone.label')}
-                            value={basicData.contactPhone}
-                            placeholder={t('settings.general.basic.fields.contactPhone.placeholder')}
-                            onChange={e => handleBasicChange('contactPhone', e.target.value)}
-                            slotProps={{
-                              input: {
-                                startAdornment: <i className='tabler-phone' />
-                              }
-                            }}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12 }}>
-                          <CustomTextField
-                            fullWidth
-                            label={t('settings.general.basic.fields.footerContact.label')}
-                            value={basicData.footerContact}
-                            placeholder={t('settings.general.basic.fields.footerContact.placeholder')}
-                            onChange={e => handleBasicChange('footerContact', e.target.value)}
-                            multiline
-                            rows={3}
-                            slotProps={{
-                              input: {
-                                startAdornment: (
-                                  <Box component='span' sx={{ mr: 1.5, display: 'flex', alignItems: 'flex-start', pt: 1.25 }}>
-                                    <i className='tabler-address-book' />
-                                  </Box>
-                                )
-                              }
-                            }}
-                          />
-                        </Grid>
+                      <Grid size={{ xs: 12, sm: 4 }}>
+                        <CustomTextField
+                          fullWidth
+                          label={t('settings.general.basic.fields.social.twitter.label')}
+                          value={basicData.twitterUrl}
+                          placeholder={t('settings.general.basic.fields.social.twitter.placeholder')}
+                          onChange={e => handleBasicChange('twitterUrl', e.target.value)}
+                          slotProps={{
+                            input: {
+                              startAdornment: <i className='tabler-brand-twitter' />
+                            }
+                          }}
+                        />
                       </Grid>
-                    </CardContent>
-                  </Card>
-
-                  <Card variant='outlined' sx={{ mb: 6 }}>
-                    <CardContent>
-                      <Typography variant='h6' sx={{ mb: 4 }}>
-                        {t('settings.general.basic.sections.storefrontDisplay')}
-                      </Typography>
-                      <Grid container spacing={4}>
-                        <Grid size={{ xs: 12 }}>
-                          <CustomTextField
-                            fullWidth
-                            label={t('settings.general.basic.fields.topBarAnnouncement.label')}
-                            value={basicData.topBarAnnouncement}
-                            placeholder={t('settings.general.basic.fields.topBarAnnouncement.placeholder')}
-                            onChange={e => handleBasicChange('topBarAnnouncement', e.target.value)}
-                            slotProps={{
-                              input: {
-                                startAdornment: <i className='tabler-message' />
-                              }
-                            }}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12 }}>
-                          <CustomTextField
-                            fullWidth
-                            label={t('settings.general.basic.fields.footerCopyright.label')}
-                            value={basicData.footerCopyright}
-                            placeholder={t('settings.general.basic.fields.footerCopyright.placeholder')}
-                            onChange={e => handleBasicChange('footerCopyright', e.target.value)}
-                            slotProps={{
-                              input: {
-                                startAdornment: <i className='tabler-copyright' />
-                              }
-                            }}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12 }}>
-                          <CustomTextField
-                            fullWidth
-                            label={t('settings.general.basic.fields.siteAnnouncement.label')}
-                            value={basicData.siteAnnouncement}
-                            placeholder={t('settings.general.basic.fields.siteAnnouncement.placeholder')}
-                            onChange={e => handleBasicChange('siteAnnouncement', e.target.value)}
-                            multiline
-                            rows={2}
-                            slotProps={{
-                              input: {
-                                startAdornment: (
-                                  <Box component='span' sx={{ mr: 1.5, display: 'flex', alignItems: 'flex-start', pt: 1.25 }}>
-                                    <i className='tabler-info-circle' />
-                                  </Box>
-                                )
-                              }
-                            }}
-                          />
-                        </Grid>
+                      <Grid size={{ xs: 12, sm: 4 }}>
+                        <CustomTextField
+                          fullWidth
+                          label={t('settings.general.basic.fields.social.instagram.label')}
+                          value={basicData.instagramUrl}
+                          placeholder={t('settings.general.basic.fields.social.instagram.placeholder')}
+                          onChange={e => handleBasicChange('instagramUrl', e.target.value)}
+                          slotProps={{
+                            input: {
+                              startAdornment: <i className='tabler-brand-instagram' />
+                            }
+                          }}
+                        />
                       </Grid>
-                    </CardContent>
-                  </Card>
+                    </Grid>
+                </SettingsSection>
 
-                  <Card variant='outlined' sx={{ mb: 6 }}>
-                    <CardContent>
-                      <Typography variant='h6' sx={{ mb: 4 }}>
-                        {t('settings.general.basic.sections.storefrontTheme')}
-                      </Typography>
-                      <Grid container spacing={4}>
-                        <Grid size={{ xs: 12, sm: 6 }}>
-                          <CustomTextField
-                            select
-                            fullWidth
-                            label={t('settings.general.basic.fields.storefrontTheme.label')}
-                            value={THEME_IDS.includes(storefrontUi.theme) ? storefrontUi.theme : THEME_IDS[0] ?? 'store'}
-                            onChange={e => handleStorefrontUiChange('theme', e.target.value)}
-                          >
-                            {THEME_IDS.map(id => (
-                              <MenuItem key={id} value={id}>
-                                {themeDisplayName(id)}
-                              </MenuItem>
-                            ))}
-                          </CustomTextField>
-                        </Grid>
-                        <Grid size={{ xs: 12 }}>
-                          <Typography variant='subtitle2' color='text.secondary' sx={{ mb: 2 }}>
-                            {t('settings.general.basic.fields.headerOptions.label')}
-                          </Typography>
-                          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2 }}>
-                            <FormControlLabel
-                              control={
-                                <Checkbox
-                                  checked={storefrontUi.header_options?.show_search !== false}
-                                  onChange={e => handleHeaderOptionChange('show_search', e.target.checked)}
-                                />
-                              }
-                              label={t('settings.general.basic.fields.headerOptions.showSearch')}
-                            />
-                            <FormControlLabel
-                              control={
-                                <Checkbox
-                                  checked={storefrontUi.header_options?.show_cart !== false}
-                                  onChange={e => handleHeaderOptionChange('show_cart', e.target.checked)}
-                                />
-                              }
-                              label={t('settings.general.basic.fields.headerOptions.showCart')}
-                            />
-                            <FormControlLabel
-                              control={
-                                <Checkbox
-                                  checked={storefrontUi.header_options?.show_language_switcher !== false}
-                                  onChange={e => handleHeaderOptionChange('show_language_switcher', e.target.checked)}
-                                />
-                              }
-                              label={t('settings.general.basic.fields.headerOptions.showLanguageSwitcher')}
-                            />
-                            <FormControlLabel
-                              control={
-                                <Checkbox
-                                  checked={storefrontUi.header_options?.show_style_selector !== false}
-                                  onChange={e => handleHeaderOptionChange('show_style_selector', e.target.checked)}
-                                />
-                              }
-                              label={t('settings.general.basic.fields.headerOptions.showStyleSelector')}
-                            />
-                            <FormControlLabel
-                              control={
-                                <Checkbox
-                                  checked={storefrontUi.header_options?.show_login !== false}
-                                  onChange={e => handleHeaderOptionChange('show_login', e.target.checked)}
-                                />
-                              }
-                              label={t('settings.general.basic.fields.headerOptions.showLogin')}
-                            />
-                          </Box>
-                        </Grid>
-                      </Grid>
-                    </CardContent>
-                  </Card>
-
-                  <Card variant='outlined' sx={{ mb: 6 }}>
-                    <CardContent>
-                      <Typography variant='h6' sx={{ mb: 4 }}>
-                        {t('settings.general.basic.sections.socialMediaLinks')}
-                      </Typography>
-                      <Grid container spacing={4}>
-                        <Grid size={{ xs: 12, sm: 4 }}>
-                          <CustomTextField
-                            fullWidth
-                            label={t('settings.general.basic.fields.social.facebook.label')}
-                            value={basicData.facebookUrl}
-                            placeholder={t('settings.general.basic.fields.social.facebook.placeholder')}
-                            onChange={e => handleBasicChange('facebookUrl', e.target.value)}
-                            slotProps={{
-                              input: {
-                                startAdornment: <i className='tabler-brand-facebook' />
-                              }
-                            }}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 4 }}>
-                          <CustomTextField
-                            fullWidth
-                            label={t('settings.general.basic.fields.social.twitter.label')}
-                            value={basicData.twitterUrl}
-                            placeholder={t('settings.general.basic.fields.social.twitter.placeholder')}
-                            onChange={e => handleBasicChange('twitterUrl', e.target.value)}
-                            slotProps={{
-                              input: {
-                                startAdornment: <i className='tabler-brand-twitter' />
-                              }
-                            }}
-                          />
-                        </Grid>
-                        <Grid size={{ xs: 12, sm: 4 }}>
-                          <CustomTextField
-                            fullWidth
-                            label={t('settings.general.basic.fields.social.instagram.label')}
-                            value={basicData.instagramUrl}
-                            placeholder={t('settings.general.basic.fields.social.instagram.placeholder')}
-                            onChange={e => handleBasicChange('instagramUrl', e.target.value)}
-                            slotProps={{
-                              input: {
-                                startAdornment: <i className='tabler-brand-instagram' />
-                              }
-                            }}
-                          />
-                        </Grid>
-                      </Grid>
-                    </CardContent>
-                  </Card>
-
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 6 }}>
-                    <Button 
-                      variant='contained' 
-                      type='submit' 
-                      disabled={saving || loading || savingAdminIdentity}
-                      startIcon={saving ? <CircularProgress size={16} /> : <i className='tabler-check' />}
-                    >
-                      {saving ? t('settings.general.basic.actions.saving') : t('settings.general.basic.actions.saveChanges')}
-                    </Button>
-                    <Button 
-                      variant='outlined' 
-                      color='secondary' 
-                      onClick={() => setBasicData(initialBasicData)}
-                      disabled={saving || loading || savingAdminIdentity}
-                    >
-                      {t('settings.general.basic.actions.resetForm')}
-                    </Button>
-                  </Box>
-                </form>
-              </CardContent>
+                <SettingsActionBar>
+                  <Button
+                    variant='contained'
+                    type='submit'
+                    disabled={saving || loading || savingAdminIdentity}
+                    startIcon={saving ? <CircularProgress size={16} /> : <i className='tabler-check' />}
+                  >
+                    {saving ? t('settings.general.basic.actions.saving') : t('settings.general.basic.actions.saveChanges')}
+                  </Button>
+                  <Button
+                    variant='outlined'
+                    color='secondary'
+                    onClick={() => setBasicData(initialBasicData)}
+                    disabled={saving || loading || savingAdminIdentity}
+                  >
+                    {t('settings.general.basic.actions.resetForm')}
+                  </Button>
+                </SettingsActionBar>
+              </form>
             </TabPanel>
 
             {/* Users Tab */}
-            <TabPanel value='users' className='p-0'>
+            <TabPanel value='users' sx={flushPanelSx}>
               <UsersListTable />
             </TabPanel>
 
             {/* Roles Tab */}
-            <TabPanel value='roles' className='p-0'>
+            <TabPanel value='roles' sx={flushPanelSx}>
               <RolesListTable />
             </TabPanel>
 
             {/* Email Tab */}
-            <TabPanel value='email' className='p-0'>
-              <CardContent>
-                <EmailTab />
-              </CardContent>
+            <TabPanel value='email' sx={flushPanelSx}>
+              {/* No gutter wrapper: like the API Keys, Users and Roles panels,
+                  EmailTab is a table that runs edge to edge and insets its own
+                  copy to match. Wrapping it pushed the table in twice over. */}
+              <EmailTab />
+            </TabPanel>
+
+            {/* Social login Tab — same flush treatment as the other tables. */}
+            <TabPanel value='social-login' sx={flushPanelSx}>
+              <SocialLoginTab />
             </TabPanel>
 
             {/* API Keys Tab */}
-            <TabPanel value='api-keys' className='p-0'>
+            <TabPanel value='api-keys' sx={flushPanelSx}>
               <APIKeysTab />
             </TabPanel>
-          </TabContext>
-        </Card>
+
+            <TabPanel value='plugins' sx={flushPanelSx}>
+              <PluginsTab />
+            </TabPanel>
+
+            <TabPanel value='versions' sx={flushPanelSx}>
+              <VersionsTab />
+            </TabPanel>
+        </SettingsCard>
       </Grid>
 
       {afterSlots.map(

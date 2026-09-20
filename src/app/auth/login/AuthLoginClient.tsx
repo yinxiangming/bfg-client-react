@@ -14,8 +14,10 @@ import Logo from '@components/Logo'
 import CustomTextField from '@components/ui/TextField'
 import Icon from '@components/Icon'
 import { authApi } from '@/utils/authApi'
+import { meApi } from '@/utils/meApi'
 import { getApiBaseUrl } from '@/utils/api'
 import { useStorefrontConfigSafe } from '@/contexts/StorefrontConfigContext'
+import { useSocialProviders } from '@/hooks/useSocialProviders'
 import { isPlatformInstance, handlePlatformPostLogin } from '@/services/platform'
 
 export default function AuthLoginClient() {
@@ -31,8 +33,10 @@ export default function AuthLoginClient() {
   const storefrontConfig = useStorefrontConfigSafe()
   const siteName = storefrontConfig.site_name?.trim() || 'BFG'
 
-  const redirect = searchParams.get('redirect') ? decodeURIComponent(searchParams.get('redirect')!) : '/account'
+  const hasExplicitRedirect = Boolean(searchParams.get('redirect'))
+  const redirect = hasExplicitRedirect ? decodeURIComponent(searchParams.get('redirect')!) : '/account'
   const host = typeof window !== 'undefined' ? window.location.host : ''
+  const enabledProviders = useSocialProviders()
 
   // If this workspace is linked to a Platform, redirect to Platform login instead.
   const platformLoginUrl = process.env.NEXT_PUBLIC_PLATFORM_LOGIN_URL
@@ -62,7 +66,19 @@ export default function AuthLoginClient() {
           redirect,
         )
       } else {
-        router.push(redirect)
+        // Default landing: staff belong in the admin area. The customer /account
+        // area bounces non-customers to the storefront, so without this a staff
+        // login lands on the shop. Respect an explicit ?redirect when present.
+        let target = redirect
+        if (!hasExplicitRedirect) {
+          try {
+            const me = await meApi.getMe()
+            if (me?.staff_member?.is_active) target = '/admin'
+          } catch {
+            // Fall back to the default redirect on any /me error.
+          }
+        }
+        router.push(target)
       }
     } catch (err: any) {
       setError(err?.message === 'NETWORK_ERROR' ? t('networkError') : (err?.message || t('loginFailed')))
@@ -79,12 +95,18 @@ export default function AuthLoginClient() {
   return (
     <div className='auth-shell'>
       <Link className='auth-logo' href='/'>
-        <Logo skipLink={true} name={siteName} />
+        <Logo
+          skipLink={true}
+          name={siteName}
+          logoSrc={storefrontConfig.logo}
+          logoDarkSrc={storefrontConfig.logo_dark}
+        />
       </Link>
 
       <div className='auth-card'>
         <div className='auth-header'>
-          <h2>{t('welcome', { siteName })}</h2>
+          <div className='auth-eyebrow'>{t('eyebrow', { siteName })}</div>
+          <h2>{t('welcome')}</h2>
           <p>{t('subtitle')}</p>
         </div>
 
@@ -157,36 +179,45 @@ export default function AuthLoginClient() {
             </Link>
           </div>
 
-          <div className='auth-divider'>
-            <span>{t('or')}</span>
-          </div>
-
-          <div className='auth-social'>
-            <IconButton
-              className='text-error'
-              size='small'
-              onClick={() => socialLogin('google')}
-              aria-label='Google'
-            >
-              <i className='tabler-brand-google-filled' />
-            </IconButton>
-            <IconButton
-              className='text-facebook'
-              size='small'
-              onClick={() => socialLogin('facebook')}
-              aria-label='Facebook'
-            >
-              <i className='tabler-brand-facebook-filled' />
-            </IconButton>
-            <IconButton
-              className='text-textPrimary'
-              size='small'
-              onClick={() => socialLogin('apple')}
-              aria-label='Apple'
-            >
-              <i className='tabler-brand-apple-filled' />
-            </IconButton>
-          </div>
+          {enabledProviders && enabledProviders.length > 0 && (
+            <>
+              <div className='auth-divider'>
+                <span>{t('or')}</span>
+              </div>
+              <div className='auth-social'>
+              {enabledProviders.includes('google') && (
+                <IconButton
+                  className='text-error'
+                  size='small'
+                  onClick={() => socialLogin('google')}
+                  aria-label='Google'
+                >
+                  <i className='tabler-brand-google-filled' />
+                </IconButton>
+              )}
+              {enabledProviders.includes('facebook') && (
+                <IconButton
+                  className='text-facebook'
+                  size='small'
+                  onClick={() => socialLogin('facebook')}
+                  aria-label='Facebook'
+                >
+                  <i className='tabler-brand-facebook-filled' />
+                </IconButton>
+              )}
+              {enabledProviders.includes('apple') && (
+                <IconButton
+                  className='text-textPrimary'
+                  size='small'
+                  onClick={() => socialLogin('apple')}
+                  aria-label='Apple'
+                >
+                  <i className='tabler-brand-apple-filled' />
+                </IconButton>
+              )}
+              </div>
+            </>
+          )}
         </form>
       </div>
     </div>

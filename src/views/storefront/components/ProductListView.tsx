@@ -29,9 +29,13 @@ import classnames from 'classnames'
 
 // Util Imports
 import { useCart } from '@/contexts/CartContext'
+import { useStorefrontCurrency } from '@/hooks/useStorefrontCurrency'
+import { productPath } from '@/utils/productUrl'
 
 type Product = {
   id: number
+  /** Canonical handle; see utils/productUrl. */
+  slug?: string | null
   name: string
   brand: string
   price: number
@@ -41,11 +45,14 @@ type Product = {
   reviews: number
   image: string
   isNew: boolean
+  inStock?: boolean
+  purchasable?: boolean
   description?: string
 }
 
 const ProductListView = ({ product }: { product: Product }) => {
   const t = useTranslations('storefront')
+  const { formatPrice } = useStorefrontCurrency()
   const [isHovered, setIsHovered] = useState(false)
   const [snackbarOpen, setSnackbarOpen] = useState(false)
   const [snackbarMessage, setSnackbarMessage] = useState('')
@@ -142,7 +149,7 @@ const ProductListView = ({ product }: { product: Product }) => {
           <CardContent>
             <Box className='flex justify-between items-start mbe-2'>
               <Box className='flex-1'>
-                <Link href={`/product/${product.id}`} className='no-underline'>
+                <Link href={productPath(product)} className='no-underline'>
                   <Typography variant='h5' className='font-semibold mbe-2 hover:text-primary'>
                     {product.brand} {product.name}
                   </Typography>
@@ -180,11 +187,11 @@ const ProductListView = ({ product }: { product: Product }) => {
             <Box className='flex justify-between items-center'>
               <Box className='flex items-center gap-2'>
                 <Typography variant='h5' className='font-bold text-primary'>
-                  ${product.price.toFixed(2)}
+                  {formatPrice(product.price)}
                 </Typography>
                 {product.originalPrice && (
                   <Typography variant='body2' className='text-textSecondary line-through'>
-                    ${product.originalPrice.toFixed(2)}
+                    {formatPrice(product.originalPrice)}
                   </Typography>
                 )}
               </Box>

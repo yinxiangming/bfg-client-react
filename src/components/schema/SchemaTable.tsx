@@ -1,7 +1,7 @@
 'use client'
 
 // React Imports
-import { useState, useMemo, useEffect, useCallback } from 'react'
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
 
 // i18n Imports
 import { useTranslations } from 'next-intl'
@@ -13,7 +13,6 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
-import Chip from '@mui/material/Chip'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import Dialog from '@mui/material/Dialog'
@@ -37,9 +36,10 @@ import classnames from 'classnames'
 // Component Imports
 import CustomTextField from '@/components/ui/TextField'
 import FilterDateRangePicker, { toDateOnly } from '@/components/schema/FilterDateRangePicker'
+import StatusBadge from '@/components/schema/StatusBadge'
 
 // Type Imports
-import type { ListSchema, SchemaAction, SchemaFilter } from '@/types/schema'
+import type { ListSchema, SchemaAction, SchemaFilter, SchemaSummaryField } from '@/types/schema'
 
 // Util Imports
 import { formatCurrency, formatDate, formatDateTime } from '@/utils/format'
@@ -91,6 +91,18 @@ function getDateRangePreset(start: string, end: string): '' | 'today' | 'yesterd
   return 'custom'
 }
 
+// Format a summary aggregate for display in the summary bar (WI-391).
+function formatSummaryValue(value: string | number | null | undefined, field: SchemaSummaryField): string {
+  if (value === null || value === undefined || value === '') return '—'
+  const num = typeof value === 'number' ? value : Number(value)
+  if (field.format === 'currency') return formatCurrency(Number.isFinite(num) ? num : 0)
+  if (field.format === 'integer' || field.format === 'number') {
+    return Number.isFinite(num) ? num.toLocaleString() : String(value)
+  }
+  // decimal (default): server pre-formats precision; add thousands grouping when numeric
+  return Number.isFinite(num) ? num.toLocaleString(undefined, { maximumFractionDigits: 3 }) : String(value)
+}
+
 type SchemaTableProps<T = any> = {
   schema: ListSchema
   data: T[]
@@ -104,6 +116,25 @@ type SchemaTableProps<T = any> = {
   /** Controlled filters for API-mode filtering: parent passes params and refetches when they change */
   filters?: Record<string, string>
   onFiltersChange?: (filters: Record<string, string>) => void
+  /** Server-side pagination: when provided, data is the current page and client-side filtering/pagination are skipped */
+  serverPagination?: {
+    total: number
+    page: number
+    rowsPerPage: number
+    onPageChange: (page: number) => void
+    onRowsPerPageChange: (rowsPerPage: number) => void
+  }
+  /** Called with debounced search string when server-side pagination is active */
+  onSearchChange?: (search: string) => void
+  /** Aggregate stats for the summary bar, keyed by SchemaSummaryField.key (WI-391). */
+  summary?: Record<string, string | number | null>
+  summaryLoading?: boolean
+  /** Total rows matching the current filters; enables cross-page "select all N".
+   *  Falls back to serverPagination.total, then the local filtered count. */
+  totalCount?: number
+  /** Notifies the container of the current selection so it can run bulk actions
+   *  by id-set (page selection) or by filter (all-matching). */
+  onSelectionChange?: (selection: { ids: (number | string)[]; allMatching: boolean; total: number }) => void
 }
 
 // Default status colors - only common/generic statuses
@@ -171,7 +202,13 @@ export default function SchemaTable<T extends { id: number | string }>({
   statusColors = defaultStatusColors,
   customFilters,
   filters: controlledFilters,
-  onFiltersChange
+  onFiltersChange,
+  serverPagination,
+  onSearchChange,
+  summary,
+  summaryLoading,
+  totalCount,
+  onSelectionChange
 }: SchemaTableProps<T>) {
   const t = useTranslations('admin')
   // State
@@ -199,6 +236,9 @@ export default function SchemaTable<T extends { id: number | string }>({
   const [filterOptions, setFilterOptions] = useState<Record<string, OptionItemType[]>>({})
   const [filterOptionsLoading, setFilterOptionsLoading] = useState<Record<string, boolean>>({})
   const [selectedRows, setSelectedRows] = useState<Set<number | string>>(new Set())
+  // Cross-page "select all N matching" mode (WI-391): selection spans the whole
+  // filtered result set, not just the rows held client-side on the current page.
+  const [allMatchingSelected, setAllMatchingSelected] = useState(false)
   const [bulkActionMenuAnchor, setBulkActionMenuAnchor] = useState<HTMLElement | null>(null)
   const [bulkDeleteConfirm, setBulkDeleteConfirm] = useState<boolean>(false)
   const [dateRangePickerOpen, setDateRangePickerOpen] = useState<string | null>(null)
@@ -213,6 +253,23 @@ export default function SchemaTable<T extends { id: number | string }>({
     }, 300)
     return () => clearTimeout(timer)
   }, [search])
+
+  // Notify parent when search changes in server-pagination mode.
+  // Only fire when debouncedSearch actually changes — do NOT include the
+  // unstable serverPagination / onSearchChange props in deps, otherwise the
+  // effect would fire on every render and repeatedly reset pagination.
+  const onSearchChangeRef = useRef(onSearchChange)
+  useEffect(() => {
+    onSearchChangeRef.current = onSearchChange
+  })
+  const didMountSearchRef = useRef(false)
+  useEffect(() => {
+    if (!didMountSearchRef.current) {
+      didMountSearchRef.current = true
+      return
+    }
+    onSearchChangeRef.current?.(debouncedSearch)
+  }, [debouncedSearch])
 
   // Load filter options dynamically
   useEffect(() => {
@@ -263,6 +320,8 @@ export default function SchemaTable<T extends { id: number | string }>({
 
   // Filter and search data
   const filteredData = useMemo(() => {
+    // When server pagination is active, data is already the current page — skip client-side processing
+    if (serverPagination) return Array.isArray(data) ? [...data] : []
     let result = Array.isArray(data) ? [...data] : []
 
     // Apply search
@@ -319,9 +378,10 @@ export default function SchemaTable<T extends { id: number | string }>({
 
   // Pagination
   const paginatedData = useMemo(() => {
+    if (serverPagination) return filteredData
     const start = page * rowsPerPage
     return filteredData.slice(start, start + rowsPerPage)
-  }, [filteredData, page, rowsPerPage])
+  }, [serverPagination, filteredData, page, rowsPerPage])
 
   // Reset to first page when filters change
   useEffect(() => {
@@ -360,17 +420,9 @@ export default function SchemaTable<T extends { id: number | string }>({
           // Note: These labels should ideally come from schema or data
           // For now, using generic status labels
           return (
-            <Chip
+            <StatusBadge
               label={value ? t('common.states.active', { defaultValue: 'Active' }) : t('common.states.inactive', { defaultValue: 'Inactive' })}
-              size="small"
               color={value ? 'success' : 'default'}
-              variant="filled"
-              sx={{ 
-                height: 24, 
-                fontSize: '0.8125rem', 
-                fontWeight: 500,
-                '& .MuiChip-label': { px: 1.5 }
-              }}
             />
           )
         }
@@ -379,36 +431,12 @@ export default function SchemaTable<T extends { id: number | string }>({
           return (
             <Box sx={{ display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
               {value.map((item, idx) => (
-                <Chip 
-                  key={idx} 
-                  label={item} 
-                  size="small" 
-                  variant="filled"
-                  sx={{ 
-                    height: 24, 
-                    fontSize: '0.8125rem', 
-                    fontWeight: 500,
-                    '& .MuiChip-label': { px: 1.5 }
-                  }}
-                />
+                <StatusBadge key={idx} label={item} color="default" noDot />
               ))}
             </Box>
           )
         }
-        return (
-          <Chip
-            label={value}
-            size="small"
-            color={statusColors[value] || 'default'}
-            variant="filled"
-            sx={{ 
-              height: 24, 
-              fontSize: '0.8125rem', 
-              fontWeight: 500,
-              '& .MuiChip-label': { px: 1.5 }
-            }}
-          />
-        )
+        return <StatusBadge label={value} color={statusColors[value] || 'default'} />
       default:
         // Format file size for media
         if (typeof value === 'number' && value > 1024) {
@@ -505,12 +533,41 @@ export default function SchemaTable<T extends { id: number | string }>({
   const globalActions = schema.actions?.filter(a => a.scope === 'global') || []
   const rowActions = schema.actions?.filter(a => a.scope === 'row') || []
 
-  const totalPages = Math.ceil(filteredData.length / rowsPerPage)
-  const startIndex = filteredData.length === 0 ? 0 : page * rowsPerPage + 1
-  const endIndex = Math.min((page + 1) * rowsPerPage, filteredData.length)
+  /**
+   * The action the first column opens when the schema has not named one itself.
+   *
+   * `column.link` has existed all along, but only a handful of the schemas set
+   * it, so most tables could be entered only through the ⋯ menu at the far right
+   * — the identity of the row sits on the left and the only way to open it on
+   * the opposite edge. Preferring 'edit' over 'view' matches where these tables
+   * are used: this is the back office, and opening a record here means editing
+   * it. A schema that marks its own link column has decided already; one that
+   * sets `firstColumnLink: false` has opted out.
+   */
+  const implicitFirstColumnAction = useMemo(() => {
+    if (schema.firstColumnLink === false) return null
+    if (schema.columns.some(column => column.link)) return null
+    for (const id of ['edit', 'view', 'detail', 'open']) {
+      const action = rowActions.find(a => a.id === id)
+      if (action) return action
+    }
+    return null
+  }, [schema.firstColumnLink, schema.columns, rowActions])
+
+  const _sp = serverPagination
+  const displayTotal = _sp ? _sp.total : filteredData.length
+  const displayPage = _sp ? _sp.page : page
+  const displayRowsPerPage = _sp ? _sp.rowsPerPage : rowsPerPage
+  const totalPages = Math.ceil(displayTotal / displayRowsPerPage)
+  const startIndex = displayTotal === 0 ? 0 : displayPage * displayRowsPerPage + 1
+  const endIndex = Math.min((displayPage + 1) * displayRowsPerPage, displayTotal)
+
+  // Total rows matching the current filters — drives the "select all N" affordance.
+  const matchingTotal = totalCount ?? (_sp ? _sp.total : filteredData.length)
 
   // Row selection handlers
   const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setAllMatchingSelected(false)
     if (event.target.checked) {
       const newSelected = new Set(paginatedData.map(item => item.id))
       setSelectedRows(newSelected)
@@ -520,6 +577,8 @@ export default function SchemaTable<T extends { id: number | string }>({
   }
 
   const handleSelectRow = (id: number | string) => {
+    // Any manual toggle drops out of cross-page "all matching" mode.
+    setAllMatchingSelected(false)
     const newSelected = new Set(selectedRows)
     if (newSelected.has(id)) {
       newSelected.delete(id)
@@ -529,18 +588,79 @@ export default function SchemaTable<T extends { id: number | string }>({
     setSelectedRows(newSelected)
   }
 
-  const isAllSelected = paginatedData.length > 0 && paginatedData.every(item => selectedRows.has(item.id))
-  const isIndeterminate = selectedRows.size > 0 && selectedRows.size < paginatedData.length
+  // Cross-page select-all (WI-391): mark the entire filtered set as selected.
+  const handleSelectAllMatching = () => {
+    setAllMatchingSelected(true)
+    setSelectedRows(new Set(paginatedData.map(item => item.id)))
+  }
+
+  const handleClearSelection = () => {
+    setAllMatchingSelected(false)
+    setSelectedRows(new Set())
+  }
+
+  const isAllSelected =
+    allMatchingSelected || (paginatedData.length > 0 && paginatedData.every(item => selectedRows.has(item.id)))
+  const isIndeterminate = !allMatchingSelected && selectedRows.size > 0 && selectedRows.size < paginatedData.length
+
+  // Surface the live selection to the container so it can run bulk actions by
+  // id-set (page selection) or by filter (all-matching). Ref-guarded so an
+  // unstable callback prop does not re-fire the effect every render.
+  const onSelectionChangeRef = useRef(onSelectionChange)
+  useEffect(() => { onSelectionChangeRef.current = onSelectionChange })
+  useEffect(() => {
+    onSelectionChangeRef.current?.({
+      ids: Array.from(selectedRows),
+      allMatching: allMatchingSelected,
+      total: allMatchingSelected ? matchingTotal : selectedRows.size
+    })
+  }, [selectedRows, allMatchingSelected, matchingTotal])
+
+  // Selected-row summary (WI-399): when summaryConfig fields declare a `sumField`,
+  // the bar aggregates client-side over the loaded rows — the selected rows when a
+  // selection is active, else the full filtered set. A server-provided `summary`
+  // still wins for the whole-set view (covers aggregates the client can't compute,
+  // e.g. declared value derived from related records).
+  const sumFields = useMemo(
+    () => schema.summaryConfig?.fields.filter(f => f.sumField) ?? [],
+    [schema.summaryConfig]
+  )
+  const hasSelection = selectedRows.size > 0 || allMatchingSelected
+  const selectionSummary = useMemo(() => {
+    if (sumFields.length === 0 || !hasSelection) return null
+    const rows = allMatchingSelected ? filteredData : data.filter(d => selectedRows.has(d.id))
+    const out: Record<string, number> = {}
+    for (const f of sumFields) {
+      out[f.key] = f.sumField === '__count__'
+        ? rows.length
+        : rows.reduce((acc, r) => acc + (Number((r as Record<string, unknown>)[f.sumField as string]) || 0), 0)
+    }
+    return out
+  }, [sumFields, hasSelection, allMatchingSelected, filteredData, data, selectedRows])
+  const computedAllSummary = useMemo(() => {
+    if (sumFields.length === 0 || summary) return null
+    const out: Record<string, number> = {}
+    for (const f of sumFields) {
+      out[f.key] = f.sumField === '__count__'
+        ? filteredData.length
+        : filteredData.reduce((acc, r) => acc + (Number((r as Record<string, unknown>)[f.sumField as string]) || 0), 0)
+    }
+    return out
+  }, [sumFields, summary, filteredData])
+  const summaryIsSelection = !!selectionSummary
+  const effectiveSummary = selectionSummary ?? summary ?? computedAllSummary ?? undefined
 
   return (
     <>
-      <Card 
-        elevation={0} 
-        sx={{ 
-          boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+      <Card
+        elevation={0}
+        className="at-schema-table"
+        sx={{
+          backgroundColor: 'var(--at-card-bg, var(--mui-palette-background-paper))',
+          boxShadow: 'var(--at-card-shadow, none)',
           border: '1px solid',
-          borderColor: 'divider',
-          borderRadius: 2,
+          borderColor: 'var(--at-card-border, var(--mui-palette-divider))',
+          borderRadius: 'var(--at-card-radius, 8px)',
           width: '100%',
           display: 'flex',
           flexDirection: 'column',
@@ -548,8 +668,72 @@ export default function SchemaTable<T extends { id: number | string }>({
         }}
       >
 
+        {/* Summary bar — aggregates the whole filtered result set, not just the
+            current page (WI-391). Driven by schema.summaryConfig + summary prop. */}
+        {schema.summaryConfig && (effectiveSummary || summaryLoading) && (
+          <CardContent
+            sx={{
+              py: 1.25, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider, var(--mui-palette-divider))',
+              display: 'flex', gap: 3, flexWrap: 'wrap', alignItems: 'baseline',
+              backgroundColor: summaryIsSelection
+                ? 'var(--at-selected-bg, rgba(105,108,255,0.08))'
+                : 'var(--at-subtle-bg, rgba(0,0,0,0.02))'
+            }}
+          >
+            {summaryLoading && !effectiveSummary ? (
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <CircularProgress size={16} />
+                <Typography variant="body2" color="text.secondary">{t('common.schemaTable.loadingStats')}</Typography>
+              </Box>
+            ) : (
+              <>
+                {summaryIsSelection && (
+                  <Typography variant="caption" sx={{ color: 'primary.main', fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.3 }}>
+                    {t('common.schemaTable.selectionSummaryLabel')}
+                  </Typography>
+                )}
+                {schema.summaryConfig.fields.map(field => (
+                  <Box key={field.key} sx={{ display: 'flex', alignItems: 'baseline', gap: 0.75 }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', textTransform: 'uppercase', letterSpacing: 0.3 }}>
+                      {field.label}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      {formatSummaryValue(effectiveSummary?.[field.key], field)}{field.unit ? ` ${field.unit}` : ''}
+                    </Typography>
+                  </Box>
+                ))}
+              </>
+            )}
+          </CardContent>
+        )}
+
+        {/* Selection banner — page selection count + cross-page "select all N" (WI-391) */}
+        {(selectedRows.size > 0 || allMatchingSelected) && (
+          <CardContent
+            sx={{
+              py: 1, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider, var(--mui-palette-divider))',
+              display: 'flex', gap: 2, alignItems: 'center', flexWrap: 'wrap',
+              backgroundColor: 'var(--at-selected-bg, rgba(105,108,255,0.08))'
+            }}
+          >
+            <Typography variant="body2">
+              {allMatchingSelected
+                ? t('common.schemaTable.selectedAllMatching', { count: matchingTotal })
+                : t('common.schemaTable.selectedCount', { count: selectedRows.size })}
+            </Typography>
+            {!allMatchingSelected && isAllSelected && matchingTotal > paginatedData.length && (
+              <Button size="small" variant="text" onClick={handleSelectAllMatching} sx={{ textTransform: 'none' }}>
+                {t('common.schemaTable.selectAllMatching', { count: matchingTotal })}
+              </Button>
+            )}
+            <Button size="small" variant="text" color="error" onClick={handleClearSelection} sx={{ textTransform: 'none' }}>
+              {t('common.schemaTable.clearSelection')}
+            </Button>
+          </CardContent>
+        )}
+
         {/* Toolbar with Search, Filters, and Actions */}
-        <CardContent sx={{ py: 2, px: 3, borderBottom: '1px solid', borderColor: 'divider' }}>
+        <CardContent sx={{ py: 2, px: 3, borderBottom: '1px solid', borderColor: 'var(--at-divider, var(--mui-palette-divider))' }}>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, alignItems: 'center' }}>
             {/* Search */}
             {schema.searchFields && (
@@ -814,13 +998,20 @@ export default function SchemaTable<T extends { id: number | string }>({
                   startIcon={action.icon ? <i className={action.icon} style={{ fontSize: '1rem' }} /> : undefined}
                   onClick={() => handleActionClick(action, {} as T)}
                   size="small"
-                  sx={{ 
-                    textTransform: 'none', 
+                  sx={{
+                    textTransform: 'none',
                     fontWeight: 500,
-                    borderRadius: 1.5,
-                    boxShadow: action.type === 'primary' ? '0 1px 2px 0 rgb(0 0 0 / 0.05)' : 'none',
+                    borderRadius: 'var(--at-control-radius, 8px)',
+                    boxShadow: 'none',
                     height: '38px',
-                    fontSize: '0.875rem'
+                    fontSize: '0.875rem',
+                    ...(action.type === 'primary'
+                      ? {
+                          backgroundColor: 'var(--at-accent, var(--mui-palette-primary-main))',
+                          color: 'var(--at-accent-fg, var(--mui-palette-primary-contrastText))',
+                          '&:hover': { backgroundColor: 'var(--at-accent-strong, var(--mui-palette-primary-dark))' }
+                        }
+                      : {})
                   }}
                 >
                   {action.label}
@@ -869,16 +1060,23 @@ export default function SchemaTable<T extends { id: number | string }>({
                     size="small"
                   />
                 </th>
-                {schema.columns.map((column) => (
+                {schema.columns.map((column) => {
+                  const isNumeric = column.type === 'currency' || column.type === 'number'
+                  return (
                   <th
                     key={column.field}
                     className={classnames({
-                      'cursor-pointer select-none': column.sortable
+                      'cursor-pointer select-none': column.sortable,
+                      'at-num': isNumeric
                     })}
+                    // `width` caps the column instead of letting `max-content`
+                    // size it to the longest cell. See the matching <td> below.
+                    style={column.width ? { maxWidth: column.width, width: column.width } : undefined}
                     onClick={() => column.sortable && handleSort(column.field)}
                   >
                     <div className={classnames({
-                      'flex items-center': column.sortable
+                      'flex items-center': column.sortable,
+                      'justify-end': isNumeric && column.sortable
                     })}>
                       {column.label}
                       {column.sortable && (
@@ -895,7 +1093,8 @@ export default function SchemaTable<T extends { id: number | string }>({
                       )}
                     </div>
                   </th>
-                ))}
+                  )
+                })}
                 {rowActions.length > 0 && <th align="right">{t('common.schemaTable.actionsColumn')}</th>}
               </tr>
             </thead>
@@ -908,8 +1107,8 @@ export default function SchemaTable<T extends { id: number | string }>({
                 </tr>
               ) : paginatedData.length === 0 ? (
                 <tr>
-                  <td colSpan={schema.columns.length + 1 + (rowActions.length > 0 ? 1 : 0)} className='text-center'>
-                    {t('common.schemaTable.noData')}
+                  <td colSpan={schema.columns.length + 1 + (rowActions.length > 0 ? 1 : 0)}>
+                    <div className='at-empty'>{t('common.schemaTable.noData')}</div>
                   </td>
                 </tr>
               ) : (
@@ -930,7 +1129,7 @@ export default function SchemaTable<T extends { id: number | string }>({
                     >
                       <td onClick={(e) => e.stopPropagation()}>
                         <Checkbox
-                          checked={selectedRows.has(item.id)}
+                          checked={allMatchingSelected || selectedRows.has(item.id)}
                           onChange={() => handleSelectRow(item.id)}
                           size="small"
                           onClick={(e) => e.stopPropagation()}
@@ -943,28 +1142,60 @@ export default function SchemaTable<T extends { id: number | string }>({
                             : '-'
                           : getNestedValue(item, column.field)
 
-                        // Check if column has a link action
-                        const hasLink = !!column.link
+                        // The action this cell opens: the one the column names, or —
+                        // for the first column — the implicit one resolved above.
+                        // Resolving to the action rather than to "a link id is set"
+                        // also stops a cell styling itself as a link when the id
+                        // matches no action, which looked clickable and did nothing.
+                        const linkAction = column.link
+                          ? schema.actions?.find(a => a.id === column.link)
+                          : columnIndex === 0
+                            ? implicitFirstColumnAction
+                            : null
+                        const hasLink = !!linkAction && !linkAction.hidden?.(item)
+                        const isNumeric = column.type === 'currency' || column.type === 'number'
                         const handleColumnClick = (e: React.MouseEvent) => {
-                          if (hasLink && column.link) {
-                            e.stopPropagation()
-                            // Find the action by ID and trigger it through executeAction
-                            const action = schema.actions?.find(a => a.id === column.link)
-                            if (action) {
-                              executeAction(action, item)
-                            }
-                          }
+                          if (!hasLink || !linkAction) return
+                          e.stopPropagation()
+                          executeAction(linkAction, item)
                         }
 
                         return (
                           <td
                             key={column.field}
-                            className={hasLink ? 'hover:underline' : ''}
+                            className={classnames({ 'hover:underline': hasLink, 'at-num': isNumeric })}
                             onClick={hasLink ? handleColumnClick : undefined}
-                            style={hasLink ? { 
-                              color: 'var(--mui-palette-primary-main)', 
-                              cursor: 'pointer' 
-                            } : undefined}
+                            // A cell that behaves like a link has to be reachable
+                            // without a mouse, and announce itself as actionable.
+                            role={hasLink ? 'link' : undefined}
+                            tabIndex={hasLink ? 0 : undefined}
+                            onKeyDown={
+                              hasLink
+                                ? e => {
+                                    if (e.key === 'Enter' || e.key === ' ') {
+                                      e.preventDefault()
+                                      handleColumnClick(e as unknown as React.MouseEvent)
+                                    }
+                                  }
+                                : undefined
+                            }
+                            style={{
+                              ...(hasLink
+                                ? { color: 'var(--mui-palette-primary-main)', cursor: 'pointer' }
+                                : {}),
+                              // The table is `min-width: max-content`, so without
+                              // a cap one long value (a 40-character product name,
+                              // say) stretches its column and pushes the rest off
+                              // screen. Wrapping rather than truncating keeps the
+                              // whole value readable inside the cap.
+                              ...(column.width
+                                ? {
+                                    maxWidth: column.width,
+                                    whiteSpace: 'normal' as const,
+                                    overflowWrap: 'anywhere' as const
+                                  }
+                                : {})
+                            }}
                           >
                             {column.render
                               ? column.render(value, item)
@@ -974,15 +1205,17 @@ export default function SchemaTable<T extends { id: number | string }>({
                       })}
                       {rowActions.length > 0 && (
                         <td align="right" onClick={(e) => e.stopPropagation()}>
-                          <IconButton
-                            size="small"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              setActionMenuAnchor({ el: e.currentTarget, item })
-                            }}
-                          >
-                            <i className="tabler-dots-vertical" />
-                          </IconButton>
+                          {rowActions.some(a => !a.hidden?.(item)) && (
+                            <IconButton
+                              size="small"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                setActionMenuAnchor({ el: e.currentTarget, item })
+                              }}
+                            >
+                              <i className="tabler-dots-vertical" />
+                            </IconButton>
+                          )}
                         </td>
                       )}
                     </tr>
@@ -999,16 +1232,16 @@ export default function SchemaTable<T extends { id: number | string }>({
           justifyContent: 'space-between', 
           alignItems: 'center', 
           flexWrap: 'wrap', 
-          gap: 2, 
-          py: 2, 
+          gap: 2,
+          py: 2,
           px: 3,
           borderTop: '1px solid',
-          borderColor: 'divider'
+          borderColor: 'var(--at-divider, var(--mui-palette-divider))'
         }}>
           {/* Left: Showing info + Items per page */}
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
             <Typography color='text.secondary' variant='body2' sx={{ fontSize: '0.875rem', minWidth: 'fit-content' }}>
-              {t('common.schemaTable.showing')} <Box component="span" sx={{ fontWeight: 500, color: 'text.primary' }}>{startIndex}</Box> {t('common.schemaTable.to')} <Box component="span" sx={{ fontWeight: 500, color: 'text.primary' }}>{endIndex}</Box> {t('common.schemaTable.of')} <Box component="span" sx={{ fontWeight: 500, color: 'text.primary' }}>{filteredData.length}</Box> {t('common.schemaTable.entries')}
+              {t('common.schemaTable.showing')} <Box component="span" sx={{ fontWeight: 500, color: 'text.primary' }}>{startIndex}</Box> {t('common.schemaTable.to')} <Box component="span" sx={{ fontWeight: 500, color: 'text.primary' }}>{endIndex}</Box> {t('common.schemaTable.of')} <Box component="span" sx={{ fontWeight: 500, color: 'text.primary' }}>{displayTotal}</Box> {t('common.schemaTable.entries')}
             </Typography>
           </Box>
 
@@ -1020,10 +1253,11 @@ export default function SchemaTable<T extends { id: number | string }>({
               </Typography>
               <FormControl size="small" sx={{ minWidth: 70 }}>
                 <Select
-                  value={rowsPerPage}
+                  value={displayRowsPerPage}
                   onChange={e => {
-                    setRowsPerPage(Number(e.target.value))
-                    setPage(0)
+                    const n = Number(e.target.value)
+                    if (_sp) { _sp.onRowsPerPageChange(n); _sp.onPageChange(0) }
+                    else { setRowsPerPage(n); setPage(0) }
                   }}
                   displayEmpty
                   sx={{ fontSize: '0.875rem', height: '38px' }}
@@ -1040,16 +1274,24 @@ export default function SchemaTable<T extends { id: number | string }>({
               color='primary'
               variant='outlined'
               count={totalPages}
-              page={page + 1}
-              onChange={(_, newPage) => setPage(newPage - 1)}
+              page={displayPage + 1}
+              onChange={(_, newPage) => _sp ? _sp.onPageChange(newPage - 1) : setPage(newPage - 1)}
               showFirstButton
               showLastButton
               sx={{
                 '& .MuiPaginationItem-root': {
-                  minWidth: 40,
-                  height: 40,
+                  minWidth: 36,
+                  height: 36,
                   fontSize: '0.875rem',
-                  fontWeight: 500
+                  fontWeight: 500,
+                  borderRadius: 'var(--at-control-radius, 8px)',
+                  borderColor: 'var(--at-card-border, var(--mui-palette-divider))'
+                },
+                '& .MuiPaginationItem-root.Mui-selected': {
+                  backgroundColor: 'var(--at-accent, var(--mui-palette-primary-main))',
+                  color: 'var(--at-accent-fg, var(--mui-palette-primary-contrastText))',
+                  borderColor: 'transparent',
+                  '&:hover': { backgroundColor: 'var(--at-accent-strong, var(--mui-palette-primary-dark))' }
                 },
                 '& .MuiPaginationItem-icon': {
                   fontSize: '1.25rem'
@@ -1066,18 +1308,20 @@ export default function SchemaTable<T extends { id: number | string }>({
         open={!!actionMenuAnchor}
         onClose={() => setActionMenuAnchor(null)}
       >
-        {rowActions.map((action) => (
-          <MenuItem
-            key={action.id}
-            onClick={() => {
-              if (actionMenuAnchor) {
-                handleActionClick(action, actionMenuAnchor.item)
-              }
-            }}
-          >
-            {action.label}
-          </MenuItem>
-        ))}
+        {rowActions
+          .filter(action => !(actionMenuAnchor && action.hidden?.(actionMenuAnchor.item)))
+          .map((action) => (
+            <MenuItem
+              key={action.id}
+              onClick={() => {
+                if (actionMenuAnchor) {
+                  handleActionClick(action, actionMenuAnchor.item)
+                }
+              }}
+            >
+              {action.label}
+            </MenuItem>
+          ))}
       </Menu>
 
       {/* Bulk Actions Menu */}

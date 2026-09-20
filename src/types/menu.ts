@@ -27,6 +27,13 @@ export type MenuItemBase = {
    */
   activeMatch?: 'exact' | 'prefix'
   activeUrl?: string
+  /**
+   * Hide this item unless the active staff member has this permission key
+   * (e.g. 'shop.product.view'). See `src/utils/permissions.ts`.
+   */
+  permission?: string
+  /** Hide this item unless the active staff member has the admin role. */
+  requireAdmin?: boolean
 }
 
 // Leaf menu item (no children)
@@ -45,6 +52,8 @@ export type MenuSection = {
   type: 'section'
   id: string
   label: ReactNode
+  /** Translation key for the section label, as on items. */
+  i18nKey?: string
   children: MenuNode[]
 }
 

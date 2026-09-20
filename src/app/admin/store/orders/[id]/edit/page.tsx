@@ -21,10 +21,13 @@ import OrderDetailsCard from '@/views/admin/store/orders/edit/OrderDetailsCard'
 import CustomerDetailsCard from '@/views/admin/store/orders/edit/CustomerDetailsCard'
 import AddressCards from '@/views/admin/store/orders/edit/AddressCards'
 import PaymentCard from '@/views/admin/store/orders/edit/PaymentCard'
+import PaymentProofCard from '@/views/admin/store/orders/edit/PaymentProofCard'
 import DeliveryCard from '@/views/admin/store/orders/edit/DeliveryCard'
 import OrderTimeline from '@/views/admin/store/orders/edit/OrderTimeline'
 import InvoiceCard from '@/views/admin/store/orders/edit/InvoiceCard'
+import ReturnsCard from '@/views/admin/store/orders/edit/ReturnsCard'
 import PackagesCard from '@/views/admin/store/orders/edit/PackagesCard'
+import ShippingFulfillmentDialog from '@/views/admin/store/orders/edit/ShippingFulfillmentDialog'
 import SchemaForm from '@/components/schema/SchemaForm'
 
 // Context Imports
@@ -34,11 +37,15 @@ import { BaseDataProvider } from '@/contexts/BaseDataContext'
 import { orderSchema } from '@/data/storeSchemas'
 
 // Extension Hooks
-import { usePageSlots } from '@/extensions/hooks/usePageSections'
+import { useOrderActions, usePageSlots } from '@/extensions/hooks/usePageSections'
 import { renderSlot } from '@/extensions/hooks/renderSection'
 
 // API Imports
-import { getOrder, updateOrder, type Order } from '@/services/store'
+import {
+  getOrder, updateOrder, cancelOrder, refundOrder, createReturnRequest, createReturnLineItem,
+  ORDER_STATUSES, PAYMENT_STATUSES,
+  type Order, type OrderStatus, type PaymentStatus
+} from '@/services/store'
 
 // Extended Order type for detail view
 type OrderDetail = Order & {
@@ -90,8 +97,10 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
   const t = useTranslations('admin')
   const [loading, setLoading] = useState(false)
   const [fetching, setFetching] = useState(true)
+  const [shippingWizardOpen, setShippingWizardOpen] = useState(false)
   const [order, setOrder] = useState<OrderDetail | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [returnsVersion, setReturnsVersion] = useState(0)
 
   const { visibleSlots, beforeSlots, afterSlots, replacements } =
     usePageSlots('admin/store/orders/edit')
@@ -122,6 +131,11 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
       }, 300)
     }
   }, [fetchOrder])
+
+  const orderActions = useOrderActions('admin/store/orders/edit', {
+    order,
+    refreshOrder: fetchOrder
+  })
 
   useEffect(() => {
     fetchOrder()
@@ -170,11 +184,7 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
         return {
           ...field,
           options: [
-            { value: 'pending', label: t('orders.status.pending') },
-            { value: 'paid', label: t('orders.status.paid') },
-            { value: 'shipped', label: t('orders.status.shipped') },
-            { value: 'completed', label: t('orders.status.completed') },
-            { value: 'cancelled', label: t('orders.status.cancelled') }
+            ...ORDER_STATUSES.map(value => ({ value, label: t(`orders.status.${value}`) }))
           ]
         }
       }
@@ -182,9 +192,7 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
         return {
           ...field,
           options: [
-            { value: 'pending', label: t('orders.paymentStatus.pending') },
-            { value: 'paid', label: t('orders.paymentStatus.paid') },
-            { value: 'failed', label: t('orders.paymentStatus.failed') }
+            ...PAYMENT_STATUSES.map(value => ({ value, label: t(`orders.paymentStatus.${value}`) }))
           ]
         }
       }
@@ -219,12 +227,51 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
     router.push(`/admin/store/orders/${id}`)
   }
 
+  const handleShip = () => {
+    setShippingWizardOpen(true)
+  }
+
+  const handleCancelOrder = async (reason?: string) => {
+    await cancelOrder(parseInt(id), reason)
+    await fetchOrder()
+  }
+
+  const handleRefund = async () => {
+    await refundOrder(parseInt(id))
+    await fetchOrder()
+  }
+
+  const handleCreateReturn = async (payload: {
+    reason_category?: string
+    customer_note?: string
+    restock_action: 'no_restock' | 'restock' | 'damage'
+  }) => {
+    const returnRequest = await createReturnRequest({
+      order: parseInt(id),
+      reason_category: payload.reason_category,
+      customer_note: payload.customer_note,
+      admin_note: payload.customer_note
+    })
+
+    for (const item of order.items || []) {
+      await createReturnLineItem(returnRequest.id, {
+        order_item: item.id,
+        quantity: item.quantity,
+        reason: payload.reason_category,
+        restock_action: payload.restock_action
+      })
+    }
+
+    setReturnsVersion(version => version + 1)
+    await fetchOrder()
+  }
+
   const handleOrderUpdate = () => {
     // Refresh order data
     fetchOrder()
   }
 
-  const handleStatusChange = async (status: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled') => {
+  const handleStatusChange = async (status: OrderStatus) => {
     try {
       await updateOrder(parseInt(id), { status })
       await fetchOrder()
@@ -234,7 +281,7 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
     }
   }
 
-  const handlePaymentStatusChange = async (status: 'pending' | 'paid' | 'failed') => {
+  const handlePaymentStatusChange = async (status: PaymentStatus) => {
     try {
       await updateOrder(parseInt(id), { payment_status: status })
       await fetchOrder()
@@ -254,18 +301,28 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
 
   return (
     <BaseDataProvider>
-      <Box sx={{ p: 4 }}>
-        <Grid container spacing={6}>
+      <Grid container spacing={3}>
         <Grid size={{ xs: 12 }}>
           <OrderEditHeader 
             order={order} 
-            onCancel={handleCancel}
+            onBack={handleCancel}
+            onShip={handleShip}
+            onRefund={handleRefund}
+            extraActions={orderActions}
+            onCreateReturn={handleCreateReturn}
+            onCancelOrder={handleCancelOrder}
             onStatusChange={handleStatusChange}
             onPaymentStatusChange={handlePaymentStatusChange}
           />
+          <ShippingFulfillmentDialog
+            open={shippingWizardOpen}
+            order={order}
+            onClose={() => setShippingWizardOpen(false)}
+            onCompleted={fetchOrder}
+          />
         </Grid>
         <Grid size={{ xs: 12, md: 8 }}>
-          <Grid container spacing={6}>
+          <Grid container spacing={3}>
             {beforeSlots.map(
               ext =>
                 ext.component && (
@@ -328,6 +385,22 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
                 )}
               </Grid>
             )}
+            {visibleSlots.includes('Returns') && (
+              <Grid size={{ xs: 12 }} id='section-returns'>
+                {renderSlot(
+                  'Returns',
+                  visibleSlots,
+                  replacements,
+                  ReturnsCard,
+                  { orderId: order.id, refreshKey: returnsVersion }
+                )}
+              </Grid>
+            )}
+            {visibleSlots.includes('Payment') && (
+              <Grid size={{ xs: 12 }} id='section-payment-proof'>
+                <PaymentProofCard attachments={(order as any).attachments} />
+              </Grid>
+            )}
             {visibleSlots.includes('Payment') && (
               <Grid size={{ xs: 12 }} id='section-payment'>
                 {renderSlot(
@@ -361,7 +434,7 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
           </Grid>
         </Grid>
         <Grid size={{ xs: 12, md: 4 }}>
-          <Grid container spacing={6}>
+          <Grid container spacing={3}>
             {visibleSlots.includes('CustomerDetails') && (
               <Grid size={{ xs: 12 }} id='section-customer'>
                 {renderSlot(
@@ -397,14 +470,13 @@ export default function OrderEditPage({ params }: { params: Promise<{ id: string
                   visibleSlots,
                   replacements,
                   DeliveryCard,
-                  { order }
+                  { order, onUpdate: () => fetchOrder() }
                 )}
               </Grid>
             )}
           </Grid>
         </Grid>
       </Grid>
-      </Box>
     </BaseDataProvider>
   )
 }

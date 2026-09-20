@@ -1,0 +1,6 @@
+{
+  "id": "website",
+  "name": "Website Skin (Auth)",
+  "description": "Non-MUI auth (login/register/etc) experience matching the storefront 'website' theme.",
+  "version": "1.0.0"
+}

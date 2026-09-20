@@ -183,13 +183,16 @@ export const productsSchema: SchemaResponse = {
         label: 'Product',
         type: 'string',
         sortable: true,
-        link: 'edit'
+        link: 'edit',
+        // Product names reach 40+ CJK characters; cap so price/stock stay visible.
+        width: 300
       },
       {
         field: 'category_names',
         label: 'Category',
         type: 'string',
         sortable: true,
+        width: 150,
         render: (value: any) => {
           const category = Array.isArray(value) && value.length > 0 ? value[0] : 'Uncategorized'
           return category
@@ -199,7 +202,8 @@ export const productsSchema: SchemaResponse = {
         field: 'sku',
         label: 'SKU',
         type: 'string',
-        sortable: true
+        sortable: true,
+        width: 130
       },
       {
         field: 'price',
@@ -236,11 +240,14 @@ export const productsSchema: SchemaResponse = {
         }
       }
     ],
+    // 'api': the list is server-paginated, so a client-side filter would only
+    // narrow the page in front of you and report the wrong total.
     filters: [
       {
         field: 'is_active',
         label: 'Status',
         type: 'select',
+        filterMode: 'api',
         options: [
           { value: 'true', label: 'Published' },
           { value: 'false', label: 'Inactive' }
@@ -250,6 +257,7 @@ export const productsSchema: SchemaResponse = {
         field: 'is_featured',
         label: 'Featured',
         type: 'select',
+        filterMode: 'api',
         options: [
           { value: 'true', label: 'Yes' },
           { value: 'false', label: 'No' }
@@ -267,13 +275,10 @@ export const productsSchema: SchemaResponse = {
         icon: 'tabler-plus'
       },
       { id: 'edit', label: 'Edit', type: 'secondary', scope: 'row' },
-      {
-        id: 'delete',
-        label: 'Delete',
-        type: 'danger',
-        scope: 'row',
-        confirm: 'Are you sure you want to delete this product?'
-      }
+      // No `confirm` here: the page asks for confirmation itself and names the
+      // product while doing it. Setting both made deleting anything a two-dialog
+      // ritual, the second one repeating the first in vaguer words.
+      { id: 'delete', label: 'Delete', type: 'danger', scope: 'row' }
     ]
   },
   form: {
@@ -321,7 +326,7 @@ export const categoriesSchema: SchemaResponse = {
         label: 'Parent Category', 
         type: 'select',
         optionsSource: 'api',
-        optionsApi: '/api/v1/categories/?language=en',
+        optionsApi: '/api/v1/shop/categories/?language=en',
         optionsValueField: 'id',
         optionsLabelField: 'name'
       },

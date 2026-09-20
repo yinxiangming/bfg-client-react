@@ -11,10 +11,10 @@ import CircularProgress from '@mui/material/CircularProgress'
 
 import SchemaTable from '@/components/schema/SchemaTable'
 import type { ListSchema, SchemaAction } from '@/types/schema'
-import { useApiData } from '@/hooks/useApiData'
+import { usePagedData } from '@/hooks/usePagedData'
 import SubscriptionPlanEditDialog from './SubscriptionPlanEditDialog'
 import {
-  getSubscriptionPlans,
+  getSubscriptionPlansPage,
   getSubscriptionPlan,
   createSubscriptionPlan,
   updateSubscriptionPlan,
@@ -71,16 +71,14 @@ const SubscriptionPlansTab = () => {
   const locale = useLocale()
   const subscriptionPlansSchema = useMemo(() => buildSubscriptionPlansSchema(t, locale), [t, locale])
 
-  const { data, loading, error, refetch } = useApiData<SubscriptionPlan[]>({
-    fetchFn: async () => {
-      const result = await getSubscriptionPlans()
-      if (Array.isArray(result)) return result
-      if (result && typeof result === 'object' && 'results' in result && Array.isArray((result as any).results)) {
-        return (result as any).results
-      }
-      return []
-    }
-  })
+  const {
+    items: data,
+    loading,
+    error,
+    serverPagination,
+    onSearchChange,
+    refetch,
+  } = usePagedData<SubscriptionPlan>(getSubscriptionPlansPage)
   const [editOpen, setEditOpen] = useState(false)
   const [selected, setSelected] = useState<SubscriptionPlan | null>(null)
 
@@ -119,7 +117,7 @@ const SubscriptionPlansTab = () => {
     }
   }
 
-  if (loading) {
+  if (loading && !data) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
         <CircularProgress />
@@ -140,8 +138,11 @@ const SubscriptionPlansTab = () => {
       <SchemaTable
         schema={subscriptionPlansSchema}
         data={data || []}
+        loading={loading}
         onActionClick={handleActionClick}
         fetchDetailFn={(id) => getSubscriptionPlan(typeof id === 'string' ? parseInt(id) : id)}
+        serverPagination={serverPagination}
+        onSearchChange={onSearchChange}
       />
       <SubscriptionPlanEditDialog
         open={editOpen}

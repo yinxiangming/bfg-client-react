@@ -11,17 +11,16 @@ import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Box from '@mui/material/Box'
-import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
-import FormControl from '@mui/material/FormControl'
-import InputLabel from '@mui/material/InputLabel'
-import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Switch from '@mui/material/Switch'
 import Divider from '@mui/material/Divider'
 import Grid from '@mui/material/Grid'
 import Typography from '@mui/material/Typography'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 import SchemaConfigEditor, { type ConfigSchema } from '@/components/config/SchemaConfigEditor'
 import type {
@@ -175,99 +174,97 @@ const PaymentGatewayEditDialog = ({
           : t('settings.finance.paymentGateways.editDialog.titleNew')}
       </DialogTitle>
       <DialogContent>
-        <Box sx={{ pt: 2 }}>
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <TextField
-                fullWidth
-                label={t('settings.finance.paymentGateways.editDialog.name')}
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                required
-              />
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <FormControl fullWidth required>
-                <InputLabel>{t('settings.finance.paymentGateways.editDialog.gatewayType')}</InputLabel>
-                <Select
-                  value={gatewayType}
-                  label={t('settings.finance.paymentGateways.editDialog.gatewayType')}
-                  onChange={(e) => setGatewayType(e.target.value)}
-                >
-                  <MenuItem value="">
-                    <em>{t('settings.finance.paymentGateways.editDialog.gatewayTypePlaceholder')}</em>
-                  </MenuItem>
-                  {pluginOptions.map((opt) => (
-                    <MenuItem key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <FormControlLabel
-                control={<Switch checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />}
-                label={t('settings.finance.paymentGateways.editDialog.active')}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, md: 6 }}>
-              <FormControlLabel
-                control={<Switch checked={isTestMode} onChange={(e) => setIsTestMode(e.target.checked)} />}
-                label={t('settings.finance.paymentGateways.editDialog.testMode')}
-              />
-            </Grid>
+        <Grid container spacing={3}>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <CustomTextField
+              fullWidth
+              label={t('settings.finance.paymentGateways.editDialog.name')}
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
           </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <CustomTextField
+              select
+              fullWidth
+              required
+              label={t('settings.finance.paymentGateways.editDialog.gatewayType')}
+              value={gatewayType}
+              onChange={(e) => setGatewayType(e.target.value)}
+            >
+              <MenuItem value="">
+                <em>{t('settings.finance.paymentGateways.editDialog.gatewayTypePlaceholder')}</em>
+              </MenuItem>
+              {pluginOptions.map((opt) => (
+                <MenuItem key={opt.value} value={opt.value}>
+                  {opt.label}
+                </MenuItem>
+              ))}
+            </CustomTextField>
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <FormControlLabel
+              control={<Switch checked={isActive} onChange={(e) => setIsActive(e.target.checked)} />}
+              label={t('settings.finance.paymentGateways.editDialog.active')}
+            />
+          </Grid>
+          <Grid size={{ xs: 12, md: 6 }}>
+            <FormControlLabel
+              control={<Switch checked={isTestMode} onChange={(e) => setIsTestMode(e.target.checked)} />}
+              label={t('settings.finance.paymentGateways.editDialog.testMode')}
+            />
+          </Grid>
+        </Grid>
 
-          {hasConfigSchema ? (
-            <>
-              <Divider sx={{ my: 4 }} />
-              <Typography variant='h6' sx={{ mb: 3 }}>
-                {t('settings.finance.paymentGateways.editDialog.pluginConfiguration')}
+        {hasConfigSchema ? (
+          <>
+            <Divider sx={{ my: 4 }} />
+            <Typography sx={{ fontSize: '0.9375rem', fontWeight: 600, mb: 3 }}>
+              {t('settings.finance.paymentGateways.editDialog.pluginConfiguration')}
+            </Typography>
+            <Box sx={{ mb: 4 }}>
+              <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, mb: 2 }}>
+                {t('settings.finance.paymentGateways.editDialog.liveConfig')}
               </Typography>
-              <Box sx={{ mb: 4 }}>
-                <Typography variant='subtitle2' sx={{ mb: 2, fontWeight: 600 }}>
-                  {t('settings.finance.paymentGateways.editDialog.liveConfig')}
-                </Typography>
-                <SchemaConfigEditor schema={configSchema} value={config} onChange={setConfig} />
-              </Box>
-              <Box>
-                <Typography variant='subtitle2' sx={{ mb: 2, fontWeight: 600 }}>
-                  {t('settings.finance.paymentGateways.editDialog.testConfig')}
-                </Typography>
-                <SchemaConfigEditor schema={configSchema} value={testConfig} onChange={setTestConfig} />
-              </Box>
-            </>
-          ) : (
-            <>
-              <Divider sx={{ my: 4 }} />
-              <Grid container spacing={3}>
-                <Grid size={{ xs: 12 }}>
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={5}
-                    label={t('settings.finance.paymentGateways.editDialog.liveConfig')}
-                    value={configJson}
-                    onChange={(e) => setConfigJson(e.target.value)}
-                    placeholder={LIVE_CONFIG_PLACEHOLDER}
-                  />
-                </Grid>
-                <Grid size={{ xs: 12 }}>
-                  <TextField
-                    fullWidth
-                    multiline
-                    rows={5}
-                    label={t('settings.finance.paymentGateways.editDialog.testConfig')}
-                    value={testConfigJson}
-                    onChange={(e) => setTestConfigJson(e.target.value)}
-                    placeholder={TEST_CONFIG_PLACEHOLDER}
-                  />
-                </Grid>
+              <SchemaConfigEditor schema={configSchema} value={config} onChange={setConfig} />
+            </Box>
+            <Box>
+              <Typography sx={{ fontSize: '0.8125rem', fontWeight: 600, mb: 2 }}>
+                {t('settings.finance.paymentGateways.editDialog.testConfig')}
+              </Typography>
+              <SchemaConfigEditor schema={configSchema} value={testConfig} onChange={setTestConfig} />
+            </Box>
+          </>
+        ) : (
+          <>
+            <Divider sx={{ my: 4 }} />
+            <Grid container spacing={3}>
+              <Grid size={{ xs: 12 }}>
+                <CustomTextField
+                  fullWidth
+                  multiline
+                  rows={5}
+                  label={t('settings.finance.paymentGateways.editDialog.liveConfig')}
+                  value={configJson}
+                  onChange={(e) => setConfigJson(e.target.value)}
+                  placeholder={LIVE_CONFIG_PLACEHOLDER}
+                />
               </Grid>
-            </>
-          )}
-        </Box>
+              <Grid size={{ xs: 12 }}>
+                <CustomTextField
+                  fullWidth
+                  multiline
+                  rows={5}
+                  label={t('settings.finance.paymentGateways.editDialog.testConfig')}
+                  value={testConfigJson}
+                  onChange={(e) => setTestConfigJson(e.target.value)}
+                  placeholder={TEST_CONFIG_PLACEHOLDER}
+                />
+              </Grid>
+            </Grid>
+          </>
+        )}
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={loading}>

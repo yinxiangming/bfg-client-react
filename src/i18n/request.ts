@@ -2,6 +2,7 @@ import {cookies, headers} from 'next/headers'
 import {getRequestConfig} from 'next-intl/server'
 import {routing, type AppLocale} from './routing'
 import {loadPluginMessages} from './plugin-messages'
+import {DEFAULT_APP_LOCALE, normalizeAppLocale, uniqueAppLocales} from './locales'
 
 type Messages = Record<string, any>
 
@@ -10,6 +11,15 @@ type EnabledApp = (typeof enabledApps)[number]
 
 function isSupportedLocale(locale: string): locale is AppLocale {
   return (routing.locales as readonly string[]).includes(locale)
+}
+
+function getWorkspaceApiBaseUrl(): string | null {
+  const baseUrl =
+    process.env.API_URL ||
+    process.env.NEXT_PUBLIC_WORKSPACE_API_URL ||
+    process.env.NEXT_PUBLIC_API_URL ||
+    ''
+  return baseUrl ? baseUrl.replace(/\/+$/, '') : null
 }
 
 /** Deep merge source into target (mutates target). */
@@ -41,22 +51,77 @@ async function getLocaleFromCookie(): Promise<AppLocale | null> {
   return null
 }
 
-async function getLocaleFromAcceptLanguage(): Promise<AppLocale | null> {
-  const headerStore = await headers()
-  const al = headerStore.get('accept-language') || ''
-  // Minimal matching for our supported locales
-  if (al.toLowerCase().includes('zh')) return 'zh-hans'
-  if (al.toLowerCase().includes('en')) return 'en'
+function getLocaleFromAcceptLanguageHeader(al: string): AppLocale | null {
+  // Minimal matching for our supported locales. Order matters: a plain `includes('zh')`
+  // check ran first, so `en-NZ,zh;q=0.5` — English preferred, Chinese as a fallback —
+  // selected Chinese. Whichever tag appears first in the header wins instead.
+  const header = al.toLowerCase()
+  const en = header.search(/\ben\b/)
+  const zh = header.search(/\bzh\b/)
+  if (en !== -1 && (zh === -1 || en <= zh)) return 'en'
+  if (zh !== -1) return 'zh-hans'
+  return null
+}
+
+async function getSingleSiteLocale(headerStore: Awaited<ReturnType<typeof headers>>): Promise<AppLocale | null> {
+  const apiBase = getWorkspaceApiBaseUrl()
+  if (!apiBase) return null
+
+  // Same precedence as getApiHeaders(): a pinned workspace id wins, and the request
+  // host is only a fallback. Without the pin a dev host (localhost:3010) matches no
+  // WorkspaceDomain row and the backend answers 400 workspace_required.
+  const workspaceId = process.env.NEXT_PUBLIC_WORKSPACE_ID || ''
+  const requestHost = headerStore.get('x-forwarded-host') || headerStore.get('host') || ''
+  try {
+    const res = await fetch(`${apiBase}/api/v1/settings/storefront/?lang=${DEFAULT_APP_LOCALE}`, {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(workspaceId
+          ? { 'X-Workspace-ID': workspaceId }
+          : requestHost
+            ? { 'X-Forwarded-Host': requestHost }
+            : {}),
+      },
+      // Same endpoint, same tenant-in-headers scheme and same window as
+      // getStorefrontConfigForServer(). `no-store` here was uncached, and because
+      // getRequestConfig runs for every route it cost one uncached API round trip
+      // on every single request — across regions that is the bulk of the page's TTFB.
+      next: { revalidate: 300 },
+    })
+    if (!res.ok) return null
+    const config = (await res.json()) as { default_language?: string; languages?: string[] }
+    const languages = uniqueAppLocales(config.languages ?? [])
+    if (languages.length === 1) return languages[0]
+
+    if (languages.length === 0) {
+      return normalizeAppLocale(config.default_language)
+    }
+  } catch {
+    return null
+  }
+
   return null
 }
 
 export default getRequestConfig(async ({requestLocale}) => {
   const requested = await requestLocale
+  const headerStore = await headers()
   const fromCookie = await getLocaleFromCookie()
-  const fromAcceptLanguage = await getLocaleFromAcceptLanguage()
+  const fromSingleSiteLanguage = await getSingleSiteLocale(headerStore)
+  const fromAcceptLanguage = getLocaleFromAcceptLanguageHeader(headerStore.get('accept-language') || '')
+  // An explicit choice comes first. `fromSingleSiteLanguage` used to sit at the
+  // top, which meant a workspace selling in one language pinned the *whole app*
+  // to it — including /admin, where the operator's own language has nothing to
+  // do with what the shop sells. The switcher writes NEXT_LOCALE and then
+  // nothing happened, because this line overrode it on the next request.
+  //
+  // The single-site pin still does its real job: it beats Accept-Language and
+  // the default, so a one-language shop renders in its language for a visitor
+  // who never asked for anything.
   const locale: AppLocale =
-    (requested && isSupportedLocale(requested) ? requested : null) ||
     fromCookie ||
+    fromSingleSiteLanguage ||
+    (requested && isSupportedLocale(requested) ? requested : null) ||
     fromAcceptLanguage ||
     routing.defaultLocale
 
@@ -89,4 +154,3 @@ export default getRequestConfig(async ({requestLocale}) => {
     }
   }
 })
-

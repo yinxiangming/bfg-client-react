@@ -18,6 +18,9 @@
     "login": "登录",
     "guest": "访客"
   },
+  "addressLookup": {
+    "usageCapReached": "本月的地址查询次数已用完，请手动填写地址。"
+  },
   "common": {
     "loading": "加载中..."
   },
@@ -30,6 +33,17 @@
     "submit": "提交",
     "success": "感谢！反馈已提交。",
     "error": "提交失败，请重试。"
+  },
+  "workspaces": {
+    "errors": {
+      "createForbidden": "只有现有店铺的店主或管理员才能新建店铺。",
+      "limitReached": "每个账号最多拥有 {limit} 家店铺（已暂停的也计算在内），你已达到上限。",
+      "limitReachedGeneric": "你拥有的店铺数量已达到上限（已暂停的也计算在内）。",
+      "ownerRequired": "只有店主才能修改店铺信息。"
+    }
+  },
+  "apiErrors": {
+    "workspaceReadOnly": "这个工作区续费前只能查看和导出，刚才的修改没有保存。"
   }
 }
 

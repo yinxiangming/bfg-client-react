@@ -44,3 +44,20 @@ body {
   color: var(--mui-palette-primary-main);
 }
 
+
+/* Logo variants for light and dark surfaces.
+   Which one shows is decided in CSS rather than in React on purpose: the colour
+   mode is only known on the client (ThemeContext writes `data-mode` after mount),
+   so choosing in JS would either mismatch the server render or flash the wrong
+   logo on every dark-mode page load. Both are in the markup; one is hidden. */
+.logo-img-dark {
+  display: none;
+}
+
+[data-mode='dark'] .logo-img-light {
+  display: none;
+}
+
+[data-mode='dark'] .logo-img-dark {
+  display: inline-block;
+}

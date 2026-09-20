@@ -4,16 +4,14 @@ import { useMemo } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import Box from '@mui/material/Box'
-import Divider from '@mui/material/Divider'
-import FormControl from '@mui/material/FormControl'
 import FormControlLabel from '@mui/material/FormControlLabel'
 import Grid from '@mui/material/Grid'
-import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
-import Select from '@mui/material/Select'
 import Switch from '@mui/material/Switch'
-import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
+
+// Component Imports
+import CustomTextField from '@/components/ui/TextField'
 
 import type { CategoryFieldSchemaEntry, CategoryFieldsSchema } from '@/services/web'
 
@@ -72,11 +70,10 @@ export default function PostCustomFieldsBlock({
         mb: 1
       }}
     >
-      <Divider sx={{ my: 2 }} />
-      <Typography variant='subtitle1' fontWeight={600} sx={{ mb: 1 }}>
+      <Typography component='div' className='at-block-title'>
         {t('settings.web.posts.editDialog.customFieldsSection')}
       </Typography>
-      <Grid container spacing={2}>
+      <Grid container spacing={3}>
         <Grid size={{ xs: 12 }}>
           <Typography variant='body2' color='text.secondary' sx={{ mb: 0 }}>
             {t('settings.web.posts.editDialog.customFieldsHint')}
@@ -124,31 +121,28 @@ export default function PostCustomFieldsBlock({
             const strVal = raw !== undefined && raw !== null ? String(raw) : ''
             return (
               <Grid key={key} size={{ xs: 12, md: 6 }}>
-                <FormControl
+                <CustomTextField
+                  select
                   fullWidth
                   size='small'
                   required={def.required}
                   disabled={disabled}
                   sx={def.required ? requiredAsteriskSx : undefined}
+                  label={label}
+                  value={strVal}
+                  onChange={e => setVal(key, e.target.value)}
                 >
-                  <InputLabel>{label}</InputLabel>
-                  <Select
-                    label={label}
-                    value={strVal}
-                    onChange={e => setVal(key, e.target.value)}
-                  >
-                    {!def.required ? (
-                      <MenuItem value=''>
-                        <em>{t('settings.web.posts.editDialog.customFieldSelectEmpty')}</em>
-                      </MenuItem>
-                    ) : null}
-                    {def.options.map(opt => (
-                      <MenuItem key={String(opt.value)} value={String(opt.value)}>
-                        {resolveOptionLabel(opt, locale)}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
+                  {!def.required ? (
+                    <MenuItem value=''>
+                      <em>{t('settings.web.posts.editDialog.customFieldSelectEmpty')}</em>
+                    </MenuItem>
+                  ) : null}
+                  {def.options.map(opt => (
+                    <MenuItem key={String(opt.value)} value={String(opt.value)}>
+                      {resolveOptionLabel(opt, locale)}
+                    </MenuItem>
+                  ))}
+                </CustomTextField>
                 {helper ? <Typography variant='caption' color='text.secondary'>{helper}</Typography> : null}
               </Grid>
             )
@@ -157,7 +151,7 @@ export default function PostCustomFieldsBlock({
           if (typ === 'text') {
             return (
               <Grid key={key} size={{ xs: 12 }}>
-                <TextField
+                <CustomTextField
                   fullWidth
                   multiline
                   minRows={3}
@@ -177,7 +171,7 @@ export default function PostCustomFieldsBlock({
           if (typ === 'integer' || typ === 'number') {
             return (
               <Grid key={key} size={{ xs: 12, md: 6 }}>
-                <TextField
+                <CustomTextField
                   fullWidth
                   type='number'
                   size='small'
@@ -204,7 +198,7 @@ export default function PostCustomFieldsBlock({
           if (typ === 'image') {
             return (
               <Grid key={key} size={{ xs: 12 }}>
-                <TextField
+                <CustomTextField
                   fullWidth
                   size='small'
                   label={label}
@@ -222,7 +216,7 @@ export default function PostCustomFieldsBlock({
 
           return (
             <Grid key={key} size={{ xs: 12, md: 6 }}>
-              <TextField
+              <CustomTextField
                 fullWidth
                 size='small'
                 label={label}

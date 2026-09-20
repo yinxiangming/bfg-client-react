@@ -2,6 +2,7 @@ import { headers } from 'next/headers'
 import { getLocale, getTranslations } from 'next-intl/server'
 import type { Metadata } from 'next'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
+import { resolveAuthPage } from '@/components/auth/themes/resolve'
 import AuthResetPasswordClient from './AuthResetPasswordClient'
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -16,6 +17,8 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: `${siteName} - ${t('pageTitle')}` }
 }
 
-export default function ResetPasswordPage() {
-  return <AuthResetPasswordClient />
+export default async function ResetPasswordPage() {
+  const Override = await resolveAuthPage('reset-password')
+  const Component = Override ?? AuthResetPasswordClient
+  return <Component />
 }

@@ -19,15 +19,15 @@ export const buildUsersSchema = (t: any): SchemaResponse => ({
         }
       },
       { field: 'email', label: t('settings.general.users.schema.columns.email'), type: 'string', sortable: true },
-      { 
-        field: 'is_staff', 
+      {
+        // The role in *this* workspace — an active StaffMember row. This column used to
+        // read Django's is_staff/is_superuser, which /api/v1/users/ does not even send,
+        // so every row rendered "user"; and nothing in the admin is decided by them.
+        field: 'staff_role',
         label: t('settings.general.users.schema.columns.role'),
-        type: 'select',
-        render: (value: any, row: any) => {
-          if (row.is_superuser) return t('settings.general.users.schema.roleValues.superuser')
-          if (row.is_staff) return t('settings.general.users.schema.roleValues.staff')
-          return t('settings.general.users.schema.roleValues.user')
-        }
+        type: 'string',
+        render: (value: any, row: any) =>
+          row.staff_role?.name || t('settings.general.users.schema.roleValues.user')
       },
       { 
         field: 'is_active', 
@@ -51,16 +51,9 @@ export const buildUsersSchema = (t: any): SchemaResponse => ({
           { value: 'true', label: t('settings.general.users.filters.status.options.active') },
           { value: 'false', label: t('settings.general.users.filters.status.options.inactive') }
         ]
-      },
-      {
-        field: 'is_staff',
-        label: t('settings.general.users.filters.role.label'),
-        type: 'select',
-        options: [
-          { value: 'true', label: t('settings.general.users.filters.role.options.staff') },
-          { value: 'false', label: t('settings.general.users.filters.role.options.user') }
-        ]
       }
+      // No role filter: it filtered on `is_staff`, which the endpoint neither sends nor
+      // accepts. Filtering by workspace role needs backend support first.
     ],
     searchFields: ['username', 'email', 'first_name', 'last_name'],
     searchPlaceholder: t('settings.general.users.searchPlaceholder'),
@@ -90,9 +83,10 @@ export const buildUsersSchema = (t: any): SchemaResponse => ({
       { field: 'first_name', label: t('settings.general.users.form.fields.firstName'), type: 'string', required: true },
       { field: 'last_name', label: t('settings.general.users.form.fields.lastName'), type: 'string', required: true },
       { field: 'phone', label: t('settings.general.users.form.fields.phone'), type: 'string' },
-      { field: 'is_staff', label: t('settings.general.users.form.fields.isStaff'), type: 'boolean' },
-      { field: 'is_active', label: t('settings.general.users.form.fields.isActive'), type: 'boolean' },
-      { field: 'is_superuser', label: t('settings.general.users.form.fields.isSuperuser'), type: 'boolean' }
+      // No is_staff / is_superuser toggles: they are Django-wide flags the admin does not
+      // consult, and the endpoint drops them anyway, so the switches did nothing. Admin
+      // access is granted on the 员工 screen, by giving the user a role in this workspace.
+      { field: 'is_active', label: t('settings.general.users.form.fields.isActive'), type: 'boolean' }
     ],
     actions: [
       { id: 'submit', label: t('settings.general.users.form.actions.save'), type: 'submit' },

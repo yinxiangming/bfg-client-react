@@ -2,8 +2,9 @@
 
 import { refreshTokenIfNeeded } from './tokenRefresh'
 import { getApiLanguageHeaders } from '@/i18n/http'
+import { getApiErrorMessage } from './apiErrors'
 import { getWorkspaceApiBaseUrlFromEnv } from './apiUrls'
-import { getWorkspaceToken } from './authTokens'
+import { getWorkspaceToken, readWorkspaceIdClaim, WORKSPACE_ID_KEY } from './authTokens'
 
 /**
  * Get API base URL from environment variable.
@@ -38,6 +39,24 @@ export const API_VERSIONS = {
   BFG2: 'v1'
 } as const
 
+/** Response shape for GET /api/v1/system/version/ */
+export type DjangoLocalAppVersion = {
+  id: string
+  version: string
+}
+
+/** Response shape for GET /api/v1/system/version/ */
+export type ServerVersionResponse = {
+  api_version: string
+  schema_version: string
+  bfg_version: string
+  /** Present when API includes workspace API server app metadata. */
+  workspace_server_app_version?: string
+  /** Django apps under apps.* (workspace server extensions). */
+  django_local_apps?: DjangoLocalAppVersion[]
+  build_id?: string
+}
+
 /**
  * Build API URL with version prefix
  */
@@ -58,15 +77,33 @@ export function buildApiUrl(
  * BFG API endpoints (v1)
  */
 export const bfgApi = {
+  // System (public)
+  serverVersion: () => buildApiUrl('/system/version/', API_VERSIONS.BFG2),
+
   // Common
   workspaces: () => buildApiUrl('/workspaces/', API_VERSIONS.BFG2),
   customers: () => buildApiUrl('/customers/', API_VERSIONS.BFG2),
   addresses: () => buildApiUrl('/addresses/', API_VERSIONS.BFG2),
   settings: () => buildApiUrl('/settings/', API_VERSIONS.BFG2),
   emailConfigs: () => buildApiUrl('/email-configs/', API_VERSIONS.BFG2),
+  socialAuthConfigs: () => buildApiUrl('/social-auth-configs/', API_VERSIONS.BFG2),
   users: () => buildApiUrl('/users/', API_VERSIONS.BFG2),
   staffRoles: () => buildApiUrl('/staff-roles/', API_VERSIONS.BFG2),
+  staffMembers: () => buildApiUrl('/staff-members/', API_VERSIONS.BFG2),
+  staffInvitations: () => buildApiUrl('/staff-invitations/', API_VERSIONS.BFG2),
+  invitationPreview: () => buildApiUrl('/invitations/preview/', API_VERSIONS.BFG2),
+  invitationAccept: () => buildApiUrl('/invitations/accept/', API_VERSIONS.BFG2),
   apiKeys: () => buildApiUrl('/api-keys/', API_VERSIONS.BFG2),
+
+  countries: () => buildApiUrl('/countries/', API_VERSIONS.BFG2),
+
+  // Setup wizard
+  onboardingStatus: () => buildApiUrl('/onboarding/status/', API_VERSIONS.BFG2),
+  onboardingOptions: () => buildApiUrl('/onboarding/options/', API_VERSIONS.BFG2),
+  onboardingPreview: () => buildApiUrl('/onboarding/preview/', API_VERSIONS.BFG2),
+  onboardingApply: () => buildApiUrl('/onboarding/apply/', API_VERSIONS.BFG2),
+  onboardingSkip: () => buildApiUrl('/onboarding/skip/', API_VERSIONS.BFG2),
+  onboardingDismiss: () => buildApiUrl('/onboarding/dismiss/', API_VERSIONS.BFG2),
 
   // Web/CMS
   sites: () => buildApiUrl('/web/sites/', API_VERSIONS.BFG2),
@@ -90,34 +127,40 @@ export const bfgApi = {
   bookings: () => buildApiUrl('/web/bookings/', API_VERSIONS.BFG2),
 
   // Shop
-  stores: () => buildApiUrl('/stores/', API_VERSIONS.BFG2),
-  salesChannels: () => buildApiUrl('/sales-channels/', API_VERSIONS.BFG2),
-  subscriptionPlans: () => buildApiUrl('/subscription-plans/', API_VERSIONS.BFG2),
-  products: () => buildApiUrl('/products/', API_VERSIONS.BFG2),
-  productCategoryRulesSchema: () => buildApiUrl('/categories/rules_schema/', API_VERSIONS.BFG2),
-  productMedia: () => buildApiUrl('/product-media/', API_VERSIONS.BFG2),
-  variants: () => buildApiUrl('/variants/', API_VERSIONS.BFG2),
-  orders: () => buildApiUrl('/orders/', API_VERSIONS.BFG2),
-  reviews: () => buildApiUrl('/reviews/', API_VERSIONS.BFG2),
-  wishlists: () => buildApiUrl('/wishlists/', API_VERSIONS.BFG2),
+  stores: () => buildApiUrl('/stores/', API_VERSIONS.BFG2, 'shop'),
+  salesChannels: () => buildApiUrl('/sales-channels/', API_VERSIONS.BFG2, 'shop'),
+  subscriptionPlans: () => buildApiUrl('/subscription-plans/', API_VERSIONS.BFG2, 'shop'),
+  /** Storefront-facing read-only product endpoint. Returns only active
+   *  products with public-safe fields (no cost / barcode / inventory flags). */
+  products: () => buildApiUrl('/products/', API_VERSIONS.BFG2, 'shop'),
+  /** Admin product management endpoint — staff only. Full data including
+   *  cost, barcode, track_inventory, finance_code, drafts. */
+  adminProducts: () => buildApiUrl('/admin/products/', API_VERSIONS.BFG2, 'shop'),
+  productCategoryRulesSchema: () => buildApiUrl('/categories/rules_schema/', API_VERSIONS.BFG2, 'shop'),
+  productMedia: () => buildApiUrl('/product-media/', API_VERSIONS.BFG2, 'shop'),
+  variants: () => buildApiUrl('/variants/', API_VERSIONS.BFG2, 'shop'),
+  orders: () => buildApiUrl('/orders/', API_VERSIONS.BFG2, 'shop'),
+  reviews: () => buildApiUrl('/reviews/', API_VERSIONS.BFG2, 'shop'),
+  wishlists: () => buildApiUrl('/wishlists/', API_VERSIONS.BFG2, 'shop'),
   cart: {
-    current: () => buildApiUrl('/cart/current/', API_VERSIONS.BFG2),
-    addItem: () => buildApiUrl('/cart/add_item/', API_VERSIONS.BFG2),
-    checkout: () => buildApiUrl('/cart/checkout/', API_VERSIONS.BFG2)
+    current: () => buildApiUrl('/cart/current/', API_VERSIONS.BFG2, 'shop'),
+    addItem: () => buildApiUrl('/cart/add_item/', API_VERSIONS.BFG2, 'shop'),
+    checkout: () => buildApiUrl('/cart/checkout/', API_VERSIONS.BFG2, 'shop')
   },
 
   // Delivery
-  warehouses: () => buildApiUrl('/warehouses/', API_VERSIONS.BFG2),
-  consignments: () => buildApiUrl('/consignments/', API_VERSIONS.BFG2),
-  carriers: () => buildApiUrl('/carriers/', API_VERSIONS.BFG2),
-  packagingTypes: () => buildApiUrl('/packaging-types/', API_VERSIONS.BFG2),
-  freightServices: () => buildApiUrl('/freight-services/', API_VERSIONS.BFG2),
+  warehouses: () => buildApiUrl('/warehouses/', API_VERSIONS.BFG2, 'delivery'),
+  pickupPoints: () => buildApiUrl('/pickup-points/', API_VERSIONS.BFG2, 'delivery'),
+  consignments: () => buildApiUrl('/consignments/', API_VERSIONS.BFG2, 'delivery'),
+  carriers: () => buildApiUrl('/carriers/', API_VERSIONS.BFG2, 'delivery'),
+  packagingTypes: () => buildApiUrl('/packaging-types/', API_VERSIONS.BFG2, 'delivery'),
+  freightServices: () => buildApiUrl('/freight-services/', API_VERSIONS.BFG2, 'delivery'),
   freightServiceConfigSchema: (templateId?: string) =>
-    buildApiUrl('/freight-services/config_schema/', API_VERSIONS.BFG2) + (templateId ? `?template=${encodeURIComponent(templateId)}` : ''),
-  freightServiceTemplates: () => buildApiUrl('/freight-services/templates/', API_VERSIONS.BFG2),
-  freightStatuses: () => buildApiUrl('/freight-statuses/', API_VERSIONS.BFG2),
-  deliveryZones: () => buildApiUrl('/delivery-zones/', API_VERSIONS.BFG2),
-  trackingEvents: () => buildApiUrl('/tracking-events/', API_VERSIONS.BFG2),
+    buildApiUrl('/freight-services/config_schema/', API_VERSIONS.BFG2, 'delivery') + (templateId ? `?template=${encodeURIComponent(templateId)}` : ''),
+  freightServiceTemplates: () => buildApiUrl('/freight-services/templates/', API_VERSIONS.BFG2, 'delivery'),
+  freightStatuses: () => buildApiUrl('/freight-statuses/', API_VERSIONS.BFG2, 'delivery'),
+  deliveryZones: () => buildApiUrl('/delivery-zones/', API_VERSIONS.BFG2, 'delivery'),
+  trackingEvents: () => buildApiUrl('/tracking-events/', API_VERSIONS.BFG2, 'delivery'),
 
   // Support
   tickets: () => buildApiUrl('/support/tickets/', API_VERSIONS.BFG2),
@@ -130,25 +173,30 @@ export const bfgApi = {
   ticketPriority: (id: string | number) => buildApiUrl(`/support/ticket-priorities/${id}/`, API_VERSIONS.BFG2),
 
   // Finance
-  invoices: () => buildApiUrl('/invoices/', API_VERSIONS.BFG2),
-  brands: () => buildApiUrl('/brands/', API_VERSIONS.BFG2),
-  currencies: () => buildApiUrl('/currencies/', API_VERSIONS.BFG2),
-  financialCodes: () => buildApiUrl('/financial-codes/', API_VERSIONS.BFG2),
-  payments: () => buildApiUrl('/payments/', API_VERSIONS.BFG2),
-  paymentMethods: () => buildApiUrl('/payment-methods/', API_VERSIONS.BFG2),
-  paymentGateways: () => buildApiUrl('/payment-gateways/', API_VERSIONS.BFG2),
-  paymentGatewayPlugins: () => buildApiUrl('/payment-gateways/plugins/', API_VERSIONS.BFG2),
-  taxRates: () => buildApiUrl('/tax-rates/', API_VERSIONS.BFG2),
-  invoiceSettings: () => buildApiUrl('/invoice-settings/', API_VERSIONS.BFG2),
-  wallets: () => buildApiUrl('/finance/wallets/', API_VERSIONS.BFG2),
+  invoices: () => buildApiUrl('/invoices/', API_VERSIONS.BFG2, 'finance'),
+  brands: () => buildApiUrl('/brands/', API_VERSIONS.BFG2, 'finance'),
+  currencies: () => buildApiUrl('/currencies/', API_VERSIONS.BFG2, 'finance'),
+  financialCodes: () => buildApiUrl('/financial-codes/', API_VERSIONS.BFG2, 'finance'),
+  payments: () => buildApiUrl('/payments/', API_VERSIONS.BFG2, 'finance'),
+  paymentMethods: () => buildApiUrl('/payment-methods/', API_VERSIONS.BFG2, 'finance'),
+  paymentGateways: () => buildApiUrl('/payment-gateways/', API_VERSIONS.BFG2, 'finance'),
+  paymentGatewayPlugins: () => buildApiUrl('/payment-gateways/plugins/', API_VERSIONS.BFG2, 'finance'),
+  taxRates: () => buildApiUrl('/tax-rates/', API_VERSIONS.BFG2, 'finance'),
+  invoiceSettings: () => buildApiUrl('/invoice-settings/', API_VERSIONS.BFG2, 'finance'),
+  /** Admin-only wallet endpoint — staff sees every customer's wallet. */
+  wallets: () => buildApiUrl('/wallets/', API_VERSIONS.BFG2, 'finance'),
+  /** Customer-facing wallet endpoint — returns own wallets and exposes
+   *  the ``withdraw`` action. Use from /account pages. */
+  meWallets: () => buildApiUrl('/me/wallets/', API_VERSIONS.BFG2),
+  meWithdrawalRequests: () => buildApiUrl('/me/withdrawal-requests/', API_VERSIONS.BFG2),
 
   // Marketing
-  campaigns: () => buildApiUrl('/campaigns/', API_VERSIONS.BFG2),
-  campaignDisplays: () => buildApiUrl('/campaign-displays/', API_VERSIONS.BFG2),
-  coupons: () => buildApiUrl('/coupons/', API_VERSIONS.BFG2),
-  giftCards: () => buildApiUrl('/gift-cards/', API_VERSIONS.BFG2),
-  referralPrograms: () => buildApiUrl('/referral-programs/', API_VERSIONS.BFG2),
-  discountRules: () => buildApiUrl('/discount-rules/', API_VERSIONS.BFG2),
+  campaigns: () => buildApiUrl('/campaigns/', API_VERSIONS.BFG2, 'marketing'),
+  campaignDisplays: () => buildApiUrl('/campaign-displays/', API_VERSIONS.BFG2, 'marketing'),
+  coupons: () => buildApiUrl('/coupons/', API_VERSIONS.BFG2, 'marketing'),
+  giftCards: () => buildApiUrl('/gift-cards/', API_VERSIONS.BFG2, 'marketing'),
+  referralPrograms: () => buildApiUrl('/referral-programs/', API_VERSIONS.BFG2, 'marketing'),
+  discountRules: () => buildApiUrl('/discount-rules/', API_VERSIONS.BFG2, 'marketing'),
 
   // Inbox/Notifications
   messageTemplates: () => buildApiUrl('/inbox/templates/', API_VERSIONS.BFG2),
@@ -163,6 +211,18 @@ export const bfgApi = {
 }
 
 /**
+ * Fetch running server version metadata (no auth).
+ */
+export async function fetchServerVersion(
+  options?: Pick<ApiFetchOptions, 'requestHost' | 'siteAdminScope'>
+): Promise<ServerVersionResponse> {
+  return apiFetch<ServerVersionResponse>(bfgApi.serverVersion(), {
+    ...options,
+    withAuth: false
+  })
+}
+
+/**
  * Get workspace auth token from partitioned storage (migrates legacy `auth_token` once).
  */
 function getAuthToken(): string | null {
@@ -170,15 +230,14 @@ function getAuthToken(): string | null {
 }
 
 /**
- * Get workspace ID from storage or env.
- * Do not default to a numeric id in development: that forces the wrong tenant when the API should
- * resolve workspace by Host / X-Forwarded-Host (e.g. Geeker on localhost). Set NEXT_PUBLIC_WORKSPACE_ID
- * explicitly when you need a fixed workspace without domain routing.
+ * Workspace id for API headers: `localStorage.workspace_id` (if set), else `NEXT_PUBLIC_WORKSPACE_ID`.
+ * When null, callers should pass `requestHost` so the backend can resolve the tenant by domain.
+ * Storefront, account, and admin all use the same source so pinned dev tenants behave consistently.
  */
 export function getWorkspaceId(): string | null {
   if (typeof window !== 'undefined') {
     // Always prefer localStorage override (set during token exchange from platform login)
-    const workspaceId = localStorage.getItem('workspace_id')
+    const workspaceId = localStorage.getItem(WORKSPACE_ID_KEY)
     if (workspaceId) return workspaceId
     const envWorkspaceId = process.env.NEXT_PUBLIC_WORKSPACE_ID || null
     if (envWorkspaceId) return envWorkspaceId
@@ -189,32 +248,13 @@ export function getWorkspaceId(): string | null {
 }
 
 /**
- * Workspace id for public storefront fetches only: never localStorage, never header by default.
- * Storefront tenant resolution should come from Host / X-Forwarded-Host.
+ * Read workspace_id from the JWT access token payload (for UI display).
+ * The backend embeds workspace_id as a signed claim so this is authoritative
+ * for the active tenant context without an extra API call.
  */
-export function getStorefrontWorkspaceId(): string | null {
-  return null
-}
-
-/**
- * Site admin requests normally omit X-Workspace-ID so the backend resolves the tenant from
- * Host / X-Forwarded-Host (e.g. geeker.co.nz). When NEXT_PUBLIC_WORKSPACE_ID is set—typical for
- * localhost where Site maps to the wrong workspace—send X-Workspace-ID like other API calls.
- */
-function resolveWorkspaceIdForApi(options?: {
-  storefrontScope?: boolean
-  siteAdminScope?: boolean
-}): string | null {
-  if (options?.storefrontScope) {
-    return getStorefrontWorkspaceId()
-  }
-  if (options?.siteAdminScope) {
-    if (process.env.NEXT_PUBLIC_WORKSPACE_ID) {
-      return getWorkspaceId()
-    }
-    return getStorefrontWorkspaceId()
-  }
-  return getWorkspaceId()
+export function getWorkspaceIdFromJwt(): number | null {
+  if (typeof window === 'undefined') return null
+  return readWorkspaceIdClaim(getWorkspaceToken())
 }
 
 export type GetApiHeadersOptions = {
@@ -223,13 +263,9 @@ export type GetApiHeadersOptions = {
   /** Attach Bearer token from storage when present (browser only). */
   withAuth?: boolean
   /**
-   * Public storefront requests should resolve tenant by Host / X-Forwarded-Host only.
-   * This never uses localStorage and currently returns null so no X-Workspace-ID is sent.
-   */
-  storefrontScope?: boolean
-  /**
-   * Site-bound admin scope: prefer domain routing (no X-Workspace-ID unless
-   * NEXT_PUBLIC_WORKSPACE_ID is set for local dev pinning).
+   * Site-bound admin scope: send `X-Workspace-ID` when `getWorkspaceId()` is non-null
+   * (`NEXT_PUBLIC_WORKSPACE_ID` or `localStorage.workspace_id`); otherwise rely on
+   * `requestHost` / `X-Forwarded-Host` for domain-based tenant resolution.
    */
   siteAdminScope?: boolean
 }
@@ -237,7 +273,6 @@ export type GetApiHeadersOptions = {
 export type ApiFetchOptions = RequestInit & {
   requestHost?: string
   withAuth?: boolean
-  storefrontScope?: boolean
   siteAdminScope?: boolean
 }
 
@@ -252,13 +287,17 @@ export function getApiHeaders(
   const headers: Record<string, string> = {
     ...getApiLanguageHeaders(),
   }
-  const useHostScopedRouting = options?.storefrontScope || options?.siteAdminScope
-  const workspaceId = useHostScopedRouting ? getStorefrontWorkspaceId() : getWorkspaceId()
+  const pinnedWorkspaceId = getWorkspaceId()
+  const isAuthenticated = Boolean(options?.withAuth && getWorkspaceToken())
+  const workspaceId = isAuthenticated && !pinnedWorkspaceId ? null : pinnedWorkspaceId
   if (workspaceId) {
     headers['X-Workspace-ID'] = workspaceId
   }
-  if (options?.requestHost) {
-    headers['X-Forwarded-Host'] = options.requestHost
+  const forwardedHost =
+    options?.requestHost ??
+    (typeof window !== 'undefined' && !workspaceId ? window.location.host : undefined)
+  if (forwardedHost) {
+    headers['X-Forwarded-Host'] = forwardedHost
   }
   if (options?.withAuth) {
     const token = getAuthToken()
@@ -279,7 +318,10 @@ export function getApiHeaders(
  */
 function redirectToLoginIfAdminUnauthorized(status: number): void {
   if (typeof window === 'undefined') return
-  if (status !== 401 && status !== 403) return
+  // 403 = the user is authenticated but lacks workspace/role permission for
+  // a specific endpoint. We surface that as an in-page error so the cause is
+  // visible — only 401 (token actually invalid/expired) forces re-login.
+  if (status !== 401) return
   const pathname = window.location.pathname
   if (!pathname.startsWith('/admin')) return
   const href = window.location.href
@@ -296,10 +338,36 @@ export function getAgentChatRequestInit(body: Record<string, unknown>): RequestI
     ...getApiLanguageHeaders(),
     'Content-Type': 'application/json'
   }
-  if (token) headers['Authorization'] = `Bearer ${token}`
-  const workspaceId = getWorkspaceId()
-  if (workspaceId) headers['X-Workspace-ID'] = workspaceId
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`
+    // Workspace resolved from JWT claim by backend; no X-Workspace-ID needed.
+  } else {
+    const workspaceId = getWorkspaceId()
+    if (workspaceId) headers['X-Workspace-ID'] = workspaceId
+    else if (typeof window !== 'undefined') {
+      headers['X-Forwarded-Host'] = window.location.host
+    }
+  }
   return { method: 'POST', headers, body: JSON.stringify(body) }
+}
+
+/** 403 codes a new access token can clear: the token itself, or the workspace it names. */
+const TOKEN_403_CODES = new Set(['workspace_access_denied', 'token_not_valid', 'not_authenticated', 'authentication_failed'])
+
+/**
+ * Whether a 403 may be about the access token, and so worth a refresh and a retry. One that
+ * names a reason of its own in `code`, such as workspace_create_forbidden, is about the
+ * request instead: a new token only gets the same answer, two requests later.
+ */
+async function mayBeAboutTheToken(response: Response): Promise<boolean> {
+  if (!(response.headers.get('content-type') || '').includes('application/json')) return true
+  try {
+    const body: unknown = await response.clone().json()
+    const code = body && typeof body === 'object' ? (body as { code?: unknown }).code : undefined
+    return typeof code !== 'string' || TOKEN_403_CODES.has(code)
+  } catch {
+    return true
+  }
 }
 
 /**
@@ -311,9 +379,11 @@ export async function apiFetch<T>(
   retryOn401: boolean = true
 ): Promise<T> {
   const token = getAuthToken()
-  const { requestHost, withAuth, storefrontScope, siteAdminScope, ...fetchOptions } = options || {}
-  const useHostScopedRouting = storefrontScope || siteAdminScope
-  const workspaceId = useHostScopedRouting ? getStorefrontWorkspaceId() : getWorkspaceId()
+  const { requestHost, withAuth, siteAdminScope, ...fetchOptions } = options || {}
+  void siteAdminScope
+  const pinnedWorkspaceId = getWorkspaceId()
+  const sendsAuth = Boolean(token && withAuth !== false)
+  const workspaceId = sendsAuth && !pinnedWorkspaceId ? null : pinnedWorkspaceId
   const headers: Record<string, string> = {
     ...(fetchOptions?.headers as Record<string, string>)
   }
@@ -336,8 +406,15 @@ export async function apiFetch<T>(
     headers['X-Workspace-ID'] = workspaceId
   }
 
-  if (requestHost) {
-    headers['X-Forwarded-Host'] = requestHost
+  // Split-host production: browser is on preloved.kiwi but API is api.preloved.kiwi.
+  // WorkspaceMiddleware resolves tenant from Host / X-Forwarded-Host via WorkspaceDomain.
+  // When there is no X-Workspace-ID (no localStorage / env pin), send the site hostname so
+  // the API can resolve workspace without trusting api.* as a tenant domain.
+  const forwardedHost =
+    requestHost ??
+    (typeof window !== 'undefined' && !workspaceId ? window.location.host : undefined)
+  if (forwardedHost) {
+    headers['X-Forwarded-Host'] = forwardedHost
   }
 
   const response = await fetch(url, {
@@ -347,7 +424,7 @@ export async function apiFetch<T>(
 
   // Handle 401 Unauthorized or 403 Forbidden - try to refresh token and retry once
   // Backend may return 403 when token is invalid (e.g. DRF IsAuthenticated)
-  if ((response.status === 401 || response.status === 403) && retryOn401) {
+  if (retryOn401 && (response.status === 401 || (response.status === 403 && (await mayBeAboutTheToken(response))))) {
     const newToken = await refreshTokenIfNeeded()
     if (newToken) {
       return apiFetch<T>(url, options, false)
@@ -384,6 +461,9 @@ export async function apiFetch<T>(
             errorDetail = parts.join('; ')
           }
         }
+        // A refusal with a code we explain ourselves reads better in the visitor's
+        // language than in the server's. Everything else keeps the server's wording.
+        errorDetail = getApiErrorMessage(errorData?.code) ?? errorDetail
         if (errorDetail.includes('token') && errorDetail.includes('not valid')) {
           console.error('[apiFetch] Token validation error:', errorDetail)
         }

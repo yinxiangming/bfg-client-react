@@ -219,7 +219,7 @@ const APIKeysTab = () => {
       >
         <DialogTitle>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <i className='tabler-key' style={{ fontSize: 24 }} />
+            <i className='tabler-key' />
             {t('settings.general.apiKeys.secretDialog.title')}
           </Box>
         </DialogTitle>

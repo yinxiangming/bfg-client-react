@@ -164,7 +164,11 @@ const InvoiceEditDialog = ({
         getTaxRates(),
         getDefaultCurrencyCode()
       ])
-      const activeCurrencies = currenciesData.filter(c => c.is_active)
+      // New invoices offer the shop's currencies; an existing one keeps its own even if since switched off.
+      const invoiceCurrencyId = invoice ? (typeof invoice.currency === 'object' ? invoice.currency.id : invoice.currency) : null
+      const activeCurrencies = currenciesData.filter(
+        c => c.is_active && (c.is_enabled !== false || c.id === invoiceCurrencyId)
+      )
 
       setBrands(brandsData)
       setCurrencies(activeCurrencies)

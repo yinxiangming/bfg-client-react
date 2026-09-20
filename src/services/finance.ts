@@ -2,6 +2,7 @@
 
 import { apiFetch, bfgApi, getApiBaseUrl } from '@/utils/api'
 import { getSiteAdminOptions } from '@/services/settings'
+import type { Address } from '@/services/store'
 
 export type Currency = {
   id: number
@@ -10,11 +11,15 @@ export type Currency = {
   symbol: string
   decimal_places: number
   is_active: boolean
+  /** Whether this workspace offers the currency (added by the list API). */
+  is_enabled?: boolean
+  /** Whether it is this workspace's default currency. */
+  is_default?: boolean
   created_at?: string
   updated_at?: string
 }
 
-export type CurrencyPayload = Omit<Currency, 'id' | 'created_at' | 'updated_at'>
+export type CurrencyPayload = Omit<Currency, 'id' | 'created_at' | 'updated_at' | 'is_enabled' | 'is_default'>
 
 export type PaymentGatewayPluginInfo = {
   gateway_type: string
@@ -54,18 +59,19 @@ export type Brand = {
   id: number
   name: string
   logo?: string
-  address_id?: number
+  address?: Address | null
   tax_id?: string
   registration_number?: string
   invoice_note?: string
   is_default: boolean
-  is_active?: boolean
   created_at?: string
   updated_at?: string
 }
 
-export type BrandPayload = Omit<Brand, 'id' | 'created_at' | 'updated_at' | 'logo'> & {
+export type BrandPayload = Omit<Brand, 'id' | 'created_at' | 'updated_at' | 'logo' | 'address'> & {
   logo?: string | File
+  /** One of the workspace's addresses; an empty value clears it. */
+  address_id?: number | ''
 }
 
 export type FinancialCode = {
@@ -88,8 +94,6 @@ export type InvoiceSetting = {
   invoice_prefix: string
   default_due_days: number
   default_footer: string
-  enable_auto_number: boolean
-  email_template_id?: number
   is_active: boolean
   created_at?: string
   updated_at?: string
@@ -98,8 +102,10 @@ export type InvoiceSetting = {
 export type InvoiceSettingPayload = Omit<InvoiceSetting, 'id' | 'created_at' | 'updated_at'>
 
 // Currency API
-export async function getCurrencies(): Promise<Currency[]> {
-  const response = await apiFetch<Currency[] | { results: Currency[] }>(bfgApi.currencies(), getSiteAdminOptions())
+/** All active currencies, or with `enabled` only the ones this workspace offers. */
+export async function getCurrencies(options: { enabled?: boolean } = {}): Promise<Currency[]> {
+  const url = options.enabled ? `${bfgApi.currencies()}?enabled=true` : bfgApi.currencies()
+  const response = await apiFetch<Currency[] | { results: Currency[] }>(url, getSiteAdminOptions())
   if (Array.isArray(response)) return response
   return response.results || []
 }
@@ -135,6 +141,16 @@ export async function deleteCurrency(id: number) {
     ...getSiteAdminOptions(),
     method: 'DELETE'
   })
+}
+
+/** Offer a currency in this workspace (workspace admins). */
+export async function enableCurrency(id: number) {
+  return apiFetch<Currency>(`${bfgApi.currencies()}${id}/enable/`, { ...getSiteAdminOptions(), method: 'POST' })
+}
+
+/** Stop offering a currency in this workspace. The API refuses the default currency. */
+export async function disableCurrency(id: number) {
+  return apiFetch<Currency>(`${bfgApi.currencies()}${id}/disable/`, { ...getSiteAdminOptions(), method: 'POST' })
 }
 
 // Payment Gateway API
@@ -403,7 +419,7 @@ export type Wallet = {
 }
 
 export async function getMyWallet(): Promise<Wallet | null> {
-  const response = await apiFetch<{ results?: Wallet[] } | Wallet[]>(bfgApi.wallets())
+  const response = await apiFetch<{ results?: Wallet[] } | Wallet[]>(bfgApi.meWallets())
   const list = Array.isArray(response) ? response : response.results || []
   const first = list[0]
   if (!first) return null
@@ -423,7 +439,7 @@ export async function createWithdrawalRequest(
   walletId: number,
   payload: { amount: number; payout_method?: string; payout_details?: Record<string, unknown>; notes?: string }
 ): Promise<{ id: number; amount: string; status: string }> {
-  return apiFetch(`${bfgApi.wallets()}${walletId}/withdraw/`, {
+  return apiFetch(`${bfgApi.meWallets()}${walletId}/withdraw/`, {
     method: 'POST',
     body: JSON.stringify(payload)
   })
@@ -485,7 +501,7 @@ export async function sendInvoice(id: number): Promise<{ status?: string; messag
 
 export async function downloadInvoice(id: number): Promise<Blob> {
   const API_BASE_URL = getApiBaseUrl()
-  const url = `${API_BASE_URL}/api/v1/invoices/${id}/download_pdf/`
+  const url = `${API_BASE_URL}/api/v1/finance/invoices/${id}/download_pdf/`
 
   const response = await apiFetch<Response>(url, {
     ...getSiteAdminOptions(),

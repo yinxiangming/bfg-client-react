@@ -9,6 +9,13 @@ export const adminNavItems: MenuNode[] = [
     icon: 'tabler-layout-dashboard'
   },
   {
+    id: 'setup',
+    label: 'Setup',
+    i18nKey: 'nav.setup',
+    href: '/admin/setup',
+    icon: 'tabler-rocket'
+  },
+  {
     id: 'store',
     label: 'Store',
     i18nKey: 'nav.store',

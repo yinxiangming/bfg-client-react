@@ -1,0 +1,290 @@
+/* Auth "website" skin — class-scoped under .website-auth-root. */
+
+.website-auth-root {
+  --au-bg: #f8fafc;
+  --au-bg-elevated: #ffffff;
+  --au-border: #e2e8f0;
+  --au-text: #0f172a;
+  --au-text-muted: #475569;
+  --au-text-subtle: #94a3b8;
+  --au-primary: #2563eb;
+  --au-primary-hover: #1d4ed8;
+  --au-shadow: 0 24px 60px -24px rgba(15, 23, 42, 0.18);
+  --au-radius: 18px;
+
+  min-height: 100svh;
+  background: linear-gradient(135deg, #eef2ff 0%, #f0f9ff 50%, #fafaf9 100%);
+  color: var(--au-text);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 1024px) {
+  .website-auth-root {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.website-auth-root .au-hero {
+  display: none;
+  position: relative;
+  background:
+    radial-gradient(circle at 20% 30%, rgba(99, 102, 241, 0.55), transparent 55%),
+    radial-gradient(circle at 80% 70%, rgba(56, 189, 248, 0.4), transparent 55%),
+    linear-gradient(135deg, #1e1b4b 0%, #2563eb 100%);
+  color: #fff;
+  padding: 4rem 3rem;
+  flex-direction: column;
+  justify-content: space-between;
+  overflow: hidden;
+}
+
+@media (min-width: 1024px) {
+  .website-auth-root .au-hero {
+    display: flex;
+  }
+}
+
+.website-auth-root .au-hero-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.website-auth-root .au-hero-brand-mark {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(10px);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 800;
+}
+
+.website-auth-root .au-hero-headline {
+  font-size: clamp(1.75rem, 3vw, 2.5rem);
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 1rem;
+  letter-spacing: -0.01em;
+}
+
+.website-auth-root .au-hero-sub {
+  font-size: 1rem;
+  color: rgba(226, 232, 240, 0.85);
+  max-width: 32rem;
+  line-height: 1.55;
+}
+
+.website-auth-root .au-hero-bullets {
+  margin-top: 2rem;
+  display: grid;
+  gap: 0.75rem;
+  font-size: 0.95rem;
+  color: rgba(226, 232, 240, 0.9);
+}
+
+.website-auth-root .au-hero-bullet {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+}
+
+.website-auth-root .au-hero-bullet i {
+  color: #93c5fd;
+}
+
+.website-auth-root .au-hero-foot {
+  font-size: 0.85rem;
+  color: rgba(148, 163, 184, 0.85);
+}
+
+.website-auth-root .au-form-pane {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1.25rem 3rem;
+  min-height: 100svh;
+}
+
+@media (min-width: 768px) {
+  .website-auth-root .au-form-pane {
+    padding: 3rem 2.5rem;
+  }
+}
+
+.website-auth-root .au-form-card {
+  width: 100%;
+  max-width: 420px;
+  background: var(--au-bg-elevated);
+  border: 1px solid var(--au-border);
+  border-radius: var(--au-radius);
+  box-shadow: var(--au-shadow);
+  padding: 2rem 1.75rem 1.75rem;
+}
+
+@media (min-width: 768px) {
+  .website-auth-root .au-form-card {
+    padding: 2.5rem 2.25rem;
+  }
+}
+
+.website-auth-root .au-form-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  margin-bottom: 1.75rem;
+  font-weight: 700;
+  font-size: 1.05rem;
+  color: var(--au-text);
+}
+
+.website-auth-root .au-form-brand-mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #2563eb, #7c3aed);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-weight: 800;
+}
+
+.website-auth-root .au-form-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.4rem;
+}
+
+.website-auth-root .au-form-sub {
+  color: var(--au-text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+}
+
+.website-auth-root .au-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.website-auth-root .au-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--au-text);
+}
+
+.website-auth-root .au-input {
+  width: 100%;
+  padding: 0.7rem 0.9rem;
+  border: 1px solid var(--au-border);
+  border-radius: 12px;
+  font-size: 0.95rem;
+  background: #fff;
+  color: var(--au-text);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.website-auth-root .au-input:focus {
+  outline: none;
+  border-color: var(--au-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+
+.website-auth-root .au-button {
+  width: 100%;
+  padding: 0.8rem 1rem;
+  border-radius: 12px;
+  border: 0;
+  background: var(--au-primary);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background 0.15s, transform 0.1s;
+}
+
+.website-auth-root .au-button:hover:not(:disabled) {
+  background: var(--au-primary-hover);
+}
+
+.website-auth-root .au-button:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+.website-auth-root .au-helper {
+  margin-top: 1.25rem;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--au-text-muted);
+}
+
+.website-auth-root .au-helper a {
+  color: var(--au-primary);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.website-auth-root .au-helper a:hover {
+  text-decoration: underline;
+}
+
+.website-auth-root .au-error {
+  background: #fef2f2;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.website-auth-root .au-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--au-text-subtle);
+  font-size: 0.8rem;
+  margin: 1.25rem 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.website-auth-root .au-divider::before,
+.website-auth-root .au-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--au-border);
+}
+
+.website-auth-root .au-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: -0.25rem 0 1rem;
+  font-size: 0.85rem;
+  color: var(--au-text-muted);
+}
+
+.website-auth-root .au-row a {
+  color: var(--au-primary);
+  text-decoration: none;
+}
+
+.website-auth-root .au-row a:hover {
+  text-decoration: underline;
+}

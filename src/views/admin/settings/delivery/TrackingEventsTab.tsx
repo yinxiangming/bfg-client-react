@@ -27,8 +27,8 @@ const buildTrackingEventsSchema = (t: any): ListSchema => ({
   title: t('settings.delivery.trackingEvents.tab.title'),
   columns: [
     { field: 'event_type', label: t('settings.delivery.trackingEvents.tab.columns.eventType'), type: 'string', sortable: true, link: 'edit' },
-    { field: 'description', label: t('settings.delivery.trackingEvents.tab.columns.description'), type: 'string' },
-    { field: 'location', label: t('settings.delivery.trackingEvents.tab.columns.location'), type: 'string' },
+    { field: 'description', label: t('settings.delivery.trackingEvents.tab.columns.description'), type: 'string', width: 260 },
+    { field: 'location', label: t('settings.delivery.trackingEvents.tab.columns.location'), type: 'string', width: 180 },
     { field: 'event_time', label: t('settings.delivery.trackingEvents.tab.columns.eventTime'), type: 'datetime', sortable: true },
     { field: 'created_at', label: t('settings.delivery.trackingEvents.tab.columns.created'), type: 'datetime', sortable: true }
   ],

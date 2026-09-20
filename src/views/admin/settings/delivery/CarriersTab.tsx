@@ -30,7 +30,7 @@ const buildCarriersSchema = (t: any): ListSchema => ({
   columns: [
     { field: 'name', label: t('settings.delivery.carriers.tab.columns.name'), type: 'string', sortable: true, link: 'edit' },
     { field: 'code', label: t('settings.delivery.carriers.tab.columns.code'), type: 'string', sortable: true },
-    { field: 'tracking_url_template', label: t('settings.delivery.carriers.tab.columns.trackingUrl'), type: 'string' },
+    { field: 'tracking_url_template', label: t('settings.delivery.carriers.tab.columns.trackingUrl'), type: 'string', width: 260 },
     { field: 'is_active', label: t('settings.delivery.carriers.tab.columns.status'), type: 'select', sortable: true }
   ],
   searchFields: ['name', 'code'],

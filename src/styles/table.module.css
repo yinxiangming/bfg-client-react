@@ -1,7 +1,8 @@
 .table {
   inline-size: 100%;
   border-collapse: collapse;
-  font-size: 0.8125rem;
+  font-size: var(--at-row-size, 0.8125rem);
+  font-family: var(--at-font-body, inherit);
   white-space: nowrap;
 
   [align='right'] > * {
@@ -12,89 +13,77 @@
   }
 
   thead {
-    text-transform: uppercase;
-    color: var(--mui-palette-text-primary);
-    background-color: var(--mui-palette-grey-50);
-    border-block-start: 1px solid var(--border-color);
-  }
-
-  [data-mode='dark'] & thead {
-    background-color: var(--mui-palette-grey-800, #2d2d2d);
-    color: var(--mui-palette-grey-100, #e0e0e0);
+    text-transform: var(--at-head-transform, none);
+    color: var(--at-head-fg, var(--mui-palette-text-secondary));
+    background-color: var(--at-head-bg, transparent);
   }
 
   thead th {
-      font-weight: 600;
-      font-size: 0.75rem;
-      letter-spacing: 0.5px;
+      font-weight: var(--at-head-weight, 600);
+      font-size: var(--at-head-size, 0.6875rem);
+      letter-spacing: var(--at-head-tracking, 0.01em);
       line-height: 1.5;
       text-align: start;
-      block-size: 44px;
+      block-size: var(--at-head-h, 44px);
+      border-block-end: var(--at-head-rule, 1px solid var(--mui-palette-divider));
       &:not(:first-of-type):not(:last-of-type) {
-        padding-block: 0.75rem;
-        padding-inline: 1.5rem;
+        padding-block: 0.625rem;
+        padding-inline: var(--at-cell-px, 1.5rem);
       }
       &:first-of-type {
         &:not(:has(input[type='checkbox'])) {
-          padding-block: 0.75rem;
-          padding-inline: 1.5rem;
+          padding-block: 0.625rem;
+          padding-inline: var(--at-cell-px, 1.5rem);
         }
         &:has(input[type='checkbox']) {
           inline-size: 56px;
-          padding-inline: 1.5rem;
+          padding-inline: var(--at-cell-px, 1.5rem);
           text-align: center;
         }
       }
       &:last-of-type {
-        padding-block: 0.75rem;
-        padding-inline: 1.5rem;
+        padding-block: 0.625rem;
+        padding-inline: var(--at-cell-px, 1.5rem);
       }
   }
 
   tbody {
-    color: var(--mui-palette-text-secondary);
+    color: var(--at-row-fg, var(--mui-palette-text-secondary));
 
     th,
     td {
-      font-size: 0.875rem;
+      font-size: var(--at-row-size, 0.875rem);
       line-height: 1.5;
-      block-size: 52px;
+      block-size: var(--at-row-h, 52px);
       &:not(:first-of-type):not(:last-of-type) {
-        padding-block: 0.75rem;
-        padding-inline: 1.5rem;
+        padding-block: 0.5rem;
+        padding-inline: var(--at-cell-px, 1.5rem);
       }
       &:first-of-type {
         &:not(:has(input[type='checkbox'])) {
-          padding-block: 0.75rem;
-          padding-inline: 1.5rem;
+          padding-block: 0.5rem;
+          padding-inline: var(--at-cell-px, 1.5rem);
         }
         &:has(input[type='checkbox']) {
           inline-size: 56px;
-          padding-inline: 1.5rem;
+          padding-inline: var(--at-cell-px, 1.5rem);
           text-align: center;
         }
       }
       &:last-of-type {
-        padding-block: 0.75rem;
-        padding-inline: 1.5rem;
+        padding-block: 0.5rem;
+        padding-inline: var(--at-cell-px, 1.5rem);
       }
     }
 
+    /* Single hairline between rows — never top + bottom (which doubled up). */
     tr:not(:last-child) {
-      border-block-end: 1px solid var(--border-color);
+      border-block-end: var(--at-row-rule, 1px solid var(--mui-palette-divider));
     }
-    tr {
-      border-block-start: 1px solid var(--border-color);
-    }
-    
-    tr:hover {
-      background-color: var(--mui-palette-grey-50);
-    }
-  }
 
-  [data-mode='dark'] & tbody tr:hover {
-    background-color: var(--mui-palette-grey-800, #2d2d2d);
-    color: var(--mui-palette-text-primary);
+    tr:hover {
+      background-color: var(--at-row-hover, var(--mui-palette-action-hover));
+    }
   }
 }
 
@@ -112,4 +101,3 @@
     outline: 1px solid var(--mui-palette-primary-main);
   }
 }
-

@@ -24,8 +24,7 @@
   --mui-palette-action-active: rgba(231, 227, 252, 0.54);
 }
 
-/* CardHeader subheader: ensure readable in dark mode (product media, resale section, etc.) */
+/* CardHeader subheader: ensure readable in dark mode (product media, plugin sections, etc.) */
 [data-mode='dark'] .MuiCardHeader-subheader {
   color: var(--mui-palette-text-secondary);
 }
-

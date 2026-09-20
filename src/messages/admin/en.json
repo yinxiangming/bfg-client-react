@@ -1,6 +1,12 @@
 {
+  "extensionDisabled": {
+    "title": "This extension is switched off",
+    "body": "This workspace has not switched the extension on, so its pages are unavailable. Ask a workspace administrator to switch it on.",
+    "back": "Back to dashboard"
+  },
   "nav": {
     "dashboard": "Dashboard",
+    "setup": "Setup",
     "store": "Store",
     "storeOrders": "Orders",
     "storeProducts": "Products",
@@ -30,13 +36,9 @@
     "settingsDelivery": "Delivery",
     "settingsMarketing": "Marketing",
     "settingsSupport": "Customer Support",
-    "resale": "Resale",
-    "resaleIntake": "Intake",
-    "resaleSettings": "Settings",
-    "resaleTimeslots": "Time Slots",
-    "resaleBookings": "Bookings",
-    "resaleProducts": "Products",
-    "resalePayouts": "Payouts"
+    "team": "Team",
+    "teamStaff": "Staff",
+    "teamRoles": "Roles & Permissions"
   },
   "common": {
     "networkUnreachable": "Unable to reach the server. Check that the API is running and NEXT_PUBLIC_API_URL is set correctly.",
@@ -52,7 +54,8 @@
       "send": "Send",
       "pay": "Pay",
       "downloadPdf": "Download PDF",
-      "retry": "Retry"
+      "retry": "Retry",
+      "back": "Back"
     },
     "imageViewer": {
       "close": "Close",
@@ -111,7 +114,13 @@
         "yesterday": "Yesterday",
         "lastWeek": "Last week",
         "selectDate": "Select date"
-      }
+      },
+      "loadingStats": "Loading statistics…",
+      "selectedCount": "Selected {count}",
+      "selectedAllMatching": "All {count} matching selected",
+      "selectAllMatching": "Select all {count} matching",
+      "clearSelection": "Clear selection",
+      "selectionSummaryLabel": "Selected totals"
     },
     "schemaForm": {
       "save": "Save",
@@ -134,14 +143,17 @@
       "paid": "Paid",
       "processing": "Processing",
       "shipped": "Shipped",
+      "ready_for_pickup": "Ready for Pickup",
       "completed": "Completed",
       "cancelled": "Cancelled",
-      "delivered": "Delivered"
+      "delivered": "Delivered",
+      "refunded": "Refunded"
     },
     "paymentStatus": {
       "pending": "Pending",
       "paid": "Paid",
-      "failed": "Failed"
+      "failed": "Failed",
+      "refunded": "Refunded"
     },
     "basicInfo": {
       "storeFallback": "Store #{store}",
@@ -160,6 +172,11 @@
       "productSearchPlaceholder": "Search by name, SKU or barcode",
       "addProduct": "Add",
       "customer": "Customer",
+      "fulfillmentMethod": "Fulfillment Method",
+      "fulfillment": {
+        "shipping": "Shipping",
+        "pickup": "Pickup"
+      },
       "customerSearchPlaceholder": "Search by email or phone",
       "createNewCustomer": "Create new customer",
       "selectExistingCustomer": "Select existing customer",
@@ -173,7 +190,9 @@
         "createCustomerFailed": "Failed to create customer",
         "addAtLeastOneProduct": "Add at least one product",
         "createOrderFailed": "Failed to create order"
-      }
+      },
+      "pickupPoint": "Pickup Point",
+      "noPickupPoints": "No pickup points configured. Add one under Settings › Delivery."
     },
     "listPage": {
       "title": "Orders",
@@ -184,7 +203,9 @@
           "copyOrderNo": "Copy order number",
           "noteLabel": "Note",
           "customer": "Customer",
-          "store": "Store",
+          "fulfillment": "Fulfillment",
+          "fulfillmentShipping": "Shipping",
+          "fulfillmentPickup": "Pickup",
           "total": "Total",
           "status": "Status",
           "payment": "Payment",
@@ -192,7 +213,8 @@
           "packagesCount": "{count} package(s)",
           "manageLogistics": "Manage",
           "addPackages": "Add packages",
-          "createdAt": "Created At"
+          "createdAt": "Created At",
+          "paymentProof": "Payment proof attached"
         }
       },
       "logisticsModal": {
@@ -217,6 +239,11 @@
         },
         "createdTime": {
           "label": "Created time"
+        },
+        "paymentProof": {
+          "label": "Payment proof",
+          "yes": "Attached",
+          "no": "None"
         }
       },
       "actions": {
@@ -233,7 +260,8 @@
         "cancelTodo": "Cancel order functionality to be implemented",
         "shipTodo": "Ship order functionality to be implemented",
         "exportTodo": "Export Excel functionality to be implemented"
-      }
+      },
+      "subtitle": "Track, fulfil, refund and export customer orders."
     },
     "addressCards": {
       "labels": {
@@ -265,7 +293,57 @@
       "orderStatusLabel": "Order Status",
       "paymentStatusLabel": "Payment Status",
       "cancelOrder": "Cancel Order",
-      "createdAt": "Created: {date}"
+      "createdAt": "Created: {date}",
+      "errors": {
+        "actionFailed": "Action failed"
+      },
+      "actions": {
+        "ship": "Ship",
+        "shipping": "Shipping...",
+        "more": "More",
+        "refund": "Refund",
+        "refunding": "Refunding...",
+        "return": "Create Return",
+        "cancelOrder": "Cancel Order"
+      },
+      "dialogs": {
+        "cancelTitle": "Cancel Order",
+        "cancelReason": "Reason",
+        "returnTitle": "Create Return",
+        "returnCategory": "Reason Category",
+        "returnNote": "Notes"
+      },
+      "restock": {
+        "restock": "Restock",
+        "noRestock": "No Restock",
+        "damage": "Damaged/Dispose"
+      }
+    },
+    "shippingWizard": {
+      "title": "Ship Order",
+      "subtitle": "Manage packaging and choose how this order will be fulfilled in one place.",
+      "modes": {
+        "shipping": "Freight Shipping",
+        "pickup": "Customer Pickup"
+      },
+      "pickup": {
+        "title": "Notify customer for pickup",
+        "description": "Send the customer a pickup-ready message, then mark the order as shipped/ready.",
+        "subject": "Message subject",
+        "message": "Message",
+        "sendAndMarkReady": "Send message and mark ready",
+        "loadingCustomerLanguage": "Loading customer language...",
+        "statusHint": "This will send an inbox message and email to the customer, then update the order status to shipped.",
+        "defaultSubject": "Order #{orderNumber} is ready for pickup",
+        "defaultMessage": "Hi {customerName}, your order #{orderNumber} is ready for pickup. Please come to the store when convenient.",
+        "customerFallback": "customer",
+        "viewOrderAction": "View order"
+      },
+      "errors": {
+        "markShippedFailed": "Shipment was created, but failed to mark the order as shipped.",
+        "pickupNotifyFailed": "Failed to notify customer for pickup.",
+        "customerRequired": "This order has no customer linked, so pickup message cannot be sent."
+      }
     },
     "editPage": {
       "errors": {
@@ -351,7 +429,17 @@
       "phoneLabel": "Phone",
       "deliveryTimelineLabel": "Delivery Timeline",
       "notShippedYet": "Order has not been shipped yet.",
-      "shippingCostLabel": "Shipping Cost"
+      "shippingCostLabel": "Shipping Cost",
+      "pickup": {
+        "title": "Pickup Information",
+        "pointLabel": "Pickup Point",
+        "noPoint": "No pickup point recorded for this order.",
+        "codeLabel": "Pickup Code",
+        "codeHelp": "Locker PIN or counter code — whatever the customer quotes on collection.",
+        "saveCodeFailed": "Failed to save the pickup code.",
+        "notReadyYet": "Order is not ready for pickup yet.",
+        "feeLabel": "Pickup Fee"
+      }
     },
     "packages": {
       "title": "Packages",
@@ -509,6 +597,34 @@
         "title": "Delete Invoice",
         "message": "Are you sure you want to delete invoice {invoiceNumber}? This action cannot be undone."
       }
+    },
+    "returns": {
+      "title": "Returns ({count})",
+      "empty": "No returns for this order",
+      "status": {
+        "open": "Open",
+        "approved": "Approved",
+        "rejected": "Rejected",
+        "received": "Received",
+        "inspected": "Inspected",
+        "refunded": "Refunded",
+        "closed": "Closed",
+        "cancelled": "Cancelled"
+      },
+      "labels": {
+        "requested": "Requested",
+        "approved": "Approved",
+        "refunded": "Refunded",
+        "closed": "Closed",
+        "customerNote": "Customer note"
+      },
+      "messages": {
+        "loadFailed": "Failed to load returns"
+      }
+    },
+    "paymentProof": {
+      "title": "Payment proof ({count})",
+      "hint": "Uploaded by the customer. Check it, then set the payment status yourself — an upload is a claim, not a payment."
     }
   },
   "reviews": {
@@ -525,9 +641,7 @@
           "customer": "Customer",
           "rating": "Rating",
           "title": "Title",
-          "comment": "Comment",
           "status": "Status",
-          "helpfulCount": "Helpful",
           "createdAt": "Created At"
         }
       },
@@ -548,7 +662,8 @@
       },
       "messages": {
         "actionFailed": "Action failed: {error}"
-      }
+      },
+      "subtitle": "Moderate product reviews before they appear on the storefront."
     }
   },
   "customers": {
@@ -557,6 +672,10 @@
       "schema": {
         "title": "Customers",
         "customerNumber": "Customer Number",
+        "name": "Name",
+        "phone": "Phone",
+        "totalSpent": "Total Spent",
+        "lastLogin": "Last Active",
         "companyName": "Company Name",
         "email": "Email",
         "taxNumber": "Tax Number",
@@ -573,7 +692,8 @@
         "confirmDelete": "Are you sure you want to delete this customer?",
         "confirmDeleteCustomer": "Are you sure you want to delete {name}?",
         "deleteFailed": "Failed to delete customer: {error}"
-      }
+      },
+      "subtitle": "Accounts, addresses, wallets and order history for everyone who has bought from you."
     },
     "editHeader": {
       "addCustomer": "Add Customer",
@@ -904,6 +1024,11 @@
       "title": "Messages ({count})",
       "sendMessage": "Send Message",
       "system": "System",
+      "results": {
+        "succeeded": "Succeeded",
+        "failed": "Failed",
+        "replayed": "Replayed"
+      },
       "errors": {
         "fetchMessages": "Failed to fetch messages"
       },
@@ -954,8 +1079,10 @@
         "confirmDeleteWithName": "Are you sure you want to delete category {name}?"
       },
       "errors": {
-        "deleteFailed": "Failed to delete category: {error}"
-      }
+        "deleteFailed": "Failed to delete category: {error}",
+        "updateFailed": "Failed to update category: {error}"
+      },
+      "subtitle": "The category tree customers browse on the storefront."
     },
     "form": {
       "title": "Category Details",
@@ -1083,19 +1210,24 @@
         "empty": "No categories found"
       },
       "tooltips": {
-        "viewProducts": "Click to view products in this category"
+        "viewProducts": "Click to view products in this category",
+        "toggleActive": "Show this category on the storefront"
       },
       "actions": {
         "addSubcategory": "Add Subcategory",
         "edit": "Edit",
         "delete": "Delete",
-        "confirmDeleteWithName": "Are you sure you want to delete category \"{name}\"?"
+        "confirmDeleteWithName": "Are you sure you want to delete category \"{name}\"?",
+        "moveUp": "Move up",
+        "moveDown": "Move down",
+        "reorderFiltered": "Clear the search and filter to reorder"
       }
     }
   },
   "stores": {
     "page": {
-      "title": "Stores"
+      "title": "Stores",
+      "subtitle": "Sales locations and the warehouses that fulfil them."
     },
     "schema": {
       "title": "Stores",
@@ -1143,7 +1275,9 @@
       "snackbar": {
         "saved": "Store saved successfully!",
         "saveFailed": "Failed to update store"
-      }
+      },
+      "title": "Edit Store",
+      "subtitle": "Contact details, fulfilment and storefront settings for this location."
     }
   },
   "support": {
@@ -1153,7 +1287,8 @@
         "titleUnprocessed": "Unprocessed",
         "titleMy": "My Tickets",
         "titleInProgress": "In Progress",
-        "titleClosed": "Closed"
+        "titleClosed": "Closed",
+        "subtitle": "Customer conversations waiting on your team."
       },
       "tabs": {
         "basic": "Basic Info",
@@ -1407,8 +1542,10 @@
       "errors": {
         "updateStatusFailed": "Failed to update status: {error}",
         "deleteFailed": "Failed to delete product: {error}",
-        "schemaNotFound": "Schema not found"
-      }
+        "schemaNotFound": "Schema not found",
+        "deleteBlockedByOrders": "This product appears in {count} order(s), so deleting it would break them. Unpublish it instead to take it off the storefront."
+      },
+      "subtitle": "Catalogue, pricing, stock and storefront visibility for every product."
     },
     "description": {
       "cardTitle": "Product Description",
@@ -1949,6 +2086,7 @@
         "subtitle": "Manage warehouses, carriers, packaging types, and delivery defaults",
         "tabs": {
           "warehouses": "Warehouses",
+          "pickupPoints": "Pickup Points",
           "freightServices": "Freight Services",
           "carriers": "Carriers",
           "freightStatus": "Freight Status",
@@ -1956,6 +2094,57 @@
           "packagingTypes": "Packaging Types",
           "deliveryZones": "Delivery Zones",
           "deliverySettings": "Delivery Settings"
+        }
+      },
+      "pickupPoints": {
+        "tab": {
+          "title": "Pickup Points",
+          "columns": {
+            "name": "Name",
+            "code": "Code",
+            "address": "Address",
+            "phone": "Phone",
+            "fee": "Fee",
+            "status": "Status",
+            "default": "Default"
+          },
+          "actions": {
+            "newPoint": "New Pickup Point",
+            "edit": "Edit",
+            "delete": "Delete",
+            "confirmDelete": "Are you sure you want to delete this pickup point?"
+          },
+          "errors": {
+            "deleteFailed": "Failed to delete pickup point: {error}. A point with orders against it cannot be deleted — deactivate it instead.",
+            "saveFailed": "Failed to save pickup point: {error}"
+          }
+        },
+        "editDialog": {
+          "title": "Pickup Point",
+          "fields": {
+            "name": "Name",
+            "code": "Code",
+            "active": "Active",
+            "defaultPoint": "Default Pickup Point",
+            "defaultPointHelp": "Used when a pickup order names no point.",
+            "addressLine1": "Address Line 1",
+            "addressLine2": "Address Line 2",
+            "city": "City",
+            "state": "State/Province",
+            "postalCode": "Postal Code",
+            "country": "Country",
+            "latitude": "Latitude",
+            "longitude": "Longitude",
+            "phone": "Phone",
+            "email": "Email",
+            "instructions": "Pickup Instructions",
+            "instructionsHelp": "Opening hours, which door, where to park — shown to the shopper.",
+            "fee": "Pickup Fee",
+            "feeHelp": "Charged on the order's delivery charge line.",
+            "sortOrder": "Sort Order",
+            "warehouse": "Stock From",
+            "warehouseHelp": "The warehouse this point draws stock from, if it is one of yours."
+          }
         }
       }
     },
@@ -1979,8 +2168,11 @@
             "name": "Name",
             "symbol": "Symbol",
             "decimals": "Decimals",
-            "status": "Status"
+            "status": "Status",
+            "enabled": "Enabled"
           },
+          "defaultChip": "Default",
+          "sharedNotice": "Currencies are shared by every shop on the platform. Switch on the ones this shop offers; the default currency, set in General settings, always stays on. Only platform administrators can add, edit or delete currencies.",
           "searchPlaceholder": "Search currencies...",
           "filters": {
             "currencyType": {
@@ -2009,7 +2201,8 @@
           },
           "errors": {
             "deleteFailed": "Failed to delete currency: {error}",
-            "saveFailed": "Failed to save currency: {error}"
+            "saveFailed": "Failed to save currency: {error}",
+            "toggleFailed": "Failed to update this currency: {error}"
           }
         },
         "editDialog": {
@@ -2060,7 +2253,7 @@
           "title": "Brands",
           "columns": {
             "name": "Name",
-            "taxId": "Tax ID",
+            "taxId": "GST / tax number",
             "registrationNumber": "Registration No.",
             "default": "Default",
             "status": "Status"
@@ -2084,8 +2277,12 @@
           "title": "Brand",
           "name": "Name",
           "logo": "Logo",
-          "addressId": "Address ID",
-          "taxId": "Tax ID",
+          "address": "Address",
+          "noAddress": "No address selected",
+          "chooseAddress": "Choose address",
+          "removeAddress": "Remove",
+          "taxId": "GST / tax number",
+          "taxIdPlaceholder": "e.g. 123-456-789 (printed on invoices)",
           "registrationNumber": "Registration Number",
           "invoiceNote": "Invoice Note",
           "invoiceNotePlaceholder": "Enter payment instructions, bank details, or other information to display on invoices.\n\nExample:\nASB Bank\nSurlex Limited\n12-3484-0026365-00\n\nPlease use the following reference when making payment:\n- Particular: [Company Name]\n- Reference: [Invoice Number]\n- Code: [Customer Number]",
@@ -2849,6 +3046,46 @@
         "errors": {
           "deleteFailed": "Failed to delete",
           "saveFailed": "Failed to save"
+        },
+        "messages": {
+          "created": "Time slot created.",
+          "updated": "Time slot updated.",
+          "deleted": "Time slot deleted."
+        },
+        "batch": {
+          "action": "Batch Generate",
+          "title": "Batch Generate Time Slots",
+          "description": "Create multiple time slots by date range and weekdays.",
+          "generate": "Generate",
+          "generating": "Generating...",
+          "cancel": "Cancel",
+          "fields": {
+            "startDate": "Start Date",
+            "endDate": "End Date",
+            "startTime": "Start Time",
+            "endTime": "End Time",
+            "maxBookings": "Max Bookings",
+            "weekdays": "Weekdays"
+          },
+          "weekdays": {
+            "sun": "Sun",
+            "mon": "Mon",
+            "tue": "Tue",
+            "wed": "Wed",
+            "thu": "Thu",
+            "fri": "Fri",
+            "sat": "Sat"
+          },
+          "errors": {
+            "missingDateRange": "Please choose a start date and end date.",
+            "missingWeekdays": "Please select at least one weekday.",
+            "noMatchingDates": "No matching dates were found in the selected range.",
+            "allExist": "All matching time slots already exist.",
+            "generateFailed": "Failed to generate time slots."
+          },
+          "messages": {
+            "generated": "Generated {count} time slots."
+          }
         }
       }
     },
@@ -3085,6 +3322,53 @@
               "label": "Product Scanner API Key",
               "placeholder": "ps-xxxxxx"
             }
+          },
+          "storefrontDisplay": {
+            "title": "Storefront Display",
+            "description": "What shoppers see on a product page, and what happens once a product runs out. Applies to the whole storefront.",
+            "skuDisplay": {
+              "label": "Product code",
+              "options": {
+                "plain": "Show without the prefix",
+                "full": "Show the full code",
+                "hidden": "Do not show"
+              },
+              "help": {
+                "plain": "Drops the prefix above, so SKU-KAS-301 reads as KAS-301.",
+                "full": "Shows the code exactly as stored, prefix included.",
+                "hidden": "No product code on the page."
+              }
+            },
+            "stockDisplay": {
+              "label": "Stock level",
+              "options": {
+                "status": "In stock / Sold out only",
+                "low_only": "Show a count only when running low",
+                "exact": "Show the exact count",
+                "hidden": "Do not show"
+              },
+              "help": {
+                "status": "Shoppers see whether it is available, never how many you hold.",
+                "low_only": "A count appears once it reaches the product's low-stock threshold.",
+                "exact": "Publishes your stock levels — competitors can read them too.",
+                "hidden": "No availability shown at all."
+              }
+            },
+            "outOfStock": {
+              "label": "When a product is sold out",
+              "options": {
+                "show": "Show it, marked sold out",
+                "notify": "Show it and collect back-in-stock requests",
+                "backorder": "Keep selling it (backorder)",
+                "hide": "Hide it from the storefront"
+              },
+              "help": {
+                "show": "Stays browsable and indexed; the buy button is disabled.",
+                "notify": "Shoppers can leave an email. Requests are listed in the back office — sending the email is still manual.",
+                "backorder": "Orders are accepted for stock you do not hold yet. Say so in your delivery terms.",
+                "hide": "Drops out of listings and its page returns 404 — any inbound links and search rankings go with it."
+              }
+            }
           }
         },
         "actions": {
@@ -3123,7 +3407,8 @@
             "displayType": "Display Type",
             "order": "Order",
             "linkUrl": "Link URL",
-            "status": "Status"
+            "status": "Status",
+            "context": "Page"
           },
           "actions": {
             "newDisplay": "New Display",
@@ -3154,12 +3439,19 @@
             "rules": "Rules",
             "rulesHelp": "JSON array: same as ProductCategory rules. e.g. [{\"column\":\"category_id\",\"relation\":\"equals\",\"condition\":\"5\"}] or [{\"column\":\"price\",\"relation\":\"greater_than\",\"condition\":\"100\"}]",
             "post": "Post",
-            "active": "Active"
+            "active": "Active",
+            "context": "Page",
+            "contextHelp": "Which storefront page shows this. Leave as \"All pages\" to show it wherever promos are requested."
           },
           "displayTypeOptions": {
             "slide": "Slide",
             "categoryEntry": "Category Entry",
             "featured": "Featured"
+          },
+          "contextOptions": {
+            "all": "All pages",
+            "home": "Home page",
+            "category": "Category page"
           }
         }
       },
@@ -3450,8 +3742,37 @@
           "users": "Users",
           "roles": "Roles",
           "email": "Email",
-          "apiKeys": "API Keys"
+          "socialLogin": "Social Login",
+          "apiKeys": "API Keys",
+          "plugins": "Plugins",
+          "versions": "Versions"
         }
+      },
+      "versions": {
+        "intro": "Runtime versions for the BFG API, this admin app, server-side Django extensions, and loaded Next.js plugins.",
+        "sections": {
+          "api": "API & server library",
+          "adminClient": "Admin client (Next.js)",
+          "djangoExtensions": "Server extension apps (Django)",
+          "nextExtensions": "Admin plugins (Next.js)"
+        },
+        "labels": {
+          "bfg": "BFG (library)",
+          "workspaceServerApp": "Workspace API server app",
+          "apiVersion": "API version",
+          "schemaVersion": "OpenAPI schema version",
+          "buildId": "Build / Git revision",
+          "packageName": "npm package",
+          "clientVersion": "Admin app version"
+        },
+        "table": {
+          "appId": "App",
+          "extensionId": "Plugin id",
+          "extensionName": "Name",
+          "version": "Version"
+        },
+        "emptyDjangoApps": "No Django extension apps are registered for this workspace API.",
+        "emptyPlugins": "No admin plugins are loaded for this build."
       },
       "email": {
         "title": "Email configuration",
@@ -3519,7 +3840,19 @@
           "storefrontDisplay": "Storefront Display",
           "storefrontTheme": "Storefront Theme & Header",
           "shop": "Shop",
-          "socialMediaLinks": "Social Media Links"
+          "socialMediaLinks": "Social Media Links",
+          "analytics": "Analytics"
+        },
+        "sectionHints": {
+          "adminIdentity": "Names this tenant inside the back office. Not shown to storefront visitors.",
+          "localization": "Defaults applied to new content, prices, and timestamps across the workspace.",
+          "shop": "Catalogue and review behaviour for this workspace.",
+          "storefrontBranding": "Logo, favicon, and the name visitors see in the header and browser tab.",
+          "contactInformation": "Published in the storefront footer and on transactional pages.",
+          "storefrontDisplay": "Announcements and copy that sit above and below every storefront page.",
+          "storefrontTheme": "Skin, colour modes, and the header layout used by the storefront.",
+          "analytics": "Measurement tags injected into every storefront page.",
+          "socialMediaLinks": "Linked from the storefront footer. Leave blank to hide an icon."
         },
         "subsections": {
           "adminIdentity": "Admin & system identity",
@@ -3527,7 +3860,13 @@
         },
         "logo": {
           "alt": "Workspace Logo",
-          "help": "Allowed JPG, GIF or PNG. Max size of 800K"
+          "help": "Allowed JPG, GIF or PNG. Max size of 800K",
+          "showSiteName": "Also show the site name next to the logo"
+        },
+        "logoDark": {
+          "alt": "Workspace logo for dark backgrounds",
+          "upload": "Upload dark logo",
+          "help": "Used where the storefront background is dark: the header in dark mode, and the footer always. Leave empty to use the same logo everywhere."
         },
         "fields": {
           "workspaceOrgName": {
@@ -3551,6 +3890,10 @@
             "label": "Site description (SEO)",
             "placeholder": "A short tagline for your brand or store",
             "helper": "Used for SEO snippets and storefront copy; independent of the admin workspace name."
+          },
+          "country": {
+            "label": "Country",
+            "helper": "Sets the tax defaults, the checkout address format and the market for address lookup."
           },
           "defaultLanguage": {
             "label": "Default Language"
@@ -3616,7 +3959,8 @@
             "showCart": "Cart",
             "showLanguageSwitcher": "Language",
             "showStyleSelector": "Theme (light/dark)",
-            "showLogin": "Login / account"
+            "showLogin": "Login / account",
+            "showRegister": "Register"
           },
           "shop": {
             "reviewModerationRequired": "Require review moderation (reviews need approval before showing)",
@@ -3643,6 +3987,13 @@
               "label": "Instagram",
               "placeholder": "https://instagram.com/yourprofile"
             }
+          },
+          "analytics": {
+            "googleAnalyticsId": {
+              "label": "Google Analytics 4 measurement ID",
+              "placeholder": "G-XXXXXXXXXX",
+              "helper": "Found in GA4 under Admin → Data streams → your web stream. Leave blank to turn tracking off. Page views are reported automatically on every storefront page."
+            }
           }
         },
         "actions": {
@@ -3660,6 +4011,11 @@
           "loadFailedWithRefresh": "Failed to load settings: {error}. Please refresh the page.",
           "settingsIdMissing": "Settings ID not found. Please refresh the page.",
           "saveFailed": "Failed to save settings: {error}"
+        },
+        "favicon": {
+          "alt": "Favicon",
+          "upload": "Upload favicon",
+          "help": "Shown in the browser tab. A square PNG, ICO or SVG — 32×32 or larger. Leave empty to keep the default icon."
         }
       },
       "users": {
@@ -3833,6 +4189,81 @@
           "regenerateFailed": "Failed to regenerate secret: {error}",
           "schemaNotFound": "API Keys schema not found"
         }
+      },
+      "plugins": {
+        "title": "Plugins",
+        "description": "Optional features, switched on per workspace. A feature that costs money per use stays off until you turn it on here.",
+        "save": "Save Changes",
+        "saving": "Saving...",
+        "saved": "Plugin settings saved",
+        "errors": {
+          "loadFailed": "Failed to load plugin settings: {error}",
+          "saveFailed": "Failed to save plugin settings: {error}",
+          "settingsIdMissing": "Settings ID is missing. Reload the page and try again."
+        },
+        "addressLookup": {
+          "title": "Address Lookup",
+          "description": "Google-backed address suggestions and GPS place names, served by this server rather than by the client.",
+          "enabled": {
+            "label": "Enable Address Lookup",
+            "help": "Suggest addresses as a shopper types, and name the place a GPS fix landed on. Used by the WeChat mini-program, which cannot load Google's browser SDK."
+          },
+          "countryCode": {
+            "label": "Country",
+            "placeholder": "NZ",
+            "help": "Two-letter country code (ISO 3166-1). Suggestions and GPS results outside it are refused. Leave blank to use the workspace's own market.",
+            "invalid": "Enter a two-letter country code, such as NZ or CN."
+          },
+          "status": {
+            "live": "Live — {country}",
+            "notLive": "Not live",
+            "liveHelp": "The server is answering lookups and restricting them to this country.",
+            "notLiveHelp": "Save the switch above, then check that a country is set here and that GOOGLE_MAPS_API_KEY is set on the server."
+          }
+        }
+      },
+      "socialLogin": {
+        "title": "Social login",
+        "subtitle": "Most shops need nothing here: the platform's shared OAuth client already covers the redirect sign-in flow, because it always returns to our own API domain. Add your own client for a provider when you want your own name on its consent screen, or One Tap on your own domain — a provider checks the page's origin for that, and only your own client can list it.",
+        "add": "Add provider",
+        "edit": "Edit",
+        "editTitle": "Edit provider",
+        "delete": "Delete",
+        "deleteConfirm": "Delete these credentials? The provider's button will disappear from your sign-in page.",
+        "cancel": "Cancel",
+        "save": "Save",
+        "saving": "Saving...",
+        "saved": "Saved.",
+        "created": "Created.",
+        "deleted": "Deleted.",
+        "copied": "Copied.",
+        "provider": "Provider",
+        "providerLocked": "Delete and re-add to change the provider.",
+        "clientId": "Client ID",
+        "secret": "Client secret",
+        "secretPlaceholder": "Leave unchanged to keep the stored secret",
+        "secretUnchanged": "The stored secret is kept unless you type a new one.",
+        "appleKeyId": "Key ID",
+        "appleCertificateKey": "Signing key (.p8)",
+        "appleCertificateKeyPlaceholder": "Paste the contents of the .p8 file. Leave blank to keep the key already on file.",
+        "isActive": "Active",
+        "activeHint": "Turning this off hides the button without discarding the credentials.",
+        "status": "Status",
+        "statusLive": "Live",
+        "statusOff": "Off",
+        "statusIncomplete": "Incomplete",
+        "consoleHeading": "Paste these into the provider's console",
+        "redirectUri": "Redirect URI",
+        "jsOrigin": "JavaScript origin",
+        "noDomains": "This workspace has no domains yet, so there are no origins to authorise. Add a domain first.",
+        "errors": {
+          "loadFailed": "Failed to load social login settings",
+          "saveFailed": "Failed to save.",
+          "deleteFailed": "Failed to delete.",
+          "copyFailed": "Could not copy — select the text and copy it manually."
+        },
+        "inheritedNotice": "{providers} sign-in is currently provided by the platform's shared client, so it already works without any setup here. Add your own client below to put your own name on the consent screen and to enable One Tap on your own domain.",
+        "overrideNotice": "Saving this replaces the platform's shared client for this shop."
       }
     }
   },
@@ -3846,7 +4277,8 @@
     "hub": {
       "title": "Tools",
       "productEntry": "Log Product",
-      "productEntryDesc": "Log product model, quantity, location and photos"
+      "productEntryDesc": "Log product model, quantity, location and photos",
+      "subtitle": "Quick actions sized for a phone."
     },
     "quickEntry": {
       "title": "Quick Entry",
@@ -3873,5 +4305,964 @@
       "errorRequired": "Product model is required",
       "errorSubmit": "Submission failed, please try again"
     }
+  },
+  "staff": {
+    "page": {
+      "title": "Staff",
+      "subtitle": "{active} active staff · {total} total",
+      "rolesLink": "Roles & Permissions",
+      "invite": "Invite staff",
+      "empty": "No staff yet. Click \"Invite staff\" to add someone.",
+      "loading": "Loading…",
+      "loadFailed": "Failed to load staff.",
+      "table": {
+        "member": "Member",
+        "role": "Role",
+        "status": "Status",
+        "joined": "Joined",
+        "actions": "Actions"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "clickDeactivate": "Click to deactivate",
+        "clickActivate": "Click to activate"
+      },
+      "remove": "Remove",
+      "confirmRemove": "Remove staff member \"{name}\"?",
+      "removeFailed": "Failed to remove staff member.",
+      "updateFailed": "Update failed."
+    },
+    "invite": {
+      "title": "Invite staff",
+      "hint": "Enter the recipient's email and we'll send them a secure invitation link. They can accept it any time before it expires — no prior account required.",
+      "emailLabel": "Email",
+      "emailPlaceholder": "person@example.com",
+      "assignRole": "Assign role",
+      "expiryLabel": "Link expires after",
+      "expiryHours": "{hours} hours",
+      "messageLabel": "Personal message (optional)",
+      "messagePlaceholder": "Add a short note that will be included in the invitation email.",
+      "cancel": "Cancel",
+      "submit": "Send invite",
+      "submitting": "Sending…",
+      "failed": "Failed to send invitation."
+    },
+    "invitations": {
+      "title": "Invitations",
+      "empty": "No pending invitations.",
+      "loadFailed": "Failed to load invitations.",
+      "table": {
+        "email": "Email",
+        "role": "Role",
+        "status": "Status",
+        "expires": "Expires",
+        "invitedBy": "Invited by",
+        "actions": "Actions"
+      },
+      "status": {
+        "pending": "Pending",
+        "accepted": "Accepted",
+        "expired": "Expired",
+        "revoked": "Revoked"
+      },
+      "resend": "Resend",
+      "revoke": "Revoke",
+      "confirmRevoke": "Revoke invitation for \"{email}\"?",
+      "revokeFailed": "Failed to revoke invitation.",
+      "resendFailed": "Failed to resend invitation.",
+      "expiresIn": "in {hours}h",
+      "expiresOn": "{date}",
+      "neverInvited": "—"
+    },
+    "roles": {
+      "page": {
+        "title": "Roles & Permissions",
+        "subtitle": "Manage workspace roles and the modules each role can access",
+        "create": "New role",
+        "loading": "Loading…",
+        "loadFailed": "Failed to load roles.",
+        "system": "System",
+        "unsaved": "Unsaved",
+        "deleteRole": "Delete role",
+        "deleting": "Deleting…",
+        "discard": "Discard changes",
+        "save": "Save permissions",
+        "saving": "Saving…",
+        "saveFailed": "Save failed. Please try again.",
+        "deleteFailed": "Delete failed.",
+        "confirmDelete": "Delete role \"{name}\"? This cannot be undone.",
+        "sync": "Sync system roles",
+        "syncing": "Syncing…",
+        "syncTooltip": "Pull in any newly-released system roles from BFG modules.",
+        "syncResult": "Sync complete: {created} new, {updated} refreshed.",
+        "syncFailed": "Failed to sync system roles.",
+        "restoreDefaults": "Restore defaults",
+        "restoring": "Restoring…",
+        "restoreFailed": "Failed to restore defaults.",
+        "confirmRestore": "Restore \"{name}\" to its system default permissions?",
+        "overriddenNotice": "This role's permissions differ from the system default. You can save further changes or click \"Restore defaults\" to revert.",
+        "alreadyDefault": "Permissions already match system defaults."
+      },
+      "create": {
+        "title": "New role",
+        "name": "Role name",
+        "namePlaceholder": "e.g. Content editor",
+        "description": "Description",
+        "descriptionPlaceholder": "Optional. Describe the responsibilities of this role.",
+        "cancel": "Cancel",
+        "submit": "Create",
+        "submitting": "Creating…",
+        "failed": "Create failed."
+      }
+    },
+    "permissions": {
+      "moduleHeader": "Module",
+      "selectAll": "All",
+      "rowToggleAll": "Toggle all",
+      "rowToggleNone": "Clear all",
+      "columnToggle": "Toggle all / clear {action}",
+      "readOnlyNotice": "System role permissions cannot be modified.",
+      "actions": {
+        "view": "View",
+        "list": "List",
+        "create": "Create",
+        "update": "Update",
+        "delete": "Delete"
+      },
+      "groups": {
+        "shop": "Shop",
+        "delivery": "Delivery",
+        "finance": "Finance",
+        "marketing": "Marketing",
+        "content": "Content",
+        "support": "Support"
+      },
+      "modules": {
+        "shop": {
+          "product": "Products",
+          "order": "Orders",
+          "customer": "Customers",
+          "category": "Categories"
+        },
+        "delivery": "Delivery",
+        "finance": {
+          "invoice": "Invoices",
+          "payment": "Payments"
+        },
+        "marketing": "Marketing",
+        "web": "CMS Content",
+        "support": "Tickets"
+      }
+    }
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "editLayout": "Edit Layout",
+    "editTitle": "Edit Dashboard Layout",
+    "cancel": "Cancel",
+    "save": "Save Layout",
+    "saving": "Saving…",
+    "emptyHint": "No blocks yet. Add blocks to customize your dashboard.",
+    "subtitle": "Today's orders, revenue and customers at a glance."
+  },
+  "setup": {
+    "title": "Set up your shop",
+    "subtitle": "Tell us where you trade and what you sell, and we will write the parts nobody enjoys writing.",
+    "loadFailed": "Could not load the setup checklist.",
+    "allDone": "Everything required is done. Anything below is optional.",
+    "remaining": "{count} required {count, plural, one {item} other {items}} left, {optional} optional.",
+    "hideFromDashboard": "Hide from dashboard",
+    "optional": "Optional",
+    "go": "Set up",
+    "review": "Review",
+    "skip": "Skip",
+    "unskip": "Unskip",
+    "skipHint": "Mark as a deliberate decision. It stays on the list but stops counting against you.",
+    "unskipHint": "Put this back on the list.",
+    "stepCount": "{done} / {total}",
+    "quickStart": {
+      "title": "Quick start",
+      "subtitle": "Pick a country and an industry. We will set your currency, tax, categories, navigation and legal pages from them — and never overwrite anything you have already changed.",
+      "country": "Where you trade",
+      "countryImplies": "Sets {currency}, {timezone} and {tax}. You can change any of them afterwards.",
+      "industry": "What you sell",
+      "siteName": "Shop name",
+      "siteNamePlaceholder": "Shown in the header and on your invoices",
+      "contactEmail": "Contact email",
+      "contactEmailHelp": "Printed on your privacy, terms and returns pages.",
+      "contactPhone": "Contact phone",
+      "preview": "Show me what this does",
+      "rerunSafe": "Safe to run again — it only fills in what is still missing.",
+      "save": "Save contact details",
+      "saved": "Saved."
+    },
+    "preview": {
+      "title": "What will be created",
+      "intro": "These do not exist yet, so they will be created:",
+      "nothingToDo": "Nothing is missing — your workspace already has everything this template would create.",
+      "nonDestructive": "Pages you have edited and menus you have reordered are left exactly as they are.",
+      "cancel": "Cancel",
+      "apply": "Create them",
+      "kind": {
+        "settings": "Workspace settings",
+        "currency": "Currency",
+        "taxRate": "Tax rate",
+        "store": "Store",
+        "warehouse": "Warehouse",
+        "zone": "Delivery zone",
+        "category": "Product categories",
+        "page": "Pages",
+        "menu": "Navigation menus",
+        "shopSettings": "Storefront display",
+        "site": "Storefront site",
+        "content": "Content"
+      }
+    },
+    "checklist": {
+      "title": "What is left",
+      "subtitle": "Each row links to the screen that fixes it. The ones we cannot do for you need your own accounts and keys."
+    },
+    "block": {
+      "title": "Setup",
+      "next": "Next up: {item}",
+      "remaining": "{count} required {count, plural, one {item} other {items}} left.",
+      "continue": "Continue setup"
+    }
+  },
+  "workspaceSwitcher": {
+    "label": "Switch workspace",
+    "labelWithCurrent": "Switch workspace (current: {name})",
+    "switching": "Switching workspace…",
+    "loading": "Loading your workspaces…",
+    "loadFailed": "Couldn't load your workspaces.",
+    "empty": "No workspaces to switch to.",
+    "switchFailed": {
+      "notMember": "You're no longer staff in this workspace.",
+      "notFound": "This workspace no longer exists or has been deactivated.",
+      "generic": "Couldn't switch to this workspace. Try again."
+    },
+    "myShops": "My workspaces"
+  },
+  "workspaces": {
+    "title": "My workspaces",
+    "subtitle": "Every workspace you own or work in. Open admin switches you to that workspace first.",
+    "loading": "Loading your workspaces",
+    "loadFailed": "Couldn't load your workspaces.",
+    "empty": {
+      "title": "You don't have any workspaces yet",
+      "description": "Workspaces you own, and workspaces that add you as staff, will show up here."
+    },
+    "billingNote": "Plan, credits and extensions will show here once billing is available.",
+    "status": {
+      "active": "Open",
+      "suspended": "Suspended",
+      "inactive": "Deactivated",
+      "scheduled_for_deletion": "Deletion scheduled"
+    },
+    "badges": {
+      "current": "Current workspace",
+      "owner": "Owner"
+    },
+    "roles": {
+      "admin": "Administrator",
+      "manager": "Manager",
+      "staff": "Staff",
+      "store_admin": "Store Administrator",
+      "marketer": "Marketer",
+      "warehouse_manager": "Warehouse Manager",
+      "accountant": "Accountant",
+      "customer_service": "Customer Service",
+      "content_editor": "Content Editor"
+    },
+    "fields": {
+      "domain": "Domain",
+      "plan": "Plan",
+      "credits": "Credits",
+      "extensions": "Extensions"
+    },
+    "noDomain": "Not connected",
+    "enter": "Open admin",
+    "blocked": {
+      "suspended": "Suspended. Contact the platform to restore it.",
+      "inactive": "Deactivated.",
+      "notMember": "You aren't staff in this workspace, so you can't open its admin."
+    },
+    "enterFailed": {
+      "notFound": "This workspace no longer exists or has been deactivated.",
+      "generic": "Couldn't open this workspace's admin. Try again."
+    },
+    "create": {
+      "button": "New workspace",
+      "title": "Create a workspace",
+      "description": "Once it's created, you'll switch to the new workspace and continue with its setup.",
+      "fields": {
+        "name": "Workspace name",
+        "country": "Where you trade",
+        "currency": "Currency",
+        "language": "Default language"
+      },
+      "more": "More settings",
+      "moreHint": "Where you trade, currency and language follow your current workspace unless you change them.",
+      "sameAsCurrent": "Same as current workspace",
+      "submit": "Create workspace",
+      "creating": "Creating…",
+      "switching": "Switching to the new workspace…",
+      "failed": "Couldn't create the workspace. Try again.",
+      "createdNotSwitched": "{name} has been created, but we couldn't switch you to it. Open its admin from its card below.",
+      "optionsFailed": "Couldn't load the countries, currencies and languages to choose from. The new workspace will use your current workspace's."
+    },
+    "manage": "Manage"
+  },
+  "console": {
+    "nav": {
+      "workspaces": "Workspaces",
+      "myWorkspaces": "My workspaces",
+      "overview": "Overview",
+      "extensions": "Extensions",
+      "usage": "Usage",
+      "billing": "Billing",
+      "bills": "Bills",
+      "platform": "Platform",
+      "allWorkspaces": "All workspaces",
+      "clusters": "Clusters",
+      "auditLog": "Audit log",
+      "platformSettings": "Platform settings"
+    },
+    "topbar": {
+      "menu": "Menu"
+    },
+    "overview": {
+      "title": "Overview",
+      "subtitle": "what this workspace is, and which extensions it uses",
+      "loading": "Loading this workspace",
+      "loadFailed": "Couldn't load this workspace.",
+      "notFound": "This workspace doesn't exist, or you don't run it.",
+      "details": "Details",
+      "fields": {
+        "name": "Name",
+        "domain": "Domain",
+        "status": "Status",
+        "cluster": "Cluster",
+        "owner": "Owner",
+        "staff": "Staff",
+        "created": "Created"
+      },
+      "ownerIsYou": "{name} (you)",
+      "noOwner": "No owner",
+      "noDomain": "Not connected",
+      "noCluster": "Not assigned",
+      "staffCount": "{count} active",
+      "extensions": "Extensions",
+      "manageExtensions": "Manage extensions",
+      "enter": "Open admin",
+      "platformActions": "Platform actions",
+      "operationHistory": "Operation history",
+      "loadingOperations": "Loading operations",
+      "operationsFailed": "Couldn't load this workspace's operations.",
+      "noOperations": "No lifecycle operations have been recorded for this workspace.",
+      "placement": {
+        "title": "Cluster placement",
+        "subtitle": "Reserve verified capacity before a future data-plane placement",
+        "loading": "Loading placement reservations",
+        "loadFailed": "Couldn't load this workspace's placement reservations.",
+        "retry": "Retry",
+        "migrationUnavailable": "Live Cluster migration is unavailable until a verified data-plane adapter is configured. The existing assignment has not changed.",
+        "reservationOnly": "A reservation holds capacity only. It does not copy customer data or change this workspace's routing.",
+        "reserved": "Capacity is reserved on {cluster} until {expiry}. Release it if the verified placement will not proceed.",
+        "target": "Target Cluster",
+        "noTargets": "No active Cluster is currently accepting new workspace placements.",
+        "reason": "Operator reason",
+        "reserve": "Reserve capacity",
+        "release": "Release reservation",
+        "working": "Working…",
+        "actionFailed": "The placement action could not be completed."
+      },
+      "runtimeFeatures": {
+        "title": "Runtime feature access",
+        "subtitle": "Platform grants that the server actively enforces",
+        "names": {
+          "batch_management": "Batch management"
+        },
+        "forever": "Does not expire",
+        "until": "Until {date}",
+        "status": {
+          "effective": "Active",
+          "expired": "Expired",
+          "revoked": "Revoked",
+          "active": "Not active"
+        }
+      },
+      "grantFeature": "Grant feature",
+      "revokeFeature": "Revoke",
+      "revokeFeatureConfirm": "Revoke this runtime feature grant? The feature becomes unavailable immediately.",
+      "loadingFeatures": "Loading feature access",
+      "featuresFailed": "Couldn't load runtime feature access.",
+      "noRuntimeFeatures": "No Platform runtime feature grants have been recorded.",
+      "operations": {
+        "create": "Workspace created",
+        "suspend": "Workspace suspended",
+        "resume": "Workspace resumed",
+        "migrate": "Workspace migration",
+        "delete": "Deletion scheduled"
+      },
+      "operationStatus": {
+        "pending": "Pending",
+        "running": "Running",
+        "completed": "Completed",
+        "failed": "Failed"
+      },
+      "suspend": "Suspend",
+      "resume": "Resume",
+  "export": "Export workspace configuration",
+      "resetPassword": "Send password reset",
+      "delete": "Schedule deletion",
+      "cancelDeletion": "Cancel deletion",
+      "deleteConfirm": "Schedule this workspace for deletion in 30 days?",
+      "deletionScheduled": "This workspace is scheduled for deletion on {date}. Cancel deletion to keep it active.",
+      "reasonPrompt": "Why are you making this Platform change? (at least 3 characters)",
+      "actionFailed": "The action could not be completed."
+    },
+    "extensions": {
+      "title": "Extensions",
+      "subtitle": "switching one on takes effect at once; switching it off only stops the feature, and its data and settings stay",
+      "loading": "Loading extensions",
+      "loadFailed": "Couldn't load this workspace.",
+      "notFound": "This workspace doesn't exist, or you don't run it.",
+      "unavailable": "Extension management is not available in this deployment yet.",
+      "none": "This platform ships no extensions a workspace can switch on.",
+      "on": "On",
+      "off": "Off",
+      "offHint": "Switch it on to start using it",
+      "activate": "Turn on",
+      "deactivate": "Turn off",
+      "acquire": "Get",
+      "acquireHint": "Get it before it can be switched on",
+      "acquireAgainHint": "Its entitlement ran out; get it again to pick up where it left off",
+      "acquireFailed": "Couldn't get this add-on. Try again.",
+      "acquired": {
+        "on": "{name} is yours, and it's on.",
+        "granted": "{name} is yours. Switch it on when you're ready.",
+        "invoiceTitle": "Invoice raised for {name}",
+        "invoiceBody": "Invoice {number} comes to {total} and is due {due}. {name} is switched on as soon as it's paid.",
+        "invoiceUnpaidTitle": "{name} is already on an unpaid invoice",
+        "invoiceUnpaidBody": "Invoice {number} comes to {total} and is due {due}; asking again doesn't raise a second one. {name} is switched on as soon as it's paid.",
+        "viewBills": "Go to bills",
+        "trialTitle": "{name} is on, free for {days} days",
+        "trialBody": "The trial runs until {until}. After that it's charged on your monthly bill.",
+        "onBillLaterTitle": "{name} is on",
+        "onBillLaterBody": "There's no invoice for it today — this period, up to {until}, is charged on your next monthly bill.",
+        "billLaterNoEnd": "It's on now, and it'll appear on your next monthly bill."
+      },
+      "settings": "Settings",
+      "enter": "Open admin",
+      "enterFailed": "Couldn't open this workspace's admin. Try again.",
+      "appliesTo": "Works in",
+      "surfaces": {
+        "admin": "Admin",
+        "storefront": "Storefront",
+        "account": "Customer account",
+        "miniprogram": "Mini program"
+      },
+      "activatedAt": "On since {date}",
+      "prerequisites": "Before it can be switched on:",
+      "failed": "Couldn't change this extension. Try again.",
+      "errors": {
+        "workspace_suspended": "This workspace is suspended, so its extensions can't be changed.",
+        "workspace_inactive": "This workspace is deactivated, so its extensions can't be changed.",
+        "unknown_extension": "This extension is no longer part of the platform.",
+        "not_activatable": "This extension is always available, so it isn't switched on or off.",
+        "invalid_config": "That configuration wasn't valid, so nothing was saved.",
+        "busy": "It's being archived or restored. Try again once that finishes.",
+        "archived": "Its data was archived. Restore it before switching it on.",
+        "requires_inactive": "Switch {names} on first.",
+        "prerequisite_failed": "Something this extension needs is still missing.",
+        "not_entitled": "This workspace isn't entitled to this extension yet.",
+        "required_by_active": "Switch {names} off first: they need this one.",
+        "already_entitled": "This workspace already has this add-on, so there's nothing to get.",
+        "not_an_addon": "This extension comes with the base plan, so there's nothing to get.",
+        "no_plan": "This add-on hasn't been priced on this platform yet, so it can't be bought.",
+        "no_owner": "This workspace has no owner to make the bill out to, so nothing can be bought for it yet.",
+        "unknown_currency": "This workspace's currency isn't one this platform bills in, so no invoice could be written.",
+        "key_too_long": "This add-on can't be billed for: its invoice number would be too long. Whoever ships it has to give it a shorter key."
+      },
+      "readOnly": {
+        "suspended": "This workspace is suspended. You can look at its extensions, but not change them.",
+        "inactive": "This workspace is deactivated. You can look at its extensions, but not change them.",
+        "scheduled_for_deletion": "This workspace is scheduled for deletion. You can look at its extensions, but not change them."
+      },
+      "confirm": {
+        "title": "Turn off {name}?",
+        "body": "The feature stops for this workspace right away. Its data and settings stay, so switching it back on picks up where it left off."
+      },
+      "notLive": "On, not live",
+      "notLiveHint": "Switched on, but something it needs is missing",
+      "paused": "Paused",
+      "pausedHint": "Paused when its entitlement ended; data and settings stay",
+      "working": "Working",
+      "workingHint": "Archiving or restoring; changes wait until that finishes",
+      "archived": "Archived",
+      "archivedHint": "Its data is archived; restore it before switching it on",
+      "grant": {
+        "action": "Grant",
+        "title": "Grant this workspace an entitlement",
+        "what": "What to grant",
+        "runtimeFeature": "Runtime feature",
+        "runtimeFeatureHint": "Only features with a server-side runtime entitlement gate are available.",
+        "basePlan": "Base plan",
+        "basePlanHint": "Everything that comes with the plan, rather than one add-on.",
+        "notSwitchedOn": "Granting doesn't switch an extension on — that stays the workspace's decision. One the platform paused when its entitlement ran out is switched back on.",
+        "forMonths": "For a number of months",
+        "neverExpires": "Never expires",
+        "months": "Months",
+        "monthsHint": "From 1 to {max}. Longer than that is what “never expires” is for.",
+        "reason": "Reason",
+        "reasonHint": "Kept on the entitlement, so it can be explained later. Required.",
+        "save": "Grant it",
+        "done": "{name} is granted to this workspace.",
+        "runsUntil": "It runs until {until}.",
+        "runsForever": "It doesn't expire.",
+        "resumed": "It was paused when its entitlement ran out, and is switched back on.",
+        "notResumed": "It couldn't be switched back on: turn it on from its card once whatever it needs is in place.",
+        "failed": "Couldn't grant this. Try again.",
+        "errors": {
+          "platform_admin_required": "Only platform administrators can grant an entitlement.",
+          "invalid_grant": "Pick either a number of months or “never expires”, and say why.",
+          "unknown_extension": "This platform doesn't ship an extension by that name.",
+          "already_entitled": "This workspace already holds this, so it wasn't granted again.",
+          "already_entitled_until": "This workspace already holds this until {until}, so it wasn't granted again.",
+          "already_entitled_forever": "This workspace already holds this and it doesn't expire, so it wasn't granted again.",
+          "workspace_not_found": "This workspace doesn't exist."
+        }
+      },
+      "price": {
+        "included": "Included in the base plan",
+        "per": "{amount} / {unit}",
+        "perMany": "{amount} / {count} {unit}",
+        "unit": {
+          "day": "day",
+          "week": "week",
+          "month": "month",
+          "year": "year"
+        },
+        "listed": "listed at {amount}",
+        "trial": "{days}-day free trial",
+        "free": "Free"
+      }
+    },
+    "all": {
+      "title": "All workspaces",
+      "subtitle": "every workspace on the platform, suspended and deactivated ones included",
+      "search": "Search by name or slug",
+      "filters": {
+        "status": "Status",
+        "allStatuses": "All statuses",
+        "cluster": "Cluster ID",
+        "clusterPlaceholder": "e.g. apac-1",
+        "unassigned": "Unassigned only"
+      },
+      "loading": "Loading workspaces",
+      "loadFailed": "Couldn't load the workspaces.",
+      "empty": "No workspace matches that.",
+      "count": "{count} workspaces",
+      "columns": {
+        "workspace": "Workspace",
+        "domain": "Domain",
+        "owner": "Owner",
+        "cluster": "Cluster",
+        "status": "Status",
+        "extensions": "Extensions on"
+      },
+      "manage": "Manage",
+      "platform": "Platform",
+      "yours": "Yours",
+      "noOwner": "No owner",
+      "forbidden": "Only platform administrators can see every workspace.",
+      "loadMore": "Load more",
+      "showing": "Showing {shown} of {count}",
+      "import": "Import workspace configuration",
+      "importTitle": "Import workspace configuration",
+      "importReason": "Why are you importing this workspace? (at least 3 characters)",
+      "importConfirm": "This creates a new workspace from a configuration export. It does not restore members, business data, or media.",
+      "importChooseFile": "Choose a configuration file",
+      "importNoFile": "No configuration file selected.",
+      "importFileTooLarge": "Choose a configuration file smaller than 1 MB.",
+      "importInvalidFile": "Choose a valid JSON workspace configuration file.",
+      "importAcknowledge": "I understand this creates a new workspace and keeps imported domains pending verification.",
+      "importFailed": "Couldn't import this workspace configuration. Check the file and try again.",
+      "deletionDue": "Deletion scheduled for {date}"
+    },
+    "usage": {
+      "title": "Usage",
+      "subtitle": "what this workspace has metered, and how much of its allowance is left",
+      "loading": "Loading usage",
+      "loadFailed": "Couldn't load this workspace's usage.",
+      "notFound": "This workspace doesn't exist, or you don't run it.",
+      "unavailable": "Usage reporting is not available in this deployment yet.",
+      "month": "Month",
+      "used": "Used",
+      "cap": "Allowance",
+      "remaining": "Left",
+      "points": "{points} pts",
+      "estimated": "About {amount} at this month's rate",
+      "noEstimate": "There's no rate to put a figure on these points yet.",
+      "overdue": {
+        "title": "Metered features are paused",
+        "body": "An invoice is past due. Everything metered starts up again as soon as it is paid, and nothing is lost in the meantime."
+      },
+      "byMeter": "By meter",
+      "byDay": "By day",
+      "columns": {
+        "meter": "Meter",
+        "quantity": "Quantity",
+        "points": "Points",
+        "amount": "Amount",
+        "day": "Day",
+        "meters": "Meters"
+      },
+      "empty": "Nothing was metered this month.",
+      "allowance": {
+        "title": "Monthly allowance",
+        "loading": "Loading this workspace's allowance",
+        "loadFailed": "Couldn't load this workspace's allowance.",
+        "change": "Change",
+        "points": "{points} pts",
+        "ownSource": "Set on this workspace",
+        "platformSource": "Platform default",
+        "ownExplains": "This workspace has an allowance of its own, so the platform default of {points} pts doesn't apply to it.",
+        "platformExplains": "This workspace follows the platform default of {points} pts, and moves with it.",
+        "followDefault": "Follow the platform default ({points} pts)",
+        "ownCap": "Give this workspace an allowance of its own",
+        "zeroMeansNothing": "0 stops this workspace metering anything at all, which is not the same as following the default.",
+        "hint": "Metered features stop for the rest of the month once the allowance is spent.",
+        "reason": "Reason",
+        "reasonHint": "This is stored with the allowance change and its audit record. Required.",
+        "save": "Save the allowance",
+        "saveFailed": "Couldn't change this allowance. Try again.",
+        "errors": {
+          "platform_admin_required": "Only platform administrators can set a workspace's allowance.",
+          "invalid_usage_cap": "That isn't an allowance that can be stored. Enter a number of points.",
+          "workspace_not_found": "This workspace doesn't exist."
+        }
+      }
+    },
+    "bills": {
+      "title": "Bills",
+      "subtitle": "every invoice for the workspaces you own",
+      "loading": "Loading bills",
+      "loadFailed": "Couldn't load your workspaces.",
+      "noWorkspaces": "You don't own a workspace yet, so there is nothing to bill.",
+      "empty": "No invoice has been raised yet.",
+      "noneLoaded": "No invoice could be loaded.",
+      "partial": "Couldn't load the bills for {names}.",
+      "overdue": {
+        "title": "{count, plural, one {# invoice is past due} other {# invoices are past due}}",
+        "body": "Metered features stay paused for those workspaces until the invoice is paid."
+      },
+      "columns": {
+        "workspace": "Workspace",
+        "period": "Period",
+        "issued": "Issued",
+        "due": "Due",
+        "total": "Total",
+        "status": "Status"
+      },
+      "status": {
+        "paid": "Paid",
+        "unpaid": "Unpaid",
+        "overdue": "Past due"
+      },
+      "expand": "Show what is on this invoice",
+      "collapse": "Hide what is on this invoice",
+      "number": "Invoice {number}",
+      "paidOn": "Paid {date}",
+      "noLines": "This invoice has no lines.",
+      "lines": {
+        "description": "Description",
+        "quantity": "Quantity",
+        "unitPrice": "Unit price",
+        "subtotal": "Subtotal"
+      },
+      "subtotal": "Subtotal",
+      "tax": "Tax",
+      "total": "Total",
+      "pay": {
+        "title": "Pay invoice {number}",
+        "opening": "Opening the payment…",
+        "failed": "Couldn't start the payment.",
+        "gateway": "Paying through",
+        "pendingTitle": "This payment is pending",
+        "pending": {
+          "card": "Payment {number} is pending. The card is charged by the payment provider, and this invoice is marked paid only once the provider's confirmation reaches us — not the moment you submit the card.",
+          "offline": "Payment {number} is pending. This invoice is marked paid once we have the money and have confirmed it, which is not the moment you send it.",
+          "unknown": "Payment {number} is pending. Finish it the way this gateway asks below. The invoice is marked paid only once that payment is confirmed, which does not happen on this page."
+        },
+        "instructions": {
+          "title": "How to pay",
+          "none": "This gateway published nothing to pay against. Tell us and we'll sort it out."
+        },
+        "fields": {
+          "bank_name": "Bank",
+          "account_name": "Account name",
+          "account_number": "Account number",
+          "routing_number": "Routing number",
+          "swift_code": "SWIFT code",
+          "accepted_methods": "Accepted"
+        },
+        "reference": "Quote invoice {number} when you send the money, so we can match it to this bill.",
+        "unknownNote": "This payment is finished away from the console. Go by whatever the gateway published above; if none of it says what to do, tell us.",
+        "card": {
+          "details": "Card details",
+          "name": "Name on card (optional)",
+          "submit": "Pay {amount}",
+          "secure": "Your card details go straight to the payment provider. They never reach us.",
+          "notReady": "The card field hasn't loaded. Give it a moment and try again — and tell us if it never does.",
+          "failed": "The card wasn't accepted.",
+          "charged": "The card went through. This invoice is marked paid once the provider's confirmation reaches us, which is usually a moment later.",
+          "inFlight": "The provider is still working on this card. This invoice is marked paid once it confirms the charge."
+        }
+      },
+      "errors": {
+        "workspace_not_found": "You can't reach this workspace any more, so its bills can't be paid from here.",
+        "invoice_not_found": "This invoice no longer exists.",
+        "invoice_already_paid": "This invoice has already been paid.",
+        "invoice_cancelled": "This invoice was cancelled, so there is nothing to pay.",
+        "invoice_nothing_to_pay": "There is nothing left to pay on this invoice.",
+        "no_payment_gateway": "The platform has no payment gateway switched on, so there is nothing to take the money. Tell us and we'll put one in place.",
+        "payment_gateway_not_found": "The payment gateway this was to go through is gone. Tell us and we'll sort it out.",
+        "payment_gateway_unavailable": "The payment gateway can't take a payment right now. Try again later, and tell us if it stays that way.",
+        "payment_in_progress": "A payment is already under way for this invoice. Finish that one, or ask us to clear it — starting another will not help.",
+        "platform_workspace_missing": "This deployment isn't set up to take platform payments. Tell us and we'll sort it out."
+      }
+    },
+    "platform": {
+      "title": "Platform settings",
+      "subtitle": "the numbers every workspace on this platform is billed by",
+      "loading": "Loading platform settings",
+      "loadFailed": "Couldn't work out who you are. Reload the page.",
+      "unavailable": "Platform billing configuration is not available in this deployment yet.",
+      "tabs": {
+        "variables": "Variables",
+        "prices": "Meter prices",
+        "rates": "Exchange rates"
+      },
+      "variables": {
+        "hint": "What every workspace is measured against. A change applies everywhere at once, so say why you made it.",
+        "loading": "Loading variables",
+        "loadFailed": "Couldn't load the variables.",
+        "empty": "This platform declares no variables.",
+        "columns": {
+          "variable": "Variable",
+          "value": "Value",
+          "default": "Default",
+          "lastChange": "Last change"
+        },
+        "overridden": "Changed",
+        "neverChanged": "Never changed",
+        "noReason": "No reason given",
+        "changedBy": "{who}, {when}",
+        "someone": "Someone",
+        "changeAction": "Change",
+        "change": "Change {key}",
+        "defaultIs": "The default is {value}.",
+        "wholeNumberDefault": "A whole number. The default is {value}.",
+        "true": "Yes",
+        "false": "No",
+        "reason": "Reason",
+        "reasonHint": "Kept for as long as the bills this explains. Required.",
+        "save": "Save the change",
+        "saveFailed": "Couldn't change this variable. Try again."
+      },
+      "prices": {
+        "hint": "What each meter costs. Prices are only ever added: a new rate is a new price from a moment on, so a bill already issued still adds up.",
+        "loading": "Loading prices",
+        "loadFailed": "Couldn't load the prices.",
+        "empty": "No meter has been priced yet.",
+        "add": "Add a price",
+        "addFor": "Add a price",
+        "addOnly": "Prices are never edited. This adds one from a moment on, and leaves what came before it alone.",
+        "inForce": "In force",
+        "hasInForce": "Priced",
+        "noneInForce": "Not priced yet",
+        "noneInForceHint": "Every price for this meter starts later than now, so nothing is billed for it until one does.",
+        "fromDefault": "platform default",
+        "columns": {
+          "meter": "Meter",
+          "vendorCost": "Vendor cost",
+          "unitSize": "Unit size",
+          "margin": "Margin",
+          "pointsPerUnit": "Points per unit",
+          "effectiveFrom": "In force from",
+          "added": "Added"
+        },
+        "meterHint": "Only meters with a server-side runtime enforcement point can be priced.",
+        "legacyMeter": "This legacy meter has no active runtime enforcement point, so its price history is read-only.",
+        "vendorCostHint": "What the vendor charges for one unit size, in US dollars.",
+        "unitSizeHint": "How many calls or tokens that buys: a rate quoted per 1,000 requests is 1000.",
+        "marginHint": "The share added on top, as a fraction: 0.30 charges 1.3 times cost. Leave it empty to follow the platform's own margin.",
+        "marginHintDefault": "The share added on top, as a fraction: 0.30 charges 1.3 times cost. Leave it empty to follow the platform's own, which is {margin} today.",
+        "effectiveFromHint": "Now when left empty. A time typed here is read in the platform's own time zone.",
+        "reason": "Reason",
+        "reasonHint": "This is stored with the price change and its audit record. Required.",
+        "save": "Add the price",
+        "saveFailed": "Couldn't add this price. Try again."
+      },
+      "rates": {
+        "hint": "What bills are converted at. Rates are read from the reference feed once a day.",
+        "loading": "Loading rates",
+        "loadFailed": "Couldn't load the rates.",
+        "empty": "No rate has been stored for that.",
+        "add": "Enter a rate",
+        "overwritten": "A rate entered by hand is a stand-in for a day the feed couldn't be read. The next refresh that does reach the feed replaces it with the published number and marks it as published.",
+        "feed": "Feed",
+        "manual": "By hand",
+        "columns": {
+          "day": "Day",
+          "pair": "Pair",
+          "rate": "Rate",
+          "source": "Source",
+          "enteredBy": "Entered by",
+          "from": "From",
+          "to": "To"
+        },
+        "dayHint": "Today when left empty. A day already stored is corrected, not duplicated.",
+        "reason": "Reason",
+        "reasonHint": "This is stored with the rate correction and its audit record. Required.",
+        "save": "Store the rate",
+        "saveFailed": "Couldn't store this rate. Try again."
+      },
+      "errors": {
+        "platform_admin_required": "Only platform administrators can change what the platform charges.",
+        "unknown_platform_variable": "This platform doesn't have a variable by that name.",
+        "invalid_platform_variable": "That isn't a value this variable can hold.",
+        "reason_required": "Say why you're making this change.",
+        "invalid_meter_price": "That price can't be stored. Check the cost, the unit size and the margin.",
+        "unknown_runtime_meter": "Choose a meter with an active runtime enforcement point.",
+        "invalid_exchange_rate": "That rate can't be stored. Check the currencies and the number."
+      }
+    },
+    "clusters": {
+      "title": "Clusters",
+      "subtitle": "the infrastructure locations that host your workspaces",
+      "loading": "Loading clusters",
+      "loadFailed": "Couldn't load the clusters. Reload the page and try again.",
+      "forbidden": "Only platform administrators can manage clusters.",
+      "unavailable": "Cluster management is not available in this deployment yet.",
+      "empty": "No clusters have been configured yet.",
+      "add": "Add cluster",
+      "manage": "Manage",
+      "checkHealth": "Check health",
+      "checkHealthTitle": "Check {name}",
+      "checkHealthBody": "The Platform will call this Cluster's configured health endpoint. Redirects are not followed.",
+      "checkHealthConfirm": "I understand this runs a server-side probe and records the result.",
+      "checkHealthFailed": "Couldn't complete the Cluster health check.",
+      "history": "Health history",
+      "historyTitle": "Health history for {name}",
+      "historyLoadFailed": "Couldn't load the Cluster health history.",
+      "historyEmpty": "No health observations have been recorded yet.",
+      "healthOverview": "Deployment health",
+      "healthWindow": "Based on server-side observations from the last {hours} hours.",
+      "healthStaleAlert": "{count} active Cluster(s) have not been checked in the last 24 hours. Their previous status is shown as unknown until a new probe is recorded.",
+      "healthSummary": {
+        "checked": "Active Clusters checked",
+        "stale": "Stale or unchecked",
+        "healthy": "{count} healthy",
+        "degraded": "{count} degraded",
+        "down": "{count} down",
+        "unknown": "{count} unknown"
+      },
+      "close": "Close",
+      "historyColumns": {
+        "when": "Checked",
+        "status": "Status",
+        "http": "HTTP"
+      },
+      "createTitle": "Add cluster",
+      "editTitle": "Manage {name}",
+      "save": "Save cluster",
+      "create": "Create cluster",
+      "saveFailed": "Couldn't save this cluster. Check the fields and try again.",
+      "reason": "Reason for this change",
+      "confirm": "I understand this changes shared platform infrastructure.",
+      "redisUnchanged": "Leave blank to keep the current value",
+      "configuration": "Connection settings",
+      "capacity": "Capacity and availability",
+      "fields": {
+        "id": "Cluster ID",
+        "name": "Name",
+        "region": "Region",
+        "api": "API URL",
+        "frontend": "Frontend URL",
+        "dbHost": "Database host",
+        "dbPort": "Database port",
+        "redis": "Redis URL",
+        "bucket": "Storage bucket",
+        "capacity": "Workspace capacity",
+        "accepting": "Accepting new workspaces",
+        "active": "Cluster active"
+      },
+      "columns": {
+        "cluster": "Cluster",
+        "region": "Region",
+        "usage": "Capacity",
+        "availability": "Availability",
+        "health": "Health",
+        "endpoint": "API endpoint"
+      },
+      "regions": {
+        "us": "United States",
+        "eu": "Europe",
+        "apac": "Asia Pacific"
+      },
+      "status": {
+        "active": "Active",
+        "inactive": "Inactive",
+        "accepting": "Accepting new workspaces",
+        "notAccepting": "Not accepting new workspaces",
+        "unknown": "Unknown",
+        "healthy": "Healthy",
+        "degraded": "Degraded",
+        "down": "Down"
+      }
+    },
+    "audit": {
+      "title": "Audit log",
+      "subtitle": "a read-only history of sensitive Platform changes",
+      "loading": "Loading audit history",
+      "loadFailed": "Couldn't load the audit history.",
+      "forbidden": "Only platform administrators can view audit history.",
+      "unavailable": "Audit history is not available in this deployment yet.",
+      "empty": "No Platform changes match these filters.",
+      "apply": "Apply filters",
+      "clear": "Clear",
+      "retry": "Retry",
+      "loadMore": "Load more",
+      "loadingMore": "Loading…",
+      "details": "Details",
+      "detailTitle": "Audited change",
+      "before": "Before",
+      "after": "After",
+      "close": "Close",
+      "system": "System",
+      "filters": {
+        "action": "Action",
+        "targetType": "Target type",
+        "targetId": "Target ID"
+      },
+      "columns": {
+        "when": "When",
+        "action": "Action",
+        "target": "Target",
+        "operator": "Operator",
+        "result": "Result",
+        "reason": "Reason"
+      }
+    },
+    "brand": "Workspaces Admin"
+  },
+  "workspaceReadOnly": {
+    "title": "This workspace is read only",
+    "body": "Its plan has not been renewed, so nothing here can be changed for now. You can still read every page, run every report and export your data. Renewing puts it back the way it was — nothing has been deleted.",
+    "action": "Renew plan"
   }
 }

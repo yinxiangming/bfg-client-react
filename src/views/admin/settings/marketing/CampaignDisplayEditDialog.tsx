@@ -25,6 +25,13 @@ const DISPLAY_TYPES = [
   { value: 'featured', labelKey: 'featured' }
 ] as const
 
+/** Storefront page the display belongs to; blank shows it on every page that asks. */
+const CONTEXTS = [
+  { value: '', labelKey: 'all' },
+  { value: 'home', labelKey: 'home' },
+  { value: 'category', labelKey: 'category' }
+] as const
+
 const buildFormSchema = (t: (key: string) => string): FormSchema => ({
   title: t('settings.marketing.campaignDisplays.editDialog.title'),
   fields: [
@@ -64,6 +71,18 @@ const buildFormSchema = (t: (key: string) => string): FormSchema => ({
         value,
         label: t(`settings.marketing.campaignDisplays.editDialog.displayTypeOptions.${labelKey}`)
       }))
+    },
+    {
+      field: 'context',
+      label: t('settings.marketing.campaignDisplays.editDialog.fields.context'),
+      type: 'select',
+      required: false,
+      defaultValue: '',
+      options: CONTEXTS.map(({ value, labelKey }) => ({
+        value,
+        label: t(`settings.marketing.campaignDisplays.editDialog.contextOptions.${labelKey}`)
+      })),
+      helperText: t('settings.marketing.campaignDisplays.editDialog.fields.contextHelp')
     },
     { field: 'order', label: t('settings.marketing.campaignDisplays.editDialog.fields.order'), type: 'number', defaultValue: 0 },
     {
@@ -150,13 +169,7 @@ const CampaignDisplayEditDialog = ({ open, display, onClose, onSave }: CampaignD
 
   return (
     <Dialog open={open} onClose={onClose} maxWidth='lg' fullWidth>
-      <DialogContent
-        sx={{
-          p: 0,
-          '& .MuiCard-root': { boxShadow: 'none' },
-          '& .MuiCardContent-root': { p: 4 }
-        }}
-      >
+      <DialogContent sx={{ p: 0 }}>
         <SchemaForm
           schema={formSchema}
           initialData={initialData}

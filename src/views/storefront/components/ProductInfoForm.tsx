@@ -19,6 +19,7 @@ import classnames from 'classnames'
 
 // Component Imports
 import { useCart } from '@/contexts/CartContext'
+import { useStorefrontCurrency } from '@/hooks/useStorefrontCurrency'
 import AddToCartModal from './AddToCartModal'
 
 type Product = {
@@ -44,6 +45,7 @@ type ProductInfoFormProps = {
 
 const ProductInfoForm = ({ product }: ProductInfoFormProps) => {
   const { addItem } = useCart()
+  const { formatPrice } = useStorefrontCurrency()
   const [selectedSize, setSelectedSize] = useState<string>(product.sizes[0] || '')
   const [selectedColor, setSelectedColor] = useState<string>(product.colors[0]?.name || '')
   const [quantity, setQuantity] = useState(1)
@@ -167,11 +169,11 @@ const ProductInfoForm = ({ product }: ProductInfoFormProps) => {
       {/* Price */}
       <Box className='mbe-4'>
         <Typography variant='h4' className='font-bold text-primary'>
-          ${product.price.toFixed(2)}
+          {formatPrice(product.price)}
         </Typography>
         {product.originalPrice && (
           <Typography variant='body2' className='text-textSecondary line-through'>
-            Regular price ${product.originalPrice.toFixed(2)}
+            Regular price {formatPrice(product.originalPrice)}
           </Typography>
         )}
       </Box>

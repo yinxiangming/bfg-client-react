@@ -12,20 +12,20 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
-  FormControl,
   Grid,
   IconButton,
-  InputLabel,
   MenuItem,
   Paper,
-  Select,
   Tab,
   Tabs,
-  TextField,
   Typography,
 } from '@mui/material'
 import { DataGrid, GridColDef, GridRenderCellParams } from '@mui/x-data-grid'
 import { Icon } from '@iconify/react'
+
+// Component Imports
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
+import CustomTextField from '@/components/ui/TextField'
 
 import { bfgApi, apiFetch } from '@/utils/api'
 
@@ -183,10 +183,8 @@ export function InquiriesPage() {
   ]
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Typography variant='h5' sx={{ mb: 3 }}>
-        Customer Inquiries
-      </Typography>
+    <Box>
+      <AdminPageHeader title='Customer Inquiries' />
 
       {/* Stats Cards */}
       {stats && (
@@ -194,7 +192,7 @@ export function InquiriesPage() {
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card>
               <CardContent>
-                <Typography variant='h4'>{stats.total}</Typography>
+                <Typography sx={{ fontSize: '1.5rem', fontWeight: 600, lineHeight: 1.2 }}>{stats.total}</Typography>
                 <Typography color='text.secondary'>Total Inquiries</Typography>
               </CardContent>
             </Card>
@@ -202,7 +200,7 @@ export function InquiriesPage() {
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card>
               <CardContent>
-                <Typography variant='h4' color='warning.main'>
+                <Typography color='warning.main' sx={{ fontSize: '1.5rem', fontWeight: 600, lineHeight: 1.2 }}>
                   {stats.pending}
                 </Typography>
                 <Typography color='text.secondary'>Pending</Typography>
@@ -212,7 +210,7 @@ export function InquiriesPage() {
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card>
               <CardContent>
-                <Typography variant='h4' color='success.main'>
+                <Typography color='success.main' sx={{ fontSize: '1.5rem', fontWeight: 600, lineHeight: 1.2 }}>
                   {stats.by_status?.completed || 0}
                 </Typography>
                 <Typography color='text.secondary'>Completed</Typography>
@@ -222,7 +220,7 @@ export function InquiriesPage() {
           <Grid size={{ xs: 12, sm: 6, md: 3 }}>
             <Card>
               <CardContent>
-                <Typography variant='h4'>{stats.by_type?.booking || 0}</Typography>
+                <Typography sx={{ fontSize: '1.5rem', fontWeight: 600, lineHeight: 1.2 }}>{stats.by_type?.booking || 0}</Typography>
                 <Typography color='text.secondary'>Bookings</Typography>
               </CardContent>
             </Card>
@@ -231,14 +229,16 @@ export function InquiriesPage() {
       )}
 
       {/* Filters */}
-      <Paper sx={{ p: 2, mb: 2 }}>
-        <Grid container spacing={2} alignItems='center'>
-          <Grid size={{ xs: 12, sm: 4, md: 3 }}>
-            <FormControl fullWidth size='small'>
-              <InputLabel>Status</InputLabel>
-              <Select
-                value={statusFilter}
+      <Card sx={{ mb: 2 }}>
+        <CardContent sx={{ p: 3 }}>
+          <Grid container spacing={2} alignItems='center'>
+            <Grid size={{ xs: 12, sm: 4, md: 3 }}>
+              <CustomTextField
+                select
+                fullWidth
+                size='small'
                 label='Status'
+                value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
               >
                 <MenuItem value=''>All</MenuItem>
@@ -246,15 +246,15 @@ export function InquiriesPage() {
                 <MenuItem value='processing'>Processing</MenuItem>
                 <MenuItem value='completed'>Completed</MenuItem>
                 <MenuItem value='cancelled'>Cancelled</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid size={{ xs: 12, sm: 4, md: 3 }}>
-            <FormControl fullWidth size='small'>
-              <InputLabel>Type</InputLabel>
-              <Select
-                value={typeFilter}
+              </CustomTextField>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 4, md: 3 }}>
+              <CustomTextField
+                select
+                fullWidth
+                size='small'
                 label='Type'
+                value={typeFilter}
                 onChange={(e) => setTypeFilter(e.target.value)}
               >
                 <MenuItem value=''>All</MenuItem>
@@ -262,21 +262,21 @@ export function InquiriesPage() {
                 <MenuItem value='inquiry'>Inquiry</MenuItem>
                 <MenuItem value='feedback'>Feedback</MenuItem>
                 <MenuItem value='other'>Other</MenuItem>
-              </Select>
-            </FormControl>
+              </CustomTextField>
+            </Grid>
+            <Grid size={{ xs: 12, sm: 4, md: 6 }}>
+              <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button startIcon={<Icon icon='mdi:refresh' />} onClick={fetchInquiries}>
+                  Refresh
+                </Button>
+              </Box>
+            </Grid>
           </Grid>
-          <Grid size={{ xs: 12, sm: 4, md: 6 }}>
-            <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-              <Button startIcon={<Icon icon='mdi:refresh' />} onClick={fetchInquiries}>
-                Refresh
-              </Button>
-            </Box>
-          </Grid>
-        </Grid>
-      </Paper>
+        </CardContent>
+      </Card>
 
       {/* Data Grid */}
-      <Paper sx={{ height: 500 }}>
+      <Card sx={{ height: 500 }}>
         <DataGrid
           rows={inquiries}
           columns={columns}
@@ -287,7 +287,7 @@ export function InquiriesPage() {
           }}
           disableRowSelectionOnClick
         />
-      </Paper>
+      </Card>
 
       {/* Detail Dialog */}
       <Dialog
@@ -300,7 +300,7 @@ export function InquiriesPage() {
           <>
             <DialogTitle>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <Typography variant='h6'>Inquiry Details</Typography>
+                Inquiry Details
                 <Chip
                   label={selectedInquiry.status_display}
                   color={STATUS_COLORS[selectedInquiry.status]}

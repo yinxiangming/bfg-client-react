@@ -1,6 +1,6 @@
 // Store API service (BFG2 Shop module)
 
-import { apiFetch, bfgApi } from '@/utils/api'
+import { apiFetch, bfgApi, buildApiUrl, API_VERSIONS } from '@/utils/api'
 import { getSiteAdminOptions } from '@/services/settings'
 import type { FormSchema } from '@/types/schema'
 
@@ -89,7 +89,7 @@ export interface VariantInventory {
 
 export async function getVariantInventories(productId: number): Promise<VariantInventory[]> {
   const response = await apiFetch<VariantInventory[] | { results?: VariantInventory[] }>(
-    `${bfgApi.products()}${productId}/inventory/`,
+    `${bfgApi.adminProducts()}${productId}/inventory/`,
     getSiteAdminOptions()
   )
   if (Array.isArray(response)) {
@@ -99,7 +99,7 @@ export async function getVariantInventories(productId: number): Promise<VariantI
 }
 
 export async function updateVariantInventories(productId: number, inventories: VariantInventory[]): Promise<void> {
-  return apiFetch<void>(`${bfgApi.products()}${productId}/inventory/`, {
+  return apiFetch<void>(`${bfgApi.adminProducts()}${productId}/inventory/`, {
     ...getSiteAdminOptions(),
     method: 'PUT',
     body: JSON.stringify({ inventories })
@@ -196,6 +196,17 @@ export async function getStores(): Promise<Store[]> {
   return response.results || response.data || []
 }
 
+export async function getStoresPage(params?: { page?: number; page_size?: number; search?: string }): Promise<PagedResult<Store>> {
+  const searchParams = new URLSearchParams()
+  if (params?.page) searchParams.append('page', String(params.page))
+  if (params?.page_size) searchParams.append('page_size', String(params.page_size))
+  if (params?.search) searchParams.append('search', params.search)
+  const url = `${bfgApi.stores()}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
+  const response = await apiFetch<{ count: number; results: Store[] } | Store[]>(url, getSiteAdminOptions())
+  if (Array.isArray(response)) return { results: response, count: response.length }
+  return { results: response.results || [], count: response.count || 0 }
+}
+
 export async function getStore(id: number): Promise<Store> {
   return apiFetch<Store>(`${bfgApi.stores()}${id}/`, getSiteAdminOptions())
 }
@@ -240,6 +251,17 @@ export async function getSalesChannels(): Promise<SalesChannel[]> {
   return response.results || response.data || []
 }
 
+export async function getSalesChannelsPage(params?: { page?: number; page_size?: number; search?: string }): Promise<PagedResult<SalesChannel>> {
+  const searchParams = new URLSearchParams()
+  if (params?.page) searchParams.append('page', String(params.page))
+  if (params?.page_size) searchParams.append('page_size', String(params.page_size))
+  if (params?.search) searchParams.append('search', params.search)
+  const url = `${bfgApi.salesChannels()}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
+  const response = await apiFetch<{ count: number; results: SalesChannel[] } | SalesChannel[]>(url, getSiteAdminOptions())
+  if (Array.isArray(response)) return { results: response, count: response.length }
+  return { results: response.results || [], count: response.count || 0 }
+}
+
 export async function getSalesChannel(id: number): Promise<SalesChannel> {
   return apiFetch<SalesChannel>(`${bfgApi.salesChannels()}${id}/`, getSiteAdminOptions())
 }
@@ -274,6 +296,17 @@ export async function getSubscriptionPlans(): Promise<SubscriptionPlan[]> {
     return response
   }
   return response.results || response.data || []
+}
+
+export async function getSubscriptionPlansPage(params?: { page?: number; page_size?: number; search?: string }): Promise<PagedResult<SubscriptionPlan>> {
+  const searchParams = new URLSearchParams()
+  if (params?.page) searchParams.append('page', String(params.page))
+  if (params?.page_size) searchParams.append('page_size', String(params.page_size))
+  if (params?.search) searchParams.append('search', params.search)
+  const url = `${bfgApi.subscriptionPlans()}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
+  const response = await apiFetch<{ count: number; results: SubscriptionPlan[] } | SubscriptionPlan[]>(url, getSiteAdminOptions())
+  if (Array.isArray(response)) return { results: response, count: response.length }
+  return { results: response.results || [], count: response.count || 0 }
 }
 
 export async function getSubscriptionPlan(id: number): Promise<SubscriptionPlan> {
@@ -316,7 +349,26 @@ export async function getWarehouses(): Promise<Warehouse[]> {
 export interface OrderItemSummary {
   product_name: string
   quantity: number
+  /** First product image, absolute URL. Null when the product has no image. */
+  image?: string | null
 }
+
+/**
+ * The only order statuses the API accepts, in workflow order.
+ *
+ * Mirrors `Order.STATUS_CHOICES` in bfg/shop/models/order.py. Every screen must
+ * build its dropdowns from this list: the admin used to offer `paid` and
+ * `completed`, neither of which is an order status — `paid` belongs to
+ * payment_status — so saving either returned
+ * `status: "paid" is not a valid choice`, while `processing`, `delivered` and
+ * `refunded` could not be set at all.
+ */
+export const ORDER_STATUSES = ['pending', 'processing', 'shipped', 'ready_for_pickup', 'delivered', 'cancelled', 'refunded'] as const
+export type OrderStatus = (typeof ORDER_STATUSES)[number]
+
+/** Mirrors `Order.PAYMENT_STATUS_CHOICES`. */
+export const PAYMENT_STATUSES = ['pending', 'paid', 'failed', 'refunded'] as const
+export type PaymentStatus = (typeof PAYMENT_STATUSES)[number]
 
 export interface Order {
   id: number
@@ -325,6 +377,15 @@ export interface Order {
   customer_name?: string
   store?: number | string
   store_name?: string
+  fulfillment_method?: 'shipping' | 'pickup'
+  /** Set only on pickup orders. The list serialises the id and the name. */
+  pickup_point?: number | null
+  pickup_point_name?: string | null
+  /** Locker PIN or counter code — whatever the customer quotes on collection. */
+  pickup_code?: string
+  /** The shopper has attached something — a bank-transfer screenshot, all but
+   *  always. Not a payment: a human still has to look at it. */
+  has_payment_proof?: boolean
   total: number
   item_count?: number
   /** Brief item list for list view (product_name, quantity) */
@@ -332,8 +393,8 @@ export interface Order {
   customer_note?: string
   /** Number of packages for logistics column */
   packages_count?: number
-  status: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled'
-  payment_status: 'pending' | 'paid' | 'failed'
+  status: OrderStatus
+  payment_status: PaymentStatus
   created_at: string
 }
 
@@ -361,6 +422,20 @@ export async function getOrders(params?: OrderListParams): Promise<Order[]> {
   return response.results || response.data || []
 }
 
+export async function getOrdersPage(params?: OrderListParams & { page?: number; page_size?: number; search?: string }): Promise<PagedResult<Order>> {
+  let url = bfgApi.orders().replace(/\/+$/, '')
+  const qs = new URLSearchParams()
+  if (params) {
+    Object.entries(params).forEach(([k, v]) => {
+      if (v != null && v !== '') qs.set(k, String(v))
+    })
+  }
+  if (qs.toString()) url += `?${qs.toString()}`
+  const response = await apiFetch<{ count: number; results: Order[] } | Order[]>(url, getSiteAdminOptions())
+  if (Array.isArray(response)) return { results: response, count: response.length }
+  return { results: response.results || [], count: response.count || 0 }
+}
+
 export async function getOrder(id: number): Promise<Order> {
   return apiFetch<Order>(`${bfgApi.orders()}${id}/`, getSiteAdminOptions())
 }
@@ -369,8 +444,12 @@ export async function getOrder(id: number): Promise<Order> {
 export interface CreateOrderPayload {
   customer_id: number
   store_id: number
-  shipping_address_id: number
-  billing_address_id?: number
+  fulfillment_method?: 'shipping' | 'pickup'
+  /** Required for pickup orders unless the workspace has a default point. */
+  pickup_point_id?: number | null
+  pickup_code?: string
+  shipping_address_id?: number | null
+  billing_address_id?: number | null
   status?: Order['status']
   payment_status?: Order['payment_status']
   customer_note?: string
@@ -382,6 +461,101 @@ export async function createOrder(data: CreateOrderPayload): Promise<Order> {
     ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
+  })
+}
+
+export async function cancelOrder(id: number, reason?: string): Promise<Order> {
+  return apiFetch<Order>(`${bfgApi.orders()}${id}/cancel/`, {
+    ...getSiteAdminOptions(),
+    method: 'POST',
+    body: JSON.stringify(reason ? { reason } : {})
+  })
+}
+
+export async function refundOrder(id: number): Promise<Order> {
+  return apiFetch<Order>(`${bfgApi.orders()}${id}/refund/`, {
+    ...getSiteAdminOptions(),
+    method: 'POST'
+  })
+}
+
+export type ReturnStatus = 'open' | 'approved' | 'rejected' | 'received' | 'inspected' | 'refunded' | 'closed' | 'cancelled'
+
+export interface ReturnLineItem {
+  id: number
+  order_item: number
+  product_name?: string
+  product_price?: string | number
+  quantity: number
+  reason?: string
+  restock_action?: 'no_restock' | 'restock' | 'damage'
+}
+
+export interface ReturnRequest {
+  id: number
+  order: number
+  order_number?: string
+  customer: number
+  customer_name?: string | null
+  return_number: string
+  status: ReturnStatus
+  reason_category?: string
+  customer_note?: string
+  admin_note?: string
+  items?: ReturnLineItem[]
+  created_at?: string
+  updated_at?: string
+  approved_at?: string | null
+  refunded_at?: string | null
+  closed_at?: string | null
+}
+
+export interface ReturnLineItemPayload {
+  order_item: number
+  quantity: number
+  reason?: string
+  restock_action?: 'no_restock' | 'restock' | 'damage'
+}
+
+const returnsApi = () => buildApiUrl('/returns/', API_VERSIONS.BFG2, 'shop')
+const returnItemsApi = () => buildApiUrl('/return-items/', API_VERSIONS.BFG2, 'shop')
+
+export async function getOrderReturns(orderId: number): Promise<ReturnRequest[]> {
+  const response = await apiFetch<ReturnRequest[] | { results?: ReturnRequest[] }>(
+    `${returnsApi()}?order=${orderId}`,
+    getSiteAdminOptions()
+  )
+  if (Array.isArray(response)) {
+    return response
+  }
+  return response.results || []
+}
+
+export async function createReturnRequest(data: {
+  order: number
+  reason_category?: string
+  customer_note?: string
+  admin_note?: string
+}): Promise<ReturnRequest> {
+  return apiFetch<ReturnRequest>(returnsApi(), {
+    ...getSiteAdminOptions(),
+    method: 'POST',
+    body: JSON.stringify(data)
+  })
+}
+
+export async function createReturnLineItem(returnId: number, data: ReturnLineItemPayload): Promise<any> {
+  return apiFetch<any>(returnItemsApi(), {
+    ...getSiteAdminOptions(),
+    method: 'POST',
+    body: JSON.stringify({ ...data, return_request: returnId })
+  })
+}
+
+export async function processReturnRefund(returnId: number): Promise<ReturnRequest> {
+  return apiFetch<ReturnRequest>(`${returnsApi()}${returnId}/process_refund/`, {
+    ...getSiteAdminOptions(),
+    method: 'POST'
   })
 }
 
@@ -445,6 +619,19 @@ export async function getReviews(params?: GetReviewsParams): Promise<ProductRevi
   return response.results || response.data || []
 }
 
+export async function getReviewsPage(params?: GetReviewsParams & { page?: number; page_size?: number; search?: string }): Promise<PagedResult<ProductReview>> {
+  const q = new URLSearchParams()
+  if (params?.product != null) q.set('product', String(params.product))
+  if (params?.is_approved != null && params.is_approved !== '') q.set('is_approved', String(params.is_approved))
+  if (params?.page) q.set('page', String(params.page))
+  if (params?.page_size) q.set('page_size', String(params.page_size))
+  if (params?.search) q.set('search', params.search)
+  const url = q.toString() ? `${bfgApi.reviews().replace(/\/+$/, '')}?${q}` : bfgApi.reviews()
+  const response = await apiFetch<{ count: number; results: ProductReview[] } | ProductReview[]>(url, getSiteAdminOptions())
+  if (Array.isArray(response)) return { results: response, count: response.length }
+  return { results: response.results || [], count: response.count || 0 }
+}
+
 export async function approveReview(id: number): Promise<ProductReview> {
   return apiFetch<ProductReview>(`${bfgApi.reviews()}${id}/approve/`, { ...getSiteAdminOptions(), method: 'POST' })
 }
@@ -483,6 +670,7 @@ export interface Customer {
     first_name?: string
     last_name?: string
     phone?: string
+    language?: string
   }
   user_id?: number
   workspace?: number | string
@@ -512,6 +700,17 @@ export async function getCustomers(params?: GetCustomersParams): Promise<Custome
   return response.results || response.data || []
 }
 
+export async function getCustomersPage(params?: GetCustomersParams & { page?: number; page_size?: number }): Promise<PagedResult<Customer>> {
+  const q = new URLSearchParams()
+  if (params?.search?.trim()) q.set('search', params.search.trim())
+  if (params?.page) q.set('page', String(params.page))
+  if (params?.page_size) q.set('page_size', String(params.page_size))
+  const url = q.toString() ? `${bfgApi.customers().replace(/\/+$/, '')}?${q}` : bfgApi.customers()
+  const response = await apiFetch<{ count: number; results: Customer[] } | Customer[]>(url, getSiteAdminOptions())
+  if (Array.isArray(response)) return { results: response, count: response.length }
+  return { results: response.results || [], count: response.count || 0 }
+}
+
 export async function getCustomer(id: number): Promise<Customer> {
   return apiFetch<Customer>(`${bfgApi.customers()}${id}/`, getSiteAdminOptions())
 }
@@ -539,6 +738,12 @@ export async function getCustomerAddresses(customerId: number): Promise<Address[
     return response
   }
   return response.results || []
+}
+
+/** Addresses the workspace keeps for itself (stores, warehouses, brands), not its customers'. */
+export async function getWorkspaceAddresses(): Promise<Address[]> {
+  const response = await apiFetch<Address[] | { results: Address[] }>(`${bfgApi.addresses()}?scope=workspace`, getSiteAdminOptions())
+  return Array.isArray(response) ? response : response.results || []
 }
 
 export async function createAddress(data: Partial<Address>): Promise<Address> {
@@ -641,36 +846,54 @@ export interface Tag {
   created_at?: string
 }
 
-export async function getProducts(params?: {
+export interface PagedResult<T> {
+  results: T[]
+  count: number
+}
+
+type ProductsParams = {
   search?: string
   category?: number
   tag?: number
   featured?: boolean
+  /** Publication state. Omit for "either" — `false` means "show me the drafts". */
+  is_active?: boolean
+  is_featured?: boolean
   page?: number
   page_size?: number
-}): Promise<Product[]> {
+}
+
+function buildProductsUrl(params?: ProductsParams): string {
   const searchParams = new URLSearchParams()
   if (params?.search) searchParams.append('search', params.search)
   if (params?.category) searchParams.append('category', params.category.toString())
   if (params?.tag) searchParams.append('tag', params.tag.toString())
   if (params?.featured !== undefined) searchParams.append('featured', params.featured.toString())
+  if (params?.is_active !== undefined) searchParams.append('is_active', params.is_active.toString())
+  if (params?.is_featured !== undefined) searchParams.append('is_featured', params.is_featured.toString())
   if (params?.page) searchParams.append('page', params.page.toString())
   if (params?.page_size) searchParams.append('page_size', params.page_size.toString())
+  return `${bfgApi.adminProducts()}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
+}
 
-  const url = `${bfgApi.products()}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`
-  const response = await apiFetch<Product[] | { results?: Product[]; data?: Product[] }>(url, getSiteAdminOptions())
-  if (Array.isArray(response)) {
-    return response
-  }
+export async function getProducts(params?: ProductsParams): Promise<Product[]> {
+  const response = await apiFetch<Product[] | { results?: Product[]; data?: Product[] }>(buildProductsUrl(params), getSiteAdminOptions())
+  if (Array.isArray(response)) return response
   return response.results || response.data || []
 }
 
+export async function getProductsPage(params?: ProductsParams): Promise<PagedResult<Product>> {
+  const response = await apiFetch<{ count: number; results: Product[] } | Product[]>(buildProductsUrl(params), getSiteAdminOptions())
+  if (Array.isArray(response)) return { results: response, count: response.length }
+  return { results: response.results || [], count: response.count || 0 }
+}
+
 export async function getProduct(id: number): Promise<Product> {
-  return apiFetch<Product>(`${bfgApi.products()}${id}/`, getSiteAdminOptions())
+  return apiFetch<Product>(`${bfgApi.adminProducts()}${id}/`, getSiteAdminOptions())
 }
 
 export async function createProduct(data: Partial<Product>): Promise<Product> {
-  return apiFetch<Product>(bfgApi.products(), {
+  return apiFetch<Product>(bfgApi.adminProducts(), {
     ...getSiteAdminOptions(),
     method: 'POST',
     body: JSON.stringify(data)
@@ -678,7 +901,7 @@ export async function createProduct(data: Partial<Product>): Promise<Product> {
 }
 
 export async function updateProduct(id: number, data: Partial<Product>): Promise<Product> {
-  return apiFetch<Product>(`${bfgApi.products()}${id}/`, {
+  return apiFetch<Product>(`${bfgApi.adminProducts()}${id}/`, {
     ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify(data)
@@ -686,7 +909,7 @@ export async function updateProduct(id: number, data: Partial<Product>): Promise
 }
 
 export async function deleteProduct(id: number): Promise<void> {
-  return apiFetch<void>(`${bfgApi.products()}${id}/`, { ...getSiteAdminOptions(), method: 'DELETE' })
+  return apiFetch<void>(`${bfgApi.adminProducts()}${id}/`, { ...getSiteAdminOptions(), method: 'DELETE' })
 }
 
 // Wishlist (admin)
@@ -723,6 +946,19 @@ export async function getCategories(lang: string = 'en'): Promise<Category[]> {
     list = Array.isArray(enResponse) ? enResponse : (enResponse.results || enResponse.data || [])
   }
   return list
+}
+
+export async function getCategoriesPage(params?: { lang?: string; page?: number; page_size?: number; search?: string }): Promise<PagedResult<Category>> {
+  const lang = params?.lang ?? 'en'
+  const q = new URLSearchParams()
+  q.set('lang', lang)
+  if (params?.page) q.set('page', String(params.page))
+  if (params?.page_size) q.set('page_size', String(params.page_size))
+  if (params?.search) q.set('search', params.search)
+  const url = `${bfgApi.products()}categories/?${q.toString()}`
+  const response = await apiFetch<{ count: number; results: Category[] } | Category[]>(url, getSiteAdminOptions())
+  if (Array.isArray(response)) return { results: response, count: response.length }
+  return { results: response.results || [], count: response.count || 0 }
 }
 
 export async function getCategoriesTree(lang: string = 'en'): Promise<Category[]> {

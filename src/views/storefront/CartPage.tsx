@@ -12,6 +12,9 @@ import { useTranslations } from 'next-intl'
 
 // Component Imports
 import { useCart } from '@/contexts/CartContext'
+import OrderingClosedNotice from './components/OrderingClosedNotice'
+import { useStorefrontCurrency } from '@/hooks/useStorefrontCurrency'
+import { useStorefrontOrdering } from '@/hooks/useStorefrontOrdering'
 
 // Util Imports
 import { getStoreImageUrl } from '@/utils/media'
@@ -23,6 +26,8 @@ import '@/styles/storefront.css'
 
 const CartPage = () => {
   const t = useTranslations('storefront')
+  const { formatPrice } = useStorefrontCurrency()
+  const { acceptingOrders } = useStorefrontOrdering()
   const router = useRouter()
   const { items, loading, removeItem, updateQuantity, getSubtotal } = useCart()
   const { beforeSlots, afterSlots } = usePageSlots('storefront/cart')
@@ -33,6 +38,9 @@ const CartPage = () => {
   } | null>(null)
 
   const handleCheckout = () => {
+    // The button below is already disabled; this is the same answer for anything that
+    // gets past it — a stale render, a keyboard, a script.
+    if (!acceptingOrders) return
     router.push('/checkout')
   }
 
@@ -187,7 +195,7 @@ const CartPage = () => {
                           {t('cart.labels.color')} {item.color}
                         </p>
                         <p className='sf-cart-item-price'>
-                          ${item.price.toFixed(2)}
+                          {formatPrice(item.price)}
                         </p>
                       </div>
                       <button
@@ -226,7 +234,7 @@ const CartPage = () => {
                         </button>
                       </div>
                       <p className='sf-cart-item-total'>
-                        ${(item.price * item.quantity).toFixed(2)}
+                        {formatPrice(item.price * item.quantity)}
                       </p>
                     </div>
                   </div>
@@ -250,13 +258,13 @@ const CartPage = () => {
                   <span style={{ fontSize: '0.875rem', color: '#757575' }}>
                     {t('cart.orderSummary.itemsCount', { count: items.length })}
                   </span>
-                  <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>${subtotal.toFixed(2)}</span>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>{formatPrice(subtotal)}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: '0.875rem', color: '#757575' }}>
                     {t('cart.orderSummary.tax', { percent: taxRate.toFixed(0) })}
                   </span>
-                  <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>${tax.toFixed(2)}</span>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>{formatPrice(tax)}</span>
                 </div>
                 <div
                   style={{
@@ -267,7 +275,7 @@ const CartPage = () => {
                 />
                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: '0.875rem', color: '#757575' }}>{t('cart.orderSummary.subtotalTaxIncl')}</span>
-                  <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>${subtotalWithTax.toFixed(2)}</span>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 600 }}>{formatPrice(subtotalWithTax)}</span>
                 </div>
                 <div
                   style={{
@@ -284,12 +292,17 @@ const CartPage = () => {
                   {t('cart.orderSummary.shippingNote')}
                 </div>
             </div>
+            {/* The basket keeps everything in it — it is the checkout that is closed,
+                not the shopping — so this explains the dead button and leaves the rest
+                of the page alone. */}
+            {!acceptingOrders && <OrderingClosedNotice style={{ margin: '1rem 0' }} />}
             <button
               onClick={handleCheckout}
+              disabled={!acceptingOrders}
               className='sf-btn sf-btn-primary sf-btn-full'
               style={{ fontSize: '1rem', padding: '0.875rem', marginBottom: '1.5rem' }}
             >
-              {t('cart.orderSummary.checkout')}
+              {acceptingOrders ? t('cart.orderSummary.checkout') : t('ordering.closedShort')}
             </button>
 
             {/* Policies */}

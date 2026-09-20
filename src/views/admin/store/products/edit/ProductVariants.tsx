@@ -11,7 +11,6 @@ import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import Button from '@mui/material/Button'
-import TextField from '@mui/material/TextField'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -32,6 +31,7 @@ import Link from '@mui/material/Link'
 import { getProductVariants, createProductVariant, deleteProductVariant, uploadProductMedia, updateProductVariant, type ProductVariant, type ProductMedia } from '@/services/store'
 
 // Component Imports
+import CustomTextField from '@/components/ui/TextField'
 import MediaLibraryDialog from '@/components/media/MediaLibraryDialog'
 import VariantInventoryModal from './VariantInventoryModal'
 
@@ -41,6 +41,7 @@ type ProductVariantsProps = {
     productId: string
     productMedia?: ProductMedia[]
     initialVariants?: ProductVariant[]
+    onInventoryUpdate?: () => void
 }
 
 type NewVariantData = Partial<ProductVariant> & {
@@ -48,7 +49,7 @@ type NewVariantData = Partial<ProductVariant> & {
     selectedMedia?: ProductMedia
 }
 
-const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVariantsProps) => {
+const ProductVariants = ({ productId, productMedia, initialVariants, onInventoryUpdate }: ProductVariantsProps) => {
     const t = useTranslations('admin')
     const [variants, setVariants] = useState<ProductVariant[]>(initialVariants || [])
     const [variantImages, setVariantImages] = useState<Record<number, string>>({})
@@ -476,9 +477,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                                     </TableCell>
                                     <TableCell sx={{ minWidth: 180 }}>
                                         {editingId === variant.id ? (
-                                            <TextField
-                                                variant='outlined'
-                                                size='small'
+                                            <CustomTextField
                                                 value={editDraft.name ?? ''}
                                                 onChange={e => setEditDraft(prev => ({ ...prev, name: e.target.value }))}
                                                 sx={{ minWidth: 180 }}
@@ -489,9 +488,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                                     </TableCell>
                                     <TableCell sx={{ minWidth: 180 }}>
                                         {editingId === variant.id ? (
-                                            <TextField
-                                                variant='outlined'
-                                                size='small'
+                                            <CustomTextField
                                                 value={editDraft.sku ?? ''}
                                                 onChange={e => setEditDraft(prev => ({ ...prev, sku: e.target.value }))}
                                                 sx={{ minWidth: 140 }}
@@ -502,9 +499,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                                     </TableCell>
                                     <TableCell sx={{ minWidth: 180 }}>
                                         {editingId === variant.id ? (
-                                            <TextField
-                                                variant='outlined'
-                                                size='small'
+                                            <CustomTextField
                                                 type='number'
                                                 value={editDraft.price ?? ''}
                                                 onChange={e => setEditDraft(prev => ({ ...prev, price: Number(e.target.value) }))}
@@ -515,28 +510,24 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                                         )}
                                     </TableCell>
                                     <TableCell sx={{ minWidth: 180 }}>
-                                        {editingId === variant.id ? (
-                                            <Link
-                                                component='button'
-                                                variant='body2'
-                                                onClick={() => {
-                                                    if (productIdNumber) {
-                                                        setInventoryModalVariantId(variant.id)
-                                                        setInventoryModalOpen(true)
-                                                    }
-                                                }}
-                                                sx={{
-                                                    cursor: productIdNumber ? 'pointer' : 'default',
-                                                    textDecoration: 'underline',
-                                                    minWidth: 80,
-                                                    textAlign: 'left'
-                                                }}
-                                            >
-                                                {variant.stock_quantity}
-                                            </Link>
-                                        ) : (
-                                            variant.stock_quantity
-                                        )}
+                                        <Link
+                                            component='button'
+                                            variant='body2'
+                                            onClick={() => {
+                                                if (productIdNumber) {
+                                                    setInventoryModalVariantId(variant.id)
+                                                    setInventoryModalOpen(true)
+                                                }
+                                            }}
+                                            sx={{
+                                                cursor: productIdNumber ? 'pointer' : 'default',
+                                                textDecoration: 'underline',
+                                                minWidth: 80,
+                                                textAlign: 'left'
+                                            }}
+                                        >
+                                            {variant.stock_quantity}
+                                        </Link>
                                     </TableCell>
                                     <TableCell sx={{ width: 120, minWidth: 120 }}>
                                         <IconButton size='small' disabled={index === 0} onClick={() => handleMove(index, -1)}>
@@ -640,9 +631,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                                         </Box>
                                     </TableCell>
                                     <TableCell sx={{ minWidth: 180 }}>
-                                        <TextField
-                                            variant='outlined'
-                                            size='small'
+                                        <CustomTextField
                                             placeholder={t('products.variants.new.placeholders.name')}
                                             value={newVariant.name || ''}
                                             onChange={e => setNewVariant(prev => prev ? { ...prev, name: e.target.value } : { name: e.target.value })}
@@ -650,9 +639,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                                         />
                                     </TableCell>
                                     <TableCell sx={{ minWidth: 140 }}>
-                                        <TextField
-                                            variant='outlined'
-                                            size='small'
+                                        <CustomTextField
                                             placeholder={t('products.variants.new.placeholders.sku')}
                                             value={newVariant.sku || ''}
                                             onChange={e => setNewVariant(prev => prev ? { ...prev, sku: e.target.value } : { sku: e.target.value })}
@@ -660,9 +647,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                                         />
                                     </TableCell>
                                     <TableCell sx={{ minWidth: 140 }}>
-                                        <TextField
-                                            variant='outlined'
-                                            size='small'
+                                        <CustomTextField
                                             type='number'
                                             placeholder={t('products.variants.new.placeholders.price')}
                                             value={newVariant.price || ''}
@@ -671,9 +656,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                                         />
                                     </TableCell>
                                     <TableCell sx={{ minWidth: 120 }}>
-                                        <TextField
-                                            variant='outlined'
-                                            size='small'
+                                        <CustomTextField
                                             type='number'
                                             placeholder={t('products.variants.new.placeholders.stock')}
                                             value={newVariant.stock_quantity || ''}
@@ -754,6 +737,7 @@ const ProductVariants = ({ productId, productMedia, initialVariants }: ProductVa
                 onUpdate={() => {
                     fetchVariants()
                     notifyProductsRefresh()
+                    onInventoryUpdate?.()
                 }}
             />
         )}

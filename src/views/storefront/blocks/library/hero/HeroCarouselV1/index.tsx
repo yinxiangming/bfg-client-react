@@ -93,9 +93,14 @@ export function HeroCarouselV1({
               />
             )}
             <div className={styles.content}>
-              {slide.title && (
-                <h1 className={styles.title}>{getLocalizedText(slide.title, locale)}</h1>
-              )}
+              {slide.title &&
+                // Every slide rendered an <h1>, so a 3-slide carousel put three H1s on the
+                // page. Only the first slide is the page heading; the rest are H2.
+                (index === 0 ? (
+                  <h1 className={styles.title}>{getLocalizedText(slide.title, locale)}</h1>
+                ) : (
+                  <h2 className={styles.title}>{getLocalizedText(slide.title, locale)}</h2>
+                ))}
               {slide.subtitle && (
                 <p className={styles.subtitle}>{getLocalizedText(slide.subtitle, locale)}</p>
               )}

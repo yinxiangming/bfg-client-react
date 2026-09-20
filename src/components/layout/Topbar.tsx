@@ -6,11 +6,13 @@ import { useState, useRef, useEffect } from 'react'
 // Component Imports
 import Icon from '@components/Icon'
 import ThemeSwitcher from '@components/theme/ThemeSwitcher'
+import AdminSkinSwitcher from '@components/theme/AdminSkinSwitcher'
 import UserDropdown from '../ui/UserDropdown'
 import CurrentUserDisplay from '../ui/CurrentUserDisplay'
 import LanguageSwitcher from '@/components/i18n/LanguageSwitcher'
 import FeedbackButton from '@/components/feedback/FeedbackButton'
 import AgentDialog from '@/views/admin/agent/AgentDialog'
+import WorkspaceSwitcher from '@/components/admin/WorkspaceSwitcher'
 
 // Hook Imports
 import { useAppLayout } from '@/hooks/useLayoutSettings'
@@ -19,9 +21,11 @@ type Props = {
   avatarInitial?: string
   onMenuToggle?: () => void
   showMenuToggle?: boolean
+  /** The admin's workspace switcher. The account area shares this bar and has none. */
+  showWorkspaceSwitcher?: boolean
 }
 
-const Topbar = ({ avatarInitial = 'N', onMenuToggle, showMenuToggle }: Props) => {
+const Topbar = ({ avatarInitial = 'N', onMenuToggle, showMenuToggle, showWorkspaceSwitcher = false }: Props) => {
   const { config, updateConfig } = useAppLayout()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [agentDialogOpen, setAgentDialogOpen] = useState(false)
@@ -60,6 +64,7 @@ const Topbar = ({ avatarInitial = 'N', onMenuToggle, showMenuToggle }: Props) =>
           </button>
         )}
         <ThemeSwitcher />
+        <AdminSkinSwitcher />
         <LanguageSwitcher />
         <FeedbackButton variant='button' />
         <button
@@ -105,6 +110,7 @@ const Topbar = ({ avatarInitial = 'N', onMenuToggle, showMenuToggle }: Props) =>
         </div>
       </div>
       <div className='admin-topbar-right'>
+        {showWorkspaceSwitcher && <WorkspaceSwitcher />}
         <CurrentUserDisplay />
         <UserDropdown avatarInitial={avatarInitial} />
       </div>

@@ -18,14 +18,17 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
-import Paper from '@mui/material/Paper'
 import Grid from '@mui/material/Grid'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import Autocomplete from '@mui/material/Autocomplete'
-import TextField from '@mui/material/TextField'
 import CircularProgress from '@mui/material/CircularProgress'
 import Alert from '@mui/material/Alert'
+
+// Component Imports
+import Link from 'next/link'
+
+import CustomTextField from '@/components/ui/TextField'
 
 // API
 import { getProducts, updateOrderItems, type Product, type OrderItemUpdatePayload } from '@/services/store'
@@ -37,6 +40,8 @@ type OrderItem = {
   product_name: string
   variant_name?: string
   sku?: string
+  /** First product image, for the row thumbnail. */
+  image?: string | null
   quantity: number
   price: number | string
   subtotal: number | string
@@ -195,6 +200,7 @@ const OrderDetailsCard = ({ order, onOrderUpdate }: OrderDetailsCardProps) => {
     <Card>
       <CardHeader
         title={t('orders.detailsCard.title')}
+        sx={{ pb: 0 }}
         action={
           !editing ? (
             <Button size='small' variant='outlined' startIcon={<i className='tabler-edit' />} onClick={startEditing}>
@@ -212,7 +218,7 @@ const OrderDetailsCard = ({ order, onOrderUpdate }: OrderDetailsCardProps) => {
           )
         }
       />
-      <CardContent>
+      <CardContent sx={{ pt: 2, '&:last-child': { pb: 2 } }}>
         {error && (
           <Alert severity='error' sx={{ mb: 2 }} onClose={() => setError(null)}>
             {error}
@@ -231,7 +237,7 @@ const OrderDetailsCard = ({ order, onOrderUpdate }: OrderDetailsCardProps) => {
               }}
               loading={productLoading}
               renderInput={params => (
-                <TextField
+                <CustomTextField
                   {...params}
                   size='small'
                   placeholder={t('orders.createOrderModal.productSearchPlaceholder')}
@@ -254,18 +260,18 @@ const OrderDetailsCard = ({ order, onOrderUpdate }: OrderDetailsCardProps) => {
           </Typography>
         ) : (
           <>
-            <TableContainer component={Paper} variant='outlined' sx={{ mb: 3 }}>
+            <TableContainer sx={{ mb: 3 }}>
               <Table sx={{ minWidth: 650 }}>
                 <TableHead>
                   <TableRow>
-                    <TableCell sx={{ fontWeight: 600 }}>{t('orders.detailsCard.table.headers.product')}</TableCell>
-                    <TableCell align='right' sx={{ fontWeight: 600, minWidth: 100 }}>
+                    <TableCell>{t('orders.detailsCard.table.headers.product')}</TableCell>
+                    <TableCell align='right' sx={{ minWidth: 100 }}>
                       {t('orders.detailsCard.table.headers.price')}
                     </TableCell>
-                    <TableCell align='right' sx={{ fontWeight: 600, minWidth: 100 }}>
+                    <TableCell align='right' sx={{ minWidth: 100 }}>
                       {t('orders.detailsCard.table.headers.quantity')}
                     </TableCell>
-                    <TableCell align='right' sx={{ fontWeight: 600, minWidth: 100 }}>
+                    <TableCell align='right' sx={{ minWidth: 100 }}>
                       {t('orders.detailsCard.table.headers.total')}
                     </TableCell>
                     {editing && <TableCell sx={{ width: 56 }} />}
@@ -275,10 +281,50 @@ const OrderDetailsCard = ({ order, onOrderUpdate }: OrderDetailsCardProps) => {
                   {(editing ? editLines : items).map((item, index) => (
                     <TableRow key={editing ? index : (item as OrderItem).id} hover>
                       <TableCell>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                          {/* Fixed box so a missing or slow image never shifts
+                              the row; the placeholder keeps the column aligned. */}
+                          <Box
+                            sx={{
+                              width: 40,
+                              height: 40,
+                              flexShrink: 0,
+                              borderRadius: 1,
+                              overflow: 'hidden',
+                              bgcolor: 'action.hover',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center'
+                            }}
+                          >
+                            {(item as OrderItem).image ? (
+                              <Box
+                                component='img'
+                                src={(item as OrderItem).image as string}
+                                alt=''
+                                sx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                              />
+                            ) : (
+                              <i className='tabler-photo' style={{ fontSize: 18, opacity: 0.4 }} />
+                            )}
+                          </Box>
                         <Box>
-                          <Typography variant='body2' sx={{ fontWeight: 500 }}>
-                            {'product_name' in item ? item.product_name : (item as OrderItem).product_name}
-                          </Typography>
+                          {/* The name is the way into the product; it was plain
+                              text, so there was no way through from an order. */}
+                          {item.product ? (
+                            <Typography
+                              component={Link}
+                              href={`/admin/store/products/${item.product}/edit`}
+                              variant='body2'
+                              sx={{ fontWeight: 500, color: 'primary.main', textDecoration: 'none', '&:hover': { textDecoration: 'underline' } }}
+                            >
+                              {'product_name' in item ? item.product_name : (item as OrderItem).product_name}
+                            </Typography>
+                          ) : (
+                            <Typography variant='body2' sx={{ fontWeight: 500 }}>
+                              {'product_name' in item ? item.product_name : (item as OrderItem).product_name}
+                            </Typography>
+                          )}
                           {('variant_name' in item && item.variant_name) && (
                             <Typography variant='caption' color='text.secondary' display='block'>
                               {item.variant_name}
@@ -290,8 +336,9 @@ const OrderDetailsCard = ({ order, onOrderUpdate }: OrderDetailsCardProps) => {
                             </Typography>
                           )}
                         </Box>
+                        </Box>
                       </TableCell>
-                      <TableCell align='right' sx={{ fontFamily: 'monospace' }}>
+                      <TableCell align='right' sx={{ fontFamily: 'var(--at-font-num, monospace)', fontFeatureSettings: 'var(--at-num-feat, "tnum" 1)' }}>
                         {formatCurrency('price' in item ? item.price : (item as OrderItem).price)}
                       </TableCell>
                       <TableCell align='right'>
@@ -309,7 +356,7 @@ const OrderDetailsCard = ({ order, onOrderUpdate }: OrderDetailsCardProps) => {
                           (item as OrderItem).quantity
                         )}
                       </TableCell>
-                      <TableCell align='right' sx={{ fontWeight: 500, fontFamily: 'monospace' }}>
+                      <TableCell align='right' sx={{ fontWeight: 500, fontFamily: 'var(--at-font-num, monospace)', fontFeatureSettings: 'var(--at-num-feat, "tnum" 1)' }}>
                         {editing
                           ? formatCurrency((item as EditableLine).price * (item as EditableLine).quantity)
                           : formatCurrency((item as OrderItem).subtotal)}
@@ -370,10 +417,10 @@ const OrderDetailsCard = ({ order, onOrderUpdate }: OrderDetailsCardProps) => {
                         </Box>
                       )}
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', pt: 1.5, borderTop: 1, borderColor: 'divider' }}>
-                        <Typography variant='body1' sx={{ fontWeight: 600 }}>
+                        <Typography variant='body2' sx={{ fontWeight: 600 }}>
                           {t('orders.detailsCard.summary.total')}:
                         </Typography>
-                        <Typography variant='body1' sx={{ fontWeight: 600 }}>
+                        <Typography variant='body2' sx={{ fontWeight: 600 }}>
                           {formatCurrency(total)}
                         </Typography>
                       </Box>

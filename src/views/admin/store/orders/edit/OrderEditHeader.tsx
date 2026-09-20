@@ -1,51 +1,84 @@
 'use client'
 
-// React Imports
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
-
-// i18n Imports
 import { useTranslations } from 'next-intl'
 
-// MUI Imports
-import Button from '@mui/material/Button'
-import Typography from '@mui/material/Typography'
+import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
 import Chip from '@mui/material/Chip'
-import Popover from '@mui/material/Popover'
-import FormControl from '@mui/material/FormControl'
-import Select from '@mui/material/Select'
+import Dialog from '@mui/material/Dialog'
+import DialogActions from '@mui/material/DialogActions'
+import DialogContent from '@mui/material/DialogContent'
+import DialogTitle from '@mui/material/DialogTitle'
+import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
+import Popover from '@mui/material/Popover'
+import Typography from '@mui/material/Typography'
 
-// Type Imports
-import type { Order } from '@/services/store'
+// Component Imports
+import AdminPageHeader from '@/components/admin/AdminPageHeader'
+import CustomTextField from '@/components/ui/TextField'
 
+import {
+  ORDER_STATUSES, PAYMENT_STATUSES,
+  type Order, type OrderStatus, type PaymentStatus
+} from '@/services/store'
+import type { OrderHeaderAction } from '@/extensions/registry'
 import { getIntlLocale } from '@/utils/format'
 
 type OrderEditHeaderProps = {
-  order: Order
-  onCancel?: () => void
-  onStatusChange?: (status: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled') => Promise<void>
-  onPaymentStatusChange?: (status: 'pending' | 'paid' | 'failed') => Promise<void>
+  order: Order & { items?: Array<{ id: number; quantity: number; product_name?: string }> }
+  onBack?: () => void
+  onShip?: () => void
+  onRefund?: () => Promise<void>
+  extraActions?: OrderHeaderAction[]
+  onCreateReturn?: (payload: {
+    reason_category?: string
+    customer_note?: string
+    restock_action: 'no_restock' | 'restock' | 'damage'
+  }) => Promise<void>
+  onCancelOrder?: (reason?: string) => Promise<void>
+  onStatusChange?: (status: OrderStatus) => Promise<void>
+  onPaymentStatusChange?: (status: PaymentStatus) => Promise<void>
 }
 
-const OrderEditHeader = ({ order, onCancel, onStatusChange, onPaymentStatusChange }: OrderEditHeaderProps) => {
+const OrderEditHeader = ({
+  order,
+  onBack,
+  onShip,
+  onRefund,
+  extraActions = [],
+  onCreateReturn,
+  onCancelOrder,
+  onStatusChange,
+  onPaymentStatusChange
+}: OrderEditHeaderProps) => {
   const router = useRouter()
   const t = useTranslations('admin')
   const [statusEditAnchor, setStatusEditAnchor] = useState<HTMLElement | null>(null)
   const [paymentStatusEditAnchor, setPaymentStatusEditAnchor] = useState<HTMLElement | null>(null)
+  const [actionsAnchor, setActionsAnchor] = useState<HTMLElement | null>(null)
   const [statusChanging, setStatusChanging] = useState(false)
   const [paymentStatusChanging, setPaymentStatusChanging] = useState(false)
+  const [busyAction, setBusyAction] = useState<string | null>(null)
+  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [cancelDialogOpen, setCancelDialogOpen] = useState(false)
+  const [returnDialogOpen, setReturnDialogOpen] = useState(false)
+  const [cancelReason, setCancelReason] = useState('')
+  const [returnReasonCategory, setReturnReasonCategory] = useState('')
+  const [returnCustomerNote, setReturnCustomerNote] = useState('')
+  const [returnRestockAction, setReturnRestockAction] = useState<'no_restock' | 'restock' | 'damage'>('restock')
 
-  const handleCancel = () => {
-    if (onCancel) {
-      onCancel()
+  const handleBack = () => {
+    if (onBack) {
+      onBack()
     } else {
       router.push(`/admin/store/orders/${order.id}`)
     }
   }
 
-  // Format date to short format
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString(getIntlLocale(), {
       month: 'short',
@@ -56,12 +89,12 @@ const OrderEditHeader = ({ order, onCancel, onStatusChange, onPaymentStatusChang
     })
   }
 
-  // Get status color
   const getStatusColor = (status: string) => {
     const colorMap: Record<string, 'warning' | 'info' | 'primary' | 'success' | 'error' | 'secondary' | 'default'> = {
       pending: 'warning',
       processing: 'info',
       shipped: 'primary',
+      ready_for_pickup: 'primary',
       paid: 'success',
       completed: 'success',
       cancelled: 'error',
@@ -70,7 +103,6 @@ const OrderEditHeader = ({ order, onCancel, onStatusChange, onPaymentStatusChang
     return colorMap[status] || 'default'
   }
 
-  // Get payment status color
   const getPaymentColor = (status: string) => {
     const colorMap: Record<string, 'warning' | 'success' | 'error' | 'secondary' | 'default'> = {
       pending: 'warning',
@@ -81,10 +113,7 @@ const OrderEditHeader = ({ order, onCancel, onStatusChange, onPaymentStatusChang
     return colorMap[status] || 'default'
   }
 
-  // Format status label
-  const formatStatusLabel = (status: string) => {
-    return status.charAt(0).toUpperCase() + status.slice(1)
-  }
+  const formatStatusLabel = (status: string) => status.charAt(0).toUpperCase() + status.slice(1)
 
   const getOrderStatusLabel = (status: string) => {
     const key = `orders.status.${status}`
@@ -98,7 +127,21 @@ const OrderEditHeader = ({ order, onCancel, onStatusChange, onPaymentStatusChang
     return has ? t(key as any) : formatStatusLabel(status)
   }
 
-  const handleStatusChange = async (newStatus: 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled') => {
+  const runAction = async (name: string, fn: () => Promise<void>) => {
+    setSubmitError(null)
+    setBusyAction(name)
+    try {
+      await fn()
+      setActionsAnchor(null)
+    } catch (err: any) {
+      setSubmitError(err?.message || t('orders.editHeader.errors.actionFailed'))
+      throw err
+    } finally {
+      setBusyAction(null)
+    }
+  }
+
+  const handleStatusChange = async (newStatus: OrderStatus) => {
     if (newStatus === order.status || !onStatusChange) {
       setStatusEditAnchor(null)
       return
@@ -107,14 +150,12 @@ const OrderEditHeader = ({ order, onCancel, onStatusChange, onPaymentStatusChang
     try {
       await onStatusChange(newStatus)
       setStatusEditAnchor(null)
-    } catch (err) {
-      console.error('Failed to update status:', err)
     } finally {
       setStatusChanging(false)
     }
   }
 
-  const handlePaymentStatusChange = async (newStatus: 'pending' | 'paid' | 'failed') => {
+  const handlePaymentStatusChange = async (newStatus: PaymentStatus) => {
     if (newStatus === order.payment_status || !onPaymentStatusChange) {
       setPaymentStatusEditAnchor(null)
       return
@@ -123,123 +164,234 @@ const OrderEditHeader = ({ order, onCancel, onStatusChange, onPaymentStatusChang
     try {
       await onPaymentStatusChange(newStatus)
       setPaymentStatusEditAnchor(null)
-    } catch (err) {
-      console.error('Failed to update payment status:', err)
     } finally {
       setPaymentStatusChanging(false)
     }
   }
 
+  const canShip = !!onShip && !['shipped', 'ready_for_pickup', 'delivered', 'cancelled'].includes(order.status)
+  const canCancel = !!onCancelOrder && !['cancelled', 'delivered', 'refunded'].includes(order.status)
+  const canRefund = !!onRefund && !['refunded', 'cancelled'].includes(order.status)
+  const enabledExtraActions = extraActions.filter(action => !action.disabled)
+  const canReturn = !!onCreateReturn && !!order.items?.length && !['cancelled'].includes(order.status)
+  const hasExtraActions = enabledExtraActions.length > 0
+
+  const translateActionLabel = (key: string | undefined, fallback: string) => {
+    if (!key) return fallback
+    const has = (t as any).has ? (t as any).has(key) : true
+    return has ? t(key as any) : fallback
+  }
+
+  const submitCancel = async () => {
+    if (!onCancelOrder) return
+    await runAction('cancel', async () => {
+      await onCancelOrder(cancelReason.trim() || undefined)
+      setCancelDialogOpen(false)
+      setCancelReason('')
+    })
+  }
+
+  const submitReturn = async () => {
+    if (!onCreateReturn) return
+    await runAction('return', async () => {
+      await onCreateReturn({
+        reason_category: returnReasonCategory.trim() || undefined,
+        customer_note: returnCustomerNote.trim() || undefined,
+        restock_action: returnRestockAction
+      })
+      setReturnDialogOpen(false)
+      setReturnReasonCategory('')
+      setReturnCustomerNote('')
+      setReturnRestockAction('restock')
+    })
+  }
+
   return (
     <Box>
-      <Box sx={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'space-between', alignItems: 'center', gap: 2, mb: 1 }}>
-        <Box>
-          <Typography variant='h5'>
-            {t('orders.editHeader.orderTitle', { orderNumber: order.order_number })}
-          </Typography>
-        </Box>
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, flexWrap: 'wrap' }}>
-          {/* Status Badges */}
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant='body2' color='text.secondary'>
-              {t('orders.editHeader.orderStatusLabel')}:
-            </Typography>
-            <Chip
-              label={getOrderStatusLabel(order.status)}
-              color={getStatusColor(order.status)}
-              variant='filled'
-              size='medium'
-              onClick={onStatusChange ? (e) => setStatusEditAnchor(e.currentTarget as HTMLElement) : undefined}
-              sx={onStatusChange ? { cursor: 'pointer' } : {}}
-            />
-            {onStatusChange && (
-              <Popover
-                open={Boolean(statusEditAnchor)}
-                anchorEl={statusEditAnchor}
-                onClose={() => setStatusEditAnchor(null)}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-              >
-                <Box sx={{ p: 2, minWidth: 150 }}>
-                  <FormControl fullWidth size='small' disabled={statusChanging}>
-                    <Select
-                      value={order.status}
-                      onChange={(e) => {
-                        const value = e.target.value as 'pending' | 'paid' | 'shipped' | 'completed' | 'cancelled'
-                        handleStatusChange(value)
-                      }}
-                    >
-                      <MenuItem value='pending'>{t('orders.status.pending')}</MenuItem>
-                      <MenuItem value='paid'>{t('orders.status.paid')}</MenuItem>
-                      <MenuItem value='shipped'>{t('orders.status.shipped')}</MenuItem>
-                      <MenuItem value='completed'>{t('orders.status.completed')}</MenuItem>
-                      <MenuItem value='cancelled'>{t('orders.status.cancelled')}</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Box>
-              </Popover>
-            )}
-          </Box>
+      {submitError && (
+        <Alert severity='error' sx={{ mb: 2 }} onClose={() => setSubmitError(null)}>
+          {submitError}
+        </Alert>
+      )}
+      <AdminPageHeader
+        title={t('orders.editHeader.orderTitle', { orderNumber: order.order_number })}
+        actions={
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant='body2' color='text.secondary'>
+                {t('orders.editHeader.orderStatusLabel')}:
+              </Typography>
+              <Chip
+                label={getOrderStatusLabel(order.status)}
+                color={getStatusColor(order.status)}
+                variant='filled'
+                size='medium'
+                onClick={onStatusChange ? (e) => setStatusEditAnchor(e.currentTarget as HTMLElement) : undefined}
+                sx={onStatusChange ? { cursor: 'pointer' } : {}}
+              />
+            </Box>
 
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <Typography variant='body2' color='text.secondary'>
-              {t('orders.editHeader.paymentStatusLabel')}:
-            </Typography>
-            <Chip
-              label={getPaymentStatusLabel(order.payment_status)}
-              color={getPaymentColor(order.payment_status)}
-              variant='filled'
-              size='medium'
-              onClick={onPaymentStatusChange ? (e) => setPaymentStatusEditAnchor(e.currentTarget as HTMLElement) : undefined}
-              sx={onPaymentStatusChange ? { cursor: 'pointer' } : {}}
-            />
-            {onPaymentStatusChange && (
-              <Popover
-                open={Boolean(paymentStatusEditAnchor)}
-                anchorEl={paymentStatusEditAnchor}
-                onClose={() => setPaymentStatusEditAnchor(null)}
-                anchorOrigin={{
-                  vertical: 'bottom',
-                  horizontal: 'left'
-                }}
-              >
-                <Box sx={{ p: 2, minWidth: 150 }}>
-                  <FormControl fullWidth size='small' disabled={paymentStatusChanging}>
-                    <Select
-                      value={order.payment_status}
-                      onChange={(e) => {
-                        const value = e.target.value as 'pending' | 'paid' | 'failed'
-                        handlePaymentStatusChange(value)
-                      }}
-                    >
-                      <MenuItem value='pending'>{t('orders.paymentStatus.pending')}</MenuItem>
-                      <MenuItem value='paid'>{t('orders.paymentStatus.paid')}</MenuItem>
-                      <MenuItem value='failed'>{t('orders.paymentStatus.failed')}</MenuItem>
-                    </Select>
-                  </FormControl>
-                </Box>
-              </Popover>
-            )}
-          </Box>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+              <Typography variant='body2' color='text.secondary'>
+                {t('orders.editHeader.paymentStatusLabel')}:
+              </Typography>
+              <Chip
+                label={getPaymentStatusLabel(order.payment_status)}
+                color={getPaymentColor(order.payment_status)}
+                variant='filled'
+                size='medium'
+                onClick={onPaymentStatusChange ? (e) => setPaymentStatusEditAnchor(e.currentTarget as HTMLElement) : undefined}
+                sx={onPaymentStatusChange ? { cursor: 'pointer' } : {}}
+              />
+            </Box>
 
-          {order.status !== 'cancelled' && (
+            {canShip && (
+              <Button
+                variant='contained'
+                onClick={() => onShip?.()}
+                disabled={busyAction !== null}
+              >
+                {t('orders.editHeader.actions.ship')}
+              </Button>
+            )}
+
             <Button
               variant='outlined'
-              color='error'
-              onClick={handleCancel}
+              onClick={(e) => setActionsAnchor(e.currentTarget)}
+              disabled={busyAction !== null || (!canCancel && !canRefund && !canReturn && !hasExtraActions)}
             >
-              {t('orders.editHeader.cancelOrder')}
+              {t('orders.editHeader.actions.more')}
             </Button>
-          )}
-        </Box>
-      </Box>
+
+            <Button variant='text' onClick={handleBack}>
+              {t('common.actions.back')}
+            </Button>
+          </Box>
+        }
+      />
       {order.created_at && (
-        <Typography variant='body2' color='text.secondary' sx={{ fontSize: '0.875rem' }}>
+        <Typography variant='body2' color='text.secondary'>
           {t('orders.editHeader.createdAt', { date: formatDate(order.created_at) })}
         </Typography>
       )}
+
+      <Popover
+        open={Boolean(statusEditAnchor)}
+        anchorEl={statusEditAnchor}
+        onClose={() => setStatusEditAnchor(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <Box sx={{ p: 2, minWidth: 150 }}>
+          <CustomTextField
+            select
+            fullWidth
+            disabled={statusChanging}
+            value={order.status}
+            onChange={(e) => handleStatusChange(e.target.value as OrderStatus)}
+          >
+            {ORDER_STATUSES.map(value => (
+              <MenuItem key={value} value={value}>{t(`orders.status.${value}`)}</MenuItem>
+            ))}
+          </CustomTextField>
+        </Box>
+      </Popover>
+
+      <Popover
+        open={Boolean(paymentStatusEditAnchor)}
+        anchorEl={paymentStatusEditAnchor}
+        onClose={() => setPaymentStatusEditAnchor(null)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+      >
+        <Box sx={{ p: 2, minWidth: 150 }}>
+          <CustomTextField
+            select
+            fullWidth
+            disabled={paymentStatusChanging}
+            value={order.payment_status}
+            onChange={(e) => handlePaymentStatusChange(e.target.value as PaymentStatus)}
+          >
+            {PAYMENT_STATUSES.map(value => (
+              <MenuItem key={value} value={value}>{t(`orders.paymentStatus.${value}`)}</MenuItem>
+            ))}
+          </CustomTextField>
+        </Box>
+      </Popover>
+
+      <Menu
+        open={Boolean(actionsAnchor)}
+        anchorEl={actionsAnchor}
+        onClose={() => setActionsAnchor(null)}
+      >
+        {canCancel && <MenuItem onClick={() => { setActionsAnchor(null); setCancelDialogOpen(true) }}>{t('orders.editHeader.actions.cancelOrder')}</MenuItem>}
+        {canRefund && <MenuItem onClick={() => onRefund && runAction('refund', onRefund)}>{busyAction === 'refund' ? t('orders.editHeader.actions.refunding') : t('orders.editHeader.actions.refund')}</MenuItem>}
+        {canReturn && <MenuItem onClick={() => { setActionsAnchor(null); setReturnDialogOpen(true) }}>{t('orders.editHeader.actions.return')}</MenuItem>}
+        {enabledExtraActions.map(action => (
+          <MenuItem key={action.id} onClick={() => runAction(action.id, action.run)}>
+            {busyAction === action.id
+              ? translateActionLabel(action.loadingI18nKey, action.loadingLabel || action.label)
+              : translateActionLabel(action.i18nKey, action.label)}
+          </MenuItem>
+        ))}
+      </Menu>
+
+      <Dialog open={cancelDialogOpen} onClose={() => setCancelDialogOpen(false)} maxWidth='sm' fullWidth>
+        <DialogTitle>{t('orders.editHeader.dialogs.cancelTitle')}</DialogTitle>
+        <DialogContent>
+          <CustomTextField
+            fullWidth
+            multiline
+            minRows={3}
+            label={t('orders.editHeader.dialogs.cancelReason')}
+            value={cancelReason}
+            onChange={(e) => setCancelReason(e.target.value)}
+            sx={{ mt: 1 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCancelDialogOpen(false)}>{t('common.actions.cancel')}</Button>
+          <Button color='error' variant='contained' onClick={submitCancel} disabled={busyAction !== null}>
+            {t('orders.editHeader.actions.cancelOrder')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog open={returnDialogOpen} onClose={() => setReturnDialogOpen(false)} maxWidth='sm' fullWidth>
+        <DialogTitle>{t('orders.editHeader.dialogs.returnTitle')}</DialogTitle>
+        <DialogContent>
+          <CustomTextField
+            fullWidth
+            label={t('orders.editHeader.dialogs.returnCategory')}
+            value={returnReasonCategory}
+            onChange={(e) => setReturnReasonCategory(e.target.value)}
+            sx={{ mt: 1, mb: 2 }}
+          />
+          <CustomTextField
+            select
+            fullWidth
+            value={returnRestockAction}
+            onChange={(e) => setReturnRestockAction(e.target.value as 'no_restock' | 'restock' | 'damage')}
+            sx={{ mb: 2 }}
+          >
+            <MenuItem value='restock'>{t('orders.editHeader.restock.restock')}</MenuItem>
+            <MenuItem value='no_restock'>{t('orders.editHeader.restock.noRestock')}</MenuItem>
+            <MenuItem value='damage'>{t('orders.editHeader.restock.damage')}</MenuItem>
+          </CustomTextField>
+          <CustomTextField
+            fullWidth
+            multiline
+            minRows={3}
+            label={t('orders.editHeader.dialogs.returnNote')}
+            value={returnCustomerNote}
+            onChange={(e) => setReturnCustomerNote(e.target.value)}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setReturnDialogOpen(false)}>{t('common.actions.cancel')}</Button>
+          <Button variant='contained' onClick={submitReturn} disabled={busyAction !== null}>
+            {t('orders.editHeader.actions.return')}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   )
 }

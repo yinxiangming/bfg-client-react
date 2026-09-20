@@ -4,7 +4,7 @@
 
 import type { ComponentType } from 'react'
 
-/** Known categories + string so plugins can use any category (e.g. 'resale') without adding to common */
+/** Known categories + string so plugins can use any category without adding to common */
 export type BlockCategory =
   | 'hero'
   | 'content'

@@ -369,6 +369,8 @@ const GatewayDisplayInfo = ({
     displayInfo?.swift_code
   )
   const instructions = displayInfo?.instructions ?? ''
+  // Anything rendered above the instructions panel, so it is not crushed against it.
+  const hasRowsAbove = hasDetails || !!displayInfo?.accepted_methods
   const boxBg = isDark ? '#374151' : 'white'
   const borderColor = isDark ? '#4b5563' : '#d0d0d0'
   const textPrimary = isDark ? '#e5e7eb' : '#2c3e50'
@@ -420,9 +422,17 @@ const GatewayDisplayInfo = ({
             )}
           </>
         )}
+        {displayInfo?.accepted_methods && (
+          <div style={{ marginBottom: '0.75rem' }}>
+            <div style={{ fontSize: '0.75rem', color: textSecondary }}>{t('checkout.payment.gatewayDisplayInfo.acceptedMethods')}</div>
+            <div style={{ fontSize: '0.875rem', fontWeight: 500, color: textPrimary }}>
+              {displayInfo.accepted_methods}
+            </div>
+          </div>
+        )}
         <div
           style={{
-            marginTop: hasDetails ? '1rem' : 0,
+            marginTop: hasRowsAbove ? '1rem' : 0,
             padding: '0.75rem',
             backgroundColor: instructionsBg,
             borderRadius: '6px',

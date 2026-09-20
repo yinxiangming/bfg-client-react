@@ -68,7 +68,6 @@ Copy `.env.example` to `.env.local` and fill in:
 | `NEXT_PUBLIC_WORKSPACE_ID` | — | Pin to a specific workspace ID. Leave unset for dynamic token-exchange-based routing |
 | `NEXT_PUBLIC_PLATFORM_LOGIN_URL` | — | If set, `/auth/login` redirects here (for workspaces managed by a Platform instance) |
 | `NEXT_PUBLIC_ENABLED_PLUGINS` | — | Comma-separated plugin IDs to activate. Default: all plugins under `src/plugins/` |
-| `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` | — | Google Maps API key for address autocomplete |
 | `NEXT_PUBLIC_MEDIA_URL` | — | Media CDN base. Default: `NEXT_PUBLIC_API_URL/media` |
 | `ALLOWED_DEV_ORIGINS` | — | Extra allowed origins for `next dev` (comma-separated) |
 | `NEXT_FILE_TRACING_ROOT` | — | File tracing root for Docker deployments |

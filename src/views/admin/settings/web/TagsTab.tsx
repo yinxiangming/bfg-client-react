@@ -10,11 +10,12 @@ import Box from '@mui/material/Box'
 import CircularProgress from '@mui/material/CircularProgress'
 
 import SchemaTable from '@/components/schema/SchemaTable'
+import { SETTINGS_GUTTER } from '@/components/admin/settings/SettingsSection'
 import type { ListSchema, SchemaAction } from '@/types/schema'
-import { useApiData } from '@/hooks/useApiData'
+import { usePagedData } from '@/hooks/usePagedData'
 import TagEditDialog from './TagEditDialog'
 import {
-  getTags,
+  getTagsPage,
   getTag,
   createTag,
   updateTag,
@@ -48,16 +49,14 @@ const TagsTab = () => {
   const t = useTranslations('admin')
   const tagsSchema = useMemo(() => buildTagsSchema(t), [t])
 
-  const { data, loading, error, refetch } = useApiData<Tag[]>({
-    fetchFn: async () => {
-      const result = await getTags()
-      if (Array.isArray(result)) return result
-      if (result && typeof result === 'object' && 'results' in result && Array.isArray((result as any).results)) {
-        return (result as any).results
-      }
-      return []
-    }
-  })
+  const {
+    items: data,
+    loading,
+    error,
+    serverPagination,
+    onSearchChange,
+    refetch,
+  } = usePagedData<Tag>(getTagsPage)
   const [editOpen, setEditOpen] = useState(false)
   const [selected, setSelected] = useState<Tag | null>(null)
 
@@ -96,9 +95,9 @@ const TagsTab = () => {
     }
   }
 
-  if (loading) {
+  if (loading && !data) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+      <Box sx={{ display: 'flex', justifyContent: 'center', px: SETTINGS_GUTTER, py: 6 }}>
         <CircularProgress />
       </Box>
     )
@@ -106,7 +105,7 @@ const TagsTab = () => {
 
   if (error) {
     return (
-      <Box sx={{ p: 4 }}>
+      <Box sx={{ px: SETTINGS_GUTTER, py: 5 }}>
         <Alert severity='error'>{error}</Alert>
       </Box>
     )
@@ -117,8 +116,11 @@ const TagsTab = () => {
       <SchemaTable
         schema={tagsSchema}
         data={data || []}
+        loading={loading}
         onActionClick={handleActionClick}
         fetchDetailFn={(id) => getTag(typeof id === 'string' ? parseInt(id) : id)}
+        serverPagination={serverPagination}
+        onSearchChange={onSearchChange}
       />
       <TagEditDialog
         open={editOpen}

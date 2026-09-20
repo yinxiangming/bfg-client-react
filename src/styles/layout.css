@@ -110,7 +110,10 @@
   flex: 1;
   overflow-y: auto;
   overflow-x: hidden;
-  padding: 24px;
+  /* Content gutter so admin pages (incl. SchemaTable/SchemaForm lists) aren't
+     flush against the sidebar/topbar. Pages that add their own p-6 wrapper will
+     read slightly roomier, which is acceptable. */
+  padding: 1.5rem;
   width: 100%;
 }
 
@@ -281,7 +284,7 @@
   }
 
   .d365-content-body {
-    padding: 16px;
+    padding: 1rem;
   }
 }
 

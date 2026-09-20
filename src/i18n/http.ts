@@ -1,7 +1,6 @@
-import type { AppLocale } from './routing'
+import { DEFAULT_APP_LOCALE, normalizeAppLocale, type AppLocale } from './locales'
 
 const LOCALE_COOKIE_NAME = 'NEXT_LOCALE'
-const DEFAULT_LOCALE: AppLocale = 'en'
 
 function readCookie(name: string): string | null {
   if (typeof document === 'undefined') return null
@@ -13,11 +12,9 @@ function readCookie(name: string): string | null {
 
 export function getCurrentLocale(): AppLocale {
   const raw = readCookie(LOCALE_COOKIE_NAME)
-  if (raw === 'en' || raw === 'zh-hans') return raw
-  return DEFAULT_LOCALE
+  return normalizeAppLocale(raw) ?? DEFAULT_APP_LOCALE
 }
 
 export function getApiLanguageHeaders(): Record<string, string> {
   return { 'Accept-Language': getCurrentLocale() }
 }
-

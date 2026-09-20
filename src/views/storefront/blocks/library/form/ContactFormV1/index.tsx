@@ -61,7 +61,6 @@ export function ContactFormV1({
       await apiFetch(`${getApiUrl()}/api/web/inquiries/`, {
         method: 'POST',
         requestHost,
-        storefrontScope: true,
         withAuth: false,
         body: JSON.stringify({
           inquiry_type: inquiryType,

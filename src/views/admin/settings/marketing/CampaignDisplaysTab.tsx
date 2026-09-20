@@ -26,11 +26,17 @@ const DISPLAY_TYPE_KEYS: Record<string, string> = {
   featured: 'featured'
 }
 
+const CONTEXT_KEYS: Record<string, string> = {
+  '': 'all',
+  home: 'home',
+  category: 'category'
+}
+
 const buildSchema = (t: any): ListSchema => ({
   title: t('settings.marketing.campaignDisplays.tab.title'),
   columns: [
-    { field: 'campaign_name', label: t('settings.marketing.campaignDisplays.tab.columns.campaign'), type: 'string', sortable: true, link: 'edit' },
-    { field: 'title', label: t('settings.marketing.campaignDisplays.tab.columns.title'), type: 'string', sortable: true },
+    { field: 'campaign_name', label: t('settings.marketing.campaignDisplays.tab.columns.campaign'), type: 'string', sortable: true, link: 'edit', width: 180 },
+    { field: 'title', label: t('settings.marketing.campaignDisplays.tab.columns.title'), type: 'string', sortable: true, width: 220 },
     {
       field: 'display_type',
       label: t('settings.marketing.campaignDisplays.tab.columns.displayType'),
@@ -38,8 +44,16 @@ const buildSchema = (t: any): ListSchema => ({
       sortable: true,
       render: (value) => t(`settings.marketing.campaignDisplays.editDialog.displayTypeOptions.${DISPLAY_TYPE_KEYS[String(value)] || value}`)
     },
+    {
+      field: 'context',
+      label: t('settings.marketing.campaignDisplays.tab.columns.context'),
+      type: 'string',
+      sortable: true,
+      render: (value) =>
+        t(`settings.marketing.campaignDisplays.editDialog.contextOptions.${CONTEXT_KEYS[String(value ?? '')] || 'all'}`)
+    },
     { field: 'order', label: t('settings.marketing.campaignDisplays.tab.columns.order'), type: 'number', sortable: true },
-    { field: 'link_url', label: t('settings.marketing.campaignDisplays.tab.columns.linkUrl'), type: 'string' },
+    { field: 'link_url', label: t('settings.marketing.campaignDisplays.tab.columns.linkUrl'), type: 'string', width: 240 },
     { field: 'is_active', label: t('settings.marketing.campaignDisplays.tab.columns.status'), type: 'select', sortable: true }
   ],
   searchFields: ['campaign_name'],
