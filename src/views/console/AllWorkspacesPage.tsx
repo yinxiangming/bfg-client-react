@@ -67,7 +67,6 @@ export default function AllWorkspacesPage() {
   const [term, setTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState<ConsoleWorkspaceStatus | ''>('')
   const [clusterFilter, setClusterFilter] = useState('')
-  const [unassignedOnly, setUnassignedOnly] = useState(false)
   const [state, setState] = useState<ListState>({ kind: 'loading' })
   const [loadingMore, setLoadingMore] = useState(false)
   const [importOpen, setImportOpen] = useState(false)
@@ -93,15 +92,14 @@ export default function AllWorkspacesPage() {
       const { workspaces, count, next } = await listConsoleWorkspaces({
         search: term,
         status: statusFilter || undefined,
-        cluster: clusterFilter,
-        unassigned: unassignedOnly
+        cluster: clusterFilter
       })
 
       setState({ kind: 'loaded', workspaces, count, next })
     } catch {
       setState({ kind: 'failed' })
     }
-  }, [clusterFilter, statusFilter, term, unassignedOnly])
+  }, [clusterFilter, statusFilter, term])
 
   useEffect(() => {
     // Anyone else would only get their own workspaces back, under a title that promises
@@ -255,7 +253,6 @@ export default function AllWorkspacesPage() {
             <MenuItem value='active'>{tStatus('active')}</MenuItem>
             <MenuItem value='suspended'>{tStatus('suspended')}</MenuItem>
             <MenuItem value='inactive'>{tStatus('inactive')}</MenuItem>
-            <MenuItem value='scheduled_for_deletion'>{tStatus('scheduled_for_deletion')}</MenuItem>
           </TextField>
           <TextField
             size='small'
@@ -263,12 +260,7 @@ export default function AllWorkspacesPage() {
             onChange={event => setClusterFilter(event.target.value)}
             label={t('filters.cluster')}
             placeholder={t('filters.clusterPlaceholder')}
-            disabled={unassignedOnly}
             sx={{ width: { xs: '100%', sm: 200 } }}
-          />
-          <FormControlLabel
-            control={<Checkbox checked={unassignedOnly} onChange={event => setUnassignedOnly(event.target.checked)} />}
-            label={t('filters.unassigned')}
           />
           {state.kind === 'loaded' && (
             <>

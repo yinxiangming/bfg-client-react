@@ -33,13 +33,9 @@ import StatusBadge from '@/components/schema/StatusBadge'
 import {
   checkConsoleClusterHealth,
   createConsoleCluster,
-  getConsoleClusterHealthSummary,
-  listConsoleClusterHealthObservations,
   listConsoleClusters,
   updateConsoleCluster,
   type ConsoleCluster,
-  type ConsoleClusterHealthObservation,
-  type ConsoleClusterHealthSummary,
   type ConsoleClusterInput
 } from '@/services/consoleAdmin'
 
@@ -48,7 +44,7 @@ import { usePlatformAdmin } from '../usePlatformAdmin'
 type LoadState =
   | { kind: 'loading' }
   | { kind: 'failed' }
-  | { kind: 'loaded'; clusters: ConsoleCluster[]; healthSummary: ConsoleClusterHealthSummary | null }
+  | { kind: 'loaded'; clusters: ConsoleCluster[] }
 
 type ClusterForm = Required<ConsoleClusterInput>
 
@@ -109,18 +105,11 @@ export default function ClustersPage() {
   const [healthConfirmed, setHealthConfirmed] = useState(false)
   const [healthError, setHealthError] = useState<string | null>(null)
   const [checkingHealth, setCheckingHealth] = useState(false)
-  const [historyTarget, setHistoryTarget] = useState<ConsoleCluster | null>(null)
-  const [history, setHistory] = useState<ConsoleClusterHealthObservation[] | null>(null)
-  const [historyError, setHistoryError] = useState<string | null>(null)
 
   const load = useCallback(async () => {
     setState({ kind: 'loading' })
     try {
-      const [clusters, healthSummary] = await Promise.all([
-        listConsoleClusters(),
-        getConsoleClusterHealthSummary().catch(() => null)
-      ])
-      setState({ kind: 'loaded', clusters, healthSummary })
+      setState({ kind: 'loaded', clusters: await listConsoleClusters() })
     } catch {
       setState({ kind: 'failed' })
     }
@@ -151,17 +140,6 @@ export default function ClustersPage() {
 
   const closeHealthCheck = () => {
     if (!checkingHealth) setHealthTarget(null)
-  }
-
-  const openHistory = async (cluster: ConsoleCluster) => {
-    setHistoryTarget(cluster)
-    setHistory(null)
-    setHistoryError(null)
-    try {
-      setHistory(await listConsoleClusterHealthObservations(cluster.id))
-    } catch {
-      setHistoryError(t('historyLoadFailed'))
-    }
   }
 
   const checkHealth = async () => {
@@ -226,38 +204,6 @@ export default function ClustersPage() {
         actions={<Button variant='contained' onClick={() => open(null)}>{t('add')}</Button>}
       />
 
-      {state.kind === 'loaded' && state.healthSummary && (
-        <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: 'repeat(2, minmax(0, 1fr))', lg: 'repeat(4, minmax(0, 1fr))' }, gap: 3, mb: 4 }}>
-          <Card sx={{ p: 4, gridColumn: { xs: 'span 1', lg: 'span 2' } }}>
-            <Typography sx={{ fontSize: 14, fontWeight: 700 }}>{t('healthOverview')}</Typography>
-            <Typography variant='body2' sx={{ mt: 1, ...mutedSx }}>
-              {t('healthWindow', { hours: state.healthSummary.window_hours })}
-            </Typography>
-            <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mt: 3 }}>
-              <StatusBadge noDot color='success' label={t('healthSummary.healthy', { count: state.healthSummary.summary.healthy })} />
-              <StatusBadge noDot color='warning' label={t('healthSummary.degraded', { count: state.healthSummary.summary.degraded })} />
-              <StatusBadge noDot color='error' label={t('healthSummary.down', { count: state.healthSummary.summary.down })} />
-              <StatusBadge noDot color='default' label={t('healthSummary.unknown', { count: state.healthSummary.summary.unknown })} />
-            </Box>
-          </Card>
-          <Card sx={{ p: 4 }}>
-            <Typography sx={{ fontSize: 13, ...mutedSx }}>{t('healthSummary.checked')}</Typography>
-            <Typography sx={{ mt: 1, fontSize: 28, fontWeight: 700 }}>{state.healthSummary.summary.checked_within_window} / {state.healthSummary.summary.active_clusters}</Typography>
-          </Card>
-          <Card sx={{ p: 4 }}>
-            <Typography sx={{ fontSize: 13, ...mutedSx }}>{t('healthSummary.stale')}</Typography>
-            <Typography sx={{ mt: 1, fontSize: 28, fontWeight: 700, color: state.healthSummary.summary.stale_or_unchecked ? 'warning.main' : undefined }}>
-              {state.healthSummary.summary.stale_or_unchecked}
-            </Typography>
-          </Card>
-          {state.healthSummary.summary.stale_or_unchecked > 0 && (
-            <Alert severity='warning' sx={{ gridColumn: '1 / -1' }}>
-              {t('healthStaleAlert', { count: state.healthSummary.summary.stale_or_unchecked })}
-            </Alert>
-          )}
-        </Box>
-      )}
-
       <Card>
         {state.kind === 'loading' && (
           <Box sx={{ display: 'flex', justifyContent: 'center', py: 12 }}>
@@ -319,7 +265,6 @@ export default function ClustersPage() {
                     <TableCell align='right'>
                       <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
                         <Button size='small' onClick={() => openHealthCheck(cluster)}>{t('checkHealth')}</Button>
-                        <Button size='small' onClick={() => void openHistory(cluster)}>{t('history')}</Button>
                         <Button size='small' onClick={() => open(cluster)}>{t('manage')}</Button>
                       </Box>
                     </TableCell>
@@ -409,28 +354,6 @@ export default function ClustersPage() {
             {t('checkHealth')}
           </Button>
         </DialogActions>
-      </Dialog>
-
-      <Dialog open={Boolean(historyTarget)} onClose={() => setHistoryTarget(null)} fullWidth maxWidth='sm'>
-        <DialogTitle>{historyTarget ? t('historyTitle', { name: historyTarget.name }) : t('history')}</DialogTitle>
-        <DialogContent>
-          {history === null && !historyError && <Box sx={{ display: 'flex', justifyContent: 'center', py: 6 }}><CircularProgress size={24} /></Box>}
-          {historyError && <Alert severity='error'>{historyError}</Alert>}
-          {history?.length === 0 && <Box sx={{ py: 4, ...mutedSx }}>{t('historyEmpty')}</Box>}
-          {history && history.length > 0 && (
-            <Table size='small'>
-              <TableHead><TableRow><TableCell>{t('historyColumns.when')}</TableCell><TableCell>{t('historyColumns.status')}</TableCell><TableCell>{t('historyColumns.http')}</TableCell></TableRow></TableHead>
-              <TableBody>{history.map(observation => (
-                <TableRow key={observation.id}>
-                  <TableCell>{new Intl.DateTimeFormat(undefined, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date(observation.observed_at))}</TableCell>
-                  <TableCell><StatusBadge noDot color={healthColor(observation.health_status)} label={t(`status.${observation.health_status}`)} /></TableCell>
-                  <TableCell>{observation.http_status ?? '—'}</TableCell>
-                </TableRow>
-              ))}</TableBody>
-            </Table>
-          )}
-        </DialogContent>
-        <DialogActions><Button onClick={() => setHistoryTarget(null)}>{t('close')}</Button></DialogActions>
       </Dialog>
     </>
   )

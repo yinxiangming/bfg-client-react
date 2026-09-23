@@ -4661,23 +4661,6 @@
       "loadingOperations": "Loading operations",
       "operationsFailed": "Couldn't load this workspace's operations.",
       "noOperations": "No lifecycle operations have been recorded for this workspace.",
-      "placement": {
-        "title": "Cluster placement",
-        "subtitle": "Reserve verified capacity before a future data-plane placement",
-        "loading": "Loading placement reservations",
-        "loadFailed": "Couldn't load this workspace's placement reservations.",
-        "retry": "Retry",
-        "migrationUnavailable": "Live Cluster migration is unavailable until a verified data-plane adapter is configured. The existing assignment has not changed.",
-        "reservationOnly": "A reservation holds capacity only. It does not copy customer data or change this workspace's routing.",
-        "reserved": "Capacity is reserved on {cluster} until {expiry}. Release it if the verified placement will not proceed.",
-        "target": "Target Cluster",
-        "noTargets": "No active Cluster is currently accepting new workspace placements.",
-        "reason": "Operator reason",
-        "reserve": "Reserve capacity",
-        "release": "Release reservation",
-        "working": "Working…",
-        "actionFailed": "The placement action could not be completed."
-      },
       "runtimeFeatures": {
         "title": "Runtime feature access",
         "subtitle": "Platform grants that the server actively enforces",
@@ -4858,8 +4841,7 @@
         "status": "Status",
         "allStatuses": "All statuses",
         "cluster": "Cluster ID",
-        "clusterPlaceholder": "e.g. apac-1",
-        "unassigned": "Unassigned only"
+        "clusterPlaceholder": "e.g. apac-1"
       },
       "loading": "Loading workspaces",
       "loadFailed": "Couldn't load the workspaces.",
@@ -4889,8 +4871,7 @@
       "importFileTooLarge": "Choose a configuration file smaller than 1 MB.",
       "importInvalidFile": "Choose a valid JSON workspace configuration file.",
       "importAcknowledge": "I understand this creates a new workspace and keeps imported domains pending verification.",
-      "importFailed": "Couldn't import this workspace configuration. Check the file and try again.",
-      "deletionDue": "Deletion scheduled for {date}"
+      "importFailed": "Couldn't import this workspace configuration. Check the file and try again."
     },
     "usage": {
       "title": "Usage",
@@ -5156,27 +5137,6 @@
       "checkHealthBody": "The Platform will call this Cluster's configured health endpoint. Redirects are not followed.",
       "checkHealthConfirm": "I understand this runs a server-side probe and records the result.",
       "checkHealthFailed": "Couldn't complete the Cluster health check.",
-      "history": "Health history",
-      "historyTitle": "Health history for {name}",
-      "historyLoadFailed": "Couldn't load the Cluster health history.",
-      "historyEmpty": "No health observations have been recorded yet.",
-      "healthOverview": "Deployment health",
-      "healthWindow": "Based on server-side observations from the last {hours} hours.",
-      "healthStaleAlert": "{count} active Cluster(s) have not been checked in the last 24 hours. Their previous status is shown as unknown until a new probe is recorded.",
-      "healthSummary": {
-        "checked": "Active Clusters checked",
-        "stale": "Stale or unchecked",
-        "healthy": "{count} healthy",
-        "degraded": "{count} degraded",
-        "down": "{count} down",
-        "unknown": "{count} unknown"
-      },
-      "close": "Close",
-      "historyColumns": {
-        "when": "Checked",
-        "status": "Status",
-        "http": "HTTP"
-      },
       "createTitle": "Add cluster",
       "editTitle": "Manage {name}",
       "save": "Save cluster",

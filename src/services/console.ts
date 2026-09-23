@@ -127,7 +127,7 @@ export interface ConsoleWorkspaceDetail extends ConsoleWorkspace {
   extensions: ConsoleExtension[]
   /** Missing on an older Platform response; callers must treat that as unavailable. */
   capabilities?: ConsoleWorkspaceCapabilities
-  /** Strict Platform-control response only; absent for the owner console. */
+  /** Strict Platform-control response only; absent for older deployments. */
   placement_fence?: number
 }
 
@@ -247,8 +247,6 @@ export interface ConsoleWorkspaceQuery {
   status?: ConsoleWorkspaceStatus
   /** Exact Cluster identifier. */
   cluster?: string
-  /** Only workspaces that have not been placed on a Cluster. */
-  unassigned?: boolean
 }
 
 /** The workspaces the signed-in account reaches, newest first, with optional inventory filters. */
@@ -261,7 +259,6 @@ export async function listConsoleWorkspaces(filters: ConsoleWorkspaceQuery = {})
   if (term) query.set('search', term)
   if (status) query.set('status', status)
   if (cluster) query.set('cluster', cluster)
-  if (filters.unassigned) query.set('unassigned', 'true')
 
   return toList(await apiFetch<Page<ConsoleWorkspace> | ConsoleWorkspace[]>(buildApiUrl(`${BASE}?${query}`)))
 }
