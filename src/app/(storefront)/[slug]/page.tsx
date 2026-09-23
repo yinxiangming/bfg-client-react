@@ -1,14 +1,15 @@
 import { getLocale } from 'next-intl/server'
 import { headers } from 'next/headers'
-import { notFound, redirect } from 'next/navigation'
+import { notFound, permanentRedirect, redirect } from 'next/navigation'
 import { getSiteConfig } from '@/utils/siteMetadata'
-import { getRequestOrigin, clampDescription } from '@/utils/seo'
+import { getRequestOrigin, clampDescription, buildBreadcrumbJsonLd, jsonLdScript } from '@/utils/seo'
 import { fetchRenderedCmsPage } from '@/services/storefrontCmsApi'
 import { resolveCmsBlocks } from '@/utils/resolveCmsBlocks'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 import { resolveStorefrontPage } from '@/components/storefront/themes/resolve'
 import DynamicPage from '@views/storefront/DynamicPage'
 import type { Metadata } from 'next'
+import { brandImagePath, getBrandSite, isBrandHomeAlias } from '@/utils/brandSites'
 
 export const dynamic = 'force-dynamic'
 
@@ -41,18 +42,29 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     getSiteConfig(locale, requestHost),
     getRequestOrigin(),
   ])
+  const brand = getBrandSite(config)
+  if (isBrandHomeAlias(config, slug)) return { alternates: { canonical: origin || '/' }, robots: { index: false, follow: true } }
+  if (!pageData) return { title: 'Not found', robots: { index: false, follow: false } }
   const title = (pageData?.meta_title || pageData?.title || slug) as string
   const description =
     clampDescription((pageData?.meta_description || pageData?.excerpt) as string | undefined) ||
     `${title} – ${site_name}`
   const canonical = origin ? `${origin}/${slug}` : `/${slug}`
+  const section = slug === 'projects' ? 'projects' : slug === 'services' ? 'service' : slug === 'products' ? 'parts' : null
+  const brandImage = brand && section
+    ? brand.posts.find(post => post.path.startsWith(`/${section}/`))?.image
+    : undefined
+  const images = brand && brandImage
+    ? [{ url: `${origin}${brandImagePath(brand, brandImage, 1600)}`, alt: title }]
+    : undefined
 
   return {
-    title,
+    // Imported SEO titles may already include the site name.
+    title: title.toLowerCase().includes(site_name.toLowerCase()) ? { absolute: title } : title,
     description,
     alternates: { canonical },
-    openGraph: { type: 'article', title, description, url: canonical, siteName: site_name },
-    twitter: { card: 'summary_large_image', title, description },
+    openGraph: { type: 'website', title, description, url: canonical, siteName: site_name, images },
+    twitter: { card: 'summary_large_image', title, description, images: images?.map(image => image.url) },
   }
 }
 
@@ -72,15 +84,27 @@ export default async function StorefrontSlugPage({ params }: Props) {
   const locale = await getLocale()
   const requestHost = (await headers()).get('host') ?? undefined
   const config = await getStorefrontConfigForServer(locale, requestHost)
+  const brand = getBrandSite(config)
+  if (isBrandHomeAlias(config, slug)) permanentRedirect('/')
   const rawPageData = await getPageData(slug, locale, requestHost, config?.languages)
   if (!rawPageData || !rawPageData.blocks?.length) {
     notFound()
   }
   const pageData = await resolveCmsBlocks(rawPageData, requestHost, locale)
+  const listLabel = slug === 'projects' ? 'Projects' : slug === 'services' ? 'Services' : slug === 'products' ? 'Parts' : null
+  const breadcrumb = brand && listLabel ? (
+    <script
+      type='application/ld+json'
+      dangerouslySetInnerHTML={{ __html: jsonLdScript(buildBreadcrumbJsonLd(await getRequestOrigin(), [
+        { name: 'Home', path: '/' },
+        { name: listLabel, path: `/${slug}` },
+      ])) }}
+    />
+  ) : null
 
   const Override = await resolveStorefrontPage('cms')
   if (Override) {
-    return <Override pageData={pageData} locale={locale} slug={slug} />
+    return <>{breadcrumb}<Override pageData={pageData} locale={locale} slug={slug} /></>
   }
-  return <DynamicPage pageData={pageData} locale={locale} />
+  return <>{breadcrumb}<DynamicPage pageData={pageData} locale={locale} /></>
 }
