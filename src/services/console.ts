@@ -127,6 +127,8 @@ export interface ConsoleWorkspaceDetail extends ConsoleWorkspace {
   extensions: ConsoleExtension[]
   /** Missing on an older Platform response; callers must treat that as unavailable. */
   capabilities?: ConsoleWorkspaceCapabilities
+  /** Strict Platform-control response only; absent for older deployments. */
+  placement_fence?: number
 }
 
 export type ConsoleWorkspaceStatus = 'active' | 'suspended' | 'inactive' | 'scheduled_for_deletion'
@@ -269,6 +271,11 @@ export async function listMoreConsoleWorkspaces(next: string): Promise<ConsoleWo
 /** One workspace with every extension it can switch, each with its configuration. */
 export async function getConsoleWorkspace(id: number): Promise<ConsoleWorkspaceDetail> {
   return apiFetch<ConsoleWorkspaceDetail>(buildApiUrl(`${BASE}${id}/`))
+}
+
+/** Deployment metadata for a Django-superuser-only Platform control action. */
+export async function getConsoleControlWorkspace(id: number): Promise<ConsoleWorkspaceDetail> {
+  return apiFetch<ConsoleWorkspaceDetail>(buildApiUrl(`${CONTROL_BASE}${id}/`))
 }
 
 /**

@@ -13,7 +13,7 @@ import { type ChangeEvent, useCallback, useEffect, useState } from 'react'
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useTranslations } from 'next-intl'
+import { useLocale, useTranslations } from 'next-intl'
 
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
@@ -60,6 +60,7 @@ export default function AllWorkspacesPage() {
   const t = useTranslations('admin.console.all')
   const tStatus = useTranslations('admin.workspaces.status')
   const tActions = useTranslations('admin.common.actions')
+  const locale = useLocale()
   const router = useRouter()
   const { state: consoleState } = useConsole()
   const [search, setSearch] = useState('')
