@@ -16,6 +16,7 @@ import {
 } from '@/utils/seo'
 import ProductDetailPage from '@views/storefront/ProductDetailPage'
 import type { Metadata } from 'next'
+import { getBrandLegacyPath, getBrandSite } from '@/utils/brandSites'
 
 type Props = {
   params: Promise<{ id: string }>
@@ -223,13 +224,20 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const headersList = await headers()
   const locale = headersList.get('x-locale') || 'en'
   const requestHost = headersList.get('host') ?? undefined
-  const [product, { site_name }, origin, config] = await Promise.all([
+  const config = await getStorefrontConfigForServer(locale, requestHost).catch(() => null)
+  const brand = getBrandSite(config)
+  if (brand) {
+    const path = getBrandLegacyPath(brand, 'products', id)
+    if (!path) return { title: 'Product not found', robots: { index: false, follow: false } }
+    const origin = await getRequestOrigin()
+    return { alternates: { canonical: `${origin}${path}` }, robots: { index: false, follow: true } }
+  }
+  const [product, { site_name }, origin] = await Promise.all([
     getProductForServer(id, requestHost),
     // requestHost is required here — without it the backend cannot resolve the workspace and
     // site_name falls back to the placeholder 'Web App'.
     getSiteConfig(locale, requestHost),
     getRequestOrigin(),
-    getStorefrontConfigForServer(locale, requestHost).catch(() => null),
   ])
 
   if (!product) {
@@ -274,10 +282,16 @@ export default async function Page(props: Props) {
   const headersList = await headers()
   const locale = headersList.get('x-locale') || 'en'
   const requestHost = headersList.get('host') ?? undefined
+  const config = await getStorefrontConfigForServer(locale, requestHost).catch(() => null)
+  const brand = getBrandSite(config)
+  if (brand) {
+    const path = getBrandLegacyPath(brand, 'products', id)
+    if (!path) notFound()
+    permanentRedirect(path)
+  }
 
-  const [lookup, config, origin] = await Promise.all([
+  const [lookup, origin] = await Promise.all([
     getProductLookup(id, requestHost),
-    getStorefrontConfigForServer(locale, requestHost).catch(() => null),
     getRequestOrigin(),
   ])
 

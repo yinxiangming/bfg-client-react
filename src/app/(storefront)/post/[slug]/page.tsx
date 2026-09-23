@@ -1,12 +1,13 @@
 import { getLocale } from 'next-intl/server'
 import { headers } from 'next/headers'
 import Image from 'next/image'
-import { notFound } from 'next/navigation'
+import { notFound, permanentRedirect } from 'next/navigation'
 import { getSiteConfig } from '@/utils/siteMetadata'
 import { getRequestOrigin, clampDescription } from '@/utils/seo'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 import { fetchRenderedCmsPost } from '@/services/storefrontCmsApi'
 import type { Metadata } from 'next'
+import { getBrandPost, getBrandSite } from '@/utils/brandSites'
 
 export const revalidate = 60
 
@@ -32,11 +33,19 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = await getLocale()
   const requestHost = (await headers()).get('host') ?? undefined
   const config = await getStorefrontConfigForServer(locale, requestHost)
+  const brand = getBrandSite(config)
+  const brandPost = brand ? getBrandPost(brand, slug) : undefined
+  if (brand && !brandPost) return { title: 'Not found', robots: { index: false, follow: false } }
+  if (brandPost) {
+    const origin = await getRequestOrigin()
+    return { alternates: { canonical: `${origin}${brandPost.path}` }, robots: { index: false, follow: true } }
+  }
   const [postData, { site_name }, origin] = await Promise.all([
     getPostData(slug, locale, requestHost, config?.languages),
     getSiteConfig(locale, requestHost),
     getRequestOrigin(),
   ])
+  if (!postData) return { title: 'Not found', robots: { index: false, follow: false } }
   const title = (postData?.meta_title || postData?.title || slug) as string
   const description =
     clampDescription((postData?.meta_description || postData?.excerpt) as string | undefined) ||
@@ -58,6 +67,10 @@ export default async function StorefrontPostPage({ params }: Props) {
   const locale = await getLocale()
   const requestHost = (await headers()).get('host') ?? undefined
   const config = await getStorefrontConfigForServer(locale, requestHost)
+  const brand = getBrandSite(config)
+  const brandPost = brand ? getBrandPost(brand, slug) : undefined
+  if (brandPost) permanentRedirect(brandPost.path)
+  if (brand) notFound()
   const post = await getPostData(slug, locale, requestHost, config?.languages)
 
   if (!post) {

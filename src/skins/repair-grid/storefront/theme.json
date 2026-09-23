@@ -1,0 +1,6 @@
+{
+  "displayName": "Repair Grid",
+  "description": "A practical light-only grid skin for mobility service, repair, and parts businesses.",
+  "homeComponent": "Home",
+  "supportedColorModes": ["light"]
+}
