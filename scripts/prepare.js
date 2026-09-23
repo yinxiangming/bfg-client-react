@@ -452,14 +452,14 @@ function generateThemeRegistry() {
   ]
 
   for (const id of themeIds) {
-    const name = id.charAt(0).toUpperCase() + id.slice(1)
+    const name = safeIdent(id)
     lines.push(`import ${name}Layout from './${id}/Layout'`)
     lines.push(`import ${name}Header from './${id}/Header'`)
     lines.push(`import ${name}Footer from './${id}/Footer'`)
   }
   const homeThemes = themeIds.filter(hasHomeComponent)
   for (const id of homeThemes) {
-    const name = id.charAt(0).toUpperCase() + id.slice(1)
+    const name = safeIdent(id)
     lines.push(`import ${name}Home from './${id}/Home'`)
   }
 
@@ -497,18 +497,18 @@ function generateThemeRegistry() {
   lines.push('')
   lines.push('export const THEME_REGISTRY: Record<string, ThemeShell> = {')
   for (const id of themeIds) {
-    const name = id.charAt(0).toUpperCase() + id.slice(1)
+    const name = safeIdent(id)
     const modes = themeMetadata[id].supportedColorModes
     const metadata = modes ? `, supportedColorModes: ${JSON.stringify(modes)}` : ''
-    lines.push(`  ${id}: { Layout: ${name}Layout, Header: ${name}Header, Footer: ${name}Footer${metadata} },`)
+    lines.push(`  ${JSON.stringify(id)}: { Layout: ${name}Layout, Header: ${name}Header, Footer: ${name}Footer${metadata} },`)
   }
   lines.push('}')
   lines.push('')
   lines.push('export const HOME_REGISTRY: Record<string, React.ComponentType<ThemeHomeProps> | null> = {')
   for (const id of themeIds) {
     const hasHome = homeThemes.includes(id)
-    const name = id.charAt(0).toUpperCase() + id.slice(1)
-    lines.push(`  ${id}: ${hasHome ? name + 'Home' : 'null'},`)
+    const name = safeIdent(id)
+    lines.push(`  ${JSON.stringify(id)}: ${hasHome ? name + 'Home' : 'null'},`)
   }
   lines.push('}')
   lines.push('')
@@ -516,11 +516,11 @@ function generateThemeRegistry() {
   for (const id of themeIds) {
     const pages = themePages[id]
     if (!pages || pages.length === 0) {
-      lines.push(`  ${id}: {},`)
+      lines.push(`  ${JSON.stringify(id)}: {},`)
       continue
     }
     const safe = safeIdent(id)
-    lines.push(`  ${id}: {`)
+    lines.push(`  ${JSON.stringify(id)}: {`)
     for (const p of pages) {
       const ident = `${safe}_pages_${safeIdent(p.key || 'index')}`
       lines.push(`    ${JSON.stringify(p.key)}: ${ident},`)
