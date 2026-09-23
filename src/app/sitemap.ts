@@ -3,6 +3,8 @@ import { isIndexableHost } from '@/utils/indexable'
 import { getRequestOrigin } from '@/utils/seo'
 import { storefrontApi } from '@/utils/storefrontApi'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
+import { fetchRenderedCmsPost } from '@/services/storefrontCmsApi'
+import { getBrandSite } from '@/utils/brandSites'
 import type { MetadataRoute } from 'next'
 
 export const revalidate = 3600
@@ -71,13 +73,18 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   if (!isIndexableHost(headersList.get('x-forwarded-host') || requestHost)) return []
   const locale = headersList.get('x-locale') || 'en'
 
-  const [config, categoriesRes, productList] = await Promise.all([
-    getStorefrontConfigForServer(locale, requestHost).catch(() => null),
-    storefrontApi
-      .getCategories({ tree: true, requestHost, lang: locale, next: { revalidate: 3600 } })
-      .catch(() => null),
-    fetchAllProducts(requestHost),
-  ])
+  const config = await getStorefrontConfigForServer(locale, requestHost).catch(() => null)
+  const brand = getBrandSite(config)
+  // Brand sites use an explicit, workspace/theme-scoped CMS allow-list. Do not call
+  // authenticated/admin post lists anonymously; verify each public rendered URL instead.
+  const [categoriesRes, productList] = brand
+    ? [null, []]
+    : await Promise.all([
+        storefrontApi
+          .getCategories({ tree: true, requestHost, lang: locale, next: { revalidate: 3600 } })
+          .catch(() => null),
+        fetchAllProducts(requestHost),
+      ])
 
   const entries: SitemapEntry[] = [
     entry(`${origin}/`, 'daily', 1.0),
@@ -105,10 +112,37 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const seen = new Set(entries.map((e) => e.url))
   for (const item of menuItems) {
     if (item.kind !== 'page' || !item.page_slug) continue
+    if (item.page_slug === 'home') continue
     const url = `${origin}/${item.page_slug}`
     if (seen.has(url)) continue
     seen.add(url)
     entries.push(entry(url, 'monthly', 0.5))
+  }
+
+  if (brand) {
+    const published = await Promise.all(brand.posts.map(async item => {
+      const post = await fetchRenderedCmsPost(item.slug, locale, requestHost, {
+        revalidate: 3600,
+        languages: config?.languages,
+      })
+      return post ? { item, post } : null
+    }))
+    for (const result of published) {
+      if (!result) continue
+      const url = `${origin}${result.item.path}`
+      if (seen.has(url)) continue
+      seen.add(url)
+      entries.push(entry(url, 'monthly', 0.7, result.post.updated_at ?? result.post.published_at ?? undefined))
+    }
+    if (brand.slug === 'ultimate-space-design') {
+      for (const category of ['residential', 'commercial']) {
+        const url = `${origin}/projects/${category}`
+        if (!seen.has(url)) {
+          seen.add(url)
+          entries.push(entry(url, 'monthly', 0.6))
+        }
+      }
+    }
   }
 
   return entries

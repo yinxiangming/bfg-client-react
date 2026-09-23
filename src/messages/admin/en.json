@@ -4557,7 +4557,8 @@
     "status": {
       "active": "Open",
       "suspended": "Suspended",
-      "inactive": "Deactivated"
+      "inactive": "Deactivated",
+      "scheduled_for_deletion": "Deletion scheduled"
     },
     "badges": {
       "current": "Current workspace",
@@ -4770,7 +4771,8 @@
       },
       "readOnly": {
         "suspended": "This workspace is suspended. You can look at its extensions, but not change them.",
-        "inactive": "This workspace is deactivated. You can look at its extensions, but not change them."
+        "inactive": "This workspace is deactivated. You can look at its extensions, but not change them.",
+        "scheduled_for_deletion": "This workspace is scheduled for deletion. You can look at its extensions, but not change them."
       },
       "confirm": {
         "title": "Turn off {name}?",

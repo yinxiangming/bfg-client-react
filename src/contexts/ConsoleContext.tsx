@@ -13,7 +13,12 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react'
 import type { ReactNode } from 'react'
 
-import { listTenantWorkspaces, type TenantWorkspace, type TenantWorkspaceCreateBlocked } from '@/services/platform'
+import {
+  getPlatformControlStatus,
+  listTenantWorkspaces,
+  type TenantWorkspace,
+  type TenantWorkspaceCreateBlocked,
+} from '@/services/platform'
 import { getWorkspaceIdFromJwt } from '@/utils/api'
 
 export type ConsoleState =

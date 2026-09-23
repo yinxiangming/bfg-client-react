@@ -4557,7 +4557,8 @@
     "status": {
       "active": "正常",
       "suspended": "已暂停",
-      "inactive": "已停用"
+      "inactive": "已停用",
+      "scheduled_for_deletion": "已计划删除"
     },
     "badges": {
       "current": "当前工作区",
@@ -4770,7 +4771,8 @@
       },
       "readOnly": {
         "suspended": "这个工作区已暂停，扩展只能查看，不能修改。",
-        "inactive": "这个工作区已停用，扩展只能查看，不能修改。"
+        "inactive": "这个工作区已停用，扩展只能查看，不能修改。",
+        "scheduled_for_deletion": "这个工作区已计划删除，扩展只能查看，不能修改。"
       },
       "confirm": {
         "title": "停用「{name}」？",

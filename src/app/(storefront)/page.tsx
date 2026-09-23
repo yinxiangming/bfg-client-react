@@ -24,6 +24,7 @@ import { resolveStorefrontPage } from '@/components/storefront/themes/resolve'
 import DynamicPage from '@views/storefront/DynamicPage'
 import HomePage from '@views/storefront/HomePage'
 import type { Metadata } from 'next'
+import { brandBusinessJsonLd, brandImagePath, getBrandSite } from '@/utils/brandSites'
 
 // 60s ISR instead of fully dynamic: the homepage was re-rendering on every request
 // (TTFB ~1.5s), which hurts Core Web Vitals and burns crawl budget. CMS edits go live
@@ -41,6 +42,7 @@ export async function generateMetadata(): Promise<Metadata> {
   ])
 
   const siteName = config?.site_name?.trim() || 'Home'
+  const brand = getBrandSite(config)
   // The CMS home page carries hand-written meta fields; they are the most specific source
   // and were previously ignored in favour of the generic site description.
   const description =
@@ -48,6 +50,10 @@ export async function generateMetadata(): Promise<Metadata> {
   // A bare site name ranks for nothing, so a store should set the CMS page's meta_title to
   // something that says what it sells. Only that field can know — this file cannot invent it.
   const title = pageData?.meta_title?.trim() || siteName
+  const brandImage = brand?.posts[0]?.image
+  const images = brand && brandImage
+    ? [{ url: `${origin}${brandImagePath(brand, brandImage, 1600)}`, alt: siteName }]
+    : undefined
 
   return {
     // `absolute` opts out of the root '%s | siteName' template so the homepage title
@@ -63,8 +69,9 @@ export async function generateMetadata(): Promise<Metadata> {
       siteName,
       // A page-level openGraph replaces the root's wholesale, so locale is repeated here.
       locale: openGraphLocale(locale, config?.country),
+      images,
     },
-    twitter: { card: 'summary_large_image', title, description },
+    twitter: { card: 'summary_large_image', title, description, images: images?.map(image => image.url) },
   }
 }
 
@@ -91,8 +98,9 @@ function SiteJsonLd({
   // No origin means no absolute @id, and no site name means no entity worth describing.
   if (!origin || !siteName) return null
   const description = clampDescription(config?.site_description, 5000) || undefined
+  const brand = getBrandSite(config)
   const graph = [
-    buildOrganizationJsonLd(origin, {
+    brand ? brandBusinessJsonLd(brand, origin) : buildOrganizationJsonLd(origin, {
       siteName,
       description,
       email: config?.contact_email || undefined,
@@ -143,12 +151,15 @@ export default async function Page() {
   const SkinHome = await resolveStorefrontPage('home')
   if (SkinHome) {
     return (
-      <SkinHome
-        pageData={pageData}
-        locale={locale}
-        workspace_id={config.workspace_id}
-        workspace_slug={config.workspace_slug}
-      />
+      <>
+        {siteJsonLd}
+        <SkinHome
+          pageData={pageData}
+          locale={locale}
+          workspace_id={config.workspace_id}
+          workspace_slug={config.workspace_slug}
+        />
+      </>
     )
   }
 

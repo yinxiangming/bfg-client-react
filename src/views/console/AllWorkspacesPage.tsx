@@ -346,6 +346,11 @@ export default function AllWorkspacesPage() {
                       </TableCell>
                       <TableCell sx={cellSx}>
                         <StatusBadge label={tStatus(status)} color={WORKSPACE_STATUS_COLOR[status]} />
+                        {workspace.scheduled_deletion_at && (
+                          <Typography variant='caption' sx={{ display: 'block', mt: 1, ...mutedSx }}>
+                            {t('deletionDue', { date: new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(new Date(workspace.scheduled_deletion_at)) })}
+                          </Typography>
+                        )}
                       </TableCell>
                       <TableCell sx={cellSx}>
                         {workspace.active_extensions.length === 0 ? (

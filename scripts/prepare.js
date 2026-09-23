@@ -436,6 +436,30 @@ function hasHomeComponent(themeId) {
   return false
 }
 
+function toThemeIdentifier(themeId) {
+  return themeId
+    .split(/[^a-zA-Z0-9]+/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join('')
+}
+
+function getThemeMetadata(themeId) {
+  const fallback = { displayName: themeId }
+  try {
+    const filename = path.join(THEMES_DIR, themeId, 'theme.json')
+    if (!fs.existsSync(filename)) return fallback
+    const data = JSON.parse(fs.readFileSync(filename, 'utf8'))
+    return {
+      displayName: typeof data.displayName === 'string' && data.displayName.trim() ? data.displayName.trim() : themeId,
+      ...(typeof data.description === 'string' && data.description.trim() ? { description: data.description.trim() } : {}),
+      ...(Array.isArray(data.supportedColorModes) ? { supportedColorModes: data.supportedColorModes } : {}),
+    }
+  } catch (_) {
+    return fallback
+  }
+}
+
 function generateThemeRegistry() {
   const themeIds = getThemeIds()
   if (themeIds.length === 0) return
@@ -452,14 +476,14 @@ function generateThemeRegistry() {
   ]
 
   for (const id of themeIds) {
-    const name = id.charAt(0).toUpperCase() + id.slice(1)
+    const name = toThemeIdentifier(id)
     lines.push(`import ${name}Layout from './${id}/Layout'`)
     lines.push(`import ${name}Header from './${id}/Header'`)
     lines.push(`import ${name}Footer from './${id}/Footer'`)
   }
   const homeThemes = themeIds.filter(hasHomeComponent)
   for (const id of homeThemes) {
-    const name = id.charAt(0).toUpperCase() + id.slice(1)
+    const name = toThemeIdentifier(id)
     lines.push(`import ${name}Home from './${id}/Home'`)
   }
 
@@ -492,23 +516,35 @@ function generateThemeRegistry() {
   lines.push('  workspace_slug?: string')
   lines.push('}')
   lines.push('')
-  lines.push('// eslint-disable-next-line @typescript-eslint/no-explicit-any')
-  lines.push('export type StorefrontSkinPage = React.ComponentType<any>')
+  lines.push('export type ThemeMetadata = {')
+  lines.push('  displayName: string')
+  lines.push('  description?: string')
+  lines.push("  supportedColorModes?: Array<'light' | 'dark'>")
+  lines.push('}')
+  lines.push('')
+  lines.push('export const THEME_METADATA: Record<string, ThemeMetadata> = {')
+  for (const id of themeIds) {
+    lines.push(`  ${JSON.stringify(id)}: ${JSON.stringify(getThemeMetadata(id))},`)
+  }
+  lines.push('}')
   lines.push('')
   lines.push('export const THEME_REGISTRY: Record<string, ThemeShell> = {')
   for (const id of themeIds) {
-    const name = id.charAt(0).toUpperCase() + id.slice(1)
+    const name = toThemeIdentifier(id)
     const modes = themeMetadata[id].supportedColorModes
     const metadata = modes ? `, supportedColorModes: ${JSON.stringify(modes)}` : ''
-    lines.push(`  ${id}: { Layout: ${name}Layout, Header: ${name}Header, Footer: ${name}Footer${metadata} },`)
+    lines.push(`  ${JSON.stringify(id)}: { Layout: ${name}Layout, Header: ${name}Header, Footer: ${name}Footer${metadata} },`)
   }
   lines.push('}')
+  lines.push('')
+  lines.push('// eslint-disable-next-line @typescript-eslint/no-explicit-any')
+  lines.push('export type StorefrontSkinPage = React.ComponentType<any>')
   lines.push('')
   lines.push('export const HOME_REGISTRY: Record<string, React.ComponentType<ThemeHomeProps> | null> = {')
   for (const id of themeIds) {
     const hasHome = homeThemes.includes(id)
-    const name = id.charAt(0).toUpperCase() + id.slice(1)
-    lines.push(`  ${id}: ${hasHome ? name + 'Home' : 'null'},`)
+    const name = toThemeIdentifier(id)
+    lines.push(`  ${JSON.stringify(id)}: ${hasHome ? name + 'Home' : 'null'},`)
   }
   lines.push('}')
   lines.push('')
@@ -516,11 +552,11 @@ function generateThemeRegistry() {
   for (const id of themeIds) {
     const pages = themePages[id]
     if (!pages || pages.length === 0) {
-      lines.push(`  ${id}: {},`)
+      lines.push(`  ${JSON.stringify(id)}: {},`)
       continue
     }
     const safe = safeIdent(id)
-    lines.push(`  ${id}: {`)
+    lines.push(`  ${JSON.stringify(id)}: {`)
     for (const p of pages) {
       const ident = `${safe}_pages_${safeIdent(p.key || 'index')}`
       lines.push(`    ${JSON.stringify(p.key)}: ${ident},`)

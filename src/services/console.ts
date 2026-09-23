@@ -129,10 +129,11 @@ export interface ConsoleWorkspaceDetail extends ConsoleWorkspace {
   capabilities?: ConsoleWorkspaceCapabilities
 }
 
-export type ConsoleWorkspaceStatus = 'active' | 'suspended' | 'inactive'
+export type ConsoleWorkspaceStatus = 'active' | 'suspended' | 'inactive' | 'scheduled_for_deletion'
 
 /** Suspended wins over inactive, as `suspend_workspace` leaves a workspace as both. */
 export function consoleWorkspaceStatus(workspace: ConsoleWorkspace): ConsoleWorkspaceStatus {
+  if (workspace.scheduled_deletion_at) return 'scheduled_for_deletion'
   if (workspace.suspended_at) return 'suspended'
 
   return workspace.is_active ? 'active' : 'inactive'

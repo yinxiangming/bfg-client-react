@@ -122,6 +122,17 @@ export interface TenantWorkspacesResponse {
   create_blocked: TenantWorkspaceCreateBlocked | null
 }
 
+/** Response from the Django-superuser-only Platform control capability endpoint. */
+export interface PlatformControlStatusResponse {
+  is_platform_superuser: true
+  platform_capabilities: {
+    cluster_management: boolean
+    audit_log: boolean
+    configuration: boolean
+    exchange_rates: boolean
+  }
+}
+
 export interface CreateTenantWorkspaceInput {
   name: string
   /** Empty or omitted: the server generates one. */
@@ -189,6 +200,16 @@ export async function getMyWorkspaces(): Promise<WorkspaceMembership[]> {
 export async function listTenantWorkspaces(): Promise<TenantWorkspacesResponse> {
   const url = buildApiUrl('/platform/workspaces/me/')
   return apiFetch<TenantWorkspacesResponse>(url)
+}
+
+/**
+ * Read the deployment-control capabilities. The endpoint is intentionally
+ * forbidden to ordinary workspace users; callers should treat a rejected
+ * request as no Platform-control access rather than as a workspace failure.
+ */
+export async function getPlatformControlStatus(): Promise<PlatformControlStatusResponse> {
+  const url = buildApiUrl('/platform/control/status/')
+  return apiFetch<PlatformControlStatusResponse>(url)
 }
 
 /**

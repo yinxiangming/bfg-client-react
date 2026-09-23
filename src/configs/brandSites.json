@@ -1,0 +1,320 @@
+{
+  "repair-grid": {
+    "slug": "repair-hub",
+    "name": "The Repair Hub",
+    "assetFolder": "repair-hub",
+    "phone": "0800 866 366",
+    "email": "info@dygroup.co.nz",
+    "address": "7/28 Harrison Road",
+    "locality": "Auckland",
+    "postalCode": "1060",
+    "country": "NZ",
+    "currency": "NZD",
+    "legacyIds": {
+      "projects": {
+        "14": "wheel-chair-general-service",
+        "15": "mobility-scooter-service-and-repair",
+        "16": "powerchair-service-and-repair"
+      },
+      "services": {
+        "14": "puncture-repair",
+        "15": "battery-replacement",
+        "16": "wheelchair-service",
+        "17": "call-out-service"
+      },
+      "products": {
+        "11": "4135-4",
+        "12": "12v-75ah-deepcycle-battery",
+        "13": "call-out-service-product"
+      }
+    },
+    "legacySlugs": {
+      "projects": {},
+      "services": {
+        "wheelchair-general-service": "wheelchair-service"
+      },
+      "products": {
+        "call-out-service": "call-out-service-product"
+      }
+    },
+    "posts": [
+      {
+        "slug": "wheel-chair-general-service",
+        "title": "Wheelchair general service",
+        "category": "repair-projects",
+        "image": "/brand-assets/repair-hub/1776850444971-730008485-960.webp",
+        "path": "/projects/wheel-chair-general-service"
+      },
+      {
+        "slug": "mobility-scooter-service-and-repair",
+        "title": "Mobility scooter service and repair",
+        "category": "repair-projects",
+        "image": "/brand-assets/repair-hub/1776850658369-648600445-960.webp",
+        "path": "/projects/mobility-scooter-service-and-repair"
+      },
+      {
+        "slug": "powerchair-service-and-repair",
+        "title": "Powerchair service and repair",
+        "category": "repair-projects",
+        "image": "/brand-assets/repair-hub/1776851070926-759348583-960.webp",
+        "path": "/projects/powerchair-service-and-repair"
+      },
+      {
+        "slug": "puncture-repair",
+        "title": "Puncture repair",
+        "category": "services",
+        "image": "/brand-assets/repair-hub/1776852175355-770108221-960.webp",
+        "path": "/service/puncture-repair"
+      },
+      {
+        "slug": "battery-replacement",
+        "title": "Battery replacement",
+        "category": "services",
+        "image": "/brand-assets/repair-hub/1776852321276-827513091-960.webp",
+        "path": "/service/battery-replacement"
+      },
+      {
+        "slug": "wheelchair-service",
+        "title": "Wheelchair general service",
+        "category": "services",
+        "image": "/brand-assets/repair-hub/1776852391560-891943404-960.webp",
+        "path": "/service/wheelchair-service"
+      },
+      {
+        "slug": "call-out-service",
+        "title": "Call-out Service",
+        "category": "services",
+        "image": "/brand-assets/repair-hub/1776853069704-632882352-960.webp",
+        "path": "/service/call-out-service"
+      },
+      {
+        "slug": "12v-75ah-deepcycle-battery",
+        "title": "12V 75Ah Deepcycle Battery",
+        "category": "parts",
+        "image": "/brand-assets/repair-hub/1776857580046-753725979-960.webp",
+        "path": "/parts/12v-75ah-deepcycle-battery"
+      },
+      {
+        "slug": "4135-4",
+        "title": "4.1/3.5-4 replacement tyre",
+        "category": "parts",
+        "image": "/brand-assets/repair-hub/1776853892259-326110687-960.webp",
+        "path": "/parts/4135-4"
+      },
+      {
+        "slug": "call-out-service-product",
+        "title": "Call-out Service",
+        "category": "parts",
+        "image": "/brand-assets/repair-hub/1776857652978-640993667-960.webp",
+        "path": "/parts/call-out-service-product"
+      }
+    ]
+  },
+  "atelier-grid": {
+    "slug": "ultimate-space-design",
+    "name": "Ultimate Space Design",
+    "assetFolder": "ultimate-space",
+    "phone": "+64 9 265 0797",
+    "email": "info@dygroup.co.nz",
+    "address": "7/28 Harrison Road",
+    "locality": "Auckland",
+    "postalCode": "1060",
+    "country": "NZ",
+    "currency": "NZD",
+    "legacyIds": {
+      "projects": {
+        "1": "karaka-pines-village",
+        "2": "metlifecare-fairway-gardens",
+        "3": "intracare-mercy-hospital",
+        "6": "te-whare-manaaki-o-tama",
+        "7": "trinity-changing-room",
+        "8": "commercial-office",
+        "9": "healthcare-facility-suspended-privacy-and-cubical-track",
+        "10": "shutter-design-and-installation",
+        "12": "office-partition-curtain",
+        "14": "window-treatment-design-and-install"
+      },
+      "services": {
+        "1": "window-treatment-manufacture-and-repair",
+        "2": "interior-design",
+        "4": "window-treatment-alteration-and-repair",
+        "5": "automation"
+      },
+      "products": {
+        "1": "luxaflex-singledouble-track-system",
+        "2": "ceiling-fix-wave-track-system",
+        "3": "james-dunlop-textile",
+        "4": "nettex-textile",
+        "5": "recess-fit-ceiling-track-system",
+        "6": "warwick-fabric",
+        "7": "basswood-shutters"
+      }
+    },
+    "legacySlugs": {
+      "projects": {
+        "commericial-office": "commercial-office"
+      },
+      "services": {},
+      "products": {}
+    },
+    "posts": [
+      {
+        "slug": "window-treatment-design-and-install",
+        "title": "Window treatment design and install",
+        "category": "projects",
+        "projectCategory": "residential",
+        "image": "/brand-assets/ultimate-space/1781613809281-308960683-960.webp",
+        "path": "/projects/window-treatment-design-and-install"
+      },
+      {
+        "slug": "office-partition-curtain",
+        "title": "Office Partition Curtain",
+        "category": "projects",
+        "projectCategory": "commercial",
+        "image": "/brand-assets/ultimate-space/1781612552522-526533595-960.webp",
+        "path": "/projects/office-partition-curtain"
+      },
+      {
+        "slug": "shutter-design-and-installation",
+        "title": "Shutter design and installation",
+        "category": "projects",
+        "projectCategory": "residential",
+        "image": "/brand-assets/ultimate-space/1778655553091-483827087-960.webp",
+        "path": "/projects/shutter-design-and-installation"
+      },
+      {
+        "slug": "healthcare-facility-suspended-privacy-and-cubical-track",
+        "title": "Healthcare facility suspended privacy and cubical track",
+        "category": "projects",
+        "projectCategory": "commercial",
+        "image": "/brand-assets/ultimate-space/1778655478215-53397689-960.webp",
+        "path": "/projects/healthcare-facility-suspended-privacy-and-cubical-track"
+      },
+      {
+        "slug": "commercial-office",
+        "title": "Commercial office",
+        "category": "projects",
+        "projectCategory": "commercial",
+        "image": "/brand-assets/ultimate-space/1778655387955-420239469-960.webp",
+        "path": "/projects/commercial-office"
+      },
+      {
+        "slug": "trinity-changing-room",
+        "title": "Trinity Changing Room",
+        "category": "projects",
+        "projectCategory": "commercial",
+        "image": "/brand-assets/ultimate-space/1778655269664-274976731-960.webp",
+        "path": "/projects/trinity-changing-room"
+      },
+      {
+        "slug": "te-whare-manaaki-o-tama",
+        "title": "Te Whare Manaaki o Tama",
+        "category": "projects",
+        "projectCategory": "commercial",
+        "image": "/brand-assets/ultimate-space/1778655230000-26764100-960.webp",
+        "path": "/projects/te-whare-manaaki-o-tama"
+      },
+      {
+        "slug": "karaka-pines-village",
+        "title": "Karaka Pines Village",
+        "category": "commercial",
+        "projectCategory": "commercial",
+        "image": "/brand-assets/ultimate-space/1768718149477-769290315-960.webp",
+        "path": "/projects/karaka-pines-village"
+      },
+      {
+        "slug": "metlifecare-fairway-gardens",
+        "title": "Metlifecare Fairway Gardens",
+        "category": "commercial",
+        "projectCategory": "commercial",
+        "image": "/brand-assets/ultimate-space/1768718354037-997267613-960.webp",
+        "path": "/projects/metlifecare-fairway-gardens"
+      },
+      {
+        "slug": "intracare-mercy-hospital",
+        "title": "Intracare - Mercy Hospital",
+        "category": "commercial",
+        "projectCategory": "commercial",
+        "image": "/brand-assets/ultimate-space/1768718835476-945932881-960.webp",
+        "path": "/projects/intracare-mercy-hospital"
+      },
+      {
+        "slug": "automation",
+        "title": "Automation",
+        "category": "services",
+        "image": "/brand-assets/ultimate-space/1783650644367-239436183-960.webp",
+        "path": "/service/automation"
+      },
+      {
+        "slug": "window-treatment-alteration-and-repair",
+        "title": "Window treatment alteration and repair",
+        "category": "services",
+        "image": "/brand-assets/ultimate-space/1781612752566-424968636-960.webp",
+        "path": "/service/window-treatment-alteration-and-repair"
+      },
+      {
+        "slug": "window-treatment-manufacture-and-repair",
+        "title": "Window treatment manufacture and repair",
+        "category": "services",
+        "image": "/brand-assets/ultimate-space/1780559707983-886018302-960.webp",
+        "path": "/service/window-treatment-manufacture-and-repair"
+      },
+      {
+        "slug": "interior-design",
+        "title": "Interior Design",
+        "category": "services",
+        "image": "/brand-assets/ultimate-space/1780559464473-598906088-960.webp",
+        "path": "/service/interior-design"
+      },
+      {
+        "slug": "basswood-shutters",
+        "title": "Basswood shutters",
+        "category": "parts",
+        "image": "/brand-assets/ultimate-space/1781612252794-539494627-960.webp",
+        "path": "/parts/basswood-shutters"
+      },
+      {
+        "slug": "warwick-fabric",
+        "title": "Warwick fabric",
+        "category": "parts",
+        "image": "/brand-assets/ultimate-space/1778655134234-253467361-960.webp",
+        "path": "/parts/warwick-fabric"
+      },
+      {
+        "slug": "recess-fit-ceiling-track-system",
+        "title": "Recess fit ceiling track system",
+        "category": "parts",
+        "image": "/brand-assets/ultimate-space/1778655024332-844411590-960.webp",
+        "path": "/parts/recess-fit-ceiling-track-system"
+      },
+      {
+        "slug": "nettex-textile",
+        "title": "Nettex Textile",
+        "category": "parts",
+        "image": "/brand-assets/ultimate-space/1768721881719-685755567-960.webp",
+        "path": "/parts/nettex-textile"
+      },
+      {
+        "slug": "james-dunlop-textile",
+        "title": "James Dunlop Textile",
+        "category": "parts",
+        "image": "/brand-assets/ultimate-space/1778655053995-800969898-960.webp",
+        "path": "/parts/james-dunlop-textile"
+      },
+      {
+        "slug": "luxaflex-singledouble-track-system",
+        "title": "Luxaflex single/double track system",
+        "category": "parts",
+        "image": "/brand-assets/ultimate-space/1778654886388-376991555-960.webp",
+        "path": "/parts/luxaflex-singledouble-track-system"
+      },
+      {
+        "slug": "ceiling-fix-wave-track-system",
+        "title": "Ceiling fix wave track system",
+        "category": "parts",
+        "image": "/brand-assets/ultimate-space/1778654935724-414592833-960.webp",
+        "path": "/parts/ceiling-fix-wave-track-system"
+      }
+    ]
+  }
+}

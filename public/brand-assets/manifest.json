@@ -1,0 +1,1971 @@
+{
+  "version": 1,
+  "targetWidths": [
+    480,
+    960,
+    1600
+  ],
+  "assets": {
+    "https://therepairhub.co.nz/uploads/1776850444971-730008485.webp": {
+      "brand": "repair-hub",
+      "sourceBasename": "1776850444971-730008485.webp",
+      "basePath": "/brand-assets/repair-hub/1776850444971-730008485",
+      "original": {
+        "width": 695,
+        "height": 527,
+        "format": "webp",
+        "bytes": 21274,
+        "sha256": "1f0bbefc037e2b795d1ccd3b672c719616ca0155717e59dc5c468acdc3e2ba5e"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/repair-hub/1776850444971-730008485-480.webp",
+          "width": 480,
+          "height": 364,
+          "bytes": 8446,
+          "sha256": "5bd179d78c3bc80257ca44ea57999825f01482c59bf066b0654acb55c650e9b6"
+        },
+        "960": {
+          "path": "/brand-assets/repair-hub/1776850444971-730008485-960.webp",
+          "width": 960,
+          "height": 728,
+          "bytes": 21338,
+          "sha256": "4ce8bb0263f2916545ba360e6e3bce9de8520e578b0883c72110016facadea74"
+        },
+        "1600": {
+          "path": "/brand-assets/repair-hub/1776850444971-730008485-1600.webp",
+          "width": 1600,
+          "height": 1213,
+          "bytes": 35766,
+          "sha256": "51cdf266af2f96d5a7dd049a52ba07a5def2ff233de67dea5d71980e61616eb0"
+        }
+      }
+    },
+    "https://therepairhub.co.nz/uploads/1776850658369-648600445.webp": {
+      "brand": "repair-hub",
+      "sourceBasename": "1776850658369-648600445.webp",
+      "basePath": "/brand-assets/repair-hub/1776850658369-648600445",
+      "original": {
+        "width": 695,
+        "height": 527,
+        "format": "webp",
+        "bytes": 32184,
+        "sha256": "59ec1d2bc3fe775f727efccfc942ccecf0dceb00a5deaec3fb72722e3b14553f"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/repair-hub/1776850658369-648600445-480.webp",
+          "width": 480,
+          "height": 364,
+          "bytes": 13406,
+          "sha256": "25d4152bbc44a0a0cde543d41305d35eb20e89a2ccca3841e1785580c09561c6"
+        },
+        "960": {
+          "path": "/brand-assets/repair-hub/1776850658369-648600445-960.webp",
+          "width": 960,
+          "height": 728,
+          "bytes": 32740,
+          "sha256": "81a0e11d33a02c18a48a28410d6d288f3df8db54d02b3c0a442532200b2e23a0"
+        },
+        "1600": {
+          "path": "/brand-assets/repair-hub/1776850658369-648600445-1600.webp",
+          "width": 1600,
+          "height": 1213,
+          "bytes": 55826,
+          "sha256": "1cb83671f75a4ea00fc62194e66b34943d030db20f783b9e3fb2a6132fc06045"
+        }
+      }
+    },
+    "https://therepairhub.co.nz/uploads/1776851070926-759348583.jpg": {
+      "brand": "repair-hub",
+      "sourceBasename": "1776851070926-759348583.jpg",
+      "basePath": "/brand-assets/repair-hub/1776851070926-759348583",
+      "original": {
+        "width": 2048,
+        "height": 2163,
+        "format": "jpeg",
+        "bytes": 522816,
+        "sha256": "8cf3cf939d04117824ed736ee0dd7f0457705639ab8abefa8625525b2a2dd90a"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/repair-hub/1776851070926-759348583-480.webp",
+          "width": 480,
+          "height": 507,
+          "bytes": 31070,
+          "sha256": "feadcbc9aaf3e8ff3d975d46450dfdcb6ec7b0f1299fcafda269db93bf377472"
+        },
+        "960": {
+          "path": "/brand-assets/repair-hub/1776851070926-759348583-960.webp",
+          "width": 960,
+          "height": 1014,
+          "bytes": 115412,
+          "sha256": "8a57d2ee76873a8513f3b97e2bebc3a9c220512222a2690403b25d57202d2a23"
+        },
+        "1600": {
+          "path": "/brand-assets/repair-hub/1776851070926-759348583-1600.webp",
+          "width": 1600,
+          "height": 1690,
+          "bytes": 292976,
+          "sha256": "e13c99f63c26d47a644d672f5986afd289c17fbaf278336b8f3a458a6f70cfd8"
+        }
+      }
+    },
+    "https://therepairhub.co.nz/uploads/1776852175355-770108221.webp": {
+      "brand": "repair-hub",
+      "sourceBasename": "1776852175355-770108221.webp",
+      "basePath": "/brand-assets/repair-hub/1776852175355-770108221",
+      "original": {
+        "width": 1100,
+        "height": 733,
+        "format": "webp",
+        "bytes": 53792,
+        "sha256": "0ee2de03c360cc7e025dcd2b3586662aabec3e49c56e2aafc2017b0ef371c2df"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/repair-hub/1776852175355-770108221-480.webp",
+          "width": 480,
+          "height": 320,
+          "bytes": 11860,
+          "sha256": "f72f81c11708e1b86c271fca9ec2def0f3fbbc2a97a4fad668ebccf27b494db6"
+        },
+        "960": {
+          "path": "/brand-assets/repair-hub/1776852175355-770108221-960.webp",
+          "width": 960,
+          "height": 640,
+          "bytes": 28836,
+          "sha256": "f1bbc6837484237e274d0d1f000b4350e928de0c58e53879f021bac7c0428ec9"
+        },
+        "1600": {
+          "path": "/brand-assets/repair-hub/1776852175355-770108221-1600.webp",
+          "width": 1600,
+          "height": 1066,
+          "bytes": 56874,
+          "sha256": "cae67ed64b9b8ce89bb067f5530658d2b1772b7dff6191cc6effa7c33b618529"
+        }
+      }
+    },
+    "https://therepairhub.co.nz/uploads/1776852321276-827513091.jpg": {
+      "brand": "repair-hub",
+      "sourceBasename": "1776852321276-827513091.jpg",
+      "basePath": "/brand-assets/repair-hub/1776852321276-827513091",
+      "original": {
+        "width": 1024,
+        "height": 683,
+        "format": "jpeg",
+        "bytes": 138146,
+        "sha256": "0b31d3727e411041ae0b5cbbbb16f6ee4217f637425b349d6f9551cf836ef4b7"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/repair-hub/1776852321276-827513091-480.webp",
+          "width": 480,
+          "height": 320,
+          "bytes": 12958,
+          "sha256": "cb73d35ac7a0d7ba146441abc0f7fed0d2af9df37eecd1d1b6446424cc73f536"
+        },
+        "960": {
+          "path": "/brand-assets/repair-hub/1776852321276-827513091-960.webp",
+          "width": 960,
+          "height": 640,
+          "bytes": 34946,
+          "sha256": "73af19178df4f3710c39fd4775facb02db7a328469c80f6c3ad5ea56da5976c0"
+        },
+        "1600": {
+          "path": "/brand-assets/repair-hub/1776852321276-827513091-1600.webp",
+          "width": 1600,
+          "height": 1067,
+          "bytes": 58224,
+          "sha256": "9d1c0f5d1ec7cf3d7ae9688d32dd3902aee19da25f5b252bb011ac2268eb176c"
+        }
+      }
+    },
+    "https://therepairhub.co.nz/uploads/1776852391560-891943404.webp": {
+      "brand": "repair-hub",
+      "sourceBasename": "1776852391560-891943404.webp",
+      "basePath": "/brand-assets/repair-hub/1776852391560-891943404",
+      "original": {
+        "width": 1200,
+        "height": 1133,
+        "format": "webp",
+        "bytes": 49930,
+        "sha256": "70e1017db3435e03f5254d8b0243dd0b435a1e497bd2a142633f3d4d11b32188"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/repair-hub/1776852391560-891943404-480.webp",
+          "width": 480,
+          "height": 453,
+          "bytes": 11912,
+          "sha256": "82d79835c8b5c4c9d39ff8ebe063d3c52d8d91c71ba8f336611c1670bfb41d0e"
+        },
+        "960": {
+          "path": "/brand-assets/repair-hub/1776852391560-891943404-960.webp",
+          "width": 960,
+          "height": 906,
+          "bytes": 28106,
+          "sha256": "d3e8e0f8f8283982ac88f59db555922cdd1ddb2bf53a97ceff3bed851bd2d628"
+        },
+        "1600": {
+          "path": "/brand-assets/repair-hub/1776852391560-891943404-1600.webp",
+          "width": 1600,
+          "height": 1511,
+          "bytes": 54688,
+          "sha256": "24a5f8e05f828bf3cb690ee539e13efb46f45f989d7bea410c3b26362129c898"
+        }
+      }
+    },
+    "https://therepairhub.co.nz/uploads/1776853069704-632882352.jpg": {
+      "brand": "repair-hub",
+      "sourceBasename": "1776853069704-632882352.jpg",
+      "basePath": "/brand-assets/repair-hub/1776853069704-632882352",
+      "original": {
+        "width": 1402,
+        "height": 1122,
+        "format": "jpeg",
+        "bytes": 458561,
+        "sha256": "7ccddb5c270284fb9832c42ea59308953b748806e9c95c5afba9be2bd17fcac9"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/repair-hub/1776853069704-632882352-480.webp",
+          "width": 480,
+          "height": 384,
+          "bytes": 33918,
+          "sha256": "c1447425160d764254820b26a9f3289d2d9563a8c883d6622a438e43e56d6a8f"
+        },
+        "960": {
+          "path": "/brand-assets/repair-hub/1776853069704-632882352-960.webp",
+          "width": 960,
+          "height": 768,
+          "bytes": 91216,
+          "sha256": "e7d6a93ddafe1e6cabf2aebcaaed634a53b15d602565249ceeea28803ecbdbbc"
+        },
+        "1600": {
+          "path": "/brand-assets/repair-hub/1776853069704-632882352-1600.webp",
+          "width": 1600,
+          "height": 1280,
+          "bytes": 166098,
+          "sha256": "ebd47fd4f43cc545affa2287737cf3fa19d1a94a5bafa601fa8d01d6488f3385"
+        }
+      }
+    },
+    "https://therepairhub.co.nz/uploads/1776853892259-326110687.webp": {
+      "brand": "repair-hub",
+      "sourceBasename": "1776853892259-326110687.webp",
+      "basePath": "/brand-assets/repair-hub/1776853892259-326110687",
+      "original": {
+        "width": 928,
+        "height": 1280,
+        "format": "webp",
+        "bytes": 129510,
+        "sha256": "a5c5a26015581ae39f76370f684703572b453365df5fd003f038e61547472f70"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/repair-hub/1776853892259-326110687-480.webp",
+          "width": 480,
+          "height": 662,
+          "bytes": 25452,
+          "sha256": "df79bec1e315cef1972ce801c1dc1c6435ca8f4b16c4bcfe40efa8267fcd68ab"
+        },
+        "960": {
+          "path": "/brand-assets/repair-hub/1776853892259-326110687-960.webp",
+          "width": 960,
+          "height": 1324,
+          "bytes": 70660,
+          "sha256": "d602e96eadbb7804cd02cddd5789da6e3b8aa75132f31ba83be049352e13ba4c"
+        },
+        "1600": {
+          "path": "/brand-assets/repair-hub/1776853892259-326110687-1600.webp",
+          "width": 1600,
+          "height": 2207,
+          "bytes": 133402,
+          "sha256": "998a8f787c766fe9e8570fc5b5c470ee3fc218e17aeb5f17b8c538064b8afc29"
+        }
+      }
+    },
+    "https://therepairhub.co.nz/uploads/1776857580046-753725979.webp": {
+      "brand": "repair-hub",
+      "sourceBasename": "1776857580046-753725979.webp",
+      "basePath": "/brand-assets/repair-hub/1776857580046-753725979",
+      "original": {
+        "width": 550,
+        "height": 450,
+        "format": "webp",
+        "bytes": 25856,
+        "sha256": "a141d880f352a3f7ab7b505f62d743aeebdb0c54258cd8a2656142444339610e"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/repair-hub/1776857580046-753725979-480.webp",
+          "width": 480,
+          "height": 393,
+          "bytes": 14620,
+          "sha256": "3641f2b8a720fe0949dafe4a7724f804df70db713093618e19105c3912bd4c8d"
+        },
+        "960": {
+          "path": "/brand-assets/repair-hub/1776857580046-753725979-960.webp",
+          "width": 960,
+          "height": 785,
+          "bytes": 35202,
+          "sha256": "b6bc78baa9798d248881f06a5d0b1ff92f8ce8e14d3896d47f14451e9ae41d0d"
+        },
+        "1600": {
+          "path": "/brand-assets/repair-hub/1776857580046-753725979-1600.webp",
+          "width": 1600,
+          "height": 1309,
+          "bytes": 61038,
+          "sha256": "a5434fef4477b008d55f959683410cfe33cf823e6e007b3b002c02d9a3559598"
+        }
+      }
+    },
+    "https://therepairhub.co.nz/uploads/1776857652978-640993667.jpg": {
+      "brand": "repair-hub",
+      "sourceBasename": "1776857652978-640993667.jpg",
+      "basePath": "/brand-assets/repair-hub/1776857652978-640993667",
+      "original": {
+        "width": 1402,
+        "height": 1122,
+        "format": "jpeg",
+        "bytes": 458561,
+        "sha256": "7ccddb5c270284fb9832c42ea59308953b748806e9c95c5afba9be2bd17fcac9"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/repair-hub/1776857652978-640993667-480.webp",
+          "width": 480,
+          "height": 384,
+          "bytes": 33918,
+          "sha256": "c1447425160d764254820b26a9f3289d2d9563a8c883d6622a438e43e56d6a8f"
+        },
+        "960": {
+          "path": "/brand-assets/repair-hub/1776857652978-640993667-960.webp",
+          "width": 960,
+          "height": 768,
+          "bytes": 91216,
+          "sha256": "e7d6a93ddafe1e6cabf2aebcaaed634a53b15d602565249ceeea28803ecbdbbc"
+        },
+        "1600": {
+          "path": "/brand-assets/repair-hub/1776857652978-640993667-1600.webp",
+          "width": 1600,
+          "height": 1280,
+          "bytes": 166098,
+          "sha256": "ebd47fd4f43cc545affa2287737cf3fa19d1a94a5bafa601fa8d01d6488f3385"
+        }
+      }
+    },
+    "https://therepairhub.co.nz/uploads/1778651484785-339303501.jpg": {
+      "brand": "repair-hub",
+      "sourceBasename": "1778651484785-339303501.jpg",
+      "basePath": "/brand-assets/repair-hub/1778651484785-339303501",
+      "original": {
+        "width": 700,
+        "height": 330,
+        "format": "jpeg",
+        "bytes": 142303,
+        "sha256": "32d636a6a2585a4d28c572d9d38ee1bca4f2b893b32b6e6c6fa402f27d2dc729"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/repair-hub/1778651484785-339303501-480.webp",
+          "width": 480,
+          "height": 226,
+          "bytes": 13536,
+          "sha256": "e932a0553cb7404eef63573408f239104cbc7e363aad8c0e6943c9aa9abf89b8"
+        },
+        "960": {
+          "path": "/brand-assets/repair-hub/1778651484785-339303501-960.webp",
+          "width": 960,
+          "height": 453,
+          "bytes": 27152,
+          "sha256": "69671c8393ee25f03f24831be1210566ae74dbdd736270518a889c5bdbd6ec0d"
+        },
+        "1600": {
+          "path": "/brand-assets/repair-hub/1778651484785-339303501-1600.webp",
+          "width": 1600,
+          "height": 754,
+          "bytes": 46448,
+          "sha256": "4229c24d8801fafb960d8f88cc9fda1e78318cc621ebacdf57c4ab185b0575dc"
+        }
+      }
+    },
+    "https://therepairhub.co.nz/uploads/1778652906260-601998585.jpg": {
+      "brand": "repair-hub",
+      "sourceBasename": "1778652906260-601998585.jpg",
+      "basePath": "/brand-assets/repair-hub/1778652906260-601998585",
+      "original": {
+        "width": 1246,
+        "height": 736,
+        "format": "jpeg",
+        "bytes": 399818,
+        "sha256": "7a95b04e5b25a905763f2df939e49fd3dc32533d636c7c694982b369be9cff01"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/repair-hub/1778652906260-601998585-480.webp",
+          "width": 480,
+          "height": 284,
+          "bytes": 42900,
+          "sha256": "5e8281e6f7beeca242b8d755f8d81b7b2b5b9152051a088e962346eaf53cba39"
+        },
+        "960": {
+          "path": "/brand-assets/repair-hub/1778652906260-601998585-960.webp",
+          "width": 960,
+          "height": 567,
+          "bytes": 130478,
+          "sha256": "6d24489562aae119b96fbf389738fa24a22c38c7ab8d4b6a24f0c586c15bac98"
+        },
+        "1600": {
+          "path": "/brand-assets/repair-hub/1778652906260-601998585-1600.webp",
+          "width": 1600,
+          "height": 945,
+          "bytes": 233838,
+          "sha256": "dfbce3ee8ca690d798796facfb8b3d8f1e012739100a026e49cd048b617466f4"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1768718149477-769290315.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1768718149477-769290315.jpg",
+      "basePath": "/brand-assets/ultimate-space/1768718149477-769290315",
+      "original": {
+        "width": 1920,
+        "height": 1440,
+        "format": "jpeg",
+        "bytes": 574455,
+        "sha256": "ea6866d1eb6123fe0c4e4878daa94fa4efbd6e1b64dbf9454b6fc4a5f3bae23d"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1768718149477-769290315-480.webp",
+          "width": 480,
+          "height": 360,
+          "bytes": 20216,
+          "sha256": "e4b39cd88497b2eb222400829e93632ca9bb8037eecc56367291d4ef61b689fb"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1768718149477-769290315-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 77480,
+          "sha256": "9a471de51fe30029a3024c600523fdf2ab1379bf7529f50a6c0fd8eb6207b6a7"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1768718149477-769290315-1600.webp",
+          "width": 1600,
+          "height": 1200,
+          "bytes": 192094,
+          "sha256": "857275233e48f26a262a1f624e515e83c6ede795a6475f1f6965f4bdefbd926a"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1768718354037-997267613.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1768718354037-997267613.jpg",
+      "basePath": "/brand-assets/ultimate-space/1768718354037-997267613",
+      "original": {
+        "width": 1920,
+        "height": 1080,
+        "format": "jpeg",
+        "bytes": 545835,
+        "sha256": "4b50ee64ffaf0347a9a5c633791090ecd79370ca8eaa2d6c4f0d2e29ef54107c"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1768718354037-997267613-480.webp",
+          "width": 480,
+          "height": 270,
+          "bytes": 18694,
+          "sha256": "2b24ac623de8a637a33d87c2ddab31c6cd64ebefd567781fa0bdf7e548a9065d"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1768718354037-997267613-960.webp",
+          "width": 960,
+          "height": 540,
+          "bytes": 62110,
+          "sha256": "e4e0a3c7998f39c7d381b1ecd6c1792bfc841d0352f0e34344aa8817a6b8b708"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1768718354037-997267613-1600.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 172102,
+          "sha256": "9b235c12f3b4fdb32976861eb54aa0f44ed78fd6252bdddece8d44b1ae5bee72"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1768718835476-945932881.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1768718835476-945932881.jpg",
+      "basePath": "/brand-assets/ultimate-space/1768718835476-945932881",
+      "original": {
+        "width": 1920,
+        "height": 1080,
+        "format": "jpeg",
+        "bytes": 344717,
+        "sha256": "c064d5febe9365869a3e0dcce856df83f3336d2f0e282ea220b4914a590b3a18"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1768718835476-945932881-480.webp",
+          "width": 480,
+          "height": 270,
+          "bytes": 15678,
+          "sha256": "392b2c579fc9229800e38821091eea8a0bb0496c9c7b1affed018ac8ccf64eb5"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1768718835476-945932881-960.webp",
+          "width": 960,
+          "height": 540,
+          "bytes": 49172,
+          "sha256": "7c6cee1bb24d49e9d60fc9e6bdc96b64261435a1e8b17b0fa3b5c5c5d315ea3e"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1768718835476-945932881-1600.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 104556,
+          "sha256": "c87a53b0ef80f9a9b1baea97aa23244794efe0fe5755a1a2182e5ac18bb4f932"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1768721881719-685755567.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1768721881719-685755567.jpg",
+      "basePath": "/brand-assets/ultimate-space/1768721881719-685755567",
+      "original": {
+        "width": 793,
+        "height": 296,
+        "format": "jpeg",
+        "bytes": 38856,
+        "sha256": "8e96d96322a81896c70750934c51f906c9161a343dfa21806688f395d9b88acb"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1768721881719-685755567-480.webp",
+          "width": 480,
+          "height": 179,
+          "bytes": 7208,
+          "sha256": "3d4a8550caec5222642ffba97176d8feab2eb96d40af97273e66058edc049d66"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1768721881719-685755567-960.webp",
+          "width": 960,
+          "height": 358,
+          "bytes": 14320,
+          "sha256": "1be8e2c62c2c0e8142a0ecaebd768a82e6c70b5ea4a21ec004e7978cbd92c212"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1768721881719-685755567-1600.webp",
+          "width": 1600,
+          "height": 597,
+          "bytes": 24346,
+          "sha256": "05e5f8e1b6ef78f84d08097659fc661b4ffee56b134a6f61d19ff3e90dcb7633"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778654886388-376991555.webp": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778654886388-376991555.webp",
+      "basePath": "/brand-assets/ultimate-space/1778654886388-376991555",
+      "original": {
+        "width": 1808,
+        "height": 783,
+        "format": "webp",
+        "bytes": 18314,
+        "sha256": "a868d1b0c31a36faefded37fa5bc9a957bdca2935266957b5470723fb5e2bef8"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778654886388-376991555-480.webp",
+          "width": 480,
+          "height": 208,
+          "bytes": 11550,
+          "sha256": "fc5fabf7503a240fb4fbbf1b5f070ec954592dbead63e9808a9237e3cbc1db76"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778654886388-376991555-960.webp",
+          "width": 960,
+          "height": 416,
+          "bytes": 26582,
+          "sha256": "58a268d03ce533a3bbea50407ce09a92d44b220bbbff1adcbaf581102c6d236f"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778654886388-376991555-1600.webp",
+          "width": 1600,
+          "height": 693,
+          "bytes": 50416,
+          "sha256": "7df137bad9b3255c07867ea3c4602f3f1af439cc1ac1618fb48b77f1e9bfdc9d"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778654935724-414592833.webp": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778654935724-414592833.webp",
+      "basePath": "/brand-assets/ultimate-space/1778654935724-414592833",
+      "original": {
+        "width": 829,
+        "height": 634,
+        "format": "webp",
+        "bytes": 34376,
+        "sha256": "1cd8c1f950ef6b41f3c4184e2ba2530dc53e65eada1619595427de30646a7cea"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778654935724-414592833-480.webp",
+          "width": 480,
+          "height": 367,
+          "bytes": 11944,
+          "sha256": "71a6db3571bfcf29fad96ee95e21d4cca54ca8f6b397bdbe6dec37c64c0ef2ef"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778654935724-414592833-960.webp",
+          "width": 960,
+          "height": 734,
+          "bytes": 30508,
+          "sha256": "bcb897bd3d34cf2bda80651d072d06368c01bb03b74374d426940274a64eaf7c"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778654935724-414592833-1600.webp",
+          "width": 1600,
+          "height": 1224,
+          "bytes": 63244,
+          "sha256": "a641980bf8f5d4d78fcdf99a1a2fa74afb6f450f2c86ecb85316d3818d3cdfff"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778655024332-844411590.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778655024332-844411590.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778655024332-844411590",
+      "original": {
+        "width": 700,
+        "height": 700,
+        "format": "jpeg",
+        "bytes": 83343,
+        "sha256": "fa9ac625cafaec895a543b72e1ffdbe1293f67d42db515bb7aaa1fa4ce75ad36"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778655024332-844411590-480.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 24894,
+          "sha256": "3e1280439eb3fd2ef7213d0c1a4ec4ac0120b9d09b9bc9cca445a6e96476397d"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778655024332-844411590-960.webp",
+          "width": 960,
+          "height": 960,
+          "bytes": 85974,
+          "sha256": "7c31b1a6c33f9e300782b052fb8759e2634d1bb1ea833ef3bd9210228d75982d"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778655024332-844411590-1600.webp",
+          "width": 1600,
+          "height": 1600,
+          "bytes": 163598,
+          "sha256": "9adc4ccc1f701f2cd82eb0462b9d0d0fd7f1b11c1a31436439e3d4e75ad2a5a5"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778655053995-800969898.png": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778655053995-800969898.png",
+      "basePath": "/brand-assets/ultimate-space/1778655053995-800969898",
+      "original": {
+        "width": 376,
+        "height": 138,
+        "format": "png",
+        "bytes": 10592,
+        "sha256": "1428cf1c35646d2a3bc73e2bf9604902276d4b3938ff38f33f8e231a2071135b"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778655053995-800969898-480.webp",
+          "width": 480,
+          "height": 176,
+          "bytes": 9056,
+          "sha256": "7fef38a505b1df3b1af59bdddc88fad645876b3b8c40fdae1cf8b960fffd93d4"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778655053995-800969898-960.webp",
+          "width": 960,
+          "height": 352,
+          "bytes": 22622,
+          "sha256": "d65ed1f5dcfc6ad25bb41a7c06aeb023a75a1d1a1ca316749b967a2c420a0839"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778655053995-800969898-1600.webp",
+          "width": 1600,
+          "height": 587,
+          "bytes": 40886,
+          "sha256": "f853b99e2e19dd576f9d982b2c1f65fc7a7875447e2a7d8aad6ef94c378996ef"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778655134234-253467361.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778655134234-253467361.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778655134234-253467361",
+      "original": {
+        "width": 200,
+        "height": 200,
+        "format": "jpeg",
+        "bytes": 3972,
+        "sha256": "cffeaf3a3c9651ab3a8e203816fd6853559463bd8cb2ac2f3a878cb99b4ab86e"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778655134234-253467361-480.webp",
+          "width": 480,
+          "height": 480,
+          "bytes": 4262,
+          "sha256": "144e4b1131d137059df499416fdef20b604957c1626908e667d4d9e63330e079"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778655134234-253467361-960.webp",
+          "width": 960,
+          "height": 960,
+          "bytes": 9830,
+          "sha256": "3ab0a5e6ca3c129179cd9ef402c35440f3c87ab94b77b147bdbfcab0e3016c80"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778655134234-253467361-1600.webp",
+          "width": 1600,
+          "height": 1600,
+          "bytes": 19346,
+          "sha256": "524256f8d2e337e77cd4952627c5a6231fe9907a493a2af6711ae9392d7874ee"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778655230000-26764100.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778655230000-26764100.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778655230000-26764100",
+      "original": {
+        "width": 1920,
+        "height": 1440,
+        "format": "jpeg",
+        "bytes": 823458,
+        "sha256": "9702b76912311bd7eeafe90768f00bff307fe5528826f2a53187e27574db565f"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778655230000-26764100-480.webp",
+          "width": 480,
+          "height": 360,
+          "bytes": 30608,
+          "sha256": "f11243d455896069488b5bb70e864b85770a310397fb5449f0ac108b4ef925fb"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778655230000-26764100-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 128008,
+          "sha256": "8797de3accec23f20067d83b279519c7dd9e1c748ff0d65b43b38c66f9c329a9"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778655230000-26764100-1600.webp",
+          "width": 1600,
+          "height": 1200,
+          "bytes": 345974,
+          "sha256": "abc277b19bf9ebeed73bdd3b3401c0411e79ca31b57a016f6f617ec33fe7e7c4"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778655269664-274976731.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778655269664-274976731.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778655269664-274976731",
+      "original": {
+        "width": 1440,
+        "height": 1920,
+        "format": "jpeg",
+        "bytes": 428897,
+        "sha256": "aee8396b1688502032782cdfe52fe18bd0e6275821088a6eb070e1aec7827690"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778655269664-274976731-480.webp",
+          "width": 480,
+          "height": 640,
+          "bytes": 24618,
+          "sha256": "41f899900b3fa13d73e8eb057bc3f69433f9f173032442343033b296c382a1a7"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778655269664-274976731-960.webp",
+          "width": 960,
+          "height": 1280,
+          "bytes": 71330,
+          "sha256": "996976386812316e640f9a0835db0a0ca6ee9ebc8a48ab991b82bd8f68b427be"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778655269664-274976731-1600.webp",
+          "width": 1600,
+          "height": 2133,
+          "bytes": 148216,
+          "sha256": "a638be5f64e037641af890977defcd0706a78762b1fdd2d661b98f1c2400c036"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778655387955-420239469.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778655387955-420239469.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778655387955-420239469",
+      "original": {
+        "width": 1440,
+        "height": 1080,
+        "format": "jpeg",
+        "bytes": 254872,
+        "sha256": "079ca6c213d8c89c8f2d10c7a6089b060d0085a8e1f1f792c01009e15aef9f0b"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778655387955-420239469-480.webp",
+          "width": 480,
+          "height": 360,
+          "bytes": 29378,
+          "sha256": "32030fbc42eeaadb1419d021c830643906c87d2bedd4162917af0022035879f9"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778655387955-420239469-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 78932,
+          "sha256": "80d5531c180609b8b3b51eca890d5ef85ef1e4bca39c89720b291b73ab7b588b"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778655387955-420239469-1600.webp",
+          "width": 1600,
+          "height": 1200,
+          "bytes": 148206,
+          "sha256": "0bc05f38a587e3c84616c9748504cdfcaa6555b89cf1364221b52b65664c86d5"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778655391413-150905495.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778655391413-150905495.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778655391413-150905495",
+      "original": {
+        "width": 1440,
+        "height": 1920,
+        "format": "jpeg",
+        "bytes": 317482,
+        "sha256": "82b20aa9718cdd29e4827caac2d3aa879d3031e36c80659bd8198506d189c4cf"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778655391413-150905495-480.webp",
+          "width": 480,
+          "height": 640,
+          "bytes": 16402,
+          "sha256": "4fd26539f7aa11665e3a5186cfe925a1136bb8fc329e291911020b9fb65c169c"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778655391413-150905495-960.webp",
+          "width": 960,
+          "height": 1280,
+          "bytes": 43314,
+          "sha256": "b757f591b4ab0e8d2dc180ddd45812db554961327dc74e61a5f74374e91fa031"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778655391413-150905495-1600.webp",
+          "width": 1600,
+          "height": 2133,
+          "bytes": 87440,
+          "sha256": "e3250f9e8c6846b7e0ac19d630da78aba667a95459b647717e591d5956df1c79"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778655394906-424362198.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778655394906-424362198.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778655394906-424362198",
+      "original": {
+        "width": 1440,
+        "height": 1080,
+        "format": "jpeg",
+        "bytes": 254872,
+        "sha256": "079ca6c213d8c89c8f2d10c7a6089b060d0085a8e1f1f792c01009e15aef9f0b"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778655394906-424362198-480.webp",
+          "width": 480,
+          "height": 360,
+          "bytes": 29378,
+          "sha256": "32030fbc42eeaadb1419d021c830643906c87d2bedd4162917af0022035879f9"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778655394906-424362198-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 78932,
+          "sha256": "80d5531c180609b8b3b51eca890d5ef85ef1e4bca39c89720b291b73ab7b588b"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778655394906-424362198-1600.webp",
+          "width": 1600,
+          "height": 1200,
+          "bytes": 148206,
+          "sha256": "0bc05f38a587e3c84616c9748504cdfcaa6555b89cf1364221b52b65664c86d5"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778655478215-53397689.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778655478215-53397689.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778655478215-53397689",
+      "original": {
+        "width": 1080,
+        "height": 1920,
+        "format": "jpeg",
+        "bytes": 223755,
+        "sha256": "ff325250ec093e339c5e1f03084097eb779fc84bf52bb14a05572ec46392b117"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778655478215-53397689-480.webp",
+          "width": 480,
+          "height": 853,
+          "bytes": 20362,
+          "sha256": "0cbaac32ff260f0c9ce5c07163af65428a0acc965f63e5b7bad932d3d872e135"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778655478215-53397689-960.webp",
+          "width": 960,
+          "height": 1707,
+          "bytes": 56418,
+          "sha256": "a796c3172106a203c20844a4528b89c72fb83a25e1f28193f9f9ec307b25c015"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778655478215-53397689-1600.webp",
+          "width": 1600,
+          "height": 2844,
+          "bytes": 104964,
+          "sha256": "59728ca728930e9538417e8cd3b3932dd1b564cc156ab2f9709dabe26f7af4ce"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778655487775-9389804.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778655487775-9389804.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778655487775-9389804",
+      "original": {
+        "width": 1280,
+        "height": 720,
+        "format": "jpeg",
+        "bytes": 212142,
+        "sha256": "f74ab070d5c2f518a0e54d16648a1d951f102f1382f6c8cfad1108c3bf8af8c3"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778655487775-9389804-480.webp",
+          "width": 480,
+          "height": 270,
+          "bytes": 19148,
+          "sha256": "90b373d6bda1d71c7243ca2715a293255c59b18f4e0ace170fcb901544e4c30e"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778655487775-9389804-960.webp",
+          "width": 960,
+          "height": 540,
+          "bytes": 61598,
+          "sha256": "bf547f04bd16709b7424b0b2c2940d08494dd1aa6765cd0bdfdf61e932bfea5e"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778655487775-9389804-1600.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 128570,
+          "sha256": "6744ae99c78122a42dbc19860d3cc1950a4b03f1e889958caab329523851b91b"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778655499777-445641815.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778655499777-445641815.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778655499777-445641815",
+      "original": {
+        "width": 1920,
+        "height": 1440,
+        "format": "jpeg",
+        "bytes": 408957,
+        "sha256": "6726d0813b8e0da4580a309c99bb33cdd62a6ff34cb4a22f5247f86ee0d56f16"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778655499777-445641815-480.webp",
+          "width": 480,
+          "height": 360,
+          "bytes": 19406,
+          "sha256": "0c190cbb6d79a916ff60f0afe0c122e379a77c45772715fedd13f7f04b76fe0f"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778655499777-445641815-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 50748,
+          "sha256": "d079674881512a764641f9fd14a215ac1032070ca4154b5c07839e733a60d71f"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778655499777-445641815-1600.webp",
+          "width": 1600,
+          "height": 1200,
+          "bytes": 101000,
+          "sha256": "c98f5590ff3392da4884cc1094a0e86a0f03f65a0ddba5ccdd0d4057b2f398ef"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778655506445-800913184.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778655506445-800913184.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778655506445-800913184",
+      "original": {
+        "width": 1920,
+        "height": 1080,
+        "format": "jpeg",
+        "bytes": 335591,
+        "sha256": "a9fde3f0a303be89272905f338077aa4e8052cd5f8ee962705af3465b88114f5"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778655506445-800913184-480.webp",
+          "width": 480,
+          "height": 270,
+          "bytes": 16954,
+          "sha256": "4d17fa337e62e2d3b171ea1a93ad94187dca5208beb1549ce2e3105d98b3adc9"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778655506445-800913184-960.webp",
+          "width": 960,
+          "height": 540,
+          "bytes": 51672,
+          "sha256": "8d7aa5784c16dd214d2eb28a1514feec9fecd18171d1bfa85a1eeee3585d05cc"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778655506445-800913184-1600.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 107748,
+          "sha256": "f587c87d6901b5efb0486fea1ae3b13fb84c0b529582949e626039b7197d219b"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778655553091-483827087.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778655553091-483827087.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778655553091-483827087",
+      "original": {
+        "width": 1920,
+        "height": 1080,
+        "format": "jpeg",
+        "bytes": 348098,
+        "sha256": "878ec2cdb9ac1a322d439017e2e56a6d459e008552ab2786d30cd6fdaf668a81"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778655553091-483827087-480.webp",
+          "width": 480,
+          "height": 270,
+          "bytes": 17136,
+          "sha256": "3489c31b1f666e1c0ea91f85ce5ee73567ea728608c2a169bbde950d9a3af21c"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778655553091-483827087-960.webp",
+          "width": 960,
+          "height": 540,
+          "bytes": 46550,
+          "sha256": "c9bfa63f084f6673d217dd88d3c3bbf27bdc6ba9888779ee0b35fc2abd2af1cf"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778655553091-483827087-1600.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 87328,
+          "sha256": "b8aa9433a0cb1711a94028886a2388594dd92bccf48dfc413833ad1d2e88cdd6"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778655558248-596430085.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778655558248-596430085.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778655558248-596430085",
+      "original": {
+        "width": 1440,
+        "height": 1920,
+        "format": "jpeg",
+        "bytes": 311378,
+        "sha256": "7ac66eb6fc3a2b0bfb1983efdbc67d4ef841c02ef99c86c1c43cd52ed58a6cb8"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778655558248-596430085-480.webp",
+          "width": 480,
+          "height": 640,
+          "bytes": 18086,
+          "sha256": "d51d2bdf2e16438a8b8ec0ccb29f10f03e74aea5be85a65a586c728408f3f4bc"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778655558248-596430085-960.webp",
+          "width": 960,
+          "height": 1280,
+          "bytes": 49304,
+          "sha256": "f5153fe89cb2e95339eee647c0196866ec483dcf81e36cd4e8ad6815009f13d7"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778655558248-596430085-1600.webp",
+          "width": 1600,
+          "height": 2133,
+          "bytes": 96582,
+          "sha256": "8a3d2f509dfdce2178b8845137d5f3ebe57d5d88f8b569088e2dc1befc831e6a"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778655562282-887433052.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778655562282-887433052.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778655562282-887433052",
+      "original": {
+        "width": 1440,
+        "height": 1920,
+        "format": "jpeg",
+        "bytes": 524297,
+        "sha256": "b13ec629111fc3f200c59ad4b0d5dd40a655b08ddf087581aa60b2f6270e5b8f"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778655562282-887433052-480.webp",
+          "width": 480,
+          "height": 640,
+          "bytes": 15440,
+          "sha256": "7849140cb7a469178d7c42e467039e6acf311e3301024e67697233aa1910b40a"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778655562282-887433052-960.webp",
+          "width": 960,
+          "height": 1280,
+          "bytes": 61804,
+          "sha256": "8a93a19717cd9917a1ce41e2b63f9b81d1adc5275f18738ae940376c1b0a258a"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778655562282-887433052-1600.webp",
+          "width": 1600,
+          "height": 2133,
+          "bytes": 186014,
+          "sha256": "d1f96fbf9cc572813c0ea3bfc55d6681c291d761ef8dd10a5c98e6208c3d94c1"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778655565023-896055534.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778655565023-896055534.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778655565023-896055534",
+      "original": {
+        "width": 1440,
+        "height": 1920,
+        "format": "jpeg",
+        "bytes": 551883,
+        "sha256": "29cf71c6628196dbef5ca57f2f34c26612399a836c35d99b9252a7c8e74bf232"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778655565023-896055534-480.webp",
+          "width": 480,
+          "height": 640,
+          "bytes": 29652,
+          "sha256": "24d714cf925f6863cb2915f1f30cce515b95510d3bf32c52c5ee63273b85ee8e"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778655565023-896055534-960.webp",
+          "width": 960,
+          "height": 1280,
+          "bytes": 108954,
+          "sha256": "68a7835095cf743bdedd4f7af7f2d0abe483b52dbbcf27bbd33677381e8e712e"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778655565023-896055534-1600.webp",
+          "width": 1600,
+          "height": 2133,
+          "bytes": 239968,
+          "sha256": "f77839b434c4929eeaab8c5ab37ab129d5011d4f731df439dfd1a3c53869eaf4"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778655574752-479198276.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778655574752-479198276.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778655574752-479198276",
+      "original": {
+        "width": 1440,
+        "height": 1920,
+        "format": "jpeg",
+        "bytes": 572114,
+        "sha256": "002f24006286d827519ddd855c59a1185eae9e88f90654d053c7f3bb29988da7"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778655574752-479198276-480.webp",
+          "width": 480,
+          "height": 640,
+          "bytes": 14184,
+          "sha256": "aca7edb35a65dc815c48d839eb81349ea74530b311033f3f3f3b9838594b1135"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778655574752-479198276-960.webp",
+          "width": 960,
+          "height": 1280,
+          "bytes": 89966,
+          "sha256": "d18738265e3ea7476afcfee3b3951386c5584f7ae2f9721f47b94ed8095ee640"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778655574752-479198276-1600.webp",
+          "width": 1600,
+          "height": 2133,
+          "bytes": 259554,
+          "sha256": "f5794c365cd1699801b0d50aea6af3dc044e8cb16287144f50d5089acd0a853c"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778655600769-793993512.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778655600769-793993512.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778655600769-793993512",
+      "original": {
+        "width": 1440,
+        "height": 1920,
+        "format": "jpeg",
+        "bytes": 621212,
+        "sha256": "42326bd266940ce6d953a9aec11e696dbb6f7c9ae608d73e4a64c8d386058433"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778655600769-793993512-480.webp",
+          "width": 480,
+          "height": 640,
+          "bytes": 37502,
+          "sha256": "0c80755ca68dd28bfe30fbf31f419089c1477c409282e5609258f0bb7054e07e"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778655600769-793993512-960.webp",
+          "width": 960,
+          "height": 1280,
+          "bytes": 137148,
+          "sha256": "eff4d7e3c16817facda5ba7cb7a32058ca8cdd3bc43bba2d57750d02263e64e0"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778655600769-793993512-1600.webp",
+          "width": 1600,
+          "height": 2133,
+          "bytes": 308098,
+          "sha256": "b44d0c7e4f4ee02db93e7a1db789dd847ca78bf876f46a965d80ab628834859e"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778655615435-920249504.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778655615435-920249504.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778655615435-920249504",
+      "original": {
+        "width": 1920,
+        "height": 1440,
+        "format": "jpeg",
+        "bytes": 628274,
+        "sha256": "49970c9f83efea6ac7fb6dcd69fb4996fdd284fc1a9f088aa4779c7db557a595"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778655615435-920249504-480.webp",
+          "width": 480,
+          "height": 360,
+          "bytes": 20398,
+          "sha256": "33b2e34ba70e2428206bee471c96160878e81d97d5cb34df405c9775473c5a8f"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778655615435-920249504-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 78082,
+          "sha256": "9180323f725dc7174d0e0b457440fe3832fd129b0eb16d488c3d1d8480db0dfe"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778655615435-920249504-1600.webp",
+          "width": 1600,
+          "height": 1200,
+          "bytes": 205814,
+          "sha256": "96b1cf7a64ff882b4cd9252fae4bbf5d6adde3e5ead8a4ebf26d2b767c39ac89"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778655631023-320617133.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778655631023-320617133.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778655631023-320617133",
+      "original": {
+        "width": 1440,
+        "height": 1920,
+        "format": "jpeg",
+        "bytes": 674037,
+        "sha256": "973ddd35ebf0b9f50324cbf673cddd95f5b128bcf2214ac5059269157b65854b"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778655631023-320617133-480.webp",
+          "width": 480,
+          "height": 640,
+          "bytes": 37278,
+          "sha256": "beea48fdeaa796bdecce96090f22ff7a034d0f4f430c16c7a29246307bc182eb"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778655631023-320617133-960.webp",
+          "width": 960,
+          "height": 1280,
+          "bytes": 164766,
+          "sha256": "f713185faa08fcc28fd4d8b400832026314c130909a4288a6bc995c14cc83265"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778655631023-320617133-1600.webp",
+          "width": 1600,
+          "height": 2133,
+          "bytes": 372616,
+          "sha256": "d3f1966c11ecc107ecbd53ee58ea407fd4bbb4eb1c15e53a2ef1bc3e9a91dd1c"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778826732244-122552934.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778826732244-122552934.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778826732244-122552934",
+      "original": {
+        "width": 1920,
+        "height": 1440,
+        "format": "jpeg",
+        "bytes": 823458,
+        "sha256": "9702b76912311bd7eeafe90768f00bff307fe5528826f2a53187e27574db565f"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778826732244-122552934-480.webp",
+          "width": 480,
+          "height": 360,
+          "bytes": 30608,
+          "sha256": "f11243d455896069488b5bb70e864b85770a310397fb5449f0ac108b4ef925fb"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778826732244-122552934-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 128008,
+          "sha256": "8797de3accec23f20067d83b279519c7dd9e1c748ff0d65b43b38c66f9c329a9"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778826732244-122552934-1600.webp",
+          "width": 1600,
+          "height": 1200,
+          "bytes": 345974,
+          "sha256": "abc277b19bf9ebeed73bdd3b3401c0411e79ca31b57a016f6f617ec33fe7e7c4"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778826748628-567488772.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778826748628-567488772.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778826748628-567488772",
+      "original": {
+        "width": 1920,
+        "height": 1440,
+        "format": "jpeg",
+        "bytes": 488502,
+        "sha256": "d9e3fdbe77d379026d0e28a158705a57f652f44c92d3926da62d546e642166fc"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778826748628-567488772-480.webp",
+          "width": 480,
+          "height": 360,
+          "bytes": 13842,
+          "sha256": "59514932ef16c2196e0be693d7a818882b93218d05f220746f80379573be97e7"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778826748628-567488772-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 41778,
+          "sha256": "2d756855fe015f23d4fa792a8007d2101d83dc1c65347b8e98dd82c8dfc775b7"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778826748628-567488772-1600.webp",
+          "width": 1600,
+          "height": 1200,
+          "bytes": 111872,
+          "sha256": "49e5bb64469dba06c92e488783b5f908b1b163f15536996e452ee44c6bc6c52e"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778826756665-702923088.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778826756665-702923088.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778826756665-702923088",
+      "original": {
+        "width": 1920,
+        "height": 1440,
+        "format": "jpeg",
+        "bytes": 567041,
+        "sha256": "d5473d46250cd9d3bf6d6648f1406e4daf4fbfc92e0a51c9fa002a0d1e816647"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778826756665-702923088-480.webp",
+          "width": 480,
+          "height": 360,
+          "bytes": 18422,
+          "sha256": "6a7a79075d1fb1eca949008b0560665b99d5246bbc4c6e863253b39009aa6545"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778826756665-702923088-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 65646,
+          "sha256": "06eb549cdf1bf1d86dc8244503d95e44020e27864e84946867991c851066a8f6"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778826756665-702923088-1600.webp",
+          "width": 1600,
+          "height": 1200,
+          "bytes": 169904,
+          "sha256": "b19c23ef6b98154d9ed9782e58a899a1af4f303c405e61436c58c4da6c391e69"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1778827080718-299272827.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1778827080718-299272827.jpg",
+      "basePath": "/brand-assets/ultimate-space/1778827080718-299272827",
+      "original": {
+        "width": 1440,
+        "height": 1080,
+        "format": "jpeg",
+        "bytes": 254872,
+        "sha256": "079ca6c213d8c89c8f2d10c7a6089b060d0085a8e1f1f792c01009e15aef9f0b"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1778827080718-299272827-480.webp",
+          "width": 480,
+          "height": 360,
+          "bytes": 29378,
+          "sha256": "32030fbc42eeaadb1419d021c830643906c87d2bedd4162917af0022035879f9"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1778827080718-299272827-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 78932,
+          "sha256": "80d5531c180609b8b3b51eca890d5ef85ef1e4bca39c89720b291b73ab7b588b"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1778827080718-299272827-1600.webp",
+          "width": 1600,
+          "height": 1200,
+          "bytes": 148206,
+          "sha256": "0bc05f38a587e3c84616c9748504cdfcaa6555b89cf1364221b52b65664c86d5"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1780559464473-598906088.webp": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1780559464473-598906088.webp",
+      "basePath": "/brand-assets/ultimate-space/1780559464473-598906088",
+      "original": {
+        "width": 667,
+        "height": 1000,
+        "format": "webp",
+        "bytes": 35016,
+        "sha256": "a3d7c4aace20833a2dc8b76e60e291861cacc7f57b3e77648bd5af55325bb177"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1780559464473-598906088-480.webp",
+          "width": 480,
+          "height": 720,
+          "bytes": 25100,
+          "sha256": "6077572d8187a2a04e3cf71d63d003ab67fa9bd6b6e77bb1ad84c48efd5ec3db"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1780559464473-598906088-960.webp",
+          "width": 960,
+          "height": 1439,
+          "bytes": 57618,
+          "sha256": "b6e07d58f96ebfc7d90104ac7dc7bc7616530bab88cc4a4c4f7a9aead564255e"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1780559464473-598906088-1600.webp",
+          "width": 1600,
+          "height": 2399,
+          "bytes": 101862,
+          "sha256": "d1bc671118f67bdc98173fc611c27c334a9aa24b8f5797d77c4bb27160668a79"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1780559707983-886018302.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1780559707983-886018302.jpg",
+      "basePath": "/brand-assets/ultimate-space/1780559707983-886018302",
+      "original": {
+        "width": 1920,
+        "height": 1440,
+        "format": "jpeg",
+        "bytes": 951462,
+        "sha256": "9bbfc6002d8e47fbed20dd4771480914038199c501eb1cf2f15ed14de7a677e0"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1780559707983-886018302-480.webp",
+          "width": 480,
+          "height": 360,
+          "bytes": 58618,
+          "sha256": "e45cacee13fe1c3623d66addc1b238ef8d6c4e9bb37d52e9dd8f822a2c463180"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1780559707983-886018302-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 191342,
+          "sha256": "24462d1380e0abb3c14b29d43caa7249abd45d88ebfa3a04a3d9491e70911dea"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1780559707983-886018302-1600.webp",
+          "width": 1600,
+          "height": 1200,
+          "bytes": 420800,
+          "sha256": "3a1a8701f88d0e99878366fd7ee72e5022e059e5cdde9fc8e7dd59faf0c300c0"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1781612252794-539494627.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1781612252794-539494627.jpg",
+      "basePath": "/brand-assets/ultimate-space/1781612252794-539494627",
+      "original": {
+        "width": 1920,
+        "height": 1440,
+        "format": "jpeg",
+        "bytes": 331174,
+        "sha256": "6fe8bcc82aab22b91c60171803110d86fb1c0aa53adb0c983080a92deb9d66f0"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1781612252794-539494627-480.webp",
+          "width": 480,
+          "height": 360,
+          "bytes": 14722,
+          "sha256": "80b6e23698abeb32aeb9e0f1da7a25b99e61494dbb8deaf44886373ebd891c05"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1781612252794-539494627-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 38162,
+          "sha256": "3d7209ebdbdf8f915520b83ffd31cb0aba1eb56761caad729a0f86b31eb19477"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1781612252794-539494627-1600.webp",
+          "width": 1600,
+          "height": 1200,
+          "bytes": 80062,
+          "sha256": "edf52355c3a565a2e8c8d2d715d8d6b235f830d5cb0698befaa9434eea8ed5a7"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1781612552522-526533595.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1781612552522-526533595.jpg",
+      "basePath": "/brand-assets/ultimate-space/1781612552522-526533595",
+      "original": {
+        "width": 1920,
+        "height": 1440,
+        "format": "jpeg",
+        "bytes": 795006,
+        "sha256": "9a2565811ef1340d276232a6baa87e46a762b92a687b28a03280dbae284e77fe"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1781612552522-526533595-480.webp",
+          "width": 480,
+          "height": 360,
+          "bytes": 37610,
+          "sha256": "c9d92b7d4d6b9fd9c8d0e2b4750a90950edf0efd8773db484296fcb9265601f0"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1781612552522-526533595-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 126848,
+          "sha256": "c586c35fc149d254a249effcf411e24f73c1203982b79cb7b8a54a31153dcd14"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1781612552522-526533595-1600.webp",
+          "width": 1600,
+          "height": 1200,
+          "bytes": 301048,
+          "sha256": "1332858c5f6f77fa3b30a103eeb7bdd2e32e9f14b81ea1eb700221c44adac9ac"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1781612561902-649028262.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1781612561902-649028262.jpg",
+      "basePath": "/brand-assets/ultimate-space/1781612561902-649028262",
+      "original": {
+        "width": 1920,
+        "height": 1440,
+        "format": "jpeg",
+        "bytes": 757018,
+        "sha256": "88ca6125c420baf4a02504c63f134840ed17e3c6f9ac6347eb67db1511213555"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1781612561902-649028262-480.webp",
+          "width": 480,
+          "height": 360,
+          "bytes": 36318,
+          "sha256": "b5faa1a03eab6ab9bc6d4443f509c0a93b84ea9d728c6fe9f211730582fc64a6"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1781612561902-649028262-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 120996,
+          "sha256": "47358fd099fd911a47867cfca6ba11fe9af80886b9e84cad3d06f63e3f3c04ac"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1781612561902-649028262-1600.webp",
+          "width": 1600,
+          "height": 1200,
+          "bytes": 274212,
+          "sha256": "07d4f5c2d5b21f3b940337b614b206ce056571fd58d37d6b43c804868dc1bb2d"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1781612752566-424968636.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1781612752566-424968636.jpg",
+      "basePath": "/brand-assets/ultimate-space/1781612752566-424968636",
+      "original": {
+        "width": 894,
+        "height": 614,
+        "format": "jpeg",
+        "bytes": 11825,
+        "sha256": "50775bd2b352c16c3609593bf4107318ae0098b79671992fbac13454965aeedb"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1781612752566-424968636-480.webp",
+          "width": 480,
+          "height": 330,
+          "bytes": 3104,
+          "sha256": "1cb2a92c4548bb9217851ce7e30dca949e5e6ebb14e5e3691ea7828ab77532ea"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1781612752566-424968636-960.webp",
+          "width": 960,
+          "height": 659,
+          "bytes": 7232,
+          "sha256": "fec8b8ed1def71af52525dc755f08726465f03a3f43d7513197788c47b49a993"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1781612752566-424968636-1600.webp",
+          "width": 1600,
+          "height": 1099,
+          "bytes": 13716,
+          "sha256": "ac36449ba5a67e35669887b7104ac6f5cd99748edbc9e64874be8d1ebb36432b"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1781613739417-810405785.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1781613739417-810405785.jpg",
+      "basePath": "/brand-assets/ultimate-space/1781613739417-810405785",
+      "original": {
+        "width": 1200,
+        "height": 1600,
+        "format": "jpeg",
+        "bytes": 371255,
+        "sha256": "a29ae633a04a7f99deae45b06d60a99213942c0db535be77c673d4b25a76dde8"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1781613739417-810405785-480.webp",
+          "width": 480,
+          "height": 640,
+          "bytes": 70792,
+          "sha256": "72b1c7371f507253723611f04f4d9c82868f95b9b7c1fd48dbdf511739fcb576"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1781613739417-810405785-960.webp",
+          "width": 960,
+          "height": 1280,
+          "bytes": 259648,
+          "sha256": "c028c59c8243d76cd7ea25541c779d0ad8728c837fda25a3b547cb5e09669532"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1781613739417-810405785-1600.webp",
+          "width": 1600,
+          "height": 2133,
+          "bytes": 554264,
+          "sha256": "ee178fac51c5b12c929b18e78aa019f5b27f595e98034790b1de1ff423f34f11"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1781613743976-931683056.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1781613743976-931683056.jpg",
+      "basePath": "/brand-assets/ultimate-space/1781613743976-931683056",
+      "original": {
+        "width": 1600,
+        "height": 900,
+        "format": "jpeg",
+        "bytes": 65007,
+        "sha256": "84f8d3cda891a27d0f439ae932cb7b3e9407d862be32fa1ccdec80b6924cfb1d"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1781613743976-931683056-480.webp",
+          "width": 480,
+          "height": 270,
+          "bytes": 7052,
+          "sha256": "da19724d970d7d217dbda5ee038f3e1cc6c176d04f18492b1650e3365bd4e76e"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1781613743976-931683056-960.webp",
+          "width": 960,
+          "height": 540,
+          "bytes": 16360,
+          "sha256": "d72f944d2c52bd72da3709f80d15ec067d0b8694dc4631fb5a6e879a3dc7beb3"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1781613743976-931683056-1600.webp",
+          "width": 1600,
+          "height": 900,
+          "bytes": 33592,
+          "sha256": "25dc05b06409bc2e30c0853156496e16a4b71011e545cd8c564e9531b38c3dd5"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1781613747104-289151600.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1781613747104-289151600.jpg",
+      "basePath": "/brand-assets/ultimate-space/1781613747104-289151600",
+      "original": {
+        "width": 900,
+        "height": 1600,
+        "format": "jpeg",
+        "bytes": 137090,
+        "sha256": "8e25206610c904e3766aec5ad54cdd9fb5c0d2356e719b40543b9a0b8564573d"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1781613747104-289151600-480.webp",
+          "width": 480,
+          "height": 853,
+          "bytes": 41326,
+          "sha256": "b15a335903cc93bbc063ff42a4e4a81a3686d36ccebbf4502f5d38692432b23c"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1781613747104-289151600-960.webp",
+          "width": 960,
+          "height": 1707,
+          "bytes": 114102,
+          "sha256": "34b70d83a1d37e8a492a09cbc5e0bdba27335d8df982a0201ca0a72ac47729b3"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1781613747104-289151600-1600.webp",
+          "width": 1600,
+          "height": 2844,
+          "bytes": 204482,
+          "sha256": "51970b0aa2b6c64d99594fc3dc2cc905acbe619e5af332e504c6d850c330d193"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1781613749273-45215807.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1781613749273-45215807.jpg",
+      "basePath": "/brand-assets/ultimate-space/1781613749273-45215807",
+      "original": {
+        "width": 900,
+        "height": 1600,
+        "format": "jpeg",
+        "bytes": 79377,
+        "sha256": "9feb5f8064fe27317b91bda52f632f72c7558a2259b393f57cc03e6ad9d9744e"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1781613749273-45215807-480.webp",
+          "width": 480,
+          "height": 853,
+          "bytes": 17768,
+          "sha256": "4de9cfd08a9d07b245d4f82f5ce6d85daeed42714e0bf6146ba0d86f36ce856d"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1781613749273-45215807-960.webp",
+          "width": 960,
+          "height": 1707,
+          "bytes": 43016,
+          "sha256": "298ac0fb376e452181dda2ebd556cd4aa49dd577e2b2b9e5ee3187202dea5c02"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1781613749273-45215807-1600.webp",
+          "width": 1600,
+          "height": 2844,
+          "bytes": 88234,
+          "sha256": "06994b5ba4a658a6925d9f0c662cfb36407d66d786057b03721641dbfd51f22e"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1781613809281-308960683.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1781613809281-308960683.jpg",
+      "basePath": "/brand-assets/ultimate-space/1781613809281-308960683",
+      "original": {
+        "width": 1440,
+        "height": 1920,
+        "format": "jpeg",
+        "bytes": 663041,
+        "sha256": "9dff3990e5c0e93fbc9de88408e53abce4a46b7de0d7fae37c9d312d0abac30c"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1781613809281-308960683-480.webp",
+          "width": 480,
+          "height": 640,
+          "bytes": 36698,
+          "sha256": "d3867f5f2ee04a171ece9259290f292afa4256b9a9d77f4377b684d7f15cccee"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1781613809281-308960683-960.webp",
+          "width": 960,
+          "height": 1280,
+          "bytes": 147736,
+          "sha256": "ef2cd37cb6cab342d161862b6b0dcb46c3307878aa744b722a7ce44c6c520c1e"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1781613809281-308960683-1600.webp",
+          "width": 1600,
+          "height": 2133,
+          "bytes": 336830,
+          "sha256": "cc1e036e148d3af6e9ce1ee3b23fb999a4701bd3108c52de14434e6946055dd1"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1781613812337-83855667.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1781613812337-83855667.jpg",
+      "basePath": "/brand-assets/ultimate-space/1781613812337-83855667",
+      "original": {
+        "width": 1920,
+        "height": 1440,
+        "format": "jpeg",
+        "bytes": 616440,
+        "sha256": "1173ab123244ab2059b33af76a8bbf06d06963643de665ee3c40738f5c96fa89"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1781613812337-83855667-480.webp",
+          "width": 480,
+          "height": 360,
+          "bytes": 18584,
+          "sha256": "934ba154a31e49cf054761353bfae15aa3fbd331c1b5896d9ce22d52222e792b"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1781613812337-83855667-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 64676,
+          "sha256": "f244cf2ef850585fb564e3802b4c020194603b70b2d71d51d9803342d35c7b5b"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1781613812337-83855667-1600.webp",
+          "width": 1600,
+          "height": 1200,
+          "bytes": 188790,
+          "sha256": "44dc5a2025b5c14892bcc14eb6adf7510dacaff356dce2d86d094656a3043b2c"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1781613815324-436521794.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1781613815324-436521794.jpg",
+      "basePath": "/brand-assets/ultimate-space/1781613815324-436521794",
+      "original": {
+        "width": 1920,
+        "height": 1440,
+        "format": "jpeg",
+        "bytes": 475115,
+        "sha256": "28f3774ea8b02b8aa4c7b0655ba7ac67a5b9890c4f9b649bb59949be16de2226"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1781613815324-436521794-480.webp",
+          "width": 480,
+          "height": 360,
+          "bytes": 23510,
+          "sha256": "e68a6a3f9754513630b3bf42bd68957b575ef30bb360ca5cd3f6454a680690b2"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1781613815324-436521794-960.webp",
+          "width": 960,
+          "height": 720,
+          "bytes": 68364,
+          "sha256": "0b309c4e640f7d43a14ddaab0f2bc155a7b64b35e7a22f95da8236b3bdfadf52"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1781613815324-436521794-1600.webp",
+          "width": 1600,
+          "height": 1200,
+          "bytes": 141124,
+          "sha256": "e253c4fe04efd310ef3ee8f0509c9bd612dc1711b0f3a6211f23fc78e5f59241"
+        }
+      }
+    },
+    "https://ultimatespacedesign.co.nz/uploads/1783650644367-239436183.jpg": {
+      "brand": "ultimate-space",
+      "sourceBasename": "1783650644367-239436183.jpg",
+      "basePath": "/brand-assets/ultimate-space/1783650644367-239436183",
+      "original": {
+        "width": 1080,
+        "height": 610,
+        "format": "jpeg",
+        "bytes": 24614,
+        "sha256": "d45429c2d9298e52a714ce88fb866900ba8ac253769e609622dc9f36c3ff57d1"
+      },
+      "variants": {
+        "480": {
+          "path": "/brand-assets/ultimate-space/1783650644367-239436183-480.webp",
+          "width": 480,
+          "height": 271,
+          "bytes": 3486,
+          "sha256": "66554f9b469877396fe7e5f56080f83424a639a08da923c7b43bdf921d763e8f"
+        },
+        "960": {
+          "path": "/brand-assets/ultimate-space/1783650644367-239436183-960.webp",
+          "width": 960,
+          "height": 542,
+          "bytes": 14762,
+          "sha256": "27dd951338112f86071689002e42e015b4cdb5109508b0606faef6f9cf97b845"
+        },
+        "1600": {
+          "path": "/brand-assets/ultimate-space/1783650644367-239436183-1600.webp",
+          "width": 1600,
+          "height": 904,
+          "bytes": 30376,
+          "sha256": "de6783e9a06fe072fafe35aaff7c573d251a2e3a368e47775071065b7b51177b"
+        }
+      }
+    }
+  },
+  "failures": []
+}

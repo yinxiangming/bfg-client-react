@@ -1,0 +1,6 @@
+{
+  "displayName": "Project Grid",
+  "description": "A practical light-only grid skin for engineering, fabrication, installation, and project-led businesses.",
+  "homeComponent": "Home",
+  "supportedColorModes": ["light"]
+}
