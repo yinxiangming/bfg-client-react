@@ -42,7 +42,16 @@ export default function CmsPage({ pageData, slug }: Props) {
       </div>}
       {(current === 'contact' || current === 'about') && <div className='ag-studio'>
         <BrandImage brand='ultimate-space' src={services[3].image} alt='Interior materials and spaces' sizes='(max-width: 760px) 100vw, 50vw' width={800} height={1000} />
-        <div><h2>Spaces shaped around you.</h2><p>Ultimate Space Design is an Auckland architecture and interior design studio dedicated to creating environments that resonate with their context.</p><p>From spatial planning to the final window treatment, our work brings together materials, light and the details that make a space feel complete.</p>
+        <div>{current === 'about' ? <>
+          <h2>Window treatments, thoughtfully considered.</h2>
+          <p>Ultimate Space Design provides window treatments and interior design for Auckland homes and commercial spaces.</p>
+          <p>Our services include curtains, shutters, window-system installation, automation, alterations and repairs. We bring together materials, light and practical details to suit each space.</p>
+          <p>Explore our completed projects to see examples of our work, or talk with us about your requirements.</p>
+        </> : <>
+          <h2>Talk to us about your space.</h2>
+          <p>Contact our Auckland team about curtains, shutters, interior design, automation or repairs to existing window treatments.</p>
+          <p>To help us understand your enquiry, include your location, the service you need and any available measurements or photos. For repairs, describe the issue and the type of window treatment.</p>
+        </>}
           <div className='ag-contact-details'>
             <div><small>Visit the studio</small><address>7/28 Harrison Road<br />Auckland 1060, New Zealand</address></div>
             <div><small>Start a conversation</small><a href='mailto:info@dygroup.co.nz'>info@dygroup.co.nz ↗</a><br /><a href='tel:+6492650797'>+64 9 265 0797</a></div>
