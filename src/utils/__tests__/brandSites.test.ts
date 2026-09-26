@@ -2,6 +2,20 @@ import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
 import test from 'node:test'
+import { buildBrandContentSchema } from '../brandContentSchema.ts'
+
+test('brand content schemas distinguish products, services and project work without invented offers', () => {
+  const base = { brandSlug: 'repair-hub', slug: '4135-4', url: 'https://example.test/parts/4135-4', organizationId: 'https://example.test/#organization', name: 'Replacement tyre' }
+  const product = buildBrandContentSchema({ ...base, section: 'parts' })
+  assert.equal(product['@type'], 'Product')
+  for (const key of ['offers', 'aggregateRating', 'review', 'manufacturer', 'creator', 'dateModified']) assert.equal(key in product, false)
+  assert.equal(buildBrandContentSchema({ ...base, section: 'service' })['@type'], 'Service')
+  const callout = buildBrandContentSchema({ ...base, slug: 'call-out-service-product', section: 'parts' })
+  assert.equal(callout['@type'], 'Service')
+  assert.deepEqual(callout.provider, { '@id': base.organizationId })
+  assert.equal(buildBrandContentSchema({ ...base, brandSlug: 'ultimate-space-design', slug: 'call-out-service-product', section: 'parts' })['@type'], 'Product')
+  assert.equal(buildBrandContentSchema({ ...base, section: 'projects' })['@type'], 'CreativeWork')
+})
 import {
   brandImagePath,
   brandImageStem,

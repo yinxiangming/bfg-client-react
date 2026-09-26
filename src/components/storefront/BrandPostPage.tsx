@@ -10,6 +10,7 @@ import { brandImagePath, fetchBrandPost, getBrandPostImage, type BrandSection } 
 import { getRequestOrigin, clampDescription, jsonLdScript, buildBreadcrumbJsonLd } from '@/utils/seo'
 import BrandImage from './BrandImage'
 import './BrandPostPage.css'
+import { buildBrandContentSchema } from '@/utils/brandContentSchema'
 
 export type BrandPostProps = { params: Promise<{ slug: string }> }
 export const loadBrandPost = cache(async (slug: string, section: BrandSection) => {
@@ -50,13 +51,12 @@ export default async function BrandPostPage({ params, section }: BrandPostProps 
   const related = brand.posts.filter(p => p.category === item.category && p.slug !== item.slug).slice(0, 3)
   const sourceImage = getBrandPostImage(post, item)
   const image = sourceImage ? brandImagePath(brand, sourceImage, 1600) : undefined
-  const schema = {
-    '@context': 'https://schema.org', '@type': section === 'service' ? 'Service' : 'CreativeWork',
-    '@id': `${origin}${item.path}#content`, url: `${origin}${item.path}`, name: post.title,
+  const schema = buildBrandContentSchema({
+    brandSlug: brand.slug, section, slug: item.slug,
+    url: `${origin}${item.path}`, organizationId: `${origin}/#organization`, name: post.title,
     description: post.excerpt || clampDescription(post.content), image: image ? `${origin}${image}` : undefined,
-    ...(section === 'service' ? { provider: { '@id': `${origin}/#organization` } } : { creator: { '@id': `${origin}/#organization` } }),
     dateModified: post.updated_at || undefined,
-  }
+  })
   return <article className={repair ? 'repair-grid-cms brand-detail' : 'ag-page brand-detail'}>
     <script type='application/ld+json' dangerouslySetInnerHTML={{ __html: jsonLdScript([schema, buildBreadcrumbJsonLd(origin, [{ name: 'Home', path: '/' }, { name: parentLabel, path: parent }, { name: post.title, path: item.path }])]) }} />
     <nav aria-label='Breadcrumb' style={{ fontSize: 13, marginBottom: 32 }}><Link href='/'>Home</Link> / <Link href={parent}>{parentLabel}</Link> / <span aria-current='page'>{post.title}</span></nav>

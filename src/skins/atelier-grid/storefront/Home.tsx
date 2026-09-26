@@ -16,7 +16,11 @@ export default function AtelierGridHome() {
   return (
     <section className='atelier-grid-hero' aria-label='Selected interiors'>
       <div className='ag-slides'>{slides.map(([file, alt], index) => <BrandImage key={file} brand='ultimate-space' src={file} alt={alt} sizes='100vw' loading={index === 0 ? 'eager' : 'lazy'} className={active === index ? 'is-active' : ''} aria-hidden={active !== index} fetchPriority={index === 0 ? 'high' : 'auto'} />)}</div>
-      <div className='atelier-grid-hero-copy'><h1>Home</h1><Link href='/projects' className='atelier-grid-arrow-link'>View Projects</Link></div>
+      <div className='atelier-grid-hero-copy'>
+        <h1>Window Treatments &amp; Interior Design in Auckland</h1>
+        <p>Custom curtains, shutters and window systems for homes and commercial spaces. Explore our installation projects, interior design, automation and repair services.</p>
+        <Link href='/projects' className='atelier-grid-arrow-link'>View Projects</Link>
+      </div>
       <div className='atelier-grid-slide-count' aria-label='Select interior image'>{slides.map(([, alt], index) => <button key={alt} type='button' aria-label={`Show image ${index + 1}: ${alt}`} aria-pressed={active === index} onClick={() => setActive(index)}><span /></button>)}</div>
     </section>
   )
