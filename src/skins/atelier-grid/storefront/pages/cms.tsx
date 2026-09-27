@@ -19,18 +19,6 @@ export default function CmsPage({ pageData, slug }: Props) {
   const visibleProjects = !hasProjectCategories || filter === 'All'
     ? posts
     : posts.filter(project => String(project.custom_fields?.project_category).toLowerCase() === filter.toLowerCase())
-  const fallbackCopy = current === 'about'
-    ? [
-      'Ultimate Space Design provides window treatments and interior design for Auckland homes and commercial spaces.',
-      'Our services include curtains, shutters, window-system installation, automation, alterations and repairs. We bring together materials, light and practical details to suit each space.',
-      'Explore our completed projects to see examples of our work, or talk with us about your requirements.',
-    ]
-    : [
-      'Contact our Auckland team about curtains, shutters, interior design, automation or repairs to existing window treatments.',
-      'To help us understand your enquiry, include your location, the service you need and any available measurements or photos. For repairs, describe the issue and the type of window treatment.',
-    ]
-  const studioCopy = copy.length ? copy : fallbackCopy
-  const studioTitle = copy.length ? title : current === 'about' ? 'Window treatments, thoughtfully considered.' : 'Talk to us about your space.'
 
   return (
     <section className={`ag-page ${current === 'services' ? 'ag-services' : ''}`}>
@@ -61,10 +49,10 @@ export default function CmsPage({ pageData, slug }: Props) {
         </article>)}
       </div>}
       {(current === 'contact' || current === 'about') && <div className='ag-studio'>
-        <div><h2>{studioTitle}</h2>{studioCopy.map((html, index) => <div key={index} dangerouslySetInnerHTML={{ __html: html }} />)}
+        <div>{title && <h2>{title}</h2>}{copy.map((html, index) => <div key={index} dangerouslySetInnerHTML={{ __html: html }} />)}
           <div className='ag-contact-details'>
-            <div><small>Contact</small><address>{config.footer_contact || 'Contact details available on request'}</address></div>
-            <div><small>Start a conversation</small>{config.contact_email && <><a href={`mailto:${config.contact_email}`}>{config.contact_email} ↗</a><br /></>}{config.contact_phone && <a href={`tel:${config.contact_phone.replace(/\s+/g, '')}`}>{config.contact_phone}</a>}</div>
+            {config.footer_contact && <div><small>Contact</small><address>{config.footer_contact}</address></div>}
+            {(config.contact_email || config.contact_phone) && <div><small>Start a conversation</small>{config.contact_email && <><a href={`mailto:${config.contact_email}`}>{config.contact_email} ↗</a><br /></>}{config.contact_phone && <a href={`tel:${config.contact_phone.replace(/\s+/g, '')}`}>{config.contact_phone}</a>}</div>}
             <Link href='/services' className='ag-text-link'>Explore our services <span aria-hidden='true'>↗</span></Link>
           </div>
         </div>

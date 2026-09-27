@@ -15,7 +15,8 @@ export default function CmsPage({ pageData, slug }: Props) {
     event.preventDefault()
     const fields = new FormData(event.currentTarget)
     const body = `Name: ${fields.get('name')}\nEmail: ${fields.get('email')}\nPhone: ${fields.get('phone')}\n\n${fields.get('message')}`
-    const email = config.contact_email || 'info@example.com'
+    const email = config.contact_email?.trim()
+    if (!email) return
     window.location.href = `mailto:${email}?subject=${encodeURIComponent('Website enquiry')}&body=${encodeURIComponent(body)}`
     setEmailReady(true)
   }
@@ -27,10 +28,10 @@ export default function CmsPage({ pageData, slug }: Props) {
         <label>Email *<input name='email' type='email' autoComplete='email' required /></label>
         <label>Phone<input name='phone' type='tel' autoComplete='tel' /></label>
         <label>How can we help? *<textarea name='message' required /></label>
-        <button type='submit'>Continue in your email app ↗</button>
+        <button type='submit' disabled={!config.contact_email?.trim()}>Continue in your email app ↗</button>
         <p style={{ fontSize: 13, color: '#73767b', lineHeight: 1.6 }} role='status'>{emailReady ? 'Your email app has been requested. Send the draft there, or contact us directly using the details alongside.' : 'Opens an email draft for you to review and send.'}</p>
       </form>
-      <div><h2>{config.site_name || 'Contact'}</h2><p>{config.site_description}</p><address>{config.footer_contact || 'Contact details available on request'}</address>{config.contact_phone && <a href={`tel:${config.contact_phone.replace(/\s+/g, '')}`}>{config.contact_phone}</a>}{config.contact_email && <a href={`mailto:${config.contact_email}`}>{config.contact_email} ↗</a>}</div>
+      <div>{config.site_name && <h2>{config.site_name}</h2>}{config.site_description && <p>{config.site_description}</p>}{config.footer_contact && <address>{config.footer_contact}</address>}{config.contact_phone && <a href={`tel:${config.contact_phone.replace(/\s+/g, '')}`}>{config.contact_phone}</a>}{config.contact_email && <a href={`mailto:${config.contact_email}`}>{config.contact_email} ↗</a>}</div>
     </div>
   </section>
   if (current === 'about') return <section className='repair-grid-cms'>

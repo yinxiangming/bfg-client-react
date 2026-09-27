@@ -15,7 +15,7 @@ export default function RepairGridHome({ pageData, locale = 'en' }: Props) {
       <section className='repair-grid-hero'>
         {hero.image && <BrandImage brand='repair-hub' src={brandImageStem(hero.image)} alt='' sizes='100vw' loading='eager' fetchPriority='high' aria-hidden='true' />}
         <div className='repair-grid-hero-copy'>
-          <h1>{hero.title || 'Welcome'}<span>.</span></h1>
+          {hero.title && <h1>{hero.title}<span>.</span></h1>}
           {hero.subtitle && <p>{hero.subtitle}</p>}
           <div className='repair-grid-actions'>
             <Link className='repair-grid-button repair-grid-button-primary' href='/projects'>View Our Work</Link>

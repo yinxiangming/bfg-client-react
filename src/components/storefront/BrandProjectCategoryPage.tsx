@@ -35,7 +35,13 @@ const loadCategory = cache(async (category: Category) => {
   }))
   const posts = rendered.filter((item): item is NonNullable<typeof item> => item !== null)
   return posts.length
-    ? { brand, posts, origin: await getRequestOrigin(), siteName: config?.site_name?.trim() || brand.slug }
+    ? {
+      brand,
+      posts,
+      origin: await getRequestOrigin(),
+      siteName: config?.site_name?.trim() || brand.slug,
+      siteDescription: config?.site_description?.trim() || '',
+    }
     : null
 })
 
@@ -49,7 +55,7 @@ export async function brandProjectCategoryMetadata(
   const label = category === 'residential' ? 'Residential projects' : 'Commercial projects'
   const title = `${label} | ${data.siteName}`
   const description = clampDescription(
-    `${label} by ${data.siteName}, including interior design, window treatments and installation across Auckland.`
+    data.posts[0].post.meta_description || data.posts[0].post.excerpt || data.siteDescription || title
   )
   const path = `/projects/${category}`
   const image = brandImagePath(
