@@ -10,6 +10,7 @@ import { resolveStorefrontPage } from '@/components/storefront/themes/resolve'
 import DynamicPage from '@views/storefront/DynamicPage'
 import type { Metadata } from 'next'
 import { brandImagePath, getBrandSite, isBrandHomeAlias } from '@/utils/brandSites'
+import { cmsPostImage, cmsPosts } from '@/utils/cmsBrandContent'
 
 export const dynamic = 'force-dynamic'
 
@@ -50,10 +51,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     clampDescription((pageData?.meta_description || pageData?.excerpt) as string | undefined) ||
     `${title} – ${site_name}`
   const canonical = origin ? `${origin}/${slug}` : `/${slug}`
-  const section = slug === 'projects' ? 'projects' : slug === 'services' ? 'service' : slug === 'products' ? 'parts' : null
-  const brandImage = brand && section
-    ? brand.posts.find(post => post.path.startsWith(`/${section}/`))?.image
-    : undefined
+  const brandImage = brand && pageData ? cmsPostImage(cmsPosts(pageData)[0] || {}) : ''
   const images = brand && brandImage
     ? [{ url: `${origin}${brandImagePath(brand, brandImage, 1600)}`, alt: title }]
     : undefined

@@ -25,6 +25,7 @@ import DynamicPage from '@views/storefront/DynamicPage'
 import HomePage from '@views/storefront/HomePage'
 import type { Metadata } from 'next'
 import { brandBusinessJsonLd, brandImagePath, getBrandSite } from '@/utils/brandSites'
+import { cmsPostImage, cmsPosts } from '@/utils/cmsBrandContent'
 
 // 60s ISR instead of fully dynamic: the homepage was re-rendering on every request
 // (TTFB ~1.5s), which hurts Core Web Vitals and burns crawl budget. CMS edits go live
@@ -50,7 +51,7 @@ export async function generateMetadata(): Promise<Metadata> {
   // A bare site name ranks for nothing, so a store should set the CMS page's meta_title to
   // something that says what it sells. Only that field can know — this file cannot invent it.
   const title = pageData?.meta_title?.trim() || siteName
-  const brandImage = brand?.posts[0]?.image
+  const brandImage = brand && pageData ? cmsPostImage(cmsPosts(pageData)[0] || {}) : ''
   const images = brand && brandImage
     ? [{ url: `${origin}${brandImagePath(brand, brandImage, 1600)}`, alt: siteName }]
     : undefined

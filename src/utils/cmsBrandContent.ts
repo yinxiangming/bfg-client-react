@@ -5,8 +5,11 @@ export type CmsBrandPost = {
   title?: string
   slug?: string
   excerpt?: string
+  meta_description?: string
   featured_image?: string
   category_name?: string | null
+  published_at?: string
+  updated_at?: string
   custom_fields?: Record<string, unknown>
 }
 

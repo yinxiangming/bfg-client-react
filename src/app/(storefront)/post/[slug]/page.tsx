@@ -7,7 +7,7 @@ import { getRequestOrigin, clampDescription } from '@/utils/seo'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 import { fetchRenderedCmsPost } from '@/services/storefrontCmsApi'
 import type { Metadata } from 'next'
-import { getBrandPost, getBrandSite } from '@/utils/brandSites'
+import { getBrandSite } from '@/utils/brandSites'
 
 export const revalidate = 60
 
@@ -34,21 +34,24 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const requestHost = (await headers()).get('host') ?? undefined
   const config = await getStorefrontConfigForServer(locale, requestHost)
   const brand = getBrandSite(config)
-  const brandPost = brand ? getBrandPost(brand, slug) : undefined
-  if (brand && !brandPost) return { title: 'Not found', robots: { index: false, follow: false } }
-  if (brandPost) {
+  const postData = brand ? await getPostData(slug, locale, requestHost, config?.languages) : null
+  const publicPath = postData?.custom_fields && typeof postData.custom_fields === 'object'
+    ? postData.custom_fields.public_path
+    : undefined
+  if (brand && postData && typeof publicPath === 'string' && publicPath.startsWith('/')) {
     const origin = await getRequestOrigin()
-    return { alternates: { canonical: `${origin}${brandPost.path}` }, robots: { index: false, follow: true } }
+    return { alternates: { canonical: `${origin}${publicPath}` }, robots: { index: false, follow: true } }
   }
-  const [postData, { site_name }, origin] = await Promise.all([
+  if (brand) return { title: 'Not found', robots: { index: false, follow: false } }
+  const [genericPostData, { site_name }, origin] = await Promise.all([
     getPostData(slug, locale, requestHost, config?.languages),
     getSiteConfig(locale, requestHost),
     getRequestOrigin(),
   ])
-  if (!postData) return { title: 'Not found', robots: { index: false, follow: false } }
-  const title = (postData?.meta_title || postData?.title || slug) as string
+  if (!genericPostData) return { title: 'Not found', robots: { index: false, follow: false } }
+  const title = (genericPostData?.meta_title || genericPostData?.title || slug) as string
   const description =
-    clampDescription((postData?.meta_description || postData?.excerpt) as string | undefined) ||
+    clampDescription((genericPostData?.meta_description || genericPostData?.excerpt) as string | undefined) ||
     `${title} - ${site_name}`
   const canonical = origin ? `${origin}/post/${encodeURIComponent(slug)}` : `/post/${slug}`
 
@@ -68,8 +71,6 @@ export default async function StorefrontPostPage({ params }: Props) {
   const requestHost = (await headers()).get('host') ?? undefined
   const config = await getStorefrontConfigForServer(locale, requestHost)
   const brand = getBrandSite(config)
-  const brandPost = brand ? getBrandPost(brand, slug) : undefined
-  if (brandPost) permanentRedirect(brandPost.path)
   if (brand) notFound()
   const post = await getPostData(slug, locale, requestHost, config?.languages)
 

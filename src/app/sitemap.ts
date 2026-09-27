@@ -3,8 +3,9 @@ import { isIndexableHost } from '@/utils/indexable'
 import { getRequestOrigin } from '@/utils/seo'
 import { storefrontApi } from '@/utils/storefrontApi'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
-import { fetchRenderedCmsPost } from '@/services/storefrontCmsApi'
 import { getBrandSite } from '@/utils/brandSites'
+import { fetchRenderedCmsPage } from '@/services/storefrontCmsApi'
+import { cmsPosts } from '@/utils/cmsBrandContent'
 import type { MetadataRoute } from 'next'
 
 export const revalidate = 3600
@@ -120,21 +121,22 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   if (brand) {
-    const published = await Promise.all(brand.posts.map(async item => {
-      const post = await fetchRenderedCmsPost(item.slug, locale, requestHost, {
+    const pages = await Promise.all(['projects', 'services', 'products'].map(slug =>
+      fetchRenderedCmsPage(slug, locale, requestHost, {
         revalidate: 3600,
         languages: config?.languages,
       })
-      return post ? { item, post } : null
-    }))
-    for (const result of published) {
-      if (!result) continue
-      const url = `${origin}${result.item.path}`
+    ))
+    const posts = pages.flatMap(page => cmsPosts(page))
+    for (const post of posts) {
+      const path = post.custom_fields?.public_path
+      if (typeof path !== 'string' || !path.startsWith('/')) continue
+      const url = origin + path
       if (seen.has(url)) continue
       seen.add(url)
-      entries.push(entry(url, 'monthly', 0.7, result.post.updated_at ?? result.post.published_at ?? undefined))
+      entries.push(entry(url, 'monthly', 0.7, post.updated_at ?? post.published_at ?? undefined))
     }
-    if (brand.slug === 'ultimate-space-design') {
+    if (posts.some(post => post.custom_fields?.project_category === 'residential' || post.custom_fields?.project_category === 'commercial')) {
       for (const category of ['residential', 'commercial']) {
         const url = `${origin}/projects/${category}`
         if (!seen.has(url)) {
