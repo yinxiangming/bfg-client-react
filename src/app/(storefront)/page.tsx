@@ -100,7 +100,7 @@ function SiteJsonLd({
   const description = clampDescription(config?.site_description, 5000) || undefined
   const brand = getBrandSite(config)
   const graph = [
-    brand ? brandBusinessJsonLd(brand, origin) : buildOrganizationJsonLd(origin, {
+    brand ? brandBusinessJsonLd(brand, origin, config) : buildOrganizationJsonLd(origin, {
       siteName,
       description,
       email: config?.contact_email || undefined,

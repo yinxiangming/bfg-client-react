@@ -1,15 +1,7 @@
 {
   "repair-grid": {
     "slug": "repair-hub",
-    "name": "The Repair Hub",
     "assetFolder": "repair-hub",
-    "phone": "0800 866 366",
-    "email": "info@dygroup.co.nz",
-    "address": "7/28 Harrison Road",
-    "locality": "Auckland",
-    "postalCode": "1060",
-    "country": "NZ",
-    "currency": "NZD",
     "legacyIds": {
       "projects": {
         "14": "wheel-chair-general-service",
@@ -112,15 +104,7 @@
   },
   "atelier-grid": {
     "slug": "ultimate-space-design",
-    "name": "Ultimate Space Design",
     "assetFolder": "ultimate-space",
-    "phone": "+64 9 265 0797",
-    "email": "info@dygroup.co.nz",
-    "address": "7/28 Harrison Road",
-    "locality": "Auckland",
-    "postalCode": "1060",
-    "country": "NZ",
-    "currency": "NZD",
     "legacyIds": {
       "projects": {
         "1": "karaka-pines-village",

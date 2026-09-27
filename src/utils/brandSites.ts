@@ -73,7 +73,7 @@ export function getBrandPostImage(
     : undefined
   if (typeof brandImage === 'string' && brandImage.trim()) return brandImage.trim()
   if (typeof post.featured_image === 'string' && post.featured_image.trim()) return post.featured_image.trim()
-  return item.image
+  return item.image || ''
 }
 
 /** Resolve the allow-listed post before calling the public rendered-post endpoint. */
@@ -90,12 +90,15 @@ export async function fetchBrandPost<T>(
   return post ? { brand, item, post } : null
 }
 
-export function brandBusinessJsonLd(brand: BrandSite, origin: string) {
+export function brandBusinessJsonLd(
+  brand: BrandSite,
+  origin: string,
+  config: { site_name?: string; contact_phone?: string; contact_email?: string; default_currency?: string; country?: string } = {}
+) {
   return {
     '@context': 'https://schema.org', '@type': 'LocalBusiness', '@id': `${origin}/#organization`,
-    name: brand.name, url: origin, telephone: brand.phone, email: brand.email,
-    currenciesAccepted: brand.currency,
-    address: { '@type': 'PostalAddress', streetAddress: brand.address, addressLocality: brand.locality, postalCode: brand.postalCode, addressCountry: brand.country },
-    areaServed: { '@type': 'City', name: 'Auckland' },
+    name: config.site_name || brand.slug, url: origin, telephone: config.contact_phone, email: config.contact_email,
+    currenciesAccepted: config.default_currency,
+    address: { '@type': 'PostalAddress', addressCountry: config.country },
   }
 }

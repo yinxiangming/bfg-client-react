@@ -8,7 +8,7 @@
     "build": "npm run prepare && node_modules/.bin/next build",
     "start": "node_modules/.bin/next start",
     "typecheck": "node_modules/.bin/tsc --noEmit",
-    "test:brand-seo": "node --experimental-transform-types --test src/utils/__tests__/brandSites.test.ts",
+    "test:brand-seo": "node --experimental-transform-types --test src/utils/__tests__/brandSites.test.ts src/utils/__tests__/cmsBrandContent.test.ts",
     "lint": "npm run typecheck",
     "check": "npm run typecheck && npm run test:brand-seo && npm run build"
   },

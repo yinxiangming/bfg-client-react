@@ -19,20 +19,22 @@ export const loadBrandPost = cache(async (slug: string, section: BrandSection) =
   const result = await fetchBrandPost(config, slug, section, () =>
     fetchRenderedCmsPost(slug, locale, host, { revalidate: 60, languages: config?.languages })
   )
-  return result ? { ...result, origin: await getRequestOrigin() } : null
+  return result
+    ? { ...result, origin: await getRequestOrigin(), siteName: config?.site_name?.trim() || result.brand.slug }
+    : null
 })
 
 export async function brandPostMetadata({ params }: BrandPostProps, section: BrandSection): Promise<Metadata> {
   const data = await loadBrandPost((await params).slug, section)
   if (!data) return { title: 'Not found', robots: { index: false, follow: false } }
-  const { brand, item, post, origin } = data
-  const title = post.meta_title || `${post.title} | ${brand.name}`
+  const { brand, item, post, origin, siteName } = data
+  const title = post.meta_title || `${post.title} | ${siteName}`
   const description = clampDescription(post.meta_description || post.excerpt || post.content)
   const image = getBrandPostImage(post, item)
   const localImage = image ? brandImagePath(brand, image, 1600) : ''
   const images = localImage ? [{ url: `${origin}${localImage}`, alt: post.title }] : undefined
   return { title: { absolute: title }, description, alternates: { canonical: `${origin}${item.path}` },
-    openGraph: { title, description, url: `${origin}${item.path}`, siteName: brand.name, type: 'article', images },
+    openGraph: { title, description, url: `${origin}${item.path}`, siteName, type: 'article', images },
     twitter: { card: 'summary_large_image', title, description, images: images?.map(i => i.url) } }
 }
 

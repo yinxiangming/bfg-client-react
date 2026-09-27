@@ -34,7 +34,9 @@ const loadCategory = cache(async (category: Category) => {
     return post ? { item, post } : null
   }))
   const posts = rendered.filter((item): item is NonNullable<typeof item> => item !== null)
-  return posts.length ? { brand, posts, origin: await getRequestOrigin() } : null
+  return posts.length
+    ? { brand, posts, origin: await getRequestOrigin(), siteName: config?.site_name?.trim() || brand.slug }
+    : null
 })
 
 export async function brandProjectCategoryMetadata(
@@ -45,9 +47,9 @@ export async function brandProjectCategoryMetadata(
   const data = await loadCategory(category)
   if (!data) return { title: 'Not found', robots: { index: false, follow: false } }
   const label = category === 'residential' ? 'Residential projects' : 'Commercial projects'
-  const title = `${label} | ${data.brand.name}`
+  const title = `${label} | ${data.siteName}`
   const description = clampDescription(
-    `${label} by ${data.brand.name}, including interior design, window treatments and installation across Auckland.`
+    `${label} by ${data.siteName}, including interior design, window treatments and installation across Auckland.`
   )
   const path = `/projects/${category}`
   const image = brandImagePath(
@@ -60,7 +62,7 @@ export async function brandProjectCategoryMetadata(
     title: { absolute: title },
     description,
     alternates: { canonical: `${data.origin}${path}` },
-    openGraph: { type: 'website', title, description, url: `${data.origin}${path}`, siteName: data.brand.name, images },
+    openGraph: { type: 'website', title, description, url: `${data.origin}${path}`, siteName: data.siteName, images },
     twitter: { card: 'summary_large_image', title, description, images: images.map(item => item.url) },
   }
 }

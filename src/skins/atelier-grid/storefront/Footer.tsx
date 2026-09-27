@@ -8,8 +8,8 @@ export default function AtelierGridFooter() {
   return (
     <footer className='atelier-grid-footer'>
       <div className='atelier-grid-footer-compact'>
-        <strong>{config?.site_name?.trim() || 'Ultimate Space Design'}</strong>
-        <span>{config?.footer_copyright || '© Ultimate Space Design'}</span>
+        <strong>{config?.site_name?.trim() || 'Site'}</strong>
+        <span>{config?.footer_copyright || ''}</span>
         <Link href='/contact'>Contact ↗</Link>
       </div>
     </footer>

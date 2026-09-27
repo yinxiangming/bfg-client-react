@@ -13,8 +13,8 @@ import {
 } from '../brandSites.ts'
 
 test('brand sites require both the exact workspace slug and theme', () => {
-  assert.equal(getBrandSite({ workspace_slug: 'repair-hub', theme: 'repair-grid' })?.name, 'The Repair Hub')
-  assert.equal(getBrandSite({ workspace_slug: 'ultimate-space-design', theme: 'atelier-grid' })?.name, 'Ultimate Space Design')
+  assert.equal(getBrandSite({ workspace_slug: 'repair-hub', theme: 'repair-grid' })?.assetFolder, 'repair-hub')
+  assert.equal(getBrandSite({ workspace_slug: 'ultimate-space-design', theme: 'atelier-grid' })?.assetFolder, 'ultimate-space')
   assert.equal(getBrandSite({ workspace_slug: 'repair-hub', theme: 'atelier-grid' }), null)
   assert.equal(getBrandSite({ workspace_slug: 'another-workspace', theme: 'repair-grid' }), null)
   assert.equal(getBrandSite({ workspace_slug: 'ultimate-space-design', theme: 'store' }), null)
