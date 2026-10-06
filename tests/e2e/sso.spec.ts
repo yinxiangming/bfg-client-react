@@ -31,7 +31,7 @@ test('displays the API error when the SSO code is rejected', async ({ page }) =>
   await expect(page.getByRole('link', { name: 'Go to login' })).toHaveAttribute('href', '/auth/login')
 })
 
-test('exchanges the SSO code, stores workspace credentials, and redirects', async ({ page }) => {
+test('exchanges the SSO code, stores workspace credentials, and follows the server redirect', async ({ page }) => {
   let requestBody: Record<string, unknown> | undefined
 
   await page.route('**/api/v1/platform/auth/sso/exchange/', async route => {
@@ -44,13 +44,14 @@ test('exchanges the SSO code, stores workspace credentials, and redirects', asyn
         refresh: 'workspace-refresh-token',
         workspace_url: 'https://workspace.example.test/',
         workspace: { id: 42, uuid: 'workspace-uuid', name: 'Demo Workspace', slug: 'demo' },
-        next: '/admin',
+        next: '/unknown',
         embedded: false
       })
     })
   })
 
-  await page.goto('/auth/sso?code=one-time-code&next=%2Funknown')
+  // The exchange response controls the landing page, not a caller-supplied URL parameter.
+  await page.goto('/auth/sso?code=one-time-code&next=%2Faccount')
 
   await expect(page).toHaveURL(/\/unknown$/)
   expect(requestBody).toEqual({ code: 'one-time-code' })

@@ -9,7 +9,7 @@ test.beforeEach(async ({ page }) => {
 test('renders the login page and account recovery link', async ({ page }) => {
   await page.goto('/auth/login')
 
-  await expect(page.getByRole('heading', { name: /Welcome to/ })).toBeVisible()
+  await expect(page.getByRole('heading', { name: /^Welcome/ })).toBeVisible()
   await expect(page.getByPlaceholder('Enter your email or username')).toBeVisible()
   await expect(page.getByRole('link', { name: 'Forgot password?' })).toHaveAttribute(
     'href',
@@ -48,7 +48,7 @@ test('redirects an unauthenticated admin visitor to login', async ({ page }) => 
 test('prevents registration when the passwords do not match', async ({ page }) => {
   let registrationRequests = 0
 
-  await page.route('**/api/v1/auth/register/', route => {
+  await page.route('**/api/v1/**/register/', route => {
     registrationRequests += 1
     return route.fulfill({ status: 201, contentType: 'application/json', body: '{}' })
   })
@@ -66,7 +66,7 @@ test('prevents registration when the passwords do not match', async ({ page }) =
 test('displays a registration API validation error', async ({ page }) => {
   let requestBody: Record<string, unknown> | undefined
 
-  await page.route('**/api/v1/auth/register/', async route => {
+  await page.route('**/api/v1/store/auth/register/', async route => {
     requestBody = route.request().postDataJSON()
     await route.fulfill({
       status: 400,
