@@ -9,13 +9,14 @@
     "start": "node_modules/.bin/next start",
     "typecheck": "node_modules/.bin/tsc --noEmit",
     "lint": "npm run typecheck",
-    "check": "npm run typecheck && npm run test:auth-logging && npm run test:guest-cart && npm run test:default-address && npm run test:skin-registry && npm run test:storefront-server && npm run test:plugin-assets && npm run build",
+    "check": "npm run typecheck && npm run test:auth-logging && npm run test:guest-cart && npm run test:default-address && npm run test:skin-registry && npm run test:storefront-server && npm run test:plugin-messages && npm run test:plugin-assets && npm run build",
     "test:guest-cart": "node --test scripts/guest-cart.test.mjs",
     "test:auth-logging": "node --test scripts/auth-logging.test.mjs",
     "test:default-address": "node --test scripts/default-address.test.mjs",
     "test:skin-registry": "node --test scripts/skin-registry.test.mjs scripts/skin-availability.test.mjs scripts/generated-sync.test.mjs",
     "test:plugin-assets": "node --test scripts/plugin-public-assets.test.mjs",
     "test:storefront-server": "node --experimental-transform-types --test scripts/storefront-server.test.mjs",
+    "test:plugin-messages": "node --experimental-transform-types --test scripts/plugin-messages.test.mjs",
     "test:e2e": "playwright test"
   },
   "dependencies": {

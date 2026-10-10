@@ -31,8 +31,23 @@ test('displays the API error when the SSO code is rejected', async ({ page }) =>
   await expect(page.getByRole('link', { name: 'Go to login' })).toHaveAttribute('href', '/auth/login')
 })
 
-test('exchanges the SSO code, stores workspace credentials, and redirects', async ({ page }) => {
+test('exchanges the SSO code, stores workspace credentials, and follows the server redirect', async ({ page }) => {
   let requestBody: Record<string, unknown> | undefined
+
+  await page.route('**/api/v1/me/', route =>
+    route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        staff_member: {
+          id: 7,
+          is_active: true,
+          role: { id: 3, code: 'admin', name: 'Administrator', permissions: {} },
+        },
+        extensions: { offered: [], available: [] },
+      }),
+    })
+  )
 
   await page.route('**/api/v1/platform/auth/sso/exchange/', async route => {
     requestBody = route.request().postDataJSON()
@@ -52,7 +67,7 @@ test('exchanges the SSO code, stores workspace credentials, and redirects', asyn
 
   await page.goto('/auth/sso?code=one-time-code&next=%2Funknown')
 
-  await expect(page).toHaveURL(/\/unknown$/)
+  await expect(page).toHaveURL(/\/admin\/dashboard$/)
   expect(requestBody).toEqual({ code: 'one-time-code' })
 
   const storage = await page.evaluate(() => Object.fromEntries(Object.entries(localStorage)))
