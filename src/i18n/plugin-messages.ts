@@ -19,19 +19,29 @@ function deepMerge(target: PluginMessages, source: PluginMessages): PluginMessag
   return target
 }
 
-/** Resolve plugins dir: prefer path relative to this module so it works regardless of cwd. */
+/** Resolve plugins dir, preferring the source tree over a compiled route directory. */
+export function resolvePluginsDir(cwd: string, moduleDir?: string): string {
+  const fromCwd = path.join(cwd, 'src', 'plugins')
+  if (fs.existsSync(fromCwd)) return fromCwd
+
+  if (moduleDir) {
+    const fromModule = path.join(moduleDir, '..', 'plugins')
+    if (fs.existsSync(fromModule)) return fromModule
+  }
+
+  return fromCwd
+}
+
 function getPluginsDir(): string {
-  const fromCwd = path.join(process.cwd(), 'src', 'plugins')
+  let moduleDir: string | undefined
   try {
-    const dir = typeof __dirname !== 'undefined'
+    moduleDir = typeof __dirname !== 'undefined'
       ? __dirname
       : path.dirname(fileURLToPath(import.meta.url))
-    const fromModule = path.join(dir, '..', 'plugins')
-    if (fs.existsSync(fromModule)) return fromModule
   } catch {
     // ESM/__dirname not available
   }
-  return fromCwd
+  return resolvePluginsDir(process.cwd(), moduleDir)
 }
 
 /**
