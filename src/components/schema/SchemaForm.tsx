@@ -158,6 +158,7 @@ type SchemaFormProps<T = any> = {
   schema: FormSchema
   initialData?: Partial<T>
   onSubmit?: (data: T) => void | Promise<void>
+  onValuesChange?: (values: Partial<T>) => void
   onCancel?: () => void
   loading?: boolean
   hideActions?: boolean
@@ -184,6 +185,7 @@ export default function SchemaForm<T extends Record<string, any>>({
   schema,
   initialData,
   onSubmit,
+  onValuesChange,
   onCancel,
   loading = false,
   hideActions = false,
@@ -442,6 +444,7 @@ export default function SchemaForm<T extends Record<string, any>>({
   async function handleChange(field: string, value: any) {
     const newFormData = { ...formData, [field]: value }
     setFormData(newFormData)
+    onValuesChange?.(newFormData)
     
     // Clear error when user starts typing
     if (errors[field]) {
