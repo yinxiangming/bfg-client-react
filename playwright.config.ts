@@ -14,8 +14,13 @@ export default defineConfig({
   },
   webServer: externalBaseUrl
     ? undefined
-    : {
-        command: 'npm run build && npm run start',
+    : [{
+        command: 'node tests/e2e/support/storefront-api-server.mjs',
+        url: 'http://127.0.0.1:8787/health',
+        reuseExistingServer: !process.env.CI,
+        timeout: 30_000
+      }, {
+        command: 'npm run build && npm run start -- --hostname 127.0.0.1',
         url: 'http://127.0.0.1:3000/auth/login',
         reuseExistingServer: !process.env.CI,
         timeout: 180_000,
@@ -23,7 +28,7 @@ export default defineConfig({
           ...process.env,
           NEXT_PUBLIC_API_URL: 'http://127.0.0.1:8787'
         }
-      },
+      }],
   projects: [
     {
       name: 'chromium',
