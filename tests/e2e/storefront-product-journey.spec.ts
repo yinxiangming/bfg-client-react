@@ -117,8 +117,8 @@ test('adds the selected product variant and quantity to the guest cart', async (
   })
 
   await page.goto('/product/sensor-hub')
-  await page.getByRole('button', { name: 'Pro' }).click()
-  await page.getByRole('button', { name: 'Blue' }).click()
+  await page.getByRole('button', { name: 'Pro', exact: true }).click()
+  await page.getByRole('button', { name: 'Blue', exact: true }).click()
   await page.locator('.sf-quantity-input').fill('2')
   page.once('dialog', async dialog => {
     expect(dialog.message()).toBe('Product added to cart!')
