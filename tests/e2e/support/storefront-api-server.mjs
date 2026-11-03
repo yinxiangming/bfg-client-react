@@ -10,6 +10,11 @@ const storefrontConfig = {
   default_color_mode: 'light',
   theme: 'store',
   read_only: false,
+  storefront_display: {
+    sku_display: 'plain',
+    stock_display: 'exact',
+    out_of_stock_policy: 'notify'
+  },
   workspace_domain: '',
   extensions: [],
   header_menus: [],
@@ -20,6 +25,47 @@ const storefrontConfig = {
     show_language_switcher: false,
     show_style_selector: false,
     show_login: true
+  }
+}
+
+const products = {
+  'sensor-hub': {
+    id: 301,
+    slug: 'sensor-hub',
+    name: 'Wireless Sensor Hub',
+    brand: 'BFG',
+    price: '89.00',
+    compare_price: '99.00',
+    short_description: 'Connect and monitor workshop sensors.',
+    description: '<p>Connect and monitor workshop sensors.</p>',
+    sku: 'BFG-HUB-301',
+    stock_quantity: 8,
+    in_stock: true,
+    low_stock: false,
+    purchasable: true,
+    images: ['/media/sensor-hub.jpg'],
+    categories: [{ id: 4, name: 'Sensors', slug: 'sensors' }],
+    variants: [
+      { id: 701, options: { size: 'Standard', color: 'Black' } },
+      { id: 702, options: { size: 'Pro', color: 'Blue' } }
+    ]
+  },
+  'sold-out-sensor': {
+    id: 302,
+    slug: 'sold-out-sensor',
+    name: 'Sold-out Temperature Sensor',
+    brand: 'BFG',
+    price: '29.00',
+    short_description: 'A compact temperature sensor.',
+    description: '<p>A compact temperature sensor.</p>',
+    sku: 'BFG-TEMP-302',
+    stock_quantity: 0,
+    in_stock: false,
+    low_stock: false,
+    purchasable: false,
+    images: ['/media/temperature-sensor.jpg'],
+    categories: [{ id: 4, name: 'Sensors', slug: 'sensors' }],
+    variants: []
   }
 }
 
@@ -35,6 +81,12 @@ const server = createServer((request, response) => {
 
   if (url.pathname === '/api/v1/settings/storefront/') {
     response.end(JSON.stringify(storefrontConfig))
+    return
+  }
+
+  const productMatch = url.pathname.match(/^\/api\/v1\/store\/products\/([^/]+)\/$/)
+  if (productMatch && products[productMatch[1]]) {
+    response.end(JSON.stringify(products[productMatch[1]]))
     return
   }
 
