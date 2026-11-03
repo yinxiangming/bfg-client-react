@@ -80,19 +80,19 @@ export default function SearchPage() {
   const [categories, setCategories] = useState<{ name: string; slug: string }[]>([])
 
   const updateUrl = useCallback(
-    (updates: { q?: string; category?: string; sort?: string; page?: number }) => {
+    (updates: { q?: string | null; category?: string | null; sort?: string | null; page?: number | null }) => {
       const params = new URLSearchParams(searchParams.toString())
-      if (updates.q !== undefined) (updates.q ? params.set('q', updates.q) : params.delete('q'))
-      if (updates.category !== undefined) (updates.category ? params.set('category', updates.category) : params.delete('category'))
-      if (updates.sort !== undefined) (updates.sort ? params.set('sort', updates.sort) : params.delete('sort'))
-      if (updates.page !== undefined) (updates.page && updates.page > 1 ? params.set('page', String(updates.page)) : params.delete('page'))
+      if ('q' in updates) (updates.q ? params.set('q', updates.q) : params.delete('q'))
+      if ('category' in updates) (updates.category ? params.set('category', updates.category) : params.delete('category'))
+      if ('sort' in updates) (updates.sort ? params.set('sort', updates.sort) : params.delete('sort'))
+      if ('page' in updates) (updates.page && updates.page > 1 ? params.set('page', String(updates.page)) : params.delete('page'))
       router.replace(`/search?${params.toString()}`, { scroll: false })
     },
     [router, searchParams]
   )
 
   const refreshResults = useCallback(() => {
-    updateUrl({ q: keyword.trim() || undefined, category: categoryFilter || undefined, sort: sortBy !== 'relevance' ? sortBy : undefined, page: currentPage !== 1 ? currentPage : undefined })
+    updateUrl({ q: keyword.trim() || null, category: categoryFilter || null, sort: sortBy !== 'relevance' ? sortBy : null, page: currentPage !== 1 ? currentPage : null })
   }, [keyword, categoryFilter, sortBy, currentPage, updateUrl])
 
   useEffect(() => {
@@ -168,19 +168,19 @@ export default function SearchPage() {
 
   const handleSortChange = (value: SortOption) => {
     setSortBy(value)
-    updateUrl({ sort: value !== 'relevance' ? value : undefined, page: undefined })
+    updateUrl({ sort: value !== 'relevance' ? value : null, page: null })
     setCurrentPage(1)
   }
 
   const handleCategoryChange = (slug: string) => {
     setCategoryFilter(slug)
-    updateUrl({ category: slug || undefined, page: undefined })
+    updateUrl({ category: slug || null, page: null })
     setCurrentPage(1)
   }
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
-    updateUrl({ page: page > 1 ? page : undefined })
+    updateUrl({ page: page > 1 ? page : null })
   }
 
   return (

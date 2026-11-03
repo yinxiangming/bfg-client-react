@@ -40,7 +40,7 @@ test('searches the catalogue and links to the canonical product slug', async ({ 
 
   await page.goto('/search?q=sensor')
 
-  await expect(page.getByRole('heading', { name: 'Search Products' })).toBeVisible()
+  await expect(page.getByRole('heading', { name: 'Search Results' })).toBeVisible()
   await expect(page.getByRole('heading', { name: 'BFG Wireless Sensor Hub' })).toBeVisible()
   await expect(page.locator('a[href="/product/sensor-hub"]').first()).toBeVisible()
   expect(new URL(requestUrl).searchParams.get('q')).toBe('sensor')
@@ -56,12 +56,15 @@ test('maps category and price sorting controls to API query parameters', async (
 
   await page.goto('/search?q=sensor&page=2')
   await page.getByRole('button', { name: 'Sensors' }).click()
+  await expect(page).toHaveURL(url =>
+    url.searchParams.get('category') === 'sensors' && !url.searchParams.has('page')
+  )
   await page.locator('.sf-sort-select').selectOption('price-desc')
 
   await expect(page).toHaveURL(/q=sensor/)
   await expect(page).toHaveURL(/category=sensors/)
   await expect(page).toHaveURL(/sort=price-desc/)
-  await expect(page).not.toHaveURL(/page=2/)
+  await expect(page).toHaveURL(url => !url.searchParams.has('page'))
   await expect.poll(() => requests.some(url =>
     url.searchParams.get('category') === 'sensors' && url.searchParams.get('sort') === 'price_desc'
   )).toBe(true)

@@ -71,8 +71,18 @@ const products = {
 
 const server = createServer((request, response) => {
   const url = new URL(request.url || '/', 'http://127.0.0.1:8787')
+  const requestOrigin = request.headers.origin
   response.setHeader('Content-Type', 'application/json')
-  response.setHeader('Access-Control-Allow-Origin', '*')
+  response.setHeader('Access-Control-Allow-Origin', requestOrigin || 'http://127.0.0.1:3000')
+  response.setHeader('Access-Control-Allow-Credentials', 'true')
+  response.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Bfg-Cart-Session, X-Forwarded-Host')
+  response.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+
+  if (request.method === 'OPTIONS') {
+    response.statusCode = 204
+    response.end()
+    return
+  }
 
   if (url.pathname === '/health') {
     response.end(JSON.stringify({ ok: true }))
