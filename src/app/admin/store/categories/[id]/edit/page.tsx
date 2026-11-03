@@ -23,6 +23,7 @@ import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import SchemaForm from '@/components/schema/SchemaForm'
 import CategoryTreeSelect from '@/components/category/CategoryTreeSelect'
 import CategoryRulesEditor from '@/components/category/CategoryRulesEditor'
+import ProductContentPolicies from '@/views/admin/settings/store/ProductContentPolicies'
 
 // Data Imports
 import { categoriesSchema } from '@/data/storeSchemas'
@@ -395,7 +396,9 @@ export default function CategoryEditPage() {
         >
           <Tab label={tabLabels.info} id='category-tab-info' aria-controls='category-tabpanel-info' />
           <Tab label={tabLabels.rules} id='category-tab-rules' aria-controls='category-tabpanel-rules' />
+          <Tab label='Public description' id='category-tab-content' aria-controls='category-tabpanel-content' />
         </Tabs>
+        {tabIndex === 2 && <ProductContentPolicies key={category.id} categoryId={category.id} initialLanguage={category.language || 'en'} />}
         {tabIndex === 0 && visibleSlots.includes('CategoryInfo') &&
           renderSlot(
             'CategoryInfo',

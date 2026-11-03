@@ -10,6 +10,7 @@ import SalesChannelsTab from './SalesChannelsTab'
 import SubscriptionPlansTab from './SubscriptionPlansTab'
 import MessageTemplatesTab from './MessageTemplatesTab'
 import StorePluginsTab from './StorePluginsTab'
+import ProductContentPolicies from './ProductContentPolicies'
 
 const StoreSettingsPage = () => {
   const t = useTranslations('admin')
@@ -20,6 +21,10 @@ const StoreSettingsPage = () => {
       subtitle={t('settings.store.page.subtitle')}
       defaultTab='stores'
       tabs={[
+        {
+          value: 'public-content', label: 'Public descriptions', icon: 'tabler-file-text', layout: 'padded',
+          content: <ProductContentPolicies />
+        },
         {
           value: 'stores',
           label: t('settings.store.page.tabs.stores'),
