@@ -11,6 +11,11 @@ type IconProps = {
 }
 
 const Icon = ({ icon, className, width, height }: IconProps) => {
+  // Tabler icons are bundled by the host; render without a remote Iconify request.
+  if (/^tabler[-:]/.test(icon)) {
+    const name = icon.replace(/^tabler:/, 'tabler-')
+    return <span aria-hidden='true' className={[name, className].filter(Boolean).join(' ')} style={{width: width || '1em', height: height || '1em', flexShrink: 0}} />
+  }
   return <Iconify icon={icon} className={className} width={width || '1em'} height={height || '1em'} />
 }
 

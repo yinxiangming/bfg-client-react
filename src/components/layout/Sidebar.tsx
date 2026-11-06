@@ -283,6 +283,8 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
             // AND expands the children; the chevron toggles independently.
             <Link
               href={submenuHref}
+              aria-expanded={isOpen}
+              aria-controls={`sidebar-submenu-${itemId}`}
               className={`menu-submenu-button level-${level} ${headerActive ? 'active' : ''}`}
               onClick={() => setOpenSubmenus(prev => ({ ...prev, [itemId]: true }))}
             >
@@ -292,6 +294,8 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
             <button
               type='button'
               className={`menu-submenu-button level-${level}`}
+              aria-expanded={isOpen}
+              aria-controls={`sidebar-submenu-${itemId}`}
               onClick={() => toggleSubmenu(itemId)}
               disabled={item.disabled}
             >
@@ -299,7 +303,7 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
             </button>
           )}
           {!collapsed && (
-            <ul className={`menu-submenu-children level-${level + 1} ${isOpen ? 'open' : ''}`}>
+            <ul id={`sidebar-submenu-${itemId}`} aria-hidden={!isOpen} inert={!isOpen} className={`menu-submenu-children level-${level + 1} ${isOpen ? 'open' : ''}`}>
               {item.children.map(child => renderMenuItem(child, level + 1, itemId))}
             </ul>
           )}
