@@ -26,6 +26,8 @@ import type { AddressSuggestion, ResolvedAddress } from '@/services/geo'
 const SUGGESTIONS_ZINDEX = 1400
 
 type AddressLookupFieldProps = {
+  /** Optional per-request country; the server authorizes market overrides. */
+  countryCode?: string
   value: string
   onChange: (value: string) => void
   /** A suggestion was picked and expanded: fill the rest of the address in. */
@@ -59,6 +61,7 @@ type AddressLookupFieldProps = {
  * line to the person typing.
  */
 const AddressLookupField = ({
+  countryCode,
   value,
   onChange,
   onResolved,
@@ -75,7 +78,7 @@ const AddressLookupField = ({
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
   const [open, setOpen] = useState(false)
   const [activeIndex, setActiveIndex] = useState(-1)
-  const { suggestions, capped, search, clear, select } = useAddressLookup()
+  const { suggestions, capped, search, clear, select } = useAddressLookup(countryCode)
 
   const handleSelect = useCallback(
     async (suggestion: AddressSuggestion) => {
