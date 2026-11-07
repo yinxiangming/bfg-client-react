@@ -5,8 +5,6 @@ import {
   DEFAULT_STOREFRONT_DISPLAY,
   getAllowedColorModes,
   getStorefrontConfig,
-  hasMultipleStorefrontLanguages,
-  resolveStorefrontLocale,
   seedStorefrontConfigCache,
   type StorefrontConfig,
 } from '@/utils/storefrontConfig'
@@ -88,13 +86,6 @@ export function StorefrontConfigProvider({ children, initialConfig }: Storefront
     }
     fetchConfig()
   }, [initialConfig, fetchConfig])
-
-  useEffect(() => {
-    if (!config || hasMultipleStorefrontLanguages(config) || typeof document === 'undefined') return
-    const locale = resolveStorefrontLocale(config)
-    const maxAge = 60 * 60 * 24 * 365
-    document.cookie = `NEXT_LOCALE=${encodeURIComponent(locale)};path=/;max-age=${maxAge}`
-  }, [config])
 
   const value: StorefrontConfigContextType = {
     config,

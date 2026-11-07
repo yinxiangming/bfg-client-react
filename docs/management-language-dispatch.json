@@ -1,0 +1,22 @@
+{
+  "status": "complete",
+  "client_baseline": "eb649ab09662051cc1eb480c434d9efa4bc25ac5",
+  "contract_version": "1.0.0",
+  "contract": "docs/management-language-contract-v1.md",
+  "host_owned_files": [
+    "src/components/i18n/LanguageSwitcher.tsx",
+    "src/contexts/StorefrontConfigContext.tsx"
+  ],
+  "reason": "Shared locale preference and management navigation behavior",
+  "verification": [
+    {
+      "check": "Browser locale persistence under single-language configuration",
+      "passed": 1
+    },
+    {
+      "check": "TypeScript noEmit against the exact baseline plus the reviewed changes",
+      "exit_code": 0
+    }
+  ],
+  "remote_actions": "Publication tracked by the pull request"
+}
