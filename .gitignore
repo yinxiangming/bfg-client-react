@@ -21,6 +21,7 @@ src/plugins/*
 src/app/account/plugins/
 src/app/admin/plugins/
 src/app/(storefront)/plugins/
+src/app/(portals)/plugins/
 src/.plugin-routes-manifest.json
 src/components/storefront/themes/registry.generated.ts
 

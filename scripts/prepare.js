@@ -4,7 +4,7 @@
  * Run all pre-build tasks: plugin loaders, plugin routes, theme registry.
  * Usage: node scripts/prepare.js
  *
- * Plugin routes: each plugin may ship `plugins/<id>/app/<segment>/...` (e.g. admin, account, storefront).
+ * Plugin routes: each plugin may ship `plugins/<id>/app/<segment>/...` (e.g. admin, account, storefront, portal).
  * Storefront segment is copied under `app/(storefront)/plugins/<id>/...` so routes use the storefront layout.
  * See syncPluginRoutes() for how that maps into `src/app/`.
  */
@@ -211,12 +211,16 @@ function syncPluginRoutes() {
     const root = path.join(PLUGINS_DIR, plugin, 'app')
     if (!fs.existsSync(root) || !isDeployed(plugin)) continue
     if (fs.lstatSync(root).isSymbolicLink()) throw new Error('Plugin app root cannot be a symlink')
+    const portalRoot = path.join(root, 'portal')
+    const portalEntries = fs.existsSync(portalRoot) && fs.lstatSync(portalRoot).isDirectory()
+      ? fs.readdirSync(portalRoot, {withFileTypes:true}) : []
+    const hasPortals = portalEntries.some(entry => entry.isDirectory() && !entry.name.startsWith('.'))
     for (const segmentEntry of fs.readdirSync(root, {withFileTypes:true})) {
       if (segmentEntry.name.startsWith('.')) continue
       if (segmentEntry.isSymbolicLink()) throw new Error('Plugin route source cannot contain symlinks')
       if (!segmentEntry.isDirectory()) continue
       const segment = segmentEntry.name
-      if (!['storefront', 'admin', 'account', 'auth'].includes(segment)) throw new Error(`Unsupported plugin route area: ${segment}`)
+      if (!['storefront', 'admin', 'account', 'auth', 'portal'].includes(segment)) throw new Error(`Unsupported plugin route area: ${segment}`)
       const segmentRoot = path.join(root, segment)
       for (const child of fs.readdirSync(segmentRoot, {withFileTypes:true})) {
         if (child.name.startsWith('.')) continue
@@ -231,14 +235,19 @@ function syncPluginRoutes() {
           name = plugin; source = path.join(source, plugin)
         }
         if (!validId(name)) throw new Error('Invalid plugin route prefix')
-        const group = segment === 'storefront' ? '(storefront)' : segment
-        if (segment !== 'storefront' && (name === 'plugins' || fs.existsSync(path.join(APP_DIR, group, name)))) throw new Error(`Plugin route overlaps a host area: /${segment}/${name}`)
-        const dest = path.join(APP_DIR, group, 'plugins', plugin, ...(name === plugin ? [] : [name]))
+        const standalone = segment === 'portal'
+        const group = standalone ? '(portals)' : segment === 'storefront' ? '(storefront)' : segment
+        if (!standalone && segment !== 'storefront' && (name === 'plugins' || fs.existsSync(path.join(APP_DIR, group, name)))) throw new Error(`Plugin route overlaps a host area: /${segment}/${name}`)
+        if (standalone && (URL_RESERVED.has(name) || fs.existsSync(path.join(APP_DIR, name)) || fs.existsSync(path.join(APP_DIR, '(storefront)', name)))) throw new Error(`Portal route overlaps a host area: /${name}`)
+        if (segment === 'storefront' && hasPortals && (name === 'portals' || (name === plugin && fs.existsSync(path.join(source, 'portals'))))) throw new Error(`Portal namespace overlaps storefront routes for extension ${plugin}`)
+        const dest = path.join(APP_DIR, group, 'plugins', plugin, ...(standalone ? ['portals'] : []), ...(name === plugin ? [] : [name]))
         collectDirectory(source, dest, SRC_DIR, files)
-        if (segment === 'storefront') {
+        if (segment === 'storefront' || standalone) {
           if (!URL_RESERVED.has(name)) {
             claimUrl('/' + name, plugin)
-            const target = name === plugin ? `/plugins/${plugin}` : `/plugins/${plugin}/${name}`
+            const routeRoot = `/plugins/${plugin}${standalone ? '/portals' : ''}`
+            const target = name === plugin ? routeRoot : `${routeRoot}/${name}`
+            if (standalone) owners.push({prefix: '/' + name, id: plugin}, {prefix: target, id: plugin})
             rewrites.push({source:`/${name}`, destination:target}, {source:`/${name}/:path*`, destination:`${target}/:path*`})
           }
         } else {
@@ -250,7 +259,7 @@ function syncPluginRoutes() {
         }
       }
     }
-    for (const area of ['(storefront)', 'account', 'auth']) {
+    for (const area of ['(storefront)', 'account', 'auth', '(portals)']) {
       const relative = `app/${area}/plugins/${plugin}/layout.tsx`
       const prefix = `app/${area}/plugins/${plugin}/`
       if (![...files.keys()].some(key => key.startsWith(prefix))) continue
@@ -258,7 +267,7 @@ function syncPluginRoutes() {
       files.set(relative, Buffer.from(routeGuardSource(plugin)))
     }
   }
-  const accepts = relative => typeof relative === 'string' && /^app\/(?:\(storefront\)|admin|account|auth)\/(?:plugins\/[a-z][a-z0-9_-]*|[a-z][a-z0-9_-]*)\/.+/.test(relative)
+  const accepts = relative => typeof relative === 'string' && /^(?:app\/(?:\(storefront\)|admin|account|auth)\/(?:plugins\/[a-z][a-z0-9_-]*|[a-z][a-z0-9_-]*)|app\/\(portals\)\/plugins\/[a-z][a-z0-9_-]*)\/.+/.test(relative)
   planGeneratedFiles(SRC_DIR, readGeneratedManifest(MANIFEST_FILE, 'files'), files, accepts, MANIFEST_FILE, 'files')
   // Rewrites and admin ownership are generated from this same validated route plan.
   const routeControl = path.join(SRC_DIR, '.plugin-route-control.json')
