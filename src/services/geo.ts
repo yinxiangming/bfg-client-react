@@ -177,7 +177,8 @@ export async function getAddressLookupStatus(): Promise<AddressLookupStatus> {
 export async function suggestAddresses(
   query: string,
   sessionToken?: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  countryCode?: string
 ): Promise<AddressSuggestion[]> {
   // Nothing is sent once the latch is set: the answer cannot change this month, and
   // a typeahead would otherwise ask again on every keystroke to be told so.
@@ -185,6 +186,7 @@ export async function suggestAddresses(
 
   const params = new URLSearchParams({ q: query })
   if (sessionToken) params.set('session', sessionToken)
+  if (countryCode) params.set('country_code', countryCode.toUpperCase())
 
   try {
     const res = await billedCall(() =>
@@ -210,17 +212,20 @@ export async function suggestAddresses(
 export async function resolveAddress(
   placeId: string,
   sessionToken?: string,
-  signal?: AbortSignal
+  signal?: AbortSignal,
+  countryCode?: string
 ): Promise<ResolvedAddress> {
   const params = new URLSearchParams({ place_id: placeId })
   if (sessionToken) params.set('session', sessionToken)
+  if (countryCode) params.set('country_code', countryCode.toUpperCase())
 
   return billedCall(() => apiFetch<ResolvedAddress>(`${geoUrl('address/resolve/')}?${params}`, { signal }))
 }
 
 /** A dropped pin turned into address fields; capped the same way as {@link resolveAddress}. */
-export async function reverseGeocode(latitude: number, longitude: number): Promise<ResolvedAddress> {
+export async function reverseGeocode(latitude: number, longitude: number, countryCode?: string): Promise<ResolvedAddress> {
   const params = new URLSearchParams({ lat: String(latitude), lng: String(longitude) })
+  if (countryCode) params.set('country_code', countryCode.toUpperCase())
 
   return billedCall(() => apiFetch<ResolvedAddress>(`${geoUrl('address/reverse/')}?${params}`))
 }

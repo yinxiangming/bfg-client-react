@@ -119,7 +119,7 @@ export type AddressLookup = {
  * server has nothing to offer — and none of them is about how the field looks. So
  * the rules live here once, and each field renders its own suggestions.
  */
-export function useAddressLookup(): AddressLookup {
+export function useAddressLookup(countryCode?: string): AddressLookup {
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([])
   const [capped, setCapped] = useState(isAddressLookupUsageCapped)
 
@@ -127,6 +127,7 @@ export function useAddressLookup(): AddressLookup {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const requestRef = useRef<AbortController | null>(null)
   const offRef = useRef(false)
+  const previousCountry = useRef(countryCode)
 
   const session = (sessionRef.current ??= createAddressLookupSession())
 
@@ -140,7 +141,16 @@ export function useAddressLookup(): AddressLookup {
 
   // A field that has gone away must not be filled in, and a request nobody is
   // waiting for need not finish.
-  useEffect(() => abortPending, [abortPending])
+  useEffect(() => {
+    if (previousCountry.current !== countryCode) {
+      abortPending()
+      setSuggestions([])
+      offRef.current = false
+      session.renew()
+      previousCountry.current = countryCode
+    }
+    return abortPending
+  }, [abortPending, countryCode, session])
 
   const clear = useCallback(() => {
     abortPending()
@@ -153,7 +163,8 @@ export function useAddressLookup(): AddressLookup {
 
       const input = query.trim()
 
-      if (offRef.current || input.length < MIN_QUERY_LENGTH) {
+      if (offRef.current || input.length < MIN_QUERY_LENGTH
+        || (countryCode !== undefined && !/^[A-Za-z]{2}$/.test(countryCode))) {
         setSuggestions([])
 
         return
@@ -175,7 +186,7 @@ export function useAddressLookup(): AddressLookup {
             return
           }
 
-          const results = await suggestAddresses(input, session.current(), request.signal)
+          const results = await suggestAddresses(input, session.current(), request.signal, countryCode)
 
           // A newer keystroke, or the field unmounted, while this was in flight.
           // Filling the list now would answer a question nobody is asking any more.
@@ -193,7 +204,7 @@ export function useAddressLookup(): AddressLookup {
         }
       }, DEBOUNCE_MS)
     },
-    [abortPending, session]
+    [abortPending, session, countryCode]
   )
 
   const select = useCallback(
@@ -207,7 +218,7 @@ export function useAddressLookup(): AddressLookup {
       requestRef.current = request
 
       try {
-        const resolved = await resolveAddress(suggestion.place_id, session.current(), request.signal)
+        const resolved = await resolveAddress(suggestion.place_id, session.current(), request.signal, countryCode)
 
         if (request.signal.aborted) return null
 
@@ -224,7 +235,7 @@ export function useAddressLookup(): AddressLookup {
         return null
       }
     },
-    [abortPending, session]
+    [abortPending, session, countryCode]
   )
 
   return { suggestions, capped, search, clear, select }
