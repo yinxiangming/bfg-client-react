@@ -7,7 +7,7 @@ import { isExtensionEnabled } from '@/extensions/availability'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 
 /**
- * Renders a plugin's storefront or account pages only while the workspace has the plugin's
+ * Renders a plugin's storefront, account, auth or standalone portal pages only while the workspace has the plugin's
  * extension switched on; otherwise the route answers 404, as if the plugin were not installed.
  *
  * scripts/prepare.js wraps each plugin's own route folder in this. The storefront config is
