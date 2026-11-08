@@ -1,0 +1,26 @@
+{
+  "status": "complete",
+  "contract_version": "1.0.0",
+  "client_baseline": "fedb77ba76bf91110d38817f89fb65b8c8230b4b",
+  "contract": "docs/contracts/address-country-v1.md",
+  "resulting_worktree": "codex/address-country-context-20261107",
+  "host_owned_files": [
+    "src/services/geo.ts",
+    "src/hooks/useAddressLookup.ts",
+    "src/components/ui/AddressLookupField.tsx"
+  ],
+  "reason": "Per-form country context and request cancellation shared by all authenticated address forms",
+  "skin_manifest": null,
+  "skin_reason": "No new visual package or theme behavior",
+  "verification": {
+    "service_tests_passed": 5,
+    "typescript": "passed"
+  },
+  "compatibility": [
+    "Existing callers without a country retain request shapes",
+    "Country changes cancel pending work and renew the session",
+    "Workspace usage-cap latch remains active across country changes"
+  ],
+  "migrations": [],
+  "new_routes": []
+}
