@@ -293,7 +293,7 @@ const ProductInformation = ({
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position='end'>
-                                        <Tooltip title={t('products.information.labelActions.regenerateSku', { defaultValue: '重新生成 SKU' })}>
+                                        <Tooltip title={t('products.information.labelActions.regenerateSku')}>
                                             <span>
                                                 <IconButton
                                                     size='small'
@@ -320,7 +320,7 @@ const ProductInformation = ({
                             InputProps={{
                                 endAdornment: (
                                     <InputAdornment position='end'>
-                                        <Tooltip title={t('products.information.labelActions.regenerateBarcode', { defaultValue: '重新生成条码' })}>
+                                        <Tooltip title={t('products.information.labelActions.regenerateBarcode')}>
                                             <span>
                                                 <IconButton
                                                     size='small'

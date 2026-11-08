@@ -44,6 +44,72 @@
   },
   "apiErrors": {
     "workspaceReadOnly": "This workspace can only be viewed and exported until its plan is renewed, so that change was not saved."
+  },
+  "categoryTreeSelect": {
+    "placeholder": "Select categories",
+    "loading": "Loading...",
+    "noOptions": "No categories available"
+  },
+  "pageBuilder": {
+    "preview": "Page preview",
+    "addBlock": "Add block",
+    "pageBlocks": "Page blocks",
+    "emptyState": "No blocks yet. Select Add block to choose a block type.",
+    "settingsJson": "Block settings (JSON)",
+    "moveUp": "Move up",
+    "moveDown": "Move down",
+    "delete": "Delete",
+    "applyJson": "Apply JSON",
+    "backToList": "Back to list",
+    "errors": {
+      "invalidJson": "Enter valid JSON.",
+      "invalidJsonContext": "JSON parse error. {detail}"
+    },
+    "categories": {
+      "hero": "Hero",
+      "content": "Content",
+      "list": "List",
+      "form": "Form",
+      "layout": "Layout",
+      "media": "Media"
+    },
+    "blocks": {
+      "text_block_v1": {
+        "name": "Text block",
+        "description": "Rich text content block with customizable styling"
+      },
+      "banner_grid_v1": {
+        "name": "Banner grid",
+        "description": "Display promotional banners in a grid layout"
+      },
+      "product_grid_v1": {
+        "name": "Product grid",
+        "description": "Display products in a grid layout with filtering options"
+      },
+      "post_list_v1": {
+        "name": "Post list",
+        "description": "Display a grid or list of posts with filtering options"
+      },
+      "category_grid_v1": {
+        "name": "Category grid",
+        "description": "Display product categories in a grid layout"
+      },
+      "section_v1": {
+        "name": "Section (container)",
+        "description": "Wrap child blocks in a fixed-width container or full width"
+      },
+      "hero_carousel_v1": {
+        "name": "Hero carousel",
+        "description": "Full-width image carousel with text overlay and call-to-action buttons"
+      },
+      "contact_form_v1": {
+        "name": "Contact form",
+        "description": "Contact form for customer inquiries, bookings, and feedback"
+      },
+      "cta_block_v1": {
+        "name": "CTA block",
+        "description": "Call-to-action block with title, description and button"
+      }
+    }
   }
 }
-

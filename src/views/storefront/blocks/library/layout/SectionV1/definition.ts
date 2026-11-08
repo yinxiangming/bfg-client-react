@@ -3,8 +3,10 @@ import type { BlockDefinition } from '../../../types'
 export const definition: BlockDefinition = {
   type: 'section_v1',
   name: 'Section (Container)',
+  nameI18nKey: 'common.pageBuilder.blocks.section_v1.name',
   category: 'layout',
   description: 'Wraps child blocks in a fixed-width container or full width',
+  descriptionI18nKey: 'common.pageBuilder.blocks.section_v1.description',
 
   settingsSchema: {},
 

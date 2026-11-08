@@ -4,9 +4,11 @@ import CtaBlockV1 from './index'
 export const definition: BlockDefinition = {
   type: 'cta_block_v1',
   name: 'CTA Block',
+  nameI18nKey: 'common.pageBuilder.blocks.cta_block_v1.name',
   category: 'content',
   thumbnail: '/blocks/thumbnails/cta-block-v1.png',
   description: 'Call-to-action block with title, description and button',
+  descriptionI18nKey: 'common.pageBuilder.blocks.cta_block_v1.description',
 
   settingsSchema: {
     variant: {

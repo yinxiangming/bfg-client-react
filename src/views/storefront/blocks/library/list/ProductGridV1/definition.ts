@@ -3,9 +3,11 @@ import type { BlockDefinition } from '../../../types'
 export const definition: BlockDefinition = {
   type: 'product_grid_v1',
   name: 'Product Grid',
+  nameI18nKey: 'common.pageBuilder.blocks.product_grid_v1.name',
   category: 'list',
   thumbnail: '/blocks/thumbnails/product-grid-v1.png',
   description: 'Display products in a grid layout with filtering options',
+  descriptionI18nKey: 'common.pageBuilder.blocks.product_grid_v1.description',
 
   settingsSchema: {
     columns: {

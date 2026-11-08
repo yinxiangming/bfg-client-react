@@ -1,6 +1,7 @@
 'use client'
 
 import React, { useState, useCallback, useEffect } from 'react'
+import { useTranslations } from 'next-intl'
 import {
   Box,
   Button,
@@ -21,6 +22,7 @@ import {
 import { Icon } from '@iconify/react'
 
 import { PageRenderer } from './PageRenderer'
+import { getBlockDefinitionText, type BlockDefinitionTranslator } from './block-definition-i18n'
 import type { BlockConfig, BlockDefinition, BlockComponent } from './types'
 
 interface PageBuilderProps {
@@ -36,6 +38,8 @@ interface PageBuilderProps {
   getBlockComponent: (type: string) => BlockComponent | null
 }
 
+type JsonEditorError = { kind: 'parse'; detail: string } | { kind: 'invalid' }
+
 /**
  * Generic block-based page builder. Registry (getBlocksByCategory, getBlockDefinition, getBlockComponent)
  * must be provided by the caller (storefront blocks, dashboard blocks, etc.).
@@ -49,12 +53,13 @@ export function PageBuilder({
   getBlockDefinition,
   getBlockComponent,
 }: PageBuilderProps) {
+  const t = useTranslations() as unknown as BlockDefinitionTranslator
   const [blocks, setBlocks] = useState<BlockConfig[]>(initialBlocks)
   const [selectedBlockId, setSelectedBlockId] = useState<string | null>(null)
   const [blockPickerAnchor, setBlockPickerAnchor] = useState<HTMLElement | null>(null)
   const [currentLocale, setCurrentLocale] = useState(locale)
   const [blockJson, setBlockJson] = useState('')
-  const [jsonError, setJsonError] = useState<string | null>(null)
+  const [jsonError, setJsonError] = useState<JsonEditorError | null>(null)
 
   // Sync from parent when initialBlocks changes (e.g. dialog opened with page blocks)
   useEffect(() => {
@@ -64,6 +69,20 @@ export function PageBuilder({
   }, [initialBlocks])
 
   const blocksByCategory = getBlocksByCategory()
+  const translate = (key: string) => t(`common.pageBuilder.${key}`)
+  const translateDefinition = (definition: BlockDefinition | null | undefined, field: 'name' | 'description') => {
+    if (!definition) return ''
+    return getBlockDefinitionText(definition, field, t)
+  }
+  const translateCategory = (category: string) => {
+    const key = `common.pageBuilder.categories.${category}`
+    return t.has(key) ? t(key) : category
+  }
+  const jsonErrorMessage = jsonError?.kind === 'parse'
+    ? t('common.pageBuilder.errors.invalidJsonContext', { detail: jsonError.detail })
+    : jsonError
+      ? t('common.pageBuilder.errors.invalidJson')
+      : null
 
   const handleAddBlock = useCallback(
     (definition: BlockDefinition) => {
@@ -142,7 +161,7 @@ export function PageBuilder({
       onBlocksChange?.(newBlocks)
       setJsonError(null)
     } catch (e) {
-      setJsonError(e instanceof Error ? e.message : 'Invalid JSON')
+      setJsonError(e instanceof Error ? { kind: 'parse', detail: e.message } : { kind: 'invalid' })
     }
   }, [selectedBlock, blockJson, blocks, onBlocksChange])
 
@@ -154,7 +173,7 @@ export function PageBuilder({
       <Paper sx={{ flex: 1, overflow: 'auto', p: 0, minHeight: 0 }}>
         <Box sx={{ p: 2, borderBottom: 1, borderColor: 'divider' }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <Typography variant='h6'>Page Preview</Typography>
+            <Typography variant='h6'>{translate('preview')}</Typography>
             <Box sx={{ display: 'flex', gap: 1 }}>
               {locales.map((loc) => (
                 <Button
@@ -190,17 +209,17 @@ export function PageBuilder({
             startIcon={<Icon icon='mdi:plus' />}
             onClick={(e) => setBlockPickerAnchor(e.currentTarget)}
           >
-            Add Block
+            {translate('addBlock')}
           </Button>
         </Box>
 
         <Box sx={{ flex: 1, overflow: 'auto', p: 2 }}>
           <Typography variant='subtitle2' color='text.secondary' sx={{ mb: 1 }}>
-            Page Blocks
+            {translate('pageBlocks')}
           </Typography>
           {blocks.length === 0 ? (
             <Typography variant='body2' color='text.secondary' sx={{ textAlign: 'center', py: 3 }}>
-              No blocks. Click &quot;Add Block&quot; above to choose a block type.
+              {translate('emptyState')}
             </Typography>
           ) : (
             <List disablePadding sx={{ mb: 2 }}>
@@ -218,7 +237,7 @@ export function PageBuilder({
                         {index + 1}
                       </Typography>
                     </ListItemIcon>
-                    <ListItemText primary={def?.name || block.type} secondary={block.type} />
+                    <ListItemText primary={translateDefinition(def, 'name') || block.type} secondary={block.type} />
                   </ListItemButton>
                 )
               })}
@@ -229,16 +248,16 @@ export function PageBuilder({
             <>
               <Divider sx={{ my: 2 }} />
               <Typography variant='subtitle2' color='text.secondary' sx={{ mb: 1 }}>
-                Block Settings (JSON)
+                {translate('settingsJson')}
               </Typography>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-                <Typography variant='body2'>{selectedDefinition.name}</Typography>
+                <Typography variant='body2'>{translateDefinition(selectedDefinition, 'name')}</Typography>
                 <Box>
                   <IconButton
                     size='small'
                     onClick={() => handleMoveBlock(selectedBlock.id, 'up')}
                     disabled={blocks.indexOf(selectedBlock) === 0}
-                    title='Move up'
+                    title={translate('moveUp')}
                   >
                     <Icon icon='mdi:arrow-up' />
                   </IconButton>
@@ -246,11 +265,11 @@ export function PageBuilder({
                     size='small'
                     onClick={() => handleMoveBlock(selectedBlock.id, 'down')}
                     disabled={blocks.indexOf(selectedBlock) === blocks.length - 1}
-                    title='Move down'
+                    title={translate('moveDown')}
                   >
                     <Icon icon='mdi:arrow-down' />
                   </IconButton>
-                  <IconButton size='small' color='error' onClick={() => handleDeleteBlock(selectedBlock.id)} title='Delete'>
+                  <IconButton size='small' color='error' onClick={() => handleDeleteBlock(selectedBlock.id)} title={translate('delete')}>
                     <Icon icon='mdi:delete' />
                   </IconButton>
                 </Box>
@@ -263,16 +282,16 @@ export function PageBuilder({
                 value={blockJson}
                 onChange={(e) => setBlockJson(e.target.value)}
                 error={Boolean(jsonError)}
-                helperText={jsonError}
+                helperText={jsonErrorMessage}
                 placeholder='{"settings": {}, "data": {}}'
                 sx={{ '& textarea': { fontFamily: 'monospace', fontSize: 12 } }}
               />
               <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
                 <Button size='small' variant='contained' onClick={handleApplyBlockJson}>
-                  Apply JSON
+                  {translate('applyJson')}
                 </Button>
                 <Button size='small' variant='text' onClick={() => setSelectedBlockId(null)}>
-                  Back to list
+                  {translate('backToList')}
                 </Button>
               </Box>
             </>
@@ -292,12 +311,12 @@ export function PageBuilder({
       >
         <Box sx={{ width: 400, p: 2 }}>
           <Typography variant='h6' sx={{ mb: 2 }}>
-            Add Block
+            {translate('addBlock')}
           </Typography>
           {Object.entries(blocksByCategory).map(([category, defs]) => (
             <Box key={category} sx={{ mb: 2 }}>
               <Typography variant='overline' color='text.secondary' sx={{ textTransform: 'capitalize' }}>
-                {category}
+                {translateCategory(category)}
               </Typography>
               <Grid container spacing={1} sx={{ mt: 0.5 }}>
                 {defs.map((def) => (
@@ -312,10 +331,10 @@ export function PageBuilder({
                     >
                       <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
                         <Typography variant='body2' noWrap>
-                          {def.name}
+                          {translateDefinition(def, 'name')}
                         </Typography>
                         <Typography variant='caption' color='text.secondary' noWrap display='block'>
-                          {def.description || def.type}
+                          {translateDefinition(def, 'description')}
                         </Typography>
                       </CardContent>
                     </Card>

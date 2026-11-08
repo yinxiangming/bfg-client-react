@@ -1,8 +1,12 @@
 // Server Component — mobile admin layout (UA redirect handled by middleware)
+import { getTranslations } from 'next-intl/server'
 import MobileAdminLayoutClient from './MobileAdminLayoutClient'
 
-export const metadata = {
-  title: { template: '管理 - %s', default: '管理' },
+export async function generateMetadata() {
+  const t = await getTranslations('admin.mobileLayout')
+  return {
+    title: { template: t('titleTemplate'), default: t('titleDefault') },
+  }
 }
 
 export default function MobileAdminLayout({

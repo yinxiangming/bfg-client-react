@@ -44,6 +44,72 @@
   },
   "apiErrors": {
     "workspaceReadOnly": "这个工作区续费前只能查看和导出，刚才的修改没有保存。"
+  },
+  "categoryTreeSelect": {
+    "placeholder": "选择分类",
+    "loading": "加载中...",
+    "noOptions": "没有可用分类"
+  },
+  "pageBuilder": {
+    "preview": "页面预览",
+    "addBlock": "添加区块",
+    "pageBlocks": "页面区块",
+    "emptyState": "还没有区块。选择“添加区块”来选择区块类型。",
+    "settingsJson": "区块设置（JSON）",
+    "moveUp": "上移",
+    "moveDown": "下移",
+    "delete": "删除",
+    "applyJson": "应用 JSON",
+    "backToList": "返回列表",
+    "errors": {
+      "invalidJson": "请输入有效的 JSON。",
+      "invalidJsonContext": "JSON 解析错误。{detail}"
+    },
+    "categories": {
+      "hero": "主视觉",
+      "content": "内容",
+      "list": "列表",
+      "form": "表单",
+      "layout": "布局",
+      "media": "媒体"
+    },
+    "blocks": {
+      "text_block_v1": {
+        "name": "文本区块",
+        "description": "可自定义样式的富文本内容区块"
+      },
+      "banner_grid_v1": {
+        "name": "横幅网格",
+        "description": "以网格布局展示促销横幅"
+      },
+      "product_grid_v1": {
+        "name": "商品网格",
+        "description": "以网格布局展示商品并提供筛选选项"
+      },
+      "post_list_v1": {
+        "name": "文章列表",
+        "description": "以网格或列表布局展示文章并提供筛选选项"
+      },
+      "category_grid_v1": {
+        "name": "分类网格",
+        "description": "以网格布局展示商品分类"
+      },
+      "section_v1": {
+        "name": "区块容器",
+        "description": "将子区块放入固定宽度或全宽容器"
+      },
+      "hero_carousel_v1": {
+        "name": "主视觉轮播",
+        "description": "全宽图片轮播，可叠加文字和行动按钮"
+      },
+      "contact_form_v1": {
+        "name": "联系表单",
+        "description": "用于客户咨询、预约和反馈的表单"
+      },
+      "cta_block_v1": {
+        "name": "行动号召区块",
+        "description": "包含标题、说明和按钮的行动号召区块"
+      }
+    }
   }
 }
-
