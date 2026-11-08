@@ -5264,5 +5264,31 @@
     "title": "这个工作区目前只能查看",
     "body": "它还没有续费，所以暂时不能做任何修改。每个页面、每张报表都还能看，数据也照常导出。续费后就会恢复原样，什么都不会丢。",
     "action": "去续费"
+  },
+  "agentDialog": {
+    "title": "AI 助手",
+    "emptyState": "输入消息与 AI 助手对话，可自动执行订单、发货等操作。",
+    "roles": {
+      "user": "我",
+      "assistant": "AI"
+    },
+    "toolNamesSummary": "{count, plural, one {已执行 {count} 个操作} other {已执行 {count} 个操作}}：{names}",
+    "toolFailure": "{name} 执行失败：{error}",
+    "errors": {
+      "requestFailed": "请求失败。",
+      "sendFailed": "消息发送失败。",
+      "unknownToolError": "未知错误"
+    },
+    "responses": {
+      "interrupted": "（请求中断）",
+      "empty": "（无文字回复）"
+    },
+    "inputPlaceholder": "输入消息...",
+    "send": "发送",
+    "close": "关闭"
+  },
+  "mobileLayout": {
+    "titleTemplate": "管理 - %s",
+    "titleDefault": "管理"
   }
 }

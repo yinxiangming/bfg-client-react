@@ -20,9 +20,13 @@ export type BlockCategory =
 export interface BlockDefinition {
   type: string
   name: string
+  /** Fully qualified next-intl message key for the block name. */
+  nameI18nKey?: string
   category: BlockCategory
   thumbnail?: string
   description?: string
+  /** Fully qualified next-intl message key for the block description. */
+  descriptionI18nKey?: string
   settingsSchema?: Record<string, FieldSchema>
   dataSchema?: Record<string, FieldSchema>
   defaultSettings?: Record<string, unknown>

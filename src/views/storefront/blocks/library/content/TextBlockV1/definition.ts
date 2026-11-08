@@ -4,9 +4,11 @@ import TextBlockV1 from './index'
 export const definition: BlockDefinition = {
   type: 'text_block_v1',
   name: 'Text Block',
+  nameI18nKey: 'common.pageBuilder.blocks.text_block_v1.name',
   category: 'content',
   thumbnail: '/blocks/thumbnails/text-block-v1.png',
   description: 'Rich text content block with customizable styling',
+  descriptionI18nKey: 'common.pageBuilder.blocks.text_block_v1.description',
 
   settingsSchema: {
     align: {

@@ -5264,5 +5264,31 @@
     "title": "This workspace is read only",
     "body": "Its plan has not been renewed, so nothing here can be changed for now. You can still read every page, run every report and export your data. Renewing puts it back the way it was — nothing has been deleted.",
     "action": "Renew plan"
+  },
+  "agentDialog": {
+    "title": "AI assistant",
+    "emptyState": "Chat with the AI assistant. It can carry out tasks such as managing orders and shipments.",
+    "roles": {
+      "user": "You",
+      "assistant": "AI"
+    },
+    "toolNamesSummary": "{count, plural, one {Executed {count} action} other {Executed {count} actions}}: {names}",
+    "toolFailure": "{name} failed: {error}",
+    "errors": {
+      "requestFailed": "The request failed.",
+      "sendFailed": "The message could not be sent.",
+      "unknownToolError": "Unknown error"
+    },
+    "responses": {
+      "interrupted": "(Request interrupted)",
+      "empty": "(No text response)"
+    },
+    "inputPlaceholder": "Type a message...",
+    "send": "Send",
+    "close": "Close"
+  },
+  "mobileLayout": {
+    "titleTemplate": "Admin - %s",
+    "titleDefault": "Admin"
   }
 }

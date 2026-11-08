@@ -3,9 +3,11 @@ import type { BlockDefinition } from '../../../types'
 export const definition: BlockDefinition = {
   type: 'banner_grid_v1',
   name: 'Banner Grid',
+  nameI18nKey: 'common.pageBuilder.blocks.banner_grid_v1.name',
   category: 'media',
   thumbnail: '/blocks/thumbnails/banner-grid-v1.png',
   description: 'Display promotional banners in a grid layout',
+  descriptionI18nKey: 'common.pageBuilder.blocks.banner_grid_v1.description',
 
   settingsSchema: {
     columns: {

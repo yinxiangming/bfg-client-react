@@ -2,6 +2,7 @@
 
 // React Imports
 import { useMemo } from 'react'
+import { useTranslations } from 'next-intl'
 
 // MUI Imports
 import Autocomplete from '@mui/material/Autocomplete'
@@ -83,12 +84,13 @@ export default function CategoryTreeSelect({
   onChange,
   onOpen,
   label,
-  placeholder = 'Select categories',
+  placeholder,
   loading = false,
   multiple = true,
   sx,
   optionSx
 }: CategoryTreeSelectProps) {
+  const t = useTranslations('common.categoryTreeSelect')
   // Flatten tree structure for Autocomplete
   const flatCategories = useMemo(() => {
     if (!categories || !Array.isArray(categories) || categories.length === 0) {
@@ -158,7 +160,7 @@ export default function CategoryTreeSelect({
         onChange(selectedOne ? [strip(selectedOne)] : [])
       }}
       loading={loading}
-      noOptionsText={loading ? 'Loading...' : 'No categories available'}
+      noOptionsText={loading ? t('loading') : t('noOptions')}
       renderInput={(params) => {
         const hasValue = multiple 
           ? (Array.isArray(normalizedValue) && normalizedValue.length > 0)
@@ -167,7 +169,7 @@ export default function CategoryTreeSelect({
           <TextField
             {...params}
             label={label || undefined}
-            placeholder={placeholder}
+            placeholder={placeholder ?? t('placeholder')}
             InputLabelProps={{
               ...params.InputLabelProps,
               shrink: hasValue || params.inputProps.value !== '' || false,

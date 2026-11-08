@@ -4,9 +4,11 @@ import PostListV1 from './index'
 export const definition: BlockDefinition = {
   type: 'post_list_v1',
   name: 'Post List',
+  nameI18nKey: 'common.pageBuilder.blocks.post_list_v1.name',
   category: 'list',
   thumbnail: '/blocks/thumbnails/post-list-v1.png',
   description: 'Display a grid or list of posts with filtering options',
+  descriptionI18nKey: 'common.pageBuilder.blocks.post_list_v1.description',
 
   settingsSchema: {
     layout: {

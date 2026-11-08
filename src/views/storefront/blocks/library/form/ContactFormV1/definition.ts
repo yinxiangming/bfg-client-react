@@ -4,9 +4,11 @@ import ContactFormV1 from './index'
 export const definition: BlockDefinition = {
   type: 'contact_form_v1',
   name: 'Contact Form',
+  nameI18nKey: 'common.pageBuilder.blocks.contact_form_v1.name',
   category: 'form',
   thumbnail: '/blocks/thumbnails/contact-form-v1.png',
   description: 'Contact form for customer inquiries, bookings, and feedback',
+  descriptionI18nKey: 'common.pageBuilder.blocks.contact_form_v1.description',
 
   settingsSchema: {
     inquiryType: {

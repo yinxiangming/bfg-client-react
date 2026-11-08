@@ -4,9 +4,11 @@ import HeroCarouselV1 from './index'
 export const definition: BlockDefinition = {
   type: 'hero_carousel_v1',
   name: 'Hero Carousel',
+  nameI18nKey: 'common.pageBuilder.blocks.hero_carousel_v1.name',
   category: 'hero',
   thumbnail: '/blocks/thumbnails/hero-carousel-v1.png',
   description: 'Full-width image carousel with text overlay and call-to-action buttons',
+  descriptionI18nKey: 'common.pageBuilder.blocks.hero_carousel_v1.description',
 
   settingsSchema: {
     autoPlay: {

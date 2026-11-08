@@ -44,6 +44,7 @@ const displayName = (customer: Customer | null): string => {
  */
 const CustomerQuickViewDialog = ({ open, customerId, onClose }: Props) => {
   const t = useTranslations('admin')
+  const tCommon = useTranslations('common')
   const [customer, setCustomer] = useState<Customer | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -74,7 +75,7 @@ const CustomerQuickViewDialog = ({ open, customerId, onClose }: Props) => {
     <Dialog open={open} onClose={onClose} maxWidth='xs' fullWidth>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <span>{displayName(customer)}</span>
-        <IconButton size='small' onClick={onClose} aria-label='close'>
+        <IconButton size='small' onClick={onClose} aria-label={tCommon('actions.close')}>
           <i className='tabler-x' />
         </IconButton>
       </DialogTitle>

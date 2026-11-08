@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
+import { useTranslations } from 'next-intl'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
@@ -20,10 +21,9 @@ type AgentDialogProps = {
 }
 
 /** Show only operation names (no execution details). */
-function toolNamesSummary(names: string[]): string {
+function toolNamesSummary(names: string[], summarize: (count: number, names: string) => string): string {
   if (!names.length) return ''
-  if (names.length === 1) return `执行了 1 个操作：${names[0]}`
-  return `执行了 ${names.length} 个操作：${names.join(', ')}`
+  return summarize(names.length, names.join(', '))
 }
 
 type ToolResult = { name: string; success: boolean; error?: string }
@@ -37,6 +37,7 @@ type ChatMessage = {
 }
 
 export default function AgentDialog({ open, onClose }: AgentDialogProps) {
+  const t = useTranslations('admin.agentDialog')
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([])
   const [chatInput, setChatInput] = useState('')
   const [chatSending, setChatSending] = useState(false)
@@ -87,7 +88,7 @@ export default function AgentDialog({ open, onClose }: AgentDialogProps) {
       const res = await sendAgentChat(body, idempotencyKey)
       if (!res.ok) {
         const err = await res.text()
-        setChatError(err || '请求失败')
+        setChatError(err || t('errors.requestFailed'))
         return
       }
       const contentType = res.headers.get('content-type') || ''
@@ -193,7 +194,7 @@ export default function AgentDialog({ open, onClose }: AgentDialogProps) {
         ])
       }
     } catch (e) {
-      setChatError(e instanceof Error ? e.message : '发送失败')
+      setChatError(e instanceof Error ? e.message : t('errors.sendFailed'))
     } finally {
       setChatSending(false)
       if (!streamDoneRef.current) {
@@ -205,7 +206,7 @@ export default function AgentDialog({ open, onClose }: AgentDialogProps) {
                   ...msgs,
                   {
                     role: 'assistant' as const,
-                    content: prev || '(请求中断)',
+                    content: prev || t('responses.interrupted'),
                     tool_names: names.length ? names : undefined,
                     tool_results: results.length ? results : undefined,
                   },
@@ -223,13 +224,13 @@ export default function AgentDialog({ open, onClose }: AgentDialogProps) {
 
   return (
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
-      <DialogTitle>AI</DialogTitle>
+      <DialogTitle>{t('title')}</DialogTitle>
       <DialogContent>
         <Box display="flex" flexDirection="column" sx={{ minHeight: 320 }}>
           <Box flex="1" overflow="auto" display="flex" flexDirection="column" sx={{ maxHeight: 360, mb: 2, pr: 1 }}>
             {chatMessages.length === 0 && (
               <Typography color="text.secondary" variant="body2">
-                输入消息与 AI 对话，可自动执行订单、发货等操作。
+                {t('emptyState')}
               </Typography>
             )}
             {chatMessages.map((m, i) => (
@@ -251,7 +252,7 @@ export default function AgentDialog({ open, onClose }: AgentDialogProps) {
                 }}
               >
                 <Typography variant="caption" sx={{ color: m.role === 'user' ? 'inherit' : 'text.secondary' }}>
-                  {m.role === 'user' ? '我' : 'AI'}
+                  {m.role === 'user' ? t('roles.user') : t('roles.assistant')}
                 </Typography>
                 {m.role === 'assistant' && (m.tool_names?.length ?? 0) > 0 && (
                   <Alert
@@ -259,7 +260,7 @@ export default function AgentDialog({ open, onClose }: AgentDialogProps) {
                     icon={false}
                     sx={{ mt: 0.5, py: 0.5, fontSize: '0.75rem', '& .MuiAlert-message': { fontSize: '0.75rem' } }}
                   >
-                    {toolNamesSummary(m.tool_names ?? [])}
+                    {toolNamesSummary(m.tool_names ?? [], (count, names) => t('toolNamesSummary', { count, names }))}
                   </Alert>
                 )}
                 {m.role === 'assistant' && !m.tool_names?.length && m.tool_calls_made?.length && (
@@ -268,7 +269,7 @@ export default function AgentDialog({ open, onClose }: AgentDialogProps) {
                     icon={false}
                     sx={{ mt: 0.5, py: 0.5, fontSize: '0.75rem', '& .MuiAlert-message': { fontSize: '0.75rem' } }}
                   >
-                    {toolNamesSummary(m.tool_calls_made.map((t) => t.tool_name ?? t.capability_id ?? '').filter(Boolean))}
+                    {toolNamesSummary(m.tool_calls_made.map((t) => t.tool_name ?? t.capability_id ?? '').filter(Boolean), (count, names) => t('toolNamesSummary', { count, names }))}
                   </Alert>
                 )}
                 {m.role === 'assistant' && m.tool_results?.some((r) => !r.success) && (
@@ -278,26 +279,26 @@ export default function AgentDialog({ open, onClose }: AgentDialogProps) {
                   >
                     {m.tool_results.filter((r) => !r.success).map((r) => (
                       <Box key={r.name} component="span" display="block">
-                        {r.name} 执行失败：{r.error ?? '未知错误'}
+                        {t('toolFailure', { name: r.name, error: r.error ?? t('errors.unknownToolError') })}
                       </Box>
                     ))}
                   </Alert>
                 )}
                 <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', color: 'inherit' }}>
-                  {m.content || '(无文字回复)'}
+                  {m.content || t('responses.empty')}
                 </Typography>
               </Box>
             ))}
             {chatSending && (streamingContent || streamingToolNames.length > 0 || streamingToolResults.length > 0) && (
               <Box sx={{ mb: 2, alignSelf: 'flex-start', maxWidth: '85%', fontSize: '0.75rem', color: 'text.secondary' }}>
-                <Typography variant="caption" sx={{ color: 'text.secondary' }}>AI</Typography>
+                <Typography variant="caption" sx={{ color: 'text.secondary' }}>{t('roles.assistant')}</Typography>
                 {streamingToolNames.length > 0 && (
                   <Alert
                     severity="info"
                     icon={false}
                     sx={{ mt: 0.5, py: 0.5, fontSize: '0.75rem', '& .MuiAlert-message': { fontSize: '0.75rem' } }}
                   >
-                    {toolNamesSummary(streamingToolNames)}
+                    {toolNamesSummary(streamingToolNames, (count, names) => t('toolNamesSummary', { count, names }))}
                   </Alert>
                 )}
                 {streamingToolResults.some((r) => !r.success) && (
@@ -307,7 +308,7 @@ export default function AgentDialog({ open, onClose }: AgentDialogProps) {
                   >
                     {streamingToolResults.filter((r) => !r.success).map((r) => (
                       <Box key={r.name} component="span" display="block">
-                        {r.name} 执行失败：{r.error ?? '未知错误'}
+                        {t('toolFailure', { name: r.name, error: r.error ?? t('errors.unknownToolError') })}
                       </Box>
                     ))}
                   </Alert>
@@ -328,7 +329,7 @@ export default function AgentDialog({ open, onClose }: AgentDialogProps) {
               fullWidth
               multiline
               maxRows={4}
-              placeholder="输入消息..."
+              placeholder={t('inputPlaceholder')}
               value={chatInput}
               onChange={(e) => setChatInput(e.target.value)}
               onKeyDown={(e) => {
@@ -341,13 +342,13 @@ export default function AgentDialog({ open, onClose }: AgentDialogProps) {
               size="small"
             />
             <Button variant="contained" onClick={handleChatSend} disabled={chatSending || !chatInput.trim()}>
-              {chatSending ? <CircularProgress size={24} /> : '发送'}
+              {chatSending ? <CircularProgress size={24} /> : t('send')}
             </Button>
           </Box>
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={handleClose}>关闭</Button>
+        <Button onClick={handleClose}>{t('close')}</Button>
       </DialogActions>
     </Dialog>
   )
