@@ -223,3 +223,8 @@ vercel --prod
 | CORS errors from backend | Set `CORS_ALLOW_ALL_ORIGINS=True` in Django (dev only) or add your frontend origin |
 | Media images 404 | Set `NEXT_PUBLIC_MEDIA_URL=http://localhost:8000/media` |
 | Token exchange fails (Platform) | Ensure `PLATFORM_API_KEY` matches on both servers |
+
+
+## Standalone builds
+
+Set `NEXT_STANDALONE=true` during a production build to generate a standalone runtime bundle. Set `NEXT_FILE_TRACING_ROOT` to the source root containing the frontend and its linked extensions when packaging a self-hosted application.
