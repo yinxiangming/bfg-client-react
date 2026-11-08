@@ -17,6 +17,10 @@ export default function InsuranceServiceGridV1({ data, settings }: BlockProps) {
 
   return (
     <section className={`${styles.section} ${styles[themeVariant]}`}>
+      <link
+        rel='stylesheet'
+        href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400&family=Manrope:wght@300;400;500&display=swap'
+      />
       <div className={styles.container}>
         <div className={styles.header}>
           <div className={styles.headerContent}>

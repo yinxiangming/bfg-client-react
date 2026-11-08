@@ -32,6 +32,10 @@ export default function InsuranceHeroV1({ data, settings }: BlockProps) {
       className={`${styles.hero} ${styles[themeVariant]} ${styles[alignVariant]}`}
       style={{ minHeight: height }}
     >
+      <link
+        rel='stylesheet'
+        href='https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Manrope:wght@300;400;500&display=swap'
+      />
       <div className={styles.noise}></div>
       <div className={styles.container}>
         <div className={styles.content}>
