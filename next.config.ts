@@ -54,6 +54,7 @@ const tracingRoot =
 
 const nextConfig: NextConfig = {
   reactStrictMode: true,
+  ...(process.env.NEXT_STANDALONE === 'true' ? { output: 'standalone' } : {}),
   images: { remotePatterns: buildImageRemotePatterns() },
   ...(process.env.API_PROXY_TARGET ? { skipTrailingSlashRedirect: true } : {}),
   ...(tracingRoot != null && tracingRoot !== '' ? { outputFileTracingRoot: tracingRoot } : {}),
