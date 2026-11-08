@@ -2,7 +2,7 @@
 
 import { useMemo, useRef, useEffect, useState } from 'react'
 
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useLocale, useTranslations } from 'next-intl'
 
 import Icon from '@components/Icon'
@@ -33,27 +33,29 @@ export default function LanguageSwitcher({
   triggerVariant = 'button'
 }: Props) {
   const router = useRouter()
+  const pathname = usePathname() || ''
+  const management = ['/admin', '/console'].some(prefix => pathname === prefix || pathname.startsWith(`${prefix}/`))
   const locale = useLocale()
   const t = useTranslations('common')
   const { config, loading } = useStorefrontConfig()
   const [isOpen, setIsOpen] = useState(false)
   const dropdownRef = useRef<HTMLDivElement>(null)
   const localeOptions = useMemo(() => {
-    if (!config) return LOCALE_OPTIONS
+    if (management || !config) return LOCALE_OPTIONS
     const available = new Set(getStorefrontLanguages(config))
     return LOCALE_OPTIONS.filter(option => available.has(option.value))
-  }, [config])
+  }, [config, management])
 
   const current = useMemo(() => {
-    return resolveStorefrontLocale(config, normalizeAppLocale(locale))
-  }, [config, locale])
+    return management ? normalizeAppLocale(locale) : resolveStorefrontLocale(config, normalizeAppLocale(locale))
+  }, [config, locale, management])
 
   const currentShortLabel = useMemo(() => {
     const opt = localeOptions.find(o => o.value === current)
     return opt?.shortLabel || 'EN'
   }, [current, localeOptions])
 
-  const shouldHideSwitcher = loading || (config && !hasMultipleStorefrontLanguages(config))
+  const shouldHideSwitcher = !management && (loading || (config && !hasMultipleStorefrontLanguages(config)))
 
   // Close dropdown when clicking outside
   useEffect(() => {
