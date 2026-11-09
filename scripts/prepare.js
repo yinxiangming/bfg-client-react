@@ -248,7 +248,16 @@ function syncPluginRoutes() {
             const routeRoot = `/plugins/${plugin}${standalone ? '/portals' : ''}`
             const target = name === plugin ? routeRoot : `${routeRoot}/${name}`
             if (standalone) owners.push({prefix: '/' + name, id: plugin}, {prefix: target, id: plugin})
-            rewrites.push({source:`/${name}`, destination:target}, {source:`/${name}/:path*`, destination:`${target}/:path*`})
+            const routePrefix = path.relative(SRC_DIR, dest).split(path.sep).join('/') + '/'
+            // Route groups, parallel slots and optional catch-alls can serve the bare prefix.
+            const indexRoute = /^(?:(?:\([^/]+\)|@[^/]+|\[\[\.\.\.[^/]+\]\])\/)*(?:page|route)\.[jt]sx?$/
+            const hasIndex = [...files.keys()].some(file =>
+              file.startsWith(routePrefix) && indexRoute.test(file.slice(routePrefix.length))
+            )
+            // Leave the bare prefix to the host CMS when the plugin only serves subpaths.
+            if (hasIndex) rewrites.push({source:`/${name}`, destination:target})
+            const subpath = hasIndex ? ':path*' : ':path+'
+            rewrites.push({source:`/${name}/${subpath}`, destination:`${target}/${subpath}`})
           }
         } else {
           const prefix = `/${segment}/${name}`
