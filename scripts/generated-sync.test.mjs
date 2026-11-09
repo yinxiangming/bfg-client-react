@@ -56,6 +56,24 @@ test('routes cannot shadow mounts; core post stays reserved', () => fixture(({ho
   assert.equal(existsSync(join(host, 'src/app/(storefront)/plugins/two/post/page.tsx')), true)
 }))
 
+test('storefront aliases leave index paths to the host when a plugin only has detail routes', () => fixture(({host, plugin, prepare}) => {
+  const source = plugin('one', 'projects')
+  const projects = join(source, 'app/storefront/projects')
+  const index = join(projects, 'page.tsx')
+  mkdirSync(join(projects, '[slug]'))
+  renameSync(index, join(projects, '[slug]/page.tsx'))
+  prepare()
+
+  const rewrites = () => JSON.parse(readFileSync(join(host, 'src/.plugin-route-rewrites.json'), 'utf8'))
+  const detailRule = { source: '/projects/:path+', destination: '/plugins/one/projects/:path+' }
+  assert.deepEqual(rewrites(), [detailRule])
+
+  mkdirSync(join(projects, '(listing)'))
+  writeFileSync(join(projects, '(listing)/page.tsx'), 'export default function Page() { return null }')
+  prepare()
+  assert.deepEqual(rewrites(), [{ source: '/projects', destination: '/plugins/one/projects' }, detailRule])
+}))
+
 test('tampered manifests and dangling output links cannot delete host files', () => fixture(({root, host, plugin, skin, prepare}) => {
   plugin('one'); skin('friendly', 'one'); prepare()
   const manifest = join(host, 'src/.plugin-routes-manifest.json')
