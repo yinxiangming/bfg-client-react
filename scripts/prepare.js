@@ -256,7 +256,8 @@ function syncPluginRoutes() {
             )
             // Leave the bare prefix to the host CMS when the plugin only serves subpaths.
             if (hasIndex) rewrites.push({source:`/${name}`, destination:target})
-            rewrites.push({source:`/${name}/:path+`, destination:`${target}/:path+`})
+            const subpath = hasIndex ? ':path*' : ':path+'
+            rewrites.push({source:`/${name}/${subpath}`, destination:`${target}/${subpath}`})
           }
         } else {
           const prefix = `/${segment}/${name}`

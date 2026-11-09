@@ -71,7 +71,10 @@ test('storefront aliases leave index paths to the host when a plugin only has de
   mkdirSync(join(projects, '(listing)'))
   writeFileSync(join(projects, '(listing)/page.tsx'), 'export default function Page() { return null }')
   prepare()
-  assert.deepEqual(rewrites(), [{ source: '/projects', destination: '/plugins/one/projects' }, detailRule])
+  assert.deepEqual(rewrites(), [
+    { source: '/projects', destination: '/plugins/one/projects' },
+    { source: '/projects/:path*', destination: '/plugins/one/projects/:path*' },
+  ])
 }))
 
 test('tampered manifests and dangling output links cannot delete host files', () => fixture(({root, host, plugin, skin, prepare}) => {
