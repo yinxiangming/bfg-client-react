@@ -84,6 +84,15 @@ const Addresses = ({ registerOpenHandler }: AddressesProps) => {
     is_default: false
   })
 
+  const canSave = [
+    formData.full_name,
+    formData.phone,
+    formData.address_line1,
+    formData.city,
+    formData.postal_code,
+    formData.country
+  ].every(value => value.trim().length > 0)
+
   // Fetch addresses and user info
   useEffect(() => {
     fetchAddresses()
@@ -487,7 +496,7 @@ const Addresses = ({ registerOpenHandler }: AddressesProps) => {
           <Button onClick={handleCloseDialog} disabled={saving}>
             {t('cancel')}
           </Button>
-          <Button variant='contained' onClick={handleSave} disabled={saving}>
+          <Button variant='contained' onClick={handleSave} disabled={saving || !canSave}>
             {saving ? t('saving') : t('save')}
           </Button>
         </DialogActions>
