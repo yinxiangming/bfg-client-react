@@ -39,7 +39,7 @@ const buildPageFormSchema = (t: any): FormSchema => ({
   fields: [
     { field: 'title', label: t('settings.web.pages.editDialog.fields.title'), type: 'string', required: true },
     { field: 'slug', label: t('settings.web.pages.editDialog.fields.slug'), type: 'string', required: true },
-    { field: 'content', label: t('settings.web.pages.editDialog.fields.content'), type: 'textarea', required: true, rows: 10 },
+    { field: 'content', label: t('settings.web.pages.editDialog.fields.content'), type: 'textarea', rows: 10 },
     { field: 'excerpt', label: t('settings.web.pages.editDialog.fields.excerpt'), type: 'textarea', rows: 3 },
     {
       field: 'parent_id',

@@ -3994,6 +3994,9 @@
               "placeholder": "G-XXXXXXXXXX",
               "helper": "Found in GA4 under Admin → Data streams → your web stream. Leave blank to turn tracking off. Page views are reported automatically on every storefront page."
             }
+          },
+          "contactAddress": {
+            "label": "Contact address"
           }
         },
         "actions": {
@@ -4714,7 +4717,7 @@
       },
       "suspend": "Suspend",
       "resume": "Resume",
-  "export": "Export workspace configuration",
+      "export": "Export workspace configuration",
       "resetPassword": "Send password reset",
       "delete": "Schedule deletion",
       "cancelDeletion": "Cancel deletion",

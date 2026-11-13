@@ -15,12 +15,15 @@ import CustomTextField from '@components/ui/TextField'
 import Icon from '@components/Icon'
 import { authApi } from '@/utils/authApi'
 import { meApi } from '@/utils/meApi'
-import { getApiBaseUrl } from '@/utils/api'
+import { getApiBaseUrl, getWorkspaceIdFromJwt } from '@/utils/api'
+import { switchWorkspace } from '@/utils/switchWorkspace'
 import { useStorefrontConfigSafe } from '@/contexts/StorefrontConfigContext'
 import { useSocialProviders } from '@/hooks/useSocialProviders'
 import { isPlatformInstance, handlePlatformPostLogin } from '@/services/platform'
 
-export default function AuthLoginClient() {
+type Props = { compact?: boolean; signInToSiteWorkspace?: boolean }
+
+export default function AuthLoginClient({ compact = false, signInToSiteWorkspace = false }: Props = {}) {
   const t = useTranslations('auth.login')
   const [isPasswordShown, setIsPasswordShown] = useState(false)
   const [email, setEmail] = useState('')
@@ -59,6 +62,11 @@ export default function AuthLoginClient() {
 
     try {
       await authApi.login({ email, password })
+
+      const siteWorkspaceId = storefrontConfig.workspace_id
+      if (signInToSiteWorkspace && siteWorkspaceId && getWorkspaceIdFromJwt() !== siteWorkspaceId) {
+        await switchWorkspace(siteWorkspaceId)
+      }
 
       if (isPlatformInstance()) {
         await handlePlatformPostLogin(
@@ -105,16 +113,18 @@ export default function AuthLoginClient() {
 
       <div className='auth-card'>
         <div className='auth-header'>
-          <div className='auth-eyebrow'>{t('eyebrow', { siteName })}</div>
-          <h2>{t('welcome')}</h2>
-          <p>{t('subtitle')}</p>
+          {!compact && <div className='auth-eyebrow'>{t('eyebrow', { siteName })}</div>}
+          <h2>{t(compact ? 'pageTitle' : 'welcome')}</h2>
+          {!compact && <p>{t('subtitle')}</p>}
         </div>
 
         {error && <div className='auth-error'>{error}</div>}
 
-        <form noValidate autoComplete='off' onSubmit={handleSubmit} className='auth-form'>
-          <label className='auth-label'>{t('emailOrUsername')}</label>
+        <form noValidate autoComplete={compact ? 'on' : 'off'} onSubmit={handleSubmit} className='auth-form'>
+          <label className='auth-label' htmlFor='auth-login-username'>{t('emailOrUsername')}</label>
           <CustomTextField
+            id='auth-login-username'
+            autoComplete='username'
             autoFocus
             fullWidth
             placeholder={t('emailPlaceholder')}
@@ -123,8 +133,9 @@ export default function AuthLoginClient() {
             required
           />
 
-          <label className='auth-label'>{t('password')}</label>
+          <label className='auth-label' htmlFor='outlined-adornment-password'>{t('password')}</label>
           <CustomTextField
+            autoComplete='current-password'
             fullWidth
             placeholder='············'
             id='outlined-adornment-password'
@@ -143,6 +154,7 @@ export default function AuthLoginClient() {
                   <InputAdornment position='end'>
                     <IconButton
                       edge='end'
+                      aria-label={isPasswordShown ? 'Hide password' : 'Show password'}
                       onClick={() => setIsPasswordShown(show => !show)}
                       onMouseDown={(e: MouseEvent) => e.preventDefault()}
                     >
@@ -154,32 +166,32 @@ export default function AuthLoginClient() {
             }}
           />
 
-          <div className='auth-row'>
+          {!compact && <div className='auth-row'>
             <FormControlLabel control={<Checkbox size='small' />} label={t('rememberMe')} />
             <Link className='auth-link' href='/auth/forgot-password'>
               {t('forgotPassword')}
             </Link>
-          </div>
+          </div>}
 
           <Button
             fullWidth
             variant='contained'
-            type='button'
+            type={compact ? 'submit' : 'button'}
             disabled={loading}
             className='auth-button'
-            onClick={() => void runLogin()}
+            onClick={compact ? undefined : () => void runLogin()}
           >
             {loading ? t('submitting') : t('submit')}
           </Button>
 
-          <div className='auth-subtext'>
+          {!compact && <div className='auth-subtext'>
             <span>{t('newToPlatform')}</span>
             <Link className='auth-link' href='/auth/register'>
               {t('createAccount')}
             </Link>
-          </div>
+          </div>}
 
-          {enabledProviders && enabledProviders.length > 0 && (
+          {!compact && enabledProviders && enabledProviders.length > 0 && (
             <>
               <div className='auth-divider'>
                 <span>{t('or')}</span>

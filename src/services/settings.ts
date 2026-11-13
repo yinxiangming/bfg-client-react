@@ -169,6 +169,7 @@ export type GeneralSettingsPayload = {
   default_timezone?: string
   contact_email?: string
   contact_phone?: string
+  contact_address?: string
   facebook_url?: string
   twitter_url?: string
   instagram_url?: string
@@ -360,13 +361,15 @@ export async function updateWebSettings(settingsId: number, web: WebSettingsPayl
   // PATCH custom_settings.web only, preserving other custom_settings
   const current = await apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`, getSiteAdminOptions())
   const currentCustom = current.custom_settings || {}
-  const nextCustom = { ...currentCustom, web }
+  const nextCustom = { ...currentCustom, web: { ...currentCustom.web, ...web } }
 
-  return apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`, {
+  const result = await apiFetch<WorkspaceSettings>(`${bfgApi.settings()}${settingsId}/`, {
     ...getSiteAdminOptions(),
     method: 'PATCH',
     body: JSON.stringify({ custom_settings: nextCustom })
   })
+  invalidateWorkspaceSettingsCache()
+  return result
 }
 
 export async function updateGeneralSettings(settingsId: number, general: GeneralSettingsPayload) {
@@ -374,7 +377,7 @@ export async function updateGeneralSettings(settingsId: number, general: General
   const url = `${bfgApi.settings()}${settingsId}/`
   const current = await apiFetch<WorkspaceSettings>(url, getSiteAdminOptions())
   const currentCustom = current.custom_settings || {}
-  const nextCustom = { ...currentCustom, general }
+  const nextCustom = { ...currentCustom, general: { ...currentCustom.general, ...general } }
   const result = await apiFetch<WorkspaceSettings>(url, {
     ...getSiteAdminOptions(),
     method: 'PATCH',

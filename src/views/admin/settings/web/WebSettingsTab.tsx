@@ -21,26 +21,20 @@ import { SETTINGS_GUTTER, SettingsActionBar } from '@/components/admin/settings/
 
 // Hook Imports
 import { useApiData } from '@/hooks/useApiData'
+import { getWorkspaceSettings, updateWebSettings as saveWebSettings, updateGeneralSettings } from '@/services/settings'
+import { clearStorefrontConfigCache } from '@/utils/storefrontConfig'
 
-// TODO: Replace with actual API service
 const getWebSettings = async () => {
-  // Mock data for now
-  await new Promise(resolve => setTimeout(resolve, 500))
+  const settings = await getWorkspaceSettings()
+  const web = settings.custom_settings?.web ?? {}
   return {
-    default_site_id: '',
-    default_theme_id: '',
-    default_language: 'en',
-    enable_comments: true,
-    enable_search: true,
-    seo_default_title: '',
-    seo_default_description: ''
+    id: settings.id,
+    default_language: settings.custom_settings?.general?.default_language ?? web.default_language ?? 'en',
+    enable_comments: web.enable_comments ?? true,
+    enable_search: web.enable_search ?? true,
+    seo_default_title: web.seo_default_title ?? '',
+    seo_default_description: web.seo_default_description ?? ''
   }
-}
-
-const updateWebSettings = async (payload: any) => {
-  // TODO: Implement actual API call
-  await new Promise(resolve => setTimeout(resolve, 300))
-  console.log('Update web settings:', payload)
 }
 
 const WebSettingsTab = () => {
@@ -72,7 +66,11 @@ const WebSettingsTab = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     try {
-      await updateWebSettings(formData)
+      if (!data?.id) throw new Error('Settings are not loaded')
+      await saveWebSettings(data.id, formData)
+      const current = await getWorkspaceSettings()
+      await updateGeneralSettings(data.id, { ...current.custom_settings?.general, default_language: formData.default_language })
+      clearStorefrontConfigCache()
       await refetch()
       alert(t('settings.web.settingsTab.alerts.saved'))
     } catch (err: any) {

@@ -27,9 +27,8 @@ import HomePage from '@views/storefront/HomePage'
 import type { Metadata } from 'next'
 import { getStorefrontServerProvider } from '@/extensions/storefrontServer'
 
-// 60s ISR instead of fully dynamic: the homepage was re-rendering on every request
-// (TTFB ~1.5s), which hurts Core Web Vitals and burns crawl budget. CMS edits go live
-// within a minute. Set back to 0 if instant preview of CMS edits matters more.
+// The API owns the rendered CMS cache and invalidates it after editorial writes.
+// Do not keep a second stale copy of content in the Next data cache.
 export const revalidate = 60
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -51,7 +50,7 @@ export async function generateMetadata(): Promise<Metadata> {
   // A bare site name ranks for nothing, so a store should set the CMS page's meta_title to
   // something that says what it sells. Only that field can know — this file cannot invent it.
   const title = pageData?.meta_title?.trim() || siteName
-  const images = provider?.homeImages?.({ config, locale, requestHost, origin })
+  const images = provider?.homeImages?.({ config, locale, requestHost, origin, pageData })
 
   return {
     // `absolute` opts out of the root '%s | siteName' template so the homepage title
@@ -74,9 +73,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 async function getPageData(slug: string, locale: string, requestHost?: string, languages?: string[]) {
-  // `cache: 'no-store'` opted the route out of the 60s ISR declared above, so the homepage
-  // re-rendered on every request. Match the route's revalidate window instead.
-  return fetchRenderedCmsPage(slug, locale, requestHost, { revalidate: 60, languages })
+  // The backend cache is shared by all clients and invalidated on commit.
+  return fetchRenderedCmsPage(slug, locale, requestHost, { cache: 'no-store', languages })
 }
 
 /**

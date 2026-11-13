@@ -115,8 +115,14 @@ export default function CmsMediaPickerDialog({ open, onClose, onSelect }: CmsMed
               return (
                 <Grid key={m.id} size={{ xs: 6, sm: 4, md: 3 }}>
                   <Paper
+                    component='button'
+                    type='button'
                     variant='outlined'
                     sx={{
+                      width: '100%',
+                      p: 0,
+                      textAlign: 'left',
+                      '&:focus-visible': { outline: '2px solid', outlineColor: 'primary.main' },
                       cursor: 'pointer',
                       overflow: 'hidden',
                       '&:hover': { borderColor: 'primary.main' }

@@ -226,7 +226,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const requestHost = headersList.get('host') ?? undefined
   const config = await getStorefrontConfigForServer(locale, requestHost).catch(() => null)
   const provider = await getStorefrontServerProvider(config)
-  const decision = provider?.legacyRoute?.('product', id, { config, locale, requestHost, origin: '' })
+  const decision = await provider?.legacyRoute?.('product', id, { config, locale, requestHost, origin: '' })
   if (decision?.notFound) return { title: 'Product not found', robots: { index: false, follow: false } }
   if (decision?.redirect) {
     const origin = await getRequestOrigin()
@@ -284,7 +284,7 @@ export default async function Page(props: Props) {
   const requestHost = headersList.get('host') ?? undefined
   const config = await getStorefrontConfigForServer(locale, requestHost).catch(() => null)
   const provider = await getStorefrontServerProvider(config)
-  const decision = provider?.legacyRoute?.('product', id, { config, locale, requestHost, origin: '' })
+  const decision = await provider?.legacyRoute?.('product', id, { config, locale, requestHost, origin: '' })
   if (decision?.notFound) notFound()
   if (decision?.redirect) permanentRedirect(decision.redirect)
 

@@ -1,6 +1,6 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useLocale, useTranslations } from 'next-intl'
 
 import Box from '@mui/material/Box'
@@ -9,6 +9,8 @@ import Grid from '@mui/material/Grid'
 import MenuItem from '@mui/material/MenuItem'
 import Switch from '@mui/material/Switch'
 import Typography from '@mui/material/Typography'
+import Button from '@mui/material/Button'
+import CmsMediaPickerDialog from './CmsMediaPickerDialog'
 
 // Component Imports
 import CustomTextField from '@/components/ui/TextField'
@@ -48,6 +50,7 @@ export default function PostCustomFieldsBlock({
 }: PostCustomFieldsBlockProps) {
   const t = useTranslations('admin')
   const locale = useLocale()
+  const [imageField,setImageField] = useState<string | null>(null)
 
   const entries = useMemo(() => {
     if (!schema || typeof schema !== 'object') return []
@@ -210,6 +213,9 @@ export default function PostCustomFieldsBlock({
                   placeholder={t('settings.web.posts.editDialog.customFieldImagePlaceholder')}
                   sx={def.required ? requiredAsteriskSx : undefined}
                 />
+                <Button variant='outlined' disabled={disabled} onClick={()=>setImageField(key)} sx={{mt:1}}>
+                  {locale.startsWith('zh') ? '选择或上传图片' : 'Choose or upload image'}
+                </Button>
               </Grid>
             )
           }
@@ -231,6 +237,7 @@ export default function PostCustomFieldsBlock({
           )
         })}
       </Grid>
+      <CmsMediaPickerDialog open={imageField!==null} onClose={()=>setImageField(null)} onSelect={media=>{if(imageField)setVal(imageField,media.file);setImageField(null)}} />
     </Box>
   )
 }

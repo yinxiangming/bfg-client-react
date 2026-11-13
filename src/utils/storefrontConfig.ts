@@ -78,9 +78,12 @@ export const DEFAULT_STOREFRONT_DISPLAY: StorefrontDisplaySettings = {
 export type StorefrontConfig = {
   site_name: string
   site_description: string
+  seo_default_title?: string
+  seo_default_description?: string
   contact_email: string
   support_email: string
   contact_phone: string
+  contact_address?: string
   facebook_url: string
   twitter_url: string
   instagram_url: string
@@ -339,8 +342,8 @@ export function getDefaultHeaderOptions(): StorefrontHeaderOptions {
  * Pass requestHost (e.g. from headers().get('host')); workspace id from env when set (same as other app surfaces).
  * Returns null when server returns 404 (e.g. workspace/site not configured yet).
  * Deduped per request via React.cache() so layout + page share one fetch.
- * Workspace branding changes need to appear promptly, so this uses a short
- * revalidate window rather than the default cross-request Next data cache.
+ * The backend invalidates its per-workspace cache after settings/menu changes;
+ * use that cache so edits appear on the next request.
  */
 export const getStorefrontConfigForServer = cache(
   async (locale: string, requestHost?: string): Promise<StorefrontConfig | null> => {
@@ -353,7 +356,9 @@ export const getStorefrontConfigForServer = cache(
           { 'Content-Type': 'application/json' },
           { requestHost }
         ),
-        next: { revalidate: 30 },
+        // The API caches and invalidates this per workspace. A second stale
+        // snapshot here otherwise hides saved branding and menu changes.
+        cache: 'no-store',
         signal: controller.signal,
       })
       clearTimeout(timeoutId)

@@ -25,7 +25,7 @@ const RESERVED_ASSET_SLUGS = new Set([
 
 async function getPageData(slug: string, locale: string, requestHost?: string, languages?: string[]) {
   if (RESERVED_ASSET_SLUGS.has(slug)) return null
-  return fetchRenderedCmsPage(slug, locale, requestHost, { revalidate: 60, languages })
+  return fetchRenderedCmsPage(slug, locale, requestHost, { cache: 'no-store', languages })
 }
 
 type Props = {
@@ -43,7 +43,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     getRequestOrigin(),
   ])
   const provider = await getStorefrontServerProvider(config)
-  const presentation = provider?.cmsPresentation?.(slug, { config, locale, requestHost, origin })
+  const presentation = provider?.cmsPresentation?.(slug, { config, locale, requestHost, origin, pageData })
   if (presentation?.redirect) return { alternates: { canonical: origin || '/' }, robots: { index: false, follow: true } }
   if (!pageData) return { title: 'Not found', robots: { index: false, follow: false } }
   const title = (pageData?.meta_title || pageData?.title || slug) as string

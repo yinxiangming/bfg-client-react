@@ -73,8 +73,12 @@ const PagesTab = () => {
       return
     }
     if (action.id === 'edit' && 'id' in item) {
-      setSelected(item as Page)
-      setEditOpen(true)
+      try {
+        setSelected(await getPage((item as Page).id))
+        setEditOpen(true)
+      } catch (err: any) {
+        alert(t('settings.web.pages.tab.errors.saveFailed', { error: err.message }))
+      }
       return
     }
     if (action.id === 'delete' && 'id' in item) {
