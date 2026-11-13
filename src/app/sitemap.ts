@@ -75,6 +75,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const config = await getStorefrontConfigForServer(locale, requestHost).catch(() => null)
   const provider = await getStorefrontServerProvider(config)
   const contribution = await provider?.sitemap?.({ config, locale, requestHost, origin })
+  if (contribution?.replaceDefaults) {
+    if (contribution.entries.some(item => !item.url.startsWith(`${origin}/`))) throw new Error('Extension sitemap entries must use the current origin.')
+    return Array.from(new Map(contribution.entries.map(item => [item.url, item])).values())
+  }
   const [categoriesRes, productList] = contribution?.includeCatalogue === false
     ? [null, []]
     : await Promise.all([

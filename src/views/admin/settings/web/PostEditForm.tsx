@@ -128,8 +128,8 @@ function mergeCustomFieldsForSchema(
   prev: Record<string, unknown>,
   schema: CategoryFieldsSchema | null | undefined
 ): Record<string, unknown> {
-  if (!schema || Object.keys(schema).length === 0) return {}
-  const next: Record<string, unknown> = {}
+  if (!schema || Object.keys(schema).length === 0) return { ...prev }
+  const next: Record<string, unknown> = { ...prev }
   for (const key of Object.keys(schema)) {
     const def = schema[key]
     const hasPrev =
@@ -453,6 +453,7 @@ export default function PostEditForm({ postId, listFallback, onCancel, onCreated
               children: (
                 <>
                   <CustomTextField
+                    id='post-category'
                     select
                     fullWidth
                     size='small'

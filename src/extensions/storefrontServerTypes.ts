@@ -6,6 +6,7 @@ export type StorefrontServerContext = {
   locale: string
   requestHost?: string
   origin: string
+  pageData?: unknown
 }
 export type StorefrontImage = { url: string; alt?: string }
 export type StorefrontRouteDecision = { redirect?: string; notFound?: boolean }
@@ -20,6 +21,6 @@ export interface StorefrontServerProvider {
   homeImages?(context: StorefrontServerContext): StorefrontImage[] | undefined
   organizationJsonLd?(context: StorefrontServerContext): Record<string, unknown> | undefined
   cmsPresentation?(slug: string, context: StorefrontServerContext): StorefrontCmsPresentation | undefined
-  legacyRoute?(kind: string, identifier: string, context: StorefrontServerContext): StorefrontRouteDecision | undefined
-  sitemap?(context: StorefrontServerContext): Promise<{ includeCatalogue?: boolean; entries: MetadataRoute.Sitemap }>
+  legacyRoute?(kind: string, identifier: string, context: StorefrontServerContext): StorefrontRouteDecision | undefined | Promise<StorefrontRouteDecision | undefined>
+  sitemap?(context: StorefrontServerContext): Promise<{ includeCatalogue?: boolean; replaceDefaults?: boolean; entries: MetadataRoute.Sitemap }>
 }

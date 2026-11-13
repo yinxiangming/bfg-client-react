@@ -35,7 +35,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const requestHost = (await headers()).get('host') ?? undefined
   const config = await getStorefrontConfigForServer(locale, requestHost)
   const provider = await getStorefrontServerProvider(config)
-  const decision = provider?.legacyRoute?.('post', slug, { config, locale, requestHost, origin: '' })
+  const decision = await provider?.legacyRoute?.('post', slug, { config, locale, requestHost, origin: '' })
   if (decision?.notFound) return { title: 'Not found', robots: { index: false, follow: false } }
   if (decision?.redirect) {
     const origin = await getRequestOrigin()
@@ -69,7 +69,7 @@ export default async function StorefrontPostPage({ params }: Props) {
   const requestHost = (await headers()).get('host') ?? undefined
   const config = await getStorefrontConfigForServer(locale, requestHost)
   const provider = await getStorefrontServerProvider(config)
-  const decision = provider?.legacyRoute?.('post', slug, { config, locale, requestHost, origin: '' })
+  const decision = await provider?.legacyRoute?.('post', slug, { config, locale, requestHost, origin: '' })
   if (decision?.redirect) permanentRedirect(decision.redirect)
   if (decision?.notFound) notFound()
   const post = await getPostData(slug, locale, requestHost, config?.languages)

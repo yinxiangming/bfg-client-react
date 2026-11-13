@@ -41,7 +41,8 @@ export async function generateMetadata(): Promise<Metadata> {
   ])
 
   const siteName = config?.site_name?.trim() || 'Web App'
-  const description = clampDescription(config?.site_description) || undefined
+  const description = clampDescription(config?.seo_default_description || config?.site_description) || undefined
+  const defaultTitle = config?.seo_default_title?.trim() || siteName
   // Workspace favicon, when one is configured. Omitting `icons` entirely lets
   // Next fall back to the app-router icon convention, so an unset favicon keeps
   // the built-in mark rather than rendering a broken link.
@@ -50,7 +51,7 @@ export async function generateMetadata(): Promise<Metadata> {
   return {
     metadataBase: origin ? new URL(origin) : undefined,
     ...(favicon ? { icons: { icon: favicon, shortcut: favicon, apple: favicon } } : {}),
-    title: { default: siteName, template: `%s | ${siteName}` },
+    title: { default: defaultTitle, template: `%s | ${siteName}` },
     description,
     applicationName: siteName,
     openGraph: {

@@ -3994,6 +3994,9 @@
               "placeholder": "G-XXXXXXXXXX",
               "helper": "在 GA4 的「管理 → 数据流 → 网页数据流」中查看。留空即关闭跟踪。填写后，店铺前台每个页面的访问都会自动上报。"
             }
+          },
+          "contactAddress": {
+            "label": "联系地址"
           }
         },
         "actions": {
@@ -4714,7 +4717,7 @@
       },
       "suspend": "暂停",
       "resume": "恢复",
-  "export": "导出 Workspace 配置",
+      "export": "导出 Workspace 配置",
       "resetPassword": "发送密码重置邮件",
       "delete": "安排删除",
       "cancelDeletion": "取消删除",

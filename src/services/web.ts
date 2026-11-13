@@ -438,18 +438,20 @@ export async function getPage(id: number): Promise<Page> {
 }
 
 export async function createPage(data: PagePayload) {
+  const { parent_id, ...fields } = data
   return apiFetch<Page>(bfgApi.pages(), {
     ...getSiteAdminOptions(),
     method: 'POST',
-    body: JSON.stringify(data)
+    body: JSON.stringify({ ...fields, ...(parent_id !== undefined ? { parent: parent_id } : {}) })
   })
 }
 
 export async function updatePage(id: number, data: Partial<PagePayload>) {
+  const { parent_id, ...fields } = data
   return apiFetch<Page>(`${bfgApi.pages()}${id}/`, {
     ...getSiteAdminOptions(),
     method: 'PATCH',
-    body: JSON.stringify(data)
+    body: JSON.stringify({ ...fields, ...(parent_id !== undefined ? { parent: parent_id } : {}) })
   })
 }
 

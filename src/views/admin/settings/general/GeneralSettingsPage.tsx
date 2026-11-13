@@ -94,6 +94,7 @@ type BasicData = {
   defaultTimezone: string
   contactEmail: string
   contactPhone: string
+  contactAddress: string
   facebookUrl: string
   twitterUrl: string
   instagramUrl: string
@@ -160,6 +161,7 @@ const initialBasicData: BasicData = {
   defaultTimezone: 'Pacific/Auckland',
   contactEmail: '',
   contactPhone: '',
+  contactAddress: '',
   facebookUrl: '',
   twitterUrl: '',
   instagramUrl: '',
@@ -335,6 +337,7 @@ const GeneralSettingsPage = () => {
     default_timezone: basicData.defaultTimezone,
     contact_email: basicData.contactEmail,
     contact_phone: basicData.contactPhone,
+    contact_address: basicData.contactAddress,
     facebook_url: basicData.facebookUrl,
     twitter_url: basicData.twitterUrl,
     instagram_url: basicData.instagramUrl,
@@ -574,6 +577,7 @@ const GeneralSettingsPage = () => {
             country: settings.country || initialBasicData.country,
             contactEmail: general.contact_email || (settings as any).contact_email || initialBasicData.contactEmail,
             contactPhone: general.contact_phone || (settings as any).contact_phone || initialBasicData.contactPhone,
+            contactAddress: general.contact_address ?? '',
             facebookUrl: general.facebook_url || (settings as any).facebook_url || initialBasicData.facebookUrl,
             twitterUrl: general.twitter_url || (settings as any).twitter_url || initialBasicData.twitterUrl,
             instagramUrl: general.instagram_url || (settings as any).instagram_url || initialBasicData.instagramUrl,
@@ -1265,6 +1269,16 @@ const GeneralSettingsPage = () => {
                               startAdornment: <i className='tabler-phone' />
                             }
                           }}
+                        />
+                      </Grid>
+                      <Grid size={{ xs: 12 }}>
+                        <CustomTextField
+                          fullWidth
+                          label={t('settings.general.basic.fields.contactAddress.label')}
+                          value={basicData.contactAddress}
+                          onChange={e => handleBasicChange('contactAddress', e.target.value)}
+                          multiline
+                          rows={2}
                         />
                       </Grid>
                       <Grid size={{ xs: 12 }}>
