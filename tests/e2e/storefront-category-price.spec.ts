@@ -63,17 +63,28 @@ test('changes category ranges before counting, sorting and pagination', async ({
 })
 
 test('price filters work in the mobile drawer and survive a sort change', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 })
+  const viewport = { width: 390, height: 844 }
+  await page.setViewportSize(viewport)
   await page.goto(category)
   await page.getByRole('button', { name: 'Toggle filters' }).click()
   await page.getByRole('checkbox', { name: '$100+' }).check()
   await expect(page.getByRole('checkbox', { name: '$100+' })).toBeChecked()
-  await expect(page.getByText('There are 13 products.')).toBeVisible()
-  await page.locator('.sf-filter-overlay').click({ position: { x: 375, y: 50 } })
-  await expect(page.locator('.sf-filter-overlay')).toHaveCount(0)
-  await page.locator('.sf-sort-select').selectOption('price-desc')
-  await expect(page).toHaveURL(/price=100-plus&sort=price-desc$/)
-  await expect(page.locator('.sf-product-card .sf-price-current').first()).toHaveText(/349/)
+  await expect(page).toHaveURL(/price=100-plus$/)
+  // The toolbar intentionally hides the count at mobile widths.
+  await expect(page.locator('.sf-products-count')).toHaveText('There are 13 products.')
+
+  const backdrop = page.locator('.sf-filter-overlay')
+  // Tap the uncovered right edge of the backdrop, beyond the drawer.
+  await backdrop.click({ position: { x: viewport.width - 16, y: viewport.height / 2 } })
+  await expect(backdrop).toHaveCount(0)
+  const prices = page.locator('.sf-product-card .sf-price-current')
+  await expect(prices.first()).toBeVisible()
+  await expect(prices).toHaveCount(12)
+  await expect(prices.first()).toHaveText(/349\.00$/)
+
+  await page.locator('.sf-sort-select').selectOption('price-asc')
+  await expect(page).toHaveURL(/price=100-plus&sort=price-asc$/)
+  await expect(prices.first()).toHaveText(/100\.00$/)
 })
 
 test('shows zero matches and clears the range without leaving the category', async ({ page }) => {
