@@ -69,6 +69,17 @@ const products = {
   }
 }
 
+// Prices straddle each boundary and span multiple pages both before and after filtering.
+const categoryPrices = [0, 7.90, 49.99, 50, 50.01, 69, 99.99, 100, 101, 109, 115, 123, 136, 140, 158, 166, 179, 188, 199, 349]
+const categoryProducts = categoryPrices.map((price, index) => ({
+  id: 401 + index,
+  slug: `price-fixture-${index}`,
+  name: `Fixture Product ${String(index + 1).padStart(2, '0')}`,
+  price: price.toFixed(2),
+  in_stock: true,
+  purchasable: true
+})).reverse()
+
 const server = createServer((request, response) => {
   const url = new URL(request.url || '/', 'http://127.0.0.1:8787')
   const requestOrigin = request.headers.origin
@@ -91,6 +102,33 @@ const server = createServer((request, response) => {
 
   if (url.pathname === '/api/v1/settings/storefront/') {
     response.end(JSON.stringify(storefrontConfig))
+    return
+  }
+
+  if (url.pathname === '/api/v1/store/categories/') {
+    response.end(JSON.stringify([
+      { id: 5, name: 'Price Fixtures', slug: 'price-fixtures', children: [] },
+      { id: 6, name: 'Premium Fixtures', slug: 'premium-fixtures', children: [] }
+    ]))
+    return
+  }
+
+  const category = url.searchParams.get('category')
+  if (url.pathname === '/api/v1/store/products/' && (category === 'price-fixtures' || category === 'premium-fixtures')) {
+    const minPrice = Math.max(
+      category === 'premium-fixtures' ? 100 : -Infinity,
+      Number(url.searchParams.get('min_price') ?? '-Infinity')
+    )
+    const maxPrice = Number(url.searchParams.get('max_price') ?? 'Infinity')
+    const filtered = categoryProducts.filter(product => Number(product.price) >= minPrice && Number(product.price) <= maxPrice)
+    const sort = url.searchParams.get('sort')
+    if (sort === 'price_asc') filtered.sort((a, b) => Number(a.price) - Number(b.price))
+    if (sort === 'price_desc') filtered.sort((a, b) => Number(b.price) - Number(a.price))
+    const page = Number(url.searchParams.get('page') ?? '1')
+    const pageSize = Number(url.searchParams.get('page_size') ?? '12')
+    const start = (page - 1) * pageSize
+
+    response.end(JSON.stringify({ count: filtered.length, results: filtered.slice(start, start + pageSize) }))
     return
   }
 

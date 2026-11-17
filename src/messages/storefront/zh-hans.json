@@ -84,7 +84,8 @@
       "sampleClothes": "服饰",
       "sampleShoes": "鞋履",
       "sampleAccessories": "配饰",
-      "priceTitle": "价格"
+      "priceTitle": "价格",
+      "priceHint": "请选择一个价格区间。"
     },
     "defaultDescription": "这里展示该分类的商品列表。",
     "toolbar": {

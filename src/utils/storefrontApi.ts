@@ -352,8 +352,8 @@ class StorefrontApiClient {
     if (params?.featured) queryParams.append('featured', 'true')
     if (params?.is_new) queryParams.append('is_new', 'true')
     if (params?.bestseller) queryParams.append('bestseller', 'true')
-    if (params?.min_price) queryParams.append('min_price', params.min_price.toString())
-    if (params?.max_price) queryParams.append('max_price', params.max_price.toString())
+    if (params?.min_price !== undefined) queryParams.append('min_price', params.min_price.toString())
+    if (params?.max_price !== undefined) queryParams.append('max_price', params.max_price.toString())
     if (params?.sort) queryParams.append('sort', params.sort)
     if (params?.limit) {
       // Page size only. The API paginates with `page_size` (config.pagination.
