@@ -5,6 +5,37 @@ import ts from 'typescript'
 import { resolveStorefrontServerProvider } from '../src/extensions/storefrontServerCore.ts'
 import { isExtensionEnabled } from '../src/extensions/availability.ts'
 
+import { categoryCatalogueHref, categoryProductFilters, parseCategoryQuery } from '../src/utils/categoryCatalogue.ts'
+
+test('category queries constrain choices to known inclusive bounds and sort options', () => {
+  assert.deepEqual(parseCategoryQuery({ page: ['2', '3'], price: '100-plus', sort: 'price-asc' }), {
+    page: 2, price: '100-plus', sort: 'price-asc'
+  })
+  assert.deepEqual(parseCategoryQuery({ page: '2oops', price: '__proto__', sort: 'constructor' }), {
+    page: 1, price: null, sort: 'relevance'
+  })
+  assert.deepEqual(categoryProductFilters('0-50', 'price-desc'), {
+    min_price: 0, max_price: 50, sort: 'price_desc'
+  })
+  assert.deepEqual(categoryProductFilters('50-100', 'name-asc'), {
+    min_price: 50, max_price: 100, sort: 'name'
+  })
+  assert.deepEqual(categoryProductFilters('100-plus', 'sales'), {
+    min_price: 100, max_price: undefined, sort: 'sales'
+  })
+  assert.deepEqual(categoryProductFilters(null, 'relevance'), {
+    min_price: undefined, max_price: undefined, sort: undefined
+  })
+})
+
+test('category controls reset page without discarding other choices', () => {
+  const query = parseCategoryQuery({ page: '2', price: '100-plus', sort: 'price-asc' })
+  assert.equal(categoryCatalogueHref('parts', query), '/category/parts?price=100-plus&sort=price-asc&page=2')
+  assert.equal(categoryCatalogueHref('parts', { ...query, page: 1 }), '/category/parts?price=100-plus&sort=price-asc')
+  assert.equal(categoryCatalogueHref('parts', { ...query, price: null, page: 1 }), '/category/parts?sort=price-asc')
+  assert.equal(categoryCatalogueHref('parts', parseCategoryQuery({})), '/category/parts')
+})
+
 test('workspace-disabled and deployment-excluded providers are never loaded', async () => {
   let calls = 0
   const loaders = { fixture: async () => { calls++; return { default: { matches: () => true } } } }

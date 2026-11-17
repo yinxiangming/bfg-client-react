@@ -84,7 +84,8 @@
       "sampleClothes": "Clothes",
       "sampleShoes": "Shoes",
       "sampleAccessories": "Accessories",
-      "priceTitle": "Price"
+      "priceTitle": "Price",
+      "priceHint": "Choose one price range."
     },
     "defaultDescription": "There are many variations of passages of Lorem Ipsum available, but the majority have suffered alteration in some form.",
     "toolbar": {
