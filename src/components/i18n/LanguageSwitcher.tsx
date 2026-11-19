@@ -125,7 +125,12 @@ export default function LanguageSwitcher({
           style={{
             display: 'inline-flex',
             alignItems: 'center',
-            gap: '0.35rem'
+            gap: '0.35rem',
+            flexShrink: 0,
+            whiteSpace: 'nowrap',
+            width: showCurrentLabel ? 'auto' : undefined,
+            minWidth: showCurrentLabel ? '4rem' : undefined,
+            paddingInline: showCurrentLabel ? '0.625rem' : undefined
           }}
         >
           <Icon icon='tabler-language' />
