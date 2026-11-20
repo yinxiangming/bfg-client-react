@@ -48,7 +48,7 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
   const pathname = usePathname()
   const currentPath = activePath || pathname
   const normalizedPath = useMemo(() => normalizePath(currentPath), [currentPath])
-  const { loading: storefrontLoading } = useStorefrontConfig()
+  const { config: storefrontConfig, loading: storefrontLoading } = useStorefrontConfig()
   // Its own namespace rather than the one the menu labels come from: the console's
   // pages sit outside /admin, where those are read from `common`.
   const tConsole = useTranslations('admin.console')
@@ -109,16 +109,16 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
    * while one of those is in flight shows the wrong brand for a moment on every load —
    * and it is only ever the right answer once nothing else is coming.
    */
-  const brandingRead = isConsole || isAccount || (isAdmin ? adminBrandingRead : !storefrontLoading)
+  const brandingRead = isConsole || (isAdmin ? adminBrandingRead : !storefrontLoading)
 
   const displayName = isConsole
     ? tConsole('brand')
     : isAccount
-      ? 'BFG'
+      ? storefrontConfig?.site_name?.trim() || undefined
       : brandingName
-  const logoSrc = isAccount ? undefined : isConsole ? undefined : workspaceLogoSrc
-  const logoDarkSrc = isAccount ? undefined : isConsole ? undefined : workspaceLogoDarkSrc
-  const nameWithLogo = isAccount ? false : showNameWithLogo
+  const logoSrc = isAccount ? storefrontConfig?.logo : isConsole ? undefined : workspaceLogoSrc
+  const logoDarkSrc = isAccount ? storefrontConfig?.logo_dark : isConsole ? undefined : workspaceLogoDarkSrc
+  const nameWithLogo = isAccount ? Boolean(storefrontConfig?.show_site_name_with_logo) : showNameWithLogo
 
   const i18nNamespace = useMemo(() => {
     if (normalizedPath?.startsWith('/admin')) return 'admin'
@@ -353,7 +353,7 @@ const Sidebar = ({ navItems, activePath, collapsed = false, onToggleCollapse, mo
             logoSrc={logoSrc}
             logoDarkSrc={logoDarkSrc}
             showNameWithLogo={nameWithLogo}
-            mark={isConsole ? 'none' : 'default'}
+            mark={isConsole || (isAccount && Boolean(displayName)) ? 'none' : 'default'}
             pending={!brandingRead}
           />
         </div>

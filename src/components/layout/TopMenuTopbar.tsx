@@ -16,6 +16,7 @@ import LanguageSwitcher from '@/components/i18n/LanguageSwitcher'
 import FeedbackButton from '@/components/feedback/FeedbackButton'
 import AgentDialog from '@/views/admin/agent/AgentDialog'
 import { fetchWorkspaceRecord, getWorkspaceSettings } from '@/services/settings'
+import { useStorefrontConfig } from '@/contexts/StorefrontConfigContext'
 
 // Hook Imports
 import { useAppLayout } from '@/hooks/useLayoutSettings'
@@ -30,6 +31,7 @@ const normalizePath = (path: string | null) =>
 const TopMenuTopbar = ({ avatarInitial = 'N' }: Props) => {
   const { updateConfig } = useAppLayout()
   const pathname = usePathname()
+  const { config: storefrontConfig, loading: storefrontLoading } = useStorefrontConfig()
   const normalizedPath = normalizePath(pathname ?? null)
   /** Workspace organization name (API) preferred; falls back to settings `site_name`. */
   const [brandingName, setBrandingName] = useState<string | undefined>(undefined)
@@ -58,12 +60,11 @@ const TopMenuTopbar = ({ avatarInitial = 'N' }: Props) => {
   }, [normalizedPath])
 
   const isAccount = normalizedPath.startsWith('/account')
-  // The BFG account shell owns its platform identity. Storefront logos belong
-  // to the public shop and must not replace the platform default here.
-  const displayName = isAccount ? 'BFG' : brandingName
-  const logoSrc = isAccount ? undefined : workspaceLogoSrc
-  const logoDarkSrc = isAccount ? undefined : workspaceLogoDarkSrc
-  const nameWithLogo = isAccount ? false : showNameWithLogo
+  // Customers use the same domain-scoped company identity in either menu layout.
+  const displayName = isAccount ? storefrontConfig?.site_name?.trim() || undefined : brandingName
+  const logoSrc = isAccount ? storefrontConfig?.logo : workspaceLogoSrc
+  const logoDarkSrc = isAccount ? storefrontConfig?.logo_dark : workspaceLogoDarkSrc
+  const nameWithLogo = isAccount ? Boolean(storefrontConfig?.show_site_name_with_logo) : showNameWithLogo
 
   const handleSwitchToVertical = () => {
     updateConfig({ menuPosition: 'vertical' })
@@ -77,6 +78,8 @@ const TopMenuTopbar = ({ avatarInitial = 'N' }: Props) => {
             logoSrc={logoSrc}
             logoDarkSrc={logoDarkSrc}
             showNameWithLogo={nameWithLogo}
+            mark={isAccount && Boolean(displayName) ? 'none' : 'default'}
+            pending={isAccount && storefrontLoading}
           />
       </div>
       <div className='topmenu-topbar-right'>
