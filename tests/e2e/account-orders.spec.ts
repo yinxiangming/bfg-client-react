@@ -387,7 +387,7 @@ test('shows pickup instructions and code without a delivery address', async ({ p
   await page.goto('/account/orders/601#pickup')
   await expect(page.getByRole('heading', { name: 'WEB-601' })).toBeVisible()
   await expect(page.getByText('PICK-601')).toBeVisible()
-  await expect(page.getByText('Auckland Depot')).toBeVisible()
+  await expect(page.locator('#pickup').getByText('Auckland Depot')).toBeVisible()
   await expect(page.getByText('20 Customs Street, Auckland')).toBeVisible()
   await expect(page.getByText('Bring photo ID to the collection counter.')).toBeVisible()
   await expect(page.getByRole('heading', { name: 'Delivery address' })).toHaveCount(0)
