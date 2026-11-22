@@ -3,6 +3,13 @@ import { headers } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { getSiteConfig } from '@/utils/siteMetadata'
 import { storefrontApi } from '@/utils/storefrontApi'
+import {
+  CATEGORY_PAGE_SIZE,
+  categoryProductFilters,
+  parseCategoryQuery,
+  type CategoryPriceRange,
+  type CategorySort
+} from '@/utils/categoryCatalogue'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 import { resolveStorefrontPage } from '@/components/storefront/themes/resolve'
 import {
@@ -17,14 +24,7 @@ import type { Metadata } from 'next'
 
 type Props = {
   params: Promise<{ slug: string }>
-  searchParams: Promise<{ page?: string | string[] }>
-}
-
-/** `?page=` is 1-based and user-supplied; anything not a positive integer is page 1. */
-function parsePage(raw: string | string[] | undefined): number {
-  const value = Array.isArray(raw) ? raw[0] : raw
-  const n = Number.parseInt(value ?? '', 10)
-  return Number.isFinite(n) && n > 1 ? n : 1
+  searchParams: Promise<Record<string, string | string[] | undefined>>
 }
 
 type CategoryAncestor = { slug: string; name: string }
@@ -35,9 +35,6 @@ type CategoryNode = {
   children: { slug: string; name: string }[]
   ancestors: CategoryAncestor[]
 }
-
-/** Must match `productsPerPage` in the view so the server seed fills exactly page 1. */
-const PRODUCTS_PER_PAGE = 12
 
 function walkTree(items: any[], slug: string, ancestors: CategoryAncestor[] = []): CategoryNode | null {
   for (const c of items ?? []) {
@@ -63,7 +60,9 @@ async function fetchCategoryData(
   slug: string,
   requestHost: string | undefined,
   locale: string,
-  page: number
+  page: number,
+  price: CategoryPriceRange | null,
+  sort: CategorySort
 ) {
   const [categoriesRes, productsRes] = await Promise.all([
     storefrontApi
@@ -72,8 +71,9 @@ async function fetchCategoryData(
     storefrontApi
       .getProducts({
         category: slug,
-        limit: PRODUCTS_PER_PAGE,
+        limit: CATEGORY_PAGE_SIZE,
         page,
+        ...categoryProductFilters(price, sort),
         requestHost,
         next: { revalidate: 300 },
       })
@@ -103,13 +103,13 @@ const getCategoryForServer = cache(fetchCategoryData)
 
 export async function generateMetadata({ params, searchParams }: Props): Promise<Metadata> {
   const { slug } = await params
-  const page = parsePage((await searchParams)?.page)
+  const { page, price, sort } = parseCategoryQuery(await searchParams)
   const headersList = await headers()
   const locale = headersList.get('x-locale') || 'en'
   const requestHost = headersList.get('host') ?? undefined
 
   const [data, { site_name }, origin, config] = await Promise.all([
-    getCategoryForServer(slug, requestHost, locale, page),
+    getCategoryForServer(slug, requestHost, locale, page, price, sort),
     // requestHost is required: without it the workspace cannot be resolved and every title
     // degrades to the 'Web App' placeholder.
     getSiteConfig(locale, requestHost),
@@ -123,9 +123,9 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 
   const name = data.category?.name ?? slug
   const base = origin ? `${origin}/category/${slug}` : `/category/${slug}`
-  // Each paginated page is self-canonical. Pointing page 2 back at page 1 would tell
-  // Google to ignore page 2 — including the product links that only exist there.
-  const canonical = page > 1 ? `${base}?page=${page}` : base
+  // Only the unfiltered default sort is crawlable; its pagination remains self-canonical.
+  const queryVariant = price !== null || sort !== 'relevance'
+  const canonical = !queryVariant && page > 1 ? `${base}?page=${page}` : base
   const description =
     clampDescription(data.category?.description) ||
     `Shop ${name} at ${site_name} — ${data.totalCount} products in stock.`
@@ -134,6 +134,7 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
     title: name,
     description,
     alternates: { canonical },
+    ...(queryVariant ? { robots: { index: false, follow: true } } : {}),
     openGraph: {
       title: `${name} | ${site_name}`,
       description,
@@ -148,13 +149,13 @@ export async function generateMetadata({ params, searchParams }: Props): Promise
 
 export default async function Page(props: Props) {
   const { slug } = await props.params
-  const page = parsePage((await props.searchParams)?.page)
+  const { page, price, sort } = parseCategoryQuery(await props.searchParams)
   const headersList = await headers()
   const locale = headersList.get('x-locale') || 'en'
   const requestHost = headersList.get('host') ?? undefined
 
   const [data, origin] = await Promise.all([
-    getCategoryForServer(slug, requestHost, locale, page),
+    getCategoryForServer(slug, requestHost, locale, page, price, sort),
     getRequestOrigin(),
   ])
 
@@ -174,7 +175,7 @@ export default async function Page(props: Props) {
     mainEntity: {
       '@type': 'ItemList',
       numberOfItems: data.totalCount,
-      itemListElement: (data.products ?? []).slice(0, PRODUCTS_PER_PAGE).map((p: any, i: number) => ({
+      itemListElement: (data.products ?? []).slice(0, CATEGORY_PAGE_SIZE).map((p: any, i: number) => ({
         '@type': 'ListItem',
         position: i + 1,
         name: p.name,
@@ -189,8 +190,7 @@ export default async function Page(props: Props) {
     { name, path: `/category/${slug}` },
   ])
 
-  // A skin may replace the page body; it still receives the server-fetched first page,
-  // so an override does not silently fall back to a client-side fetch.
+  // A skin may replace the page body but still receives the requested server-fetched results.
   const Override = await resolveStorefrontPage('category/[slug]')
   const Component = Override ?? CategoryPage
 
@@ -207,6 +207,8 @@ export default async function Page(props: Props) {
       <Component
         slug={slug}
         initialPage={page}
+        priceRange={price}
+        sortBy={sort}
         initialData={{
           products: data.products ?? [],
           totalCount: data.totalCount,

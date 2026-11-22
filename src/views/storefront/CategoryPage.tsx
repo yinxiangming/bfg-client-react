@@ -1,10 +1,11 @@
 'use client'
 
 // React Imports
-import { useState, useEffect, useRef } from 'react'
+import { useOptimistic, useState, useTransition } from 'react'
 
 // Next Imports
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
 // i18n Imports
 import { useTranslations } from 'next-intl'
@@ -14,7 +15,13 @@ import ProductCard from './components/ProductCard'
 
 // Util Imports
 import { getStoreImageUrl, getMediaUrl } from '@/utils/media'
-import { storefrontApi } from '@/utils/storefrontApi'
+import {
+  CATEGORY_PAGE_SIZE,
+  CATEGORY_PRICE_RANGES,
+  categoryCatalogueHref,
+  type CategoryPriceRange,
+  type CategorySort
+} from '@/utils/categoryCatalogue'
 import { usePageSlots } from '@/extensions/hooks/usePageSections'
 
 // Import CSS
@@ -37,31 +44,7 @@ type Product = {
   purchasable?: boolean
 }
 
-type SortOption = 'relevance' | 'sales' | 'name-asc' | 'name-desc' | 'price-asc' | 'price-desc'
-
 type CategoryAncestor = { slug: string; name: string }
-
-function findCategoryInTree(
-  items: any[],
-  targetSlug: string,
-  ancestors: CategoryAncestor[] = []
-): { name: string; description: string; children: any[]; ancestors: CategoryAncestor[] } | null {
-  for (const c of items) {
-    if (c.slug === targetSlug) {
-      return {
-        name: c.name ?? targetSlug,
-        description: c.description ?? '',
-        children: Array.isArray(c.children) ? c.children : [],
-        ancestors
-      }
-    }
-    if (c.children?.length) {
-      const found = findCategoryInTree(c.children, targetSlug, [...ancestors, { slug: c.slug, name: c.name }])
-      if (found) return found
-    }
-  }
-  return null
-}
 
 type CategoryInitialData = {
   products: any[]
@@ -70,7 +53,7 @@ type CategoryInitialData = {
   subcategories: { slug: string; name: string }[]
 }
 
-/** Map an API product onto the card view model (module scope: shared by SSR seed + refetch). */
+/** Map a server-provided product onto the card view model. */
 const transformApiProduct = (apiProduct: any): Product => ({
   id: apiProduct.id,
   name: apiProduct.name,
@@ -110,117 +93,35 @@ const PaginationLink = ({ href, disabled, label }: { href: string; disabled: boo
 const CategoryPage = ({
   slug,
   initialData,
-  initialPage
+  initialPage: currentPage,
+  priceRange,
+  sortBy
 }: {
   slug: string
-  /**
-   * First page of products fetched on the server. Without it the SSR HTML is just a loading
-   * placeholder, so a crawler indexing this category sees no products and no internal links
-   * through to the product pages.
-   */
-  initialData?: CategoryInitialData
-  /**
-   * Page number from `?page=`. Pagination is URL state rather than component state so the
-   * links are real hrefs a crawler can follow, and so a page-2 URL can be shared or
-   * bookmarked. Sort stays component state and resets when you move between pages.
-   */
-  initialPage?: number
+  initialData: CategoryInitialData
+  initialPage: number
+  priceRange: CategoryPriceRange | null
+  sortBy: CategorySort
 }) => {
   const t = useTranslations('storefront')
+  const router = useRouter()
   const { beforeSlots, afterSlots } = usePageSlots('storefront/category')
-  const hasInitialData = Boolean(initialData)
-  const [products, setProducts] = useState<Product[]>(
-    () => initialData?.products?.map(transformApiProduct) ?? []
-  )
-  const [loading, setLoading] = useState(!initialData)
-  const [sortBy, setSortBy] = useState<SortOption>('relevance')
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
-  const [totalCount, setTotalCount] = useState(initialData?.totalCount ?? 0)
-  const [categoryInfo, setCategoryInfo] = useState<
-    { name: string; description: string; ancestors: CategoryAncestor[] } | null
-  >(
-    initialData?.category ? { ...initialData.category, ancestors: initialData.category.ancestors ?? [] } : null
-  )
-  const [subcategories, setSubcategories] = useState<{ slug: string; name: string }[]>(
-    initialData?.subcategories ?? []
-  )
   const [showFilters, setShowFilters] = useState(false)
-  // Distinguishes the hydration pass from later sort/page changes.
-  const isFirstLoad = useRef(true)
+  const [isPending, startTransition] = useTransition()
+  const [displayFilters, setDisplayFilters] = useOptimistic({ price: priceRange, sort: sortBy })
 
-  const productsPerPage = 12
-  const currentPage = Math.max(1, initialPage ?? 1)
+  const { totalCount, category: categoryInfo, subcategories } = initialData
+  const products = initialData.products.map(transformApiProduct)
+  const totalPages = Math.ceil(totalCount / CATEGORY_PAGE_SIZE)
+  const pageHref = (page: number) => categoryCatalogueHref(slug, { page, price: priceRange, sort: sortBy })
+  const updateFilters = (price: CategoryPriceRange | null, sort: CategorySort) => {
+    startTransition(() => {
+      setDisplayFilters({ price, sort })
+      router.push(categoryCatalogueHref(slug, { page: 1, price, sort }), { scroll: false })
+    })
+  }
 
-  /** Pagination hrefs: page 1 drops the parameter so the canonical URL stays clean. */
-  const pageHref = (page: number) => (page <= 1 ? `/category/${slug}` : `/category/${slug}?page=${page}`)
-
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        // Server-seeded first render already shows page 1; only later navigations spin.
-        if (!(hasInitialData && isFirstLoad.current)) setLoading(true)
-        isFirstLoad.current = false
-
-        const sortMap: Record<SortOption, string | undefined> = {
-          relevance: undefined,
-          sales: 'sales',
-          'name-asc': 'name',
-          'name-desc': 'name',
-          'price-asc': 'price_asc',
-          'price-desc': 'price_desc'
-        }
-
-        const params: any = {
-          category: slug,
-          limit: productsPerPage,
-          page: currentPage
-        }
-
-        if (sortMap[sortBy]) {
-          params.sort = sortMap[sortBy]
-        }
-
-        const response = await storefrontApi.getProducts(params)
-        const productsList = Array.isArray(response) ? response : response.results || response.data || []
-
-        setProducts(productsList.map(transformApiProduct))
-        setTotalCount(response.count || productsList.length)
-
-        // Fetch category info + subcategories (tree)
-        try {
-          const categoriesRes = await storefrontApi.getCategories({ tree: true })
-          const categoriesList = Array.isArray(categoriesRes)
-            ? categoriesRes
-            : categoriesRes.results || categoriesRes.data || []
-          const found = findCategoryInTree(categoriesList, slug)
-          if (found) {
-            setCategoryInfo({
-              name: found.name,
-              description: found.description || '',
-              ancestors: found.ancestors
-            })
-            const subs = found.children
-              .filter((ch: any) => ch?.slug && ch?.name)
-              .map((ch: any) => ({ slug: ch.slug as string, name: ch.name as string }))
-            setSubcategories(subs)
-          } else {
-            setSubcategories([])
-          }
-        } catch (err) {
-          console.warn('Failed to fetch category info:', err)
-          setSubcategories([])
-        }
-      } catch (err) {
-        console.error('Error fetching products:', err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchProducts()
-  }, [slug, sortBy, currentPage])
-
-  const totalPages = Math.ceil(totalCount / productsPerPage)
   const categoryName = categoryInfo?.name || slug.charAt(0).toUpperCase() + slug.slice(1)
   const categoryDescription =
     categoryInfo?.description ||
@@ -282,22 +183,29 @@ const CategoryPage = ({
           )}
 
           <div className='sf-card' style={{ padding: '1.5rem' }}>
-            <h3 className='sf-sidebar-title' style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem' }}>
+            <h3 id='sf-category-price-title' className='sf-sidebar-title' style={{ fontSize: '1rem', fontWeight: 600, marginBottom: '1rem' }}>
               {t('category.sidebar.priceTitle')}
             </h3>
-            <div className='sf-filter-options' style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
-              <label className='sf-filter-label' style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
-                <input type='checkbox' className='sf-filter-checkbox' />
-                <span className='sf-filter-text'>$0 - $50</span>
-              </label>
-              <label className='sf-filter-label' style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
-                <input type='checkbox' className='sf-filter-checkbox' />
-                <span className='sf-filter-text'>$50 - $100</span>
-              </label>
-              <label className='sf-filter-label' style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}>
-                <input type='checkbox' className='sf-filter-checkbox' />
-                <span className='sf-filter-text'>$100+</span>
-              </label>
+            <p id='sf-category-price-hint' className='sf-filter-text' style={{ fontSize: '0.875rem', marginBottom: '0.5rem' }}>
+              {t('category.sidebar.priceHint')}
+            </p>
+            <div role='group' aria-labelledby='sf-category-price-title' aria-describedby='sf-category-price-hint' className='sf-filter-options' style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+              {(Object.keys(CATEGORY_PRICE_RANGES) as CategoryPriceRange[]).map(value => (
+                <label
+                  key={value}
+                  className='sf-filter-label'
+                  style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.875rem' }}
+                >
+                  <input
+                    type='checkbox'
+                    className='sf-filter-checkbox'
+                    checked={displayFilters.price === value}
+                    disabled={isPending}
+                    onChange={e => updateFilters(e.currentTarget.checked ? value : null, sortBy)}
+                  />
+                  <span className='sf-filter-text'>{CATEGORY_PRICE_RANGES[value].label}</span>
+                </label>
+              ))}
             </div>
           </div>
         </aside>
@@ -308,7 +216,7 @@ const CategoryPage = ({
         )}
 
         {/* Main Content */}
-        <main className='sf-category-main'>
+        <main className='sf-category-main' aria-busy={isPending}>
           {/* Category Header */}
           <div style={{ marginBottom: '2rem' }}>
             <h1 className='sf-category-title'>
@@ -352,8 +260,9 @@ const CategoryPage = ({
                 <div className='sf-sort-select-wrapper'>
                   <span className='sf-sort-label'>{t('category.toolbar.sortBy')}</span>
                   <select
-                    value={sortBy}
-                    onChange={e => setSortBy(e.target.value as SortOption)}
+                    value={displayFilters.sort}
+                    onChange={e => updateFilters(priceRange, e.target.value as CategorySort)}
+                    disabled={isPending}
                     className='sf-sort-select'
                   >
                     <option value='relevance'>{t('category.toolbar.sort.relevance')}</option>
@@ -369,11 +278,7 @@ const CategoryPage = ({
           </div>
 
           {/* Products Grid */}
-          {loading ? (
-            <div style={{ textAlign: 'center', padding: '4rem 0' }}>
-              <p className='sf-text-muted'>{t('common.loading')}</p>
-            </div>
-          ) : products.length > 0 ? (
+          {products.length > 0 ? (
             <>
               <div className={viewMode === 'grid' ? 'sf-grid sf-grid-cols-4' : ''} style={{ marginBottom: '2rem' }}>
                 {products.map(product => (
