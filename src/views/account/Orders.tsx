@@ -132,11 +132,12 @@ const Orders = () => {
     try {
       await meApi.cancelOrder(cancelTarget.id, { reason: cancelReason.trim() })
       refreshAfterChange()
+      setCancelTarget(null)
+      setCancelReason('')
     } catch (err) {
       setError(err instanceof Error ? err.message : t('orders.failedCancel'))
     } finally {
       setCancelling(false)
-      setCancelTarget(null)
     }
   }
 
