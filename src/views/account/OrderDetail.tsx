@@ -211,11 +211,12 @@ const OrderDetail = ({ orderId }: OrderDetailProps) => {
     try {
       await meApi.cancelOrder(order.id, { reason: cancelReason.trim() })
       refreshAfterChange()
+      setCancelOpen(false)
+      setCancelReason('')
     } catch (err) {
       setError(err instanceof Error ? err.message : t('orders.failedCancel'))
     } finally {
       setCancelling(false)
-      setCancelOpen(false)
     }
   }
 
