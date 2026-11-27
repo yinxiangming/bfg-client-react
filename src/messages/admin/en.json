@@ -4489,6 +4489,7 @@
       "subtitle": "Pick a country and an industry. We will set your currency, tax, categories, navigation and legal pages from them — and never overwrite anything you have already changed.",
       "country": "Where you trade",
       "countryImplies": "Sets {currency}, {timezone} and {tax}. You can change any of them afterwards.",
+      "loadOptionsFailed": "Could not load the country and industry options.",
       "industry": "What you sell",
       "siteName": "Shop name",
       "siteNamePlaceholder": "Shown in the header and on your invoices",

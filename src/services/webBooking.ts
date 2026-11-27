@@ -50,6 +50,8 @@ interface TimeSlotListParams {
   date_to?: string
   site?: number
   is_active?: boolean
+  page?: number
+  page_size?: number
 }
 
 interface TimeSlotListResponse {
@@ -79,12 +81,14 @@ export async function getBookingTimeSlots(
   params?: TimeSlotListParams
 ): Promise<TimeSlotListResponse> {
   const queryParams = new URLSearchParams()
-  if (params?.slot_type) queryParams.append('slot_type', params.slot_type)
+  if (params?.slot_type) queryParams.append('type', params.slot_type)
   if (params?.date) queryParams.append('date', params.date)
   if (params?.date_from) queryParams.append('date_from', params.date_from)
   if (params?.date_to) queryParams.append('date_to', params.date_to)
   if (params?.site) queryParams.append('site', params.site.toString())
   if (params?.is_active !== undefined) queryParams.append('is_active', params.is_active.toString())
+  if (params?.page != null) queryParams.append('page', String(params.page))
+  if (params?.page_size != null) queryParams.append('page_size', String(params.page_size))
 
   const url = queryParams.toString()
     ? `${bfgApi.timeslots()}?${queryParams.toString()}`
@@ -98,10 +102,10 @@ export async function getBookingTimeSlots(
 }
 
 export async function getAvailableTimeSlots(
-  params?: Omit<TimeSlotListParams, 'is_active'>
+  params?: Omit<TimeSlotListParams, 'is_active' | 'page' | 'page_size'>
 ): Promise<BookingTimeSlot[]> {
   const queryParams = new URLSearchParams()
-  if (params?.slot_type) queryParams.append('slot_type', params.slot_type)
+  if (params?.slot_type) queryParams.append('type', params.slot_type)
   if (params?.date) queryParams.append('date', params.date)
   if (params?.date_from) queryParams.append('date_from', params.date_from)
   if (params?.date_to) queryParams.append('date_to', params.date_to)
