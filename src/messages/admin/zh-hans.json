@@ -4489,6 +4489,7 @@
       "subtitle": "选择国家与行业，我们据此设置货币、税率、商品分类、导航与法务页面——已经被你改过的内容一律不动。",
       "country": "经营地",
       "countryImplies": "将设置为 {currency}、{timezone}、{tax}，之后都可以自行调整。",
+      "loadOptionsFailed": "无法加载国家和行业选项。",
       "industry": "所属行业",
       "siteName": "店铺名称",
       "siteNamePlaceholder": "显示在页头与发票上",

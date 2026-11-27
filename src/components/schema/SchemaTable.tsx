@@ -1208,6 +1208,9 @@ export default function SchemaTable<T extends { id: number | string }>({
                           {rowActions.some(a => !a.hidden?.(item)) && (
                             <IconButton
                               size="small"
+                              aria-label={t('common.schemaTable.actionsColumn')}
+                              aria-haspopup="menu"
+                              aria-expanded={actionMenuAnchor?.item === item}
                               onClick={(e) => {
                                 e.stopPropagation()
                                 setActionMenuAnchor({ el: e.currentTarget, item })
@@ -1254,6 +1257,7 @@ export default function SchemaTable<T extends { id: number | string }>({
               <FormControl size="small" sx={{ minWidth: 70 }}>
                 <Select
                   value={displayRowsPerPage}
+                  inputProps={{ 'aria-label': t('common.schemaTable.itemsPerPage') }}
                   onChange={e => {
                     const n = Number(e.target.value)
                     if (_sp) { _sp.onRowsPerPageChange(n); _sp.onPageChange(0) }

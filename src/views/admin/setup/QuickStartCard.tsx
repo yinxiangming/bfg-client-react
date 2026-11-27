@@ -9,7 +9,7 @@
  * and hoping someone comes back.
  */
 
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { useLocale, useTranslations } from 'next-intl'
 
@@ -29,6 +29,7 @@ import MenuItem from '@mui/material/MenuItem'
 import Typography from '@mui/material/Typography'
 
 import CustomTextField from '@/components/ui/TextField'
+import { useApiData } from '@/hooks/useApiData'
 import { getWorkspaceSettings, updateGeneralSettings } from '@/services/settings'
 import {
   applyTemplate,
@@ -36,8 +37,6 @@ import {
   getOnboardingStatus,
   localised,
   previewTemplate,
-  type CountryOption,
-  type IndustryOption,
   type OnboardingStatus,
   type TemplateChange,
   type TemplatePreview
@@ -84,17 +83,18 @@ function summarise(changes: TemplateChange[]) {
 
 const QuickStartCard = ({ status, onApplied }: QuickStartCardProps) => {
   const t = useTranslations('admin.setup')
+  const tActions = useTranslations('admin.common.actions')
   const locale = useLocale()
 
-  const [countries, setCountries] = useState<CountryOption[]>([])
-  const [industries, setIndustries] = useState<IndustryOption[]>([])
-  const [country, setCountry] = useState(status.state.country)
-  const [industry, setIndustry] = useState(status.state.industry)
+  const { data: options, loading: loadingOptions, error: optionsError, refetch: reloadOptions } = useApiData({
+    fetchFn: getOnboardingOptions
+  })
+  const [countryChoice, setCountry] = useState(status.state.country)
+  const [industryChoice, setIndustry] = useState(status.state.industry)
   const [siteName, setSiteName] = useState('')
   const [contactEmail, setContactEmail] = useState('')
   const [contactPhone, setContactPhone] = useState('')
 
-  const [loadingOptions, setLoadingOptions] = useState(true)
   const [saving, setSaving] = useState(false)
   const [saved, setSaved] = useState(false)
   const [preview, setPreview] = useState<TemplatePreview | null>(null)
@@ -126,33 +126,14 @@ const QuickStartCard = ({ status, onApplied }: QuickStartCardProps) => {
     }
   }, [])
 
-  useEffect(() => {
-    let cancelled = false
-
-    getOnboardingOptions()
-      .then(options => {
-        if (cancelled) return
-        setCountries(options.countries)
-        setIndustries(options.industries)
-        setCountry(current => current || options.defaults.country)
-        setIndustry(current => current || options.defaults.industry)
-      })
-      .catch(e => {
-        if (!cancelled) setError(e instanceof Error ? e.message : 'Failed to load')
-      })
-      .finally(() => {
-        if (!cancelled) setLoadingOptions(false)
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [])
-
-  const selectedCountry = useMemo(
-    () => countries.find(item => item.code === country),
-    [countries, country]
-  )
+  const countries = options?.countries ?? []
+  const industries = options?.industries ?? []
+  const selectedCountry = countries.find(item => item.code === countryChoice)
+    ?? countries.find(item => item.code === options?.defaults.country) ?? countries[0]
+  const selectedIndustry = industries.find(item => item.key === industryChoice)
+    ?? industries.find(item => item.key === options?.defaults.industry) ?? industries[0]
+  const country = selectedCountry?.code ?? ''
+  const industry = selectedIndustry?.key ?? ''
 
   const overrides = () => ({
     ...(siteName ? { site_name: siteName } : {}),
@@ -245,6 +226,13 @@ const QuickStartCard = ({ status, onApplied }: QuickStartCardProps) => {
             </Typography>
           </Box>
 
+          {optionsError && (
+            <Alert severity='error' action={
+              <Button color='inherit' size='small' onClick={() => void reloadOptions()}>{tActions('retry')}</Button>
+            }>
+              {t('quickStart.loadOptionsFailed')}
+            </Alert>
+          )}
           {error && <Alert severity='error'>{error}</Alert>}
 
           <Grid container spacing={4}>
@@ -254,6 +242,7 @@ const QuickStartCard = ({ status, onApplied }: QuickStartCardProps) => {
                 fullWidth
                 label={t('quickStart.country')}
                 value={country}
+                disabled={!countries.length}
                 onChange={event => setCountry(event.target.value)}
               >
                 {countries.map(option => (
@@ -279,6 +268,7 @@ const QuickStartCard = ({ status, onApplied }: QuickStartCardProps) => {
                 fullWidth
                 label={t('quickStart.industry')}
                 value={industry}
+                disabled={!industries.length}
                 onChange={event => setIndustry(event.target.value)}
               >
                 {industries.map(option => (
@@ -287,9 +277,9 @@ const QuickStartCard = ({ status, onApplied }: QuickStartCardProps) => {
                   </MenuItem>
                 ))}
               </CustomTextField>
-              {industries.find(item => item.key === industry) && (
+              {selectedIndustry && (
                 <Typography variant='caption' color='text.secondary' sx={{ display: 'block', mt: 1 }}>
-                  {localised(industries.find(item => item.key === industry)!, 'description', locale)}
+                  {localised(selectedIndustry, 'description', locale)}
                 </Typography>
               )}
             </Grid>
@@ -325,7 +315,7 @@ const QuickStartCard = ({ status, onApplied }: QuickStartCardProps) => {
           </Grid>
 
           <Box sx={{ display: 'flex', gap: 3, flexWrap: 'wrap', alignItems: 'center' }}>
-            <Button variant='contained' onClick={handlePreview} disabled={busy || saving}>
+            <Button variant='contained' onClick={handlePreview} disabled={busy || saving || !country || !industry}>
               {busy ? <CircularProgress size={18} color='inherit' /> : t('quickStart.preview')}
             </Button>
             <Button variant='tonal' color='secondary' onClick={handleSave} disabled={busy || saving}>

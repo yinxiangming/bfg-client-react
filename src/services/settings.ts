@@ -95,6 +95,7 @@ export type ShopSettingsPayload = {
 
 export type WorkspaceSettings = {
   id: number
+  default_currency?: string
   /**
    * ISO 3166-1 alpha-2. A real model field, not part of `custom_settings`:
    * it drives the tax defaults, the checkout address format and the geo

@@ -136,7 +136,11 @@ export async function getOnboardingStatus(): Promise<OnboardingStatus> {
 }
 
 export async function getOnboardingOptions(): Promise<OnboardingOptions> {
-  return apiFetch<OnboardingOptions>(bfgApi.onboardingOptions(), getSiteAdminOptions())
+  const options = await apiFetch<OnboardingOptions | null>(bfgApi.onboardingOptions(), getSiteAdminOptions())
+  if (!options || !Array.isArray(options.countries) || !Array.isArray(options.industries) || !options.defaults) {
+    throw new Error('Invalid setup options')
+  }
+  return options
 }
 
 export async function previewTemplate(

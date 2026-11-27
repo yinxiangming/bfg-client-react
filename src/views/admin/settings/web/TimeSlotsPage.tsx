@@ -36,6 +36,15 @@ import {
 
 const DEFAULT_SLOT_TYPE = 'dropoff'
 
+async function loadTimeSlots(): Promise<BookingTimeSlot[]> {
+  const slots: BookingTimeSlot[] = []
+  for (let page = 1; ; page += 1) {
+    const { results, next } = await getBookingTimeSlots({ slot_type: DEFAULT_SLOT_TYPE, page, page_size: 100 })
+    slots.push(...results)
+    if (!next) return slots
+  }
+}
+
 type BatchFormState = {
   start_date: string
   end_date: string
@@ -202,10 +211,7 @@ export default function TimeSlotsPage() {
   )
 
   const { data, loading, error, refetch } = useApiData<BookingTimeSlot[]>({
-    fetchFn: async () => {
-      const res = await getBookingTimeSlots({ slot_type: DEFAULT_SLOT_TYPE })
-      return res.results ?? (res as unknown as BookingTimeSlot[]) ?? []
-    }
+    fetchFn: loadTimeSlots
   })
 
   const statusColors = useMemo(
@@ -361,6 +367,7 @@ export default function TimeSlotsPage() {
       setSubmitError(
         err instanceof Error ? err.message : t('settings.web.timeSlots.batch.errors.generateFailed')
       )
+      await refetch()
     } finally {
       setBatchSubmitting(false)
     }
@@ -398,22 +405,6 @@ export default function TimeSlotsPage() {
     return null
   }
 
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
-        <CircularProgress />
-      </Box>
-    )
-  }
-
-  if (error) {
-    return (
-      <Alert severity='error' onClose={() => {}}>
-        {error}
-      </Alert>
-    )
-  }
-
   return (
     <>
       <AdminPageHeader
@@ -422,6 +413,7 @@ export default function TimeSlotsPage() {
           <Button
             variant='outlined'
             startIcon={<i className='tabler-calendar-repeat' />}
+            disabled={loading || Boolean(error)}
             onClick={() => {
               setSubmitError(null)
               setSubmitSuccess(null)
@@ -443,15 +435,25 @@ export default function TimeSlotsPage() {
           {submitError}
         </Alert>
       )}
-      <SchemaTable
-        schema={listSchema}
-        data={data ?? []}
-        onActionClick={handleActionClick}
-        fetchDetailFn={(id) =>
-          getBookingTimeSlot(typeof id === 'string' ? parseInt(id, 10) : id)
-        }
-        statusColors={statusColors}
-      />
+      {loading ? (
+        <Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+          <CircularProgress aria-label={t('settings.web.timeSlots.title')} />
+        </Box>
+      ) : error ? (
+        <Alert severity='error' action={<Button color='inherit' onClick={() => void refetch()}>{t('common.actions.retry')}</Button>}>
+          {error}
+        </Alert>
+      ) : (
+        <SchemaTable
+          schema={listSchema}
+          data={data ?? []}
+          onActionClick={handleActionClick}
+          fetchDetailFn={(id) =>
+            getBookingTimeSlot(typeof id === 'string' ? parseInt(id, 10) : id)
+          }
+          statusColors={statusColors}
+        />
+      )}
       <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth='sm' fullWidth>
         <DialogContent sx={{ p: 0 }}>
           <SchemaForm

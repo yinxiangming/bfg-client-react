@@ -84,6 +84,7 @@ export default function Bookings() {
           label: t('bookings.actions.cancel'),
           type: 'danger',
           scope: 'row',
+          hidden: (row: Booking) => row.status !== 'pending' && row.status !== 'confirmed',
           confirm: t('bookings.actions.confirmCancel')
         }
       ]
