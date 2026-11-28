@@ -31,7 +31,6 @@ import CircularProgress from '@mui/material/CircularProgress'
 
 import Icon from '@components/Icon'
 import AdminPageHeader from '@/components/admin/AdminPageHeader'
-import { useAppDialog } from '@/contexts/AppDialogContext'
 import { useConsole, useConsoleWorkspace } from '@/contexts/ConsoleContext'
 import ConsoleWorkspacePanels from '@/extensions/ConsoleWorkspacePanels'
 import {
@@ -42,7 +41,6 @@ import {
   extensionName,
   formatMoney,
   getConsoleErrorCode,
-  getConsoleErrorKeys,
   needsAcquiring,
   type ConsoleAcquireInvoice,
   type ConsoleExtension
@@ -52,6 +50,7 @@ import { formatDay, formatMoment, formatMomentDay } from './billingPeriods'
 import ExtensionCard from './ExtensionCard'
 import { useConsoleWorkspaceDetail } from './useConsoleWorkspaceDetail'
 import { useEnterWorkspace } from './useEnterWorkspace'
+import { useExtensionActionMessages } from './useExtensionActionMessages'
 
 /** Where the bills for every workspace the account owns are read and settled. */
 const BILLS_PATH = '/workspaces/billing'
@@ -67,7 +66,7 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
   const t = useTranslations('admin.console.extensions')
   const tActions = useTranslations('admin.common.actions')
   const locale = useLocale()
-  const { confirm } = useAppDialog()
+  const { confirmDeactivation, refusalMessage } = useExtensionActionMessages()
   const { state: consoleState } = useConsole()
   const membership = useConsoleWorkspace(workspaceId)
   const { state, reload, replaceExtension } = useConsoleWorkspaceDetail(workspaceId)
@@ -95,29 +94,6 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
     if (!(await enter(path))) setFailure(t('enterFailed'))
   }
 
-  /** What a refusal means, with the extensions it names written out. */
-  const refusalMessage = (error: unknown, fallback: string): string => {
-    const code = getConsoleErrorCode(error)
-
-    if (!code || !t.has(`errors.${code}`)) return fallback
-
-    const named =
-      code === 'requires_inactive'
-        ? getConsoleErrorKeys(error, 'requires')
-        : code === 'required_by_active'
-          ? getConsoleErrorKeys(error, 'required_by')
-          : []
-    const names = named
-      .map(key => {
-        const other = workspace?.extensions.find(extension => extension.key === key)
-
-        return other ? extensionName(other, locale) : key
-      })
-      .join(locale.startsWith('zh') ? '、' : ', ')
-
-    return t(`errors.${code}`, { names })
-  }
-
   const change = async (extension: ConsoleExtension, action: 'activate' | 'deactivate') => {
     setBusyKey(extension.key)
     setFailure(null)
@@ -131,7 +107,7 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
 
       replaceExtension(updated)
     } catch (error) {
-      setFailure(refusalMessage(error, t('failed')))
+      setFailure(refusalMessage(error, t('failed'), workspace?.extensions))
     } finally {
       setBusyKey(null)
     }
@@ -177,20 +153,14 @@ export default function WorkspaceExtensionsPage({ workspaceId }: { workspaceId: 
         setNothingToAcquire(keys => (keys.includes(extension.key) ? keys : [...keys, extension.key]))
       }
 
-      setFailure(refusalMessage(error, t('acquireFailed')))
+      setFailure(refusalMessage(error, t('acquireFailed'), workspace?.extensions))
     } finally {
       setBusyKey(null)
     }
   }
 
   const askThenDeactivate = async (extension: ConsoleExtension) => {
-    const name = extensionName(extension, locale)
-    const confirmed = await confirm(t('confirm.body', { name }), {
-      title: t('confirm.title', { name }),
-      confirmText: t('deactivate')
-    })
-
-    if (confirmed) await change(extension, 'deactivate')
+    if (await confirmDeactivation(extension)) await change(extension, 'deactivate')
   }
 
   if (state.kind === 'loading') {

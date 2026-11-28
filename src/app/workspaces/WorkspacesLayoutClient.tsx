@@ -12,9 +12,10 @@ import { authApi } from '@/utils/authApi'
 
 type Props = {
   children: React.ReactNode
+  extensionVersions: Readonly<Record<string, string>>
 }
 
-export default function WorkspacesLayoutClient({ children }: Props) {
+export default function WorkspacesLayoutClient({ children, extensionVersions }: Props) {
   const router = useRouter()
   // The token lives in localStorage, out of the server's sight: render nothing until the
   // browser has looked, then show the page or send the visitor to sign in.
@@ -38,7 +39,7 @@ export default function WorkspacesLayoutClient({ children }: Props) {
   return (
     <AdminSkinProvider>
       {signedIn && (
-        <ConsoleProvider>
+        <ConsoleProvider extensionVersions={extensionVersions}>
           <ConsoleShell>{children}</ConsoleShell>
         </ConsoleProvider>
       )}

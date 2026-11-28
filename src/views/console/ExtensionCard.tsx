@@ -18,6 +18,8 @@ import {
   type ConsoleExtensionPrice
 } from '@/services/console'
 
+import ExtensionVersion from './ExtensionVersion'
+
 type Props = {
   extension: ConsoleExtension
   /** Someone who may switch this workspace's extensions; an owner of a closed one may not. */
@@ -181,6 +183,7 @@ export default function ExtensionCard({
               }}
             >
               {extensionName(extension, locale)}
+              <ExtensionVersion extensionKey={extension.key} />
             </Typography>
             <StatusBadge label={presentation.label} color={presentation.color} />
           </Box>

@@ -4634,7 +4634,9 @@
       "platformSettings": "平台设置"
     },
     "topbar": {
-      "menu": "菜单"
+      "menu": "菜单",
+      "accountMenu": "账号菜单",
+      "accountMenuFor": "{name}，账号菜单"
     },
     "overview": {
       "title": "概览",
@@ -4739,7 +4741,11 @@
       "off": "未开启",
       "offHint": "开启后即可使用",
       "activate": "开启",
+      "activateNamed": "开启 {name}",
+      "activated": "{name} 已开启。",
       "deactivate": "停用",
+      "deactivateNamed": "停用 {name}",
+      "deactivated": "{name} 已停用。",
       "acquire": "获取",
       "acquireHint": "获取之后才能开启",
       "acquireAgainHint": "权益已经结束；重新获取就能接着用，数据和设置都保留",
@@ -5262,7 +5268,7 @@
         "reason": "原因"
       }
     },
-    "brand": "工作区管理台"
+    "brand": "管理台"
   },
   "workspaceReadOnly": {
     "title": "这个工作区目前只能查看",
