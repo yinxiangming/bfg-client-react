@@ -4634,7 +4634,9 @@
       "platformSettings": "Platform settings"
     },
     "topbar": {
-      "menu": "Menu"
+      "menu": "Menu",
+      "accountMenu": "Account menu",
+      "accountMenuFor": "{name}, account menu"
     },
     "overview": {
       "title": "Overview",
@@ -4739,7 +4741,11 @@
       "off": "Off",
       "offHint": "Switch it on to start using it",
       "activate": "Turn on",
+      "activateNamed": "Turn on {name}",
+      "activated": "{name} is on.",
       "deactivate": "Turn off",
+      "deactivateNamed": "Turn off {name}",
+      "deactivated": "{name} is off.",
       "acquire": "Get",
       "acquireHint": "Get it before it can be switched on",
       "acquireAgainHint": "Its entitlement ran out; get it again to pick up where it left off",
@@ -5262,7 +5268,7 @@
         "reason": "Reason"
       }
     },
-    "brand": "Workspaces Admin"
+    "brand": "Admin"
   },
   "workspaceReadOnly": {
     "title": "This workspace is read only",

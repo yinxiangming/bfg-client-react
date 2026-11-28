@@ -22,6 +22,66 @@
   background: transparent;
 }
 
+.console-shell > .admin-main > .admin-content {
+  max-width: none;
+  min-width: 0;
+}
+
+.console-shell .d365-content-body {
+  max-width: 1440px;
+  margin-inline: auto;
+}
+
+.console-shell .user-avatar-trigger--named {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 36px;
+  padding: 3px 8px 3px 4px;
+  border: 1px solid var(--at-card-border);
+  border-radius: var(--at-control-radius);
+  background: var(--at-card-bg);
+  color: var(--at-row-fg);
+}
+
+.console-shell .user-avatar-trigger--named:hover {
+  background: var(--at-row-hover);
+}
+
+.console-shell .user-avatar-trigger--named:focus-visible {
+  outline: 2px solid var(--at-accent);
+  outline-offset: 2px;
+}
+
+.console-shell .user-avatar-trigger--named .user-avatar {
+  width: 28px;
+  height: 28px;
+}
+
+.console-shell .user-avatar-trigger-name {
+  max-width: 13ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font: 600 13px/1.3 var(--at-font-body);
+}
+
+.console-shell .user-avatar-trigger-arrow {
+  display: flex;
+  color: var(--at-row-sub);
+}
+
+@media (max-width: 599px) {
+  .console-shell .user-avatar-trigger--named {
+    min-width: 44px;
+    min-height: 44px;
+  }
+
+  .console-shell .user-avatar-trigger-name {
+    display: none;
+  }
+}
+
 /* D365 Style Layout - Sidebar + Content with Topbar in content area */
 .d365-admin-layout {
   display: flex;

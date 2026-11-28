@@ -30,25 +30,32 @@ import AdminPageHeader from '@/components/admin/AdminPageHeader'
 import StatusBadge from '@/components/schema/StatusBadge'
 import { useConsole, useConsoleWorkspace } from '@/contexts/ConsoleContext'
 import {
+  activateExtension,
   consoleWorkspaceStatus,
+  deactivateExtension,
   deleteConsoleWorkspace,
   exportConsoleWorkspace,
   extensionName,
   listConsoleWorkspaceOperations,
+  needsAcquiring,
   resetConsoleAdminPassword,
   restoreConsoleWorkspace,
   resumeConsoleWorkspace,
   suspendConsoleWorkspace,
+  type ConsoleExtension,
   type ConsoleWorkspaceOperation
 } from '@/services/console'
 
+import ExtensionVersion from './ExtensionVersion'
 import { useConsoleWorkspaceDetail } from './useConsoleWorkspaceDetail'
 import { useEnterWorkspace } from './useEnterWorkspace'
+import { useExtensionActionMessages } from './useExtensionActionMessages'
 import RuntimeFeatureAccessCard from './RuntimeFeatureAccessCard'
 import WorkspacePlacementCard from './WorkspacePlacementCard'
 import { WORKSPACE_STATUS_COLOR } from './workspaceStatus'
 
 type PlatformAction = 'suspend' | 'resume' | 'restore' | 'export' | 'resetPassword' | 'delete'
+type ExtensionAction = 'activate' | 'deactivate'
 
 function InfoRow({ label, children }: { label: string; children: React.ReactNode }) {
   return (
@@ -99,9 +106,12 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
   const locale = useLocale()
   const membership = useConsoleWorkspace(workspaceId)
   const { state: consoleState } = useConsole()
-  const { state, reload } = useConsoleWorkspaceDetail(workspaceId)
+  const { state, reload, replaceExtension } = useConsoleWorkspaceDetail(workspaceId)
   const enter = useEnterWorkspace(workspaceId)
+  const { confirmDeactivation, refusalMessage } = useExtensionActionMessages()
   const [failure, setFailure] = useState<string | null>(null)
+  const [extensionBusy, setExtensionBusy] = useState<string | null>(null)
+  const [extensionNotice, setExtensionNotice] = useState<{ kind: 'success' | 'error'; message: string } | null>(null)
   const [actionBusy, setActionBusy] = useState(false)
   const [pendingAction, setPendingAction] = useState<PlatformAction | null>(null)
   const [actionReason, setActionReason] = useState('')
@@ -212,8 +222,33 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
   const workspace = state.workspace
   const status = consoleWorkspaceStatus(workspace)
   const canManageExtensions = workspace.capabilities?.extension_management === true
+  const isPlatformAdmin = consoleState.kind === 'loaded' && consoleState.isPlatformAdmin
+  const canChangeExtensions = canManageExtensions && (isPlatformAdmin || (workspace.owned_by_viewer && status === 'active'))
   const owner = workspace.owner?.username
   const createdAt = new Date(workspace.created_at)
+
+  const changeExtension = async (extension: ConsoleExtension, action: ExtensionAction) => {
+    setExtensionBusy(extension.key)
+    try {
+      if (action === 'deactivate' && !(await confirmDeactivation(extension))) return
+      setExtensionNotice(null)
+      const updated = action === 'activate'
+        ? await activateExtension(workspaceId, extension.key)
+        : await deactivateExtension(workspaceId, extension.key)
+      replaceExtension(updated)
+      setExtensionNotice({
+        kind: 'success',
+        message: tExtensions(action === 'activate' ? 'activated' : 'deactivated', { name: extensionName(extension, locale) })
+      })
+    } catch (error) {
+      setExtensionNotice({
+        kind: 'error',
+        message: refusalMessage(error, tExtensions('failed'), workspace.extensions)
+      })
+    } finally {
+      setExtensionBusy(null)
+    }
+  }
 
   return (
     <>
@@ -317,33 +352,60 @@ export default function WorkspaceOverviewPage({ workspaceId }: { workspaceId: nu
               </Button>
             )}
           </Box>
+          {extensionNotice && (
+            <Alert severity={extensionNotice.kind} onClose={() => setExtensionNotice(null)} sx={{ mx: 4, mt: 2 }}>
+              {extensionNotice.message}
+            </Alert>
+          )}
           {workspace.extensions.length === 0 ? (
             <Box sx={{ px: 4, py: 6, color: 'var(--at-row-sub)', fontSize: 13 }}>{tExtensions('none')}</Box>
           ) : (
-            workspace.extensions.map(extension => (
-              <Box
-                key={extension.key}
-                sx={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 3,
-                  px: 4,
-                  py: 2.5,
-                  '&:not(:last-of-type)': { borderBottom: '1px solid var(--at-card-border)' }
-                }}
-              >
-                <Box aria-hidden sx={{ display: 'flex', fontSize: 18, color: 'var(--at-accent-soft-fg)' }}>
-                  <Icon icon={extension.icon || 'tabler-puzzle'} />
+            workspace.extensions.map(extension => {
+              const name = extensionName(extension, locale)
+              const needsAcquire = needsAcquiring(extension)
+              const canTurnOn = extension.status === 'inactive' && !needsAcquire && extension.unmet_prerequisites.length === 0
+              const canTurnOff = extension.status === 'active' || (extension.status === 'paused' && !needsAcquire)
+              const action = canTurnOn ? 'activate' : 'deactivate'
+              return (
+                <Box
+                  key={extension.key}
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: { xs: 1.5, sm: 3 },
+                    px: { xs: 2, sm: 4 },
+                    py: 2.5,
+                    '&:not(:last-of-type)': { borderBottom: '1px solid var(--at-card-border)' }
+                  }}
+                >
+                  <Box aria-hidden sx={{ display: 'flex', fontSize: 18, color: 'var(--at-accent-soft-fg)' }}>
+                    <Icon icon={extension.icon || 'tabler-puzzle'} />
+                  </Box>
+                  <Box sx={{ flex: 1, minWidth: 0, overflowWrap: 'anywhere', fontSize: 13, color: 'var(--at-row-fg)' }}>
+                    {name}
+                    <ExtensionVersion extensionKey={extension.key} />
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
+                    <StatusBadge
+                      label={extensionStatusLabel(extension, tExtensions)}
+                      color={extensionStatusColor(extension)}
+                    />
+                    {canChangeExtensions && (canTurnOn || canTurnOff) && (
+                      <Button
+                        color={canTurnOn ? 'primary' : 'secondary'}
+                        size='small'
+                        aria-label={tExtensions(`${action}Named`, { name })}
+                        disabled={extensionBusy !== null}
+                        loading={extensionBusy === extension.key}
+                        onClick={() => void changeExtension(extension, action)}
+                      >
+                        {tExtensions(action)}
+                      </Button>
+                    )}
+                  </Box>
                 </Box>
-                <Box sx={{ flex: 1, minWidth: 0, fontSize: 13, color: 'var(--at-row-fg)' }}>
-                  {extensionName(extension, locale)}
-                </Box>
-                <StatusBadge
-                  label={extensionStatusLabel(extension, tExtensions)}
-                  color={extensionStatusColor(extension)}
-                />
-              </Box>
-            ))
+              )
+            })
           )}
         </Card>
       </Box>

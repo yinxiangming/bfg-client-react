@@ -39,6 +39,7 @@ export type OpenWorkspace = { id: number; name: string }
 
 type ConsoleContextValue = {
   state: ConsoleState
+  extensionVersions: Readonly<Record<string, string>>
   /** The workspace the access token belongs to, which is the one /admin opens. */
   currentId: number | null
   openWorkspace: OpenWorkspace | null
@@ -48,7 +49,13 @@ type ConsoleContextValue = {
 
 const ConsoleContext = createContext<ConsoleContextValue | null>(null)
 
-export function ConsoleProvider({ children }: { children: ReactNode }) {
+export function ConsoleProvider({
+  children,
+  extensionVersions
+}: {
+  children: ReactNode
+  extensionVersions: Readonly<Record<string, string>>
+}) {
   const [state, setState] = useState<ConsoleState>({ kind: 'loading' })
   const [currentId, setCurrentId] = useState<number | null>(null)
   const [openWorkspace, setOpen] = useState<OpenWorkspace | null>(null)
@@ -76,16 +83,17 @@ export function ConsoleProvider({ children }: { children: ReactNode }) {
       // control endpoint succeeds only for a Django superuser, so an expected
       // 403 means this signed-in user simply has no deployment controls.
       const control = await getPlatformControlStatus().catch(() => null)
+      const capabilities = control?.is_platform_superuser === true ? control.platform_capabilities : undefined
 
       setState({
         kind: 'loaded',
         workspaces: workspaces ?? [],
         isPlatformAdmin: control?.is_platform_superuser === true,
         platformCapabilities: {
-          cluster_management: Boolean(control?.platform_capabilities.cluster_management),
-          audit_log: Boolean(control?.platform_capabilities.audit_log),
-          configuration: Boolean(control?.platform_capabilities.configuration),
-          exchange_rates: Boolean(control?.platform_capabilities.exchange_rates)
+          cluster_management: Boolean(capabilities?.cluster_management),
+          audit_log: Boolean(capabilities?.audit_log),
+          configuration: Boolean(capabilities?.configuration),
+          exchange_rates: Boolean(capabilities?.exchange_rates)
         },
         createBlocked: create_blocked ?? null,
         workspaceLimit: workspace_limit
@@ -102,8 +110,8 @@ export function ConsoleProvider({ children }: { children: ReactNode }) {
   }, [reload])
 
   const value = useMemo(
-    () => ({ state, currentId, openWorkspace, setOpenWorkspace, reload }),
-    [state, currentId, openWorkspace, setOpenWorkspace, reload]
+    () => ({ state, extensionVersions, currentId, openWorkspace, setOpenWorkspace, reload }),
+    [state, extensionVersions, currentId, openWorkspace, setOpenWorkspace, reload]
   )
 
   return <ConsoleContext.Provider value={value}>{children}</ConsoleContext.Provider>

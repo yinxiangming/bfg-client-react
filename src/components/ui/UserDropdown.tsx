@@ -30,6 +30,7 @@ type Props = {
    * Optional initial used by some layouts. Currently unused but kept for API compatibility.
    */
   avatarInitial?: string
+  showName?: boolean
 }
 
 const menuItems = [
@@ -38,7 +39,7 @@ const menuItems = [
   { label: 'Addresses', icon: 'tabler-map-pin', href: '/account/addresses' }
 ]
 
-const UserDropdown = (_props: Props) => {
+const UserDropdown = ({ showName = false }: Props) => {
   const t = useTranslations('admin')
   const [open, setOpen] = useState(false)
   const [user, setUser] = useState<UserInfo | null>(null)
@@ -114,6 +115,7 @@ const UserDropdown = (_props: Props) => {
 
   const avatarSrc = getAvatarUrl(user?.avatar)
   const avatarAlt = user?.name || 'User'
+  const triggerLabel = user?.name ? t('console.topbar.accountMenuFor', { name: user.name }) : t('console.topbar.accountMenu')
 
   const renderAvatar = (size: 'sm' | 'lg') => {
     const className = size === 'sm' ? 'user-avatar' : 'user-info-avatar'
@@ -122,7 +124,7 @@ const UserDropdown = (_props: Props) => {
       return (
         <div className={className}>
           <img src={avatarSrc} alt={avatarAlt} />
-          {size === 'sm' && <span className='user-status-dot' aria-hidden />}
+          {size === 'sm' && !showName && <span className='user-status-dot' aria-hidden />}
         </div>
       )
     }
@@ -131,7 +133,7 @@ const UserDropdown = (_props: Props) => {
     return (
       <div className={className}>
         <span>{fallback}</span>
-        {size === 'sm' && <span className='user-status-dot' aria-hidden />}
+        {size === 'sm' && !showName && <span className='user-status-dot' aria-hidden />}
       </div>
     )
   }
@@ -158,12 +160,19 @@ const UserDropdown = (_props: Props) => {
       </Snackbar>
       <button
         type='button'
-        className='user-avatar-trigger'
+        className={showName ? 'user-avatar-trigger user-avatar-trigger--named' : 'user-avatar-trigger'}
+        aria-label={showName ? triggerLabel : undefined}
         aria-haspopup='menu'
         aria-expanded={open}
         onClick={toggleMenu}
       >
         {renderAvatar('sm')}
+        {showName && (
+          <>
+            {user?.name && <span className='user-avatar-trigger-name'>{user.name}</span>}
+            <span className='user-avatar-trigger-arrow' aria-hidden><Icon icon='tabler-chevron-down' /></span>
+          </>
+        )}
       </button>
 
       {open && (

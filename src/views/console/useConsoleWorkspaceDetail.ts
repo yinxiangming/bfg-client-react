@@ -85,7 +85,7 @@ export function useConsoleWorkspaceDetail(workspaceId: number) {
   /** Put a changed extension back in place, so a switch does not reload the page. */
   const replaceExtension = useCallback((extension: ConsoleExtension) => {
     setState(previous => {
-      if (previous.kind !== 'loaded') return previous
+      if (previous.kind !== 'loaded' || previous.workspace.id !== workspaceId) return previous
 
       return {
         kind: 'loaded',
@@ -97,7 +97,7 @@ export function useConsoleWorkspaceDetail(workspaceId: number) {
         }
       }
     })
-  }, [])
+  }, [workspaceId])
 
   return { state, reload: load, replaceExtension }
 }

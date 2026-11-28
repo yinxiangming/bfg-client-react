@@ -1,10 +1,11 @@
-// Server Component - metadata, skin fonts and the site config the topbar brands itself with
+// Server Component - metadata, site config, skin fonts and deployed plugin versions
 import type { Metadata } from 'next'
 import { headers } from 'next/headers'
 import { getLocale, getTranslations } from 'next-intl/server'
 
 import AdminSkinFonts from '@/components/theme/AdminSkinFonts'
 import { StorefrontConfigProvider } from '@/contexts/StorefrontConfigContext'
+import { loadExtensions } from '@/extensions'
 import { getStorefrontConfigForServer } from '@/utils/storefrontConfig'
 
 import WorkspacesLayoutClient from './WorkspacesLayoutClient'
@@ -27,13 +28,18 @@ export default async function WorkspacesLayout({ children }: { children: React.R
   const locale = await getLocale()
   const requestHost = (await headers()).get('host') ?? undefined
   // The root layout already made this call; getStorefrontConfigForServer is cached per request.
-  const config = await getStorefrontConfigForServer(locale, requestHost)
+  const [config, extensions] = await Promise.all([getStorefrontConfigForServer(locale, requestHost), loadExtensions()])
+  const extensionVersions: Record<string, string> = {}
+
+  for (const extension of extensions) {
+    if (extension.version) extensionVersions[extension.id] = extension.version
+  }
 
   return (
     <>
       <AdminSkinFonts />
       <StorefrontConfigProvider initialConfig={config}>
-        <WorkspacesLayoutClient>{children}</WorkspacesLayoutClient>
+        <WorkspacesLayoutClient extensionVersions={extensionVersions}>{children}</WorkspacesLayoutClient>
       </StorefrontConfigProvider>
     </>
   )
