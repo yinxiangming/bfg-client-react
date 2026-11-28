@@ -6,7 +6,6 @@ import { useConsole } from '@/contexts/ConsoleContext'
 import {
   getConsoleErrorStatus,
   getConsoleWorkspace,
-  getOwnerWorkspace,
   type ConsoleExtension,
   type ConsoleWorkspaceDetail
 } from '@/services/console'
@@ -46,9 +45,8 @@ export function useConsoleWorkspaceDetail(workspaceId: number) {
       return
     }
 
-    // Wait for one definitive capability result before choosing a namespace. A
-    // superuser can inspect every workspace through the control plane; an owner must
-    // use the tenant-safe route, never a privileged fallback.
+    // Wait for the signed-in console. The tenant console applies its own
+    // owner/platform administrator check for the requested workspace.
     if (consoleState.kind === 'failed') {
       setState({ kind: 'failed', notFound: false, error: consoleState.error })
       return
@@ -56,9 +54,7 @@ export function useConsoleWorkspaceDetail(workspaceId: number) {
     if (consoleState.kind !== 'loaded') return
 
     try {
-      const workspace = consoleState.isPlatformAdmin
-        ? await getConsoleWorkspace(workspaceId)
-        : await getOwnerWorkspace(workspaceId)
+      const workspace = await getConsoleWorkspace(workspaceId)
 
       if (currentRequest.current !== request) return
 
