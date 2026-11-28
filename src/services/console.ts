@@ -271,22 +271,21 @@ export async function listMoreConsoleWorkspaces(next: string): Promise<ConsoleWo
   return toList(await apiFetch<Page<ConsoleWorkspace> | ConsoleWorkspace[]>(next))
 }
 
-/** One workspace with every extension it can switch, each with its configuration. */
+/** A console workspace, available to its owner and to platform administrators. */
 export async function getConsoleWorkspace(id: number): Promise<ConsoleWorkspaceDetail> {
-  return apiFetch<ConsoleWorkspaceDetail>(buildApiUrl(`${BASE}${id}/`))
+  const workspace = await apiFetch<ConsoleWorkspaceDetail>(buildApiUrl(`${BASE}${id}/`))
+
+  // This endpoint serves the extension catalogue and usage even on servers
+  // that predate explicit capability flags. Keep any explicit restrictions.
+  return {
+    ...workspace,
+    capabilities: workspace.capabilities ?? { extension_management: true, usage: true }
+  }
 }
 
 /** Deployment metadata for a Django-superuser-only Platform control action. */
 export async function getConsoleControlWorkspace(id: number): Promise<ConsoleWorkspaceDetail> {
   return apiFetch<ConsoleWorkspaceDetail>(buildApiUrl(`${CONTROL_BASE}${id}/`))
-}
-
-/**
- * The tenant-safe workspace contract for an owner or member. Platform console routes
- * deliberately remain Django-superuser-only and must never be used as an owner fallback.
- */
-export async function getOwnerWorkspace(id: number): Promise<ConsoleWorkspaceDetail> {
-  return apiFetch<ConsoleWorkspaceDetail>(buildApiUrl(`/platform/workspaces/${id}/`))
 }
 
 export async function activateExtension(workspaceId: number, key: string): Promise<ConsoleExtension> {
